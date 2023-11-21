@@ -49,6 +49,10 @@ public class JinjaTemplateRenderer {
 	public boolean translate(String sTemplateFile, String sOutputFile, String sJsonInputs, boolean bStrict) {
 		
 		try {
+			
+			WasdiLog.debugLog("JinjaTemplateRenderer.translate: sTemplate = " + sTemplateFile);
+			WasdiLog.debugLog("JinjaTemplateRenderer.translate: JsonInput = " + sJsonInputs);
+			
 			// Create the command
 			String sRenderCommand = buildRenderCommand(sTemplateFile, sOutputFile, sJsonInputs, bStrict);
 			
@@ -97,5 +101,11 @@ public class JinjaTemplateRenderer {
 		return oSB.toString();
 	}
 	
-	
+//	public static void main(String[] args) {
+//		Jinjava oJinjava = new Jinjava();
+//		String sTemplate = WasdiFileUtils.fileToText("C:\\Codice\\Progetti\\WASDI\\Codice\\processorTypes\\eoepcaDocker\\appDeployBody.json.j2");
+//		Map<String, Object> aoVariables = JsonUtils.jsonToMapOfObjects("{\"cwlLink\":\"http://www.nonce.piu\"}");
+//		String sRendered = oJinjava.render(sTemplate, aoVariables);
+//		System.out.println(sRendered);
+//	}
 }
