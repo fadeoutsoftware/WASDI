@@ -102,6 +102,7 @@ def run(processId):
 
 	log("opening workspace")
 	wasdi.openWorkspaceById(sWorkspaceId)
+
 	#Run the processor
 	try:
 		sConfigFilePath = sLocalPath + '/' + processId + '.config'
