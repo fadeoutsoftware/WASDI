@@ -1596,7 +1596,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             		if (oContainerInfo.Names != null) {
             			if (oContainerInfo.Names.size()>0) {
             				sContainerName = oContainerInfo.Names.get(0);
-            				if (sContainerName.startsWith("/")) sContainerName = sContainerName.substring(1);
+            				if (sContainerName.startsWith("/")) {
+            					sContainerName = sContainerName.substring(1);
+            					oParameter.setContainerName(sContainerName);
+            				}
             			}
             		}
             	}            	
