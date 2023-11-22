@@ -27,7 +27,11 @@ else
       %into this
       %C:\Program Files\Java\jdk1.8.0_211\jre\bin\server
       sOldJavaHome=sJavaHome;
-      sJavaHome= [sJavaHome, '/jre/bin/server'];
+	  if length(strfind(sJavaHome,"8.0"))>0
+		sJavaHome= [sJavaHome, '/jre/bin/server'];
+	  else
+		sJavaHome= [sJavaHome, '/bin/server'];
+	  end
       setenv('JAVA_HOME',sJavaHome);
       disp(['WASDI: Changed JAVA_HOME from ', sOldJavaHome, ' to ', sJavaHome]);
       disp('WASDI: (This is temporary and will not affect the operating system)')
