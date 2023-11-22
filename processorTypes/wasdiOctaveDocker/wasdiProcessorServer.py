@@ -4,12 +4,8 @@ from flask import jsonify
 from flask import request
 import os
 import wasdi
-import json
-import urllib.parse
 import subprocess
 import traceback
-from distutils.dir_util import copy_tree
-from os.path import sys
 
 app = Flask(__name__)
 
