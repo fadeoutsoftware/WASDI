@@ -52,7 +52,7 @@ public class OctaveProcessorEngine extends DockerBuildOnceEngine {
 				oMainFileWriter.newLine();
 				oMainFileWriter.write("\taddpath(\""+sApplicationHome+"\");");
 				oMainFileWriter.newLine();
-				oMainFileWriter.write("\tWasdi = startWasdi(\"\"+sApplicationHome+\"config.properties\")");
+				oMainFileWriter.write("\tWasdi = startWasdi(\""+sApplicationHome+"config.properties\")");
 				oMainFileWriter.newLine();
 				oMainFileWriter.write("\ttry");
 				oMainFileWriter.newLine();
