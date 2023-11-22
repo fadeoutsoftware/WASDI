@@ -25,7 +25,7 @@ ENV PATH="/home/wasdi/venv/bin:${PATH}"
 RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
     useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
     mkdir --parent /home/wasdi && \
-    chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} {{ sWasdiSystemGroupName }}
+    chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} /home/wasdi
 
 
 # RUN generic to update the system and install common packages
