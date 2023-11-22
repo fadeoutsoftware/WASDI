@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -51,7 +52,7 @@ public class IDL2ProcessorEngine extends DockerBuildOnceEngine {
 	 * After copy template, overwrite call_idl, wasdi_wrapper e run processor
 	 */
 	@Override
-	protected void onAfterCopyTemplate(String sProcessorFolder) {
+	protected void onAfterCopyTemplate(String sProcessorFolder, Processor oProcessor) {
 		
 		// Docker local processor folder
 		String sLocalProcessorFolder = "/home/appwasdi/application/";
@@ -176,7 +177,7 @@ public class IDL2ProcessorEngine extends DockerBuildOnceEngine {
 	}
 	
 	@Override
-	protected void onAfterDeploy(String sProcessorFolder) {
+	protected void onAfterDeploy(String sProcessorFolder, Processor oProcessor) {
 		try {
 			String sFileName = sProcessorFolder+"envi552-linux.tar";
 			File oFile = new File(sFileName);

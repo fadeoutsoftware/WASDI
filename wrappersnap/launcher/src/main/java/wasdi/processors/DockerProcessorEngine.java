@@ -189,7 +189,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             	LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, m_oProcessWorkspace, ProcessStatus.RUNNING, 25);
             }
             
-            onAfterCopyTemplate(sProcessorFolder);
+            onAfterCopyTemplate(sProcessorFolder, oProcessor);
 
             // Generate the image
             WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: building image (Registry = " + m_sDockerRegistry + ")");
@@ -203,7 +203,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             	return logDeployErrorAndClean("the deploy returned an empyt image name, something went wrong", bFirstDeploy);            	
             }
 
-            onAfterDeploy(sProcessorFolder);
+            onAfterDeploy(sProcessorFolder, oProcessor);
             processWorkspaceLog("Image done");
 
             if (bFirstDeploy) {
@@ -278,7 +278,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
      *
      * @param sProcessorFolder
      */
-    protected void onAfterCopyTemplate(String sProcessorFolder) {
+    protected void onAfterCopyTemplate(String sProcessorFolder, Processor oProcessor) {
 
     }
 
@@ -287,7 +287,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
      *
      * @param sProcessorFolder
      */
-    protected void onAfterDeploy(String sProcessorFolder) {
+    protected void onAfterDeploy(String sProcessorFolder, Processor oProcessor) {
 
     }
     
@@ -822,7 +822,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
 
-            onAfterCopyTemplate(sProcessorFolder);
+            onAfterCopyTemplate(sProcessorFolder, oProcessor);
             
             // Create utils
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sDockerRegistry);
@@ -838,7 +838,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             WasdiLog.infoLog("DockerProcessorEngine.redeploy: deploy the image");
             m_sDockerImageName = oDockerUtils.build();
 
-            onAfterDeploy(sProcessorFolder);
+            onAfterDeploy(sProcessorFolder, oProcessor);
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
