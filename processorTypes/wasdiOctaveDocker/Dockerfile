@@ -79,7 +79,7 @@ ENV PATH="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin:${PATH}"
 # RUN specific to install Octave
 RUN apt-get update && \
     apt-get install \
-        octave-*
+        octave-* \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
