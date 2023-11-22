@@ -16,7 +16,6 @@ m_sProcId = ""
 def log(sLogString):
 	print("[" + m_sProcId + "] wasdiProcessorServer PythonPip3.7 local build - Engine v.2.0.0 - " + sLogString)
 
-
 def executeProcessor(parameters, processId):
     global m_sProcId
     m_sProcId = processId
@@ -74,7 +73,9 @@ def executeProcessor(parameters, processId):
     
     if not wasdi.init():
         log("init FAILED")
-        
+
+    wasdi.openWorkspaceById(sWorkspaceId)
+
     sForceStatus = 'ERROR'
     
     wasdi.setProcId(processId)
