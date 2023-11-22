@@ -8,6 +8,7 @@ package wasdi.shared.queryexecutors.onda;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.abdera.i18n.templates.Template;
@@ -30,6 +31,8 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
  *
  */
 public class QueryExecutorONDA extends QueryExecutorOpenSearch {
+	
+	private static final List<String> s_asUnsupportedProductTypes = Arrays.asList("SL_2_AOD___", "SL_2_FRP___");
 	
 	public QueryExecutorONDA() {
 		m_sProvider="ONDA";
@@ -128,8 +131,15 @@ public class QueryExecutorONDA extends QueryExecutorOpenSearch {
 		
 		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
 		
-		if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
-			return 0;
+		if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
+			return -1;
+		}
+		
+		// two product types are not supported by ONDA. In this case, we return -1
+		if (!Utils.isNullOrEmpty(oQueryViewModel.productType) 
+				&& (s_asUnsupportedProductTypes.contains(oQueryViewModel.productType))) {
+			WasdiLog.debugLog("QueryExecutorONDA.executeAndRetrieve. The following product type is not supported by the provider: " + oQueryViewModel.productType);
+			return -1;
 		}
 		
 		return super.executeCount(sQuery);
@@ -153,7 +163,14 @@ public class QueryExecutorONDA extends QueryExecutorOpenSearch {
 		
 		if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
 			return new ArrayList<QueryResultViewModel>();
-		}		
+		}	
+		
+		// two product types are not supported by ONDA. In this case, we return null
+		if (!Utils.isNullOrEmpty(oQueryViewModel.productType) 
+				&& (s_asUnsupportedProductTypes.contains(oQueryViewModel.productType))) {
+			WasdiLog.debugLog("QueryExecutorONDA.executeAndRetrieve. The following product type is not supported by the provider: " + oQueryViewModel.productType);
+			return null;
+		}
 		
 		String sResult = null;
 		String sUrl = null;
