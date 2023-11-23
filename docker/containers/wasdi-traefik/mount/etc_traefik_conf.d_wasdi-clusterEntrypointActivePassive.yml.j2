@@ -1,15 +1,11 @@
 http:
   routers:
     r_{{ sWasdiTraefikGenericServiceName }}:
-{% if bWasdiTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
-      entrypoints: "websecure"
-{% else %}
-      entrypoints: "webs"
-{% endif %}
+      entrypoints: "{{ sWasdiTraefikEntrypoint }}"
       rule: "Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiTraefikGenericDefaultContextPath }}`)"
       service: "s_{{ sWasdiTraefikGenericServiceName }}_lb"
       middlewares: "mw_wasdi-secure-allowFrame@file"
-{% if bWasdiTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiTraefikSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
       tls: true
 {% endif %}
   services:

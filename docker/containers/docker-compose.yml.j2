@@ -710,7 +710,7 @@ services:
     and aWasdiTraefikExternalIp | default([]) | length > 0 )
     or ( sWasdiTraefikHttpsInternalPort | default("") != ""
     and sWasdiTraefikHttpsExternalPort | default("") != ""
-    and aWasdiContainerTraefikHttpsExternalIp | default([]) | length > 0 ) %}
+    and aWasdiTraefikHttpsExternalIp | default([]) | length > 0 ) %}
     ports:
 {% for sCurrentExternalIp in aWasdiTraefikExternalIp | sort %}
 {% if ( sWasdiTraefikHttpInternalPort | default("") != ""
@@ -738,7 +738,7 @@ services:
     volumes:
       - "{{ sWasdiDockerSocketFilePath }}:{{ sWasdiDockerSocketFilePath }}:ro"
 {% if bWasdiTraefikSslSourceType | upper == 'MOUNT_EACH_FILE' %}
-{% for aCurrentTraefikSslCertificate in aoWasdiContainerTraefikSslCertificates %}
+{% for aCurrentTraefikSslCertificate in aoWasdiTraefikSslCertificates %}
       - "{{ aCurrentTraefikSslCertificate['srcCertFile'] }}:/etc/traefik/certs/{{ aCurrentTraefikSslCertificate['certFile'] }}:ro"
       - "{{ aCurrentTraefikSslCertificate['srcKeyFile'] }}:/etc/traefik/certs/{{ aCurrentTraefikSslCertificate['keyFile'] }}:ro"
 {% endfor %}

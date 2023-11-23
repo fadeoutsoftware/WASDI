@@ -1,7 +1,7 @@
 http:
   routers:
     r_{{ sWasdiTraefikGenericServiceName }}:
-      entrypoints: "websecure"
+      entrypoints: "{{ sWasdiTraefikEntrypoint }}"
       rule: "Host(`{{ sWasdiTraefikGenericRuleHost }}`)"
       service: "s_{{ sWasdiTraefikGenericServiceName }}"
       middlewares: "mw_wasdi-secure-allowFrame@file"
