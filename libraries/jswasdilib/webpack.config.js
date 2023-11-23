@@ -4,8 +4,7 @@ const PrettierPlugin = require("prettier-webpack-plugin");
 const TerserPlugin = require('terser-webpack-plugin');
 const getPackageJson = require('./scripts/getPackageJson');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
-const CopyPlugin = require("copy-webpack-plugin");
+
 
 
 const {
@@ -25,10 +24,11 @@ const banner = `
   This source code is licensed under the ${license} license found in the
   LICENSE file in the root directory of this source tree.
 `;
+// Export of module, with types 
 let TsExport = {
   mode: "production",
   devtool: 'source-map',
-  entry: './src/lib/TS-index.ts',
+  entry: './src/lib/index.ts',
   output: {
     filename: 'wasdi-module.js',
     path: path.resolve(__dirname, 'build'),
@@ -50,13 +50,6 @@ let TsExport = {
         use: {
           loader: 'babel-loader'
         }
-      },
-      {
-        test: /\.(sa|sc|c)ss$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          { loader: "css-loader", options: { sourceMap: true } },
-        ],
       }
     ]
   },
@@ -65,12 +58,46 @@ let TsExport = {
     new MiniCssExtractPlugin({
       filename: 'css/index.css'
     }),
+    new webpack.BannerPlugin(banner)
+  ],
+  resolve: {
+    extensions: ['.ts', '.js', '.json']
+  }
+}
+
+// Export of module, with types 
+let JsExport = {
+  mode: "production",
+  devtool: 'source-map',
+  entry: './src/lib/index.ts',
+  output: {
+    filename: 'wasdi.js',
+    path: path.resolve(__dirname, 'build'),
+    library: {                                                                                                                                                                       
+      type: "window",                                                                                                                                                                
+    },  
+    
+  },
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({ extractComments: false }),
+    ],
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(m|j|t)s$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader'
+        }
+      }
+    ]
+  },
+  plugins: [
+    new PrettierPlugin(),
     new webpack.BannerPlugin(banner),
-    new CopyPlugin({
-      patterns: [
-        { from: "./src/lib/JS-index.js", to: "wasdi-javascript.js" },
-      ],
-    })
   ],
 
 
@@ -82,4 +109,4 @@ let TsExport = {
 
 
 
-module.exports = [TsExport];
+module.exports = [TsExport,JsExport];

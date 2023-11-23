@@ -578,62 +578,6 @@ export class Wasdi {
   }
 
   /**
-   * Get a filtered paginated list of process workspaces.
-   *
-   * @param sSessionId User session id
-   * @param sWorkspaceId Workspace Id
-   * @param sStatus Status filter
-   * @param sOperationType Operation type filter
-   * @param sNamePattern Name filter
-   * @param sDateFrom Start update date filter
-   * @param sDateTo End update date filter
-   * @param iStartIndex start index
-   * @param iEndIndex end index
-   * @return List of Process Workspace View Models
-   */
-  getProcessesByWorkspace(
-    sWorkspaceId: string,
-    sOperationType: string,
-    sNamePattern: string,
-    dateFrom: string,
-    dateTo: string,
-    iStartIndex: number,
-    iEndIndex: number
-  ) {
-    return this.getObject(
-      this._m_sBaseUrl + "/process/byws",
-      "?workspace=" +
-        sWorkspaceId +
-        "&operationType=" +
-        sOperationType +
-        "&namePattern=" +
-        sNamePattern +
-        "&dateFrom=" +
-        dateFrom +
-        "&dateTo=" +
-        dateTo +
-        "&startIndex=" +
-        iStartIndex +
-        "&endIndex=" +
-        iEndIndex
-    );
-  }
-
-  /**
-   * Get all the process workspaces related to an application.
-   * This API is exposed by the main server that calls the same API on all computing node,
-   * retrieving execution data on all distributed nodes.
-   * @param sProcessorName The name of the processor
-   * @returns
-   */
-  getProcessesByApp(sProcessorName: string) {
-    return this.getObject(
-      this._m_sBaseUrl + "/process/byapp",
-      "?processorName=" + sProcessorName
-    );
-  }
-
-  /**
    * Retrieves a list of applications available on the WASDI marketplace.
    * The response is an array of strings that can be used to launch the particular application
    */
@@ -726,6 +670,63 @@ export class Wasdi {
       "layerId ": sourceMapPayload?.layerId,
     };
     return ret;
+  }
+
+  
+  /**
+   * Get a filtered paginated list of process workspaces.
+   *
+   * @param sSessionId User session id
+   * @param sWorkspaceId Workspace Id
+   * @param sStatus Status filter
+   * @param sOperationType Operation type filter
+   * @param sNamePattern Name filter
+   * @param sDateFrom Start update date filter
+   * @param sDateTo End update date filter
+   * @param iStartIndex start index
+   * @param iEndIndex end index
+   * @return List of Process Workspace View Models
+   */
+  getProcessesByWorkspace(
+    sWorkspaceId: string,
+    sOperationType: string,
+    sNamePattern: string,
+    dateFrom: string,
+    dateTo: string,
+    iStartIndex: number,
+    iEndIndex: number
+  ) {
+    return this.getObject(
+      this._m_sBaseUrl + "/process/byws",
+      "?workspace=" +
+        sWorkspaceId +
+        "&operationType=" +
+        sOperationType +
+        "&namePattern=" +
+        sNamePattern +
+        "&dateFrom=" +
+        dateFrom +
+        "&dateTo=" +
+        dateTo +
+        "&startIndex=" +
+        iStartIndex +
+        "&endIndex=" +
+        iEndIndex
+    );
+  }
+
+  /**
+   * Get all the process workspaces related to an application.
+   * This API is exposed by the main server that calls the same API on all computing node,
+   * retrieving execution data on all distributed nodes.
+   * @param sProcessorName The name of the processor
+   * @returns
+   */
+  getProcessesByApp(sProcessorName: string) {
+    return this.getObject(
+      this._m_sBaseUrl + "/process/byapp",
+      "?processorName=" + sProcessorName
+    );
   }
 
   /**
