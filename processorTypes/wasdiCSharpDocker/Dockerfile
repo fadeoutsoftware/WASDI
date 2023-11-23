@@ -59,10 +59,7 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
 
 
 # RUN specific to install the .NET runtime
-RUN wget --quiet --output-document=/tmp/microsoft-repository.deb https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb && \
-    dpkg -i /tmp/microsoft-repository.deb && \
-    rm --force /tmp/microsoft-repository.deb && \
-    apt-get update && \
+RUN apt-get update && \
     apt-get install \
         aspnetcore-runtime-6.0 && \
     rm --recursive --force /var/lib/apt/lists/* && \
@@ -74,7 +71,6 @@ USER {{ sWasdiSystemUserName }}
 
 
 # Create the application directory
-# Create the virtual environment
 RUN mkdir --parents \
         {{ sWasdiSystemUserHome }}/application
 
@@ -106,10 +102,6 @@ RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-
 
 # From now, all commands executed are executed as {{ sWasdiSystemUserName }}
 USER {{ sWasdiSystemUserName }}
-
-
-# Install libraries only if {{ sWasdiSystemUserHome }}/application/pip.txt exists -> PIP Not used in .net
-#RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-pip
 
 
 # Start the container
