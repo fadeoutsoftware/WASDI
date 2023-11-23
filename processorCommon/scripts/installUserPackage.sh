@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # MAINTAINER: WASDI SARL
-# VERSION: 1.1
+# VERSION: 1.2
 
 
 #### FUNCTION ####
@@ -59,7 +59,7 @@ function getGreatestValue() {
 }
 
 function installPackageApt() {
-    local sFileToParse="${sHomeDirectory}/packages.txt"
+    local sFileToParse="${sApplicationirectory}/packages.txt"
     local iReturnCode=0
 
     echo "[INFO] Check if the file '${sFileToParse}' exists..."
@@ -108,7 +108,7 @@ function cleanCacheApt() {
 }
 
 function installPackageConda() {
-    local sFileToParse="${sHomeDirectory}/env.yml"
+    local sFileToParse="${sApplicationDirectory}/env.yml"
     local iReturnCode=0
 
     echo "[INFO] Check if the file '${sFileToParse}' exists..."
@@ -152,7 +152,7 @@ function cleanCacheConda() {
 }
 
 function installPackagePip() {
-    local sFileToParse="${sHomeDirectory}/pip.txt"
+    local sFileToParse="${sApplicationDirectory}/pip.txt"
     local iReturnCode=0
 
     echo "[INFO] Check if the file '${sFileToParse}' exists..."
@@ -191,7 +191,7 @@ function installPackagePip() {
 }
 
 function cleanCachePip() {
-    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
+    find ${sHomeDirectory} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
     return ${?}
 }
 #### /FUNCTION ####
@@ -205,6 +205,17 @@ do
     case "${1}" in
         -h|--help)
             showHelp 0
+        ;;
+
+        --application-directory)
+            shift
+
+            if [[ -n "${1}" ]]
+            then
+                sApplicationDirectory="${1}"
+            fi
+
+            shift
         ;;
 
         --home-directory)
@@ -251,9 +262,21 @@ then
     exit 0
 fi
 
+if [[ -z "${sApplicationDirectory}" ]]
+then
+    echo "[ERROR] Please specify the application directory in which user files are copied."
+    errorDetected="true"
+fi
+
+if [[ -n "${sApplicationDirectory}" && ! -d "${sApplicationDirectory}" ]]
+then
+    echo "[INFO] The directory '${sApplicationDirectory}' doesn't exists."
+    errorDetected="true"
+fi
+
 if [[ -z "${sHomeDirectory}" ]]
 then
-    echo "[ERROR] Please specify the home directory in which user files are copied."
+    echo "[ERROR] Please specify the home directory in which we have everything (application, virtual environment, etc)."
     errorDetected="true"
 fi
 

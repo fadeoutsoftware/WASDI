@@ -86,7 +86,10 @@ USER root
 
 
 # Install packages only if /home/wasdi/packages.txt exists
-RUN bash /home/wasdi/installUserPackage.sh --failure-is-ok --home-directory /home/wasdi --package-apt
+RUN bash /home/wasdi/installUserPackage.sh \
+        --application-directory /home/wasdi \
+        --home-directory /home/wasdi \
+        --package-apt
 
 
 # From now, all commands executed are executed as {{ sWasdiSystemUserName }}
@@ -94,7 +97,10 @@ USER {{ sWasdiSystemUserName }}
 
 
 # Install libraries only if /home/wasdi/pip.txt exists
-RUN bash /home/wasdi/installUserPackage.sh --failure-is-ok --home-directory /home/wasdi --package-pip
+RUN bash /home/wasdi/installUserPackage.sh \
+        --application-directory /home/wasdi \
+        --home-directory /home/wasdi \
+        --package-pip
 
 
 # Start the container

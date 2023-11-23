@@ -91,24 +91,30 @@ RUN python3 -m venv --system-site-packages $sContainerUserHomeDirectory/venv && 
 COPY --chown=${sContainerUserName}:${sContainerGroupName} ./ ${sContainerUserHomeDirectory}/application/
 
 
-# Install user's Python libraries only if $sContainerUserHomeDirectory/application/pip.txt exists
-RUN bash ${sContainerUserHomeDirectory}/application/installUserPackage.sh --home-directory ${sContainerUserHomeDirectory}/application --package-pip && \
-    find ${sContainerUserHomeDirectory} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
-
-
 # From now, all commands executed are executed with the user 'root'
 USER root
 
 
 # Install user's packages only if $sContainerUserHomeDirectory/application/packages.txt exists
-RUN bash ${sContainerUserHomeDirectory}/application/installUserPackage.sh --home-directory ${sContainerUserHomeDirectory}/application --package-apt && \
-    rm --recursive --force /var/lib/apt/lists/* && \
-    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
+RUN bash ${sContainerUserHomeDirectory}/application/installUserPackage.sh \
+        --application-directory ${sContainerUserHomeDirectory}/application \
+        --home-directory ${sContainerUserHomeDirectory} \
+        --package-apt
 
 
 # From now, all commands executed are executed with the user ${sContainerUserName}
 USER ${sContainerUserName}
 
 
+# Install user's Python libraries only if $sContainerUserHomeDirectory/application/pip.txt exists
+RUN bash ${sContainerUserHomeDirectory}/application/installUserPackage.sh \
+        --application-directory ${sContainerUserHomeDirectory}/application \
+        --home-directory ${sContainerUserHomeDirectory} \
+        --package-pip
+
+
 # Execute the processor
-CMD ["python3", "eoepcaProcessorExecutor.py"]
+CMD [ \
+    "python3", \
+    "eoepcaProcessorExecutor.py" \
+]

@@ -121,7 +121,10 @@ USER root
 
 
 # Install packages only if {{ sWasdiSystemUserHome }}/application/packages.txt exists
-RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-apt
+RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
+        --application-directory {{ sWasdiSystemUserHome }}/application \
+        --home-directory {{ sWasdiSystemUserHome }} \
+        --package-apt
 
 
 # From now, all commands executed are executed as {{ sWasdiSystemUserName }}
@@ -129,7 +132,10 @@ USER {{ sWasdiSystemUserName }}
 
 
 # Install libraries only if {{ sWasdiSystemUserHome }}/application/pip.txt exists
-RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-pip
+RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
+        --application-directory {{ sWasdiSystemUserHome }}/application \
+        --home-directory {{ sWasdiSystemUserHome }} \
+        --package-pip
 
 
 # Start the container
