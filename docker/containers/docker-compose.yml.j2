@@ -213,11 +213,11 @@ services:
       - {{ aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable['key'] }}={{ aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
-    image: "{{ sWasdiInfluxDbGrafanaDockerImage }}"
+    image: "{{ sWasdiInfluxDbGrafanaDockerImageName }}:{{ sWasdiInfluxDbGrafanaVersion }}"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiInfluxDbGrafanaServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiInfluxDbGrafanaServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiInfluxDbGrafanaDefaultContextPath }}`)"
+      - "traefik.http.routers.r_{{ sWasdiGrafanaServiceName }}.rule=Host(`{{ sWasdiInfluxDbGrafanaUrl }}`)"
       - "traefik.http.routers.r_{{ sWasdiInfluxDbGrafanaServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sWasdiInfluxDbGrafanaServiceName }}.service=s_{{ sWasdiInfluxDbGrafanaServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}

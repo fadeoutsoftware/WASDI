@@ -1,0 +1,13 @@
+http:
+  routers:
+    r_{{ sWasdiTraefikGenericServiceName }}:
+      entrypoints: "websecure"
+      rule: "Host(`{{ sWasdiTraefikGenericRuleHost }}`)"
+      service: "s_{{ sWasdiTraefikGenericServiceName }}"
+      middlewares: "mw_wasdi-secure-allowFrame@file"
+      tls: true
+  services:
+    s_{{ sWasdiTraefikGenericServiceName }}:
+      loadBalancer:
+        servers:
+          - url: "{{ sWasdiTraefikGenericLoadBalancerMainServerUrl }}"
