@@ -1,19 +1,19 @@
 http:
   routers:
     r_{{ sWasdiNexusServiceName }}:
-{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
       entrypoints: "websecure"
 {% else %}
       entrypoints: "webs"
 {% endif %}
-      rule: "Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiNexusDefaultContextPath }}`)"
+      rule: "Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiNexusDefaultContextPath }}`)"
       service: "s_{{ sWasdiNexusServiceName }}"
       middlewares: "mw_wasdi-secure-allowFrame@file"
-{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
       tls: true
 {% endif %}
     r_{{ sWasdiNexusServiceName }}_docker-registry:
-{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
       entrypoints: "websecure"
 {% else %}
       entrypoints: "webs"
@@ -21,7 +21,7 @@ http:
       rule: "Host(`{{ sEnvironmentName }}-docker-registry-main{{ sWasdiHostId }}.wasdi.net`) && PathPrefix(`/`)"
       service: "s_{{ sWasdiNexusServiceName }}_docker-registry"
       middlewares: "mw_wasdi-secure-allowFrame@file"
-{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
       tls: true
 {% endif %}
   services:

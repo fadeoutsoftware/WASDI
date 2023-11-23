@@ -66,7 +66,7 @@ RUN apt-get update && \
         /var/www/html && \
     sed --in-place 's/user www-data;/user {{ sWasdiSystemUserName }};/g' /etc/nginx/nginx.conf && \
     echo "server_tokens off;" > /etc/nginx/conf.d/wasdi-secure.conf && \
-{% if bWasdiContainerTraefikSslEnabled == True %}
+{% if bWasdiTraefikSslEnabled == True %}
     echo "add_header Strict-Transport-Security \"max-age=31536000; includeSubDomains\" always;" >> /etc/nginx/conf.d/wasdi-secure.conf && \
 {% endif %}
     rm --recursive --force /var/lib/apt/lists/* && \

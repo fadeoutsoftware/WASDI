@@ -1,15 +1,15 @@
 http:
   routers:
     r_{{ sWasdiTraefikGenericServiceName }}:
-{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
       entrypoints: "websecure"
 {% else %}
       entrypoints: "webs"
 {% endif %}
-      rule: "Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiTraefikGenericDefaultContextPath }}`)"
+      rule: "Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiTraefikGenericDefaultContextPath }}`)"
       service: "s_{{ sWasdiTraefikGenericServiceName }}_lb"
       middlewares: "mw_wasdi-secure-allowFrame@file"
-{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
       tls: true
 {% endif %}
   services:
