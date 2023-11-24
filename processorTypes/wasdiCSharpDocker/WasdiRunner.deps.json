@@ -8,7 +8,7 @@
     ".NETCoreApp,Version=v6.0": {
       "WasdiRunner/1.0.0": {
         "dependencies": {
-          "WasdiLib": "0.0.3.2"
+          "WasdiLib": "0.0.3.5"
         },
         "runtime": {
           "WasdiRunner.dll": {}
@@ -200,7 +200,7 @@
           "System.Text.Encodings.Web": "6.0.0"
         }
       },
-      "WasdiLib/0.0.3.2": {
+      "WasdiLib/0.0.3.5": {
         "dependencies": {
           "Microsoft.Extensions.Configuration": "6.0.0",
           "Microsoft.Extensions.Configuration.Abstractions": "6.0.0",
@@ -219,8 +219,8 @@
         },
         "runtime": {
           "lib/net6.0/WasdiLib.dll": {
-            "assemblyVersion": "0.0.3.2",
-            "fileVersion": "0.0.3.2"
+            "assemblyVersion": "0.0.3.5",
+            "fileVersion": "0.0.3.5"
           }
         }
       }
@@ -428,12 +428,12 @@
       "path": "system.text.json/6.0.0",
       "hashPath": "system.text.json.6.0.0.nupkg.sha512"
     },
-    "WasdiLib/0.0.3.2": {
+    "WasdiLib/0.0.3.5": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-EqCJBjq2qaZD/A2Z9153ux6JqccFggiOTi7hfuzPpwhKPQbGCyCAY33DURYnHz6C7a6xSBF6DPc/MiaKRwo9Vw==",
-      "path": "wasdilib/0.0.3.2",
-      "hashPath": "wasdilib.0.0.3.2.nupkg.sha512"
+      "sha512": "sha512-Hb0EhsDHrCp5cIE2FvaWMsMtfDSKzSGoTPH48bR3hLiGH7+1GbifZSdHi5NAxzv4LlmT46pILX/tVvDMiJ6q6g==",
+      "path": "wasdilib/0.0.3.5",
+      "hashPath": "wasdilib.0.0.3.5.nupkg.sha512"
     }
   }
 }
