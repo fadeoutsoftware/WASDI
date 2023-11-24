@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.5.0
+Version 0.8.5.1
 
-Last Update: 23/10/2023
+Last Update: 24/11/2023
 
 Tested with: Python 3.7, Python 3.8, Python 3.9, Python 3.10
 
@@ -1091,9 +1091,7 @@ def getProductsByWorkspaceId(sWorkspaceId):
     :return: the list is an array of string. Can be empty if there is any error
     """
     global m_sBaseUrl
-    global m_sActiveWorkspace
 
-    m_sActiveWorkspace = sWorkspaceId
     asHeaders = _getStandardHeaders()
     payload = {'workspace': sWorkspaceId}
 
