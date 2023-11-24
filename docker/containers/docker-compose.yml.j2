@@ -73,6 +73,10 @@ services:
 {% endif %}
     pull_policy: "never"
     restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiClientUlimitNofile }}
+        hard: {{ sWasdiClientUlimitNofile }}
 {% endif %}
 {% if bWasdiClientV2Enabled == True %}
   {{ sWasdiClientV2ServiceName }}:
@@ -123,6 +127,10 @@ services:
 {% endif %}
     pull_policy: "never"
     restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiClientV2UlimitNofile }}
+        hard: {{ sWasdiClientV2UlimitNofile }}
 {% endif %}
 {% if bWasdiGeoserverEnabled == True %}
   {{ sWasdiGeoserverServiceName }}:
@@ -174,7 +182,7 @@ services:
       - {{ aoWasdiGrafanaCurrentEnvironmentVariable['key'] }}={{ aoWasdiGrafanaCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
-    image: "{{ sWasdiGrafanaDockerImageName }}:{{ sWasdiGrafanaVersion }}"
+    image: "{{ sWasdiGrafanaImageName }}:{{ sWasdiGrafanaVersion }}"
 {% if bWasdiGrafanaCluster == False %}
     labels:
       - "traefik.enable=true"
@@ -216,7 +224,7 @@ services:
       - {{ aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable['key'] }}={{ aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
-    image: "{{ sWasdiInfluxDbGrafanaDockerImageName }}:{{ sWasdiInfluxDbGrafanaVersion }}"
+    image: "{{ sWasdiInfluxDbGrafanaImageName }}:{{ sWasdiInfluxDbGrafanaVersion }}"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiInfluxDbGrafanaServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
@@ -337,25 +345,6 @@ services:
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiKeycloakServiceName }}/opt_wasdi_keycloak_data_import:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/data/import:ro
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiKeycloakServiceName }}/opt_wasdi_keycloak_providers:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/providers:ro
-  {{ sWasdiPostgresqlKeycloakServiceName }}:
-{% if bWasdiPostgresqlKeycloakInitialized == False %}
-    environment:
-      - POSTGRES_DB=${sPostgresqlKeycloakDatabaseName}
-      - POSTGRES_USER=${sPostgresqlKeycloakDatabaseUsername}
-      - POSTGRES_PASSWORD=${sPostgresqlKeycloakDatabasePassword}
-      - POSTGRES_USER1_NAME=${sPostgresqlKeycloakUser1Name}
-      - POSTGRES_USER1_PASSWORD=${sPostgresqlKeycloakUser1Password}
-{% endif %}
-    image: "{{ sWasdiPostgresqlKeycloakImageName }}:{{ sWasdiPostgresqlKeycloakImageVersion }}"
-    pull_policy: "always"
-    restart: "unless-stopped"
-    ulimits:
-      nofile:
-        soft: {{ sWasdiPostgresqlKeycloakUlimitNofile }}
-        hard: {{ sWasdiPostgresqlKeycloakUlimitNofile }}
-    volumes:
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlKeycloakServiceName }}/data01:/var/lib/postgresql/data
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlKeycloakServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
 {% endif %}
 {% if bWasdiMongoEnabled == True %}
   {{ sWasdiMongoServiceName }}:
@@ -411,6 +400,48 @@ services:
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiMongoServiceName }}/data01:/data/db:rw
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiMongoServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+{% endif %}
+{% if bWasdiKeycloakEnabled == True %}
+  {{ sWasdiPostgresqlKeycloakServiceName }}:
+{% if bWasdiPostgresqlKeycloakInitialized == False %}
+    environment:
+      - POSTGRES_DB=${sPostgresqlKeycloakDatabaseName}
+      - POSTGRES_USER=${sPostgresqlKeycloakDatabaseUsername}
+      - POSTGRES_PASSWORD=${sPostgresqlKeycloakDatabasePassword}
+      - POSTGRES_USER1_NAME=${sPostgresqlKeycloakUser1Name}
+      - POSTGRES_USER1_PASSWORD=${sPostgresqlKeycloakUser1Password}
+{% endif %}
+    image: "{{ sWasdiPostgresqlKeycloakImageName }}:{{ sWasdiPostgresqlKeycloakVersion }}"
+    pull_policy: "always"
+    restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiPostgresqlKeycloakUlimitNofile }}
+        hard: {{ sWasdiPostgresqlKeycloakUlimitNofile }}
+    volumes:
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlKeycloakServiceName }}/data01:/var/lib/postgresql/data
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlKeycloakServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+{% endif %}
+{% if bWasdiSonarqubeEnabled == True %}
+  {{ sWasdiPostgresqlSonarqubeServiceName }}:
+{% if bWasdiPostgresqlSonarqubeInitialized == False %}
+    environment:
+      - POSTGRES_DB=${sPostgresqlSonarqubeDatabaseName}
+      - POSTGRES_USER=${sPostgresqlSonarqubeDatabaseUsername}
+      - POSTGRES_PASSWORD=${sPostgresqlSonarqubeDatabasePassword}
+      - POSTGRES_USER1_NAME=${sPostgresqlSonarqubeUser1Name}
+      - POSTGRES_USER1_PASSWORD=${sPostgresqlSonarqubeUser1Password}
+{% endif %}
+    image: "{{ sWasdiPostgresqlSonarqubeImageName }}:{{ sWasdiPostgresqlSonarqubeVersion }}"
+    pull_policy: "always"
+    restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiPostgresqlSonarqubeUlimitNofile }}
+        hard: {{ sWasdiPostgresqlSonarqubeUlimitNofile }}
+    volumes:
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlSonarqubeServiceName }}/data01:/var/lib/postgresql/data
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlSonarqubeServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
 {% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
   {{ sWasdiRabbitMqServiceName }}:
@@ -503,6 +534,49 @@ services:
       - "{{ sWasdiDockerSocketFilePath }}:{{ sWasdiDockerSocketFilePath }}:ro"
       - "{{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw"
       - "{{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro"
+{% endif %}
+{% if bWasdiSonarqubeEnabled == True %}
+  {{ sWasdiSonarqubeServiceName }}:
+    depends_on:
+      - {{ sWasdiPostgresqlSonarqubeServiceName }}
+      - {{ sWasdiTraefikServiceName }}
+{% if ( aoWasdiSonarqubeEnvironmentVariable | length ) > 0 %}
+    environment:
+{% for aoWasdiSonarqubeCurrentEnvironmentVariable in aoWasdiSonarqubeEnvironmentVariable %}
+      - {{ aoWasdiSonarqubeCurrentEnvironmentVariable['key'] }}={{ aoWasdiSonarqubeCurrentEnvironmentVariable['value'] }}
+{% endfor %}
+{% endif %}
+    image: "{{ sWasdiSonarqubeImageName }}:{{ sWasdiSonarqubeVersion }}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.r_{{ sWasdiSonarqubeServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiSonarqubeServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiSonarqubeDefaultContextPath.rstrip('/') }}`)"
+      - "traefik.http.routers.r_{{ sWasdiSonarqubeServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiSonarqubeServiceName }}.service=s_{{ sWasdiSonarqubeServiceName }}"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sWasdiSonarqubeServiceName }}.tls=true"
+{% endif %}
+      - "traefik.http.services.s_{{ sWasdiSonarqubeServiceName }}.loadbalancer.server.port={{ sWasdiSonarqubeInternalPort }}"
+{% if sWasdiSonarqubeInternalPort | default("") != ""
+    and sWasdiSonarqubeExternalPort | default("") != ""
+    and aWasdiSonarqubeExternalIp | default([]) | length > 0 %}
+    ports:
+{% for sCurrentExternalIp in aWasdiSonarqubeExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiSonarqubeExternalPort }}:{{ sWasdiSonarqubeInternalPort }}"
+{% endfor %}
+{% endif %}
+    pull_policy: "always"
+    restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiSonarqubeUlimitNofile }}
+        hard: {{ sWasdiSonarqubeUlimitNofile }}
+{% if ( aWasdiSonarqubeVolume | length ) > 0 %}
+    volumes:
+{% for sWasdiSonarqubeCurrentVolume in aWasdiSonarqubeVolume %}
+      - "{{ sWasdiSonarqubeCurrentVolume }}"
+{% endfor %}
+{% endif %}
 {% endif %}
 {% if bWasdiTelegrafEnabled == True %}
   {{ sWasdiTelegrafServiceName }}:
@@ -714,7 +788,7 @@ services:
       - "--providers.docker.watch=true"
       - "--providers.file.directory=/etc/traefik/conf.d"
       - "--providers.file.watch=true"
-    image: "{{ sWasdiTraefikDockerImageName }}:{{ sWasdiTraefikVersion }}"
+    image: "{{ sWasdiTraefikImageName }}:{{ sWasdiTraefikVersion }}"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.dashboard.entrypoints={{ sWasdiTraefikEntrypoint }}"
