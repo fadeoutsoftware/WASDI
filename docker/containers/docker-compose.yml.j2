@@ -687,7 +687,7 @@ services:
       - "--entryPoints.web.http.redirections.entrypoint.scheme=https"
 {% endif %}
 {% if bWasdiTraefikAccessLogEnabled == True %}
-      - "--accesslog=true
+      - "--accesslog=true"
 {% endif %}
       - "--log=true"
       - "--log.level=DEBUG"
