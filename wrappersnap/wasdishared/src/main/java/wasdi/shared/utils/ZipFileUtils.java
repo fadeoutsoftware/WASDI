@@ -94,9 +94,9 @@ public class ZipFileUtils {
 					asFileNames.add(oEntry.getName());
 				}
 			}
-		} catch (Exception oE) {
+		} 
+		catch (Exception oE) {
 			WasdiLog.errorLog("ZipFileUtils.pokeZipArchiveContent: Error during creation of zip archive " );
-			throw oE;
 		}
 
 		return asFileNames;
