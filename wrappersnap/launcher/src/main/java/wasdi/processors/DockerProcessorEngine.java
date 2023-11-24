@@ -947,9 +947,12 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
             return true;
-        } catch (Exception oEx) {
+        } 
+        catch (Exception oEx) {
             WasdiLog.errorLog("DockerProcessorEngine.libraryUpdate Exception", oEx);
 
+            LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+            
             return false;
         }
         finally {
@@ -960,10 +963,9 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                     if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
                         oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
                     }
-
-                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
                 }
-            } catch (Exception e) {
+            } 
+            catch (Exception e) {
                 WasdiLog.errorLog("DockerProcessorEngine.libraryUpdate Exception", e);
             }
         	
