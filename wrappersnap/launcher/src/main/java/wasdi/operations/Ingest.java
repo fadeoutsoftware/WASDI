@@ -2,6 +2,7 @@ package wasdi.operations;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
@@ -181,6 +182,27 @@ public class Ingest extends Operation {
             if (oImportProductViewModel.getName().equals("geotiff")) {
                 oImportProductViewModel.setName(oImportProductViewModel.getFileName());
             }
+            
+            // Hanlde netcdf zipped files read by SNAP
+            try {
+                if (oImportProductViewModel.getFileName().endsWith(".zip")) {
+                	List<String> asFiles = ZipFileUtils.peepZipArchiveContent(oDstFile.getAbsolutePath());
+                	
+                	if (asFiles!=null) {
+                		if (asFiles.size() == 1) {
+                			String sFile = asFiles.get(0);
+                			String sExt = Utils.GetFileNameExtension(sFile);
+                			if (sExt.toLowerCase().equals("nc")) {
+                				WasdiLog.infoLog("Ingest.executeOperation: this looks a zip file with only on netcdf inside. We set the name with the .zip extension");
+                				oImportProductViewModel.setName(oImportProductViewModel.getFileName());
+                			}
+                		}
+                	}
+                }            	
+            }
+            catch (Exception oEx) {
+            	WasdiLog.errorLog("Ingest.executeOperation: Exception occurred while trying to detect if it is only a netcdf zipped", oEx);
+			}
 
             // add product to db
             addProductToDbAndWorkspaceAndSendToRabbit(oImportProductViewModel, oDstFile.getAbsolutePath(),
