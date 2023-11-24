@@ -427,11 +427,25 @@ services:
       - RABBITMQ_PID_FILE=/var/run/rabbitmq/rabbitmq.pid
     image: "{{ sWasdiRabbitMqServiceName }}:latest"
     labels:
+{% if bWasdiRabbitMqInterfaceEndpointEnabled == True or bWasdiRabbitMqWebStompEndpointEnabled == True %}
       - "traefik.enable=true"
-      - "traefik.http.middlewares.mw_{{ sWasdiRabbitMqServiceName }}_stomp.stripprefix.prefixes=/rabbit-stomp"
+{% if bWasdiRabbitMqInterfaceEndpointEnabled == True %}
+      - "traefik.http.middlewares.mw_{{ sWasdiRabbitMqServiceName }}_interface.stripprefix.prefixes={{ sWasdiRabbitMqInterfaceDefaultContextPath.rstrip('/') }}"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_interface.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_interface.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiRabbitMqInterfaceDefaultContextPath.rstrip('/') }}`)"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_interface.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_interface.service=s_{{ sWasdiRabbitMqServiceName }}_interface"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_interface.tls=true"
+{% endif %}
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_interface.middlewares=mw_{{ sWasdiRabbitMqServiceName }}_interface@docker"
+      - "traefik.http.services.s_{{ sWasdiRabbitMqServiceName }}_interface.loadbalancer.server.port={{ sWasdiRabbitMqInterfaceInternalPort }}"
+{% endif %}
+{% if bWasdiRabbitMqWebStompEndpointEnabled == True %}
+      - "traefik.http.middlewares.mw_{{ sWasdiRabbitMqServiceName }}_stomp.stripprefix.prefixes={{ sWasdiRabbitMqWebStompDefaultContextPath.rstrip('/') }}"
       - "traefik.http.middlewares.mw_{{ sWasdiRabbitMqServiceName }}_stomp.stripprefix.forceSlash=true"
       - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.entrypoints={{ sWasdiTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`/rabbit-stomp`)"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiRabbitMqWebStompDefaultContextPath.rstrip('/') }}`)"
       - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.service=s_{{ sWasdiRabbitMqServiceName }}_stomp"
 {% if bWasdiSslEnabled == True %}
@@ -439,6 +453,8 @@ services:
 {% endif %}
       - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.middlewares=mw_{{ sWasdiRabbitMqServiceName }}_stomp@docker"
       - "traefik.http.services.s_{{ sWasdiRabbitMqServiceName }}_stomp.loadbalancer.server.port={{ sWasdiRabbitMqWebStompInternalPort }}"
+{% endif %}
+{% endif %}
 {% if (( sWasdiRabbitMqMainInternalPort | default("") ) != ""
         and ( sWasdiRabbitMqMainExternalPort | default("") ) != ""
         and (( aWasdiRabbitMqMainExternalIp | default([]) ) | length ) > 0
