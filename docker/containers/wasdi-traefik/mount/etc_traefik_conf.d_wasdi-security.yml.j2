@@ -13,7 +13,7 @@ http:
     mw_wasdi-secure-allowFrame:
       headers:
         frameDeny: false
-{% if bWasdiTraefikSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
         sslRedirect: true
 {% else %}
         sslRedirect: false
@@ -28,7 +28,7 @@ http:
     mw_wasdi-secure-denyFrame:
       headers:
         frameDeny: true
-{% if bWasdiTraefikSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
         sslRedirect: true
 {% else %}
         sslRedirect: false
@@ -41,7 +41,7 @@ http:
         forceStsHeader: true
         referrerPolicy: same-origin
 
-{% if bWasdiTraefikSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
 tls:
   options:
     default:

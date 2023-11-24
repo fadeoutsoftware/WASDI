@@ -9,5 +9,9 @@ http:
   services:
     s_{{ sWasdiTraefikGenericServiceName }}:
       loadBalancer:
+        healthCheck:
+          path: "{{ sWasdiTraefikGenericLoadBalancerHealthCheckPath }}"
+          interval: "{{ sWasdiTraefikGenericLoadBalancerHealthCheckInterval }}"
+          timeout: "{{ sWasdiTraefikGenericLoadBalancerHealthCheckTimeout }}"
         servers:
           - url: "{{ sWasdiTraefikGenericLoadBalancerServersUrlMain }}"

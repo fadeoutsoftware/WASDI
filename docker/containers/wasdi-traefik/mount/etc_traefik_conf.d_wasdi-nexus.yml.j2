@@ -5,7 +5,7 @@ http:
       rule: "Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiNexusDefaultContextPath }}`)"
       service: "s_{{ sWasdiNexusServiceName }}"
       middlewares: "mw_wasdi-secure-allowFrame@file"
-{% if bWasdiTraefikSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
       tls: true
 {% endif %}
     r_{{ sWasdiNexusServiceName }}_docker-registry:
@@ -13,7 +13,7 @@ http:
       rule: "Host(`{{ sEnvironmentName }}-docker-registry-main{{ sWasdiHostId }}.wasdi.net`) && PathPrefix(`/`)"
       service: "s_{{ sWasdiNexusServiceName }}_docker-registry"
       middlewares: "mw_wasdi-secure-allowFrame@file"
-{% if bWasdiTraefikSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
       tls: true
 {% endif %}
   services:

@@ -5,7 +5,7 @@ http:
       rule: "Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiJenkinsDefaultContextPath }}`)"
       service: "s_{{ sWasdiJenkinsServiceName }}"
       middlewares: "mw_wasdi-secure-denyFrame@file"
-{% if bWasdiTraefikSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
       tls: true
 {% endif %}
     r_{{ sWasdiJenkinsServiceName }}_old:
@@ -13,7 +13,7 @@ http:
       rule: "Host(`test-jenkins.wasdi.net`) && PathPrefix(`/`)"
       service: "s_{{ sWasdiJenkinsServiceName }}"
       middlewares: "mw_wasdi-secure-denyFrame@file"
-{% if bWasdiTraefikSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
       tls: true
 {% endif %}
   services:

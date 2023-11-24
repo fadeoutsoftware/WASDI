@@ -5,14 +5,14 @@ http:
       rule: "Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiTraefikGenericDefaultContextPath }}`)"
       service: "s_{{ sWasdiTraefikGenericServiceName }}_lb"
       middlewares: "mw_wasdi-secure-allowFrame@file"
-{% if bWasdiTraefikSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
       tls: true
 {% endif %}
   services:
     s_{{ sWasdiTraefikGenericServiceName }}_lb:
       loadBalancer:
         healthCheck:
-          path: "{{ sWasdiTraefikGenericDefaultContextPath }}"
+          path: "{{ sWasdiTraefikGenericLoadBalancerHealthCheckPath }}"
           interval: "{{ sWasdiTraefikGenericLoadBalancerHealthCheckInterval }}"
           timeout: "{{ sWasdiTraefikGenericLoadBalancerHealthCheckTimeout }}"
         servers:
