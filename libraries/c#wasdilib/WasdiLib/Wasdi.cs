@@ -50,13 +50,11 @@ namespace WasdiLib
 		/// </summary>
 		public Wasdi()
 		{
-
-
 			Startup.RegisterServices();
 
-			Startup.RegisterLogger(false);
+			Startup.RegisterLogger(true);
 			_logger = Startup.ServiceProvider.GetService<ILogger<Wasdi>>();
-			_logger.LogDebug("Wasdi()");
+			_logger.LogInformation("Wasdi Dot Net Lib v.0.3.5");
 
 			Startup.SetupErrorLogger();
 
@@ -76,17 +74,19 @@ namespace WasdiLib
 		/// <returns>True if the system is initialized, False if there is any error</returns>
 		public bool Init(string? sConfigFilePath = null)
 		{
-			_logger.LogDebug($"Init({sConfigFilePath})");
+			_logger.LogInformation($"Init({sConfigFilePath})");
 
-			bool loadConfiguration = LoadConfigurationFile(sConfigFilePath);
+			bool bLoadConfiguration = LoadConfigurationFile(sConfigFilePath);
 
-			if (!loadConfiguration)
-				return false;
+			if (!bLoadConfiguration)
+			{
+                _logger.LogError("Wasdi.Init: There was an error reading the configuration, we exit");
+                return false;
+            }
 
 			LoadConfigurationValues();
 
 			LoadParametersFile();
-
 
 			if (InternalInit(GetUser(), GetPassword(), GetSessionId()))
 			{
@@ -1134,6 +1134,9 @@ namespace WasdiLib
 
 			if (m_sWorkspaceBaseUrl == "")
 				m_sWorkspaceBaseUrl = m_sBaseUrl;
+
+			if (!m_sWorkspaceBaseUrl.EndsWith("/"))
+				m_sWorkspaceBaseUrl = m_sWorkspaceBaseUrl + "/";
 
 			return m_sActiveWorkspace;
 		}
