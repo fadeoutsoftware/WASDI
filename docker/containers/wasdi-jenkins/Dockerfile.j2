@@ -261,8 +261,4 @@ COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy
 ENTRYPOINT [ \
     "/bin/bash", \
     "{{ sWasdiJenkinsRootDirectoryPath }}/docker-entrypoint.sh", \
-    "{{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }}/bin/java", \
-    "${JAVA_OPTS}",
-    "-jar", \
-    "{{ sWasdiJenkinsRootDirectoryPath }}/{{ sWasdiJenkinsVersion }}/{{ sWasdiJenkinsSourceUrl | basename }}" \
 ]
