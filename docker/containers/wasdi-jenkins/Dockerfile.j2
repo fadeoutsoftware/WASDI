@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 
 MAINTAINER "WASDI SARL"
@@ -25,9 +25,14 @@ ENV EDITOR="nano"
 RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
     useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
     mkdir --parents \
+        {{ sWasdiSystemUserHome }}/.ssh \
         {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} \
+        {{ sWasdiSystemUserHome }}/.ssh && \
     chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} \
         {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chmod 700 \
+        {{ sWasdiSystemUserHome }}/.ssh && \
     chmod {{ sWasdiSoftwareRootDirectoryMode }} \
         {{ sWasdiSoftwareRootDirectoryPath }}
 
@@ -59,12 +64,13 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
 # RUN specific to install Jenkins
 RUN apt-get update && \
     apt-get install \
-        ansible \
         acl \
         fontconfig \
         git \
         libfreetype6 \
-        openssh-client && \
+        openssh-client \
+        python3 \
+        python3-venv && \
     mkdir --parents \
         {{ sWasdiDataPartitionRootDirectoryPath }} \
         {{ sWasdiDataRootDirectoryPath }} && \
@@ -198,21 +204,31 @@ ENV PATH="{{ sWasdiNodeJs18RootDirectoryPath }}/latest/bin:${PATH}"
 RUN mkdir --parents \
         {{ sWasdiJenkinsRootDirectoryPath }} \
         {{ sWasdiJenkinsRootDirectoryPath }}/{{ sWasdiJenkinsVersion }} \
-        {{ sWasdiJenkinsRootDirectoryPath }}/{{ sWasdiJenkinsVersion }}/ansible && \
+        {{ sWasdiSoftwareRootDirectoryPath }}/ansible \
+        {{ sWasdiSoftwareRootDirectoryPath }}/venv && \
     chown {{ sWasdiJenkinsRootDirectoryOwner }}:{{ sWasdiJenkinsRootDirectoryGroup }} \
         {{ sWasdiJenkinsRootDirectoryPath }} \
         {{ sWasdiJenkinsRootDirectoryPath }}/{{ sWasdiJenkinsVersion }} \
-        {{ sWasdiJenkinsRootDirectoryPath }}/{{ sWasdiJenkinsVersion }}/ansible && \
+        {{ sWasdiSoftwareRootDirectoryPath }}/ansible \
+        {{ sWasdiSoftwareRootDirectoryPath }}/venv && \
     chmod {{ sWasdiJenkinsRootDirectoryMode }} \
         {{ sWasdiJenkinsRootDirectoryPath }} \
         {{ sWasdiJenkinsRootDirectoryPath }}/{{ sWasdiJenkinsVersion }} \
-        {{ sWasdiJenkinsRootDirectoryPath }}/{{ sWasdiJenkinsVersion }}/ansible && \
+        {{ sWasdiSoftwareRootDirectoryPath }}/ansible \
+        {{ sWasdiSoftwareRootDirectoryPath }}/venv && \
+    python3 -m venv --system-site-packages {{ sWasdiSoftwareRootDirectoryPath }}/venv && \
+    {{ sWasdiSoftwareRootDirectoryPath }}/venv/bin/pip3 install --no-cache-dir --no-compile \
+        ansible \
+        jmespath \
+        pymongo && \
     wget \
         --no-verbose \
         --output-document /tmp/{{ sWasdiJenkinsSourceUrl | basename }} \
         --progress=bar:force:noscroll \
         --show-progress \
         {{ sWasdiJenkinsSourceUrl }} --output-document {{ sWasdiJenkinsRootDirectoryPath }}/{{ sWasdiJenkinsVersion }}/{{ sWasdiJenkinsSourceUrl | basename }}
+
+ENV PATH="{{ sWasdiSoftwareRootDirectoryPath }}/venv/bin:{{ sWasdiNodeJs18RootDirectoryPath }}/latest/bin:${PATH}"
 
 
 # From now, all commands executed are executed with the user '{{ sWasdiSystemUserName }}'
@@ -223,8 +239,16 @@ USER {{ sWasdiSystemUserName }}
 WORKDIR {{ sWasdiJenkinsRootDirectoryPath }}/{{ sWasdiJenkinsVersion }}
 
 
+# Copy data
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/home_.ssh_config {{ sWasdiSystemUserHome }}/.ssh/config
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/home_.ssh_id_ed25519 {{ sWasdiSystemUserHome }}/.ssh/id_ed25519
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/docker-entrypoint.sh {{ sWasdiJenkinsRootDirectoryPath }}/docker-entrypoint.sh
+
+
 # Start the container
 ENTRYPOINT [ \
+    "/bin/bash", \
+    "{{ sWasdiJenkinsRootDirectoryPath }}/docker-entrypoint.sh", \
     "{{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }}/bin/java", \
     "-jar", \
     "{{ sWasdiJenkinsRootDirectoryPath }}/{{ sWasdiJenkinsVersion }}/{{ sWasdiJenkinsSourceUrl | basename }}" \
