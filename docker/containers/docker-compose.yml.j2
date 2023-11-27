@@ -259,6 +259,14 @@ services:
 {% if bWasdiJenkinsEnabled == True %}
   {{ sWasdiJenkinsServiceName }}:
     command:
+      - "{{ sWasdiJdk17RootDirectoryPath }}/latest/bin/java"
+{% if ( aWasdiJenkinsJavaArgs | length ) > 0 %}
+{% for sWasdiJenkinsCurrentJavaArg in aWasdiJenkinsJavaArgs %}
+      - "{{ sWasdiJenkinsCurrentJavaArg }}"
+{% endfor %}
+{% endif %}
+      - "-jar"
+      - "{{ sWasdiJenkinsRootDirectoryPath }}/{{ sWasdiJenkinsVersion }}/{{ sWasdiJenkinsSourceUrl | basename }}"
       - "--httpPort={{ sWasdiJenkinsInternalPort }}"
       - "--prefix={{ sWasdiJenkinsDefaultContextPath.rstrip('/') }}"
       - "--sessionTimeout={{ iWasdiJenkinsSessionTimeout }}"

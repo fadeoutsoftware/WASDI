@@ -59,11 +59,11 @@
     <distributionManagement>
         <repository>
             <id>wasdi-release</id>
-            <url>${sWasdiNexusRepositoryUrl}/repository/wasdi-release/</url>
+            <url>${sWasdiNexusRepositoryReleaseUrl}</url>
         </repository>
         <snapshotRepository>
             <id>wasdi-snapshot</id>
-            <url>${sWasdiNexusRepositoryUrl}/repository/wasdi-snapshot/</url>
+            <url>${sWasdiNexusRepositorySnapshotUrl}</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -108,7 +108,7 @@
         <repository>
             <id>wasdi-library</id>
             <name>WASDI - INTERNAL REPOSITORY - LIBRARY</name>
-            <url>${sWasdiNexusRepositoryUrl}/repository/wasdi-library/</url>
+            <url>${sWasdiNexusRepositoryLibraryUrl}</url>
         </repository>
     </repositories>
 </project>

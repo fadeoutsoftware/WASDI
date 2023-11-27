@@ -25,9 +25,14 @@ ENV EDITOR="nano"
 RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
     useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
     mkdir --parents \
+        {{ sWasdiSystemUserHome }}/.ssh \
         {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} \
+        {{ sWasdiSystemUserHome }}/.ssh && \
     chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} \
         {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chmod 700 \
+        {{ sWasdiSystemUserHome }}/.ssh && \
     chmod {{ sWasdiSoftwareRootDirectoryMode }} \
         {{ sWasdiSoftwareRootDirectoryPath }}
 
