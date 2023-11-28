@@ -81,8 +81,8 @@ pipeline {
           script {
             try {
               sh script: """
-                echo "Please execute manually this command:"
-                echo "docker compose --file /opt/wasdi/docker/docker-compose.yml up --detach --force-recreate wasdi-jenkins"
+                echo "Please execute manually this command in the right directory:"
+                echo "docker compose up --detach --force-recreate wasdi-jenkins"
               """,
               label: "Command to start or restart the container"
             } catch (oError) {
