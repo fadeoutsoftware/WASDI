@@ -1,6 +1,6 @@
 {
   "name": "wasdi",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "description": "Javascript library for WASDI - Web Advanced Space Developer Interface",
   "main": "build/index.ts",
   "types": "build/index.d.ts",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/fadeoutsoftware/WASDI/"
+    "url": "https://github.com/fadeoutsoftware/WASDI/tree/master/libraries/jswasdilib"
   },
   "author": "WASDI (LU) Sarl",
   "license": "GPL-3.0",
