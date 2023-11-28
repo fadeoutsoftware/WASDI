@@ -100,21 +100,16 @@ pipeline {
       }
     }
 
-    stage('START OR RESTART THE CONTAINER') {
+    stage('PLEASE READ LOGS') {
       steps {
         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
           script {
             try {
               sh script: """
-                cd ${env.sWasdiAnsiblePath}
-                ansible-playbook \
-                    playbooks/runDockerContainerWasdiJenkins.yml \
-                    --inventory inventories/wasdi.yml \
-                    --limit ${env.sAnsibleLimit} \
-                    --diff \
-                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+                echo "Please execute manually this command:"
+                echo "docker compose --file /opt/wasdi/docker/docker-compose.yml up --detach --force-recreate wasdi-jenkins"
               """,
-              label: "Start or restart the container"
+              label: "Command to start or restart the container"
             } catch (oError) {
               echo oError.getMessage()
               throw oError
