@@ -20,8 +20,8 @@ http:
     s_{{ sWasdiNexusServiceName }}:
       loadBalancer:
         servers:
-          - url: "http://{{ sWasdiDockerNetworkGateway }}:{{ iWasdiNexusListenPort }}/{{ sWasdiNexusDefaultContextPath.lstrip('/').rstrip('/') }}"
+          - url: "http://{{ sWasdiDockerNetworkGateway }}:8081/{{ sWasdiNexusDefaultContextPath.lstrip('/').rstrip('/') }}"
     s_{{ sWasdiNexusServiceName }}_docker-registry:
       loadBalancer:
         servers:
-          - url: "http://{{ sWasdiDockerNetworkGateway }}:{{ iWasdiNexusDockerRegistryListenPort }}"
+          - url: "http://{{ sWasdiDockerNetworkGateway }}:8081"
