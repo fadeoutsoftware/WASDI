@@ -403,6 +403,8 @@ services:
 {% endif %}
 {% if bWasdiNexusEnabled == True %}
   {{ sWasdiNexusServiceName }}:
+    depends_on:
+      - {{ sWasdiTraefikServiceName }}
 {% if ( aoWasdiNexusEnvironmentVariable | length ) > 0 %}
     environment:
 {% for aoWasdiNexusCurrentEnvironmentVariable in aoWasdiNexusEnvironmentVariable %}
@@ -420,6 +422,16 @@ services:
       - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiNexusServiceName }}.loadbalancer.server.port={{ sWasdiNexusInternalPort }}"
+{% for aoWasdiNexusDockerCurrentRegistry in aoWasdiNexusDockerRegistries: %}
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}_registry{{ loop.index }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}_registry{{ loop.index }}.rule=Host(`{{ aoWasdiNexusDockerCurrentRegistry['url'] }}`)"
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}_registry{{ loop.index }}.middlewares=mw_wasdi-secure-allowFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}_registry{{ loop.index }}.service=s_{{ sWasdiNexusServiceName }}_registry{{ loop.index }}"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}_registry{{ loop.index }}.tls=true"
+{% endif %}
+      - "traefik.http.services.s_{{ sWasdiNexusServiceName }}_registry{{ loop.index }}.loadbalancer.server.port={{ aoWasdiNexusDockerCurrentRegistry['port'] }}"
+{% endfor %}
 {% if sWasdiNexusInternalPort | default("") != ""
     and sWasdiNexusExternalPort | default("") != ""
     and aWasdiNexusExternalIp | default([]) | length > 0 %}
