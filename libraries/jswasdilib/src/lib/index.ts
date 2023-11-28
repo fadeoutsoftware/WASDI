@@ -1,3 +1,4 @@
+
 /**
  * Wasdi class expose methods and utilities to interact with WASDI services, using
  * Javascript/Typescript as specification and programming language. The package available
@@ -61,6 +62,7 @@ class Wasdi {
     this._m_sWorkspaceName = "";
     this._m_sWorkspaceId = "";
   }
+
 
   /**
    * Print status utility, prints the information about the current session with WASDI
@@ -396,20 +398,24 @@ class Wasdi {
     return workspaceList;
   }
 
-  /**
+    /**
    * Returns the workspace Id from the name. It search through the workspaces
    * of the current logged user.
    * @param wsName Workspace name to be searched for
    * @returns A string containing the workspace Id, if the name was found. An empty string otherwise
    */
-  getWorkspaceIdByName(wsName: string) {
-    this.getWorkspaces().forEach(
-      (a: { workspaceName: string; workspaceId: string }) => {
-        if (a.workspaceName == wsName) return a.workspaceId;
-      }
-    );
-    return "";
-  }
+    getWorkspaceIdByName(wsName: string): string {
+      let sResult: string = ""
+      this.getWorkspaces().forEach(
+        (a: { workspaceName: string; workspaceId: string }) => {
+          if (a.workspaceName == wsName) {
+            sResult = a.workspaceId;
+            return;
+          }
+        }
+      );
+      return sResult;
+    }
 
   /**
    * Retrieve a list of workspace of the current logged user.
