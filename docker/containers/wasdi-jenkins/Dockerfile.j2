@@ -74,9 +74,7 @@ RUN apt-get update && \
         rsync && \
     mkdir --parents \
         {{ sWasdiDataPartitionRootDirectoryPath }} \
-        {{ sWasdiDataRootDirectoryPath }} \
-        {{ sWasdiMavenDataRootDirectoryPath }} \
-        {{ sWasdiMavenLocalRepositoryDirectoryPath }} && \
+        {{ sWasdiDataRootDirectoryPath }} && \
     chown {{ sWasdiDataPartitionRootDirectoryOwner }}:{{ sWasdiDataPartitionRootDirectoryGroup }} \
         {{ sWasdiDataPartitionRootDirectoryPath }} && \
     chmod {{ sWasdiDataPartitionRootDirectoryMode }} \
@@ -85,14 +83,6 @@ RUN apt-get update && \
         {{ sWasdiDataRootDirectoryPath }} && \
     chmod {{ sWasdiDataRootDirectoryMode }} \
         {{ sWasdiDataRootDirectoryPath }} && \
-    chown {{ sWasdiMavenDataRootDirectoryGroup }}:{{ sWasdiMavenDataRootDirectoryOwner }} \
-        {{ sWasdiMavenDataRootDirectoryPath }} && \
-    chmod {{ sWasdiMavenDataRootDirectoryMode }} \
-        {{ sWasdiMavenDataRootDirectoryPath }} && \
-    chown {{ sWasdiMavenLocalRepositoryDirectoryGroup }}:{{ sWasdiMavenLocalRepositoryDirectoryOwner }} \
-        {{ sWasdiMavenLocalRepositoryDirectoryPath }} && \
-    chmod {{ sWasdiMavenLocalRepositoryDirectoryMode }} \
-        {{ sWasdiMavenLocalRepositoryDirectoryPath }} && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
@@ -158,13 +148,16 @@ RUN mkdir --parents \
 #    to avoid to install opendjk with apt
 RUN mkdir --parents \
         {{ sWasdiMavenRootDirectoryPath }} \
-        {{ sWasdiMavenRootDirectoryPath }}/{{ sWasdiMavenVersion }} && \
+        {{ sWasdiMavenRootDirectoryPath }}/{{ sWasdiMavenVersion }} \
+        {{ sWasdiMavenRootDirectoryPath }}/{{ sWasdiMavenVersion }}/repository && \
     chown {{ sWasdiMavenRootDirectoryOwner }}:{{ sWasdiMavenRootDirectoryGroup }} \
         {{ sWasdiMavenRootDirectoryPath }} \
-        {{ sWasdiMavenRootDirectoryPath }}/{{ sWasdiMavenVersion }} && \
+        {{ sWasdiMavenRootDirectoryPath }}/{{ sWasdiMavenVersion }} \
+        {{ sWasdiMavenRootDirectoryPath }}/{{ sWasdiMavenVersion }}/repository && \
     chmod {{ sWasdiMavenRootDirectoryMode }} \
         {{ sWasdiMavenRootDirectoryPath }} \
-        {{ sWasdiMavenRootDirectoryPath }}/{{ sWasdiMavenVersion }} && \
+        {{ sWasdiMavenRootDirectoryPath }}/{{ sWasdiMavenVersion }} \
+        {{ sWasdiMavenRootDirectoryPath }}/{{ sWasdiMavenVersion }}/repository && \
     wget \
         --no-verbose \
         --output-document /tmp/{{ sWasdiMavenSourceUrl | basename }} \
@@ -260,5 +253,5 @@ COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy
 # Start the container
 ENTRYPOINT [ \
     "/bin/bash", \
-    "{{ sWasdiJenkinsRootDirectoryPath }}/docker-entrypoint.sh", \
+    "{{ sWasdiJenkinsRootDirectoryPath }}/docker-entrypoint.sh" \
 ]
