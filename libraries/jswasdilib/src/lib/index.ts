@@ -36,17 +36,17 @@ export class Wasdi {
    * As convention the name "wasdi" is used, both for Javascript and Typescript.
    */
   constructor() {
-    this._m_sUser = undefined;
-    this._m_sPassword = undefined;
+    this._m_sUser = "";
+    this._m_sPassword = "";
 
-    this._m_sActiveWorkspace = undefined;
+    this._m_sActiveWorkspace = "";
     this._m_sWorkspaceOwner = "";
     this._m_sWorkspaceBaseUrl = "";
 
-    this._m_sParametersFilePath = undefined;
+    this._m_sParametersFilePath = "";
     this._m_sSessionId = "";
     this._m_bValidSession = false;
-    this._m_sBasePath = undefined;
+    this._m_sBasePath = "";
 
     this._m_bDownloadActive = true;
     this._m_bUploadActive = true;
@@ -118,7 +118,7 @@ export class Wasdi {
    */
   helloWasdiWorld(noOutput: boolean): string {
     var xhr = new XMLHttpRequest();
-    let response = undefined;
+    let response = "";
     xhr.addEventListener("readystatechange", function () {
       if (this.readyState === 4) {
         response = this.responseText;
@@ -854,6 +854,3 @@ export class Wasdi {
     return this._m_sWorkspaceName;
   }
 }
-
-let wasdi = new Wasdi();
-export default wasdi;
