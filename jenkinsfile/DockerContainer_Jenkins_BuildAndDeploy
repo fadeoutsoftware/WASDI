@@ -41,7 +41,7 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD OF UPDATE METRIC CONTAINER + DEPLOY IT"
+          currentBuild.description = "WASDI - BUILD AND DEPLOY THE JENKINS CONTAINER"
         }
       }
     }
@@ -49,28 +49,33 @@ pipeline {
     stage('BUILD THE CONTAINER') {
       steps {
         sh script: """
-          cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiUpdateMetric=true'
+            cd ${env.sWasdiAnsiblePath}
+            ansible-playbook \
+                playbooks/buildWasdiDockerContainer.yml \
+                --inventory inventories/wasdi.yml \
+                --limit ${env.sAnsibleLimit} \
+                --diff \
+                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiJenkinsContainer=true'
         """,
-        label: "Build the toolbox container"
+        label: "Build the container"
       }
     }
 
-    stage('DEPLOYMENT') {
+    stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
       steps {
         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
           script {
             try {
               sh script: """
-                cd ${env.sWasdiAnsiblePath}
-                ansible-playbook \
-                  playbooks/deployDockerContainerWasdiUpdateMetric.yml \
-                  --inventory inventories/wasdi.yml \
-                  --limit ${env.sAnsibleLimit} \
-                  --diff \
-                  --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+                  cd ${env.sWasdiAnsiblePath}
+                  ansible-playbook \
+                    playbooks/deployDockerContainerWasdiJenkins.yml \
+                    --inventory inventories/wasdi.yml \
+                    --limit ${env.sAnsibleLimit} \
+                    --diff \
+                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
-              label: "Execute ansible-playbook"
+              label: "Deploy the container and its run element"
             } catch (oError) {
               echo oError.getMessage()
               throw oError
@@ -82,16 +87,25 @@ pipeline {
 
     stage('START OR RESTART THE CONTAINER') {
       steps {
-        sh script: """
-          cd ${env.sWasdiAnsiblePath}
-          ansible-playbook \
-            playbooks/runDockerContainer.yml \
-            --inventory inventories/wasdi.yml \
-            --limit ${env.sAnsibleLimit} \
-            --diff \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiUpdateMetric=true'
-        """,
-        label: "Start or restart the container"
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          script {
+            try {
+              sh script: """
+                cd ${env.sWasdiAnsiblePath}
+                ansible-playbook \
+                    playbooks/runDockerContainerWasdiJenkins.yml \
+                    --inventory inventories/wasdi.yml \
+                    --limit ${env.sAnsibleLimit} \
+                    --diff \
+                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+              """,
+              label: "Start or restart the container"
+            } catch (oError) {
+              echo oError.getMessage()
+              throw oError
+            }
+          }
+        }
       }
     }
   }

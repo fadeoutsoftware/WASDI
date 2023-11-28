@@ -12,7 +12,6 @@ pipeline {
   environment {
     sCurrentEnvironmentLower = getEnvironmentName(env.sAnsibleLimit, true)
     sCurrentEnvironmentUpper = getEnvironmentName(env.sAnsibleLimit, false)
-    sCurrentRevision         = "${env.BUILD_ID}"
     sMavenProfile            = "wasdi-${env.sCurrentEnvironmentLower}"
   }
 
@@ -41,42 +40,23 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - UPDATE TRAEFIK VERSION AND RESTART IT"
+          currentBuild.description = "WASDI - DEPLOY THE JENKINS CONTAINER"
         }
       }
     }
 
-    stage('BUILD THE CONTAINER') {
+    stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiKeycloakContainer=true'
+          ansible-playbook \
+            playbooks/deployDockerContainerWasdiJenkins.yml \
+            --inventory inventories/wasdi.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
-        label: "Build the Keycloak container"
-      }
-    }
-
-    stage('DEPLOYMENT') {
-      steps {
-        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-          script {
-            try {
-              sh script: """
-                cd ${env.sWasdiAnsiblePath}
-                ansible-playbook \
-                  playbooks/deployDockerContainerWasdiKeycloak.yml \
-                  --inventory inventories/wasdi.yml \
-                  --limit ${env.sAnsibleLimit} \
-                  --diff \
-                  --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sWasdiKeycloakThemeVersion=${env.sWasdiKeycloakThemeVersion}'
-              """,
-              label: "Execute ansible-playbook"
-            } catch (oError) {
-              echo oError.getMessage()
-              throw oError
-            }
-          }
-        }
+        label: "Deploy the container and its run element"
       }
     }
 
@@ -85,7 +65,7 @@ pipeline {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
-            playbooks/runDockerContainerWasdiKeycloak.yml \
+            playbooks/runDockerContainerWasdiJenkins.yml \
             --inventory inventories/wasdi.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \

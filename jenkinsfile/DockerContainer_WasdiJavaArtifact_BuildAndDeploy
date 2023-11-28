@@ -156,10 +156,10 @@ pipeline {
         script {
           if ( env.executeSonarqube.toBoolean() && env.sCurrentEnvironmentLower == 'test' ) {
             withCredentials([
-                string(credentialsId: 'SONARQUBE_JDK_HOME', variable: 'SONARQUBE_JDK_HOME'),
-                string(credentialsId: 'SONARQUBE_PROJECT_KEY', variable: 'SONARQUBE_PROJECT_KEY'),
-                string(credentialsId: 'SONARQUBE_TOKEN', variable: 'SONARQUBE_TOKEN'),
-                string(credentialsId: 'SONARQUBE_URL', variable: 'SONARQUBE_URL')
+                string(credentialsId: 'sWasdiSonarqubeJdkHome', variable: 'sWasdiSonarqubeJdkHome'),
+                string(credentialsId: 'sWasdiSonarqubeProjectKey', variable: 'sWasdiSonarqubeProjectKey'),
+                string(credentialsId: 'sWasdiSonarqubeToken', variable: 'sWasdiSonarqubeToken'),
+                string(credentialsId: 'sWasdiSonarqubeUrl', variable: 'sWasdiSonarqubeUrl')
             ]) {
                 sh script: """
                   mvn \
@@ -169,10 +169,10 @@ pipeline {
                     --also-make \
                     sonar:sonar \
                     --define revision=${env.sCurrentRevision} \
-                    --define sonar.projectKey=${SONARQUBE_PROJECT_KEY} \
-                    --define sonar.host.url=${SONARQUBE_URL} \
-                    --define sonar.login=${SONARQUBE_TOKEN} \
-                    --define sonar.java.jdkHome=${SONARQUBE_JDK_HOME}
+                    --define sonar.projectKey=${sWasdiSonarqubeProjectKey} \
+                    --define sonar.host.url=${sWasdiSonarqubeUrl} \
+                    --define sonar.login=${sWasdiSonarqubeToken} \
+                    --define sonar.java.jdkHome=${sWasdiSonarqubeJdkHome}
                 """,
                 label: "Execute the Sonarqube scanner"
             }
