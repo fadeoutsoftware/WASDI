@@ -401,6 +401,46 @@ services:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiMongoServiceName }}/data01:/data/db:rw
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiMongoServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
 {% endif %}
+{% if bWasdiNexusEnabled == True %}
+  {{ sWasdiNexusServiceName }}:
+{% if ( aoWasdiNexusEnvironmentVariable | length ) > 0 %}
+    environment:
+{% for aoWasdiNexusCurrentEnvironmentVariable in aoWasdiNexusEnvironmentVariable %}
+      - {{ aoWasdiNexusCurrentEnvironmentVariable['key'] }}={{ aoWasdiNexusCurrentEnvironmentVariable['value'] }}
+{% endfor %}
+{% endif %}
+    image: "{{ sWasdiNexusImageName }}:{{ sWasdiNexusVersion }}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiNexusDefaultContextPath.rstrip('/') }}`)"
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}.middlewares=mw_wasdi-secure-allowFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}.service=s_{{ sWasdiNexusServiceName }}"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}.tls=true"
+{% endif %}
+      - "traefik.http.services.s_{{ sWasdiNexusServiceName }}.loadbalancer.server.port={{ sWasdiNexusInternalPort }}"
+{% if sWasdiNexusInternalPort | default("") != ""
+    and sWasdiNexusExternalPort | default("") != ""
+    and aWasdiNexusExternalIp | default([]) | length > 0 %}
+    ports:
+{% for sCurrentExternalIp in aWasdiNexusExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiNexusExternalPort }}:{{ sWasdiNexusInternalPort }}"
+{% endfor %}
+{% endif %}
+    pull_policy: "always"
+    restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiNexusUlimitNofile }}
+        hard: {{ sWasdiNexusUlimitNofile }}
+{% if ( aoWasdiNexusVolume | length ) > 0 %}
+    volumes:
+{% for aoWasdiNexusCurrentVolume in aoWasdiNexusVolume %}
+      - {{ aoWasdiNexusCurrentVolume }}
+{% endfor %}
+{% endif %}
+{% endif %}
 {% if bWasdiKeycloakEnabled == True %}
   {{ sWasdiPostgresqlKeycloakServiceName }}:
 {% if bWasdiPostgresqlKeycloakInitialized == False %}
