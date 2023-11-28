@@ -76,7 +76,12 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerGdal=true sDeployWasdiContainerSen2cor=true sDeployWasdiContainerSnaphu=true'
+          ansible-playbook \
+            playbooks/buildWasdiDockerContainer.yml \
+            --inventory inventories/wasdi.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiGdalContainer=true sDeployWasdiSen2corContainer=true sDeployWasdiSnaphuContainer=true'
         """,
         label: "Build the containers"
       }
@@ -89,7 +94,12 @@ pipeline {
             try {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
-                ansible-playbook playbooks/deployDockerContainerWasdiCommandLineTool.yml  --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+                ansible-playbook \
+                  playbooks/deployDockerContainerWasdiCommandLineTool.yml \
+                  --inventory inventories/wasdi.yml \
+                  --limit ${env.sAnsibleLimit} \
+                  --diff \
+                  --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
               label: "Deploy the containers and their run elements"
             } catch (oError) {
