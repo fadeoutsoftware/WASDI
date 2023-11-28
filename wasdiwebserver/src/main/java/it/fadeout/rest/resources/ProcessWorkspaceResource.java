@@ -54,6 +54,7 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.processors.AppStatsViewModel;
 import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
+import wasdi.shared.viewmodels.processworkspace.ComputingTimeViewModel;
 import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceAggregatedViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceSummaryViewModel;
@@ -1281,17 +1282,21 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/runningTime/SP")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Map<String, Map<String, Long>> getRunningTimeBySubscriptionAndProject(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getRunningTimeBySubscriptionAndProject(@HeaderParam("x-session-token") String sSessionId) {
 
 		WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject");
 
+		// OUTER MAP. Keys: subscription-id, Values: dictionary
+		// INNER MAPS: Keys: project-ids, Values: computing times
 		Map<String, Map<String, Long>> aoRunningTimeBySubscriptionByProject = new HashMap<String, Map<String,Long>>();
+		
+		List<ComputingTimeViewModel> aoComputingTimesList = new ArrayList<>();
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: invalid session");
-			return aoRunningTimeBySubscriptionByProject;
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
 		try {
@@ -1372,14 +1377,20 @@ public class ProcessWorkspaceResource {
 						}
 					} catch (Exception oEx) {
 						WasdiLog.errorLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: exception contacting computing node: " + oEx.toString());
+						return Response.serverError().build();
 					}
 				}
+				
+				aoComputingTimesList = buildComputingTimeViewModel(aoRunningTimeBySubscriptionByProject, oUser.getUserId());
+				return Response.ok(aoComputingTimesList).build();
 			}
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject error: " + oEx);
+			return Response.serverError().build();
 		}
-
-		return aoRunningTimeBySubscriptionByProject;
+		
+		return Response.serverError().build();
+			
 	}
 	
 	
@@ -1703,6 +1714,42 @@ public class ProcessWorkspaceResource {
 		}
 
 		return aoViewModels;
+	}
+	
+	/**
+	 * Converts a map summarising the statistics about the the computing times per subscription and project into the corresponding view model
+	 * @param aoComputingTimes a map where: keys are the ids of the subscriptions and values are maps projectId-computingTime
+	 * @return the computing time view model
+	 */
+	private List<ComputingTimeViewModel> buildComputingTimeViewModel(Map<String, Map<String, Long>> aoComputingTimes, String sUserId) {
+		
+		List<ComputingTimeViewModel> aoResultList = new ArrayList<>();
+		
+		for (String sSubscriptionId : aoComputingTimes.keySet()) {
+			Map<String, Long> asProjectsMap = aoComputingTimes.get(sSubscriptionId);
+			List<ComputingTimeViewModel> aoViewModels = asProjectsMap.entrySet().stream()
+					.map(oEntry -> buildComputingTimeViewModel(sSubscriptionId, sUserId, oEntry.getKey(), oEntry.getValue()))
+					.collect(Collectors.toList());
+			aoResultList.addAll(aoViewModels);
+		}
+		return aoResultList;
+	}
+	
+	/**
+	 * Build the computing time view model for a given subscription, user and project
+	 * @param sSubscriptionId
+	 * @param sUserId
+	 * @param sProjectId
+	 * @param sComputingTime
+	 * @return the computing time view model
+	 */
+	private ComputingTimeViewModel buildComputingTimeViewModel(String sSubscriptionId, String sUserId, String sProjectId, Long sComputingTime) {
+		ComputingTimeViewModel oViewModel = new ComputingTimeViewModel();
+		oViewModel.setSubscriptionId(sSubscriptionId);
+		oViewModel.setProjectId(sProjectId);
+		oViewModel.setUserId(sUserId);
+		oViewModel.setComputingTime(sComputingTime);
+		return oViewModel;
 	}
 
 }
