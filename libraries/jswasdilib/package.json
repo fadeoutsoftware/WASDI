@@ -1,9 +1,9 @@
 {
   "name": "wasdi",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "Javascript library for WASDI - Web Advanced Space Developer Interface",
-  "main": "build/wasdi-module.js",
-  "types": "build/types/TS-index.d.ts",
+  "main": "build/wasdi-module.ts",
+  "types": "build/types/wasdi-module.d.ts",
   "scripts": {
     "start": "webpack serve --config webpack.config.demo.js",
     "build": "webpack && tsc",

@@ -672,7 +672,6 @@ export class Wasdi {
     return ret;
   }
 
-  
   /**
    * Get a filtered paginated list of process workspaces.
    *

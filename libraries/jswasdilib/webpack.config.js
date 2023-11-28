@@ -3,7 +3,6 @@ const webpack = require('webpack');
 const PrettierPlugin = require("prettier-webpack-plugin");
 const TerserPlugin = require('terser-webpack-plugin');
 const getPackageJson = require('./scripts/getPackageJson');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 
 
@@ -34,10 +33,11 @@ let TsExport = {
     path: path.resolve(__dirname, 'build'),
     library: "wasdi",
     libraryTarget: 'umd',
-    clean: true
+    clean: true,
+    globalObject: 'this' // This line was missing
   },
   optimization: {
-    minimize: true,
+    minimize: false,
     minimizer: [
       new TerserPlugin({ extractComments: false }),
     ],
@@ -55,9 +55,6 @@ let TsExport = {
   },
   plugins: [
     new PrettierPlugin(),
-    new MiniCssExtractPlugin({
-      filename: 'css/index.css'
-    }),
     new webpack.BannerPlugin(banner)
   ],
   resolve: {
@@ -65,7 +62,7 @@ let TsExport = {
   }
 }
 
-// Export of module, with types 
+// Export of vanilla JS 
 let JsExport = {
   mode: "production",
   devtool: 'source-map',
