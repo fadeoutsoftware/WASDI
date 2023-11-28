@@ -5,7 +5,7 @@
  * Object definitions are also provided.
  * Check README and LICENSE for further details
  */
-export class Wasdi {
+class Wasdi {
   _m_sUser: string;
   _m_sPassword: string;
 
@@ -854,3 +854,5 @@ export class Wasdi {
     return this._m_sWorkspaceName;
   }
 }
+let wasdi = new Wasdi;
+export default wasdi;
