@@ -1741,5 +1741,36 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
 		return aoResultList;
     }
+	
+	public List<ProcessWorkspaceAggregatorBySubscriptionAndProjectResult> getProjectRunningTime(String sUserId, Collection<String> asSubscriptionIds) {
+		List<ProcessWorkspaceAggregatorBySubscriptionAndProjectResult> aoResultList = new ArrayList<>();
+
+		try {
+			AggregateIterable<Document> oDocuments = getCollection(m_sThisCollection).aggregate(
+					// records where the subscription id somehow relates to the user and the value is not null
+					Arrays.asList(
+							new Document("$match",
+									new Document("subscriptionId", new Document("$in", asSubscriptionIds))
+										.append("projectId", new Document("$exists", true).append("$ne", new BsonNull()))
+										.append("userId", sUserId)
+							),
+							// groups all the documents having same subscription and same and project id and sum the computing time
+							new Document("$group",
+									new Document("_id",
+											new Document("subscriptionId", "$subscriptionId")
+												.append("projectId", "$projectId")
+									)
+										.append("total", new Document("$sum", "$runningTime"))
+							)
+					)
+			);
+
+			fillList(aoResultList, oDocuments, ProcessWorkspaceAggregatorBySubscriptionAndProjectResult.class);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getRunningTimeInfo: exception ", oEx);
+		}
+
+		return aoResultList;
+    }
 
 }

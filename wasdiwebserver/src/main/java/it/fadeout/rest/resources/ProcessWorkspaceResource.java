@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -1278,25 +1279,21 @@ public class ProcessWorkspaceResource {
 
 		return lRunningTime;
 	}
-
+	
 	@GET
 	@Path("/runningTime/SP")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response getRunningTimeBySubscriptionAndProject(@HeaderParam("x-session-token") String sSessionId) {
+	public Map<String, Map<String, Long>> getRunningTimeBySubscriptionAndProject(@HeaderParam("x-session-token") String sSessionId) {
 
 		WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject");
 
-		// OUTER MAP. Keys: subscription-id, Values: dictionary
-		// INNER MAPS: Keys: project-ids, Values: computing times
 		Map<String, Map<String, Long>> aoRunningTimeBySubscriptionByProject = new HashMap<String, Map<String,Long>>();
-		
-		List<ComputingTimeViewModel> aoComputingTimesList = new ArrayList<>();
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: invalid session");
-			return Response.status(Status.UNAUTHORIZED).build();
+			return aoRunningTimeBySubscriptionByProject;
 		}
 
 		try {
@@ -1377,12 +1374,117 @@ public class ProcessWorkspaceResource {
 						}
 					} catch (Exception oEx) {
 						WasdiLog.errorLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: exception contacting computing node: " + oEx.toString());
+					}
+				}
+			}
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject error: " + oEx);
+		}
+
+		return aoRunningTimeBySubscriptionByProject;
+	}
+	
+	private void updateComputingTimesMap(Map<String, Map<String, Long>> aoSubscriptionsComputingTimeMap, ProcessWorkspaceAggregatorBySubscriptionAndProjectResult oComputingTime) {
+		String sSubscriptionId = oComputingTime.getSubscriptionId();
+		String sProjectId = oComputingTime.getProjectId();
+		Long lComputingTime = oComputingTime.getTotal();
+		
+		Map<String, Long> aoProjectsComputingTimeMap = aoSubscriptionsComputingTimeMap.getOrDefault(sSubscriptionId, new HashMap<String, Long>());
+		Long lRunningTime = aoProjectsComputingTimeMap.getOrDefault(sProjectId, Long.valueOf(0)) + lComputingTime;
+		aoProjectsComputingTimeMap.put(sProjectId, lRunningTime);
+		aoSubscriptionsComputingTimeMap.put(sSubscriptionId, aoProjectsComputingTimeMap);
+	}
+	
+	private void updateComputingTimesMap(Map<String, Map<String, Long>> aoGeneralStatisticsMap, Map<String, Map<String, Long>> aoPartialStatisticsMap) {
+		for (Map.Entry<String, Map<String, Long>> oEntrySubscription : aoPartialStatisticsMap.entrySet()) {
+			String sSubscriptionId = oEntrySubscription.getKey();
+			Map<String, Long> aoPartialRunningTimeByProject = oEntrySubscription.getValue();
+			
+			Map<String, Long> aoRunningTimeByProject = aoGeneralStatisticsMap.getOrDefault(sSubscriptionId, new HashMap<String, Long>());
+
+			for (Map.Entry<String, Long> oEntryProject : aoPartialRunningTimeByProject.entrySet()) {
+					String sProjectId = oEntryProject.getKey();
+					Long lPartialRunningTime = oEntryProject.getValue();
+					Long lGeneralRunningTime = aoRunningTimeByProject.getOrDefault(sProjectId, Long.valueOf(0));
+					aoRunningTimeByProject.put(sProjectId, lGeneralRunningTime + lPartialRunningTime);
+			}
+			aoGeneralStatisticsMap.put(sSubscriptionId, aoRunningTimeByProject);
+		}
+			
+	}
+	
+	private HttpCallResponse sendRequestToNode(String sNodeBaseAddress, String sResourcePath, String sSessionId) {
+		String sUrl = sNodeBaseAddress;
+		if (!sUrl.endsWith("/")) sUrl += "/";
+		sUrl += sResourcePath;
+
+		Map<String, String> asHeaders = Collections.singletonMap("x-session-token", sSessionId);
+
+		WasdiLog.debugLog("ProcessWorkspaceResource.sendRequestToNode: calling url: " + sUrl);
+
+		return HttpUtils.httpGet(sUrl, asHeaders); 
+	}
+
+	@GET
+	@Path("/runningtimeproject")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response getOverallRunningTimeProject(@HeaderParam("x-session-token") String sSessionId) {
+
+		WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject");
+
+		// OUTER MAP. Keys: subscription-id, Values: dictionary
+		// INNER MAPS: Keys: project-ids, Values: computing times
+		Map<String, Map<String, Long>> aoRunningTimeBySubscription = new HashMap<String, Map<String,Long>>();
+		
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.warnLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: invalid session");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+
+		try {
+			// ids of the subscriptions associated to the user
+			Collection<String> asSubscriptionIds =
+					new SubscriptionResource().getIdsOfSubscriptionsAssociatedWithUser(oUser.getUserId());
+
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			List<ProcessWorkspaceAggregatorBySubscriptionAndProjectResult> aoRunningTimes =
+					oProcessWorkspaceRepository.getRunningTimeInfo(asSubscriptionIds);
+			
+			aoRunningTimes.forEach(oRunningTimeInfo -> updateComputingTimesMap(aoRunningTimeBySubscription, oRunningTimeInfo));
+
+
+			// The main node needs to query also the others
+			if (WasdiConfig.Current.isMainNode()) {
+				NodeRepository oNodeRepo = new NodeRepository();
+				List<Node> aoNodes = oNodeRepo.getNodesList();
+
+				for (Node oNode : aoNodes) {
+					if (oNode.getNodeCode().equals("wasdi")) continue;
+					if (oNode.getActive() == false) continue;
+
+					try {
+						HttpCallResponse oHttpCallResponse = sendRequestToNode(oNode.getNodeBaseAddress(), "process/runningtimeproject", sSessionId); 
+						String sResponse = oHttpCallResponse.getResponseBody();
+
+						if (!Utils.isNullOrEmpty(sResponse)) {
+							Map<String, Map<String, Long>> aoSubscriptionRunningTimesFromNode = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<Map<String, Map<String, Long>>>(){});
+							if (aoSubscriptionRunningTimesFromNode != null) {
+								updateComputingTimesMap(aoRunningTimeBySubscription, aoSubscriptionRunningTimesFromNode);
+							}
+						} else {
+							WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: response body from computing node is empty");
+						}
+					} catch (Exception oEx) {
+						WasdiLog.errorLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: exception contacting computing node: " + oEx.toString());
 						return Response.serverError().build();
 					}
 				}
 				
-				aoComputingTimesList = buildComputingTimeViewModel(aoRunningTimeBySubscriptionByProject, oUser.getUserId());
+				List<ComputingTimeViewModel> aoComputingTimesList = buildComputingTimeViewModel(aoRunningTimeBySubscription, oUser.getUserId());
 				return Response.ok(aoComputingTimesList).build();
+			
 			}
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject error: " + oEx);
@@ -1392,6 +1494,125 @@ public class ProcessWorkspaceResource {
 		return Response.serverError().build();
 			
 	}
+	
+	
+	@GET
+	@Path("/runningtimeproject/byuser")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response getProjectRunningTimeByUser(@HeaderParam("x-session-token") String sSessionId) {
+
+		WasdiLog.debugLog("ProcessWorkspaceResource.getProjectRunningTimeByUser");
+
+		Map<String, Map<String, Long>> aoRunningTimesBySubscription = new HashMap<String, Map<String,Long>>();
+		
+		List<ComputingTimeViewModel> aoComputingTimesList = new ArrayList<>();
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.warnLog("ProcessWorkspaceResource.getProjectRunningTimeByUser: invalid session");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+
+		try {
+			Collection<String> asUserSubscriptionsIds =
+					new SubscriptionResource().getIdsOfSubscriptionsAssociatedWithUser(oUser.getUserId());
+
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			List<ProcessWorkspaceAggregatorBySubscriptionAndProjectResult> aoResultList =
+					oProcessWorkspaceRepository.getProjectRunningTime(oUser.getUserId(), asUserSubscriptionsIds);
+
+			for (ProcessWorkspaceAggregatorBySubscriptionAndProjectResult oResult : aoResultList) {
+				Map<String, Long> aoRunningTimeByProject = aoRunningTimesBySubscription.get(oResult.getSubscriptionId());
+
+				if (aoRunningTimeByProject == null) {
+					aoRunningTimeByProject = new HashMap<>();
+					aoRunningTimesBySubscription.put(oResult.getSubscriptionId(), aoRunningTimeByProject);
+				}
+
+				Long lTotalRunningTime = aoRunningTimeByProject.get(oResult.getProjectId());
+
+				if (lTotalRunningTime == null) {
+					lTotalRunningTime = Long.valueOf(0);
+					aoRunningTimeByProject.put(oResult.getProjectId(), lTotalRunningTime);
+				}
+
+				aoRunningTimeByProject.put(oResult.getProjectId(), aoRunningTimeByProject.get(oResult.getProjectId()) + oResult.getTotal());
+			}
+			
+			aoComputingTimesList = buildComputingTimeViewModel(aoRunningTimesBySubscription, oUser.getUserId());
+			return Response.ok(aoComputingTimesList).build();
+
+			/*
+			// The main node needs to query also the others
+			if (WasdiConfig.Current.isMainNode()) {
+				NodeRepository oNodeRepo = new NodeRepository();
+				List<Node> aoNodes = oNodeRepo.getNodesList();
+
+				for (Node oNode : aoNodes) {
+					if (oNode.getNodeCode().equals("wasdi")) continue;
+					if (oNode.getActive() == false) continue;
+
+					try {
+						String sUrl = oNode.getNodeBaseAddress();
+						if (!sUrl.endsWith("/")) sUrl += "/";
+						sUrl += "process/runningtime/byuser";
+
+						Map<String, String> asHeaders = new HashMap<String, String>();
+						asHeaders.put("x-session-token", sSessionId);
+
+						WasdiLog.debugLog("ProcessWorkspaceResource.getProjectRunningTimeByUser: calling url: " + sUrl);
+
+						HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+						String sResponse = oHttpCallResponse.getResponseBody();
+
+						if (!Utils.isNullOrEmpty(sResponse)) {
+							Map<String, Map<String, Long>> aoRunningTimeBySubscriptionFromNode = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<Map<String, Map<String, Long>>>(){});
+							if (aoRunningTimeBySubscriptionFromNode != null) {
+								for (Map.Entry<String, Map<String, Long>> oEntrySubscription : aoRunningTimeBySubscriptionFromNode.entrySet()) {
+									String sSubscriptionId = oEntrySubscription.getKey();
+									Map<String, Long> aoRunningTimeByProjectFromNode = oEntrySubscription.getValue();
+
+									Map<String, Long> aoRunningTimeByProject = aoRunningTimesBySubscription.get(sSubscriptionId);
+
+									if (aoRunningTimeByProject == null) {
+										aoRunningTimesBySubscription.put(sSubscriptionId, aoRunningTimeByProjectFromNode);
+									} else {
+										for (Map.Entry<String, Long> oEntryProject : aoRunningTimeByProjectFromNode.entrySet()) {
+											String sProjectId = oEntryProject.getKey();
+											Long lRunningTimeFromNode = oEntryProject.getValue();
+
+											Long lRunningTime = aoRunningTimeByProject.get(sProjectId);
+
+											if (lRunningTime == null) {
+												aoRunningTimeByProject.put(sProjectId, lRunningTimeFromNode);
+											} else {
+												aoRunningTimeByProject.put(sProjectId, lRunningTime + lRunningTimeFromNode);
+											}
+										}
+									}
+								}
+							}
+						}
+					} catch (Exception oEx) {
+						WasdiLog.errorLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: exception contacting computing node: " + oEx.toString());
+						return Response.serverError().build();
+					}
+				}
+				
+				aoComputingTimesList = buildComputingTimeViewModel(aoRunningTimesBySubscription, oUser.getUserId());
+				return Response.ok(aoComputingTimesList).build();
+			
+			} */
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject error: " + oEx);
+			return Response.serverError().build();
+		}
+		
+//		return Response.serverError().build();
+			
+	}
+	
 	
 	
 	/**
