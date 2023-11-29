@@ -32,7 +32,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.aggregators.ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult;
-import wasdi.shared.business.aggregators.ProcessWorkspaceAggregatorBySubscriptionAndProjectResult;
+import wasdi.shared.business.aggregators.ProcessWorkspaceAggregatorBySubscriptionAndProject;
 import wasdi.shared.business.aggregators.ProcessWorkspaceAggregatorByUserIdResult;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -1714,8 +1714,8 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     	return oFilter;
     }
 
-	public List<ProcessWorkspaceAggregatorBySubscriptionAndProjectResult> getRunningTimeInfo(Collection<String> asSubscriptionIds) {
-		List<ProcessWorkspaceAggregatorBySubscriptionAndProjectResult> aoResultList = new ArrayList<>();
+	public List<ProcessWorkspaceAggregatorBySubscriptionAndProject> getRunningTimeInfo(Collection<String> asSubscriptionIds) {
+		List<ProcessWorkspaceAggregatorBySubscriptionAndProject> aoResultList = new ArrayList<>();
 
 		try {
 			AggregateIterable<Document> oDocuments = getCollection(m_sThisCollection).aggregate(
@@ -1734,7 +1734,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 					)
 			);
 
-			fillList(aoResultList, oDocuments, ProcessWorkspaceAggregatorBySubscriptionAndProjectResult.class);
+			fillList(aoResultList, oDocuments, ProcessWorkspaceAggregatorBySubscriptionAndProject.class);
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessWorkspaceRepository.getRunningTimeInfo: exception ", oEx);
 		}
@@ -1742,8 +1742,8 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 		return aoResultList;
     }
 	
-	public List<ProcessWorkspaceAggregatorBySubscriptionAndProjectResult> getProjectRunningTime(String sUserId, Collection<String> asSubscriptionIds) {
-		List<ProcessWorkspaceAggregatorBySubscriptionAndProjectResult> aoResultList = new ArrayList<>();
+	public List<ProcessWorkspaceAggregatorBySubscriptionAndProject> getProjectRunningTime(String sUserId, Collection<String> asSubscriptionIds) {
+		List<ProcessWorkspaceAggregatorBySubscriptionAndProject> aoResultList = new ArrayList<>();
 
 		try {
 			AggregateIterable<Document> oDocuments = getCollection(m_sThisCollection).aggregate(
@@ -1765,7 +1765,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 					)
 			);
 
-			fillList(aoResultList, oDocuments, ProcessWorkspaceAggregatorBySubscriptionAndProjectResult.class);
+			fillList(aoResultList, oDocuments, ProcessWorkspaceAggregatorBySubscriptionAndProject.class);
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessWorkspaceRepository.getRunningTimeInfo: exception ", oEx);
 		}
