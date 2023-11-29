@@ -1,9 +1,7 @@
 #!/bin/bash
 
-if [[ -n "${ANSIBLE_VAULT_FILE}" && -n "${ANSIBLE_VAULT_PASSWORD} ]]" ]]
-then
-    mkdir --parents $(dirname ${ANSIBLE_VAULT_FILE})
-    echo "${ANSIBLE_VAULT_PASSWORD}" > ${ANSIBLE_VAULT_FILE}
-fi
-
-exec ${@}
+{{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }}/bin/java \
+    ${JAVA_OPTS} \
+    -jar \
+    {{ sWasdiJenkinsRootDirectoryPath }}/{{ sWasdiJenkinsVersion }}/{{ sWasdiJenkinsSourceUrl | basename }} \
+    ${@}

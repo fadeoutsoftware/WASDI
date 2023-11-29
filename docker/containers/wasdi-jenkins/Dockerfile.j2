@@ -202,6 +202,15 @@ RUN mkdir --parents \
         /tmp/{{ sWasdiNodeJs18SourceUrl | basename }}
 
 ENV PATH="{{ sWasdiNodeJs18RootDirectoryPath }}/latest/bin:${PATH}"
+{% if ( aWasdiNodeJs18Modules | default([]) | length ) > 0 %}
+
+
+# RUN specific to install modules for NodeJS 18
+RUN npm install --global --prefix {{ sWasdiNodeJs18RootDirectoryPath }}/{{ sWasdiNodeJs18Version }} \
+{% for sWasdiNodeJs18CurrentModule in aWasdiNodeJs18Modules %}
+    {{ sWasdiNodeJs18CurrentModule }}{%- if not loop.last -%} \{% endif %}
+{% endfor %}
+{% endif %}
 
 
 # RUN specific to install Jenkins

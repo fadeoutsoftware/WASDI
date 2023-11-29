@@ -4,17 +4,11 @@ pipeline {
   environment {
     sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
     sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
-    sCurrentRevision         = "${env.BUILD_ID}"
   }
 
   options {
     buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
     disableConcurrentBuilds()
-  }
-
-  tools {
-    jdk "WASDI_JDK_8"
-    maven "WASDI_MAVEN"
   }
 
   stages {
@@ -37,7 +31,7 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD AND DEPLOY THE CLI TOOLS CONTAINERS (gdal, sen2cor, snaphu, etc)"
+          currentBuild.description = "WASDI - DEPLOY THE JENKINS CONTAINER"
         }
       }
     }
@@ -65,36 +59,31 @@ pipeline {
       }
     }
 
-    stage('BUILD THE CONTAINERS') {
+    stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
-            playbooks/buildWasdiDockerContainer.yml \
+            playbooks/deployDockerContainerWasdiJenkins.yml \
             --inventory inventories/wasdi.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiGdalContainer=true sDeployWasdiSen2corContainer=true sDeployWasdiSnaphuContainer=true'
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
-        label: "Build the containers"
+        label: "Deploy the container and its run element"
       }
     }
 
-    stage('DEPLOY THE CONTAINERS AND THEIR RUN ELEMENTS') {
+    stage('PLEASE READ LOGS') {
       steps {
         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
           script {
             try {
               sh script: """
-                cd ${env.sWasdiAnsiblePath}
-                ansible-playbook \
-                  playbooks/deployDockerContainerWasdiCommandLineTool.yml \
-                  --inventory inventories/wasdi.yml \
-                  --limit ${env.sAnsibleLimit} \
-                  --diff \
-                  --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+                echo "Please execute manually this command in the right directory:"
+                echo "docker compose up --detach --force-recreate wasdi-jenkins"
               """,
-              label: "Deploy the containers and their run elements"
+              label: "Command to start or restart the container"
             } catch (oError) {
               echo oError.getMessage()
               throw oError

@@ -1,18 +1,9 @@
-def getEnvironmentName(String sAnsibleLimit, boolean bLower) {
-  if ( bLower ) {
-    return sAnsibleLimit.split('-')[0].toLowerCase()
-  }
-
-  return sAnsibleLimit.split('-')[0].toUpperCase()
-}
-
 pipeline {
   agent any
 
   environment {
-    sCurrentEnvironmentLower = getEnvironmentName(env.sAnsibleLimit, true)
-    sCurrentEnvironmentUpper = getEnvironmentName(env.sAnsibleLimit, false)
-    sMavenProfile            = "wasdi-${env.sCurrentEnvironmentLower}"
+    sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
+    sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
   }
 
   options {
@@ -41,6 +32,29 @@ pipeline {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
           currentBuild.description = "WASDI - DEPLOY THE RABBITMQ CONTAINER"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          sh script: """
+            mkdir --parents `dirname ${sWasdiAnsibleVaultFile}`
+            echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
+          """,
+          label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloud', url: "${env.sWasdiAnsibleGitRepositoryUrl}"]]])
         }
       }
     }
