@@ -4,6 +4,7 @@ pipeline {
   environment {
     sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
     sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
+    sCurrentRevision         = "${env.BUILD_ID}"
   }
 
   options {
@@ -24,15 +25,6 @@ pipeline {
         echo "env.sWasdiAnsiblePath             = " + env.sWasdiAnsiblePath
         echo "env.WORKSPACE                     = " + env.WORKSPACE
         sh script: "pwd", label: "Current location"
-      }
-    }
-
-    stage('INITIALIZATION') {
-      steps {
-        script {
-          currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - DEPLOY THE GEOSERVER CONTAINER"
-        }
       }
     }
 
