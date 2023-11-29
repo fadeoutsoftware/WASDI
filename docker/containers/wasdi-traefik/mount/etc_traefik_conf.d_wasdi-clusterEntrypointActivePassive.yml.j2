@@ -1,0 +1,31 @@
+http:
+  routers:
+    r_{{ sWasdiTraefikGenericServiceName }}:
+      entrypoints: "{{ sWasdiTraefikEntrypoint }}"
+      rule: "Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiTraefikGenericDefaultContextPath }}`)"
+      service: "s_{{ sWasdiTraefikGenericServiceName }}_lb"
+      middlewares: "mw_wasdi-secure-allowFrame@file"
+{% if bWasdiSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
+      tls: true
+{% endif %}
+  services:
+    s_{{ sWasdiTraefikGenericServiceName }}_lb:
+      failover:
+        service: "s_{{ sWasdiTraefikGenericServiceName }}_main"
+        fallback: "s_{{ sWasdiTraefikGenericServiceName }}_fallback"
+    s_{{ sWasdiTraefikGenericServiceName }}_main:
+      loadBalancer:
+        healthCheck:
+          path: "{{ sWasdiTraefikGenericLoadBalancerHealthCheckPath }}"
+          interval: "{{ sWasdiTraefikGenericLoadBalancerHealthCheckInterval }}"
+          timeout: "{{ sWasdiTraefikGenericLoadBalancerHealthCheckTimeout }}"
+        servers:
+          - url: "{{ sWasdiTraefikGenericLoadBalancerServersUrlMain }}"
+    s_{{ sWasdiTraefikGenericServiceName }}_fallback:
+      loadBalancer:
+        healthCheck:
+          path: "{{ sWasdiTraefikGenericLoadBalancerHealthCheckPath }}"
+          interval: "{{ sWasdiTraefikGenericLoadBalancerHealthCheckInterval }}"
+          timeout: "{{ sWasdiTraefikGenericLoadBalancerHealthCheckTimeout }}"
+        servers:
+          - url: "{{ sWasdiTraefikGenericLoadBalancerServersUrlFallback }}"

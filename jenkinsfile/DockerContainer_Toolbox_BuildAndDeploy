@@ -1,19 +1,10 @@
-def getEnvironmentName(String sAnsibleLimit, boolean bLower) {
-  if ( bLower ) {
-    return sAnsibleLimit.split('-')[0].toLowerCase()
-  }
-
-  return sAnsibleLimit.split('-')[0].toUpperCase()
-}
-
 pipeline {
   agent any
 
   environment {
-    sCurrentEnvironmentLower = getEnvironmentName(env.sAnsibleLimit, true)
-    sCurrentEnvironmentUpper = getEnvironmentName(env.sAnsibleLimit, false)
+    sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
+    sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
     sCurrentRevision         = "${env.BUILD_ID}"
-    sMavenProfile            = "wasdi-${env.sCurrentEnvironmentLower}"
   }
 
   options {
@@ -31,7 +22,6 @@ pipeline {
         echo "env.sCurrentRevision         = " + env.sCurrentRevision
         echo "env.sSourceBranch            = " + env.sSourceBranch
         echo "env.sWasdiAnsiblePath        = " + env.sWasdiAnsiblePath
-        echo "env.sWasdiMavenSettings      = " + env.sWasdiMavenSettings
         echo "env.WORKSPACE                = " + env.WORKSPACE
 
         sh script: "pwd", label: "Current location"
@@ -47,6 +37,29 @@ pipeline {
       }
     }
 
+    stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          sh script: """
+            mkdir --parents `dirname ${sWasdiAnsibleVaultFile}`
+            echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
+          """,
+          label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloud', url: "${env.sWasdiAnsibleGitRepositoryUrl}"]]])
+        }
+      }
+    }
+
     stage('BUILD THE CONTAINER') {
       steps {
         sh script: """
@@ -56,7 +69,7 @@ pipeline {
             --inventory inventories/wasdi.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerToolbox=true'
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiToolboxContainer=true'
         """,
         label: "Build the container"
       }

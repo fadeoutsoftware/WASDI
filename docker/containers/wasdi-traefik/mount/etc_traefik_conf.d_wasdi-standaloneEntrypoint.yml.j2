@@ -1,0 +1,17 @@
+http:
+  routers:
+    r_{{ sWasdiTraefikGenericServiceName }}:
+      entrypoints: "{{ sWasdiTraefikEntrypoint }}"
+      rule: "Host(`{{ sWasdiTraefikGenericRuleHost }}`)"
+      service: "s_{{ sWasdiTraefikGenericServiceName }}"
+      middlewares: "mw_wasdi-secure-allowFrame@file"
+      tls: true
+  services:
+    s_{{ sWasdiTraefikGenericServiceName }}:
+      loadBalancer:
+        healthCheck:
+          path: "{{ sWasdiTraefikGenericLoadBalancerHealthCheckPath }}"
+          interval: "{{ sWasdiTraefikGenericLoadBalancerHealthCheckInterval }}"
+          timeout: "{{ sWasdiTraefikGenericLoadBalancerHealthCheckTimeout }}"
+        servers:
+          - url: "{{ sWasdiTraefikGenericLoadBalancerServersUrlMain }}"

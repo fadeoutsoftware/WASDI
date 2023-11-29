@@ -2,10 +2,12 @@ package wasdi.shared.utils.jinja;
 
 import java.util.Map;
 
+import com.hubspot.jinjava.Jinjava;
+
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.JsonUtils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.shared.utils.runtime.RunTimeUtils;
 
 /**
  * Utility class to translate a Jinja Template in a valorized file
@@ -49,20 +51,31 @@ public class JinjaTemplateRenderer {
 	public boolean translate(String sTemplateFile, String sOutputFile, String sJsonInputs, boolean bStrict) {
 		
 		try {
-			// Create the command
-			String sRenderCommand = buildRenderCommand(sTemplateFile, sOutputFile, sJsonInputs, bStrict);
 			
-			// Utility to execute the script
-			boolean bRet = RunTimeUtils.runCommand(WasdiConfig.Current.paths.wasdiTempFolder, sRenderCommand);
+			WasdiLog.debugLog("JinjaTemplateRenderer.translate: sTemplate = " + sTemplateFile);
+			WasdiLog.debugLog("JinjaTemplateRenderer.translate: JsonInput = " + sJsonInputs);
+//			
+//			// Create the command
+//			String sRenderCommand = buildRenderCommand(sTemplateFile, sOutputFile, sJsonInputs, bStrict);
+//			// Utility to execute the script
+//			boolean bRet = RunTimeUtils.runCommand(WasdiConfig.Current.paths.wasdiTempFolder, sRenderCommand);
+			
+			Jinjava oJinjava = new Jinjava();
+			String sTemplate = WasdiFileUtils.fileToText(sTemplateFile);
+			Map<String, Object> aoVariables = JsonUtils.jsonToMapOfObjects(sJsonInputs);
+			String sRendered = oJinjava.render(sTemplate, aoVariables);
+			
+			WasdiFileUtils.writeFile(sRendered, sOutputFile);
+			
+			WasdiLog.debugLog("JinjaTemplateRenderer.translate: template rendered in = " + sOutputFile);
 			
 			// Bye bye
-			return bRet;			
+			return true;
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("JinjaTemplateRenderer.translate: exception " + oEx.toString());
+			return false;
 		}
-		
-		return false;
 	}
 	
 	/**
@@ -96,6 +109,4 @@ public class JinjaTemplateRenderer {
 
 		return oSB.toString();
 	}
-	
-	
 }

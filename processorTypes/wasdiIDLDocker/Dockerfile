@@ -45,8 +45,6 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
         gdal-bin \
         git \
         gunicorn \
-        libxpm4 \
-        libxmu6 \
         nano \
         python3 \
         python3-flask \
@@ -54,23 +52,31 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
         python3-requests \
         python3-pip \
         python3-venv \
-        python3-wheel && \
+        python3-wheel \
+        wget && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
 # Specific for IDL:
+# - install additional packages
 # - create directories
 # - extract the archive in a temporary directory
 # - install the license server
 # - clean temporary files
-RUN mkdir --parents \
+RUN apt-get update && \
+    apt-get install \
+        libxpm4 \
+        libxmu6 && \
+mkdir --parents \
         /.idl \
         /tmp/install && \
     chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} \
         /.idl && \
     chmod 750 \
-        /.idl
+        /.idl && \
+    rm --recursive --force /var/lib/apt/lists/* && \
+    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 ADD envi552-linux.tar /tmp/install/
 
@@ -91,22 +97,23 @@ USER {{ sWasdiSystemUserName }}
 # Create the application directory
 # Create the virtual environment
 RUN mkdir --parents \
-        {{ sWasdiSystemUserHome }}/application \
-        {{ sWasdiSystemUserHome }}/venv && \
-    python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
-    pip3 install --no-cache-dir --no-compile wasdi
+        {{ sWasdiSystemUserHome }}/application
 
 
 # Set the workdir to {{ sWasdiSystemUserHome }}/application
 WORKDIR {{ sWasdiSystemUserHome }}/application
 
 
-# Overwrite install script with the one which is close to the Dockerfile
+## FROM HERE, THERE IS NO MORE CACHE ##
+# Copy the needed files
 COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} ./ {{ sWasdiSystemUserHome }}/application/
 
 
-# Install libraries only if {{ sWasdiSystemUserHome }}/application/pip.txt exists
-#RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-pip
+# Create the virtual environment
+# Install the common PIP libraries
+RUN python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
+    pip3 install --no-cache-dir --no-compile \
+        wasdi
 
 
 # From now, all commands executed are executed with the user 'root'
@@ -114,12 +121,25 @@ USER root
 
 
 # Install packages only if {{ sWasdiSystemUserHome }}/application/packages.txt exists
-RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-apt
+RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
+        --application-directory {{ sWasdiSystemUserHome }}/application \
+        --home-directory {{ sWasdiSystemUserHome }} \
+        --package-apt
 
 
 # From now, all commands executed are executed as {{ sWasdiSystemUserName }}
 USER {{ sWasdiSystemUserName }}
 
 
+# Install libraries only if {{ sWasdiSystemUserHome }}/application/pip.txt exists
+RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
+        --application-directory {{ sWasdiSystemUserHome }}/application \
+        --home-directory {{ sWasdiSystemUserHome }} \
+        --package-pip
+
+
 # Start the container
-CMD ["/bin/bash", "{{ sWasdiSystemUserHome }}/application/docker-entrypoint.sh"]
+CMD [ \
+    "/bin/bash", \
+    "{{ sWasdiSystemUserHome }}/application/docker-entrypoint.sh" \
+]

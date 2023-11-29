@@ -270,10 +270,8 @@ public class ProductResource {
                             oParameter.setProductName(sProductName);
                             oParameter.setUserId(sUserId);
 
-                            String sPath = WasdiConfig.Current.paths.serializationPath;
-
                             // Trigger the Launcher Operation
-                            Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.READMETADATA.name(), sProductName, sPath, oParameter, null);
+                            Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.READMETADATA.name(), sProductName, oParameter, null);
 
                             oMetadataViewModel = new MetadataViewModel();
                             oMetadataViewModel.setName("Generating Metadata, try later");
@@ -771,9 +769,7 @@ public class ProductResource {
             oParameter.setProcessObjId(sProcessObjId);
             oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
-            sPath = WasdiConfig.Current.paths.serializationPath;
-
-            PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oOutputFilePath.getName(), sPath, oParameter);
+            PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oOutputFilePath.getName(), oParameter);
 
             if (oRes.getBoolValue()) {
                 return Response.ok().build();

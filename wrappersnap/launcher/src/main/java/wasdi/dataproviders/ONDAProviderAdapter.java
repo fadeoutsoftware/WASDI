@@ -34,9 +34,12 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.queryexecutors.onda.ResponseTranslatorONDA;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 
 /**
  * @author c.nattero
@@ -546,7 +549,44 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			return extractDestinationFileName(sPath);
 
 		} else if(isHttpsProtocol(sFileURL)) {
-			return getFileNameViaHttp(sFileURL);
+			String sFileNameFromHeader = getFileNameViaHttp(sFileURL);
+			
+			if (!Utils.isNullOrEmpty(sFileNameFromHeader)) {
+				return sFileNameFromHeader;
+			}
+			
+			// sometimes the file name we try to read from the header is empty. If this is the case, we try to find it retrieving the information about the product
+			String sODataSuffix = "/$value";
+			if (sFileURL.contains(ResponseTranslatorONDA.s_sAPI_URL + "(") && sFileURL.endsWith(")" + sODataSuffix)) {
+				
+				WasdiLog.debugLog("ONDAProviderAdapter.GetFileName: couldn't retrieve name from header. Try from product's details");
+				
+				// URL should look like: "https://catalogue.onda-dias.eu/dias-catalogue/Products(28009b42-e7ae-4487-a1b2-7b268f1ecb47)"
+				String sNewURL = sFileURL.replace(sODataSuffix, "");
+				
+				WasdiLog.debugLog("ONDAProviderAdapter.GetFileName: url for retrieving product's details " + sNewURL);
+				
+				HttpCallResponse oResponse = HttpUtils.httpGet(sNewURL);
+				
+				if (oResponse.getResponseCode() >= 200 && oResponse.getResponseCode() < 300 ) {
+					
+					String sResponseBody = oResponse.getResponseBody();
+					
+					JSONObject oJson = new JSONObject(sResponseBody);
+					String sFileName = oJson.optString("name");
+					
+					if (!Utils.isNullOrEmpty(sFileName)) {
+						WasdiLog.debugLog("ONDAProviderAdapter.GetFileName: file name retrieved from provider " + sFileName);
+						return sFileName;
+					}
+					
+					WasdiLog.warnLog("ONDAProviderAdapter.GetFileName: could not find file name from product's details");
+										
+				} else {
+					WasdiLog.warnLog("ONDAProviderAdapter.GetFileName: got error code from provider: " + oResponse.getResponseCode() );
+				}
+				
+			}
 		} 
 		return null;	
 	}
@@ -592,6 +632,5 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		
 		return 0;
 	}
-
 
 }

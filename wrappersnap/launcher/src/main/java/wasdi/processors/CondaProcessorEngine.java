@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import org.mozilla.universalchardet.UniversalDetector;
 
 import wasdi.shared.business.processors.ProcessorTypes;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.packagemanagers.CondaPackageManagerImpl;
 import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.utils.log.WasdiLog;
@@ -23,7 +24,7 @@ import wasdi.shared.utils.log.WasdiLog;
  * @author p.campanella
  *
  */
-public class CondaProcessorEngine extends DockerProcessorEngine {
+public class CondaProcessorEngine extends DockerBuildOnceEngine {
 	
 	public CondaProcessorEngine() {
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
@@ -91,7 +92,7 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 					}
 					else if (sRow.startsWith("prefix:")) {
 						WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: changing prefix");
-						sRow = "prefix: /home/tomcat/miniconda";
+						sRow = "prefix: /home/" + WasdiConfig.Current.systemUserName + "/venv/bin";
 					}
 									
 					oEnvWriter.write(sRow);

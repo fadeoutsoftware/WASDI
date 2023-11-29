@@ -38,10 +38,13 @@ import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
+import wasdi.shared.data.ParametersRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.parameters.BaseParameter;
+import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.PermissionsUtils;
@@ -1378,6 +1381,62 @@ public class ProcessWorkspaceResource {
 
 		return aoRunningTimeBySubscriptionByProject;
 	}
+	
+	
+	/**
+	 * Get a Process Workspace View Model by id
+	 *
+	 * @param sSessionId User Session Id
+	 * @param sProcessWorkspaceId Process Workspace ID
+	 * @return Process Workspace View Model
+	 */
+	@GET
+	@Path("/paramsbyid")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response getProcessParameters(@HeaderParam("x-session-token") String sSessionId, @QueryParam("procws") String sProcessWorkspaceId) {
+		
+		WasdiLog.debugLog("ProcessWorkspaceResource.getProcessParameters( ProcWsId: " + sProcessWorkspaceId + " )");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		ProcessWorkspaceViewModel oProcess = new ProcessWorkspaceViewModel();
+		
+		// Initialize status as ERROR
+		oProcess.setStatus("ERROR");
+
+		try {
+			// Domain Check
+			if (oUser == null) {
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessParameters: invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			if (!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessWorkspaceId)) {
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessParameters: user cannot access the process workspace");
+				return Response.status(Status.FORBIDDEN).build();
+			}
+			
+			// Create repo
+			ParametersRepository oParametersRepository = new ParametersRepository();
+			BaseParameter oBaseParameter = oParametersRepository.getParameterByProcessObjId(sProcessWorkspaceId);
+			
+			if (oBaseParameter == null) {
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessParameters: user cannot access the process workspace");
+				return Response.status(Status.BAD_REQUEST).build();			
+			}
+			
+			if (oBaseParameter.getClass()==ProcessorParameter.class) {
+				ProcessorParameter oProcessorParameter = (ProcessorParameter) oBaseParameter;
+				String sJson = oProcessorParameter.getJson();
+				return Response.ok(sJson).build();
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessWorkspaceResource.getProcessParameters: " + oEx);
+		}
+
+		return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+	}	
 	
 	/**
 	 * Get a list of 

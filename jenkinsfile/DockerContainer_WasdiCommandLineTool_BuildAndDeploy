@@ -1,19 +1,10 @@
-def getEnvironmentName(String sAnsibleLimit, boolean bLower) {
-  if ( bLower ) {
-    return sAnsibleLimit.split('-')[0].toLowerCase()
-  }
-
-  return sAnsibleLimit.split('-')[0].toUpperCase()
-}
-
 pipeline {
   agent any
 
   environment {
-    sCurrentEnvironmentLower = getEnvironmentName(env.sAnsibleLimit, true)
-    sCurrentEnvironmentUpper = getEnvironmentName(env.sAnsibleLimit, false)
+    sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
+    sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
     sCurrentRevision         = "${env.BUILD_ID}"
-    sMavenProfile            = "wasdi-${env.sCurrentEnvironmentLower}"
   }
 
   options {
@@ -36,16 +27,9 @@ pipeline {
         echo "env.sCurrentRevision         = " + env.sCurrentRevision
         echo "env.sSourceBranch            = " + env.sSourceBranch
         echo "env.sWasdiAnsiblePath        = " + env.sWasdiAnsiblePath
-        echo "env.sWasdiMavenSettings      = " + env.sWasdiMavenSettings
         echo "env.WORKSPACE                = " + env.WORKSPACE
 
         sh script: "pwd", label: "Current location"
-        sh script: "cat pom.xml", label: "Content of the main pom.xml file"
-
-        sh script: "which mvn", label: "Tool > mvn > path"
-        sh script: "mvn --version", label: "Tool > mvn > current version"
-        sh script: "which java", label: "Tool > java > path"
-        sh script: "java -version", label: "Tool > java > current version"
       }
     }
 
@@ -58,11 +42,39 @@ pipeline {
       }
     }
 
+    stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          sh script: """
+            mkdir --parents `dirname ${sWasdiAnsibleVaultFile}`
+            echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
+          """,
+          label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloud', url: "${env.sWasdiAnsibleGitRepositoryUrl}"]]])
+        }
+      }
+    }
+
     stage('BUILD THE CONTAINERS') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerGdal=true sDeployWasdiContainerSen2cor=true sDeployWasdiContainerSnaphu=true'
+          ansible-playbook \
+            playbooks/buildWasdiDockerContainer.yml \
+            --inventory inventories/wasdi.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiGdalContainer=true sDeployWasdiSen2corContainer=true sDeployWasdiSnaphuContainer=true'
         """,
         label: "Build the containers"
       }
@@ -75,7 +87,12 @@ pipeline {
             try {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
-                ansible-playbook playbooks/deployDockerContainerWasdiCommandLineTool.yml  --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+                ansible-playbook \
+                  playbooks/deployDockerContainerWasdiCommandLineTool.yml \
+                  --inventory inventories/wasdi.yml \
+                  --limit ${env.sAnsibleLimit} \
+                  --diff \
+                  --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
               label: "Deploy the containers and their run elements"
             } catch (oError) {

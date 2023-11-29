@@ -1,6 +1,5 @@
 package wasdi.scheduler;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,10 +20,6 @@ import wasdi.shared.utils.runtime.ShellExecReturn;
 
 public class ProcessScheduler {
 	
-	/**
-	 * the folder that contains the serialised parameters used by each process
-	 */
-	protected File m_oParametersFilesFolder = null;
 	/**
 	 * sleeping time between iterations
 	 */
@@ -99,16 +94,6 @@ public class ProcessScheduler {
 			m_sSchedulerKey = sSchedulerKey;
 			// Init the scheduler log prefix
 			m_sLogPrefix = m_sSchedulerKey + ": ";
-			
-			//Read the Serialisation Path
-			File oFolder = new File(WasdiConfig.Current.paths.serializationPath);
-			
-			if (!oFolder.isDirectory()) {
-				WasdiLog.errorLog(m_sLogPrefix + ".init: cannot access parameters folder: " + oFolder.getAbsolutePath());
-			}
-			
-			// Save the path 
-			m_oParametersFilesFolder = oFolder;
 			
 			SchedulerQueueConfig oSchedulerQueueConfig = WasdiConfig.Current.scheduler.getSchedulerQueueConfig(sSchedulerKey);
 			
@@ -674,11 +659,10 @@ public class ProcessScheduler {
 	 */
 	private String executeProcess(ProcessWorkspace oProcessWorkspace) {
 		try {
-			File oParameterFilePath = new File(m_oParametersFilesFolder, oProcessWorkspace.getProcessObjId());
 	
 			String sShellExString = m_sJavaExePath + " -jar " + m_sLauncherPath +
 					" -operation " + oProcessWorkspace.getOperationType() +
-					" -parameter " + oParameterFilePath.getAbsolutePath();
+					" -parameter " + oProcessWorkspace.getProcessObjId();
 	
 			WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executing command for process " + oProcessWorkspace.getProcessObjId() + ": ");
 			WasdiLog.infoLog(sShellExString);

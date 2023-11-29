@@ -17,13 +17,24 @@ ENV PYTHONDONTWRITEBYTECODE="False"
 # This variable is setted to force the 'print' method of Python to flush message directly
 ENV PYTHONUNBUFFERED="True"
 
+# This variable is setted to set the default editor
+ENV EDITOR="nano"
+
 
 # RUN generic to create user, group, directories, etc
 RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
     useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
-    mkdir --parents {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chmod {{ sWasdiSoftwareRootDirectoryMode }} {{ sWasdiSoftwareRootDirectoryPath }}
+    mkdir --parents \
+        {{ sWasdiSystemUserHome }}/.ssh \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} \
+        {{ sWasdiSystemUserHome }}/.ssh && \
+    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chmod 700 \
+        {{ sWasdiSystemUserHome }}/.ssh && \
+    chmod {{ sWasdiSoftwareRootDirectoryMode }} \
+        {{ sWasdiSoftwareRootDirectoryPath }}
 
 
 # RUN generic to update the system and install common packages
@@ -54,34 +65,56 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
 USER {{ sWasdiSystemUserName }}
 
 
-# RUN specific to install the JRE
-RUN mkdir --parents {{ sWasdiJreRootDirectoryPath }} \
+# RUN specific to install JRE 17
+RUN mkdir --parents \
         {{ sWasdiJre17RootDirectoryPath }} \
         {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
-    chown {{ sWasdiJreRootDirectoryOwner }}:{{ sWasdiJreRootDirectoryGroup }} {{ sWasdiJreRootDirectoryPath }} && \
-    chmod {{ sWasdiJreRootDirectoryMode }} {{ sWasdiJreRootDirectoryPath }} && \
-    chown {{ sWasdiJre17RootDirectoryOwner }}:{{ sWasdiJre17RootDirectoryGroup }} {{ sWasdiJre17RootDirectoryPath }} && \
-    chmod {{ sWasdiJre17RootDirectoryMode }} {{ sWasdiJre17RootDirectoryPath }} && \
-    chown {{ sWasdiJre17RootDirectoryOwner }}:{{ sWasdiJre17RootDirectoryGroup }} {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
-    chmod {{ sWasdiJre17RootDirectoryMode }} {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
-    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiJre17SourceUrl }} --output-document /tmp/{{ sWasdiJre17SourceUrl | basename }} && \
-    tar --extract --strip-components=1 --file /tmp/{{ sWasdiJre17SourceUrl | basename }} --directory {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
-    rm --force /tmp/{{ sWasdiJre17SourceUrl | basename }}
+    chown {{ sWasdiJre17RootDirectoryOwner }}:{{ sWasdiJre17RootDirectoryGroup }} \
+        {{ sWasdiJre17RootDirectoryPath }} \
+        {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
+    chmod {{ sWasdiJre17RootDirectoryMode }} \
+        {{ sWasdiJre17RootDirectoryPath }} \
+        {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
+    wget \
+        --no-verbose \
+        --output-document /tmp/{{ sWasdiJre17SourceUrl | basename }} \
+        --progress=bar:force:noscroll \
+        --show-progress \
+        {{ sWasdiJre17SourceUrl }} --output-document /tmp/{{ sWasdiJre17SourceUrl | basename }} && \
+    tar \
+        --directory {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} \
+        --extract \
+        --file /tmp/{{ sWasdiJre17SourceUrl | basename }} \
+        --strip-components=1 && \
+    rm --force \
+        /tmp/{{ sWasdiJre17SourceUrl | basename }}
 
 ENV JAVA_HOME="{{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }}"
 ENV PATH="{{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }}/bin:${PATH}"
 
 
 # RUN specific to install Keycloak
-RUN mkdir --parents {{ sWasdiKeycloakRootDirectoryPath }} \
+RUN mkdir --parents \
+        {{ sWasdiKeycloakRootDirectoryPath }} \
         {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }} \
         {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/data \
         {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/data/import && \
-    chmod {{ sWasdiKeycloakRootDirectoryMode }} {{ sWasdiKeycloakRootDirectoryPath }} && \
-    chmod {{ sWasdiKeycloakRootDirectoryMode }} {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }} && \
-    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiKeycloakSourceUrl }} --output-document=/tmp/{{ sWasdiKeycloakSourceUrl | basename }} && \
-    tar --extract --strip-components=1 --file /tmp/{{ sWasdiKeycloakSourceUrl | basename }} --directory {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }} && \
-    rm --force /tmp/{{ sWasdiKeycloakSourceUrl | basename }}
+    chmod {{ sWasdiKeycloakRootDirectoryMode }} \
+        {{ sWasdiKeycloakRootDirectoryPath }} \
+        {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }} && \
+    wget \
+        --no-verbose \
+        --output-document=/tmp/{{ sWasdiKeycloakSourceUrl | basename }} \
+        --progress=bar:force:noscroll \
+        --show-progress \
+        {{ sWasdiKeycloakSourceUrl }} && \
+    tar \
+        --directory {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }} \
+        --extract \
+        --strip-components=1 \
+        --file /tmp/{{ sWasdiKeycloakSourceUrl | basename }} && \
+    rm --force \
+        /tmp/{{ sWasdiKeycloakSourceUrl | basename }}
 
 ENV PATH="{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/bin:${PATH}"
 

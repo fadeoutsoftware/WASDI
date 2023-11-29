@@ -121,6 +121,11 @@ public class Processor {
 	private String logo = "";
 	
 	/**
+	 * Log of the build operations
+	 */
+	private ArrayList<String> buildLogs = new ArrayList<String>();
+	
+	/**
 	 * List of associated categories
 	 */
 	private ArrayList<String> categories = new ArrayList<String>();
@@ -272,6 +277,12 @@ public class Processor {
 	}
 	public void setLogo(String logo) {
 		this.logo = logo;
+	}
+	public ArrayList<String> getBuildLogs() {
+		return buildLogs;
+	}
+	public void setBuildLogs(ArrayList<String> buildLogs) {
+		this.buildLogs = buildLogs;
 	}
 	
 }

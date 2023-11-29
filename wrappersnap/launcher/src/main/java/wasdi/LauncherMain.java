@@ -36,6 +36,7 @@ import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
+import wasdi.shared.data.ParametersRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
@@ -202,7 +203,8 @@ public class LauncherMain  {
             LauncherMain oLauncher = new LauncherMain();
 
             // Deserialize the parameter
-            BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+            ParametersRepository oParametersRepository = new ParametersRepository();
+            BaseParameter oBaseParameter = oParametersRepository.getParameterByProcessObjId(sParameter);
 
             // Read the Process Workspace from the db
             ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -232,7 +234,7 @@ public class LauncherMain  {
             }
 
             // Run the operation
-            oLauncher.executeOperation(sOperation, sParameter);
+            oLauncher.executeOperation(sOperation, oBaseParameter);
 
             // Operation Done
             WasdiLog.debugLog(getBye());
@@ -457,7 +459,7 @@ public class LauncherMain  {
      * @param sOperation Operation to be done validated above the ones from enumeration
      * @param sParameter Parameter passed as file location of the parameter
      */
-    public void executeOperation(String sOperation, String sParameter) {
+    public void executeOperation(String sOperation, BaseParameter oBaseParameter) {
 
         String sWorkspace = "";
         String sExchange = "";
@@ -469,9 +471,6 @@ public class LauncherMain  {
 
         	// Re contrusct the full package class name
         	sClassName = "wasdi.operations." + sClassName;
-
-            // Deserialize the Parameter
-            BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 
             // Read Workspace and Exchange for Rabbit
             sWorkspace = oBaseParameter.getWorkspace();
@@ -518,6 +517,13 @@ public class LauncherMain  {
             // update process status and send rabbit updateProcess message
             closeProcessWorkspace();
             WasdiLog.debugLog("LauncherMain.executeOperation: CloseProcessWorkspace done");
+        }
+        
+        String sParameter = "ND";
+        if (oBaseParameter!=null) {
+        	if (oBaseParameter.getProcessObjId()!=null) {
+        		sParameter = oBaseParameter.getProcessObjId();
+        	}
         }
 
         WasdiLog.debugLog("Launcher did his job. Bye bye, see you soon. [" + sParameter + "]");

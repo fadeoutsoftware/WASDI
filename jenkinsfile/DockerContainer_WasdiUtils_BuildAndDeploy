@@ -1,17 +1,9 @@
-def getEnvironmentName(String sAnsibleLimit, boolean bLower) {
-  if ( bLower ) {
-    return sAnsibleLimit.split('-')[0].toLowerCase()
-  }
-
-  return sAnsibleLimit.split('-')[0].toUpperCase()
-}
-
 pipeline {
   agent any
 
   environment {
-    sCurrentEnvironmentLower = getEnvironmentName(env.sAnsibleLimit, true)
-    sCurrentEnvironmentUpper = getEnvironmentName(env.sAnsibleLimit, false)
+    sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
+    sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
     sCurrentRevision         = "${env.BUILD_ID}"
     sMavenProfile            = "wasdi-${env.sCurrentEnvironmentLower}"
   }
@@ -36,7 +28,6 @@ pipeline {
         echo "env.sCurrentRevision         = " + env.sCurrentRevision
         echo "env.sSourceBranch            = " + env.sSourceBranch
         echo "env.sWasdiAnsiblePath        = " + env.sWasdiAnsiblePath
-        echo "env.sWasdiMavenSettings      = " + env.sWasdiMavenSettings
         echo "env.WORKSPACE                = " + env.WORKSPACE
 
         sh script: "pwd", label: "Current location"
@@ -58,13 +49,34 @@ pipeline {
       }
     }
 
+    stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          sh script: """
+            mkdir --parents `dirname ${sWasdiAnsibleVaultFile}`
+            echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
+          """,
+          label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloud', url: "${env.sWasdiAnsibleGitRepositoryUrl}"]]])
+        }
+      }
+    }
+
     stage('BUILD THE CODE WITH MAVEN') {
       steps {
         sh script: """
             mvn \
                 --batch-mode \
-                -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true \
-                --settings ${env.sWasdiMavenSettings} \
                 --activate-profiles ${env.sMavenProfile} \
                 --define revision=${env.sCurrentRevision} \
                 --define skipTests \

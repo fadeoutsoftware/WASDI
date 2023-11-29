@@ -51,7 +51,7 @@ namespace WasdiLib.Configuration
                     oConfigure.AddConsole();
                 })
                 .Configure<LoggerFilterOptions>(oOptions => 
-                    oOptions.MinLevel = (logLevelVerbose ? LogLevel.Information : LogLevel.Error)
+                    oOptions.MinLevel = (logLevelVerbose ? LogLevel.Debug : LogLevel.Error)
                 );
 
             ServiceProvider = aoServicies.BuildServiceProvider();

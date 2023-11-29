@@ -449,9 +449,10 @@ public class RunTimeUtils {
 			}			
 
 			if (oShellExecReturn.isOperationOk()) {
-				WasdiLog.debugLog("RunTimeUtils.runCommand: The shell command ran successfully.");
+				WasdiLog.debugLog("RunTimeUtils.runCommand: The shell command ran successfully. " + oShellExecReturn.getOperationLogs());
+				bResult = true;
 			} else {
-				WasdiLog.debugLog("RunTimeUtils.runCommand: The shell command did not run successfully.");
+				WasdiLog.debugLog("RunTimeUtils.runCommand: The shell command did not run successfully. "  + oShellExecReturn.getOperationLogs());
 			}
 
 			return bResult;

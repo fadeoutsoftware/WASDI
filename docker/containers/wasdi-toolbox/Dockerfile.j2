@@ -17,13 +17,24 @@ ENV PYTHONDONTWRITEBYTECODE="False"
 # This variable is setted to force the 'print' method of Python to flush message directly
 ENV PYTHONUNBUFFERED="True"
 
+# This variable is setted to set the default editor
+ENV EDITOR="nano"
+
 
 # RUN generic to create user, group, directories, etc
 RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
     useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
-    mkdir --parents {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chmod {{ sWasdiSoftwareRootDirectoryMode }} {{ sWasdiSoftwareRootDirectoryPath }}
+    mkdir --parents \
+        {{ sWasdiSystemUserHome }}/.ssh \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} \
+        {{ sWasdiSystemUserHome }}/.ssh && \
+    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chmod 700 \
+        {{ sWasdiSystemUserHome }}/.ssh && \
+    chmod {{ sWasdiSoftwareRootDirectoryMode }} \
+        {{ sWasdiSoftwareRootDirectoryPath }}
 
 
 # RUN generic to update the system and install common packages
@@ -80,8 +91,32 @@ RUN groupadd --gid {{ sWasdiBackupSystemGroupId }} --non-unique {{ sWasdiBackupS
 USER {{ sWasdiSystemUserName }}
 
 
-# Update the ${PATH} variable to be able to call the PostgreSQL binaries
-ENV PATH="${PATH}:/usr/lib/postgresql/14/bin"
+# RUN specific to install JDK 17
+RUN mkdir --parents \
+        {{ sWasdiJdk17RootDirectoryPath }} \
+        {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} && \
+    chown {{ sWasdiJdk17RootDirectoryOwner }}:{{ sWasdiJdk17RootDirectoryGroup }} \
+        {{ sWasdiJdk17RootDirectoryPath }} \
+        {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} && \
+    chmod {{ sWasdiJdk17RootDirectoryMode }} \
+        {{ sWasdiJdk17RootDirectoryPath }} \
+        {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} && \
+    wget \
+        --no-verbose \
+        --output-document /tmp/{{ sWasdiJdk17SourceUrl | basename }} \
+        --progress=bar:force:noscroll \
+        --show-progress \
+        {{ sWasdiJdk17SourceUrl }} --output-document /tmp/{{ sWasdiJdk17SourceUrl | basename }} && \
+    tar \
+        --directory {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} \
+        --extract \
+        --file /tmp/{{ sWasdiJdk17SourceUrl | basename }} \
+        --strip-components=1 && \
+    rm --force \
+        /tmp/{{ sWasdiJdk17SourceUrl | basename }}
+
+ENV JAVA_HOME="{{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }}"
+ENV PATH="{{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }}/bin:${PATH}"
 
 
 # RUN specific to install all elements related to the toolbox

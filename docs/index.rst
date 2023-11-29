@@ -41,7 +41,7 @@ If you're acquired the basic concepts of WASDI and you're interested in how proc
 
 
 WASDI User Manual
----------------------------
+-------------------------------
 WASDI has created a comprehensive user manual to explain and simplify all operations in WASDI. If you require explaination for any concepts in WASDI, please see the corresponding section in the manual. 
 A good starting point to search for and executing applications is the tutorial on the Space Marketplace 
 

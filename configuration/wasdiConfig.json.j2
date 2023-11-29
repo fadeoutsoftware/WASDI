@@ -528,7 +528,8 @@
                 "apiAddress": "{{ aoWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['apiAddress'] }}",
                 "user": "{{ aoWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['user'] }}",
                 "password": "{{ aoWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['password'] }}",
-                "priority": {{ aoWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['priority'] }}
+                "priority": {{ aoWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['priority'] }},
+                "repositoryName": "{{ aoWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['repositoryName'] }}"
             }{% if not loop.last %},
 {% endif %}
 {% endfor %}

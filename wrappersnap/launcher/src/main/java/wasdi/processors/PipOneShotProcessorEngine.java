@@ -28,7 +28,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
-public class PipOneShotProcessorEngine extends PipProcessorEngine {
+public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 	
 	public PipOneShotProcessorEngine() {
 		super();
@@ -136,6 +136,7 @@ public class PipOneShotProcessorEngine extends PipProcessorEngine {
             
             if (oProcessorTypeConfig == null) {
             	oProcessorTypeConfig = new ProcessorTypeConfig();
+            	oProcessorTypeConfig.processorType = oProcessor.getType();
             	WasdiConfig.Current.dockers.processorTypes.add(oProcessorTypeConfig);
             }
             
@@ -203,7 +204,7 @@ public class PipOneShotProcessorEngine extends PipProcessorEngine {
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
 
             // Check if is started otherwise start it
-            String sContainerName = startContainerAndGetName(oDockerUtils,oProcessor, oParameter);
+            String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter);
             
             // If we do not have a container name here, we are not in the position to continue
             if (Utils.isNullOrEmpty(sContainerName)) {

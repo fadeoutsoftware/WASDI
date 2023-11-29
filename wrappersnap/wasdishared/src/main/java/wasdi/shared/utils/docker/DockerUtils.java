@@ -24,6 +24,7 @@ import wasdi.shared.config.EnvironmentVariableConfig;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.ProcessorTypeConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.StringUtils;
@@ -374,8 +375,16 @@ public class DockerUtils {
         	
         	WasdiLog.debugLog("DockerUtils.build: build done");
         	
+        	String sBuildOutput = oResponse.getResponseBody();
+        	sBuildOutput = cleanDockerLogsString(sBuildOutput);
+        	
+        	// Save the build output
+        	m_oProcessor.getBuildLogs().add(sBuildOutput);
+        	ProcessorRepository oProcessorRepository = new ProcessorRepository();
+        	oProcessorRepository.updateProcessor(m_oProcessor);
+        	
         	if (WasdiConfig.Current.dockers.logDockerAPICallsPayload) {
-        		WasdiLog.debugLog("DockerUtils.build: build output = " + oResponse.getResponseBody());
+        		WasdiLog.debugLog("DockerUtils.build: build output = " + sBuildOutput);
         	}
         	
         	// Delete the tar
@@ -394,6 +403,24 @@ public class DockerUtils {
         }
 
         return sImageName;
+    }
+    
+    protected String cleanDockerLogsString(String sInputString) {
+    	String sOutputString = "";
+    	
+    	sOutputString = sInputString.replace("{\"stream\":", "");
+    	sOutputString = sOutputString.replace("\"\\n\"}", "\n");
+    	sOutputString = sOutputString.replace("\\n\"}", "\n");
+    	sOutputString = sOutputString.replace("\"}", "");
+    	sOutputString = sOutputString.replace("---\\u003e", "");
+    	sOutputString = sOutputString.replace("\\u0026", "");
+    	sOutputString = sOutputString.replace("\\u0026", "");
+    	sOutputString = sOutputString.replace("\\u001b", "");
+    	
+    	sOutputString = sOutputString.replace("\\n", "\n");
+    	
+    	
+    	return sOutputString;
     }
 
     /**
@@ -494,7 +521,7 @@ public class DockerUtils {
         		
         		// Since we are creating the Container, we need to set up our name
         		sContainerName = m_oProcessor.getName() + "_" + m_oProcessor.getVersion() + "_" + Utils.getRandomName();
-        		WasdiLog.debugLog("DockerUtils.start: ok is image pulled create the container named " + sContainerName);
+        		WasdiLog.debugLog("DockerUtils.start: image pulled, create the container named " + sContainerName);
         		
         		// Create the container
             	try {
@@ -516,15 +543,20 @@ public class DockerUtils {
             		// Set the network mode
             		oContainerCreateParams.HostConfig.NetworkMode = m_sDockerNetworkMode;
             		
-            		// Add the volume with the Processor Code
-            		MountVolumeParam oProcessorPath = new MountVolumeParam();
-            		oProcessorPath.Source = m_sProcessorFolder;
-            		oProcessorPath.Target = "/wasdi";
-            		oProcessorPath.ReadOnly = false;
-            		oProcessorPath.Type= MountTypes.BIND;
+            		// Mount the processor folder only if it exists
+            		File oProcessorFolder = new File(m_sProcessorFolder);
             		
-            		oContainerCreateParams.HostConfig.Mounts.add(oProcessorPath);
-            		
+            		if (oProcessorFolder.exists() && oProcessorFolder.isDirectory()) {
+                		// Add the volume with the Processor Code
+                		MountVolumeParam oProcessorPath = new MountVolumeParam();
+                		oProcessorPath.Source = m_sProcessorFolder;
+                		oProcessorPath.Target = "/wasdi";
+                		oProcessorPath.ReadOnly = false;
+                		oProcessorPath.Type= MountTypes.BIND;
+                		
+                		oContainerCreateParams.HostConfig.Mounts.add(oProcessorPath);            			
+            		}
+            		            		
             		oContainerCreateParams.HostConfig.RestartPolicy.put("Name", "no");
             		oContainerCreateParams.HostConfig.RestartPolicy.put("MaximumRetryCount", 0);
             		
@@ -1555,7 +1587,7 @@ public class DockerUtils {
     		String sUrl = oRegistry.apiAddress;
     		if (!sUrl.endsWith("/")) sUrl += "/";
     		
-    		sUrl += "repository/docker-wasdi-processor/v2/";
+    		sUrl += "repository/"  +  oRegistry.repositoryName + "/v2/";
     		sUrl += sImageName;
     		sUrl += "/manifests/" + sVersion;
     		
@@ -1583,7 +1615,7 @@ public class DockerUtils {
         		
         		if (!sUrl.endsWith("/")) sUrl += "/";
         		
-        		sUrl += "repository/docker-wasdi-processor/v2/";
+        		sUrl += "repository/"+  oRegistry.repositoryName +"/v2/";
         		sUrl += sImageName;
         		sUrl += "/manifests/" + sDigest;
         		

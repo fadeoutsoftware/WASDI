@@ -17,13 +17,24 @@ ENV PYTHONDONTWRITEBYTECODE="False"
 # This variable is setted to force the 'print' method of Python to flush message directly
 ENV PYTHONUNBUFFERED="True"
 
+# This variable is setted to set the default editor
+ENV EDITOR="nano"
+
 
 # RUN generic to create user, group, directories, etc
 RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
     useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
-    mkdir --parents {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chmod {{ sWasdiSoftwareRootDirectoryMode }} {{ sWasdiSoftwareRootDirectoryPath }}
+    mkdir --parents \
+        {{ sWasdiSystemUserHome }}/.ssh \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} \
+        {{ sWasdiSystemUserHome }}/.ssh && \
+    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chmod 700 \
+        {{ sWasdiSystemUserHome }}/.ssh && \
+    chmod {{ sWasdiSoftwareRootDirectoryMode }} \
+        {{ sWasdiSoftwareRootDirectoryPath }}
 
 
 # RUN generic to update the system and install common packages
@@ -50,50 +61,66 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
-# From now, all commands executed are executed with the user '{{ sWasdiSystemUserName }}'
-USER {{ sWasdiSystemUserName }}
-
-
-# RUN specific to install the JRE
-RUN mkdir --parents {{ sWasdiJreRootDirectoryPath }} \
-        {{ sWasdiJre8RootDirectoryPath }} \
-        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
-    chown {{ sWasdiJreRootDirectoryOwner }}:{{ sWasdiJreRootDirectoryGroup }} {{ sWasdiJreRootDirectoryPath }} && \
-    chmod {{ sWasdiJreRootDirectoryMode }} {{ sWasdiJreRootDirectoryPath }} && \
-    chown {{ sWasdiJre8RootDirectoryOwner }}:{{ sWasdiJre8RootDirectoryGroup }} {{ sWasdiJre8RootDirectoryPath }} && \
-    chmod {{ sWasdiJre8RootDirectoryMode }} {{ sWasdiJre8RootDirectoryPath }} && \
-    chown {{ sWasdiJre8RootDirectoryOwner }}:{{ sWasdiJre8RootDirectoryGroup }} {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
-    chmod {{ sWasdiJre8RootDirectoryMode }} {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
-    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiJre8SourceUrl }} --output-document /tmp/{{ sWasdiJre8SourceUrl | basename }} && \
-    tar --extract --strip-components=1 --file /tmp/{{ sWasdiJre8SourceUrl | basename }} --directory {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
-    rm --force /tmp/{{ sWasdiJre8SourceUrl | basename }}
-
-ENV JAVA_HOME="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}"
-ENV PATH="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin:${PATH}"
-
-
-# From now, all commands executed are executed with the user 'root'
-USER root
-
-
-# RUN specific to install the Trigger
+# RUN specific to install the trigger
 RUN apt-get update && \
     apt-get install \
         libjhdf4-jni \
         libjhdf5-jni && \
     mkdir --parents \
+        {{ sWasdiDataPartitionRootDirectoryPath }} \
+        {{ sWasdiDataRootDirectoryPath }} \
         {{ sWasdiDataConfigurationRootDirectoryPath }} \
         {{ sWasdiTriggerRootDirectoryPath }} && \
-    chown {{ sWasdiDataConfigurationRootDirectoryOwner }}:{{ sWasdiDataConfigurationRootDirectoryGroup }} {{ sWasdiDataConfigurationRootDirectoryPath }} && \
-    chmod {{ sWasdiDataConfigurationRootDirectoryMode }} {{ sWasdiDataConfigurationRootDirectoryPath }} && \
-    chown {{ sWasdiTriggerRootDirectoryOwner }}:{{ sWasdiTriggerRootDirectoryGroup }} {{ sWasdiTriggerRootDirectoryPath }} && \
-    chmod {{ sWasdiTriggerRootDirectoryMode }} {{ sWasdiTriggerRootDirectoryPath }} && \
+    chown {{ sWasdiDataPartitionRootDirectoryOwner }}:{{ sWasdiDataPartitionRootDirectoryGroup }} \
+        {{ sWasdiDataPartitionRootDirectoryPath }} && \
+    chmod {{ sWasdiDataPartitionRootDirectoryMode }} \
+        {{ sWasdiDataPartitionRootDirectoryPath }} && \
+    chown {{ sWasdiDataRootDirectoryOwner }}:{{ sWasdiDataRootDirectoryGroup }} \
+        {{ sWasdiDataRootDirectoryPath }} && \
+    chmod {{ sWasdiDataRootDirectoryMode }} \
+        {{ sWasdiDataRootDirectoryPath }} && \
+    chown {{ sWasdiDataConfigurationRootDirectoryOwner }}:{{ sWasdiDataConfigurationRootDirectoryGroup }} \
+        {{ sWasdiDataConfigurationRootDirectoryPath }} && \
+    chmod {{ sWasdiDataConfigurationRootDirectoryMode }} \
+        {{ sWasdiDataConfigurationRootDirectoryPath }} && \
+    chown {{ sWasdiTriggerRootDirectoryOwner }}:{{ sWasdiTriggerRootDirectoryGroup }} \
+        {{ sWasdiTriggerRootDirectoryPath }} && \
+    chmod {{ sWasdiTriggerRootDirectoryMode }} \
+        {{ sWasdiTriggerRootDirectoryPath }} && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
 # From now, all commands executed are executed with the user '{{ sWasdiSystemUserName }}'
 USER {{ sWasdiSystemUserName }}
+
+
+# RUN specific to install JRE 8
+RUN mkdir --parents \
+        {{ sWasdiJre8RootDirectoryPath }} \
+        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
+    chown {{ sWasdiJre8RootDirectoryOwner }}:{{ sWasdiJre8RootDirectoryGroup }} \
+        {{ sWasdiJre8RootDirectoryPath }} \
+        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
+    chmod {{ sWasdiJre8RootDirectoryMode }} \
+        {{ sWasdiJre8RootDirectoryPath }} \
+        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
+    wget \
+        --no-verbose \
+        --output-document /tmp/{{ sWasdiJre8SourceUrl | basename }} \
+        --progress=bar:force:noscroll \
+        --show-progress \
+        {{ sWasdiJre8SourceUrl }} --output-document /tmp/{{ sWasdiJre8SourceUrl | basename }} && \
+    tar \
+        --directory {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} \
+        --extract \
+        --file /tmp/{{ sWasdiJre8SourceUrl | basename }} \
+        --strip-components=1 && \
+    rm --force \
+        /tmp/{{ sWasdiJre8SourceUrl | basename }}
+
+ENV JAVA_HOME="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}"
+ENV PATH="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin:${PATH}"
 
 
 # Set the workdir

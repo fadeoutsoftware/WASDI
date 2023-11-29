@@ -84,8 +84,7 @@ public class ProcessWorkspaceService {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			oKillProcessParameter.setUserId(oUser.getUserId());
 			
-			PrimitiveResult oResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.KILLPROCESSTREE.name(),
-					asProcesses.get(0), WasdiConfig.Current.paths.serializationPath, oKillProcessParameter, null);
+			PrimitiveResult oResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.KILLPROCESSTREE.name(), asProcesses.get(0), oKillProcessParameter, null);
 			
 			WasdiLog.debugLog("ProcessWorkspaceService.killProcesses: kill scheduled with result: " + oResult.getBoolValue() );
 			

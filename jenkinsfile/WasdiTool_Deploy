@@ -13,11 +13,12 @@ pipeline {
   stages {
     stage('DEBUG') {
       steps {
-        echo "env.GIT_BRANCH        = " + env.GIT_BRANCH
-        echo "env.sAnsibleLimit     = " + env.sAnsibleLimit
-        echo "env.sCurrentRevision  = " + env.sCurrentRevision
-        echo "env.sWasdiAnsiblePath = " + env.sWasdiAnsiblePath
-        echo "env.WORKSPACE         = " + env.WORKSPACE
+        echo "env.GIT_BRANCH          = " + env.GIT_BRANCH
+        echo "env.sAnsibleLimit       = " + env.sAnsibleLimit
+        echo "env.sCurrentRevision    = " + env.sCurrentRevision
+        echo "env.sSourceBranch       = " + env.sSourceBranch
+        echo "env.sWasdiAnsiblePath   = " + env.sWasdiAnsiblePath
+        echo "env.WORKSPACE           = " + env.WORKSPACE
 
         sh script: "pwd", label: "Current location"
       }
@@ -28,6 +29,29 @@ pipeline {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
           currentBuild.description = "WASDI - DEPLOY TOOLS (renderJinjaTemplate.py, etc)"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          sh script: """
+            mkdir --parents `dirname ${sWasdiAnsibleVaultFile}`
+            echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
+          """,
+          label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloud', url: "${env.sWasdiAnsibleGitRepositoryUrl}"]]])
         }
       }
     }

@@ -1111,9 +1111,7 @@ public class WorkspaceResource {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(oWorkspace.getWorkspaceId()));
 
-			String sPath = WasdiConfig.Current.paths.serializationPath;
-
-			PrimitiveResult oRes = Wasdi.runProcess(oWorkspace.getUserId(), sSessionId, LauncherOperations.TERMINATEJUPYTERNOTEBOOK.name(), sJupyterNotebookCode, sPath, oProcessorParameter);
+			PrimitiveResult oRes = Wasdi.runProcess(oWorkspace.getUserId(), sSessionId, LauncherOperations.TERMINATEJUPYTERNOTEBOOK.name(), sJupyterNotebookCode, oProcessorParameter);
 
 			if (oRes.getBoolValue()) {
 				return true;

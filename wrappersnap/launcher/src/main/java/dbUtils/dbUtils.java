@@ -22,6 +22,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
+import org.esa.snap.engine_utilities.util.PathUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -30,6 +31,7 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
+import wasdi.shared.business.ParameterEntity;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -54,6 +56,7 @@ import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
+import wasdi.shared.data.ParametersRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
@@ -70,6 +73,8 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.statistics.JobsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
+import wasdi.shared.parameters.DownloadFileParameter;
+import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.OgcProcessesClient;
@@ -1450,21 +1455,16 @@ public class dbUtils {
                 }
 
                 Collections.sort(aoProcesses, new ProcessWorkspaceStartDateComparator());
+                ParametersRepository oParametersRepository = new ParametersRepository();
 
                 for (ProcessWorkspace oProcToRun : aoProcesses) {
 
                     System.out.println("Starting again " + oProcToRun.getProcessObjId());
 
-                    String sSerializationPath = WasdiConfig.Current.paths.serializationPath;
-
-                    if (!sSerializationPath.endsWith("" + File.separatorChar)) sSerializationPath += File.separatorChar;
-
-                    String sParameter = sSerializationPath + oProcToRun.getProcessObjId();
-
                     try {
 
                         // Create the base Parameter
-                        BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                        BaseParameter oBaseParameter = oParametersRepository.getParameterByProcessObjId(oProcToRun.getProcessObjId());
 
                         String sSessionId = oBaseParameter.getSessionID();
                         String sUser = oBaseParameter.getUserId();
@@ -1795,6 +1795,7 @@ public class dbUtils {
 
             System.out.println("\t1 - Delete ProcessWorkspace where Workspace does not exist");
             System.out.println("\t2 - Align Local Process Workspaces to Statistics Centralized Db");
+            System.out.println("\t3 - Import Local Process Workspaces to mongo");
             System.out.println("\tx - back");
             System.out.println("");
 
@@ -1855,9 +1856,73 @@ public class dbUtils {
             else if (sInputString.equals("2")) {
             	alignJobsToCentralDb();
             }
+            else if (sInputString.equals("3")) {
+            	importProcessWorkspacesInMongo();
+            }
 
-        } catch (Exception oEx) {
+        } 
+        catch (Exception oEx) {
             System.out.println("processWorkpsaces Exception: " + oEx);
+        }
+    }
+    
+    public static void importProcessWorkspacesInMongo() {
+    	try {
+    		System.out.println("Importing all the process workspaces in mongo");
+    		
+    		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+    		List<ProcessWorkspace> aoProcessWorkspaces = oProcessWorkspaceRepository.getByNode(WasdiConfig.Current.nodeCode);
+    		
+    		if (aoProcessWorkspaces == null) {
+    			System.out.println("Obtained null list, not good");
+    			return;
+    		}
+    		
+    		int iSize = aoProcessWorkspaces.size();
+    		System.out.println("Analyzing " + iSize + " Process Workspaces");
+    		int iTenPercent = (int) (iSize/10);
+    		
+    		ParametersRepository oParametersRepository = new ParametersRepository();
+    		
+    		for(int iProcWs = 0; iProcWs<aoProcessWorkspaces.size(); iProcWs ++) {
+    			
+    			try {
+    				
+        			if (iProcWs>0 && iProcWs%iTenPercent == 0) {
+        				System.out.println("I'm not sleeping, just done another 10%");
+        			}    	
+        			
+        			ProcessWorkspace oProcessWorkspace = aoProcessWorkspaces.get(iProcWs);
+        			
+        			if (oProcessWorkspace == null) continue;
+        			
+        			String sParameterId = oProcessWorkspace.getProcessObjId();
+        			
+        			if (Utils.isNullOrEmpty(sParameterId)) continue;
+        			
+        			String sParamPath = PathsConfig.getParameterPath(sParameterId);
+        			
+        			File oParamFile = new File(sParamPath);
+        			
+        			if (!oParamFile.exists()) {
+        				System.out.println("Parameter file " + sParamPath + " does not exists!!");
+        				continue;
+        			}
+        			
+        			BaseParameter oParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParamPath);
+        			oParametersRepository.insertParameter(oParameter);
+    			}
+    	        catch (Exception oEx) {
+    	            System.out.println("processWorkpsaces.importProcessWorkspacesInMongo Exception in the import loop: " + oEx);
+    	        }
+    			
+    		}
+    		
+    		System.out.println("Import done!!");
+    		
+    	}
+        catch (Exception oEx) {
+            System.out.println("processWorkpsaces.importProcessWorkspacesInMongo Exception: " + oEx);
         }
     }
     

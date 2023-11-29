@@ -13,7 +13,7 @@ http:
     mw_wasdi-secure-allowFrame:
       headers:
         frameDeny: false
-{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
         sslRedirect: true
 {% else %}
         sslRedirect: false
@@ -28,7 +28,7 @@ http:
     mw_wasdi-secure-denyFrame:
       headers:
         frameDeny: true
-{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
         sslRedirect: true
 {% else %}
         sslRedirect: false
@@ -41,7 +41,7 @@ http:
         forceStsHeader: true
         referrerPolicy: same-origin
 
-{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+{% if bWasdiSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
 tls:
   options:
     default:
@@ -54,7 +54,7 @@ tls:
         - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
         - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
   certificates:
-{% for aoCurrentCertificate in aoWasdiContainerTraefikSslCertificates %}
+{% for aoCurrentCertificate in aoWasdiTraefikSslCertificates %}
     - certFile: /etc/traefik/certs/{{ aoCurrentCertificate.certFile }}
       keyFile: /etc/traefik/certs/{{ aoCurrentCertificate.keyFile }}
       stores:

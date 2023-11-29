@@ -1,0 +1,127 @@
+pipeline {
+  agent any
+
+  environment {
+    sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
+    sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
+    sCurrentRevision         = "${env.BUILD_ID}"
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
+    disableConcurrentBuilds()
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        echo "env.GIT_BRANCH               = " + env.GIT_BRANCH
+        echo "env.sAnsibleLimit            = " + env.sAnsibleLimit
+        echo "env.sCurrentEnvironmentLower = " + env.sCurrentEnvironmentLower
+        echo "env.sCurrentEnvironmentUpper = " + env.sCurrentEnvironmentUpper
+        echo "env.sCurrentRevision         = " + env.sCurrentRevision
+        echo "env.sSourceBranch            = " + env.sSourceBranch
+        echo "env.sWasdiAnsiblePath        = " + env.sWasdiAnsiblePath
+        echo "env.WORKSPACE                = " + env.WORKSPACE
+
+        sh script: "pwd", label: "Current location"
+      }
+    }
+
+    stage('INITIALIZATION') {
+      steps {
+        script {
+          currentBuild.displayName = "${env.sCurrentRevision}"
+          currentBuild.description = "WASDI - BUILD AND DEPLOY THE JENKINS CONTAINER"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          sh script: """
+            mkdir --parents `dirname ${sWasdiAnsibleVaultFile}`
+            echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
+          """,
+          label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloud', url: "${env.sWasdiAnsibleGitRepositoryUrl}"]]])
+        }
+      }
+    }
+
+    stage('BUILD THE CONTAINER') {
+      steps {
+        sh script: """
+            cd ${env.sWasdiAnsiblePath}
+            ansible-playbook \
+                playbooks/buildWasdiDockerContainer.yml \
+                --inventory inventories/wasdi.yml \
+                --limit ${env.sAnsibleLimit} \
+                --diff \
+                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiJenkinsContainer=true'
+        """,
+        label: "Build the container"
+      }
+    }
+
+    stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
+      steps {
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          script {
+            try {
+              sh script: """
+                  cd ${env.sWasdiAnsiblePath}
+                  ansible-playbook \
+                    playbooks/deployDockerContainerWasdiJenkins.yml \
+                    --inventory inventories/wasdi.yml \
+                    --limit ${env.sAnsibleLimit} \
+                    --diff \
+                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+              """,
+              label: "Deploy the container and its run element"
+            } catch (oError) {
+              echo oError.getMessage()
+              throw oError
+            }
+          }
+        }
+      }
+    }
+
+    stage('PLEASE READ LOGS') {
+      steps {
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          script {
+            try {
+              sh script: """
+                echo "Please execute manually this command in the right directory:"
+                echo "docker compose up --detach --force-recreate wasdi-jenkins"
+              """,
+              label: "Command to start or restart the container"
+            } catch (oError) {
+              echo oError.getMessage()
+              throw oError
+            }
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}

@@ -27,8 +27,10 @@ services:
 {% if bWasdiClientEnabled == True %}
   {{ sWasdiClientServiceName }}:
     depends_on:
+{% if bWasdiGeoserverEnabled == True %}
       - {{ sWasdiGeoserverServiceName }}
-{% if sWasdiServerTypeIsMain == True %}
+{% endif %}
+{% if bWasdiKeycloakEnabled == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
@@ -53,11 +55,11 @@ services:
     image: "{{ sWasdiClientServiceName }}:latest"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`/`)"
       - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.service=s_{{ sWasdiClientServiceName }}"
-{% if bWasdiContainerTraefikSslEnabled == True %}
+{% if bWasdiSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiClientServiceName }}.loadbalancer.server.port={{ sWasdiClientInternalPort }}"
@@ -69,14 +71,20 @@ services:
       - "{{ sCurrentExternalIp }}:{{ sWasdiClientExternalPort }}:{{ sWasdiClientInternalPort }}"
 {% endfor %}
 {% endif %}
+    pull_policy: "never"
     restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiClientUlimitNofile }}
+        hard: {{ sWasdiClientUlimitNofile }}
 {% endif %}
 {% if bWasdiClientV2Enabled == True %}
-
   {{ sWasdiClientV2ServiceName }}:
     depends_on:
+{% if bWasdiGeoserverEnabled == True %}
       - {{ sWasdiGeoserverServiceName }}
-{% if sWasdiServerTypeIsMain == True %}
+{% endif %}
+{% if bWasdiKeycloakEnabled == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
@@ -101,11 +109,11 @@ services:
     image: "{{ sWasdiClientV2ServiceName }}:latest"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
       - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.rule=Host(`testnew.wasdi.net`) && PathPrefix(`/`)"
       - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.service=s_{{ sWasdiClientV2ServiceName }}"
-{% if bWasdiContainerTraefikSslEnabled == True %}
+{% if bWasdiSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiClientV2ServiceName }}.loadbalancer.server.port={{ sWasdiClientV2InternalPort }}"
@@ -117,9 +125,14 @@ services:
       - "{{ sCurrentExternalIp }}:{{ sWasdiClientV2ExternalPort }}:{{ sWasdiClientV2InternalPort }}"
 {% endfor %}
 {% endif %}
+    pull_policy: "never"
     restart: "unless-stopped"
-
+    ulimits:
+      nofile:
+        soft: {{ sWasdiClientV2UlimitNofile }}
+        hard: {{ sWasdiClientV2UlimitNofile }}
 {% endif %}
+{% if bWasdiGeoserverEnabled == True %}
   {{ sWasdiGeoserverServiceName }}:
     depends_on:
       - {{ sWasdiTraefikServiceName }}
@@ -132,11 +145,11 @@ services:
     image: "{{ sWasdiGeoserverServiceName }}:latest"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.r_{{ sWasdiGeoserverServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiGeoserverServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/geoserver`)"
+      - "traefik.http.routers.r_{{ sWasdiGeoserverServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiGeoserverServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiGeoserverDefaultContextPath.rstrip('/') }}`)"
       - "traefik.http.routers.r_{{ sWasdiGeoserverServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sWasdiGeoserverServiceName }}.service=s_{{ sWasdiGeoserverServiceName }}"
-{% if bWasdiContainerTraefikSslEnabled == True %}
+{% if bWasdiSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiGeoserverServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiGeoserverServiceName }}.loadbalancer.server.port={{ sWasdiGeoserverInternalPort }}"
@@ -148,6 +161,7 @@ services:
       - "{{ sCurrentExternalIp }}:{{ sWasdiGeoserverExternalPort }}:{{ sWasdiGeoserverInternalPort }}"
 {% endfor %}
 {% endif %}
+    pull_policy: "never"
     restart: "unless-stopped"
     ulimits:
       nofile:
@@ -155,8 +169,138 @@ services:
         hard: {{ sWasdiGeoserverUlimitNofile }}
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01:{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01:rw
-{% if sWasdiServerTypeIsMain == True %}
-
+{% endif %}
+{% if bWasdiGrafanaEnabled == True %}
+  {{ sWasdiGrafanaServiceName }}:
+{% if bWasdiInfluxDbGrafanaEnabled == True %}
+    depends_on:
+      - {{ sWasdiInfluxDbGrafanaServiceName }}
+{% endif %}
+{% if ( aoWasdiGrafanaEnvironmentVariable | length ) > 0 %}
+    environment:
+{% for aoWasdiGrafanaCurrentEnvironmentVariable in aoWasdiGrafanaEnvironmentVariable %}
+      - {{ aoWasdiGrafanaCurrentEnvironmentVariable['key'] }}={{ aoWasdiGrafanaCurrentEnvironmentVariable['value'] }}
+{% endfor %}
+{% endif %}
+    image: "{{ sWasdiGrafanaImageName }}:{{ sWasdiGrafanaVersion }}"
+{% if bWasdiGrafanaCluster == False %}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.r_{{ sWasdiGrafanaServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiGrafanaServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiGrafanaDefaultContextPath.rstrip('/') }}`)"
+      - "traefik.http.routers.r_{{ sWasdiGrafanaServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiGrafanaServiceName }}.service=s_{{ sWasdiGrafanaServiceName }}"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sWasdiGrafanaServiceName }}.tls=true"
+{% endif %}
+      - "traefik.http.services.s_{{ sWasdiGrafanaServiceName }}.loadbalancer.server.port={{ sWasdiGrafanaInternalPort }}"
+{% endif %}
+{% if sWasdiGrafanaInternalPort | default("") != ""
+    and sWasdiGrafanaExternalPort | default("") != ""
+    and aWasdiGrafanaExternalIp | default([]) | length > 0 %}
+    ports:
+{% for sCurrentExternalIp in aWasdiGrafanaExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiGrafanaExternalPort }}:{{ sWasdiGrafanaInternalPort }}"
+{% endfor %}
+{% endif %}
+    pull_policy: "always"
+    restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiGrafanaUlimitNofile }}
+        hard: {{ sWasdiGrafanaUlimitNofile }}
+{% if ( aoWasdiGrafanaVolume | length ) > 0 %}
+    volumes:
+{% for aoWasdiGrafanaCurrentVolume in aoWasdiGrafanaVolume %}
+      - {{ aoWasdiGrafanaCurrentVolume }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% if bWasdiInfluxDbGrafanaEnabled == True %}
+  {{ sWasdiInfluxDbGrafanaServiceName }}:
+{% if ( aoWasdiInfluxDbGrafanaEnvironmentVariable | length ) > 0 %}
+    environment:
+{% for aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable in aoWasdiInfluxDbGrafanaEnvironmentVariable %}
+      - {{ aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable['key'] }}={{ aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable['value'] }}
+{% endfor %}
+{% endif %}
+    image: "{{ sWasdiInfluxDbGrafanaImageName }}:{{ sWasdiInfluxDbGrafanaVersion }}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.r_{{ sWasdiInfluxDbGrafanaServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiGrafanaServiceName }}.rule=Host(`{{ sWasdiInfluxDbGrafanaUrl }}`)"
+      - "traefik.http.routers.r_{{ sWasdiInfluxDbGrafanaServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiInfluxDbGrafanaServiceName }}.service=s_{{ sWasdiInfluxDbGrafanaServiceName }}"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sWasdiInfluxDbGrafanaServiceName }}.tls=true"
+{% endif %}
+      - "traefik.http.services.s_{{ sWasdiInfluxDbGrafanaServiceName }}.loadbalancer.server.port={{ sWasdiInfluxDbGrafanaInternalPort }}"
+{% if sWasdiInfluxDbGrafanaInternalPort | default("") != ""
+    and sWasdiInfluxDbGrafanaExternalPort | default("") != ""
+    and aWasdiInfluxDbGrafanaExternalIp | default([]) | length > 0 %}
+    ports:
+{% for sCurrentExternalIp in aWasdiInfluxDbGrafanaExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiInfluxDbGrafanaExternalPort }}:{{ sWasdiInfluxDbGrafanaInternalPort }}"
+{% endfor %}
+{% endif %}
+    pull_policy: "always"
+    restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiInfluxDbGrafanaUlimitNofile }}
+        hard: {{ sWasdiInfluxDbGrafanaUlimitNofile }}
+{% if ( aoWasdiInfluxDbGrafanaVolume | length ) > 0 %}
+    volumes:
+{% for aoWasdiInfluxDbGrafanaCurrentVolume in aoWasdiInfluxDbGrafanaVolume %}
+      - {{ aoWasdiInfluxDbGrafanaCurrentVolume }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% if bWasdiJenkinsEnabled == True %}
+  {{ sWasdiJenkinsServiceName }}:
+    command:
+      - "--httpPort={{ sWasdiJenkinsInternalPort }}"
+      - "--prefix={{ sWasdiJenkinsDefaultContextPath.rstrip('/') }}"
+      - "--sessionTimeout={{ iWasdiJenkinsSessionTimeout }}"
+{% if ( aoWasdiJenkinsEnvironmentVariable | length ) > 0 %}
+    environment:
+{% for aoWasdiJenkinsCurrentEnvironmentVariable in aoWasdiJenkinsEnvironmentVariable %}
+      - {{ aoWasdiJenkinsCurrentEnvironmentVariable['key'] }}={{ aoWasdiJenkinsCurrentEnvironmentVariable['value'] }}
+{% endfor %}
+{% endif %}
+    image: "{{ sWasdiJenkinsServiceName }}:latest"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.r_{{ sWasdiJenkinsServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiJenkinsServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiJenkinsDefaultContextPath.rstrip('/') }}`)"
+      - "traefik.http.routers.r_{{ sWasdiJenkinsServiceName }}.middlewares=mw_wasdi-secure-allowFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiJenkinsServiceName }}.service=s_{{ sWasdiJenkinsServiceName }}"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sWasdiJenkinsServiceName }}.tls=true"
+{% endif %}
+      - "traefik.http.services.s_{{ sWasdiJenkinsServiceName }}.loadbalancer.server.port={{ sWasdiJenkinsInternalPort }}"
+{% if sWasdiJenkinsInternalPort | default("") != ""
+    and sWasdiJenkinsExternalPort | default("") != ""
+    and aWasdiJenkinsExternalIp | default([]) | length > 0 %}
+    ports:
+{% for sCurrentExternalIp in aWasdiJenkinsExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiJenkinsExternalPort }}:{{ sWasdiJenkinsInternalPort }}"
+{% endfor %}
+{% endif %}
+    pull_policy: "never"
+    restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiJenkinsUlimitNofile }}
+        hard: {{ sWasdiJenkinsUlimitNofile }}
+{% if ( aoWasdiJenkinsVolume | length ) > 0 %}
+    volumes:
+{% for aoWasdiJenkinsCurrentVolume in aoWasdiJenkinsVolume %}
+      - {{ aoWasdiJenkinsCurrentVolume }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% if bWasdiKeycloakEnabled == True %}
   {{ sWasdiKeycloakServiceName }}:
     command:
       - "start"
@@ -176,11 +320,11 @@ services:
     image: "{{ sWasdiKeycloakServiceName }}:latest"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/{{ sWasdiKeycloakPathName.lstrip('/').rstrip('/') }}`)"
+      - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiKeycloakDefaultContextPath.rstrip('/') }}`)"
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.middlewares=mw_wasdi-secure-allowFrame@file"
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.service=s_{{ sWasdiKeycloakServiceName }}"
-{% if bWasdiContainerTraefikSslEnabled == True %}
+{% if bWasdiSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiKeycloakServiceName }}.loadbalancer.server.port={{ sWasdiKeycloakInternalPort }}"
@@ -192,6 +336,7 @@ services:
       - "{{ sCurrentExternalIp }}:{{ sWasdiKeycloakExternalPort }}:{{ sWasdiKeycloakInternalPort }}"
 {% endfor %}
 {% endif %}
+    pull_policy: "never"
     restart: "unless-stopped"
     ulimits:
       nofile:
@@ -200,28 +345,8 @@ services:
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiKeycloakServiceName }}/opt_wasdi_keycloak_data_import:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/data/import:ro
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiKeycloakServiceName }}/opt_wasdi_keycloak_providers:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/providers:ro
-
-  {{ sWasdiPostgresqlKeycloakServiceName }}:
-{% if bWasdiPostgresqlKeycloakInitialized == False %}
-    environment:
-      - POSTGRES_DB=${sPostgresqlKeycloakDatabaseName}
-      - POSTGRES_USER=${sPostgresqlKeycloakDatabaseUsername}
-      - POSTGRES_PASSWORD=${sPostgresqlKeycloakDatabasePassword}
-      - POSTGRES_USER1_NAME=${sPostgresqlKeycloakUser1Name}
-      - POSTGRES_USER1_PASSWORD=${sPostgresqlKeycloakUser1Password}
 {% endif %}
-    image: "{{ sWasdiPostgresqlKeycloakImageName }}:{{ sWasdiPostgresqlKeycloakImageVersion }}"
-    restart: "unless-stopped"
-    ulimits:
-      nofile:
-        soft: {{ sWasdiPostgresqlKeycloakUlimitNofile }}
-        hard: {{ sWasdiPostgresqlKeycloakUlimitNofile }}
-    volumes:
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlKeycloakServiceName }}/data01:/var/lib/postgresql/data
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlKeycloakServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
-{% endif %}
-
-  # MongoDB
+{% if bWasdiMongoEnabled == True %}
   {{ sWasdiMongoServiceName }}:
 {% if ( sWasdiMongoInternalPort | default('') ) not in ['', '27017'] %}
     command:
@@ -233,7 +358,7 @@ services:
 {% endif %}
 {% if bWasdiMongoInitialized == False %}
     environment:
-      - MONGO_INITDB_DATABASE=${sWasdiMongoWasdiDatabaseName}
+      - MONGO_INITDB_DATABASE=${sWasdiMongoMainDatabaseName}
       - MONGO_INITDB_ROOT_PASSWORD=${sWasdiAdministratorUserPassword}
       - MONGO_INITDB_ROOT_USERNAME=${sWasdiAdministratorUserName}
       - sWasdiMongoAdditionalUserBackupUserName=${sWasdiMongoAdditionalUserBackupUserName}
@@ -248,13 +373,13 @@ services:
       - sWasdiMongoModisUserName=${sWasdiMongoModisUserName}
       - sWasdiMongoModisUserPassword=${sWasdiMongoModisUserPassword}
 {% endif %}
-      - sWasdiMongoWasdiDatabaseName=${sWasdiMongoWasdiDatabaseName}
-      - sWasdiMongoWasdiUserName=${sWasdiMongoWasdiUserName}
-      - sWasdiMongoWasdiUserPassword=${sWasdiMongoWasdiUserPassword}
+      - sWasdiMongoMainDatabaseName=${sWasdiMongoMainDatabaseName}
+      - sWasdiMongoMainUserName=${sWasdiMongoMainUserName}
+      - sWasdiMongoMainUserPassword=${sWasdiMongoMainUserPassword}
 {% if sWasdiServerTypeIsMain == True %}
-      - sWasdiMongoWasdiStatsDatabaseName=${sWasdiMongoWasdiStatsDatabaseName}
-      - sWasdiMongoWasdiStatsUserName=${sWasdiMongoWasdiStatsUserName}
-      - sWasdiMongoWasdiStatsUserPassword=${sWasdiMongoWasdiStatsUserPassword}
+      - sWasdiMongoStatisticsDatabaseName=${sWasdiMongoStatisticsDatabaseName}
+      - sWasdiMongoStatisticsUserName=${sWasdiMongoStatisticsUserName}
+      - sWasdiMongoStatisticsUserPassword=${sWasdiMongoStatisticsUserPassword}
 {% endif %}
 {% endif %}
     image: "mongo:{{ sWasdiMongoVersion }}"
@@ -266,6 +391,7 @@ services:
       - "{{ sCurrentExternalIp }}:{{ sWasdiMongoExternalPort }}:{{ sWasdiMongoInternalPort }}"
 {% endfor %}
 {% endif %}
+    pull_policy: "always"
     restart: "unless-stopped"
     ulimits:
       nofile:
@@ -274,8 +400,102 @@ services:
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiMongoServiceName }}/data01:/data/db:rw
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiMongoServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
-{% if sWasdiServerTypeIsMain == True %}
-
+{% endif %}
+{% if bWasdiNexusEnabled == True %}
+  {{ sWasdiNexusServiceName }}:
+    depends_on:
+      - {{ sWasdiTraefikServiceName }}
+{% if ( aoWasdiNexusEnvironmentVariable | length ) > 0 %}
+    environment:
+{% for aoWasdiNexusCurrentEnvironmentVariable in aoWasdiNexusEnvironmentVariable %}
+      - {{ aoWasdiNexusCurrentEnvironmentVariable['key'] }}={{ aoWasdiNexusCurrentEnvironmentVariable['value'] }}
+{% endfor %}
+{% endif %}
+    image: "{{ sWasdiNexusImageName }}:{{ sWasdiNexusVersion }}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiNexusDefaultContextPath.rstrip('/') }}`)"
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}.middlewares=mw_wasdi-secure-allowFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}.service=s_{{ sWasdiNexusServiceName }}"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}.tls=true"
+{% endif %}
+      - "traefik.http.services.s_{{ sWasdiNexusServiceName }}.loadbalancer.server.port={{ sWasdiNexusInternalPort }}"
+{% for aoWasdiNexusDockerCurrentRegistry in aoWasdiNexusDockerRegistries: %}
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}_registry{{ loop.index }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}_registry{{ loop.index }}.rule=Host(`{{ aoWasdiNexusDockerCurrentRegistry['url'] }}`)"
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}_registry{{ loop.index }}.middlewares=mw_wasdi-secure-allowFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}_registry{{ loop.index }}.service=s_{{ sWasdiNexusServiceName }}_registry{{ loop.index }}"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sWasdiNexusServiceName }}_registry{{ loop.index }}.tls=true"
+{% endif %}
+      - "traefik.http.services.s_{{ sWasdiNexusServiceName }}_registry{{ loop.index }}.loadbalancer.server.port={{ aoWasdiNexusDockerCurrentRegistry['port'] }}"
+{% endfor %}
+{% if sWasdiNexusInternalPort | default("") != ""
+    and sWasdiNexusExternalPort | default("") != ""
+    and aWasdiNexusExternalIp | default([]) | length > 0 %}
+    ports:
+{% for sCurrentExternalIp in aWasdiNexusExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiNexusExternalPort }}:{{ sWasdiNexusInternalPort }}"
+{% endfor %}
+{% endif %}
+    pull_policy: "always"
+    restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiNexusUlimitNofile }}
+        hard: {{ sWasdiNexusUlimitNofile }}
+{% if ( aoWasdiNexusVolume | length ) > 0 %}
+    volumes:
+{% for aoWasdiNexusCurrentVolume in aoWasdiNexusVolume %}
+      - {{ aoWasdiNexusCurrentVolume }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% if bWasdiKeycloakEnabled == True %}
+  {{ sWasdiPostgresqlKeycloakServiceName }}:
+{% if bWasdiPostgresqlKeycloakInitialized == False %}
+    environment:
+      - POSTGRES_DB=${sPostgresqlKeycloakDatabaseName}
+      - POSTGRES_USER=${sPostgresqlKeycloakDatabaseUsername}
+      - POSTGRES_PASSWORD=${sPostgresqlKeycloakDatabasePassword}
+      - POSTGRES_USER1_NAME=${sPostgresqlKeycloakUser1Name}
+      - POSTGRES_USER1_PASSWORD=${sPostgresqlKeycloakUser1Password}
+{% endif %}
+    image: "{{ sWasdiPostgresqlKeycloakImageName }}:{{ sWasdiPostgresqlKeycloakVersion }}"
+    pull_policy: "always"
+    restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiPostgresqlKeycloakUlimitNofile }}
+        hard: {{ sWasdiPostgresqlKeycloakUlimitNofile }}
+    volumes:
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlKeycloakServiceName }}/data01:/var/lib/postgresql/data
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlKeycloakServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+{% endif %}
+{% if bWasdiSonarqubeEnabled == True %}
+  {{ sWasdiPostgresqlSonarqubeServiceName }}:
+{% if bWasdiPostgresqlSonarqubeInitialized == False %}
+    environment:
+      - POSTGRES_DB=${sPostgresqlSonarqubeDatabaseName}
+      - POSTGRES_USER=${sPostgresqlSonarqubeDatabaseUsername}
+      - POSTGRES_PASSWORD=${sPostgresqlSonarqubeDatabasePassword}
+      - POSTGRES_USER1_NAME=${sPostgresqlSonarqubeUser1Name}
+      - POSTGRES_USER1_PASSWORD=${sPostgresqlSonarqubeUser1Password}
+{% endif %}
+    image: "{{ sWasdiPostgresqlSonarqubeImageName }}:{{ sWasdiPostgresqlSonarqubeVersion }}"
+    pull_policy: "always"
+    restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiPostgresqlSonarqubeUlimitNofile }}
+        hard: {{ sWasdiPostgresqlSonarqubeUlimitNofile }}
+    volumes:
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlSonarqubeServiceName }}/data01:/var/lib/postgresql/data
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlSonarqubeServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+{% endif %}
+{% if bWasdiRabbitMqEnabled == True %}
   {{ sWasdiRabbitMqServiceName }}:
     depends_on:
       - {{ sWasdiTraefikServiceName }}
@@ -290,18 +510,34 @@ services:
       - RABBITMQ_PID_FILE=/var/run/rabbitmq/rabbitmq.pid
     image: "{{ sWasdiRabbitMqServiceName }}:latest"
     labels:
+{% if bWasdiRabbitMqInterfaceEndpointEnabled == True or bWasdiRabbitMqWebStompEndpointEnabled == True %}
       - "traefik.enable=true"
-      - "traefik.http.middlewares.mw_{{ sWasdiRabbitMqServiceName }}_stomp.stripprefix.prefixes=/rabbit-stomp"
+{% if bWasdiRabbitMqInterfaceEndpointEnabled == True %}
+      - "traefik.http.middlewares.mw_{{ sWasdiRabbitMqServiceName }}_interface.stripprefix.prefixes={{ sWasdiRabbitMqInterfaceDefaultContextPath.rstrip('/') }}"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_interface.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_interface.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiRabbitMqInterfaceDefaultContextPath.rstrip('/') }}`)"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_interface.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_interface.service=s_{{ sWasdiRabbitMqServiceName }}_interface"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_interface.tls=true"
+{% endif %}
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_interface.middlewares=mw_{{ sWasdiRabbitMqServiceName }}_interface@docker"
+      - "traefik.http.services.s_{{ sWasdiRabbitMqServiceName }}_interface.loadbalancer.server.port={{ sWasdiRabbitMqInterfaceInternalPort }}"
+{% endif %}
+{% if bWasdiRabbitMqWebStompEndpointEnabled == True %}
+      - "traefik.http.middlewares.mw_{{ sWasdiRabbitMqServiceName }}_stomp.stripprefix.prefixes={{ sWasdiRabbitMqWebStompDefaultContextPath.rstrip('/') }}"
       - "traefik.http.middlewares.mw_{{ sWasdiRabbitMqServiceName }}_stomp.stripprefix.forceSlash=true"
-      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/rabbit-stomp`)"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiRabbitMqWebStompDefaultContextPath.rstrip('/') }}`)"
       - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.service=s_{{ sWasdiRabbitMqServiceName }}_stomp"
-{% if bWasdiContainerTraefikSslEnabled == True %}
+{% if bWasdiSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.tls=true"
 {% endif %}
       - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.middlewares=mw_{{ sWasdiRabbitMqServiceName }}_stomp@docker"
       - "traefik.http.services.s_{{ sWasdiRabbitMqServiceName }}_stomp.loadbalancer.server.port={{ sWasdiRabbitMqWebStompInternalPort }}"
+{% endif %}
+{% endif %}
 {% if (( sWasdiRabbitMqMainInternalPort | default("") ) != ""
         and ( sWasdiRabbitMqMainExternalPort | default("") ) != ""
         and (( aWasdiRabbitMqMainExternalIp | default([]) ) | length ) > 0
@@ -325,6 +561,7 @@ services:
 {% endfor %}
 {% endif %}
 {% endif %}
+    pull_policy: "never"
     restart: "unless-stopped"
     ulimits:
       nofile:
@@ -334,10 +571,11 @@ services:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiRabbitMqServiceName }}/data01:/var/lib/rabbitmq:rw
 {% endif %}
 {% if bWasdiSchedulerEnabled == True %}
-
   {{ sWasdiSchedulerServiceName }}:
+{% if bWasdiMongoEnabled == True %}
     depends_on:
       - {{ sWasdiMongoServiceName }}
+{% endif %}
     image: "{{ sWasdiSchedulerServiceName }}:latest"
     restart: "unless-stopped"
     ulimits:
@@ -349,11 +587,55 @@ services:
       - "{{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw"
       - "{{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro"
 {% endif %}
+{% if bWasdiSonarqubeEnabled == True %}
+  {{ sWasdiSonarqubeServiceName }}:
+    depends_on:
+      - {{ sWasdiPostgresqlSonarqubeServiceName }}
+      - {{ sWasdiTraefikServiceName }}
+{% if ( aoWasdiSonarqubeEnvironmentVariable | length ) > 0 %}
+    environment:
+{% for aoWasdiSonarqubeCurrentEnvironmentVariable in aoWasdiSonarqubeEnvironmentVariable %}
+      - {{ aoWasdiSonarqubeCurrentEnvironmentVariable['key'] }}={{ aoWasdiSonarqubeCurrentEnvironmentVariable['value'] }}
+{% endfor %}
+{% endif %}
+    image: "{{ sWasdiSonarqubeImageName }}:{{ sWasdiSonarqubeVersion }}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.r_{{ sWasdiSonarqubeServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiSonarqubeServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiSonarqubeDefaultContextPath.rstrip('/') }}`)"
+      - "traefik.http.routers.r_{{ sWasdiSonarqubeServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiSonarqubeServiceName }}.service=s_{{ sWasdiSonarqubeServiceName }}"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sWasdiSonarqubeServiceName }}.tls=true"
+{% endif %}
+      - "traefik.http.services.s_{{ sWasdiSonarqubeServiceName }}.loadbalancer.server.port={{ sWasdiSonarqubeInternalPort }}"
+{% if sWasdiSonarqubeInternalPort | default("") != ""
+    and sWasdiSonarqubeExternalPort | default("") != ""
+    and aWasdiSonarqubeExternalIp | default([]) | length > 0 %}
+    ports:
+{% for sCurrentExternalIp in aWasdiSonarqubeExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiSonarqubeExternalPort }}:{{ sWasdiSonarqubeInternalPort }}"
+{% endfor %}
+{% endif %}
+    pull_policy: "always"
+    restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiSonarqubeUlimitNofile }}
+        hard: {{ sWasdiSonarqubeUlimitNofile }}
+{% if ( aWasdiSonarqubeVolume | length ) > 0 %}
+    volumes:
+{% for sWasdiSonarqubeCurrentVolume in aWasdiSonarqubeVolume %}
+      - "{{ sWasdiSonarqubeCurrentVolume }}"
+{% endfor %}
+{% endif %}
+{% endif %}
 {% if bWasdiTelegrafEnabled == True %}
-
   {{ sWasdiTelegrafServiceName }}:
     depends_on:
+{% if bWasdiMongoEnabled == True %}
       - {{ sWasdiMongoServiceName }}
+{% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
       - {{ sWasdiRabbitMqServiceName }}
 {% endif %}
@@ -381,6 +663,7 @@ services:
       - "{{ sCurrentExternalIp }}:{{ sWasdiTelegrafExternalPort }}:{{ sWasdiTelegrafInternalPort }}"
 {% endfor %}
 {% endif %}
+    pull_policy: "never"
     restart: "unless-stopped"
     ulimits:
       nofile:
@@ -394,11 +677,14 @@ services:
 {% endif %}
 {% endif %}
 {% if bWasdiTomcatOgcProcessesServerEnabled == True %}
-
   {{ sWasdiTomcatOgcProcessesServerServiceName }}:
     depends_on:
+{% if bWasdiGeoserverEnabled == True %}
       - {{ sWasdiGeoserverServiceName }}
+{% endif %}
+{% if bWasdiKeycloakEnabled == True %}
       - {{ sWasdiKeycloakServiceName }}
+{% endif %}
       - {{ sWasdiMongoServiceName }}
 {% if bWasdiRabbitMqEnabled == True %}
       - {{ sWasdiRabbitMqServiceName }}
@@ -411,11 +697,11 @@ services:
     image: "{{ sWasdiTomcatOgcProcessesServerServiceName }}:latest"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.r_{{ sWasdiTomcatOgcProcessesServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiTomcatOgcProcessesServerServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/ogcprocesses`)"
+      - "traefik.http.routers.r_{{ sWasdiTomcatOgcProcessesServerServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiTomcatOgcProcessesServerServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiTomcatOgcProcessesServerDefaultContextPath.rstrip('/') }}`)"
       - "traefik.http.routers.r_{{ sWasdiTomcatOgcProcessesServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sWasdiTomcatOgcProcessesServerServiceName }}.service=s_{{ sWasdiTomcatOgcProcessesServerServiceName }}"
-{% if bWasdiContainerTraefikSslEnabled == True %}
+{% if bWasdiSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiTomcatOgcProcessesServerServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiTomcatOgcProcessesServerServiceName }}.loadbalancer.server.port={{ sWasdiTomcatOgcProcessesServerInternalPort }}"
@@ -427,6 +713,7 @@ services:
       - "{{ sCurrentExternalIp }}:{{ sWasdiTomcatOgcProcessesServerExternalPort }}:{{ sWasdiTomcatOgcProcessesServerInternalPort }}"
 {% endfor %}
 {% endif %}
+    pull_policy: "never"
     restart: "unless-stopped"
     ulimits:
       nofile:
@@ -435,14 +722,16 @@ services:
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
-#      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiGeoserverServiceName }}:rw
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
-
   {{ sWasdiTomcatWasdiOpenEoServerServiceName }}:
     depends_on:
+{% if bWasdiGeoserverEnabled == True %}
       - {{ sWasdiGeoserverServiceName }}
+{% endif %}
+{% if bWasdiKeycloakEnabled == True %}
       - {{ sWasdiKeycloakServiceName }}
+{% endif %}
       - {{ sWasdiMongoServiceName }}
 {% if bWasdiRabbitMqEnabled == True %}
       - {{ sWasdiRabbitMqServiceName }}
@@ -455,11 +744,11 @@ services:
     image: "{{ sWasdiTomcatWasdiOpenEoServerServiceName }}:latest"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/wasdi-openeo-server`)"
+      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiTomcatWasdiOpenEoServerDefaultContextPath.rstrip('/') }}`)"
       - "traefik.http.routers.r_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.service=s_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}"
-{% if bWasdiContainerTraefikSslEnabled == True %}
+{% if bWasdiSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.loadbalancer.server.port={{ sWasdiTomcatWasdiOpenEoServerInternalPort }}"
@@ -471,6 +760,7 @@ services:
       - "{{ sCurrentExternalIp }}:{{ sWasdiTomcatWasdiOpenEoServerExternalPort }}:{{ sWasdiTomcatWasdiOpenEoServerInternalPort }}"
 {% endfor %}
 {% endif %}
+    pull_policy: "never"
     restart: "unless-stopped"
     ulimits:
       nofile:
@@ -479,14 +769,14 @@ services:
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
-#      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiGeoserverServiceName }}:rw
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
-
   {{ sWasdiTomcatWasdiWebServerServiceName }}:
     depends_on:
+{% if bWasdiGeoserverEnabled == True %}
       - {{ sWasdiGeoserverServiceName }}
-{% if sWasdiServerTypeIsMain == True %}
+{% endif %}
+{% if bWasdiKeycloakEnabled == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
       - {{ sWasdiMongoServiceName }}
@@ -501,11 +791,11 @@ services:
     image: "{{ sWasdiTomcatWasdiWebServerServiceName }}:latest"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiWebServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiWebServerServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/wasdiwebserver`)"
+      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiWebServerServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiWebServerServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiTomcatWasdiWebServerDefaultContextPath.rstrip('/') }}`)"
       - "traefik.http.routers.r_{{ sWasdiTomcatWasdiWebServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sWasdiTomcatWasdiWebServerServiceName }}.service=s_{{ sWasdiTomcatWasdiWebServerServiceName }}"
-{% if bWasdiContainerTraefikSslEnabled == True %}
+{% if bWasdiSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiTomcatWasdiWebServerServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiTomcatWasdiWebServerServiceName }}.loadbalancer.server.port={{ sWasdiTomcatWasdiWebServerInternalPort }}"
@@ -517,6 +807,7 @@ services:
       - "{{ sCurrentExternalIp }}:{{ sWasdiTomcatWasdiWebServerExternalPort }}:{{ sWasdiTomcatWasdiWebServerInternalPort }}"
 {% endfor %}
 {% endif %}
+    pull_policy: "never"
     restart: "unless-stopped"
     ulimits:
       nofile:
@@ -525,72 +816,74 @@ services:
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
-#      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiGeoserverServiceName }}:rw
 {% endif %}
-
   {{ sWasdiTraefikServiceName }}:
     command:
       - "--global.sendanonymoususage=false"
       - "--api.dashboard=true"
-      - "--entryPoints.web.address=:{{ sWasdiContainerTraefikHttpInternalPort }}"
+      - "--entryPoints.web.address=:{{ sWasdiTraefikHttpInternalPort }}"
       - "--entryPoints.web.forwardedHeaders.insecure"
-{% if bWasdiContainerTraefikSslEnabled == True %}
-      - "--entryPoints.websecure.address=:{{ sWasdiContainerTraefikHttpsInternalPort }}"
+{% if bWasdiSslEnabled == True %}
+      - "--entryPoints.websecure.address=:{{ sWasdiTraefikHttpsInternalPort }}"
       - "--entryPoints.web.http.redirections.entrypoint.to=websecure"
       - "--entryPoints.web.http.redirections.entrypoint.scheme=https"
+{% endif %}
+{% if bWasdiTraefikAccessLogEnabled == True %}
+      - "--accesslog=true"
 {% endif %}
       - "--log=true"
       - "--log.level=DEBUG"
       - "--log.format=common"
       - "--providers.docker=true"
-      - "--providers.docker.endpoint={{ sWasdiContainerTraefikDockerEndpoint }}"
+      - "--providers.docker.endpoint={{ sWasdiTraefikDockerEndpoint }}"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.watch=true"
       - "--providers.file.directory=/etc/traefik/conf.d"
       - "--providers.file.watch=true"
-    image: "{{ sWasdiContainerTraefikImageName }}:{{ sWasdiContainerTraefikImageVersion }}"
+    image: "{{ sWasdiTraefikImageName }}:{{ sWasdiTraefikVersion }}"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.dashboard.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      - "traefik.http.routers.dashboard.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.dashboard.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
       - "traefik.http.routers.dashboard.middlewares=mw_wasdi-secure-denyFrame@file,mw_auth-dashboard@file"
       - "traefik.http.routers.dashboard.service=api@internal"
-{% if bWasdiContainerTraefikSslEnabled == True %}
+{% if bWasdiSslEnabled == True %}
       - "traefik.http.routers.dashboard.tls=true"
 {% endif %}
-{% if ( sWasdiContainerTraefikHttpInternalPort | default("") != ""
-    and sWasdiContainerTraefikHttpExternalPort | default("") != ""
-    and aWasdiContainerTraefikExternalIp | default([]) | length > 0 )
-    or ( sWasdiContainerTraefikHttpsInternalPort | default("") != ""
-    and sWasdiContainerTraefikHttpsExternalPort | default("") != ""
-    and aWasdiContainerTraefikHttpsExternalIp | default([]) | length > 0 ) %}
+{% if ( sWasdiTraefikHttpInternalPort | default("") != ""
+    and sWasdiTraefikHttpExternalPort | default("") != ""
+    and aWasdiTraefikExternalIp | default([]) | length > 0 )
+    or ( sWasdiTraefikHttpsInternalPort | default("") != ""
+    and sWasdiTraefikHttpsExternalPort | default("") != ""
+    and aWasdiTraefikHttpsExternalIp | default([]) | length > 0 ) %}
     ports:
-{% for sCurrentExternalIp in aWasdiContainerTraefikExternalIp | sort %}
-{% if ( sWasdiContainerTraefikHttpInternalPort | default("") != ""
-    and sWasdiContainerTraefikHttpExternalPort | default("") != ""
-    and aWasdiContainerTraefikExternalIp | default([]) | length > 0 ) %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiContainerTraefikHttpExternalPort }}:{{ sWasdiContainerTraefikHttpInternalPort }}"
+{% for sCurrentExternalIp in aWasdiTraefikExternalIp | sort %}
+{% if ( sWasdiTraefikHttpInternalPort | default("") != ""
+    and sWasdiTraefikHttpExternalPort | default("") != ""
+    and aWasdiTraefikExternalIp | default([]) | length > 0 ) %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiTraefikHttpExternalPort }}:{{ sWasdiTraefikHttpInternalPort }}"
 {% endif %}
-{% if bWasdiContainerTraefikSslEnabled == True
-    and sWasdiContainerTraefikHttpsInternalPort | default("") != ""
-    and sWasdiContainerTraefikHttpsExternalPort | default("") != ""
-    and aWasdiContainerTraefikExternalIp | default([]) | length > 0 %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiContainerTraefikHttpsExternalPort }}:{{ sWasdiContainerTraefikHttpsInternalPort }}"
+{% if bWasdiSslEnabled == True
+    and sWasdiTraefikHttpsInternalPort | default("") != ""
+    and sWasdiTraefikHttpsExternalPort | default("") != ""
+    and aWasdiTraefikExternalIp | default([]) | length > 0 %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiTraefikHttpsExternalPort }}:{{ sWasdiTraefikHttpsInternalPort }}"
 {% endif %}
 {% endfor %}
 {% endif %}
+    pull_policy: "always"
     restart: "unless-stopped"
     stdin_open: true
     tty: true
-    user: "{{ sWasdiContainerTraefikUserName }}:{{ sWasdiContainerTraefikGroupName }}"
+    user: "{{ sWasdiTraefikUserName }}:{{ sWasdiTraefikGroupName }}"
     ulimits:
       nofile:
         soft: {{ sWasdiTraefikUlimitNofile }}
         hard: {{ sWasdiTraefikUlimitNofile }}
     volumes:
       - "{{ sWasdiDockerSocketFilePath }}:{{ sWasdiDockerSocketFilePath }}:ro"
-{% if bWasdiContainerTraefikSslSourceType | upper == 'MOUNT_EACH_FILE' %}
-{% for aCurrentTraefikSslCertificate in aoWasdiContainerTraefikSslCertificates %}
+{% if sWasdiTraefikSslSourceType | upper == 'MOUNT_EACH_FILE' %}
+{% for aCurrentTraefikSslCertificate in aoWasdiTraefikSslCertificates %}
       - "{{ aCurrentTraefikSslCertificate['srcCertFile'] }}:/etc/traefik/certs/{{ aCurrentTraefikSslCertificate['certFile'] }}:ro"
       - "{{ aCurrentTraefikSslCertificate['srcKeyFile'] }}:/etc/traefik/certs/{{ aCurrentTraefikSslCertificate['keyFile'] }}:ro"
 {% endfor %}
@@ -599,10 +892,9 @@ services:
 {% endif %}
       - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiTraefikServiceName }}/etc_traefik_conf.d:/etc/traefik/conf.d:ro"
 {% if bWasdiUpdateMetricEnabled == True %}
-
   {{ sWasdiUpdateMetricServiceName }}:
     depends_on:
-{% if sWasdiServerTypeIsMain == True %}
+{% if bWasdiKeycloakEnabled == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
       - {{ sWasdiTomcatWasdiWebServerServiceName }}

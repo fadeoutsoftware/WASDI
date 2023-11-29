@@ -26,6 +26,8 @@ import wasdi.shared.viewmodels.search.QueryResultViewModel;
  */
 public class ResponseTranslatorONDA extends ResponseTranslator {
 
+	public static final String s_sAPI_URL = "catalogue.onda-dias.eu/dias-catalogue/Products";
+	
 	private static final String SFILENAME = "filename";
 	private static final String SCREATION_DATE = "creationDate";
 	private static final String SFOOTPRINT = "footprint";
@@ -163,7 +165,7 @@ public class ResponseTranslatorONDA extends ResponseTranslator {
 			if(!sProtocol.endsWith("//")) {
 				sLink += "//";
 			}
-			sLink += "catalogue.onda-dias.eu/dias-catalogue/Products";
+			sLink += s_sAPI_URL;
 			sLink += "(";
 			sLink += sProductId;
 			sLink += ")";

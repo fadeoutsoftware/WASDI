@@ -40,11 +40,11 @@
     <distributionManagement>
         <repository>
             <id>wasdi-release</id>
-            <url>${sWasdiNexusRepositoryUrl}/repository/wasdi-release/</url>
+            <url>${sWasdiNexusRepositoryReleaseUrl}</url>
         </repository>
         <snapshotRepository>
             <id>wasdi-snapshot</id>
-            <url>${sWasdiNexusRepositoryUrl}/repository/wasdi-snapshot/</url>
+            <url>${sWasdiNexusRepositorySnapshotUrl}</url>
         </snapshotRepository>
     </distributionManagement>
 </project>

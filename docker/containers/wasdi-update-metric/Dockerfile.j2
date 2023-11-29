@@ -17,13 +17,24 @@ ENV PYTHONDONTWRITEBYTECODE="False"
 # This variable is setted to force the 'print' method of Python to flush message directly
 ENV PYTHONUNBUFFERED="True"
 
+# This variable is setted to set the default editor
+ENV EDITOR="nano"
+
 
 # RUN generic to create user, group, directories, etc
 RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
     useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
-    mkdir --parents {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chmod {{ sWasdiSoftwareRootDirectoryMode }} {{ sWasdiSoftwareRootDirectoryPath }}
+    mkdir --parents \
+        {{ sWasdiSystemUserHome }}/.ssh \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} \
+        {{ sWasdiSystemUserHome }}/.ssh && \
+    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chmod 700 \
+        {{ sWasdiSystemUserHome }}/.ssh && \
+    chmod {{ sWasdiSoftwareRootDirectoryMode }} \
+        {{ sWasdiSoftwareRootDirectoryPath }}
 
 
 # RUN generic to update the system and install common packages
@@ -65,9 +76,11 @@ USER {{ sWasdiSystemUserName }}
 
 
 # RUN specific to install all elements related to the service
-RUN mkdir --parents {{ sWasdiUpdateMetricRootDirectoryPath }} \
+RUN mkdir --parents \
+        {{ sWasdiUpdateMetricRootDirectoryPath }} \
         {{ sWasdiUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment && \
-    chmod {{ sWasdiUpdateMetricRootDirectoryMode }} {{ sWasdiUpdateMetricRootDirectoryPath }} \
+    chmod {{ sWasdiUpdateMetricRootDirectoryMode }} \
+        {{ sWasdiUpdateMetricRootDirectoryPath }} \
         {{ sWasdiUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment && \
     python3 -m venv --system-site-packages {{ sWasdiUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment && \
     {{ sWasdiUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment/bin/pip3 install --no-cache-dir --no-compile \

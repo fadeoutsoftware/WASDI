@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 
 MAINTAINER "WASDI SARL"
@@ -8,111 +8,105 @@ MAINTAINER "WASDI SARL"
 USER root
 
 
-# Define arguments
-# Values not setted here are provided with the docker build command
-ARG sContainerGroupId="1000"
-ARG sContainerGroupName="wasdi"
-ARG sContainerUserId="1000"
-ARG sContainerUserName="wasdi"
-ARG sContainerUserHomeDirectory="/home/$sContainerUserName"
-ARG PIP_INSTALL_WASDI_ARGUMENTS=""
-
-
-# Create environment variables:
-#   - SYSTEM (name are imposed):
-#     - DEBIAN_FRONTEND: to avoid packages to ask a confirmation
-#     - PATH: to use binaries from our future virtual environment as default
-#     - PYTHONDONTWRITEBYTECODE: to stop Python to write pyc files
-#     - PYTHONUNBUFFERED: to force 'print' to flush message directly
+# This environment variable is setted to avoid packages to ask a confirmation
 ENV DEBIAN_FRONTEND="noninteractive"
-ENV PATH="$sContainerUserHomeDirectory/venv/bin:$PATH"
+
+# This variable is setted to make Python stop creating files '.pyc'
 ENV PYTHONDONTWRITEBYTECODE="False"
+
+# This variable is setted to force the 'print' method of Python to flush message directly
 ENV PYTHONUNBUFFERED="True"
 
+# This variable is setted to use binaries from our virtual environment
+ENV PATH="{{ sWasdiSystemUserHome }}/venv/bin:${PATH}"
 
-# Big task 1:
-#   - Create a group
-#   - Create a user
-#   - Change rights on /home
-#   - Configure the APT command
-#   - Update the repository cache
-#   - Update the system
-#   - Install needed packages
+
+# RUN generic to create user, group, directories, etc
+RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
+    useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }}
+
+
+# RUN generic to update the system and install common packages
 RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     echo "APT::Install-Recommends \"0\";" >> /etc/apt/apt.conf.d/99local && \
     echo "APT::Get::Assume-Yes \"true\";" >> /etc/apt/apt.conf.d/99local && \
     echo "APT::Keep-Downloaded-Packages \"false\";" >> /etc/apt/apt.conf.d/99local && \
     echo "Dpkg::Options::--force-confold;" >> /etc/apt/apt.conf.d/99local && \
     apt-get update && \
-    apt-get install ca-certificates && \
-    echo "deb mirror://mirrors.ubuntu.com/mirrors.txt focal main restricted universe multiverse" > /etc/apt/sources.list && \
-    echo "deb mirror://mirrors.ubuntu.com/mirrors.txt focal-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
-    echo "deb mirror://mirrors.ubuntu.com/mirrors.txt focal-security main restricted universe multiverse" >> /etc/apt/sources.list && \
-    apt-get update && \
-    apt-get upgrade && \
     apt-get install \
+        ca-certificates && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy main restricted universe multiverse"           > /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get dist-upgrade && \
+    apt-get install \
+        curl \
         gdal-bin \
         git \
+        nano \
         python3 \
         python3-gdal \
         python3-requests \
         python3-pip \
-        python3-venv && \
-    rm -rf /var/lib/apt/lists/* && \
-    find / -xdev -type d -name __pycache__ -exec rm -rf {} +
+        python3-venv \
+        python3-wheel \
+        wget && \
+    rm --recursive --force /var/lib/apt/lists/* && \
+    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
-# Big task 2:
-#   - create the internal group
-#   - create the internal user
-#   - create all directories
-RUN groupadd --gid $sContainerGroupId --non-unique $sContainerGroupName && \
-    useradd --create-home --home-dir $sContainerUserHomeDirectory --uid $sContainerUserId --gid $sContainerGroupId --non-unique --shell /bin/bash $sContainerUserName && \
-    mkdir -p $sContainerUserHomeDirectory/application && \
-    chown -R $sContainerUserName:$sContainerGroupName $sContainerUserHomeDirectory/ && \
-    chmod -R 755 $sContainerUserHomeDirectory/
+# From now, all commands executed are executed as {{ sWasdiSystemUserName }}
+USER {{ sWasdiSystemUserName }}
 
 
-# Set the workdir to $sContainerUserHomeDirectory
-WORKDIR $sContainerUserHomeDirectory/application
+# Create the application directory
+# Create the virtual environment
+RUN mkdir --parents \
+        {{ sWasdiSystemUserHome }}/application
 
 
-# From now, all commands executed are executed with the user $sContainerUserName who must not be root
-USER $sContainerUserName
+# Set the workdir to {{ sWasdiSystemUserHome }}/application
+WORKDIR {{ sWasdiSystemUserHome }}/application
 
 
-# Create a virtual environment
-# [IN OUR VENV] Install needed Python libraries
-# Please note:
-#   - 'wasdi' is installed independently to be able to set the repository
-#   - there is no cache: I suppose because it is too much dynamic
-RUN python3 -m venv --system-site-packages $sContainerUserHomeDirectory/venv && \
-    pip3 install --no-cache-dir --no-compile $PIP_INSTALL_WASDI_ARGUMENTS wasdi && \
+## FROM HERE, THERE IS NO MORE CACHE ##
+# Copy the needed files
+COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} ./ {{ sWasdiSystemUserHome }}/application/
+
+
+# Create the virtual environment
+# Install the common PIP libraries
+RUN python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
     pip3 install --no-cache-dir --no-compile \
-        numpy
-
-
-# Copy:
-#   - the tool to install package
-#   - the application files
-COPY --chown=$sContainerUserName:$sContainerGroupName ./ $sContainerUserHomeDirectory/application/
-
-
-# Install user's Python libraries only if $sContainerUserHomeDirectory/application/pip.txt exists
-RUN bash $sContainerUserHomeDirectory/application/installUserPackage.sh --home-directory $sContainerUserHomeDirectory/application --package-pip
+        numpy \
+        wasdi
 
 
 # From now, all commands executed are executed with the user 'root'
 USER root
 
 
-# Install user's packages only if $sContainerUserHomeDirectory/application/packages.txt exists
-RUN bash $sContainerUserHomeDirectory/application/installUserPackage.sh --home-directory $sContainerUserHomeDirectory/application --package-apt
+# Install packages only if {{ sWasdiSystemUserHome }}/application/packages.txt exists
+RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
+        --application-directory {{ sWasdiSystemUserHome }}/application \
+        --home-directory {{ sWasdiSystemUserHome }} \
+        --package-apt
 
 
-# From now, all commands executed are executed with the user $sContainerUserName who must not be root
-USER $sContainerUserName
+# From now, all commands executed are executed as {{ sWasdiSystemUserName }}
+USER {{ sWasdiSystemUserName }}
 
 
-# Execute the processor
-CMD ["python3", "eoepcaProcessorExecutor.py"]
+# Install libraries only if {{ sWasdiSystemUserHome }}/application/pip.txt exists
+RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
+        --application-directory {{ sWasdiSystemUserHome }}/application \
+        --home-directory {{ sWasdiSystemUserHome }} \
+        --package-pip
+
+
+# Start the container
+CMD [ \
+    "{{ sWasdiSystemUserHome }}/venv/bin/python3", \
+    "wasdiProcessorExecutor.py" \
+]

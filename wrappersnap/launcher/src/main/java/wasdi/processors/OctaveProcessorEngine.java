@@ -7,13 +7,14 @@ import java.io.IOException;
 
 import com.google.common.io.Files;
 
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.log.WasdiLog;
 
-public class OctaveProcessorEngine extends DockerProcessorEngine {
+public class OctaveProcessorEngine extends DockerBuildOnceEngine {
 	
 	public OctaveProcessorEngine() {
 		super();
@@ -29,31 +30,35 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 	@Override
 	public boolean deploy(ProcessorParameter oParameter, boolean bFirstDeploy) {
 		
-		String sProcessorName = oParameter.getName();
-		
-		String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
-		
+		WasdiLog.debugLog("OctaveProcessorEngine.deploy: Calling base class deploy");
+		return super.deploy(oParameter, bFirstDeploy);
+	}
+	
+	@Override
+	protected void onAfterCopyTemplate(String sProcessorFolder, Processor oProcessor) {
 		// Generate shell script file
 		String sMainFile = sProcessorFolder+"myProcessor.m";
+		
+		String sApplicationHome = "/home/appwasdi/application/";
 		
 		File oMainFile = new File(sMainFile);
 		
 		try (BufferedWriter oMainFileWriter = new BufferedWriter(new FileWriter(oMainFile))) {
 			// Fill the script file
 			if(oMainFileWriter != null ) {
-				WasdiLog.debugLog("OctaveProcessorEngine.deploy: Creating "+sMainFile+" file");
+				WasdiLog.debugLog("OctaveProcessorEngine.onAfterDeploy: Creating "+sMainFile+" file");
 
 				oMainFileWriter.write("function myProcessor()");
 				oMainFileWriter.newLine();
-				oMainFileWriter.write("\taddpath(\"/home/wasdi/\");");
+				oMainFileWriter.write("\taddpath(\""+sApplicationHome+"\");");
 				oMainFileWriter.newLine();
-				oMainFileWriter.write("\tWasdi = startWasdi(\"/home/wasdi/config.properties\")");
+				oMainFileWriter.write("\tWasdi = startWasdi(\""+sApplicationHome+"config.properties\")");
 				oMainFileWriter.newLine();
 				oMainFileWriter.write("\ttry");
 				oMainFileWriter.newLine();
 				oMainFileWriter.write("\t\twLog(Wasdi, \"Starting Octave WASDI App\");");
 				oMainFileWriter.newLine();
-				oMainFileWriter.write("\t\t" + sProcessorName + "(Wasdi)");
+				oMainFileWriter.write("\t\t" + oProcessor.getName() + "(Wasdi)");
 				oMainFileWriter.newLine();
 				oMainFileWriter.write("\t\tsMyProcId = wGetMyProcId(Wasdi);");				
 				oMainFileWriter.newLine();
@@ -82,56 +87,7 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 				oMainFileWriter.close();
 			}
 		} catch (IOException e) {
-			WasdiLog.debugLog("OctaveProcessorEngine.deploy: Exception Creating Main File :"+e.toString());
-		}
-		
-		WasdiLog.debugLog("OctaveProcessorEngine.deploy: call super Docker Proc Engine deploy method");
-		
-		return super.deploy(oParameter, bFirstDeploy);
-	}
-	
-	
-	@Override
-	public boolean libraryUpdate(ProcessorParameter oParameter) {
-		
-		try {
-			WasdiLog.debugLog("OctaveProcessorEngine.libraryUpdate: move lib in the processor folder");
-			
-			// Get the lib path
-			String sLibFilePath = m_sDockerTemplatePath;
-			
-			if (!sLibFilePath.endsWith(File.separator)) {
-				sLibFilePath += File.separator;
-			}
-			
-			// Get the processor Path
-			String sDestinationFilePath = PathsConfig.getProcessorFolder(m_oParameter.getName());
-			
-			// Lib folder
-			File oLibFolder = new File(sLibFilePath);
-						
-			if (oLibFolder.exists()) {
-				File [] aoFiles = oLibFolder.listFiles();
-				
-				for (File oFile : aoFiles) {
-					
-					if (oFile.getName().endsWith(".m") || oFile.getName().endsWith(".jar")) {
-						// Create the file in the destination folder
-						File oDestinationFile = new File(sDestinationFilePath+oFile.getName());
-						// Copy the file
-						Files.copy(oFile, oDestinationFile);						
-					}
-				}
-			}
-						
-			WasdiLog.debugLog("OctaveProcessorEngine.libraryUpdate: call super implementation to update the docker");
-			
-			return super.libraryUpdate(oParameter);
-		}
-		catch (Exception oEx) {
-			WasdiLog.debugLog("OctaveProcessorEngine.libraryUpdate: Exception in lib update: " + oEx.toString());
-			return false;
+			WasdiLog.debugLog("OctaveProcessorEngine.onAfterDeploy: Exception Creating Main File :"+e.toString());
 		}
 	}
-
 }

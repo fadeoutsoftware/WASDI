@@ -9,7 +9,7 @@ import wasdi.shared.packagemanagers.IPackageManager;
  * @author p.campanella
  *
  */
-public class CSharpProcessorEngine extends DockerProcessorEngine {
+public class CSharpProcessorEngine extends DockerBuildOnceEngine {
 	
 	public CSharpProcessorEngine() {
 		super();
