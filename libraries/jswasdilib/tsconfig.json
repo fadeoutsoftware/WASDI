@@ -1,16 +1,24 @@
 {
-    "compilerOptions": {
-      "noImplicitAny": true,
-      "outDir": "build/",
-      "module": "esnext",
-      "target": "es5",
-      "allowJs": true,
-      "sourceMap": true,
-      "declaration": true,
-      "emitDeclarationOnly": true,
-      "lib": ["es2018", "dom"],
-      "moduleResolution": "node",
-    },
-    "include": ["src/lib"],
-    "exclude": ["src/lib/**/tests"],
+  "include": [
+    "./src/**/*.ts"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "es2023",
+      "dom"
+    ],
+    "module": "nodenext",
+    "target": "es2022",
+    "moduleResolution": "nodenext",
+    "rootDir": "./src",
+    "outDir": "build",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "resolveJsonModule": true
+  }
 }
