@@ -377,9 +377,9 @@ services:
       - sWasdiMongoMainUserName=${sWasdiMongoMainUserName}
       - sWasdiMongoMainUserPassword=${sWasdiMongoMainUserPassword}
 {% if sWasdiServerTypeIsMain == True %}
-      - sWasdiMongoWasdiStatsDatabaseName=${sWasdiMongoWasdiStatsDatabaseName}
-      - sWasdiMongoWasdiStatsUserName=${sWasdiMongoWasdiStatsUserName}
-      - sWasdiMongoWasdiStatsUserPassword=${sWasdiMongoWasdiStatsUserPassword}
+      - sWasdiMongoStatisticsDatabaseName=${sWasdiMongoStatisticsDatabaseName}
+      - sWasdiMongoStatisticsUserName=${sWasdiMongoStatisticsUserName}
+      - sWasdiMongoStatisticsUserPassword=${sWasdiMongoStatisticsUserPassword}
 {% endif %}
 {% endif %}
     image: "mongo:{{ sWasdiMongoVersion }}"

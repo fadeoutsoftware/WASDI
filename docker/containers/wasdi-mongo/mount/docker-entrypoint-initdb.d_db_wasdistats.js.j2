@@ -9,15 +9,15 @@ oCurrentDatabase.auth(
 print('[WASDI STATS] OK')
 
 print('[WASDI STATS] Creating the database user...')
-oCurrentDatabase = db.getSiblingDB(_getEnv('sWasdiMongoWasdiStatsDatabaseName'));
+oCurrentDatabase = db.getSiblingDB(_getEnv('sWasdiMongoStatisticsDatabaseName'));
 oCurrentDatabase.createUser(
     {
-        user: _getEnv('sWasdiMongoWasdiStatsUserName'),
-        pwd: _getEnv('sWasdiMongoWasdiStatsUserPassword'),
+        user: _getEnv('sWasdiMongoStatisticsUserName'),
+        pwd: _getEnv('sWasdiMongoStatisticsUserPassword'),
         roles: [
             {
                 role: 'readWrite',
-                db: _getEnv('sWasdiMongoWasdiStatsDatabaseName')
+                db: _getEnv('sWasdiMongoStatisticsDatabaseName')
             }
         ]
     }
