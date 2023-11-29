@@ -91,31 +91,6 @@ pipeline {
         label: "Upload in Nexus"
       }
     }
-
-    /*
-    stage('DEPLOYMENT') {
-      steps {
-        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-          script {
-            try {
-              sh script: """
-                cd ${env.sWasdiAnsiblePath}
-                ansible-playbook playbooks/deployKeycloakTheme.yml \
-                  --inventory inventories/wasdi.yml \
-                  --limit ${env.sAnsibleLimit} \
-                  --diff \
-                  --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} keycloakDeploymentSpecificTheme=True sWasdiKeycloakThemeVersion=${env.sCurrentRevision}'
-              """,
-              label: "Execute ansible-playbook"
-            } catch (oError) {
-              echo oError.getMessage()
-              throw oError
-            }
-          }
-        }
-      }
-    }
-    */
   }
 
   post {
