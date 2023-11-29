@@ -38,15 +38,6 @@ pipeline {
       }
     }
 
-    stage('INITIALIZATION') {
-      steps {
-        script {
-          currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - DEPLOY THE CLI TOOLS CONTAINERS (gdal, sen2cor, snaphu, etc)"
-        }
-      }
-    }
-
     stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
       steps {
         withCredentials([
