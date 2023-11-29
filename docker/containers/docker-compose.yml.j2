@@ -358,7 +358,7 @@ services:
 {% endif %}
 {% if bWasdiMongoInitialized == False %}
     environment:
-      - MONGO_INITDB_DATABASE=${sWasdiMongoWasdiDatabaseName}
+      - MONGO_INITDB_DATABASE=${sWasdiMongoMainDatabaseName}
       - MONGO_INITDB_ROOT_PASSWORD=${sWasdiAdministratorUserPassword}
       - MONGO_INITDB_ROOT_USERNAME=${sWasdiAdministratorUserName}
       - sWasdiMongoAdditionalUserBackupUserName=${sWasdiMongoAdditionalUserBackupUserName}
@@ -373,9 +373,9 @@ services:
       - sWasdiMongoModisUserName=${sWasdiMongoModisUserName}
       - sWasdiMongoModisUserPassword=${sWasdiMongoModisUserPassword}
 {% endif %}
-      - sWasdiMongoWasdiDatabaseName=${sWasdiMongoWasdiDatabaseName}
-      - sWasdiMongoWasdiUserName=${sWasdiMongoWasdiUserName}
-      - sWasdiMongoWasdiUserPassword=${sWasdiMongoWasdiUserPassword}
+      - sWasdiMongoMainDatabaseName=${sWasdiMongoMainDatabaseName}
+      - sWasdiMongoMainUserName=${sWasdiMongoMainUserName}
+      - sWasdiMongoMainUserPassword=${sWasdiMongoMainUserPassword}
 {% if sWasdiServerTypeIsMain == True %}
       - sWasdiMongoWasdiStatsDatabaseName=${sWasdiMongoWasdiStatsDatabaseName}
       - sWasdiMongoWasdiStatsUserName=${sWasdiMongoWasdiStatsUserName}
