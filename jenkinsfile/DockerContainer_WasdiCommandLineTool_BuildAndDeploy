@@ -1,19 +1,10 @@
-def getEnvironmentName(String sAnsibleLimit, boolean bLower) {
-  if ( bLower ) {
-    return sAnsibleLimit.split('-')[0].toLowerCase()
-  }
-
-  return sAnsibleLimit.split('-')[0].toUpperCase()
-}
-
 pipeline {
   agent any
 
   environment {
-    sCurrentEnvironmentLower = getEnvironmentName(env.sAnsibleLimit, true)
-    sCurrentEnvironmentUpper = getEnvironmentName(env.sAnsibleLimit, false)
+    sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
+    sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
     sCurrentRevision         = "${env.BUILD_ID}"
-    sMavenProfile            = "wasdi-${env.sCurrentEnvironmentLower}"
   }
 
   options {
@@ -39,12 +30,15 @@ pipeline {
         echo "env.WORKSPACE                = " + env.WORKSPACE
 
         sh script: "pwd", label: "Current location"
-        sh script: "cat pom.xml", label: "Content of the main pom.xml file"
+      }
+    }
 
-        sh script: "which mvn", label: "Tool > mvn > path"
-        sh script: "mvn --version", label: "Tool > mvn > current version"
-        sh script: "which java", label: "Tool > java > path"
-        sh script: "java -version", label: "Tool > java > current version"
+    stage('INITIALIZATION') {
+      steps {
+        script {
+          currentBuild.displayName = "${env.sCurrentRevision}"
+          currentBuild.description = "WASDI - BUILD AND DEPLOY THE CLI TOOLS CONTAINERS (gdal, sen2cor, snaphu, etc)"
+        }
       }
     }
 
@@ -63,11 +57,10 @@ pipeline {
       }
     }
 
-    stage('INITIALIZATION') {
+    stage('UPDATE THE ANSIBLE CODE') {
       steps {
-        script {
-          currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD AND DEPLOY THE CLI TOOLS CONTAINERS (gdal, sen2cor, snaphu, etc)"
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloud', url: "${env.sWasdiAnsibleGitRepositoryUrl}"]]])
         }
       }
     }

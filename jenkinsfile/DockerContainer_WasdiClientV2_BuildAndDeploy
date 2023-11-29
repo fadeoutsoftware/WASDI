@@ -2,7 +2,9 @@ pipeline {
   agent any
 
   environment {
-    sCurrentRevision = "${env.BUILD_ID}"
+    sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
+    sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
+    sCurrentRevision         = "${env.BUILD_ID}"
   }
 
   options {
@@ -56,6 +58,14 @@ pipeline {
             echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
           """,
           label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloud', url: "${env.sWasdiAnsibleGitRepositoryUrl}"]]])
         }
       }
     }

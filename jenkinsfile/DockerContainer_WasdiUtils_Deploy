@@ -1,18 +1,9 @@
-def getEnvironmentName(String sAnsibleLimit, boolean bLower) {
-  if ( bLower ) {
-    return sAnsibleLimit.split('-')[0].toLowerCase()
-  }
-
-  return sAnsibleLimit.split('-')[0].toUpperCase()
-}
-
 pipeline {
   agent any
 
   environment {
-    sCurrentEnvironmentLower = getEnvironmentName(env.sAnsibleLimit, true)
-    sCurrentEnvironmentUpper = getEnvironmentName(env.sAnsibleLimit, false)
-    sMavenProfile            = "wasdi-${env.sCurrentEnvironmentLower}"
+    sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
+    sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
   }
 
   options {
@@ -47,6 +38,15 @@ pipeline {
       }
     }
 
+    stage('INITIALIZATION') {
+      steps {
+        script {
+          currentBuild.displayName = "${env.sCurrentRevision}"
+          currentBuild.description = "WASDI - DEPLOY THE DB UTILS CONTAINER"
+        }
+      }
+    }
+
     stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
       steps {
         withCredentials([
@@ -62,11 +62,10 @@ pipeline {
       }
     }
 
-    stage('INITIALIZATION') {
+    stage('UPDATE THE ANSIBLE CODE') {
       steps {
-        script {
-          currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - DEPLOY THE DB UTILS CONTAINER"
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloud', url: "${env.sWasdiAnsibleGitRepositoryUrl}"]]])
         }
       }
     }
