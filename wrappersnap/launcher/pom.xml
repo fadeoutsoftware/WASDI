@@ -39,10 +39,10 @@
         <sVersionNetcdfAll>5.3.1</sVersionNetcdfAll>
         <sVersionOkHttp>4.9.0</sVersionOkHttp>
         <sVersionProbav>2.2.0</sVersionProbav>
-        <sVersionS1tbx>9.0.2</sVersionS1tbx>
-        <sVersionS2tbx>9.0.1</sVersionS2tbx>
+        <sVersionS1tbx>9.0.4</sVersionS1tbx>
+        <sVersionS2tbx>9.0.2</sVersionS2tbx>
         <sVersionS3tbx>9.0.3</sVersionS3tbx>
-        <sVersionSnap>9.0.4</sVersionSnap>
+        <sVersionSnap>9.0.8</sVersionSnap>
         <sVersionSshj>0.29.0</sVersionSshj>
         <sVersionXercesImpl>2.12.2</sVersionXercesImpl>
     </properties>
@@ -195,6 +195,8 @@
             <artifactId>sshj</artifactId>
             <version>${sVersionSshj}</version>
         </dependency>
+        
+        
         <!-- SNAP -->
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -241,6 +243,8 @@
             <artifactId>snap-land-cover</artifactId>
             <version>${sVersionSnap}</version>
         </dependency>
+        
+        
         <!-- S1 -->
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
@@ -302,62 +306,66 @@
             <artifactId>s1tbx-op-utilities</artifactId>
             <version>${sVersionS1tbx}</version>
         </dependency>
+        
+        
         <!-- S2 -->
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-biophysical</artifactId>
-            <version>8.0.7</version>
+            <version>${sVersionS2tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-cache</artifactId>
-            <version>8.0.7</version>
+            <version>${sVersionS2tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-forest-cover-change</artifactId>
-            <version>8.0.7</version>
+            <version>${sVersionS2tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-gdal-reader</artifactId>
-            <version>9.0.0</version>
+            <version>${sVersionS2tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-gdal-writer</artifactId>
-            <version>8.0.7</version>
+            <version>${sVersionS2tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-mosaic</artifactId>
-            <version>8.0.7</version>
+            <version>${sVersionS2tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-radiometric-indices</artifactId>
-            <version>8.0.7</version>
+            <version>${sVersionS2tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-rapideye-reader</artifactId>
-            <version>8.0.7</version>
+            <version>${sVersionS2tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-s2msi-reader</artifactId>
-            <version>9.0.0</version>
+            <version>${sVersionS2tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-spot-reader</artifactId>
-            <version>8.0.7</version>
+            <version>${sVersionS2tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-spot6-reader</artifactId>
-            <version>8.0.7</version>
+            <version>${sVersionS2tbx}</version>
         </dependency>
+        
+        
         <!-- S3 -->
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
@@ -579,6 +587,22 @@
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
         </repository>
+        <repository>
+            <id>wasdi-snap-build</id>
+            <name>WASDI Local Repository for SNAP</name>
+            <url>https://main01.wasdi.net/nexus/repository/wasdi-snap-build/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </repository>
+        
         <repository>
             <id>osgeo</id>
             <name>OSGeo Release Repository</name>

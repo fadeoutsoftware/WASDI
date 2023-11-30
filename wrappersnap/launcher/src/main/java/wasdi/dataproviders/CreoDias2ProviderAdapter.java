@@ -70,12 +70,12 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			String sPath = null;
 			if (isFileProtocol(sFileURL)) {
 				sPath = removePrefixFile(sFileURL);
-				WasdiLog.debugLog("CREODIASProviderAdapter.getDownloadFileSize: file protocol detected. File path " + sFileURL);
+				WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize: file protocol detected. File path " + sFileURL);
 			} else if(isHttpsProtocol(sFileURL)) {
 				sPath = extractFilePathFromHttpsUrl(sFileURL);
-				WasdiLog.debugLog("CREODIASProviderAdapter.getDownloadFileSize: http protocol detected. File path " + sFileURL);
+				WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize: http protocol detected. File path " + sFileURL);
 			} else {
-				WasdiLog.debugLog("CREODIASProviderAdapter.getDownloadFileSize: unknown protocol " + sFileURL);
+				WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize: unknown protocol " + sFileURL);
 			}
 
 			if (sPath != null) {
@@ -83,7 +83,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 
 				if (oSourceFile != null && oSourceFile.exists()) {
 					lSizeInBytes = getSourceFileLength(oSourceFile);
-					WasdiLog.debugLog("CREODIASProviderAdapter.getDownloadFileSize: detected file size: " + lSizeInBytes);
+					WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize: detected file size: " + lSizeInBytes);
 					return lSizeInBytes;
 				}
 			}
