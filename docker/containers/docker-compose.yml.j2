@@ -348,9 +348,13 @@ services:
 {% endif %}
 {% if bWasdiMongoEnabled == True %}
   {{ sWasdiMongoServiceName }}:
-{% if ( sWasdiMongoInternalPort | default('') ) not in ['', '27017'] %}
+{% if ( aWasdiMongoCommand | length ) > 0 %}
     command:
-      - "mongod"
+{% for sWasdiMongoCurrentCommand in aWasdiMongoCommand %}
+      - "{{ sWasdiMongoCurrentCommand }}"
+{% endfor %}
+{% endif %}
+{% if ( sWasdiMongoInternalPort | default('') ) not in ['', '27017'] %}
       - "--port"
       - "{{ sWasdiMongoInternalPort }}"
     expose:
