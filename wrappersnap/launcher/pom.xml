@@ -590,7 +590,7 @@
         <repository>
             <id>wasdi-snap-build</id>
             <name>WASDI Local Repository for SNAP</name>
-            <url>https://main01.wasdi.net/nexus/repository/wasdi-snap-build/</url>
+            <url>${sWasdiNexusRepositorySnapBuildUrl}</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
@@ -602,7 +602,6 @@
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
         </repository>
-        
         <repository>
             <id>osgeo</id>
             <name>OSGeo Release Repository</name>
