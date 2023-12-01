@@ -38,7 +38,7 @@
         <sVersionMockFtpServer>2.7.1</sVersionMockFtpServer>
         <sVersionNetcdfAll>5.3.1</sVersionNetcdfAll>
         <sVersionOkHttp>4.9.0</sVersionOkHttp>
-        <sVersionProbav>2.2.0</sVersionProbav>
+        <sVersionProbav>2.3.0</sVersionProbav>
         <sVersionS1tbx>9.0.4</sVersionS1tbx>
         <sVersionS2tbx>9.0.2</sVersionS2tbx>
         <sVersionS3tbx>9.0.3</sVersionS3tbx>
