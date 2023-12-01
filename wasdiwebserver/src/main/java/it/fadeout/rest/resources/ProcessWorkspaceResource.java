@@ -1408,11 +1408,14 @@ public class ProcessWorkspaceResource {
 		try {
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
+			
 
 			if (oUser == null) {
 				WasdiLog.warnLog("ProcessWorkspaceResource.getOverallRunningTimeProject: invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
+			
+			WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: user id: " + oUser.getUserId());
 			
 			// ids of the subscriptions associated to the user
 			Collection<String> asSubscriptionIds =new SubscriptionResource().getIdsOfSubscriptionsAssociatedWithUser(oUser.getUserId());
@@ -1447,10 +1450,12 @@ public class ProcessWorkspaceResource {
 							String sUserId = oViewModel.optString("userId");
 							Long lComputingTime = oViewModel.optLong("computingTime");
 							
-							if (!oUser.getUserId().equals(sUserId)) {
-								WasdiLog.errorLog("ProcessWorkspaceResource.getOverallRunningTimeProject: mismatch between the user in the main node and the user in the computing node");
-								return Response.serverError().build();
-							}
+							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: subscription: " + sSubscriptionId + ", project: " + sProjectId + ", user: " + sUserId);
+							
+//							if (!oUser.getUserId().equals(sUserId)) {
+//								WasdiLog.errorLog("ProcessWorkspaceResource.getOverallRunningTimeProject: mismatch between the user in the main node and the user in the computing node");
+//								return Response.serverError().build();
+//							}
 							
 							if (Utils.isNullOrEmpty(sSubscriptionId) || Utils.isNullOrEmpty(sProjectId)) {
 								WasdiLog.errorLog("ProcessWorkspaceResource.getOverallRunningTimeProject: subscription id or project id not available.");
