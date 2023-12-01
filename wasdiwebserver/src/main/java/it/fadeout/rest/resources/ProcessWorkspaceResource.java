@@ -1444,7 +1444,7 @@ public class ProcessWorkspaceResource {
 						
 						// Convert the View Models
 						for (int iViewModel = 0; iViewModel < oResults.length(); iViewModel++) {
-							JSONObject oViewModel = oResults.getJSONObject(iViewModel));
+							JSONObject oViewModel = oResults.getJSONObject(iViewModel);
 							String sSubscriptionId = oViewModel.optString("subscriptionId");
 							String sProjectId = oViewModel.optString("projectId");
 							String sUserId = oViewModel.optString("userId");
