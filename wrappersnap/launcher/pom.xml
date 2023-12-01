@@ -195,8 +195,8 @@
             <artifactId>sshj</artifactId>
             <version>${sVersionSshj}</version>
         </dependency>
-        
-        
+
+
         <!-- SNAP -->
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -243,8 +243,8 @@
             <artifactId>snap-land-cover</artifactId>
             <version>${sVersionSnap}</version>
         </dependency>
-        
-        
+
+
         <!-- S1 -->
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
@@ -306,8 +306,8 @@
             <artifactId>s1tbx-op-utilities</artifactId>
             <version>${sVersionS1tbx}</version>
         </dependency>
-        
-        
+
+
         <!-- S2 -->
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
@@ -364,8 +364,8 @@
             <artifactId>s2tbx-spot6-reader</artifactId>
             <version>${sVersionS2tbx}</version>
         </dependency>
-        
-        
+
+
         <!-- S3 -->
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
