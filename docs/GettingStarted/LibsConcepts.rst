@@ -94,7 +94,7 @@ Applications Model
 
 The typical WASDI Application can be represented by this schema:
 
-.. image:: _static/libs_concepts_images/functionmodel.jpg
+.. image:: ../_static/libs_concepts_images/functionmodel.jpg
 
 **EO Application** is the real processor deployed with WASDI. When the End-User starts an application, he must set the input parameters. These parameters can be a date interval, a bounding box, a sensitivity index and any other specific option. 
 
