@@ -106,9 +106,9 @@
 
     <repositories>
         <repository>
-            <id>wasdi-all-library</id>
-            <name>WASDI - INTERNAL REPOSITORY - LIBRARY</name>
-            <url>${sWasdiNexusRepositoryLibraryUrl}</url>
+            <id>wasdi-all-libraries</id>
+            <name>WASDI - INTERNAL REPOSITORY - LIBRARIES</name>
+            <url>${sWasdiNexusRepositoryLibrariesUrl}</url>
         </repository>
     </repositories>
 </project>
