@@ -1444,7 +1444,7 @@ public class ProcessWorkspaceResource {
 						
 						// Convert the View Models
 						for (int iViewModel = 0; iViewModel < oResults.length(); iViewModel++) {
-							JSONObject oViewModel = new JSONObject(oResults.get(iViewModel));
+							JSONObject oViewModel = oResults.getJSONObject(iViewModel));
 							String sSubscriptionId = oViewModel.optString("subscriptionId");
 							String sProjectId = oViewModel.optString("projectId");
 							String sUserId = oViewModel.optString("userId");
@@ -1538,9 +1538,35 @@ public class ProcessWorkspaceResource {
 						String sResponse = oHttpCallResponse.getResponseBody();
 
 						if (!Utils.isNullOrEmpty(sResponse)) {
-							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: got a not-empty answer from node. Updating the computing statistics");
-							Map<String, Map<String, Long>> aoSubscriptionRunningTimesFromNode = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<Map<String, Map<String, Long>>>(){});
-							updateRunningTimesMap(aoRunningTimesBySubscription, aoSubscriptionRunningTimesFromNode);
+							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: response code " + oHttpCallResponse.getResponseCode());
+							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: response body " + sResponse);
+							
+							
+							// Create an array of answers
+							JSONArray oResults = new JSONArray(sResponse);
+							
+							// Convert the View Models
+							for (int iViewModel = 0; iViewModel < oResults.length(); iViewModel++) {
+								JSONObject oViewModel = oResults.getJSONObject(iViewModel);
+								String sSubscriptionId = oViewModel.optString("subscriptionId");
+								String sProjectId = oViewModel.optString("projectId");
+								String sUserIdFromNode = oViewModel.optString("userId");
+								Long lComputingTime = oViewModel.optLong("computingTime");
+								
+								WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: subscription: " + sSubscriptionId + ", project: " + sProjectId + ", user: " + sUserId);
+								
+								if (Utils.isNullOrEmpty(sSubscriptionId) || Utils.isNullOrEmpty(sProjectId)) {
+									WasdiLog.errorLog("ProcessWorkspaceResource.getOverallRunningTimeProject: subscription id or project id not available.");
+									return Response.serverError().build();
+								}
+								
+								updateRunningTimesMap(aoRunningTimesBySubscription, sSubscriptionId, sProjectId, lComputingTime);
+								WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: general statistics should be updated with the statistics from node");
+
+							}
+//							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: got a not-empty answer from node. Updating the computing statistics");
+//							Map<String, Map<String, Long>> aoSubscriptionRunningTimesFromNode = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<Map<String, Map<String, Long>>>(){});
+//							updateRunningTimesMap(aoRunningTimesBySubscription, aoSubscriptionRunningTimesFromNode);
 						}
 						else {
 							WasdiLog.debugLog("ProcessWorkspaceResource.getProjectRunningTimeByUser: response body from computing node is empty");
