@@ -1,5 +1,9 @@
 
 
+### [0.6.6] - 2023-12-01
+
+Added
+- Notes: don't use sys.exit() unless you want the application to end in ERROR
 
 ### [0.6.5] - 2021-09-02
 

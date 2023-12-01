@@ -667,6 +667,11 @@ _getDefaultCRS
 .. automodule:: wasdi
    :members: _getDefaultCRS
 
+Notes
+---------------------------------------
+
+To exit from a wasdi app, just return from your run function, do not use ``sys.exit()``
+The method itself can be called to interrupt in any moment and any file, but you must be aware that this will lead WASDI to think that the application had an error and so will update the status to ERROR.
 
 Changelog
 ---------------------------------------
@@ -675,10 +680,6 @@ Changelog
     :hidden:
 
    changelog.md
-
-
-
-
 
 
 
