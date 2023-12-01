@@ -459,13 +459,17 @@ services:
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
   {{ sWasdiPostgresqlKeycloakServiceName }}:
+{% if ( aWasdiPostgresqlKeycloakCommand | length ) > 0 %}
+    command:
+{% for sWasdiPostgresqlKeycloakCurrentCommand in aWasdiPostgresqlKeycloakCommand %}
+      - "{{ sWasdiPostgresqlKeycloakCurrentCommand }}"
+{% endfor %}
+{% endif %}
 {% if bWasdiPostgresqlKeycloakInitialized == False %}
     environment:
       - POSTGRES_DB=${sPostgresqlKeycloakDatabaseName}
       - POSTGRES_USER=${sPostgresqlKeycloakDatabaseUsername}
       - POSTGRES_PASSWORD=${sPostgresqlKeycloakDatabasePassword}
-      - POSTGRES_USER1_NAME=${sPostgresqlKeycloakUser1Name}
-      - POSTGRES_USER1_PASSWORD=${sPostgresqlKeycloakUser1Password}
 {% endif %}
     image: "{{ sWasdiPostgresqlKeycloakImageName }}:{{ sWasdiPostgresqlKeycloakVersion }}"
     pull_policy: "always"

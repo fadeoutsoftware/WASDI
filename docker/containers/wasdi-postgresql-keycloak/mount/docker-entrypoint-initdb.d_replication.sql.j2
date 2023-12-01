@@ -1,0 +1,3 @@
+CREATE ROLE {{ sWasdiPostgresqlKeycloakReplicationUserName }} WITH LOGIN REPLICATION PASSWORD '{{ sWasdiPostgresqlKeycloakReplicationUserPassword }}';
+SELECT * FROM pg_create_physical_replication_slot('{{ sWasdiPostgresqlKeycloakReplicationSlotName }}');
+SELECT * FROM pg_replication_slots;
