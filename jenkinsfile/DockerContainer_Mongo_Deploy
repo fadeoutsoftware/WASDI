@@ -27,15 +27,6 @@ pipeline {
       }
     }
 
-    stage('INITIALIZATION') {
-      steps {
-        script {
-          currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - DEPLOY THE MONGO CONTAINER"
-        }
-      }
-    }
-
     stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
       steps {
         withCredentials([

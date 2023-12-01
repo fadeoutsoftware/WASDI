@@ -14,15 +14,15 @@ pipeline {
   stages {
     stage('DEBUG') {
       steps {
-        echo "env.GIT_BRANCH               = " + env.GIT_BRANCH
-        echo "env.sAnsibleLimit            = " + env.sAnsibleLimit
-        echo "env.sCurrentEnvironmentLower = " + env.sCurrentEnvironmentLower
-        echo "env.sCurrentEnvironmentUpper = " + env.sCurrentEnvironmentUpper
-        echo "env.sCurrentRevision         = " + env.sCurrentRevision
-        echo "env.sSourceBranch            = " + env.sSourceBranch
-        echo "env.sWasdiAnsiblePath        = " + env.sWasdiAnsiblePath
-        echo "env.WORKSPACE                = " + env.WORKSPACE
-
+        echo "env.GIT_BRANCH                    = " + env.GIT_BRANCH
+        echo "env.sAnsibleLimit                 = " + env.sAnsibleLimit
+        echo "env.sCurrentEnvironmentLower      = " + env.sCurrentEnvironmentLower
+        echo "env.sCurrentEnvironmentUpper      = " + env.sCurrentEnvironmentUpper
+        echo "env.sCurrentRevision              = " + env.sCurrentRevision
+        echo "env.sSourceBranch                 = " + env.sSourceBranch
+        echo "env.sWasdiAnsibleGitRepositoryUrl = " + env.sWasdiAnsibleGitRepositoryUrl
+        echo "env.sWasdiAnsiblePath             = " + env.sWasdiAnsiblePath
+        echo "env.WORKSPACE                     = " + env.WORKSPACE
         sh script: "pwd", label: "Current location"
       }
     }
@@ -55,13 +55,13 @@ pipeline {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
-            playbooks/deployDockerContainerWasdiKeycloak.yml \
+            playbooks/deployDockerContainerWasdiNexus.yml \
             --inventory inventories/wasdi.yml \
             --limit ${env.sAnsibleLimit} \
-              --diff \
-              --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sWasdiKeycloakThemeVersion=${env.sWasdiKeycloakThemeVersion}'
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
-        label: "Deploy the container and its run elements"
+        label: "Deploy the container and its run element"
       }
     }
 
@@ -70,7 +70,7 @@ pipeline {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
-            playbooks/runDockerContainerWasdiKeycloak.yml \
+            playbooks/runDockerContainerWasdiNexus.yml \
             --inventory inventories/wasdi.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \

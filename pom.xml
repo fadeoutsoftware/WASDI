@@ -114,11 +114,11 @@
     -->
     <distributionManagement>
         <repository>
-            <id>wasdi-release</id>
+            <id>wasdi-all-artifacts</id>
             <url>${sWasdiNexusRepositoryReleaseUrl}</url>
         </repository>
         <snapshotRepository>
-            <id>wasdi-snapshot</id>
+            <id>wasdi-all-artifacts</id>
             <url>${sWasdiNexusRepositorySnapshotUrl}</url>
         </snapshotRepository>
     </distributionManagement>
@@ -129,9 +129,14 @@
     -->
     <repositories>
         <repository>
-            <id>wasdi-library</id>
-            <name>WASDI - INTERNAL REPOSITORY - LIBRARY</name>
-            <url>${sWasdiNexusRepositoryLibraryUrl}</url>
+            <id>wasdi-all-libraries</id>
+            <name>WASDI - INTERNAL REPOSITORY - LIBRARIES</name>
+            <url>${sWasdiNexusRepositoryLibrariesUrl}</url>
+        </repository>
+        <repository>
+            <id>wasdi-snap-build</id>
+            <name>WASDI - INTERNAL REPOSITORY - SNAP BUILD</name>
+            <url>${sWasdiNexusRepositorySnapBuildUrl}</url>
         </repository>
     </repositories>
 </project>

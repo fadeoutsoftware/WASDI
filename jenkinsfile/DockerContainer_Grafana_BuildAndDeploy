@@ -28,15 +28,6 @@ pipeline {
       }
     }
 
-    stage('INITIALIZATION') {
-      steps {
-        script {
-          currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD AND DEPLOY THE GRAFANA CONTAINER"
-        }
-      }
-    }
-
     stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
       steps {
         withCredentials([
