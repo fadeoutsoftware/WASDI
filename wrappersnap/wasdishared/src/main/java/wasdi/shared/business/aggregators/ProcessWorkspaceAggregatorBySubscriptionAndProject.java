@@ -1,6 +1,6 @@
 package wasdi.shared.business.aggregators;
 
-public class ProcessWorkspaceAggregatorBySubscriptionAndProjectResult {
+public class ProcessWorkspaceAggregatorBySubscriptionAndProject {
 
 	private Id _id;
 

@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.aggregators.ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult;
-import wasdi.shared.business.aggregators.ProcessWorkspaceAggregatorBySubscriptionAndProjectResult;
+import wasdi.shared.business.aggregators.ProcessWorkspaceAggregatorBySubscriptionAndProject;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.config.SchedulerQueueConfig;
@@ -54,6 +55,7 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.processors.AppStatsViewModel;
 import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
+import wasdi.shared.viewmodels.processworkspace.ComputingTimeViewModel;
 import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceAggregatedViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceSummaryViewModel;
@@ -1277,7 +1279,7 @@ public class ProcessWorkspaceResource {
 
 		return lRunningTime;
 	}
-
+	
 	@GET
 	@Path("/runningTime/SP")
 	@Produces({"application/xml", "application/json", "text/xml"})
@@ -1299,10 +1301,10 @@ public class ProcessWorkspaceResource {
 					new SubscriptionResource().getIdsOfSubscriptionsAssociatedWithUser(oUser.getUserId());
 
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			List<ProcessWorkspaceAggregatorBySubscriptionAndProjectResult> aoResultList =
+			List<ProcessWorkspaceAggregatorBySubscriptionAndProject> aoResultList =
 					oProcessWorkspaceRepository.getRunningTimeInfo(asIdsOfSubscriptionsAssociatedWithUser);
 
-			for (ProcessWorkspaceAggregatorBySubscriptionAndProjectResult oResult : aoResultList) {
+			for (ProcessWorkspaceAggregatorBySubscriptionAndProject oResult : aoResultList) {
 				Map<String, Long> aoRunningTimeByProject = aoRunningTimeBySubscriptionByProject.get(oResult.getSubscriptionId());
 
 				if (aoRunningTimeByProject == null) {
@@ -1380,6 +1382,143 @@ public class ProcessWorkspaceResource {
 		}
 
 		return aoRunningTimeBySubscriptionByProject;
+	}
+	
+	/**
+	 * Get the overall computing time of projects associated to user. The overall computing time takes into account the computing times of ALL the users
+	 * who worked on the project, and not only the computing time of the user in the corresponding session
+	 * @param sSessionId user session id
+	 * @return the list of view models 
+	 */
+	@GET
+	@Path("/runningtimeproject")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response getOverallRunningTimeProject(@HeaderParam("x-session-token") String sSessionId) {
+
+		WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject");
+
+		// OUTER MAP. Keys: subscription-id, Values: dictionary
+		// INNER MAPS: Keys: project-id, Values: computing time
+		Map<String, Map<String, Long>> aoRunningTimeBySubscription = new HashMap<String, Map<String,Long>>();
+		
+
+		try {
+			
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oUser == null) {
+				WasdiLog.warnLog("ProcessWorkspaceResource.getOverallRunningTimeProject: invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			// ids of the subscriptions associated to the user
+			Collection<String> asSubscriptionIds =new SubscriptionResource().getIdsOfSubscriptionsAssociatedWithUser(oUser.getUserId());
+			List<ProcessWorkspaceAggregatorBySubscriptionAndProject> aoRunningTimes = new ProcessWorkspaceRepository().getRunningTimeInfo(asSubscriptionIds);
+			aoRunningTimes.forEach(oRunningTimeInfo -> updateRunningTimesMap(aoRunningTimeBySubscription, oRunningTimeInfo));
+			
+			if (WasdiConfig.Current.isMainNode()) {
+				NodeRepository oNodeRepo = new NodeRepository();
+				List<Node> aoNodes = oNodeRepo.getNodesList();
+
+				for (Node oNode : aoNodes) {
+					if (oNode.getNodeCode().equals("wasdi")) continue;
+					if (oNode.getActive() == false) continue;
+
+					try {
+						HttpCallResponse oHttpCallResponse = sendRequestToNode(oNode.getNodeBaseAddress(), "process/runningtimeproject", sSessionId); 
+						String sResponse = oHttpCallResponse.getResponseBody();
+
+						if (!Utils.isNullOrEmpty(sResponse)) {
+							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: got a not-empty answer from node. Updating the computing statistics");
+							Map<String, Map<String, Long>> aoSubscriptionRunningTimesFromNode = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<Map<String, Map<String, Long>>>(){});
+							updateRunningTimesMap(aoRunningTimeBySubscription, aoSubscriptionRunningTimesFromNode);
+						}
+						else {
+							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: response body from computing node is empty");
+						}
+					} catch (Exception oEx) {
+						WasdiLog.errorLog("ProcessWorkspaceResource.getOverallRunningTimeProject: exception contacting computing node", oEx);
+						return Response.serverError().build();
+					}
+				}
+				
+			}
+			
+			List<ComputingTimeViewModel> aoComputingTimesList = buildComputingTimeViewModel(aoRunningTimeBySubscription, oUser.getUserId());
+			return Response.ok(aoComputingTimesList).build();
+			
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject error: " + oEx);
+			return Response.serverError().build();
+		}
+					
+	}
+	
+	/**
+	 * Get the user computing time for the projects associated to them. The computing time refers only to the computing time of the user on the projects, and not
+	 * the computing time of other users on the same projects.
+	 * @param sSessionId user session id
+	 * @return the list of view models 
+	 */
+	@GET
+	@Path("/runningtimeproject/byuser")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response getProjectRunningTimeByUser(@HeaderParam("x-session-token") String sSessionId) {
+
+		WasdiLog.debugLog("ProcessWorkspaceResource.getProjectRunningTimeByUser");
+
+		Map<String, Map<String, Long>> aoRunningTimesBySubscription = new HashMap<String, Map<String,Long>>();
+		
+		
+		try {
+			
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oUser == null) {
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProjectRunningTimeByUser: invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			String sUserId = oUser.getUserId();
+			Collection<String> asUserSubscriptionsIds = new SubscriptionResource().getIdsOfSubscriptionsAssociatedWithUser(sUserId);
+			List<ProcessWorkspaceAggregatorBySubscriptionAndProject> aoRunningTimes = new ProcessWorkspaceRepository().getProjectRunningTime(sUserId, asUserSubscriptionsIds);
+			aoRunningTimes.forEach(oRunningTimeInfo -> updateRunningTimesMap(aoRunningTimesBySubscription, oRunningTimeInfo));
+			
+			if (WasdiConfig.Current.isMainNode()) {
+				NodeRepository oNodeRepo = new NodeRepository();
+				List<Node> aoNodes = oNodeRepo.getNodesList();
+
+				for (Node oNode : aoNodes) {
+					if (oNode.getNodeCode().equals("wasdi")) continue;
+					if (oNode.getActive() == false) continue;
+
+					try {
+						
+						HttpCallResponse oHttpCallResponse = sendRequestToNode(oNode.getNodeBaseAddress(), "process/runningtimeproject/byuser", sSessionId); 
+						String sResponse = oHttpCallResponse.getResponseBody();
+
+						if (!Utils.isNullOrEmpty(sResponse)) {
+							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: got a not-empty answer from node. Updating the computing statistics");
+							Map<String, Map<String, Long>> aoSubscriptionRunningTimesFromNode = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<Map<String, Map<String, Long>>>(){});
+							updateRunningTimesMap(aoRunningTimesBySubscription, aoSubscriptionRunningTimesFromNode);
+						}
+						else {
+							WasdiLog.debugLog("ProcessWorkspaceResource.getProjectRunningTimeByUser: response body from computing node is empty");
+						}
+					} catch (Exception oEx) {
+						WasdiLog.errorLog("ProcessWorkspaceResource.getProjectRunningTimeByUser: exception contacting computing node: " + oEx.toString());
+						return Response.serverError().build();
+					}
+				}
+			} 
+			
+			List<ComputingTimeViewModel>  aoComputingTimesList = buildComputingTimeViewModel(aoRunningTimesBySubscription, oUser.getUserId());
+			return Response.ok(aoComputingTimesList).build();
+			
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject error: " + oEx);
+			return Response.serverError().build();
+		}			
 	}
 	
 	
@@ -1703,6 +1842,106 @@ public class ProcessWorkspaceResource {
 		}
 
 		return aoViewModels;
+	}
+	
+	/**
+	 * Converts a map summarising the statistics about the the computing times per subscription and project into the corresponding view model
+	 * @param aoComputingTimes a map where: keys are the ids of the subscriptions and values are maps projectId-computingTime
+	 * @return the computing time view model
+	 */
+	private List<ComputingTimeViewModel> buildComputingTimeViewModel(Map<String, Map<String, Long>> aoComputingTimes, String sUserId) {
+		
+		List<ComputingTimeViewModel> aoResultList = new ArrayList<>();
+		
+		for (String sSubscriptionId : aoComputingTimes.keySet()) {
+			Map<String, Long> asProjectsMap = aoComputingTimes.get(sSubscriptionId);
+			List<ComputingTimeViewModel> aoViewModels = asProjectsMap.entrySet().stream()
+					.map(oEntry -> buildComputingTimeViewModel(sSubscriptionId, sUserId, oEntry.getKey(), oEntry.getValue()))
+					.collect(Collectors.toList());
+			aoResultList.addAll(aoViewModels);
+		}
+		return aoResultList;
+	}
+	
+	/**
+	 * Build the computing time view model for a given subscription, user and project
+	 * @param sSubscriptionId the id or the subscription
+	 * @param sUserId the id of the user 
+	 * @param sProjectId the id of the project
+	 * @param sComputingTime the computing time for the specified project and subscription ids
+	 * @return the computing time view model the corresponding view model
+	 */
+	private ComputingTimeViewModel buildComputingTimeViewModel(String sSubscriptionId, String sUserId, String sProjectId, Long sComputingTime) {
+		ComputingTimeViewModel oViewModel = new ComputingTimeViewModel();
+		oViewModel.setSubscriptionId(sSubscriptionId);
+		oViewModel.setProjectId(sProjectId);
+		oViewModel.setUserId(sUserId);
+		oViewModel.setComputingTime(sComputingTime);
+		return oViewModel;
+	}
+	
+	/**
+	 * Updates the map containing the computing times by subscription and projects
+	 * @param aoSubscriptionsComputingTimeMap the map that needs to be updated, where the keys are subscription ids and the values are maps <project-id, computing time>
+	 * @param oComputingTime an object representing the computing time associated to a specific project and subscription id
+	 */
+	private void updateRunningTimesMap(Map<String, Map<String, Long>> aoSubscriptionsComputingTimeMap, ProcessWorkspaceAggregatorBySubscriptionAndProject oComputingTime) {
+		String sSubscriptionId = oComputingTime.getSubscriptionId();
+		String sProjectId = oComputingTime.getProjectId();
+		Long lComputingTime = oComputingTime.getTotal();
+		
+		Map<String, Long> aoProjectsComputingTimeMap = aoSubscriptionsComputingTimeMap.getOrDefault(sSubscriptionId, new HashMap<String, Long>());
+		Long lRunningTime = aoProjectsComputingTimeMap.getOrDefault(sProjectId, Long.valueOf(0)) + lComputingTime;
+		aoProjectsComputingTimeMap.put(sProjectId, lRunningTime);
+		aoSubscriptionsComputingTimeMap.put(sSubscriptionId, aoProjectsComputingTimeMap);
+	}
+	
+	/**
+	 * Updates the map containing the computing times by subscription and projects
+	 * @param aoGeneralStatisticsMap the map that contains the overall count of the computing times and that needs to be updated. The keys are subscription ids and the values are maps <project-id, computing time> 
+	 * @param aoPartialStatisticsMap the map that contains the computing times to be added in the map with the overall computing times. The keys are subscription ids and the values are maps <project-id, computing time> 
+	 */
+	private void updateRunningTimesMap(Map<String, Map<String, Long>> aoGeneralStatisticsMap, Map<String, Map<String, Long>> aoPartialStatisticsMap) {
+		
+		if (aoPartialStatisticsMap == null || aoPartialStatisticsMap.isEmpty()) {
+			WasdiLog.debugLog("ProcessWorkspaceResource.updateComputingTimesMap: no computing times from node. ");
+			return;
+		}
+		
+		for (Map.Entry<String, Map<String, Long>> oEntrySubscription : aoPartialStatisticsMap.entrySet()) {
+			String sSubscriptionId = oEntrySubscription.getKey();
+			Map<String, Long> aoPartialRunningTimeByProject = oEntrySubscription.getValue();
+			
+			Map<String, Long> aoRunningTimeByProject = aoGeneralStatisticsMap.getOrDefault(sSubscriptionId, new HashMap<String, Long>());
+
+			for (Map.Entry<String, Long> oEntryProject : aoPartialRunningTimeByProject.entrySet()) {
+					String sProjectId = oEntryProject.getKey();
+					Long lPartialRunningTime = oEntryProject.getValue();
+					Long lGeneralRunningTime = aoRunningTimeByProject.getOrDefault(sProjectId, Long.valueOf(0));
+					aoRunningTimeByProject.put(sProjectId, lGeneralRunningTime + lPartialRunningTime);
+			}
+			aoGeneralStatisticsMap.put(sSubscriptionId, aoRunningTimeByProject);
+		}
+			
+	}
+
+	/**
+	 * Send a HTTP request to one of the WASDI nodes
+	 * @param sNodeBaseAddress base address of the node
+	 * @param sResourcePath path of the endpoint to call
+	 * @param sSessionId id of the session
+	 * @return the HTTP response returned by te node
+	 */
+	private HttpCallResponse sendRequestToNode(String sNodeBaseAddress, String sResourcePath, String sSessionId) {
+		String sUrl = sNodeBaseAddress;
+		
+		if (!sUrl.endsWith("/")) sUrl += "/";
+		sUrl += sResourcePath;
+
+		Map<String, String> asHeaders = Collections.singletonMap("x-session-token", sSessionId);
+
+		WasdiLog.debugLog("ProcessWorkspaceResource.sendRequestToNode: calling url: " + sUrl);
+		return HttpUtils.httpGet(sUrl, asHeaders); 
 	}
 
 }
