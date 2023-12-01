@@ -23,6 +23,7 @@ import javax.ws.rs.core.GenericType;
 
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -1434,17 +1435,31 @@ public class ProcessWorkspaceResource {
 						WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: response code " + oHttpCallResponse.getResponseCode());
 						WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: response body " + sResponseBody);
 						
-						String sNodeResponse = oHttpCallResponse.getResponseBody();
 						
 						// Create an array of answers
-						JSONArray oResults = new JSONArray(sNodeResponse);
+						JSONArray oResults = new JSONArray(sResponseBody);
 						
 						// Convert the View Models
-						for (int iViewModels = 0; iViewModels<oResults.length(); iViewModels++) {
-							Object oNodeQueueStatus = oResults.get(iViewModels);
+						for (int iViewModel = 0; iViewModel < oResults.length(); iViewModel++) {
+							JSONObject oViewModel = new JSONObject(oResults.get(iViewModel));
+							String sSubscriptionId = oViewModel.optString("subscriptionId");
+							String sProjectId = oViewModel.optString("projectId");
+							String sUserId = oViewModel.optString("userId");
+							Long lComputingTime = oViewModel.optLong("computingTime");
 							
-							ProcessWorkspaceAggregatorBySubscriptionAndProject oVM = (ProcessWorkspaceAggregatorBySubscriptionAndProject) MongoRepository.s_oMapper.readValue(oNodeQueueStatus.toString(), ProcessWorkspaceAggregatorBySubscriptionAndProject.class);
-							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: - project id " + oVM.getProjectId());
+							if (!oUser.getUserId().equals(sUserId)) {
+								WasdiLog.errorLog("ProcessWorkspaceResource.getOverallRunningTimeProject: mismatch between the user in the main node and the user in the computing node");
+								return Response.serverError().build();
+							}
+							
+							if (Utils.isNullOrEmpty(sSubscriptionId) || Utils.isNullOrEmpty(sProjectId)) {
+								WasdiLog.errorLog("ProcessWorkspaceResource.getOverallRunningTimeProject: subscription id or project id not available.");
+								return Response.serverError().build();
+							}
+							
+							updateRunningTimesMap(aoRunningTimeBySubscription, sSubscriptionId, sProjectId, lComputingTime);
+							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: general statistics should be updated with the statistics from node");
+							
 						}
 						
 
@@ -1944,13 +1959,28 @@ public class ProcessWorkspaceResource {
 		}
 			
 	}
+	
+	/**
+	 */
+	private void updateRunningTimesMap(Map<String, Map<String, Long>> aoGeneralStatisticsMap, String sSbuscriptionId, String sProjectId, Long lComputingTime) {
+		Map<String, Long> aoProjectStatisticsMap = null;	
+		if (aoGeneralStatisticsMap.containsKey(sSbuscriptionId)) {
+			aoProjectStatisticsMap = aoGeneralStatisticsMap.get(sSbuscriptionId);
+			Long lGeneralRunningTime = aoProjectStatisticsMap.getOrDefault(sProjectId, Long.valueOf(0));
+			aoProjectStatisticsMap.put(sProjectId, lGeneralRunningTime + lComputingTime);
+		} else {
+			aoProjectStatisticsMap = new HashMap<>();
+			aoProjectStatisticsMap.put(sProjectId, lComputingTime);
+			aoGeneralStatisticsMap.put(sSbuscriptionId, aoProjectStatisticsMap);
+		}	
+	}
 
 	/**
 	 * Send a HTTP request to one of the WASDI nodes
 	 * @param sNodeBaseAddress base address of the node
 	 * @param sResourcePath path of the endpoint to call
 	 * @param sSessionId id of the session
-	 * @return the HTTP response returned by te node
+	 * @return the HTTP response returned by the node
 	 */
 	private HttpCallResponse sendRequestToNode(String sNodeBaseAddress, String sResourcePath, String sSessionId) {
 		String sUrl = sNodeBaseAddress;
@@ -1964,5 +1994,8 @@ public class ProcessWorkspaceResource {
 		WasdiLog.debugLog("ProcessWorkspaceResource.sendRequestToNode: calling url: " + sUrl);
 		return HttpUtils.httpGet(sUrl, asHeaders); 
 	}
+	
+	
+
 
 }
