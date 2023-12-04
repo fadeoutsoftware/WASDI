@@ -205,9 +205,35 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			processWorkspaceLog("Creating the container for Notebook id: " + sJupyterNotebookCode);
 			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: Creating the container for Notebook id: " + sJupyterNotebookCode);
 			
+			// Set the container name
 			String sContainerName = "nb_" + sJupyterNotebookCode;
 			
-			String sContanerId = oDockerUtils.createAndStartContainer(sContainerName, oProcessorTypeConfig.image, oProcessorTypeConfig.version, oProcessorTypeConfig.commands, oProcessorTypeConfig.additionalMountPoints, oProcessorTypeConfig.extraHosts, oProcessorTypeConfig.environmentVariables);
+			
+			// Add the 2 dynamic mounted folder (workspace, and notebook)
+			
+			ArrayList<String> asAdditionalMountPointsCopy = new ArrayList<>();
+			
+			for (String sMountPoint : oProcessorTypeConfig.additionalMountPoints) {
+				asAdditionalMountPointsCopy.add(sMountPoint);
+			}
+			
+			String sWorkspaceFolderMount = PathsConfig.getWorkspacePath(oParameter);
+			String sContainerWorkspacePath = PathsConfig.getWorkspacePath(oParameter, "/home/" + WasdiConfig.Current.systemUserName + "/.wasdi/");
+			sWorkspaceFolderMount = sWorkspaceFolderMount + ":" + sContainerWorkspacePath;
+			
+			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: adding mount folder " + sWorkspaceFolderMount);
+			asAdditionalMountPointsCopy.add(sWorkspaceFolderMount);
+			
+			String sWorkspaceNotebookFolderMount = PathsConfig.getWorkspacePath(oParameter) + "notebook";
+			String sContainerNotebookFolderPath = "/home/"  + WasdiConfig.Current.systemUserName + "/notebook";
+			sWorkspaceNotebookFolderMount = sWorkspaceNotebookFolderMount +":" + sContainerNotebookFolderPath;
+			
+			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: adding mount folder " + sWorkspaceNotebookFolderMount);
+			asAdditionalMountPointsCopy.add(sWorkspaceNotebookFolderMount);			
+			
+			
+			// Create and start the container
+			String sContanerId = oDockerUtils.createAndStartContainer(sContainerName, oProcessorTypeConfig.image, oProcessorTypeConfig.version, oProcessorTypeConfig.commands, asAdditionalMountPointsCopy, oProcessorTypeConfig.extraHosts, oProcessorTypeConfig.environmentVariables);
 			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: obtained container id " + sContanerId);
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 60);

@@ -1952,7 +1952,6 @@ public class DockerUtils {
             		}
             		
             		oContainerCreateParams.HostConfig.RestartPolicy.put("Name", "unless-stopped");
-            		oContainerCreateParams.HostConfig.RestartPolicy.put("MaximumRetryCount", 3);
             		
             		if (asArg!=null) oContainerCreateParams.Cmd.addAll(asArg);
             		
