@@ -1883,4 +1883,195 @@ public class DockerUtils {
         }    	
     }
 
+    
+    
+    /**
+     * Create and Start a container
+     * @param sImageName Name of the image
+     * @param sImageVersion Version
+     * @param asArg Args to be passed as CMD parameter
+     * @return The Id of the container if created, empty string in case of problems
+     */
+    public String createAndStartContainer(String sContainerName, String sImageName, String sImageVersion, List<String> asArg,  List<String> asAdditionalMountPoints, List<String> asExtraHosts,List<EnvironmentVariableConfig> asEnvironmentVariables) {
+
+        try {
+        	
+        	// We need the name of the image
+        	if (Utils.isNullOrEmpty(sImageName)) {
+        		WasdiLog.warnLog("DockerUtils.createAndStartContainer: image is null");
+        		return "";
+        	}        	
+        	
+            // Attach the version, if available
+        	if (!Utils.isNullOrEmpty(sImageVersion))  sImageName += ":" + sImageVersion;
+        	
+            WasdiLog.debugLog("DockerUtils.createAndStartContainer: try to start a container from image " + sImageName);
+            
+            // Id of the container
+            String sContainerId = "";
+        	
+            // Search first of all if the container is already here
+        	ContainerInfo oContainerInfo = getContainerInfoByContainerName(sContainerName);        	
+        	
+        	if (oContainerInfo == null) {
+        		
+        		// No we do not have it
+        		WasdiLog.debugLog("DockerUtils.createAndStartContainer: the container is not available, try to create a container named " + sContainerName);
+        		
+        		// Create the container
+            	try {
+            		// API URL
+            		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+            		if (!sUrl.endsWith("/")) sUrl += "/";
+            		sUrl += "containers/create?name=" + sContainerName;
+            		
+            		// Create the Payload to send to create the container
+            		CreateParams oContainerCreateParams = new CreateParams();
+            		            		
+            		// Set the image
+            		oContainerCreateParams.Image = sImageName;            		
+            		            		
+            		// Set the network mode
+            		oContainerCreateParams.HostConfig.NetworkMode = m_sDockerNetworkMode;
+            		
+            		// Activate tty
+            		oContainerCreateParams.Tty = true;
+            		
+            		// Expose the TCP Port
+            		oContainerCreateParams.ExposedPorts.add("" + WasdiConfig.Current.dockers.processorsInternalPort + "/tcp");
+            		
+            		// If we are dockerized, no need to add the ip and port
+            		if (WasdiConfig.Current.shellExecLocally) {
+            			oContainerCreateParams.HostConfig.PortBindings.put("" + WasdiConfig.Current.dockers.processorsInternalPort + ":8083/tcp", "80");
+            		}            		
+            		
+            		if (asAdditionalMountPoints!=null) {
+            			for (String sMountPoint : asAdditionalMountPoints) {
+            				oContainerCreateParams.HostConfig.Binds.add(sMountPoint);
+						}
+            		}
+            		
+            		oContainerCreateParams.HostConfig.RestartPolicy.put("Name", "unless-stopped");
+            		oContainerCreateParams.HostConfig.RestartPolicy.put("MaximumRetryCount", 3);
+            		
+            		if (asArg!=null) oContainerCreateParams.Cmd.addAll(asArg);
+            		
+                    // Extra hosts mapping, useful for some instances when the server host can't be resolved
+                    // The symptoms of such problem is that the POST call from the Docker container timeouts
+                    if (asExtraHosts != null) {
+                    	if (asExtraHosts.size()>0) {
+                    		WasdiLog.debugLog("DockerUtils.createAndStartContainer adding configured extra host mapping to the run arguments");
+                        	for (int iExtraHost = 0; iExtraHost<asExtraHosts.size(); iExtraHost ++) {
+                        		String sExtraHost = asExtraHosts.get(iExtraHost);
+                        		oContainerCreateParams.HostConfig.ExtraHosts.add(sExtraHost);
+                        	}
+                    	}
+                    }
+                    
+                    if (asEnvironmentVariables != null) {
+                		
+                		for (EnvironmentVariableConfig oEnvironmentVariable : asEnvironmentVariables) {
+                			
+                			String sKey = oEnvironmentVariable.key;
+                			String sValue = oEnvironmentVariable.value;
+                			
+                			if (Utils.isNullOrEmpty(sKey)) {
+                				WasdiLog.warnLog("DockerUtils.createAndStartContainer: there is an env variable with key null. Jump it");
+                				continue;
+                			}
+                			
+                			if (sValue == null) sValue="";
+                			
+                			String sVariable = sKey + "=" + sValue;
+                			
+                			WasdiLog.warnLog("DockerUtils.createAndStartContainer: adding env variable: " + sVariable);
+                			
+                			oContainerCreateParams.Env.add(sVariable);
+						}
+                	}                    
+            		
+                    // Convert the payload in JSON (NOTE: is hand-made !!)
+            		String sContainerCreateParams = oContainerCreateParams.toJson();
+            		
+            		if (Utils.isNullOrEmpty(sContainerCreateParams)) {
+            			WasdiLog.errorLog("DockerUtils.createAndStartContainer: impossible to get the payload to create the container. We cannot proceed :(");
+            			return "";
+            		}
+            		
+            		if (WasdiConfig.Current.dockers.logDockerAPICallsPayload) {
+                		WasdiLog.debugLog("DOCKER JSON PAYLOAD DUMP");
+                		WasdiLog.debugLog(sContainerCreateParams);
+                		WasdiLog.debugLog("------------------");            			
+            		}
+            		
+            		// We need to set the json Content-Type
+            		HashMap<String, String> asHeaders = new HashMap<>();
+            		asHeaders.put("Content-Type", "application/json");
+            		
+            		// Is a post!
+            		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, sContainerCreateParams, asHeaders);
+            		
+            		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
+            			// Here is not good
+            			WasdiLog.errorLog("DockerUtils.createAndStartContainer: impossible to create the container. We cannot proceed :(. ERROR = " + oResponse.getResponseBody());
+            			return "";
+            		}
+            		
+            		WasdiLog.debugLog("DockerUtils.createAndStartContainer: Container created. Message = " + oResponse.getResponseBody());
+            		
+            		String sCreateResult = oResponse.getResponseBody();
+            		CreateContainerResponse oCreateContainerResponse = JsonUtils.s_oMapper.readValue(sCreateResult,CreateContainerResponse.class);
+            		
+            		if (oCreateContainerResponse != null) {
+            			WasdiLog.debugLog("DockerUtils.createAndStartContainer: got the response, ContainerId = " + oCreateContainerResponse.Id);
+            			sContainerId = oCreateContainerResponse.Id;
+            		}
+            		else {
+            			WasdiLog.warnLog("DockerUtils.createAndStartContainer: impossible to get or transalte the api return, so not container id available");
+            		}            		
+            	}
+            	catch (Exception oEx) {
+            		WasdiLog.errorLog("DockerUtils.createAndStartContainer exception creating the container: " + oEx.toString());
+                    return "";
+                }        		
+        	}
+        	else {        		
+        		// If the container exists, we can take the ID
+        		WasdiLog.debugLog("DockerUtils.createAndStartContainer: Container already found, we will use the id");
+        		sContainerId = oContainerInfo.Id;
+        	}
+            
+            WasdiLog.debugLog("DockerUtils.createAndStartContainer: Starting Container Named " + sContainerName + " Id " + sContainerId);
+            
+            // Prepare the url to start it
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		sUrl +="containers/" + sContainerId + "/start";
+    		
+    		// Make the call
+    		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "");
+    		
+    		if (oResponse.getResponseCode() == 204) {
+    			// Started Well
+    			WasdiLog.debugLog("DockerUtils.createAndStartContainer: Container " + sContainerName + " started");
+    			return sContainerId;
+    		}
+    		else if (oResponse.getResponseCode() == 304) {
+    			// ALready Started (but so why we did not detected this before?!?)
+    			WasdiLog.debugLog("DockerUtils.createAndStartContainer: Container " + sContainerName + " wasd already started");
+    			return sContainerId;
+    		}
+    		else {
+    			// Error!
+    			WasdiLog.errorLog("DockerUtils.createAndStartContainer: Impossible to start Container " + sContainerName);
+    			WasdiLog.errorLog("DockerUtils.createAndStartContainer: Message Received " + oResponse.getResponseBody());
+    			return "";
+    		}
+            
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("DockerUtils.createAndStartContainer error creating the container: " + oEx.toString());
+            return "";
+        }
+    }
+        
 }

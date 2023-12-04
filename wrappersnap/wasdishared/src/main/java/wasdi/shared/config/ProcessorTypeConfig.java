@@ -18,9 +18,34 @@ public class ProcessorTypeConfig {
 	public String processorType;
 	
 	/**
+	 * List of strings that are additional moung points for this specific docker
+	 */
+	public ArrayList<String> additionalMountPoints = new ArrayList<>();
+
+	/**
+	 * List of strings that are additional moung points for this specific docker
+	 */
+	public ArrayList<String> commands = new ArrayList<>();
+	
+	/**
 	 * List of environment variables to pass when creating the container
 	 */
 	public List<EnvironmentVariableConfig> environmentVariables = new ArrayList<>();
+	
+	/**
+	 * If needed, contains the name of the base image to use
+	 */
+	public String image;
+	
+	/**
+	 * If needed, contains the version of the base image to use
+	 */
+	public String version;
+	
+	/**
+	 * Personalized Extra Hosts
+	 */
+	public ArrayList<String> extraHosts = new ArrayList<>();
 	
 	/**
 	 * Return the EnvironmentVariableConfig with the specified key
