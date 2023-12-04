@@ -328,13 +328,19 @@ services:
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiKeycloakServiceName }}.loadbalancer.server.port={{ sWasdiKeycloakInternalPort }}"
-{% if ( sWasdiKeycloakInternalPort | default("") != ""
-    and sWasdiKeycloakExternalPort | default("") != ""
-    and aWasdiKeycloakExternalIp | default([]) | length > 0 )
+{% if 
+    (
+        sWasdiKeycloakInternalPort | default("") != ""
+        and sWasdiKeycloakExternalPort | default("") != ""
+        and aWasdiKeycloakExternalIp | default([]) | length > 0
+    )
     or
-    ( sWasdiKeycloakClusterInternalPort | default("") != ""
-    and sWasdiKeycloakClusterExternalPort | default("") != ""
-    and aWasdiKeycloakClusterExternalIp | default([]) | length > 0 ) %}
+    (
+        sWasdiKeycloakClusterInternalPort | default("") != ""
+        and sWasdiKeycloakClusterExternalPort | default("") != ""
+        and aWasdiKeycloakClusterExternalIp | default([]) | length > 0
+    )
+%}
     ports:
 {% for sWasdiKeycloakCurrentExternalIp in aWasdiKeycloakExternalIp | sort %}
       - "{{ sWasdiKeycloakCurrentExternalIp }}:{{ sWasdiKeycloakExternalPort }}:{{ sWasdiKeycloakInternalPort }}"
@@ -532,7 +538,8 @@ services:
       - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
       - RABBITMQ_DISTRIBUTION_BUFFER_SIZE=128000
       - RABBITMQ_MNESIA_BASE=/var/lib/rabbitmq/mnesia/
-      - RABBITMQ_NODENAME={{ sWasdiRabbitMqServiceName }}
+      - RABBITMQ_USE_LONGNAME=true
+      - RABBITMQ_NODENAME={{ sWasdiRabbitMqNodeName }}
 {% if sWasdiRabbitMqMainInternalPort != '' %}
       - RABBITMQ_NODE_PORT={{ sWasdiRabbitMqMainInternalPort }}
 {% endif %}
@@ -567,28 +574,11 @@ services:
       - "traefik.http.services.s_{{ sWasdiRabbitMqServiceName }}_stomp.loadbalancer.server.port={{ sWasdiRabbitMqWebStompInternalPort }}"
 {% endif %}
 {% endif %}
-{% if (( sWasdiRabbitMqMainInternalPort | default("") ) != ""
-        and ( sWasdiRabbitMqMainExternalPort | default("") ) != ""
-        and (( aWasdiRabbitMqMainExternalIp | default([]) ) | length ) > 0
-    ) or (
-        ( sWasdiRabbitMqWebStompInternalPort | default("") ) != ""
-        and ( sWasdiRabbitMqWebStompExternalPort | default("") ) != ""
-        and (( aWasdiRabbitMqWebStompExternalIp | default([]) ) | length ) > 0
-    )
-%}
+{% if ( aWasdiRabbitMqPorts | length ) > 0 %}
     ports:
-{% if sWasdiRabbitMqMainInternalPort | default("") != ""
-    and sWasdiRabbitMqMainExternalPort | default("") != "" %}
-{% for sCurrentExternalIp in aWasdiRabbitMqMainExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiRabbitMqMainExternalPort }}:{{ sWasdiRabbitMqMainInternalPort }}"
+{% for sWasdiRabbitMqCurrentPort in aWasdiRabbitMqPorts %}
+      - "{{ sWasdiRabbitMqCurrentPort }}"
 {% endfor %}
-{% endif %}
-{% if sWasdiRabbitMqWebStompInternalPort | default("") != ""
-    and sWasdiRabbitMqWebStompExternalPort | default("") != "" %}
-{% for sCurrentExternalIp in aWasdiRabbitMqWebStompExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiRabbitMqWebStompExternalPort }}:{{ sWasdiRabbitMqWebStompInternalPort }}"
-{% endfor %}
-{% endif %}
 {% endif %}
     pull_policy: "never"
     restart: "unless-stopped"
