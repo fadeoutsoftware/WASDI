@@ -478,9 +478,12 @@ services:
       nofile:
         soft: {{ sWasdiPostgresqlKeycloakUlimitNofile }}
         hard: {{ sWasdiPostgresqlKeycloakUlimitNofile }}
+{% if ( aWasdiPostgresqlKeycloakVolume | length ) > 0 %}
     volumes:
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlKeycloakServiceName }}/data01:/var/lib/postgresql/data
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlKeycloakServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+{% for sWasdiPostgresqlKeycloakCurrentVolume in aWasdiPostgresqlKeycloakVolume %}
+      - "{{ sWasdiPostgresqlKeycloakCurrentVolume }}"
+{% endfor %}
+{% endif %}
 {% endif %}
 {% if bWasdiSonarqubeEnabled == True %}
   {{ sWasdiPostgresqlSonarqubeServiceName }}:
