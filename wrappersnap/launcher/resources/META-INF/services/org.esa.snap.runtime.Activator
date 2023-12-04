@@ -1,3 +1,4 @@
-org.esa.lib.gdal.activator.GDALPlugInActivator
+org.esa.snap.lib.openjpeg.activator.OpenJPEGActivator
+org.esa.snap.dataio.netcdf.NetCdfActivator
 org.esa.s2tbx.dataio.cache.S2CacheActivator
 org.esa.s2tbx.biophysical.BiophysicalActivator
