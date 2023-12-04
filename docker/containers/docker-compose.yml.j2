@@ -328,12 +328,19 @@ services:
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiKeycloakServiceName }}.loadbalancer.server.port={{ sWasdiKeycloakInternalPort }}"
-{% if sWasdiKeycloakInternalPort | default("") != ""
+{% if ( sWasdiKeycloakInternalPort | default("") != ""
     and sWasdiKeycloakExternalPort | default("") != ""
-    and aWasdiKeycloakExternalIp | default([]) | length > 0 %}
+    and aWasdiKeycloakExternalIp | default([]) | length > 0 )
+    or
+    ( sWasdiKeycloakClusterInternalPort | default("") != ""
+    and sWasdiKeycloakClusterExternalPort | default("") != ""
+    and aWasdiKeycloakClusterExternalIp | default([]) | length > 0 ) %}
     ports:
-{% for sCurrentExternalIp in aWasdiKeycloakExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiKeycloakExternalPort }}:{{ sWasdiKeycloakInternalPort }}"
+{% for sWasdiKeycloakCurrentExternalIp in aWasdiKeycloakExternalIp | sort %}
+      - "{{ sWasdiKeycloakCurrentExternalIp }}:{{ sWasdiKeycloakExternalPort }}:{{ sWasdiKeycloakInternalPort }}"
+{% endfor %}
+{% for sWasdiKeycloakClusterCurrentExternalIp in aWasdiKeycloakClusterExternalIp | sort %}
+      - "{{ sWasdiKeycloakClusterCurrentExternalIp }}:{{ sWasdiKeycloakClusterExternalPort }}:{{ sWasdiKeycloakClusterInternalPort }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -401,9 +408,12 @@ services:
       nofile:
         soft: {{ sWasdiMongoUlimitNofile }}
         hard: {{ sWasdiMongoUlimitNofile }}
+{% if ( aWasdiMongoVolume | length ) > 0 %}
     volumes:
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiMongoServiceName }}/data01:/data/db:rw
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiMongoServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+{% for sWasdiMongoCurrentVolume in aWasdiMongoVolume %}
+      - "{{ sWasdiMongoCurrentVolume }}"
+{% endfor %}
+{% endif %}
 {% endif %}
 {% if bWasdiNexusEnabled == True %}
   {{ sWasdiNexusServiceName }}:
@@ -472,6 +482,14 @@ services:
       - POSTGRES_PASSWORD=${sPostgresqlKeycloakDatabasePassword}
 {% endif %}
     image: "{{ sWasdiPostgresqlKeycloakImageName }}:{{ sWasdiPostgresqlKeycloakVersion }}"
+{% if sWasdiPostgresqlKeycloakInternalPort | default("") != ""
+    and sWasdiPostgresqlKeycloakExternalPort | default("") != ""
+    and aWasdiPostgresqlKeycloakExternalIp | default([]) | length > 0 %}
+    ports:
+{% for sCurrentExternalIp in aWasdiPostgresqlKeycloakExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiPostgresqlKeycloakExternalPort }}:{{ sWasdiPostgresqlKeycloakInternalPort }}"
+{% endfor %}
+{% endif %}
     pull_policy: "always"
     restart: "unless-stopped"
     ulimits:
