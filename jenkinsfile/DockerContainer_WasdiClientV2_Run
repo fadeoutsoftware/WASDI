@@ -1,0 +1,78 @@
+pipeline {
+  agent any
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
+    disableConcurrentBuilds()
+  }
+
+  tools {
+    nodejs "WASDI_NODEJS_V18"
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        echo "env.GIT_BRANCH        = " + env.GIT_BRANCH
+        echo "env.PYTHONPATH        = " + env.PYTHONPATH
+        echo "env.sAnsibleLimit     = " + env.sAnsibleLimit
+        echo "env.sCurrentRevision  = " + env.sCurrentRevision
+        echo "env.sSourceBranch     = " + env.sSourceBranch
+        echo "env.sWasdiAnsiblePath = " + env.sWasdiAnsiblePath
+        echo "env.WORKSPACE         = " + env.WORKSPACE
+
+        sh script: "pwd", label: "Current location"
+
+        sh script: "which node", label: "Tool > node > path"
+        sh script: "node --version", label: "Tool > node > current version"
+        sh script: "which npm", label: "Tool > npm > path"
+        sh script: "npm --version", label: "Tool > npm > current version"
+        sh script: "which sass", label: "Tool > sass > path"
+        sh script: "sass --version", label: "Tool > sass > current version"
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          sh script: """
+            mkdir --parents `dirname ${sWasdiAnsibleVaultFile}`
+            echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
+          """,
+          label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloud', url: "${env.sWasdiAnsibleGitRepositoryUrl}"]]])
+        }
+      }
+    }
+
+    stage('START OR RESTART THE CONTAINERS') {
+      steps {
+        sh script: """
+            cd ${env.sWasdiAnsiblePath}
+            ansible-playbook playbooks/runDockerContainer.yml \
+                --inventory inventories/wasdi.yml \
+                --limit ${env.sAnsibleLimit} \
+                --diff \
+                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiClientV2Container=true'
+        """,
+        label: "Start or restart the container"
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
