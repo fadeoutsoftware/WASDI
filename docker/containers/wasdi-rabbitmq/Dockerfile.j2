@@ -54,20 +54,14 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
 RUN apt-get update && \
     apt-get install \
         rabbitmq-server && \
-    echo "{{ sWasdiRabbitMqErlangCookie }}" > /root/.erlang.cookie && \
-    echo "{{ sWasdiRabbitMqErlangCookie }}" > /home/{{ sWasdiRabbitMqSystemUserName }}/.erlang.cookie && \
     mkdir --parents \
         /var/log/rabbitmq \
         /var/run/rabbitmq && \
-    chmod 400 \
-        /root/.erlang.cookie \
-        /home/{{ sWasdiRabbitMqSystemUserName }}/.erlang.cookie && \
     chmod 770 \
         /etc/rabbitmq \
         /var/log/rabbitmq \
         /var/run/rabbitmq && \
     chown --recursive {{ sWasdiRabbitMqSystemUserName }}:{{ sWasdiRabbitMqSystemGroupName }} \
-        /home/{{ sWasdiRabbitMqSystemUserName }}/.erlang.cookie \
         /etc/rabbitmq \
         {{ sWasdiRabbitMqBaseDirectoryPath }} \
         /var/log/rabbitmq/ \

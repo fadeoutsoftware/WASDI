@@ -596,8 +596,12 @@ services:
       nofile:
         soft: {{ sWasdiRabbitMqUlimitNofile }}
         hard: {{ sWasdiRabbitMqUlimitNofile }}
+{% if ( aWasdiRabbitMqVolume | length ) > 0 %}
     volumes:
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiRabbitMqServiceName }}/data01:/var/lib/rabbitmq:rw
+{% for sWasdiRabbitMqCurrentVolume in aWasdiRabbitMqVolume %}
+      - "{{ sWasdiRabbitMqCurrentVolume }}"
+{% endfor %}
+{% endif %}
 {% endif %}
 {% if bWasdiSchedulerEnabled == True %}
   {{ sWasdiSchedulerServiceName }}:
