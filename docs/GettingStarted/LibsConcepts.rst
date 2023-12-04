@@ -28,7 +28,7 @@ In `python <https://pypi.org/project/wasdi/>`_ you can use:
 
     pip install wasdi
 	
-In `IDL <https://www.wasdi.net/idlwasdilib.zip>`_ or `Matlab/Octave <https://www.wasdi.net/matlabwasdilib.zip>`_, just donwload the lib files and save on your computer.
+In `IDL <https://github.com/fadeoutsoftware/WASDI/blob/master/libraries/idlwasdilib/idlwasdilib.pro>`_ or `Matlab/Octave <https://github.com/fadeoutsoftware/WASDI/blob/master/libraries/matlabwasdilib/matlabwasdilib.zip>`_, just donwload the lib files and save on your computer.
 
 For `Java <https://www.wasdi.net/javawasdilib.zip>`_, just download and link our jar to your project.
 
@@ -94,7 +94,7 @@ Applications Model
 
 The typical WASDI Application can be represented by this schema:
 
-.. image:: _static/libs_concepts_images/functionmodel.jpg
+.. image:: ../_static/libs_concepts_images/functionmodel.jpg
 
 **EO Application** is the real processor deployed with WASDI. When the End-User starts an application, he must set the input parameters. These parameters can be a date interval, a bounding box, a sensitivity index and any other specific option. 
 
@@ -198,14 +198,14 @@ In the .wasdi folder WASDI will create a subfolder for each user and for each wo
 
 Each workspace folder will be named as the workspaceId. The Workspace Id is a guid. You can find the workspace Id from the web application in two ways:
 
-.. image:: _static/libs_concepts_images/workspaceid.jpg
+.. image:: ../_static/libs_concepts_images/workspaceid.jpg
 
 It is in the address bar, when you are in the Editor section.
 You can click on the info button and read from the property window the Workspace Id.
 
 The folder structure will be something similar:
 
-.. image:: _static/libs_concepts_images/folders.jpg
+.. image:: ../_static/libs_concepts_images/folders.jpg
 
 * Linux: /home/[your user]/.wasdi/[WASDI_User]/[WorkspaceId]/
 * Windows: C:\\Users\\[your user]\\.wasdi\\[WASDI_User]\\[WorkspaceId]\\

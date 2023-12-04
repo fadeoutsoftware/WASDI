@@ -6,12 +6,10 @@
                     "param": "PROVIDER",
                     "type": "dropdown",
                     "label": "Data Provider:",
-                    "default": "ONDA",
+                    "default": "AUTO",
                     "values": [
-                        "ONDA",
-                        "EODC",
-                        "SOBLOO",
-                        "CREODIAS"
+                        "AUTO",
+                        "CREODIAS2"
                     ]
                 }, {
                     "param": "DATE",
