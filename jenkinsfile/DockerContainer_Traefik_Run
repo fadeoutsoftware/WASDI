@@ -1,0 +1,87 @@
+pipeline {
+  agent any
+
+  environment {
+    sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
+    sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
+    sCurrentRevision         = "${env.BUILD_ID}"
+    sMavenProfile            = "wasdi-${env.sCurrentEnvironmentLower}"
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
+    disableConcurrentBuilds()
+  }
+
+  tools {
+    jdk "WASDI_JDK_8"
+    maven "WASDI_MAVEN"
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        echo "env.GIT_BRANCH               = " + env.GIT_BRANCH
+        echo "env.sAnsibleLimit            = " + env.sAnsibleLimit
+        echo "env.sCurrentEnvironmentLower = " + env.sCurrentEnvironmentLower
+        echo "env.sCurrentEnvironmentUpper = " + env.sCurrentEnvironmentUpper
+        echo "env.sCurrentRevision         = " + env.sCurrentRevision
+        echo "env.sSourceBranch            = " + env.sSourceBranch
+        echo "env.sWasdiAnsiblePath        = " + env.sWasdiAnsiblePath
+        echo "env.WORKSPACE                = " + env.WORKSPACE
+
+        sh script: "pwd", label: "Current location"
+        sh script: "cat pom.xml", label: "Content of the main pom.xml file"
+
+        sh script: "which mvn", label: "Tool > mvn > path"
+        sh script: "mvn --version", label: "Tool > mvn > current version"
+        sh script: "which java", label: "Tool > java > path"
+        sh script: "java -version", label: "Tool > java > current version"
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          sh script: """
+            mkdir --parents `dirname ${sWasdiAnsibleVaultFile}`
+            echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
+          """,
+          label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloud', url: "${env.sWasdiAnsibleGitRepositoryUrl}"]]])
+        }
+      }
+    }
+
+    stage('START OR RESTART THE CONTAINERS') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/runDockerContainer.yml \
+            --inventory inventories/wasdi.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiTraefikContainer=true'
+        """,
+        label: "Start or restart the containers"
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
