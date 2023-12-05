@@ -494,8 +494,31 @@
 {% for aoCurrentProcessorType in aoWasdiConfiguration['dockers']['processorTypes'] %}
             {
                 "processorType": "{{ aoCurrentProcessorType['processorType'] }}",
+{% if aoCurrentProcessorType['additionalMountPoints'] == [] %}
+                "additionalMountPoints": [],
+{% else %}
+                "additionalMountPoints": [
+{% for aoCurrentAdditionalMountPoint in aoCurrentProcessorType['additionalMountPoints'] %}
+                    "{{ aoCurrentAdditionalMountPoint }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                ],
+{% endif %}
+{% if aoCurrentProcessorType['commands'] == [] %}
+                "commands": [],
+{% else %}
+                "commands": [
+{% for aoCurrentCommand in aoCurrentProcessorType['commands'] %}
+                    "{{ aoCurrentCommand }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                ],
+{% endif %}
+                "image": "{{ aoCurrentProcessorType['image'] }}",
 {% if aoCurrentProcessorType['environmentVariables'] == [] %}
-                "environmentVariables": []
+                "environmentVariables": [],
 {% else %}
                 "environmentVariables": [
 {% for aoCurrentEnvironmentVariable in aoCurrentProcessorType['environmentVariables'] %}
@@ -506,12 +529,12 @@
 {% endif %}
 {% endfor %}
 
-                ]
+                ],
 {% endif %}
+                "version": "{{ aoCurrentProcessorType['version'] }}"
             }{% if not loop.last %},
 {% endif %}
 {% endfor %}
-
         ],
 {% endif %}
 {% if aoWasdiConfiguration['dockers']['registers'] | length == 0 %}
