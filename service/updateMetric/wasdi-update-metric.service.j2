@@ -15,7 +15,7 @@ Group=root
 LimitNOFILE=327680
 
 Type=simple
-ExecStart=/usr/bin/python3 {{ sWasdiUpdateMetricTargetFilePath }} --configuration-file {{ sWasdiDataConfigurationRootDirectoryPath }}/wasdiConfig.json
+ExecStart=/usr/bin/python3 {{ sWasdiUpdateMetricTargetFilePath }} --configuration-file {{ sWasdiConfigurationRootDirectoryPath }}/wasdiConfig.json
 ExecReload=/bin/kill -HUP $MAINPID
 
 Restart=always

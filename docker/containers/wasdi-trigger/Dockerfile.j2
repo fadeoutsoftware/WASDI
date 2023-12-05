@@ -69,7 +69,7 @@ RUN apt-get update && \
     mkdir --parents \
         {{ sWasdiDataPartitionRootDirectoryPath }} \
         {{ sWasdiDataRootDirectoryPath }} \
-        {{ sWasdiDataConfigurationRootDirectoryPath }} \
+        {{ sWasdiConfigurationRootDirectoryPath }} \
         {{ sWasdiTriggerRootDirectoryPath }} && \
     chown {{ sWasdiDataPartitionRootDirectoryOwner }}:{{ sWasdiDataPartitionRootDirectoryGroup }} \
         {{ sWasdiDataPartitionRootDirectoryPath }} && \
@@ -80,9 +80,9 @@ RUN apt-get update && \
     chmod {{ sWasdiDataRootDirectoryMode }} \
         {{ sWasdiDataRootDirectoryPath }} && \
     chown {{ sWasdiDataConfigurationRootDirectoryOwner }}:{{ sWasdiDataConfigurationRootDirectoryGroup }} \
-        {{ sWasdiDataConfigurationRootDirectoryPath }} && \
+        {{ sWasdiConfigurationRootDirectoryPath }} && \
     chmod {{ sWasdiDataConfigurationRootDirectoryMode }} \
-        {{ sWasdiDataConfigurationRootDirectoryPath }} && \
+        {{ sWasdiConfigurationRootDirectoryPath }} && \
     chown {{ sWasdiTriggerRootDirectoryOwner }}:{{ sWasdiTriggerRootDirectoryGroup }} \
         {{ sWasdiTriggerRootDirectoryPath }} && \
     chmod {{ sWasdiTriggerRootDirectoryMode }} \
@@ -141,6 +141,6 @@ ENTRYPOINT [ \
     "-jar", \
     "{{ sWasdiTriggerRootDirectoryPath }}/{{ sWasdiTriggerBuildTargetFileName }}", \
     "--config", \
-    "{{ sWasdiDataConfigurationRootDirectoryPath }}/wasdiConfig.json", \
+    "{{ sWasdiConfigurationRootDirectoryPath }}/wasdiConfig.json", \
     "-scheduleid" \
 ]
