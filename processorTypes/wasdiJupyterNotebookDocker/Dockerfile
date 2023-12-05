@@ -77,17 +77,19 @@ RUN mkdir --parents {{ sWasdiSystemUserHome }}/notebook && \
     find {{ sWasdiSystemUserHome }} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
+# Declare the environment variable
+ENV sWasdiNotebookId=""
+
+
 # Start the container
-CMD [ \
-    "{{ sWasdiSystemUserHome }}/venv/bin/jupyter", \
-    "lab", \
-    "--KernelManager.transport=tcp", \
-    "--ServerApp.ip=0.0.0.0", \
-    "--ServerApp.port=8888", \
-    "--ServerApp.base_url=/notebook/${sWasdiJupyterNotebookId}", \
-    "--ServerApp.password=''", \
-    "--ServerApp.token=''", \
-    "--ServerApp.trust_xheaders=true", \
-    "--ServerApp.root_dir={{ sWasdiSystemUserHome }}/notebook", \
-    "--ServerApp.browser=false" \
-]
+CMD {{ sWasdiSystemUserHome }}/venv/bin/jupyter lab \
+    --KernelManager.transport=tcp \
+    --ServerApp.ip=0.0.0.0 \
+    --ServerApp.port=8888 \
+    --ServerApp.password="" \
+    --ServerApp.token="" \
+    --ServerApp.trust_xheaders=true \
+    --ServerApp.root_dir={{ sWasdiSystemUserHome }}/notebook \
+    --ServerApp.base_url=/notebook/${sWasdiNotebookId} \
+    --ServerApp.browser=false \
+    --no-browser
