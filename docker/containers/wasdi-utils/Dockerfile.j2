@@ -66,9 +66,9 @@ RUN apt-get update && \
     mkdir --parents \
         {{ sWasdiConfigurationRootDirectoryPath }} \
         {{ sWasdiUtilsRootDirectoryPath }} && \
-    chown {{ sWasdiDataConfigurationRootDirectoryOwner }}:{{ sWasdiDataConfigurationRootDirectoryGroup }} \
+    chown {{ sWasdiConfigurationRootDirectoryOwner }}:{{ sWasdiConfigurationRootDirectoryGroup }} \
         {{ sWasdiConfigurationRootDirectoryPath }} && \
-    chmod {{ sWasdiDataConfigurationRootDirectoryMode }} \
+    chmod {{ sWasdiConfigurationRootDirectoryMode }} \
         {{ sWasdiConfigurationRootDirectoryPath }} && \
     chown {{ sWasdiUtilsRootDirectoryOwner }}:{{ sWasdiUtilsRootDirectoryGroup }} \
         {{ sWasdiUtilsRootDirectoryPath }} && \
