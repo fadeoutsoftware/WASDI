@@ -74,6 +74,7 @@ RUN mkdir --parents {{ sWasdiSystemUserHome }}/notebook && \
         jupyterlab \
         numpy \
         wasdi && \
+    jupyter labextension disable "@jupyterlab/apputils-extension:announcements" && \
     find {{ sWasdiSystemUserHome }} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
