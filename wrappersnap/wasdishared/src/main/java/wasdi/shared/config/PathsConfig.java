@@ -15,11 +15,6 @@ import wasdi.shared.utils.log.WasdiLog;
 public class PathsConfig {
 	
 	/**
-	 * Path of the web application
-	 */
-	public String tomcatWebAppPath;
-	
-	/**
 	 * Base root path that contains subfolders:
 	 * 	.workspaces
 	 * 	.metadata
@@ -70,13 +65,7 @@ public class PathsConfig {
 	 * Folder used by WASDI to write temporary files
 	 */
 	public String wasdiTempFolder;
-	
-	/**
-	 * Path the python tool used to render jinja templates by java code.
-	 * We use external script because there was an incompatibility with the most know jar implementing it
-	 */
-	public String jinjaTemplateRenderTool;
-	
+		
 	/**
 	 * Full path to execute python commands (ie /usr/bin/python3)
 	 */

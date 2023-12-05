@@ -77,36 +77,4 @@ public class JinjaTemplateRenderer {
 			return false;
 		}
 	}
-	
-	/**
-	 * Creates the render command
-	 * 
-	 * @param sTemplateFile Full template file path
-	 * @param sOutputFile Full output file path
-	 * @param sJsonInputs String representing a json that represents the paramters
-	 * @param bStrict True to apply strict flag
-	 * @return the full command line to execute
-	 */
-	protected String buildRenderCommand(String sTemplateFile, String sOutputFile, String sJsonInputs, boolean bStrict) {
-		
-		String sLineSeparator = System.getProperty("line.separator");
-		
-		StringBuilder oSB = new StringBuilder();
-		
-		oSB.append(WasdiConfig.Current.paths.pythonExecPath + "  " +  WasdiConfig.Current.paths.jinjaTemplateRenderTool + " \\");
-		oSB.append(sLineSeparator);
-		oSB.append("  --template " + sTemplateFile + " \\");
-		oSB.append(sLineSeparator);
-		oSB.append("  --rendered-file " + sOutputFile + " \\");
-		oSB.append(sLineSeparator);
-		oSB.append("  --json-inline '" + sJsonInputs + "'");
-		
-		if (bStrict) {
-			oSB.append(" \\");
-			oSB.append(sLineSeparator);
-			oSB.append("  --strict");			
-		}
-
-		return oSB.toString();
-	}
 }

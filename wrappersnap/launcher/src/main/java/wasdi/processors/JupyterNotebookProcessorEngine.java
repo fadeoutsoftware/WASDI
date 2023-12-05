@@ -13,6 +13,8 @@ import wasdi.shared.business.JupyterNotebook;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.Processor;
+import wasdi.shared.config.DockerRegistryConfig;
+import wasdi.shared.config.DockersConfig;
 import wasdi.shared.config.EnvironmentVariableConfig;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.ProcessorTypeConfig;
@@ -52,6 +54,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 	 * @return
 	 */
 	public boolean launchJupyterNotebook(ProcessorParameter oParameter) {
+		
 		WasdiLog.debugLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: start");
 
 		// Check the parameter
@@ -65,110 +68,155 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		
 		// Fixed Processor Name in this case
 		String sProcessorName = "jupyter-notebook";
+		
+		// Take reference to the folder of the local processor
+		String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
+		// And of the template folder
+		String sProcessorTemplateFolder = getProcessorTemplateFolder(sProcessorName);		
 
 		try {
 			processWorkspaceLog("Creating JupyterLab on this workspace");
 			
+			// Get the processor Type Config
 			ProcessorTypeConfig oProcessorTypeConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig(sProcessorName);
 			
 			if (oProcessorTypeConfig == null) {
 				WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: impossible to find the " + sProcessorName + " config");
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-				return false;					
+				return false;		
 			}
 			
 			WasdiLog.debugLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: check if the jupyter image exists: name = " + oProcessorTypeConfig.image + " version = " + oProcessorTypeConfig.version);
 			
-			// Take reference to the folder of the notebooks "processor" where all the dockers are deployed
-			String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
-			String sProcessorTemplateFolder = getProcessorTemplateFolder(sProcessorName);
-
 			// Create the Docker Utils Object that will be used to build and create containers
 			DockerUtils oDockerUtils = new DockerUtils();
+			
+			// We do not need to start after the build
+			m_bRunAfterDeploy = false;
+			// And we work with our main register
+			m_sDockerRegistry = getDockerRegisterAddress();
+			
+			// Create the "fake" processor Entity
+			Processor oNotebookFakeProcessor = new Processor();
+			oNotebookFakeProcessor.setName(oProcessorTypeConfig.image);
+			oNotebookFakeProcessor.setVersion(oProcessorTypeConfig.version);			
+			
+			// Initialize Docker Utils
+			oDockerUtils.setProcessor(oNotebookFakeProcessor);
+			oDockerUtils.setWasdiSystemUserName(WasdiConfig.Current.systemUserName);
+			oDockerUtils.setWasdiSystemGroupName(WasdiConfig.Current.systemGroupName);
+			oDockerUtils.setWasdiSystemGroupId(WasdiConfig.Current.systemGroupId);
+			oDockerUtils.setWasdiSystemUserId(WasdiConfig.Current.systemUserId);
+			oDockerUtils.setProcessorFolder(sProcessorFolder);
+			oDockerUtils.setDockerRegistry(m_sDockerRegistry);
+			
+			// Get back the full Docker Register Config entity
+			DockerRegistryConfig oDockerRegistryConfig = WasdiConfig.Current.dockers.getRegisterByAddress(m_sDockerRegistry);
+			
+			// That must exists
+			if (oDockerRegistryConfig == null) {
+				WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: impossible to find the registry config for " + m_sDockerRegistry);
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				return false;						
+			}
+			
+			// Login in the registry
+			String sRegistryToken = oDockerUtils.loginInRegistry(oDockerRegistryConfig);
+			
+			if (Utils.isNullOrEmpty(sRegistryToken)) {
+				WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: impossible to login in the registry");
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				return false;										
+			}
+			
+			WasdiLog.debugLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: logged in the registry, search if the image is available");
+			
 			// is the image available?
 			boolean bImageAvailable = oDockerUtils.isImageAvailable(oProcessorTypeConfig.image, oProcessorTypeConfig.version);
 			
 			if (!bImageAvailable) {
+				// We have no local image. But maybe is available on the registry
+				WasdiLog.debugLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: image not available, can we pull it?");
 				
-				WasdiLog.debugLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: image not available");				
+				// Prepare the full name of the image
+				String sFullImageName = m_sDockerRegistry + "/wasdi/" + oProcessorTypeConfig.image + ":" + oProcessorTypeConfig.version;
+				
+				// Try to pull
+				boolean bPullDone = oDockerUtils.pull(sFullImageName, sRegistryToken);
+				
+				if (!bPullDone) {
+					
+					WasdiLog.debugLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: Impossible to pull the image. We need to build");
+					
+					// check if the jupyter-notebook template folder exists
+					boolean bProcessorTemplateFolderExists = WasdiFileUtils.fileExists(sProcessorTemplateFolder);
 
-				// check if the jupyter-notebook template folder exists
-				boolean bProcessorTemplateFolderExists = WasdiFileUtils.fileExists(sProcessorTemplateFolder);
+					if (!bProcessorTemplateFolderExists) {
+						WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the ProcessorTemplateFolder does not exist: " + sProcessorTemplateFolder);
+						LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+						return false;
+					}
 
-				if (!bProcessorTemplateFolderExists) {
-					WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the ProcessorTemplateFolder does not exist: " + sProcessorTemplateFolder);
-					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-					return false;
+					processWorkspaceLog("Copy template directory");
+
+					// check if the processor folder exists
+					boolean bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
+					
+					if (!bProcessorFolderExists) {
+						// Copy Docker template files in the processor folder
+						File oDockerTemplateFolder = new File(sProcessorTemplateFolder);
+						File oProcessorFolder = new File(sProcessorFolder);
+
+						WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: creating the ProcessorFolder: " + sProcessorFolder + " and copy the template");
+						FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
+					}
+
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 10);
+					
+					// We build our new docker
+					processWorkspaceLog("Building Notebook Docker");
+					WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: starting docker build");
+													
+					// Trigger the build
+					String sDockerImageName = oDockerUtils.build();
+					
+					if (Utils.isNullOrEmpty(sDockerImageName)) {
+						WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker build command failed");
+						LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+						return false;
+					}
+
+					WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: got built image name " + sDockerImageName);
+					
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 30);
+					
+					// This step will let WASDI push in a docker repository
+					processWorkspaceLog("Push new image to the registers");
+					WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: pushing image in registers");
+					
+					// Save the name of the image to push
+					m_sDockerImageName = sDockerImageName;
+					
+					// Here we save the address of the image
+					String sPushedImageAddress = pushImageInRegisters(oNotebookFakeProcessor);
+					
+					if (Utils.isNullOrEmpty(sPushedImageAddress)) {
+						WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: Impossible to push the image.");
+						return false;
+					}
+					
+					WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: pushed image in registers = " + sPushedImageAddress);					
 				}
-
-				processWorkspaceLog("Copy template directory");
-
-				// check if the processor folder exists
-				boolean bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
-				
-				if (!bProcessorFolderExists) {
-					// Copy Docker template files in the processor folder
-					File oDockerTemplateFolder = new File(sProcessorTemplateFolder);
+				else {
+					WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: image pulled = " + sFullImageName);
+					m_sDockerImageName = sFullImageName;
+					
+					// Check and or create the processor folder
 					File oProcessorFolder = new File(sProcessorFolder);
-
-					WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: creating the ProcessorFolder: " + sProcessorFolder + " and copy the template");
-					FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
+					if (!oProcessorFolder.exists()) {
+						oProcessorFolder.mkdirs();
+					}
 				}
-
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 10);
-				
-				// We build our new docker
-				processWorkspaceLog("Building Notebook Docker");
-				WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: starting docker build");
-				
-				// We do not need to start after the build
-				m_bRunAfterDeploy = false;
-				// And we work with our main register
-				m_sDockerRegistry = getDockerRegisterAddress();
-				
-				// Create the "fake" processor Entity
-				Processor oNotebookFakeProcessor = new Processor();
-				oNotebookFakeProcessor.setName(oProcessorTypeConfig.image);
-				oNotebookFakeProcessor.setVersion(oProcessorTypeConfig.version);
-				
-				// Initialize Docker Utils
-				oDockerUtils.setProcessor(oNotebookFakeProcessor);
-				oDockerUtils.setWasdiSystemUserName(WasdiConfig.Current.systemUserName);
-				oDockerUtils.setWasdiSystemGroupName(WasdiConfig.Current.systemGroupName);
-				oDockerUtils.setWasdiSystemGroupId(WasdiConfig.Current.systemGroupId);
-				oDockerUtils.setWasdiSystemUserId(WasdiConfig.Current.systemUserId);
-				oDockerUtils.setProcessorFolder(sProcessorFolder);
-				oDockerUtils.setDockerRegistry(m_sDockerRegistry);
-				
-				// Trigger the build
-				String sDockerImageName = oDockerUtils.build();
-				
-				if (Utils.isNullOrEmpty(sDockerImageName)) {
-					WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker build command failed");
-					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-					return false;
-				}
-
-				WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: got built image name " + sDockerImageName);
-				
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 30);
-				
-				// This step will let WASDI push in a docker repository
-				processWorkspaceLog("Push new image to the registers");
-				WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: pushing image in registers");
-				
-				// Save the name of the image to push
-				m_sDockerImageName = sDockerImageName;
-				
-				// Here we save the address of the image
-				String sPushedImageAddress = pushImageInRegisters(oNotebookFakeProcessor);
-				
-				if (Utils.isNullOrEmpty(sPushedImageAddress)) {
-					WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: Impossible to push the image.");
-					return false;
-				}
-				
-				WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: pushed image in registers = " + sPushedImageAddress);
 			}
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 40);
@@ -215,14 +263,22 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 				aoEnvironmentVariablesCopy.add(oCopy);
 			}
 			
+			// Add the notebook id variable
 			EnvironmentVariableConfig oEnvNotebookId = new EnvironmentVariableConfig();
 			oEnvNotebookId.key = "sWasdiNotebookId";
 			oEnvNotebookId.value = sJupyterNotebookCode;
 			aoEnvironmentVariablesCopy.add(oEnvNotebookId);
 			
 			// Create and start the container
-			String sContanerId = oDockerUtils.createAndStartContainer(sContainerName, oProcessorTypeConfig.image, oProcessorTypeConfig.version, oProcessorTypeConfig.commands, asAdditionalMountPointsCopy, oProcessorTypeConfig.extraHosts, aoEnvironmentVariablesCopy);
-			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: obtained container id " + sContanerId);
+			String sContainerId = oDockerUtils.createAndStartContainer(sContainerName, "wasdi/" + oProcessorTypeConfig.image, oProcessorTypeConfig.version, oProcessorTypeConfig.commands, asAdditionalMountPointsCopy, oProcessorTypeConfig.extraHosts, aoEnvironmentVariablesCopy);
+			
+			if (Utils.isNullOrEmpty(sContainerId)) {
+				WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker createAndStartContainer command failed");
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				return false;
+			}
+			
+			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: obtained container id " + sContainerId);			
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 60);
 
