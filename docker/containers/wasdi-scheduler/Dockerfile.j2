@@ -46,7 +46,7 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     apt-get update && \
     apt-get install \
         ca-certificates && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ jammy main restricted universe multiverse"          > /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy main restricted universe multiverse"           > /etc/apt/sources.list && \
     echo "deb https://mirror.ubuntu.ikoula.com/ jammy-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
     echo "deb https://mirror.ubuntu.ikoula.com/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list && \
     apt-get update && \
@@ -69,7 +69,7 @@ RUN apt-get update && \
     mkdir --parents \
         {{ sWasdiDataPartitionRootDirectoryPath }} \
         {{ sWasdiDataRootDirectoryPath }} \
-        {{ sWasdiDataConfigurationRootDirectoryPath }} \
+        {{ sWasdiConfigurationRootDirectoryPath }} \
         {{ sWasdiSchedulerRootDirectoryPath }} && \
     chown {{ sWasdiDataPartitionRootDirectoryOwner }}:{{ sWasdiDataPartitionRootDirectoryGroup }} \
         {{ sWasdiDataPartitionRootDirectoryPath }} && \
@@ -79,10 +79,10 @@ RUN apt-get update && \
         {{ sWasdiDataRootDirectoryPath }} && \
     chmod {{ sWasdiDataRootDirectoryMode }} \
         {{ sWasdiDataRootDirectoryPath }} && \
-    chown {{ sWasdiDataConfigurationRootDirectoryOwner }}:{{ sWasdiDataConfigurationRootDirectoryGroup }} \
-        {{ sWasdiDataConfigurationRootDirectoryPath }} && \
-    chmod {{ sWasdiDataConfigurationRootDirectoryMode }} \
-        {{ sWasdiDataConfigurationRootDirectoryPath }} && \
+    chown {{ sWasdiConfigurationRootDirectoryOwner }}:{{ sWasdiConfigurationRootDirectoryGroup }} \
+        {{ sWasdiConfigurationRootDirectoryPath }} && \
+    chmod {{ sWasdiConfigurationRootDirectoryMode }} \
+        {{ sWasdiConfigurationRootDirectoryPath }} && \
     chown {{ sWasdiSchedulerRootDirectoryOwner }}:{{ sWasdiSchedulerRootDirectoryGroup }} \
         {{ sWasdiSchedulerRootDirectoryPath }} && \
     chmod {{ sWasdiSchedulerRootDirectoryMode }} \
@@ -137,5 +137,5 @@ CMD [ \
     "-jar", \
     "{{ sWasdiSchedulerBuildTargetFileName }}", \
     "--config", \
-    "{{ sWasdiDataConfigurationRootDirectoryPath }}/wasdiConfig.json" \
+    "{{ sWasdiConfigurationRootDirectoryPath }}/wasdiConfig.json" \
 ]

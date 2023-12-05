@@ -38,4 +38,4 @@ services:
         soft: {{ sWasdiTriggerUlimitNofile }}
         hard: {{ sWasdiTriggerUlimitNofile }}
     volumes:
-      - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
+      - {{ sWasdiConfigurationRootDirectoryPath }}:{{ sWasdiConfigurationRootDirectoryPath }}:ro

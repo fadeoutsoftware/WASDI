@@ -608,7 +608,7 @@ services:
     volumes:
       - "{{ sWasdiDockerSocketFilePath }}:{{ sWasdiDockerSocketFilePath }}:ro"
       - "{{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw"
-      - "{{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro"
+      - "{{ sWasdiConfigurationRootDirectoryPath }}:{{ sWasdiConfigurationRootDirectoryPath }}:ro"
 {% endif %}
 {% if bWasdiSonarqubeEnabled == True %}
   {{ sWasdiSonarqubeServiceName }}:
@@ -744,7 +744,7 @@ services:
         hard: {{ sWasdiTomcatOgcProcessesServerUlimitNofile }}
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
-      - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
+      - {{ sWasdiConfigurationRootDirectoryPath }}:{{ sWasdiConfigurationRootDirectoryPath }}:ro
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
   {{ sWasdiTomcatWasdiOpenEoServerServiceName }}:
@@ -791,7 +791,7 @@ services:
         hard: {{ sWasdiTomcatWasdiOpenEoServerUlimitNofile }}
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
-      - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
+      - {{ sWasdiConfigurationRootDirectoryPath }}:{{ sWasdiConfigurationRootDirectoryPath }}:ro
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
   {{ sWasdiTomcatWasdiWebServerServiceName }}:
@@ -838,7 +838,7 @@ services:
         hard: {{ sWasdiTomcatWasdiWebServerUlimitNofile }}
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
-      - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
+      - {{ sWasdiConfigurationRootDirectoryPath }}:{{ sWasdiConfigurationRootDirectoryPath }}:ro
 {% endif %}
   {{ sWasdiTraefikServiceName }}:
     command:
@@ -928,6 +928,6 @@ services:
         soft: {{ sWasdiUpdateMetricUlimitNofile }}
         hard: {{ sWasdiUpdateMetricUlimitNofile }}
     volumes:
-      - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
+      - {{ sWasdiConfigurationRootDirectoryPath }}:{{ sWasdiConfigurationRootDirectoryPath }}:ro
       - {{ sWasdiDataPartitionRootDirectoryPath }}:{{ sWasdiDataPartitionRootDirectoryPath }}:ro
 {% endif %}
