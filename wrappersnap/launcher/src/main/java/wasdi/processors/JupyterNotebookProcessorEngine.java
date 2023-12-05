@@ -145,6 +145,18 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 				FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
 			}
 			
+			// mkdir **notebook** in the Workspace folder: it will be mounted on the docker that hosts the users' notebook
+			String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
+			String sNotebookPath = sWorkspacePath + "notebook";
+			
+			File oNotebookFolder = new File(sNotebookPath);
+
+			if (!WasdiFileUtils.fileExists(oNotebookFolder)) {
+				FileUtils.forceMkdir(oNotebookFolder);
+			}
+
+			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the " + sNotebookPath + " folder was" + (WasdiFileUtils.fileExists(oNotebookFolder) ? " " : " not ") + "created");			
+			
 			WasdiLog.debugLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: search if the image is available");
 			
 			// is the image available?
@@ -283,18 +295,6 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: obtained container id " + sContainerId);			
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 60);
-
-			// mkdir **notebook** in the Workspace folder: it will be mounted on the docker that hosts the users' notebook
-			String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
-			String sNotebookPath = sWorkspacePath + "notebook";
-			
-			File oNotebookFolder = new File(sNotebookPath);
-
-			if (!WasdiFileUtils.fileExists(oNotebookFolder)) {
-				FileUtils.forceMkdir(oNotebookFolder);
-			}
-
-			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the " + sNotebookPath + " folder was" + (WasdiFileUtils.fileExists(oNotebookFolder) ? " " : " not ") + "created");
 			
 			processWorkspaceLog("Adding notebook configuration file");
 			
