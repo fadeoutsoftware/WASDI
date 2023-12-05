@@ -1,0 +1,28 @@
+---
+http:
+{%- if aWasdiNotebookFirewallAllowedIps is defined %}
+  middlewares:
+    mw_{{ sWasdiNotebookId }}:
+      ipWhiteList:
+        sourceRange:
+{%- for sWasdiNotebookFirewallCurrentAllowedIp in aWasdiNotebookFirewallAllowedIps %}
+          - "{{ sWasdiNotebookFirewallCurrentAllowedIp }}"
+{%- endfor %}
+        ipStrategy:
+          depth: 1
+{% endif %}
+  services:
+    svc_{{ sWasdiNotebookId }}:
+      loadBalancer:
+        servers:
+        - url: "http://nb_{{ sWasdiNotebookId }}:{{ sWasdiNotebookContainerInternalPort | default(8888) }}/"
+
+  routers:
+    r_{{ sWasdiNotebookId }}:
+      rule: PathPrefix(`/notebook/{{ sWasdiNotebookId }}`)
+      entryPoints:
+        - "web"
+      service: "svc_{{ sWasdiNotebookId }}"
+{% if aWasdiNotebookFirewallAllowedIps is defined %}      middlewares:
+        - "mw_{{ sWasdiNotebookId }}"
+{% endif %}
