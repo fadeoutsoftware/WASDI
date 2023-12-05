@@ -65,19 +65,16 @@ USER {{ sWasdiSystemUserName }}
 WORKDIR {{ sWasdiSystemUserHome }}
 
 
-## FROM HERE, THERE IS NO MORE CACHE ##
-# Copy the needed files
-COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} ./ {{ sWasdiSystemUserHome }}/application/
-
-
 # Create the virtual environment
 # Install the common PIP libraries
 # Install JupyterLab
-RUN python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
+RUN mkdir --parents {{ sWasdiSystemUserHome }}/notebook && \
+    python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
     pip3 install --no-cache-dir --no-compile \
         jupyterlab \
         numpy \
-        wasdi
+        wasdi && \
+    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
 # Start the container
@@ -87,7 +84,7 @@ CMD [ \
     "--KernelManager.transport=tcp", \
     "--ServerApp.ip=0.0.0.0", \
     "--ServerApp.port=8888", \
-    "--ServerApp.base_url=/notebook/%(ENV_WASDI_NOTEBOOK_ID)s", \
+    "--ServerApp.base_url=/notebook/${sWasdiJupyterNotebookId}", \
     "--ServerApp.password=''", \
     "--ServerApp.token=''", \
     "--ServerApp.trust_xheaders=true", \
