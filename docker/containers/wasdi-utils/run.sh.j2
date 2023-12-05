@@ -9,8 +9,10 @@ fi
 docker \
     run \
     --interactive \
+    --rm \
     --mount type=bind,source={{ sWasdiDataConfigurationRootDirectoryPath }},destination={{ sWasdiDataConfigurationRootDirectoryPath }},readonly \
     --mount type=bind,source={{ sWasdiDataRootDirectoryPath }},destination={{ sWasdiDataRootDirectoryPath }} \
     --network {{ sWasdiDockerNetworkName }} \
     --tty \
-    {{ sWasdiUtilsServiceName }}:latest
+    {{ sWasdiUtilsServiceName }}:latest \
+    ${@}
