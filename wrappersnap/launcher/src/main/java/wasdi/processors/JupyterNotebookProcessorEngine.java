@@ -13,6 +13,7 @@ import wasdi.shared.business.JupyterNotebook;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.Processor;
+import wasdi.shared.config.EnvironmentVariableConfig;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.ProcessorTypeConfig;
 import wasdi.shared.config.WasdiConfig;
@@ -41,7 +42,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 	
 	@Override
 	protected IPackageManager getPackageManager(String sUrl) {
-		WasdiLog.infoLog("JupyterNotebookProcessorEngine.getPackageManager: Package Manager Not available for Jupyter Notebook Engine");
+		WasdiLog.warnLog("JupyterNotebookProcessorEngine.getPackageManager: Package Manager Not available for Jupyter Notebook Engine");
 		return null;
 	}
 
@@ -53,7 +54,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 	public boolean launchJupyterNotebook(ProcessorParameter oParameter) {
 		WasdiLog.debugLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: start");
 
-		// Check the domain
+		// Check the parameter
 		if (oParameter == null) {
 			WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: oParameter is null");
 			return false;
@@ -61,106 +62,12 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 		ProcessWorkspace oProcessWorkspace = m_oProcessWorkspace;
-
+		
+		// Fixed Processor Name in this case
 		String sProcessorName = "jupyter-notebook";
 
 		try {
 			processWorkspaceLog("Creating JupyterLab on this workspace");
-			
-			// Take reference to the folder of the notebooks "processor" where all the dockers are deployed
-			String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
-			String sProcessorTemplateFolder = getProcessorTemplateFolder(sProcessorName);
-
-			// check if the processors/jupyter-notebook template and processor exists
-			boolean bProcessorTemplateFolderExists = WasdiFileUtils.fileExists(sProcessorTemplateFolder);
-
-			if (!bProcessorTemplateFolderExists) {
-				WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the ProcessorTemplateFolder does not exist: " + sProcessorTemplateFolder);
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-				return false;
-			}
-
-			processWorkspaceLog("Copy template directory");
-
-			boolean bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
-
-			if (bProcessorFolderExists) {
-				
-				// Check if nothing changed in the templates
-				
-				String sGeneralCommonEnvTemplateFilePath = getProcessorTemplateGeneralCommonEnvFilePath(sProcessorName);
-				File oGeneralCommonEnvTemplate = new File(sGeneralCommonEnvTemplateFilePath);
-
-				String sGeneralCommonEnvProcessorFilePath = getProcessorGeneralCommonEnvFilePath(sProcessorName);
-				File oGeneralCommonEnvProcessor = new File(sGeneralCommonEnvProcessorFilePath);
-
-
-				if (WasdiFileUtils.fileExists(oGeneralCommonEnvTemplate)) {
-					if (!WasdiFileUtils.filesAreTheSame(oGeneralCommonEnvTemplate, oGeneralCommonEnvProcessor)) {
-						WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: found a new version of the general_common env: cleaning local processor folder to rebuild");
-						// Files are different: we will need to re-create
-						WasdiFileUtils.deleteFile(sProcessorFolder);
-						bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
-					}
-				}
-
-			}
-
-			if (!bProcessorFolderExists) {
-				// Copy Docker template files in the processor folder
-				File oDockerTemplateFolder = new File(sProcessorTemplateFolder);
-				File oProcessorFolder = new File(sProcessorFolder);
-
-				WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: creating the ProcessorFolder: " + sProcessorFolder + " and copy the template");
-				FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
-			}
-
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 10);
-			
-			// Check if our proxy is up and running
-			processWorkspaceLog("verify that the Traefik container is up-and-running");
-			
-			boolean bTraefikDockerContainerInspectResult = false;
-			
-			DockerUtils oDockerUtils = new DockerUtils();
-			ContainerInfo oContainer = oDockerUtils.getContainerInfoByContainerName("traefik-notebook");			
-
-    		if (oContainer != null) {
-    			if (oContainer.State.equals(ContainerStates.RUNNING)) bTraefikDockerContainerInspectResult = true;
-    		}
-			
-			if (!bTraefikDockerContainerInspectResult) {
-				
-				// No!! Time to wake-up it
-				WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the Traefik container is down or missing, restart it");
-
-				processWorkspaceLog("starting the Traefik container");
-				
-				ProcessorTypeConfig oProxyConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig("notebook-proxy");
-				
-				if (oProxyConfig == null) {
-					WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: impossible to find the notebook-proxy config" );
-					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-					return false;					
-				}
-				
-				String sProxyContainerId = oDockerUtils.createAndStartContainer("traefik-notebook", oProxyConfig.image, oProxyConfig.version, oProxyConfig.commands, oProxyConfig.additionalMountPoints, oProxyConfig.extraHosts, oProxyConfig.environmentVariables);
-				
-				if (Utils.isNullOrEmpty(sProxyContainerId)) {
-					WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: impossible to start the notebook-proxy container" );
-					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-					return false;					
-				}
-				else {
-					WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: notebook-proxy container created with id " + sProxyContainerId);
-				}
-
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
-			}
-			
-			// We build our new docker
-			processWorkspaceLog("execute command: docker build");
-			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: starting docker build");
 			
 			ProcessorTypeConfig oProcessorTypeConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig(sProcessorName);
 			
@@ -170,32 +77,96 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 				return false;					
 			}
 			
-			Processor oNotebookFakeProcessor = new Processor();
-			oNotebookFakeProcessor.setName(oProcessorTypeConfig.image);
-			oNotebookFakeProcessor.setVersion(oProcessorTypeConfig.version);
-			oDockerUtils.setProcessor(oNotebookFakeProcessor);
-			oDockerUtils.setWasdiSystemUserName(WasdiConfig.Current.systemUserName);
-			oDockerUtils.setWasdiSystemGroupName(WasdiConfig.Current.systemGroupName);
-			oDockerUtils.setWasdiSystemGroupId(WasdiConfig.Current.systemGroupId);
-			oDockerUtils.setWasdiSystemUserId(WasdiConfig.Current.systemUserId);
-			oDockerUtils.setProcessorFolder(sProcessorFolder);
+			WasdiLog.debugLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: check if the jupyter image exists: name = " + oProcessorTypeConfig.image + " version = " + oProcessorTypeConfig.version);
 			
-			String sDockerImageName = oDockerUtils.build();
+			DockerUtils oDockerUtils = new DockerUtils();
 			
-			if (Utils.isNullOrEmpty(sDockerImageName)) {
-				WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker build command failed");
+			// Take reference to the folder of the notebooks "processor" where all the dockers are deployed
+			String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
+			String sProcessorTemplateFolder = getProcessorTemplateFolder(sProcessorName);
 
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-				return false;
+			
+			boolean bImageAvailable = oDockerUtils.isImageAvailable(oProcessorTypeConfig.image, oProcessorTypeConfig.version);
+			
+			if (!bImageAvailable) {
+				
+				WasdiLog.debugLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: image not available");				
+
+				// check if the jupyter-notebook template folder exists
+				boolean bProcessorTemplateFolderExists = WasdiFileUtils.fileExists(sProcessorTemplateFolder);
+
+				if (!bProcessorTemplateFolderExists) {
+					WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the ProcessorTemplateFolder does not exist: " + sProcessorTemplateFolder);
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+					return false;
+				}
+
+				processWorkspaceLog("Copy template directory");
+
+				// check if the processor folder exists
+				boolean bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
+				
+				if (!bProcessorFolderExists) {
+					// Copy Docker template files in the processor folder
+					File oDockerTemplateFolder = new File(sProcessorTemplateFolder);
+					File oProcessorFolder = new File(sProcessorFolder);
+
+					WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: creating the ProcessorFolder: " + sProcessorFolder + " and copy the template");
+					FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
+				}
+
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 10);
+				
+				// We build our new docker
+				processWorkspaceLog("Building Notebook Docker");
+				WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: starting docker build");
+				
+				// We do not need to start after the build
+				m_bRunAfterDeploy = false;
+				// And we work with our main register
+				m_sDockerRegistry = getDockerRegisterAddress();
+				
+				// Create the "fake" processor Entity
+				Processor oNotebookFakeProcessor = new Processor();
+				oNotebookFakeProcessor.setName(oProcessorTypeConfig.image);
+				oNotebookFakeProcessor.setVersion(oProcessorTypeConfig.version);
+				
+				// Initialize Docker Utils
+				oDockerUtils.setProcessor(oNotebookFakeProcessor);
+				oDockerUtils.setWasdiSystemUserName(WasdiConfig.Current.systemUserName);
+				oDockerUtils.setWasdiSystemGroupName(WasdiConfig.Current.systemGroupName);
+				oDockerUtils.setWasdiSystemGroupId(WasdiConfig.Current.systemGroupId);
+				oDockerUtils.setWasdiSystemUserId(WasdiConfig.Current.systemUserId);
+				oDockerUtils.setProcessorFolder(sProcessorFolder);
+				oDockerUtils.setDockerRegistry(m_sDockerRegistry);
+				
+				// Trigger the build
+				String sDockerImageName = oDockerUtils.build();
+				
+				if (Utils.isNullOrEmpty(sDockerImageName)) {
+					WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker build command failed");
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+					return false;
+				}
+
+				WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: got built image name " + sDockerImageName);
+				
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 30);
+				
+				// This step will let WASDI push in a docker repository
+				processWorkspaceLog("Push new image to the registers");
+				WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: pushing image in registers");
+				
+				// Here we save the address of the image
+				String sPushedImageAddress = pushImageInRegisters(oNotebookFakeProcessor);
+				
+				if (Utils.isNullOrEmpty(sPushedImageAddress)) {
+					WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: Impossible to push the image.");
+					return false;
+				}
+				
+				WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: pushed image in registers = " + sPushedImageAddress);
 			}
-
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 30);
-			
-			// This step will let WASDI push in a docker repository if (when) we will install one.
-			processWorkspaceLog("execute command: docker push");
-			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: docker push");
-			
-			// TODO: push 
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 40);
 			
@@ -208,15 +179,14 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			// Set the container name
 			String sContainerName = "nb_" + sJupyterNotebookCode;
 			
-			
-			// Add the 2 dynamic mounted folder (workspace, and notebook)
-			
+			// Create a copy of the mount points
 			ArrayList<String> asAdditionalMountPointsCopy = new ArrayList<>();
 			
 			for (String sMountPoint : oProcessorTypeConfig.additionalMountPoints) {
 				asAdditionalMountPointsCopy.add(sMountPoint);
 			}
 			
+			// Add the folder fo the workspace
 			String sWorkspaceFolderMount = PathsConfig.getWorkspacePath(oParameter);
 			String sContainerWorkspacePath = PathsConfig.getWorkspacePath(oParameter, "/home/" + WasdiConfig.Current.systemUserName + "/.wasdi/");
 			sWorkspaceFolderMount = sWorkspaceFolderMount + ":" + sContainerWorkspacePath;
@@ -224,23 +194,37 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: adding mount folder " + sWorkspaceFolderMount);
 			asAdditionalMountPointsCopy.add(sWorkspaceFolderMount);
 			
+			// Add the folder of the notebook
 			String sWorkspaceNotebookFolderMount = PathsConfig.getWorkspacePath(oParameter) + "notebook";
 			String sContainerNotebookFolderPath = "/home/"  + WasdiConfig.Current.systemUserName + "/notebook";
 			sWorkspaceNotebookFolderMount = sWorkspaceNotebookFolderMount +":" + sContainerNotebookFolderPath;
 			
 			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: adding mount folder " + sWorkspaceNotebookFolderMount);
-			asAdditionalMountPointsCopy.add(sWorkspaceNotebookFolderMount);			
+			asAdditionalMountPointsCopy.add(sWorkspaceNotebookFolderMount);
 			
+			// Create a copy of the environment variables
+			ArrayList<EnvironmentVariableConfig> aoEnvironmentVariablesCopy = new ArrayList<>();
+			
+			for (EnvironmentVariableConfig oEnv : oProcessorTypeConfig.environmentVariables) {
+				EnvironmentVariableConfig oCopy = new EnvironmentVariableConfig();
+				oCopy.key = oEnv.key;
+				oCopy.value = oEnv.value;
+				aoEnvironmentVariablesCopy.add(oCopy);
+			}
+			
+			EnvironmentVariableConfig oEnvNotebookId = new EnvironmentVariableConfig();
+			oEnvNotebookId.key = "sWasdiNotebookId";
+			oEnvNotebookId.value = sJupyterNotebookCode;
+			aoEnvironmentVariablesCopy.add(oEnvNotebookId);
 			
 			// Create and start the container
-			String sContanerId = oDockerUtils.createAndStartContainer(sContainerName, oProcessorTypeConfig.image, oProcessorTypeConfig.version, oProcessorTypeConfig.commands, asAdditionalMountPointsCopy, oProcessorTypeConfig.extraHosts, oProcessorTypeConfig.environmentVariables);
+			String sContanerId = oDockerUtils.createAndStartContainer(sContainerName, oProcessorTypeConfig.image, oProcessorTypeConfig.version, oProcessorTypeConfig.commands, asAdditionalMountPointsCopy, oProcessorTypeConfig.extraHosts, aoEnvironmentVariablesCopy);
 			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: obtained container id " + sContanerId);
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 60);
 
 			// mkdir **notebook** in the Workspace folder: it will be mounted on the docker that hosts the users' notebook
 			String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
-
 			String sNotebookPath = sWorkspacePath + "notebook";
 			
 			File oNotebookFolder = new File(sNotebookPath);
@@ -251,7 +235,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the " + sNotebookPath + " folder was" + (WasdiFileUtils.fileExists(oNotebookFolder) ? " " : " not ") + "created");
 			
-			processWorkspaceLog("adding file: notebook_config.cfg");
+			processWorkspaceLog("Adding notebook configuration file");
 			
 			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: adding notebook config");
 			
@@ -271,12 +255,12 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			String sVolumeFolder = WasdiConfig.Current.paths.traefikMountedVolume;
 			if (!sVolumeFolder.endsWith("/")) sVolumeFolder += "/";
 			
-			String sTemplateFile = sVolumeFolder + "template/conf.d_notebook.yml.j2";
-			String sOutputFile = sVolumeFolder + "conf.d/nb_" + sJupyterNotebookCode + ".yml";
+			String sTemplateFile = sProcessorFolder + "traefik_notebook.yml.j2";
+			String sOutputFile = sVolumeFolder + "nb_" + sJupyterNotebookCode + ".yml";
 			
 			Map<String, Object> aoTraefikTemplateParams = new HashMap<>();
 			
-			aoTraefikTemplateParams.put("wasdiNotebookId", sJupyterNotebookCode);
+			aoTraefikTemplateParams.put("sWasdiJupyterNotebookId", sJupyterNotebookCode);
 			
 			JupyterNotebookRepository oJupyterNotebookRepository = new JupyterNotebookRepository();
 			JupyterNotebook oNotebook = oJupyterNotebookRepository.getJupyterNotebook(sJupyterNotebookCode);
@@ -288,7 +272,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 					asWhiteIp.addAll(WasdiConfig.Current.traefik.firewallWhiteList);
 				}
 				
-				aoTraefikTemplateParams.put("sourceRangeList", asWhiteIp);
+				aoTraefikTemplateParams.put("aWasdiJupyterNotebookFirewallAllowedIps", asWhiteIp);
 			}
 			
 			String sJSON = JsonUtils.stringify(aoTraefikTemplateParams);
@@ -303,7 +287,8 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			processWorkspaceLog(new EndMessageProvider().getGood());
 
 			return true;
-		} catch (Exception oEx) {
+		} 
+		catch (Exception oEx) {
 			WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook Exception", oEx);
 
 			return false;

@@ -77,12 +77,13 @@ public class Launchjupyternotebook extends Operation {
 						}
 
 					}
-
 				}
-
-			} catch (Exception oRabbitException) {
+			} 
+			catch (Exception oRabbitException) {
 				WasdiLog.errorLog("Launchjupyternotebook.executeOperation: exception sending Rabbit Message", oRabbitException);
 			}
+			
+			return bRet;
 
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("Launchjupyternotebook.executeOperation: exception", oEx);
