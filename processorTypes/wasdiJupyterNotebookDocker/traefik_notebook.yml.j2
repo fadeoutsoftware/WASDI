@@ -1,4 +1,3 @@
----
 http:
 {%- if aWasdiJupyterNotebookFirewallAllowedIps is defined %}
   middlewares:
@@ -11,18 +10,19 @@ http:
         ipStrategy:
           depth: 1
 {% endif %}
-  services:
-    svc_{{ sWasdiJupyterNotebookId }}:
-      loadBalancer:
-        servers:
-        - url: "http://nb_{{ sWasdiJupyterNotebookId }}:{{ sWasdiNotebookContainerInternalPort | default(8888) }}/"
-
   routers:
     r_{{ sWasdiJupyterNotebookId }}:
-      rule: PathPrefix(`/notebook/{{ sWasdiJupyterNotebookId }}`)
-      entryPoints:
-        - "web"
-      service: "svc_{{ sWasdiJupyterNotebookId }}"
-{% if aWasdiJupyterNotebookFirewallAllowedIps is defined %}      middlewares:
-        - "mw_{{ sWasdiJupyterNotebookId }}"
-{% endif %}
+      entrypoints: "websecure"
+      rule: "PathPrefix(`/notebook/{{ sWasdiJupyterNotebookId }}`)"
+      service: "s_{{ sWasdiJupyterNotebookId }}"
+      middlewares: "mw_wasdi-secure-allowFrame@file"
+      tls: true
+  services:
+    s_{{ sWasdiJupyterNotebookId }}:
+      loadBalancer:
+        healthCheck:
+          path: "/notebook/{{ sWasdiJupyterNotebookId }}/lab"
+          interval: "1s"
+          timeout: "3s"
+        servers:
+          - url: "http://nb_{{ sWasdiJupyterNotebookId }}:8888/"

@@ -74,7 +74,7 @@ RUN mkdir --parents {{ sWasdiSystemUserHome }}/notebook && \
         jupyterlab \
         numpy \
         wasdi && \
-    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
+    find {{ sWasdiSystemUserHome }} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
 # Start the container
