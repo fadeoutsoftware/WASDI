@@ -79,13 +79,13 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			
 			WasdiLog.debugLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: check if the jupyter image exists: name = " + oProcessorTypeConfig.image + " version = " + oProcessorTypeConfig.version);
 			
-			DockerUtils oDockerUtils = new DockerUtils();
-			
 			// Take reference to the folder of the notebooks "processor" where all the dockers are deployed
 			String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
 			String sProcessorTemplateFolder = getProcessorTemplateFolder(sProcessorName);
 
-			
+			// Create the Docker Utils Object that will be used to build and create containers
+			DockerUtils oDockerUtils = new DockerUtils();
+			// is the image available?
 			boolean bImageAvailable = oDockerUtils.isImageAvailable(oProcessorTypeConfig.image, oProcessorTypeConfig.version);
 			
 			if (!bImageAvailable) {
@@ -156,6 +156,9 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 				// This step will let WASDI push in a docker repository
 				processWorkspaceLog("Push new image to the registers");
 				WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: pushing image in registers");
+				
+				// Save the name of the image to push
+				m_sDockerImageName = sDockerImageName;
 				
 				// Here we save the address of the image
 				String sPushedImageAddress = pushImageInRegisters(oNotebookFakeProcessor);
