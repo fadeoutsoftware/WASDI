@@ -1,6 +1,5 @@
 package it.fadeout.rest.resources;
 
-import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +32,6 @@ import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.jinja.JinjaTemplateRenderer;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
@@ -52,8 +50,6 @@ import wasdi.shared.viewmodels.PrimitiveResult;
  */
 @Path("/console")
 public class ConsoleResource {
-
-	private static final String FILE_SEPARATOR = System.getProperty("file.separator");
 	
 	/**
 	 * Creates a new Jupyter Notebook in a workspace
@@ -149,8 +145,10 @@ public class ConsoleResource {
 					String sVolumeFolder = WasdiConfig.Current.paths.traefikMountedVolume;
 					if (!sVolumeFolder.endsWith("/")) sVolumeFolder += "/";
 					
-					String sTemplateFile = sVolumeFolder + "template/conf.d_notebook.yml.j2";
-					String sOutputFile = sVolumeFolder + "conf.d/nb_" + sJupyterNotebookCode + ".yml";
+					String sProcessorTemplateFolder = PathsConfig.getProcessorDockerTemplateFolder(ProcessorTypes.JUPYTER_NOTEBOOK);
+					
+					String sTemplateFile = sProcessorTemplateFolder + "traefik_notebook.yml.j2";
+					String sOutputFile = sVolumeFolder + "nb_" + sJupyterNotebookCode + ".yml";
 					
 					// We need to update the list of allowed users: start removing the actual one
 					oJupyterNotebook.removeUserFromAllowedIp(sUserId);
@@ -174,17 +172,17 @@ public class ConsoleResource {
 					if (WasdiConfig.Current.traefik.firewallWhiteList!=null) {
 						asAllowedIps.addAll(WasdiConfig.Current.traefik.firewallWhiteList);
 					}
+					
 					// Create the parameters Map
 					Map<String, Object> aoTraefikTemplateParams = new HashMap<>();
 					
-					aoTraefikTemplateParams.put("wasdiNotebookId", sJupyterNotebookCode);
-					aoTraefikTemplateParams.put("sourceRangeList", asAllowedIps);
+					aoTraefikTemplateParams.put("sWasdiJupyterNotebookId", sJupyterNotebookCode);
+					aoTraefikTemplateParams.put("aWasdiJupyterNotebookFirewallAllowedIps", asAllowedIps);
 					
 					// Render the template in the new config file
 					JinjaTemplateRenderer oJinjaTemplateRenderer = new JinjaTemplateRenderer();
 					oJinjaTemplateRenderer.translate(sTemplateFile, sOutputFile, aoTraefikTemplateParams);
 				}
-				
 				
 				WasdiLog.debugLog("ConsoleResource.create: notebook already exists, check if it is up and running");
 				
@@ -197,7 +195,7 @@ public class ConsoleResource {
 				
 				WasdiLog.debugLog("ConsoleResource.create | bIsActive: " + bIsActive);
 				
-				boolean bIsUpToDate = internalNotebookUpToDate();
+				boolean bIsUpToDate = true;
 				WasdiLog.debugLog("ConsoleResource.create | bIsUpToDate: " + bIsUpToDate);
 
 				if (bIsActive && bIsUpToDate) {
@@ -395,7 +393,7 @@ public class ConsoleResource {
 			}
 			
 			// Is it updated?
-			boolean bIsUpToDate = internalNotebookUpToDate();
+			boolean bIsUpToDate = true;
 
 			PrimitiveResult oResult = new PrimitiveResult();
 			
@@ -469,26 +467,6 @@ public class ConsoleResource {
 	}
 	
 	/**
-	 * Check if the notebook is up to date or not
-	 * @return true of the conf files of the notebook are the same of the reference folder
-	 */
-	private boolean internalNotebookUpToDate() {
-
-		String sProcessorName = "jupyter-notebook";
-
-		String sProcessorTemplateGeneralCommonEnvFilePath = getProcessorTemplateGeneralCommonEnvFilePath(sProcessorName);
-		WasdiLog.debugLog("ConsoleResource.internalNotebookUpToDate | sProcessorTemplateGeneralCommonEnvFilePath: " + sProcessorTemplateGeneralCommonEnvFilePath);
-
-		String sProcessorGeneralCommonEnvFilePath = getProcessorGeneralCommonEnvFilePath(sProcessorName);
-		WasdiLog.debugLog("ConsoleResource.internalNotebookUpToDate | sProcessorGeneralCommonEnvFilePath: " + sProcessorGeneralCommonEnvFilePath);
-
-		boolean bFilesAreTheSame = WasdiFileUtils.filesAreTheSame(sProcessorTemplateGeneralCommonEnvFilePath, sProcessorGeneralCommonEnvFilePath);
-		WasdiLog.debugLog("ConsoleResource.internalNotebookUpToDate | bFilesAreTheSame: " + bFilesAreTheSame);	
-		
-		return bFilesAreTheSame;
-	}
-	
-	/**
 	 * Get the Node where the workspace is running
 	 * @param oWorkspace Workspace to check
 	 * @return Node entity
@@ -534,24 +512,7 @@ public class ConsoleResource {
 
 		return sNodeNormalizedDomain;
 	}
-
-	private String getProcessorGeneralCommonEnvFilePath(String sProcessorName) {
-		// Set the processor path
-		String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
-		return sProcessorFolder + "var" + FILE_SEPARATOR + "general_common.env";
-	}
-
-	private String getProcessorTemplateGeneralCommonEnvFilePath(String sProcessorName) {
-		// Set the processor template path
-		String sDockerTemplatePath = WasdiConfig.Current.paths.dockerTemplatePath;
-
-		if (!sDockerTemplatePath.endsWith(File.separator)) sDockerTemplatePath = sDockerTemplatePath + File.separator;
-
-		String sProcessorTemplateFolder = sDockerTemplatePath + sProcessorName + File.separator;
-
-		return sProcessorTemplateFolder + "var" + FILE_SEPARATOR + "general_common.env";
-	}
-
+	
 	/**
 	 * Checks if the actual client Ip fo the user is enabled for the notebook
 	 * 

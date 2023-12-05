@@ -13,6 +13,7 @@ import wasdi.shared.business.JupyterNotebook;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.DockersConfig;
 import wasdi.shared.config.EnvironmentVariableConfig;
@@ -67,7 +68,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		ProcessWorkspace oProcessWorkspace = m_oProcessWorkspace;
 		
 		// Fixed Processor Name in this case
-		String sProcessorName = "jupyter-notebook";
+		String sProcessorName = ProcessorTypes.JUPYTER_NOTEBOOK;
 		
 		// Take reference to the folder of the local processor
 		String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
@@ -367,7 +368,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 		ProcessWorkspace oProcessWorkspace = m_oProcessWorkspace;
 
-		String sProcessorName = "jupyter-notebook";
+		String sProcessorName = ProcessorTypes.JUPYTER_NOTEBOOK;
 
 		try {
 			processWorkspaceLog("Start termination of the notebook in the workspace " + oParameter.getWorkspace());
@@ -378,11 +379,14 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oParameter.getWorkspaceOwnerId(), oParameter.getWorkspace());
 
+			WasdiLog.debugLog("JupyterNotebookProcessorEngine.terminateJupyterNotebook: terminate notebook with code " + sJupyterNotebookCode);
 
 			// delete the Traefik configuration file
-			// rm -f /data/wasdi/container/volume/traefik-notebook/etc_traefik/conf.d/nb_<notebook ID>
+			String sVolumeFolder = WasdiConfig.Current.paths.traefikMountedVolume;
+			if (!sVolumeFolder.endsWith("/")) sVolumeFolder += "/";
 			
-			String sTraefikConfigurationFilePath = "/data/wasdi/container/volume/traefik-notebook/etc_traefik/conf.d/nb_" + sJupyterNotebookCode + ".yml";
+			String sTraefikConfigurationFilePath = sVolumeFolder + "nb_" + sJupyterNotebookCode + ".yml";
+			
 			File oTraefikConfigurationFile = new File(sTraefikConfigurationFilePath);
 
 			if (WasdiFileUtils.fileExists(oTraefikConfigurationFile)) {
@@ -395,43 +399,19 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			// stop the container instance
 			// docker-compose [--file </path/to/the/docker-compose/file.yml] stop
 			processWorkspaceLog("Stop docker");
-
-			// Launch docker-compose stop command
-			String sDockerComposeStopCommand = buildCommandDockerComposeStopJupyterNotebook(sProcessorFolder, sJupyterNotebookCode);
-			boolean bDockerComposeStopResult = RunTimeUtils.runCommand(sProcessorFolder, sDockerComposeStopCommand);
-
-			if (!bDockerComposeStopResult) {
-				WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker compose stop command failed:" + s_sLINE_SEPARATOR + sDockerComposeStopCommand);
-			}
-
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
-
-			// delete the container instance
-			// docker-compose [--file </path/to/the/docker-compose/file.yml] rm
+			DockerUtils oDockerUtils = new DockerUtils();
 			
-
-			processWorkspaceLog("Remove docker");
-
-			// Launch docker-compose rm command
-			String sDockerComposeRmCommand = buildCommandDockerComposeRmJupyterNotebook(sProcessorFolder, sJupyterNotebookCode);
-			boolean bDockerComposeRmResult = RunTimeUtils.runCommand(sProcessorFolder, sDockerComposeRmCommand);
-
-			if (!bDockerComposeRmResult) {
-				WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker compose rm command failed:" + s_sLINE_SEPARATOR + sDockerComposeRmCommand);
+			ContainerInfo oContainerInfo = oDockerUtils.getContainerInfoByContainerName(sJupyterNotebookCode);
+			
+			if (oContainerInfo != null) {
+				WasdiLog.debugLog("JupyterNotebookProcessorEngine.terminateJupyterNotebook: stopping container ");
+				oDockerUtils.stop(oContainerInfo.Id);
+				oDockerUtils.removeContainer(oContainerInfo.Id);
 			}
-
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 75);
-
-			// Delete the Jupyter Notebook docker-compose file
-			// rm -f /data/wasdi/processors/jupyter-notebook/docker-compose_<notebook ID>.yml
-
-			String sDockerComposeFilePath = PathsConfig.getProcessorFolder(sProcessorName) + "docker-compose_" + sJupyterNotebookCode + ".yml";
-			File oDockerComposeFile = new File(sDockerComposeFilePath);
-
-			if (WasdiFileUtils.fileExists(oDockerComposeFile)) {
-				FileUtils.deleteQuietly(oDockerComposeFile);
+			else {
+				WasdiLog.debugLog("JupyterNotebookProcessorEngine.terminateJupyterNotebook: container not found");
 			}
-
+			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
 			processWorkspaceLog(new EndMessageProvider().getGood());
@@ -457,33 +437,6 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			return false;
 		}
 
-	}
-
-	private static String buildCommandDockerBuild(String sProcessorFolder) {
-		return "bash " + sProcessorFolder + "tool" + s_sFILE_SEPARATOR + "dockerBuild.sh";
-	}
-
-	private static String buildCommandDockerPush(String sProcessorFolder) {
-		return "bash " + sProcessorFolder + "tool" + s_sFILE_SEPARATOR + "dockerPush.sh";
-	}
-
-	private static String buildCommandDockerComposeUpJupyterNotebook(String sProcessorFolder, String sJupyterNotebookCode) {
-		StringBuilder oSB = new StringBuilder();
-
-		
-		oSB.append(WasdiConfig.Current.dockers.dockerComposeCommand + " \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --project-name " + sJupyterNotebookCode + "\\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --file " + sProcessorFolder + "docker-compose_" + sJupyterNotebookCode + ".yml \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --env-file " + sProcessorFolder + "var" + s_sFILE_SEPARATOR + "general_common.env \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    up \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --detach");
-
-		return oSB.toString();
 	}
 
 	// docker-compose [--file </path/to/the/docker-compose/file.yml] stop
@@ -520,68 +473,6 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		oSB.append("    --stop \\");
 		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --force");
-
-		return oSB.toString();
-	}
-
-	private static String buildCommandTraefikConfigurationFile(String sProcessorFolder, String sJupyterNotebookCode) {
-		StringBuilder oSB = new StringBuilder();
-
-		oSB.append("/usr/bin/python3 \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("  -B \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("  /opt/companyExploitation/common/tool/toolbox/sysadmin/code/toolbox.py \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("  --configuration-directory /opt/companyExploitation/common/tool/toolbox/sysadmin/configuration/ \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("  --module jinja2 \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("  --submodule renderTemplate \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("  --template /data/wasdi/container/volume/traefik-notebook/etc_traefik/template/conf.d_notebook.yml.j2 \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("  --rendered-file /data/wasdi/container/volume/traefik-notebook/etc_traefik/conf.d/nb_" + sJupyterNotebookCode + ".yml \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("  --json-inline '{\"wasdiNotebookId\": \"" + sJupyterNotebookCode + "\"}' \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("  --strict");
-
-		return oSB.toString();
-	}
-
-	private static String buildCommandDockerContainerInspect(String sContainerName) {
-		StringBuilder oSB = new StringBuilder();
-
-		oSB.append("docker container inspect --format '{{.State.Running}}' ");
-		oSB.append(sContainerName);
-
-		return oSB.toString();
-	}
-
-	private static String buildCommandDockerCpFile(String sContainerName, String sTemporaryFileFullPath) {
-		StringBuilder oSB = new StringBuilder();
-
-		oSB.append("docker cp ");
-		oSB.append(sTemporaryFileFullPath);
-		oSB.append(" ");
-		oSB.append(sContainerName);
-		oSB.append(":/home/wasdi/notebook/notebook_config.cfg");
-
-		return oSB.toString();
-	}
-
-	// docker-compose --file /data/wasdi/processors/traefik-notebook/docker-compose.yml up --detach
-	private static String buildCommandDockerComposeUpTraefik() {
-		StringBuilder oSB = new StringBuilder();
-
-		oSB.append(WasdiConfig.Current.dockers.dockerComposeCommand + " \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --file /data/wasdi/processors/traefik-notebook/docker-compose.yml \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    up \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --detach");
 
 		return oSB.toString();
 	}

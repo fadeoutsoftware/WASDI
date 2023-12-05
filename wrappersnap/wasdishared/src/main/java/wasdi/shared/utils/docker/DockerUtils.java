@@ -1945,14 +1945,6 @@ public class DockerUtils {
             		// Activate tty
             		oContainerCreateParams.Tty = true;
             		
-            		// Expose the TCP Port
-            		oContainerCreateParams.ExposedPorts.add("" + WasdiConfig.Current.dockers.processorsInternalPort + "/tcp");
-            		
-            		// If we are dockerized, no need to add the ip and port
-            		if (WasdiConfig.Current.shellExecLocally) {
-            			oContainerCreateParams.HostConfig.PortBindings.put("" + WasdiConfig.Current.dockers.processorsInternalPort + ":8083/tcp", "80");
-            		}            		
-            		
             		if (asAdditionalMountPoints!=null) {
             			for (String sMountPoint : asAdditionalMountPoints) {
             				oContainerCreateParams.HostConfig.Binds.add(sMountPoint);

@@ -3,6 +3,7 @@ package wasdi.shared.config;
 import java.io.File;
 
 import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -225,5 +226,19 @@ public class PathsConfig {
 		sParametersPath = sParametersPath + sParameterObjId;
 		
 		return sParametersPath;
+	}
+	
+	/**
+	 * Get the full path of a processor docker template
+	 * @param sProcessorType
+	 * @return
+	 */
+	public static String getProcessorDockerTemplateFolder(String sProcessorType) {
+		
+		String sDockerTemplatePath = WasdiConfig.Current.paths.dockerTemplatePath;
+		if (!sDockerTemplatePath.endsWith("/")) sDockerTemplatePath += "/";
+		sDockerTemplatePath += ProcessorTypes.getTemplateFolder(sProcessorType);
+		sDockerTemplatePath += "/";
+		return sDockerTemplatePath;
 	}
 }
