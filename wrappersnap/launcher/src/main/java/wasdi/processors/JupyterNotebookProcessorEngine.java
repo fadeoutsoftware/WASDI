@@ -129,7 +129,23 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 				return false;										
 			}
 			
-			WasdiLog.debugLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: logged in the registry, search if the image is available");
+			WasdiLog.debugLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: logged in the registry, check the processor folder");
+		
+			processWorkspaceLog("Copy template directory");
+
+			// check if the processor folder exists
+			boolean bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
+			
+			if (!bProcessorFolderExists) {
+				// Copy Docker template files in the processor folder
+				File oDockerTemplateFolder = new File(sProcessorTemplateFolder);
+				File oProcessorFolder = new File(sProcessorFolder);
+
+				WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: creating the ProcessorFolder: " + sProcessorFolder + " and copy the template");
+				FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
+			}
+			
+			WasdiLog.debugLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: search if the image is available");
 			
 			// is the image available?
 			boolean bImageAvailable = oDockerUtils.isImageAvailable(oProcessorTypeConfig.image, oProcessorTypeConfig.version);
@@ -155,20 +171,6 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 						WasdiLog.errorLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: the ProcessorTemplateFolder does not exist: " + sProcessorTemplateFolder);
 						LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 						return false;
-					}
-
-					processWorkspaceLog("Copy template directory");
-
-					// check if the processor folder exists
-					boolean bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
-					
-					if (!bProcessorFolderExists) {
-						// Copy Docker template files in the processor folder
-						File oDockerTemplateFolder = new File(sProcessorTemplateFolder);
-						File oProcessorFolder = new File(sProcessorFolder);
-
-						WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: creating the ProcessorFolder: " + sProcessorFolder + " and copy the template");
-						FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
 					}
 
 					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 10);

@@ -6,6 +6,7 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.JupyterNotebookRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -38,6 +39,18 @@ public class Launchjupyternotebook extends Operation {
 			oEngine.setProcessWorkspace(oProcessWorkspace);
 
 			boolean bRet = oEngine.launchJupyterNotebook(oParameter);
+			
+			if (!bRet) {
+				WasdiLog.warnLog("Launchjupyternotebook.executeOperation: operation was false, clean the db");
+				String sWorkspaceId = oProcessWorkspace.getWorkspaceId();
+				WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+				Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+				
+				String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oWorkspace.getUserId(), sWorkspaceId);
+
+				JupyterNotebookRepository oJupyterNotebookRepository = new JupyterNotebookRepository();
+				oJupyterNotebookRepository.deleteJupyterNotebook(sJupyterNotebookCode);
+			}
 
 			try {
 				// In the exchange we should have the workspace on which the user requested

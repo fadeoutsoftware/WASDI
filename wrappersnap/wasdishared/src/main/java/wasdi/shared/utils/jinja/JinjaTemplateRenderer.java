@@ -54,11 +54,6 @@ public class JinjaTemplateRenderer {
 			
 			WasdiLog.debugLog("JinjaTemplateRenderer.translate: sTemplate = " + sTemplateFile);
 			WasdiLog.debugLog("JinjaTemplateRenderer.translate: JsonInput = " + sJsonInputs);
-//			
-//			// Create the command
-//			String sRenderCommand = buildRenderCommand(sTemplateFile, sOutputFile, sJsonInputs, bStrict);
-//			// Utility to execute the script
-//			boolean bRet = RunTimeUtils.runCommand(WasdiConfig.Current.paths.wasdiTempFolder, sRenderCommand);
 			
 			Jinjava oJinjava = new Jinjava();
 			String sTemplate = WasdiFileUtils.fileToText(sTemplateFile);
