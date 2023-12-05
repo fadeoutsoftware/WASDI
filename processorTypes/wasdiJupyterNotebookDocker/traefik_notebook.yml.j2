@@ -1,28 +1,28 @@
 ---
 http:
-{%- if aWasdiNotebookFirewallAllowedIps is defined %}
+{%- if aWasdiJupyterNotebookFirewallAllowedIps is defined %}
   middlewares:
-    mw_{{ sWasdiNotebookId }}:
+    mw_{{ sWasdiJupyterNotebookId }}:
       ipWhiteList:
         sourceRange:
-{%- for sWasdiNotebookFirewallCurrentAllowedIp in aWasdiNotebookFirewallAllowedIps %}
+{%- for sWasdiNotebookFirewallCurrentAllowedIp in aWasdiJupyterNotebookFirewallAllowedIps %}
           - "{{ sWasdiNotebookFirewallCurrentAllowedIp }}"
 {%- endfor %}
         ipStrategy:
           depth: 1
 {% endif %}
   services:
-    svc_{{ sWasdiNotebookId }}:
+    svc_{{ sWasdiJupyterNotebookId }}:
       loadBalancer:
         servers:
-        - url: "http://nb_{{ sWasdiNotebookId }}:{{ sWasdiNotebookContainerInternalPort | default(8888) }}/"
+        - url: "http://nb_{{ sWasdiJupyterNotebookId }}:{{ sWasdiNotebookContainerInternalPort | default(8888) }}/"
 
   routers:
-    r_{{ sWasdiNotebookId }}:
-      rule: PathPrefix(`/notebook/{{ sWasdiNotebookId }}`)
+    r_{{ sWasdiJupyterNotebookId }}:
+      rule: PathPrefix(`/notebook/{{ sWasdiJupyterNotebookId }}`)
       entryPoints:
         - "web"
-      service: "svc_{{ sWasdiNotebookId }}"
-{% if aWasdiNotebookFirewallAllowedIps is defined %}      middlewares:
-        - "mw_{{ sWasdiNotebookId }}"
+      service: "svc_{{ sWasdiJupyterNotebookId }}"
+{% if aWasdiJupyterNotebookFirewallAllowedIps is defined %}      middlewares:
+        - "mw_{{ sWasdiJupyterNotebookId }}"
 {% endif %}
