@@ -405,6 +405,13 @@ public class DockerUtils {
         return sImageName;
     }
     
+    /**
+     * Clean the string representing the log of a docker build, replacing
+     * different special chars obtained by dockers api.
+     * 
+     * @param sInputString Logs returned from docker
+     * @return Logs cleaned from special chars
+     */
     protected String cleanDockerLogsString(String sInputString) {
     	String sOutputString = "";
     	
@@ -809,7 +816,7 @@ public class DockerUtils {
      * @param sUser Server User
      * @param sPassword Server Password
      * @param sFolder 
-     * @return True if logged false otherwise
+     * @return The encoded auth header for the registry or an empty string
      */
     public String loginInRegistry(String sServer, String sUser, String sPassword) {
     	
@@ -1904,6 +1911,7 @@ public class DockerUtils {
         	
             // Attach the version, if available
         	if (!Utils.isNullOrEmpty(sImageVersion))  sImageName += ":" + sImageVersion;
+        	if (!Utils.isNullOrEmpty(m_sDockerRegistry)) sImageName = m_sDockerRegistry+"/" + sImageName;
         	
             WasdiLog.debugLog("DockerUtils.createAndStartContainer: try to start a container from image " + sImageName);
             

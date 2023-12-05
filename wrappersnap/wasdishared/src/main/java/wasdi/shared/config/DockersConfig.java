@@ -141,6 +141,25 @@ public class DockersConfig {
 	}
 	
 	/**
+	 * Get one docker register config from the address
+	 * @param sAddress Address to search
+	 * @return The config or null
+	 */
+	public DockerRegistryConfig getRegisterByAddress(String sAddress) {
+		try {
+			for (DockerRegistryConfig oDockerRegistryConfig : registers) {
+				if (!sAddress.equals(oDockerRegistryConfig.address)) continue;
+				return oDockerRegistryConfig;
+			}
+		}		
+		catch (Exception oEx) {
+			WasdiLog.errorLog("DockersConfig.getRegisters: Exception ordering the registers list");
+		}
+		
+		return null;	
+	}
+	
+	/**
 	 * Safe get a ShellExecItemConfig
 	 * @param sCommand Command we are searching for
 	 * @return Equivalent ShellExecItemConfig or null in case of any problem
