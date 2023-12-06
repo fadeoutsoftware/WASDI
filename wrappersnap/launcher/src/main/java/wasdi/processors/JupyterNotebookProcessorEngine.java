@@ -375,13 +375,11 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
-			String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
-
 			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oParameter.getWorkspaceOwnerId(), oParameter.getWorkspace());
 
 			WasdiLog.debugLog("JupyterNotebookProcessorEngine.terminateJupyterNotebook: terminate notebook with code " + sJupyterNotebookCode);
 
-			// delete the Traefik configuration file
+			// Delete the Traefik configuration file
 			String sVolumeFolder = WasdiConfig.Current.paths.traefikMountedVolume;
 			if (!sVolumeFolder.endsWith("/")) sVolumeFolder += "/";
 			
@@ -401,7 +399,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			processWorkspaceLog("Stop docker");
 			DockerUtils oDockerUtils = new DockerUtils();
 			
-			ContainerInfo oContainerInfo = oDockerUtils.getContainerInfoByContainerName(sJupyterNotebookCode);
+			ContainerInfo oContainerInfo = oDockerUtils.getContainerInfoByContainerName("nb_" + sJupyterNotebookCode);
 			
 			if (oContainerInfo != null) {
 				WasdiLog.debugLog("JupyterNotebookProcessorEngine.terminateJupyterNotebook: stopping container ");

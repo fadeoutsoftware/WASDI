@@ -3,6 +3,10 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.8.5.3] - 2023-12-05
+### Fixed
+- local config path for on-line notebooks
+- 
 ## [0.8.5.2] - 2023-11-24
 ### Added
 - methods to get file properties
