@@ -61,6 +61,15 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
+# RUN specific to install GDAL
+RUN apt-get update && \
+    apt-get install \
+        gdal-bin \
+        python3-gdal && \
+    rm --recursive --force /var/lib/apt/lists/* && \
+    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
+
+
 # RUN specific to install the launcher
 RUN apt-get update && \
     apt-get install \
