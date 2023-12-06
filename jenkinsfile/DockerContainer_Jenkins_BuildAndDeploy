@@ -58,7 +58,7 @@ pipeline {
             ansible-playbook \
                 playbooks/buildWasdiDockerContainer.yml \
                 --inventory inventories/wasdi.yml \
-                --limit ${env.sAnsibleLimit} \
+                --limit ${env.sCurrentEnvironmentLower} \
                 --diff \
                 --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiJenkinsContainer=true'
         """,
