@@ -3,4 +3,4 @@ Implementation-Vendor: Fadeout
 Implementation-Title: WASDI
 Implementation-Version: 1.0.0
 Main-Class: wasdi.LauncherMain
-
+OpenIDE-Module-Specification-Version: 9.0.8

@@ -122,7 +122,6 @@
                     <archive>
                         <manifest>
                             <mainClass>wasdi.LauncherMain</mainClass>
-                            <OpenIDE-Module-Specification-Version>9.0.8</OpenIDE-Module-Specification-Version>
                         </manifest>
                     </archive>
                 </configuration>
