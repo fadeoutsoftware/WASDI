@@ -228,7 +228,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiInfluxDbGrafanaServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiGrafanaServiceName }}.rule=Host(`{{ sWasdiInfluxDbGrafanaUrl }}`)"
+      - "traefik.http.routers.r_{{ sWasdiInfluxDbGrafanaServiceName }}.rule=Host(`{{ sWasdiInfluxDbGrafanaHost }}`)"
       - "traefik.http.routers.r_{{ sWasdiInfluxDbGrafanaServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sWasdiInfluxDbGrafanaServiceName }}.service=s_{{ sWasdiInfluxDbGrafanaServiceName }}"
 {% if bWasdiSslEnabled == True %}
