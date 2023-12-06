@@ -920,7 +920,15 @@ services:
 {% if bWasdiKeycloakEnabled == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
+{% if bWasdiTomcatWasdiWebServerEnabled == True %}
       - {{ sWasdiTomcatWasdiWebServerServiceName }}
+{% endif %}
+{% if ( aoWasdiUpdateMetricEnvironmentVariable | length ) > 0 %}
+    environment:
+{% for aoWasdiUpdateMetricCurrentEnvironmentVariable in aoWasdiUpdateMetricEnvironmentVariable %}
+      - {{ aoWasdiUpdateMetricCurrentEnvironmentVariable['key'] }}={{ aoWasdiUpdateMetricCurrentEnvironmentVariable['value'] }}
+{% endfor %}
+{% endif %}
     image: "{{ sWasdiUpdateMetricServiceName }}:latest"
     restart: "unless-stopped"
     ulimits:

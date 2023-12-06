@@ -4,7 +4,6 @@
 '''
 Import needed libraries
 '''
-import argparse
 import cpuinfo
 import datetime
 import logging
@@ -137,7 +136,7 @@ class SystemResourceMetric(object):
                 aoToAppend = OrderedDict(
                     {
                         "name": sValue,
-                        "fileToRead": kwargs['aLicense'][sValue]['fileToRead'],
+                        "hostValue": kwargs['aLicense'][sValue]['hostValue'],
                         "valuesToConsiderTrue": [(sValueToConsiderTrue.lower()) for sValueToConsiderTrue in kwargs['aLicense'][sValue]['valuesToConsiderTrue']]
                     }
                 )
@@ -319,27 +318,16 @@ class SystemResourceMetric(object):
 
         try:
             for aoCurrentLicense in self.aLicense:
-                try:
-                    with open(aoCurrentLicense['fileToRead'], 'r', encoding='utf-8') as oLicenseFile:
-                        if oLicenseFile.read().strip().lower() in aoCurrentLicense['valuesToConsiderTrue']:
-                            aResult.append(
-                                OrderedDict(
-                                    {
-                                        "name": aoCurrentLicense['name'].lower(),
-                                        "status": True
-                                    }
-                                )
-                            )
-                        else:
-                            aResult.append(
-                                OrderedDict(
-                                    {
-                                        "name": aoCurrentLicense['name'].lower(),
-                                        "status": False
-                                    }
-                                )
-                            )
-                except FileNotFoundError:
+                if aoCurrentLicense['hostValue'] in aoCurrentLicense['valuesToConsiderTrue']:
+                    aResult.append(
+                        OrderedDict(
+                            {
+                                "name": aoCurrentLicense['name'].lower(),
+                                "status": True
+                            }
+                        )
+                    )
+                else:
                     aResult.append(
                         OrderedDict(
                             {
@@ -348,6 +336,8 @@ class SystemResourceMetric(object):
                             }
                         )
                     )
+
+            self.oLogging.info('OK')
         except:
             self.oLogging.error('Unable to get datas')
 
@@ -816,29 +806,25 @@ if __name__ == '__main__':
 
 
     '''
-    INITIALIZE THE ARGUMENT PARSER AND PARSE ARGUMENTS
+    INITIALIZE THE ENGINE
     '''
-    oArgumentParser = argparse.ArgumentParser()
-
-    oArgumentParser.add_argument(
-        '-c',
-        '--configuration-file',
-        type = str,
-        required = False,
-        dest = 'sConfigurationFilePath',
-        default = '{{ sWasdiConfigurationRootDirectoryPath }}/wasdiConfig.json',
-        help = 'Full path to the WASDI\' configuration file'
-    )
-
-    oArgumentParsed = oArgumentParser.parse_args()
-    '''
-    /INITIALIZE THE ARGUMENT PARSER AND PARSE ARGUMENTS
-    '''
-
+    try:
+        sConfigurationFilePath = os.environ['WASDI_CONFIGURATION_FILE']
+    except KeyError:
+        oLogging.error('The environment variable \'WASDI_CONFIGURATION_FILE\' is not filled')
+        sys.exit(1)
+    except:
+        EngineException(
+            oLogging = self.oLogging,
+            aoError = {
+                'inspectError': inspect.stack(),
+                'sysError': sys.exc_info()
+            }
+        )
 
     oWasdiSystemResourceMain = WasdiSystemResourceMain(
         oLogging = oLogging,
-        sConfigurationFilePath = oArgumentParsed.sConfigurationFilePath
+        sConfigurationFilePath = os.environ['WASDI_CONFIGURATION_FILE']
     )
 
 
@@ -862,13 +848,22 @@ if __name__ == '__main__':
     '''
     PARSE THE WASDI CONFIGURATION FILE
     '''
-    oLogging.info('Read the WASDI configuration file')
+    oLogging.info(
+        'Try to read the WASDI configuration file \'%(sConfigurationFilePath)s\''
+        %{
+            'sConfigurationFilePath': sConfigurationFilePath
+        }
+    )
     oWasdiSystemResourceMain.getConfiguration()
 
     if type(oWasdiSystemResourceMain.aoConfiguration) == dict:
         oLogging.info('OK')
     else:
         oLogging.error('Unable to read the configuration file')
+        oLogging.error('Please verify:')
+        oLogging.error('\t- if the file exists')
+        oLogging.error('\t- if the file is readable by the current user')
+        oLogging.error('\t- if the file is a JSON file')
         sys.exit(1)
     '''
     /PARSE THE WASDI CONFIGURATION FILE

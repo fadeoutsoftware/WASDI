@@ -71,7 +71,7 @@
             "license": {
 {% for sCurrentLicense in aoWasdiConfiguration['metrics']['metric']['license'] %}
                 "{{ sCurrentLicense }}": {
-                    "fileToRead": "{{ aoWasdiConfiguration['metrics']['metric']['license'][sCurrentLicense]['fileToRead'] }}",
+                    "hostValue": "{{ sWasdiIdlLicenseServerUrl }}",
 {% if aoWasdiConfiguration['metrics']['metric']['license'][sCurrentLicense]['valuesToConsiderTrue'] | length == 0 %}
                     "valuesToConsiderTrue": []
 {% else %}
