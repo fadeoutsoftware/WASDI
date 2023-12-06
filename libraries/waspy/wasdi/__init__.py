@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.5.2
+Version 0.8.5.3
 
-Last Update: 24/11/2023
+Last Update: 05/12/2023
 
 Tested with: Python 3.7, Python 3.8, Python 3.9, Python 3.10
 
@@ -606,8 +606,8 @@ def init(sConfigFilePath=None):
 
     # P.Campanella 2022/08/30: if there is no config file, try the default notebook one
     if sConfigFilePath is None:
-        if os.path.exists("/home/wasdi/notebook/notebook_config.cfg"):
-            sConfigFilePath = "/home/wasdi/notebook/notebook_config.cfg"
+        if os.path.exists("/home/appwasdi/notebook/notebook_config.cfg"):
+            sConfigFilePath = "/home/appwasdi/notebook/notebook_config.cfg"
 
     if sConfigFilePath is not None:
         bConfigOk, sWorkspaceName, sWorkspaceId = _loadConfig(sConfigFilePath)
