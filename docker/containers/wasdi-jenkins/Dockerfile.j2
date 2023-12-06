@@ -255,6 +255,7 @@ WORKDIR {{ sWasdiJenkinsRootDirectoryPath }}/{{ sWasdiJenkinsVersion }}
 # Copy data
 COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/home_.ssh_config {{ sWasdiSystemUserHome }}/.ssh/config
 COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/home_.ssh_id_ed25519 {{ sWasdiSystemUserHome }}/.ssh/id_ed25519
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/home_.ssh_id_rsa_ro_sysadmin-toolbox {{ sWasdiSystemUserHome }}/.ssh/id_rsa_ro_sysadmin-toolbox
 COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/docker-entrypoint.sh {{ sWasdiJenkinsRootDirectoryPath }}/docker-entrypoint.sh
 COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/maven_settings.xml {{ sWasdiMavenRootDirectoryPath }}/{{ sWasdiMavenVersion }}/conf/settings.xml
 
