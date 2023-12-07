@@ -1607,6 +1607,20 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
 		return aoReturnList;
 	}
+	
+	public List<ProcessWorkspace> getByNodeUnsorted(String sComputingNodeCode) {
+		final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
+					Filters.eq("nodeCode", sComputingNodeCode));
+			fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getByNode: exception ", oEx);
+		}
+
+		return aoReturnList;
+	}
 
 	public List<ProcessWorkspace> getUnfinishedByNode(String sComputingNodeCode) {
 		List<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
