@@ -12,6 +12,12 @@ docker \
     --rm \
     --mount type=bind,source={{ sWasdiConfigurationRootDirectoryPath }},destination={{ sWasdiConfigurationRootDirectoryPath }},readonly \
     --mount type=bind,source={{ sWasdiDataRootDirectoryPath }},destination={{ sWasdiDataRootDirectoryPath }} \
+    --mount type=bind,source={{ sWasdiDataImagesRootDirectoryPath }},destination={{ sWasdiDataImagesRootDirectoryPath }} \
+    --mount type=bind,source={{ sWasdiDataParamsRootDirectoryPath }},destination={{ sWasdiDataParamsRootDirectoryPath }} \
+    --mount type=bind,source={{ sWasdiDataProcessorsRootDirectoryPath }},destination={{ sWasdiDataProcessorsRootDirectoryPath }} \
+    --mount type=bind,source={{ sWasdiDataStylesRootDirectoryPath }},destination={{ sWasdiDataStylesRootDirectoryPath }} \
+    --mount type=bind,source={{ sWasdiDataWorkflowsRootDirectoryPath }},destination={{ sWasdiDataWorkflowsRootDirectoryPath }} \
+    --mount type=bind,source={{ sWasdiDockerSocketFilePath }},destination={{ sWasdiDockerSocketFilePath }} \
     --network {{ sWasdiDockerNetworkName }} \
     --tty \
     {{ sWasdiUtilsServiceName }}:latest \
