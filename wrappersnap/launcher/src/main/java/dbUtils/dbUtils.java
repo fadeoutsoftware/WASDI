@@ -1871,7 +1871,7 @@ public class dbUtils {
     		System.out.println("Importing all the process workspaces in mongo");
     		
     		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-    		List<ProcessWorkspace> aoProcessWorkspaces = oProcessWorkspaceRepository.getByNode(WasdiConfig.Current.nodeCode);
+    		List<ProcessWorkspace> aoProcessWorkspaces = oProcessWorkspaceRepository.getByNodeUnsorted(WasdiConfig.Current.nodeCode);
     		
     		if (aoProcessWorkspaces == null) {
     			System.out.println("Obtained null list, not good");
