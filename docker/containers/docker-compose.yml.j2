@@ -68,7 +68,7 @@ services:
     and aWasdiClientExternalIp | default([]) | length > 0 %}
     ports:
 {% for sCurrentExternalIp in aWasdiClientExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiClientExternalPort }}:{{ sWasdiClientInternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiClientExternalPort }}:{{ sWasdiClientInternalPort }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -122,7 +122,7 @@ services:
     and aWasdiClientV2ExternalIp | default([]) | length > 0 %}
     ports:
 {% for sCurrentExternalIp in aWasdiClientV2ExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiClientV2ExternalPort }}:{{ sWasdiClientV2InternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiClientV2ExternalPort }}:{{ sWasdiClientV2InternalPort }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -158,7 +158,7 @@ services:
     and aWasdiGeoserverExternalIp | default([]) | length > 0 %}
     ports:
 {% for sCurrentExternalIp in aWasdiGeoserverExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiGeoserverExternalPort }}:{{ sWasdiGeoserverInternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiGeoserverExternalPort }}:{{ sWasdiGeoserverInternalPort }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -200,7 +200,7 @@ services:
     and aWasdiGrafanaExternalIp | default([]) | length > 0 %}
     ports:
 {% for sCurrentExternalIp in aWasdiGrafanaExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiGrafanaExternalPort }}:{{ sWasdiGrafanaInternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiGrafanaExternalPort }}:{{ sWasdiGrafanaInternalPort }}"
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
@@ -240,7 +240,7 @@ services:
     and aWasdiInfluxDbGrafanaExternalIp | default([]) | length > 0 %}
     ports:
 {% for sCurrentExternalIp in aWasdiInfluxDbGrafanaExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiInfluxDbGrafanaExternalPort }}:{{ sWasdiInfluxDbGrafanaInternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiInfluxDbGrafanaExternalPort }}:{{ sWasdiInfluxDbGrafanaInternalPort }}"
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
@@ -284,7 +284,7 @@ services:
     and aWasdiJenkinsExternalIp | default([]) | length > 0 %}
     ports:
 {% for sCurrentExternalIp in aWasdiJenkinsExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiJenkinsExternalPort }}:{{ sWasdiJenkinsInternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiJenkinsExternalPort }}:{{ sWasdiJenkinsInternalPort }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -405,7 +405,7 @@ services:
     and aWasdiMongoExternalIp | default([]) | length > 0 %}
     ports:
 {% for sCurrentExternalIp in aWasdiMongoExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiMongoExternalPort }}:{{ sWasdiMongoInternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiMongoExternalPort }}:{{ sWasdiMongoInternalPort }}"
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
@@ -457,7 +457,7 @@ services:
     and aWasdiNexusExternalIp | default([]) | length > 0 %}
     ports:
 {% for sCurrentExternalIp in aWasdiNexusExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiNexusExternalPort }}:{{ sWasdiNexusInternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiNexusExternalPort }}:{{ sWasdiNexusInternalPort }}"
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
@@ -493,7 +493,7 @@ services:
     and aWasdiPostgresqlKeycloakExternalIp | default([]) | length > 0 %}
     ports:
 {% for sCurrentExternalIp in aWasdiPostgresqlKeycloakExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiPostgresqlKeycloakExternalPort }}:{{ sWasdiPostgresqlKeycloakInternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiPostgresqlKeycloakExternalPort }}:{{ sWasdiPostgresqlKeycloakInternalPort }}"
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
@@ -637,7 +637,7 @@ services:
     and aWasdiSonarqubeExternalIp | default([]) | length > 0 %}
     ports:
 {% for sCurrentExternalIp in aWasdiSonarqubeExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiSonarqubeExternalPort }}:{{ sWasdiSonarqubeInternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiSonarqubeExternalPort }}:{{ sWasdiSonarqubeInternalPort }}"
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
@@ -683,7 +683,7 @@ services:
     and aWasdiTelegrafExternalIp | default([]) | length > 0 %}
     ports:
 {% for sCurrentExternalIp in aWasdiTelegrafExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiTelegrafExternalPort }}:{{ sWasdiTelegrafInternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiTelegrafExternalPort }}:{{ sWasdiTelegrafInternalPort }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -733,7 +733,7 @@ services:
     and aWasdiTomcatOgcProcessesServerExternalIp | default([]) | length > 0 %}
     ports:
 {% for sCurrentExternalIp in aWasdiTomcatOgcProcessesServerExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiTomcatOgcProcessesServerExternalPort }}:{{ sWasdiTomcatOgcProcessesServerInternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiTomcatOgcProcessesServerExternalPort }}:{{ sWasdiTomcatOgcProcessesServerInternalPort }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -780,7 +780,7 @@ services:
     and aWasdiTomcatWasdiOpenEoServerExternalIp | default([]) | length > 0 %}
     ports:
 {% for sCurrentExternalIp in aWasdiTomcatWasdiOpenEoServerExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiTomcatWasdiOpenEoServerExternalPort }}:{{ sWasdiTomcatWasdiOpenEoServerInternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiTomcatWasdiOpenEoServerExternalPort }}:{{ sWasdiTomcatWasdiOpenEoServerInternalPort }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -827,7 +827,7 @@ services:
     and aWasdiTomcatWasdiWebServerExternalIp | default([]) | length > 0 %}
     ports:
 {% for sCurrentExternalIp in aWasdiTomcatWasdiWebServerExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiTomcatWasdiWebServerExternalPort }}:{{ sWasdiTomcatWasdiWebServerInternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiTomcatWasdiWebServerExternalPort }}:{{ sWasdiTomcatWasdiWebServerInternalPort }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -884,13 +884,13 @@ services:
 {% if ( sWasdiTraefikHttpInternalPort | default("") != ""
     and sWasdiTraefikHttpExternalPort | default("") != ""
     and aWasdiTraefikExternalIp | default([]) | length > 0 ) %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiTraefikHttpExternalPort }}:{{ sWasdiTraefikHttpInternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiTraefikHttpExternalPort }}:{{ sWasdiTraefikHttpInternalPort }}"
 {% endif %}
 {% if bWasdiSslEnabled == True
     and sWasdiTraefikHttpsInternalPort | default("") != ""
     and sWasdiTraefikHttpsExternalPort | default("") != ""
     and aWasdiTraefikExternalIp | default([]) | length > 0 %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiTraefikHttpsExternalPort }}:{{ sWasdiTraefikHttpsInternalPort }}"
+      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiTraefikHttpsExternalPort }}:{{ sWasdiTraefikHttpsInternalPort }}"
 {% endif %}
 {% endfor %}
 {% endif %}
