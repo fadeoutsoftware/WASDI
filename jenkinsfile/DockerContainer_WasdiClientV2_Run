@@ -58,12 +58,13 @@ pipeline {
     stage('START OR RESTART THE CONTAINERS') {
       steps {
         sh script: """
-            cd ${env.sWasdiAnsiblePath}
-            ansible-playbook playbooks/runDockerContainer.yml \
-                --inventory inventories/wasdi.yml \
-                --limit ${env.sAnsibleLimit} \
-                --diff \
-                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiClientV2Container=true'
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/runDockerContainerWasdiClientV2.yml \
+            --inventory inventories/wasdi.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
         label: "Start or restart the container"
       }
