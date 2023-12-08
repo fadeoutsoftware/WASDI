@@ -2001,6 +2001,7 @@ def wasdiLog(sLogRow):
 def deleteProduct(sProduct):
     """
     Delete a Product from a Workspace
+    NOTE: the method DOES NOT delete the pyshical file on your local Disk if the app is running in your environment.
 
     :param sProduct: Name of the product to delete (WITH EXTENSION)
     :return: True if the file has been deleted, False if there was any error
