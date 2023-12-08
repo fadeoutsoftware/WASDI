@@ -836,9 +836,12 @@ services:
       nofile:
         soft: {{ sWasdiTomcatWasdiWebServerUlimitNofile }}
         hard: {{ sWasdiTomcatWasdiWebServerUlimitNofile }}
+{% if ( aoWasdiTomcatWasdiWebServerVolume | length ) > 0 %}
     volumes:
-      - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
-      - {{ sWasdiConfigurationRootDirectoryPath }}:{{ sWasdiConfigurationRootDirectoryPath }}:ro
+{% for aoWasdiTomcatWasdiWebServerCurrentVolume in aoWasdiTomcatWasdiWebServerVolume %}
+      - {{ aoWasdiTomcatWasdiWebServerCurrentVolume }}
+{% endfor %}
+{% endif %}
 {% endif %}
   {{ sWasdiTraefikServiceName }}:
     command:
