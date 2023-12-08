@@ -1728,6 +1728,11 @@ public class DockerUtils {
         		sContainerName = sImageName.replace(":", "_") + "_" + Utils.getRandomName();
         		WasdiLog.debugLog("DockerUtils.run: try to create a container named " + sContainerName);
         		
+        		if (sContainerName.length()>62) {
+        			sContainerName = sContainerName.substring(0, 62);
+        			WasdiLog.debugLog("DockerUtils.run: container name too long, cut it to " + sContainerName);
+        		}
+        		
         		// Create the container
             	try {
             		// API URL
