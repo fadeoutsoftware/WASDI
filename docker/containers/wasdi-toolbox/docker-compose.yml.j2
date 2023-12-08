@@ -97,6 +97,28 @@ services:
       - /data/wasdibck/cache/mongodb:/mnt/cache:rw
       - /data/wasdibck/mongodb:/mnt/data:rw
 
+  monitoring-monitorMissingFile:
+    command:
+      - --mode-execute
+      - real
+      - --mode-batch
+    environment:
+      - TOOLBOX_LOG_VERBOSE=true
+      - TOOLBOX_LOG_ON_SCREEN=true
+      - TOOLBOX_MODULE_NAME=monitoring
+      - TOOLBOX_SUBMODULE_NAME=monitorMissingFile
+    image: {{ sWasdiToolboxServiceName }}:latest
+    restart: "no"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiToolboxUlimitNofile }}
+        hard: {{ sWasdiToolboxUlimitNofile }}
+    user: "root:root"
+    volumes:
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiToolboxServiceName }}/opt_wasdi_toolbox_configuration:{{ sWasdiToolboxRootDirectoryPath }}/configuration:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiToolboxServiceName }}/opt_wasdi_toolbox_output:{{ sWasdiToolboxRootDirectoryPath }}/output:rw
+      - {{ sWasdiDataSftpRootDirectoryPath }}:/mnt/data:ro
+
   postgresql-backupDatabaseLogicalDump:
     command:
       - --mode-execute
