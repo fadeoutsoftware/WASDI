@@ -353,11 +353,11 @@ fi
 
 
 # Reconfigure the administrator credentials (user name and password)
-if [[ -n "${GEOSERVER_ADMIN_USER_NAME}" && -n "${GEOSERVER_ADMIN_USER_PASSWORD}" && -f "${sGeoserverWorkingDir}/security/usergroup/default/users.xml" ]]
+if [[ -n "${GEOSERVER_USER_ADMINISTRATOR_NAME}" && -n "${GEOSERVER_USER_ADMINISTRATOR_PASSWORD}" && -f "${sGeoserverWorkingDir}/security/usergroup/default/users.xml" ]]
 then
-    createOrUpdateUser "${GEOSERVER_ADMIN_USER_NAME}" "${GEOSERVER_ADMIN_USER_PASSWORD}" "ADMIN"
+    createOrUpdateUser "${GEOSERVER_USER_ADMINISTRATOR_NAME}" "${GEOSERVER_USER_ADMINISTRATOR_PASSWORD}" "ADMIN"
 
-    if [[ ${?} -eq 0 && "${GEOSERVER_ADMIN_USER_NAME}" != "admin" ]]
+    if [[ ${?} -eq 0 && "${GEOSERVER_USER_ADMINISTRATOR_NAME}" != "admin" ]]
     then
         deleteUser "admin"
     fi
@@ -365,16 +365,16 @@ fi
 
 
 # Create the application user
-if [[ -n "${GEOSERVER_APPLICATION_USER_NAME}" && -n "${GEOSERVER_APPLICATION_USER_PASSWORD}" && -n "${GEOSERVER_APPLICATION_USER_ROLE}" ]]
+if [[ -n "${GEOSERVER_USER_APPLICATION_NAME}" && -n "${GEOSERVER_USER_APPLICATION_PASSWORD}" && -n "${GEOSERVER_USER_APPLICATION_ROLE}" ]]
 then
-    createOrUpdateUser "${GEOSERVER_APPLICATION_USER_NAME}" "${GEOSERVER_APPLICATION_USER_PASSWORD}" "${GEOSERVER_APPLICATION_USER_ROLE}"
+    createOrUpdateUser "${GEOSERVER_USER_APPLICATION_NAME}" "${GEOSERVER_USER_APPLICATION_PASSWORD}" "${GEOSERVER_USER_APPLICATION_ROLE}"
 fi
 
 
 # Create the additional user
-if [[ -n "${GEOSERVER_ADDITIONAL_USER_NAME}" && -n "${GEOSERVER_ADDITIONAL_USER_PASSWORD}" && -n "${GEOSERVER_ADDITIONAL_USER_ROLE}" ]]
+if [[ -n "${GEOSERVER_USER_ADDITIONAL_NAME}" && -n "${GEOSERVER_USER_ADDITIONAL_PASSWORD}" && -n "${GEOSERVER_USER_ADDITIONAL_ROLE}" ]]
 then
-    createOrUpdateUser "${GEOSERVER_ADDITIONAL_USER_NAME}" "${GEOSERVER_ADDITIONAL_USER_PASSWORD}" "${GEOSERVER_ADDITIONAL_USER_ROLE}"
+    createOrUpdateUser "${GEOSERVER_USER_ADDITIONAL_NAME}" "${GEOSERVER_USER_ADDITIONAL_PASSWORD}" "${GEOSERVER_USER_ADDITIONAL_ROLE}"
 fi
 
 exec "$@"
