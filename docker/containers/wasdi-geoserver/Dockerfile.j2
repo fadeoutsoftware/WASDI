@@ -149,6 +149,10 @@ ENV PATH="{{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/bi
 WORKDIR {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}
 
 
+# Set the home directory of the Geoserver installation
+ENV GEOSERVER_HOME="{{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}"
+
+
 # Copy data
 COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/docker-entrypoint.sh /docker-entrypoint.sh
 
