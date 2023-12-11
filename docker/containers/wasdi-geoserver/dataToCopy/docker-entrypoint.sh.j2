@@ -1,22 +1,26 @@
 #!/bin/bash
 
-function generateHash() {
-    local sPassword=${1}
+function associateRoleToUser() {
+    local sUserName=${1}
+    local sRoleName=${2}
+    local iCurrentLine
 
-    if [[ -z "${GEOSERVER_HOME}" ]]
+    if [[ ! -f "${sGeoserverWorkingDir}/security/role/default/roles.xml" ]]
     then
-        echo ""
-        return 1
+        echo "[ENTRYPOINT] The file '${sGeoserverWorkingDir}/security/role/default/roles.xml' does not exist: we bypass the role manipulation"
+        return 0
     fi
 
-    sPasswordHash="$(java -classpath $(find "${GEOSERVER_HOME}/webapps/geoserver" -regex ".*jasypt-[0-9]\.[0-9]\.[0-9].*jar") org.jasypt.intf.cli.JasyptStringDigestCLI digest.sh algorithm=SHA-256 saltSizeBytes=16 iterations=100000 input="${sPassword}" verbose=0)"
+    echo "[ENTRYPOINT] Associate the role '${sRoleName}' to the user '${sUserName}' adding an entry in '${sGeoserverWorkingDir}/security/role/default/roles.xml'"
+    iCurrentLine=$(grep --line-number "</userList>" ${sGeoserverWorkingDir}/security/role/default/roles.xml | cut --delimiter ':' --fields '1')
+    sed --in-place "${iCurrentLine}i \        <userRoles username=\"${sUserName}\">\n\            <roleRef roleID=\"${sRoleName}\"\/>\n\        </userRoles>" ${sGeoserverWorkingDir}/security/role/default/roles.xml
 
-    if [[ -n "${sPasswordHash}" ]]
+    if [[ ${?} -eq 0 ]]
     then
-        echo "digest1:${sPasswordHash}" | tr --delete "\n"
+        echo "[ENTRYPOINT] OK"
         return 0
     else
-        echo ""
+        echo "[ENTRYPOINT] ERROR"
         return 1
     fi
 }
@@ -26,13 +30,19 @@ function createUser() {
     local sUserPassword=${2}
     local iCurrentLine
 
-    echo "[ENTRYPOINT] Create a hash for ${sUserName}'s password"
+    if [[ ! -f "${sGeoserverWorkingDir}/security/usergroup/default/users.xml" ]]
+    then
+        echo "[ENTRYPOINT] The file '${sGeoserverWorkingDir}/security/usergroup/default/users.xml' does not exist: we bypass the user manipulation"
+        return 0
+    fi
+
+    echo "[ENTRYPOINT] Hash the password of the user '${sUserName}'"
     sUserPasswordHash=$(generateHash "${sUserPassword}")
 
     if [[ ${?} -eq 0 && -n "${sUserPasswordHash}" ]]
     then
         echo "[ENTRYPOINT] OK"
-        echo "[ENTRYPOINT] Add an entry in '${sGeoserverWorkingDir}/security/usergroup/default/users.xml' to create the user '${sUserName}'"
+        echo "[ENTRYPOINT] Create the user '${sUserName}' adding an entry in '${sGeoserverWorkingDir}/security/usergroup/default/users.xml'"
         iCurrentLine=$(grep --line-number "</users>" ${sGeoserverWorkingDir}/security/usergroup/default/users.xml | cut --delimiter ':' --fields '1')
 
         if [[ -n "${iCurrentLine}" ]]
@@ -58,6 +68,12 @@ function deleteUser() {
     local sUserName=${1}
     local iReturnCode=0
 
+    if [[ ! -f "${sGeoserverWorkingDir}/security/usergroup/default/users.xml" ]]
+    then
+        echo "[ENTRYPOINT] The file '${sGeoserverWorkingDir}/security/usergroup/default/users.xml' does not exist: we bypass the user manipulation"
+        return 0
+    fi
+
     echo "[ENTRYPOINT] Search if the user '${sUserName}' exists"
     iCurrentLine=$(grep --line-number "<user.*name=\"${sUserName}\".*" ${sGeoserverWorkingDir}/security/usergroup/default/users.xml | cut --delimiter ':' --fields '1')
 
@@ -78,7 +94,7 @@ function deleteUser() {
             iReturnCode=1
         fi
 
-        echo "[ENTRYPOINT] Delete the role of the user '${sUserName}' from '${sGeoserverWorkingDir}/security/role/default/roles.xml'"
+        echo "[ENTRYPOINT] Delete the role associated to the user '${sUserName}' from '${sGeoserverWorkingDir}/security/role/default/roles.xml'"
         sed --in-place "/<userRoles username=\"${sUserName}\">/,/<\/userRoles>/d" ${sGeoserverWorkingDir}/security/role/default/roles.xml
 
         if [[ ${?} -eq 0 ]]
@@ -93,38 +109,86 @@ function deleteUser() {
     return ${iReturnCode}
 }
 
+function generateHash() {
+    local sPassword=${1}
+
+    if [[ -z "${GEOSERVER_HOME}" ]]
+    then
+        echo ""
+        return 1
+    fi
+
+    sPasswordHash="$(java -classpath $(find "${GEOSERVER_HOME}/webapps/geoserver" -regex ".*jasypt-[0-9]\.[0-9]\.[0-9].*jar") org.jasypt.intf.cli.JasyptStringDigestCLI digest.sh algorithm=SHA-256 saltSizeBytes=16 iterations=100000 input="${sPassword}" verbose=0)"
+
+    if [[ -n "${sPasswordHash}" ]]
+    then
+        echo "digest1:${sPasswordHash}" | tr --delete "\n"
+        return 0
+    else
+        echo ""
+        return 1
+    fi
+}
+
 function updateUser() {
     local sUserName=${1}
     local sUserPassword=${2}
-    local iCurrentLine=${3}
+    local sUserRole=${3}
+    local iReturnCode=0
 
-    echo "[ENTRYPOINT] Create a hash for ${sUserName}'s password"
+    if [[ ! -f "${sGeoserverWorkingDir}/security/usergroup/default/users.xml" ]]
+    then
+        echo "[ENTRYPOINT] The file '${sGeoserverWorkingDir}/security/usergroup/default/users.xml' does not exist: we bypass the user manipulation"
+        return 0
+    fi
+
+    echo "[ENTRYPOINT] Hash the password of the user '${sUserName}'"
     sUserPasswordHash=$(generateHash "${sUserPassword}")
 
     if [[ ${?} -eq 0 && -n "${sUserPasswordHash}" ]]
     then
         echo "[ENTRYPOINT] OK"
         echo "[ENTRYPOINT] Update the user '${sUserName}' in '${sGeoserverWorkingDir}/security/usergroup/default/users.xml'"
-        sed --in-place "${iCurrentLine}s/.*/\        <user enabled=\"true\" name=\"${sUserName}\" password=\"${sUserPasswordHash//\//\\/}\"\/>/g" ${sGeoserverWorkingDir}/security/usergroup/default/users.xml
+        sed --in-place "s/<user.*name=\"${sUserName}\".*>/<user enabled=\"true\" name=\"${sUserName}\" password=\"${sUserPasswordHash//\//\\/}\"\/>/g" ${sGeoserverWorkingDir}/security/usergroup/default/users.xml
 
         if [[ ${?} -eq 0 ]]
         then
             echo "[ENTRYPOINT] OK"
-            return 0
         else
             echo "[ENTRYPOINT] ERROR"
-            return 1
+            iReturnCode=1
+        fi
+
+        echo "[ENTRYPOINT] Update the role of the user '${sUserName}' in '${sGeoserverWorkingDir}/security/role/default/roles.xml'"
+        sed --in-place "/<userRoles username=\"${sUserName}\">/,/<\/userRoles>/c\        <userRoles username=\"${sUserName}\">\n\            <roleRef roleID=\"${sUserRole}\"\/>\n\        <\/userRoles>" ${sGeoserverWorkingDir}/security/role/default/roles.xml
+
+        if [[ ${?} -eq 0 ]]
+        then
+            echo "[ENTRYPOINT] OK"
+        else
+            echo "[ENTRYPOINT] ERROR"
+            iReturnCode=1
         fi
     else
         echo "[ENTRYPOINT] ERROR: unable to get a hash"
-        return 1
+        iReturnCode=1
     fi
+
+    return ${iReturnCode}
 }
 
 function createOrUpdateUser() {
     local sUserName=${1}
     local sUserPassword=${2}
+    local sUserRole=${3}
+    local iReturnCode=0
     local iCurrentLine
+
+    if [[ ! -f "${sGeoserverWorkingDir}/security/usergroup/default/users.xml" ]]
+    then
+        echo "[ENTRYPOINT] The file '${sGeoserverWorkingDir}/security/usergroup/default/users.xml' does not exist: we bypass the user manipulation"
+        return 0
+    fi
 
     echo "[ENTRYPOINT] Search if the user '${sUserName}' exists"
     iCurrentLine=$(grep --line-number "<user.*name=\"${sUserName}\".*" ${sGeoserverWorkingDir}/security/usergroup/default/users.xml | cut --delimiter ':' --fields '1')
@@ -133,31 +197,29 @@ function createOrUpdateUser() {
     then
         echo "[ENTRYPOINT] The user does not exist"
         createUser "${sUserName}" "${sUserPassword}"
-        return ${?}
+
+        if [[ ${?} -eq 0 ]]
+        then
+            associateRoleToUser "${sUserName}" "${sUserRole}"
+
+            if [[ ${?} -ne 0 ]]
+            then
+                iReturnCode=1
+            fi
+        else
+            iReturnCode=1
+        fi
     else
         echo "[ENTRYPOINT] The user exists"
-        updateUser "${sUserName}" "${sUserPassword}" ${iCurrentLine}
-        return ${?}
+        updateUser "${sUserName}" "${sUserPassword}" "${sUserRole}"
+
+        if [[ ${?} -ne 0 ]]
+        then
+            iReturnCode=1
+        fi
     fi
-}
 
-function associateRoleToUser() {
-    local sUserName=${1}
-    local sRoleName=${2}
-    local iCurrentLine
-
-    echo "[ENTRYPOINT] Add an entry in '${sGeoserverWorkingDir}/security/role/default/roles.xml' to give the role '${sRoleName}' to the user '${sUserName}'"
-    iCurrentLine=$(grep --line-number "</userList>" ${sGeoserverWorkingDir}/security/role/default/roles.xml | cut --delimiter ':' --fields '1')
-    sed --in-place "${iCurrentLine}i \        <userRoles username=\"${sUserName}\">\n\            <roleRef roleID=\"${sRoleName}\"\/>\n\        </userRoles>" ${sGeoserverWorkingDir}/security/role/default/roles.xml
-
-    if [[ ${?} -eq 0 ]]
-    then
-        echo "[ENTRYPOINT] OK"
-        return 0
-    else
-        echo "[ENTRYPOINT] ERROR"
-        return 1
-    fi
+    return ${iReturnCode}
 }
 
 
@@ -203,7 +265,7 @@ fi
 if [[ -f "${sGeoserverWorkingDir}/security/config.xml" ]]
 then
     echo "[ENTRYPOINT] Reconfigure ${sGeoserverWorkingDir}/security/config.xml"
-    sed --in-place 's/<configPasswordEncrypterName>pbePasswordEncoder<\/configPasswordEncrypterName>/<configPasswordEncrypterName>strongPbePasswordEncoder<\/configPasswordEncrypterName>/g' ${sGeoserverWorkingDir}/security/config.xml
+    sed --in-place "s/<configPasswordEncrypterName>pbePasswordEncoder<\/configPasswordEncrypterName>/<configPasswordEncrypterName>strongPbePasswordEncoder<\/configPasswordEncrypterName>/g" ${sGeoserverWorkingDir}/security/config.xml
 
     if [[ ${?} -eq 0 ]]
     then
@@ -232,7 +294,7 @@ fi
 # Reconfigure the default master password
 if [[ -n "${GEOSERVER_MASTER_PASSWORD}" && ! -f "${sGeoserverWorkingDir}/security/masterpw.digest" ]]
 then
-    echo "[ENTRYPOINT] Create a hash for the master password"
+    echo "[ENTRYPOINT] Hash the master password"
     sGeoserverMasterPasswordHash=$(generateHash "${GEOSERVER_MASTER_PASSWORD}")
 
     if [[ -n "${sGeoserverMasterPasswordHash}" ]]
@@ -249,23 +311,6 @@ then
         fi
     else
         echo "[ENTRYPOINT] ERROR: unable to get a hash"
-    fi
-fi
-
-
-# Reconfigure the administrator credentials (user name and password)
-if [[ -n "${GEOSERVER_ADMIN_USER_NAME}" && -n "${GEOSERVER_ADMIN_USER_PASSWORD}" && -f "${sGeoserverWorkingDir}/security/usergroup/default/users.xml" ]]
-then
-    createOrUpdateUser "${GEOSERVER_ADMIN_USER_NAME}" "${GEOSERVER_ADMIN_USER_PASSWORD}"
-
-    if [[ ${?} -eq 0 && -f "${sGeoserverWorkingDir}/security/role/default/roles.xml" ]]
-    then
-        associateRoleToUser "${GEOSERVER_ADMIN_USER_NAME}" "ADMIN"
-
-        if [[ ${?} -eq 0 ]]
-        then
-            deleteUser "admin"
-        fi
     fi
 fi
 
@@ -307,15 +352,29 @@ then
 fi
 
 
-# Create the application user
-if [[ -n "${GEOSERVER_APPLICATION_USER_NAME}" && -n "${GEOSERVER_APPLICATION_USER_PASSWORD}" && -f "${sGeoserverWorkingDir}/security/usergroup/default/users.xml" ]]
+# Reconfigure the administrator credentials (user name and password)
+if [[ -n "${GEOSERVER_ADMIN_USER_NAME}" && -n "${GEOSERVER_ADMIN_USER_PASSWORD}" && -f "${sGeoserverWorkingDir}/security/usergroup/default/users.xml" ]]
 then
-    createOrUpdateUser "${GEOSERVER_APPLICATION_USER_NAME}" "${GEOSERVER_APPLICATION_USER_PASSWORD}"
+    createOrUpdateUser "${GEOSERVER_ADMIN_USER_NAME}" "${GEOSERVER_ADMIN_USER_PASSWORD}" "ADMIN"
 
-    if [[ ${?} -eq 0 && -n "${GEOSERVER_APPLICATION_USER_ROLE}" && -f "${sGeoserverWorkingDir}/security/role/default/roles.xml" ]]
+    if [[ ${?} -eq 0 && "${GEOSERVER_ADMIN_USER_NAME}" != "admin" ]]
     then
-        associateRoleToUser "${GEOSERVER_APPLICATION_USER_NAME}" "${GEOSERVER_APPLICATION_USER_ROLE}"
+        deleteUser "admin"
     fi
+fi
+
+
+# Create the application user
+if [[ -n "${GEOSERVER_APPLICATION_USER_NAME}" && -n "${GEOSERVER_APPLICATION_USER_PASSWORD}" && -n "${GEOSERVER_APPLICATION_USER_ROLE}" ]]
+then
+    createOrUpdateUser "${GEOSERVER_APPLICATION_USER_NAME}" "${GEOSERVER_APPLICATION_USER_PASSWORD}" "${GEOSERVER_APPLICATION_USER_ROLE}"
+fi
+
+
+# Create the additional user
+if [[ -n "${GEOSERVER_ADDITIONAL_USER_NAME}" && -n "${GEOSERVER_ADDITIONAL_USER_PASSWORD}" && -n "${GEOSERVER_ADDITIONAL_USER_ROLE}" ]]
+then
+    createOrUpdateUser "${GEOSERVER_ADDITIONAL_USER_NAME}" "${GEOSERVER_ADDITIONAL_USER_PASSWORD}" "${GEOSERVER_ADDITIONAL_USER_ROLE}"
 fi
 
 exec "$@"
