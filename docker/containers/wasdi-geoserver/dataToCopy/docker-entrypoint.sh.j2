@@ -1,5 +1,95 @@
 #!/bin/bash
 
+function addOrUpdateLine() {
+    local sFile="${1}"
+    local sAddAfter="${2}"
+    local sLineToSearch="${3}"
+    local sLineToAddOrUpdate="${4}"
+    local iIndentation="${5}"
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '${sFile}' exists"
+
+    if [[ -f "${sFile}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the file does not exist"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '\${sAddAfter}' is filled"
+
+    if [[ -n "${sAddAfter}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the variable is not filled"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '\${sLineToSearch}' is filled"
+
+    if [[ -n "${sLineToSearch}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the variable is not filled"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '\${sLineToAddOrUpdate}' is filled"
+
+    if [[ -n "${sLineToAddOrUpdate}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the variable is not filled"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Search if the line '${sLineToSearch}' exists"
+    iPositionLineWeSearch=$(grep --line-number "${sLineToSearch}" ${sFile} | cut --delimiter ':' --fields '1')
+
+    if [[ -n "${iPositionLineWeSearch}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] The line exists: we will try to update it"
+        echo "[ENTRYPOINT] [${FUNCNAME}] Update the line"
+        sed --in-place "s/${sLineToSearch//\//\\/}/${sLineToAddOrUpdate//\//\\/}/g" ${sGeoserverWorkingDir}/global.xml
+
+        if [[ ${?} -eq 0 ]]
+        then
+            echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+        else
+            echo "[ENTRYPOINT] [${FUNCNAME}] ERROR"
+        fi
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] The line does not exist: we will try to insert it"
+        echo "[ENTRYPOINT] [${FUNCNAME}] We requested an insertion after the line '${sAddAfter}': search if the line exists"
+        iPositionLineReference=$(grep --line-number "${sAddAfter}" ${sFile} | cut --delimiter ':' --fields '1')
+
+        if [[ -n "${iPositionLineReference}" ]]
+        then
+            echo "[ENTRYPOINT] [${FUNCNAME}] OK: the line exists"
+            sSpace="$(generateSpace ${iIndentation})"
+            iPositionInsertion=$(( ${iPositionLineReference} + 1 ))
+
+            echo "[ENTRYPOINT] [${FUNCNAME}] Insert the line '${sLineToAddOrUpdate}'"
+            sed --in-place "${iPositionInsertion}i \ ${sSpace}${sLineToAddOrUpdate//\//\\/}" ${sFile}
+
+            if [[ ${?} -eq 0 ]]
+            then
+                echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+            else
+                echo "[ENTRYPOINT] [${FUNCNAME}] ERROR"
+            fi
+        else
+            return 1
+        fi
+    fi
+
+    return 0
+}
+
 function associateRoleToUser() {
     local sUserName=${1}
     local sRoleName=${2}
@@ -128,6 +218,20 @@ function generateHash() {
         echo ""
         return 1
     fi
+}
+
+function generateSpace() {
+    local sNumber="${1}"
+    local sCounter=0
+    local sSpace=""
+
+    while [[ ${sCounter} -lt ${sNumber} ]]
+    do
+        sSpace="${sSpace} "
+        sCounter=$(( ${sCounter} + 1 ))
+    done
+
+    echo "${sSpace}"
 }
 
 function updateUser() {
@@ -315,6 +419,21 @@ then
 fi
 
 
+# Enable the usage of headers for proxy URL
+if [[ -f "${sGeoserverWorkingDir}/global.xml" ]]
+then
+    echo "[ENTRYPOINT] Reconfigure useHeadersProxyURL to enable it in '${sGeoserverWorkingDir}/global.xml'"
+    sed --in-place "s/<useHeadersProxyURL>.*<\/useHeadersProxyURL>/<useHeadersProxyURL>true<\/useHeadersProxyURL>/g" ${sGeoserverWorkingDir}/global.xml
+
+    if [[ ${?} -eq 0 ]]
+    then
+        echo "[ENTRYPOINT] OK"
+    else
+        echo "[ENTRYPOINT] ERROR"
+    fi
+fi
+
+
 # Reconfigure the URL
 if [[ -n "${GEOSERVER_URL}" && -f "${sGeoserverWorkingDir}/global.xml" ]]
 then
@@ -322,7 +441,7 @@ then
 
     if [[ -n "${iCurrentLine}" ]]
     then
-        echo "[ENTRYPOINT] Reconfigure proxyBaseUrl in ${sGeoserverWorkingDir}/global.xml"
+        echo "[ENTRYPOINT] Reconfigure proxyBaseUrl in '${sGeoserverWorkingDir}/global.xml'"
         sed --in-place "s/<proxyBaseUrl>.*<\/proxyBaseUrl>/<proxyBaseUrl>${GEOSERVER_URL//\//\\/}<\/proxyBaseUrl>/g" ${sGeoserverWorkingDir}/global.xml
 
         if [[ ${?} -eq 0 ]]
@@ -349,6 +468,128 @@ then
             echo "[ENTRYPOINT] ERROR: unable to get the number of the line which contain 'useHeadersProxyURL'"
         fi
     fi
+fi
+
+
+# Configure the contact informations
+if [[ -n "${GEOSERVER_CONTACT_ADDRESS}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<address>.*</address>" \
+        "<address>${GEOSERVER_CONTACT_ADDRESS}</address>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_ADDRESS_CITY}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<addressCity>.*</addressCity>" \
+        "<addressCity>${GEOSERVER_CONTACT_ADDRESS_CITY}</addressCity>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_ADDRESS_COUNTRY}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<addressCountry>.*</addressCountry>" \
+        "<addressCountry>${GEOSERVER_CONTACT_ADDRESS_COUNTRY}</addressCountry>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_ADDRESS_POSTAL_CODE}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<addressPostalCode>.*</addressPostalCode>" \
+        "<addressPostalCode>${GEOSERVER_CONTACT_ADDRESS_POSTAL_CODE}</addressPostalCode>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_ADDRESS_STATE}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<addressState>.*</addressState>" \
+        "<addressState>${GEOSERVER_CONTACT_ADDRESS_STATE}</addressState>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_ADDRESS_TYPE}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<addressType>.*</addressType>" \
+        "<addressType>${GEOSERVER_CONTACT_ADDRESS_TYPE}</addressType>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_EMAIL}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<contactEmail>.*</contactEmail>" \
+        "<contactEmail>${GEOSERVER_CONTACT_EMAIL}</contactEmail>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_ORGANIZATION}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<contactOrganization>.*</contactOrganization>" \
+        "<contactOrganization>${GEOSERVER_CONTACT_ORGANIZATION}</contactOrganization>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_PERSON}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<contactPerson>.*</contactPerson>" \
+        "<contactPerson>${GEOSERVER_CONTACT_PERSON}</contactPerson>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_POSITION}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<contactPosition>.*</contactPosition>" \
+        "<contactPosition>${GEOSERVER_CONTACT_POSITION}</contactPosition>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_ONLINE_RESOURCE}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<onlineResource>.*</onlineResource>" \
+        "<onlineResource>${GEOSERVER_ONLINE_RESOURCE}</onlineResource>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_WELCOME}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<welcome>.*</welcome>" \
+        "<welcome>${GEOSERVER_WELCOME}</welcome>" \
+        5
 fi
 
 

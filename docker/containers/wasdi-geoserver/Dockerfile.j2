@@ -141,16 +141,12 @@ RUN mkdir --parents \
         /tmp/{{ sWasdiGeoserverSourceUrl | basename }} \
         /tmp/{{ sWasdiGeoserverPluginImagePyramidSourceUrl | basename }} \
         /tmp/geoserverPlugin
-
+ENV GEOSERVER_HOME="{{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}"
 ENV PATH="{{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/bin:${PATH}"
 
 
 # Set the workdir
 WORKDIR {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}
-
-
-# Set the home directory of the Geoserver installation
-ENV GEOSERVER_HOME="{{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}"
 
 
 # Copy data
