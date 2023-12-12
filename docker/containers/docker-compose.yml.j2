@@ -139,7 +139,9 @@ services:
 {% if ( aoWasdiGeoserverEnvironmentVariable | length ) > 0 %}
     environment:
 {% for aoWasdiGeoserverCurrentEnvironmentVariable in aoWasdiGeoserverEnvironmentVariable %}
+{% if 'omitIfEmpty' not in aoWasdiGeoserverCurrentEnvironmentVariable or aoWasdiGeoserverCurrentEnvironmentVariable['omitIfEmpty'] != True %}
       - {{ aoWasdiGeoserverCurrentEnvironmentVariable['key'] }}={{ aoWasdiGeoserverCurrentEnvironmentVariable['value'] }}
+{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiGeoserverServiceName }}:latest"
