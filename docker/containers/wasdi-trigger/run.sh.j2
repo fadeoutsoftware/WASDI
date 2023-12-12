@@ -1,5 +1,17 @@
 #!/bin/bash
 
+if [[ -z "${USER}" ]]
+then
+    echo "[DEBUG] The variable '\${USER}' is empty: we fill it manually with the command 'whoami'"
+    USER="$(whoami)"
+fi
+
+if [[ -z "${USER}" ]]
+then
+    echo "[ERROR] The variable '\${USER}' is still empty: we exit here"
+    exit 1
+fi
+
 if [[ "${USER}" != "{{ sWasdiSystemUserName }}" ]]
 then
     echo "[ERROR] You are '${USER}' when should be '{{ sWasdiSystemUserName }}'"
@@ -8,7 +20,6 @@ fi
 
 docker \
     run \
-    --interactive \
     --rm \
     --mount type=bind,source={{ sWasdiConfigurationRootDirectoryPath }},destination={{ sWasdiConfigurationRootDirectoryPath }},readonly \
     --mount type=bind,source={{ sWasdiDataRootDirectoryPath }},destination={{ sWasdiDataRootDirectoryPath }} \
@@ -19,6 +30,5 @@ docker \
     --mount type=bind,source={{ sWasdiDataWorkflowsRootDirectoryPath }},destination={{ sWasdiDataWorkflowsRootDirectoryPath }} \
     --mount type=bind,source={{ sWasdiDockerSocketFilePath }},destination={{ sWasdiDockerSocketFilePath }} \
     --network {{ sWasdiDockerNetworkName }} \
-    --tty \
     {{ sWasdiTriggerServiceName }}:latest \
     ${@}

@@ -1,32 +1,621 @@
 #!/bin/bash
 
+function addOrUpdateLine() {
+    local sFile="${1}"
+    local sAddAfter="${2}"
+    local sLineToSearch="${3}"
+    local sLineToAddOrUpdate="${4}"
+    local iIndentation="${5}"
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '${sFile}' exists"
+
+    if [[ -f "${sFile}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the file does not exist"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '\${sAddAfter}' is filled"
+
+    if [[ -n "${sAddAfter}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the variable is not filled"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '\${sLineToSearch}' is filled"
+
+    if [[ -n "${sLineToSearch}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the variable is not filled"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '\${sLineToAddOrUpdate}' is filled"
+
+    if [[ -n "${sLineToAddOrUpdate}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the variable is not filled"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Search if the line '${sLineToSearch}' exists"
+    iPositionLineWeSearch=$(grep --line-number "${sLineToSearch}" ${sFile} | cut --delimiter ':' --fields '1')
+
+    if [[ -n "${iPositionLineWeSearch}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] The line exists: we will try to update it"
+        echo "[ENTRYPOINT] [${FUNCNAME}] Update the line"
+        sed --in-place "s/${sLineToSearch//\//\\/}/${sLineToAddOrUpdate//\//\\/}/g" ${sGeoserverWorkingDir}/global.xml
+
+        if [[ ${?} -eq 0 ]]
+        then
+            echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+        else
+            echo "[ENTRYPOINT] [${FUNCNAME}] ERROR"
+        fi
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] The line does not exist: we will try to insert it"
+        echo "[ENTRYPOINT] [${FUNCNAME}] We requested an insertion after the line '${sAddAfter}': search if the line exists"
+        iPositionLineReference=$(grep --line-number "${sAddAfter}" ${sFile} | cut --delimiter ':' --fields '1')
+
+        if [[ -n "${iPositionLineReference}" ]]
+        then
+            echo "[ENTRYPOINT] [${FUNCNAME}] OK: the line exists"
+            sSpace="$(generateSpace ${iIndentation})"
+            iPositionInsertion=$(( ${iPositionLineReference} + 1 ))
+
+            echo "[ENTRYPOINT] [${FUNCNAME}] Insert the line '${sLineToAddOrUpdate}'"
+            sed --in-place "${iPositionInsertion}i \ ${sSpace}${sLineToAddOrUpdate//\//\\/}" ${sFile}
+
+            if [[ ${?} -eq 0 ]]
+            then
+                echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+            else
+                echo "[ENTRYPOINT] [${FUNCNAME}] ERROR"
+            fi
+        else
+            return 1
+        fi
+    fi
+
+    return 0
+}
+
+function associateRoleToUser() {
+    local sUserName=${1}
+    local sRoleName=${2}
+    local iCurrentLine
+
+    if [[ ! -f "${sGeoserverWorkingDir}/security/role/default/roles.xml" ]]
+    then
+        echo "[ENTRYPOINT] The file '${sGeoserverWorkingDir}/security/role/default/roles.xml' does not exist: we bypass the role manipulation"
+        return 0
+    fi
+
+    echo "[ENTRYPOINT] Associate the role '${sRoleName}' to the user '${sUserName}' adding an entry in '${sGeoserverWorkingDir}/security/role/default/roles.xml'"
+    iCurrentLine=$(grep --line-number "</userList>" ${sGeoserverWorkingDir}/security/role/default/roles.xml | cut --delimiter ':' --fields '1')
+    sed --in-place "${iCurrentLine}i \        <userRoles username=\"${sUserName}\">\n\            <roleRef roleID=\"${sRoleName}\"\/>\n\        </userRoles>" ${sGeoserverWorkingDir}/security/role/default/roles.xml
+
+    if [[ ${?} -eq 0 ]]
+    then
+        echo "[ENTRYPOINT] OK"
+        return 0
+    else
+        echo "[ENTRYPOINT] ERROR"
+        return 1
+    fi
+}
+
+function createUser() {
+    local sUserName=${1}
+    local sUserPassword=${2}
+    local iCurrentLine
+
+    if [[ ! -f "${sGeoserverWorkingDir}/security/usergroup/default/users.xml" ]]
+    then
+        echo "[ENTRYPOINT] The file '${sGeoserverWorkingDir}/security/usergroup/default/users.xml' does not exist: we bypass the user manipulation"
+        return 0
+    fi
+
+    echo "[ENTRYPOINT] Hash the password of the user '${sUserName}'"
+    sUserPasswordHash=$(generateHash "${sUserPassword}")
+
+    if [[ ${?} -eq 0 && -n "${sUserPasswordHash}" ]]
+    then
+        echo "[ENTRYPOINT] OK"
+        echo "[ENTRYPOINT] Create the user '${sUserName}' adding an entry in '${sGeoserverWorkingDir}/security/usergroup/default/users.xml'"
+        iCurrentLine=$(grep --line-number "</users>" ${sGeoserverWorkingDir}/security/usergroup/default/users.xml | cut --delimiter ':' --fields '1')
+
+        if [[ -n "${iCurrentLine}" ]]
+        then
+            sed --in-place "${iCurrentLine}i \        <user enabled=\"true\" name=\"${sUserName}\" password=\"${sUserPasswordHash//\//\\/}\"/>" ${sGeoserverWorkingDir}/security/usergroup/default/users.xml
+
+            if [[ ${?} -eq 0 ]]
+            then
+                echo "[ENTRYPOINT] OK"
+                return 0
+            else
+                echo "[ENTRYPOINT] ERROR"
+                return 1
+            fi
+        fi
+    else
+        echo "[ENTRYPOINT] ERROR: unable to get a hash"
+        return 1
+    fi
+}
+
+function deleteUser() {
+    local sUserName=${1}
+    local iReturnCode=0
+
+    if [[ ! -f "${sGeoserverWorkingDir}/security/usergroup/default/users.xml" ]]
+    then
+        echo "[ENTRYPOINT] The file '${sGeoserverWorkingDir}/security/usergroup/default/users.xml' does not exist: we bypass the user manipulation"
+        return 0
+    fi
+
+    echo "[ENTRYPOINT] Search if the user '${sUserName}' exists"
+    iCurrentLine=$(grep --line-number "<user.*name=\"${sUserName}\".*" ${sGeoserverWorkingDir}/security/usergroup/default/users.xml | cut --delimiter ':' --fields '1')
+
+    if [[ -z "${iCurrentLine}" ]]
+    then
+        echo "[ENTRYPOINT] The user does not exist: nothing to do"
+        return 0
+    else
+        echo "[ENTRYPOINT] The user exists"
+        echo "[ENTRYPOINT] Delete the user '${sUserName}' from '${sGeoserverWorkingDir}/security/usergroup/default/users.xml'"
+        sed --in-place "${iCurrentLine}d" ${sGeoserverWorkingDir}/security/usergroup/default/users.xml
+
+        if [[ ${?} -eq 0 ]]
+        then
+            echo "[ENTRYPOINT] OK"
+        else
+            echo "[ENTRYPOINT] ERROR"
+            iReturnCode=1
+        fi
+
+        echo "[ENTRYPOINT] Delete the role associated to the user '${sUserName}' from '${sGeoserverWorkingDir}/security/role/default/roles.xml'"
+        sed --in-place "/<userRoles username=\"${sUserName}\">/,/<\/userRoles>/d" ${sGeoserverWorkingDir}/security/role/default/roles.xml
+
+        if [[ ${?} -eq 0 ]]
+        then
+            echo "[ENTRYPOINT] OK"
+        else
+            echo "[ENTRYPOINT] ERROR"
+            iReturnCode=1
+        fi
+    fi
+
+    return ${iReturnCode}
+}
+
+function generateHash() {
+    local sPassword=${1}
+
+    if [[ -z "${GEOSERVER_HOME}" ]]
+    then
+        echo ""
+        return 1
+    fi
+
+    sPasswordHash="$(java -classpath $(find "${GEOSERVER_HOME}/webapps/geoserver" -regex ".*jasypt-[0-9]\.[0-9]\.[0-9].*jar") org.jasypt.intf.cli.JasyptStringDigestCLI digest.sh algorithm=SHA-256 saltSizeBytes=16 iterations=100000 input="${sPassword}" verbose=0)"
+
+    if [[ -n "${sPasswordHash}" ]]
+    then
+        echo "digest1:${sPasswordHash}" | tr --delete "\n"
+        return 0
+    else
+        echo ""
+        return 1
+    fi
+}
+
+function generateSpace() {
+    local sNumber="${1}"
+    local sCounter=0
+    local sSpace=""
+
+    while [[ ${sCounter} -lt ${sNumber} ]]
+    do
+        sSpace="${sSpace} "
+        sCounter=$(( ${sCounter} + 1 ))
+    done
+
+    echo "${sSpace}"
+}
+
+function updateUser() {
+    local sUserName=${1}
+    local sUserPassword=${2}
+    local sUserRole=${3}
+    local iReturnCode=0
+
+    if [[ ! -f "${sGeoserverWorkingDir}/security/usergroup/default/users.xml" ]]
+    then
+        echo "[ENTRYPOINT] The file '${sGeoserverWorkingDir}/security/usergroup/default/users.xml' does not exist: we bypass the user manipulation"
+        return 0
+    fi
+
+    echo "[ENTRYPOINT] Hash the password of the user '${sUserName}'"
+    sUserPasswordHash=$(generateHash "${sUserPassword}")
+
+    if [[ ${?} -eq 0 && -n "${sUserPasswordHash}" ]]
+    then
+        echo "[ENTRYPOINT] OK"
+        echo "[ENTRYPOINT] Update the user '${sUserName}' in '${sGeoserverWorkingDir}/security/usergroup/default/users.xml'"
+        sed --in-place "s/<user.*name=\"${sUserName}\".*>/<user enabled=\"true\" name=\"${sUserName}\" password=\"${sUserPasswordHash//\//\\/}\"\/>/g" ${sGeoserverWorkingDir}/security/usergroup/default/users.xml
+
+        if [[ ${?} -eq 0 ]]
+        then
+            echo "[ENTRYPOINT] OK"
+        else
+            echo "[ENTRYPOINT] ERROR"
+            iReturnCode=1
+        fi
+
+        echo "[ENTRYPOINT] Update the role of the user '${sUserName}' in '${sGeoserverWorkingDir}/security/role/default/roles.xml'"
+        sed --in-place "/<userRoles username=\"${sUserName}\">/,/<\/userRoles>/c\        <userRoles username=\"${sUserName}\">\n\            <roleRef roleID=\"${sUserRole}\"\/>\n\        <\/userRoles>" ${sGeoserverWorkingDir}/security/role/default/roles.xml
+
+        if [[ ${?} -eq 0 ]]
+        then
+            echo "[ENTRYPOINT] OK"
+        else
+            echo "[ENTRYPOINT] ERROR"
+            iReturnCode=1
+        fi
+    else
+        echo "[ENTRYPOINT] ERROR: unable to get a hash"
+        iReturnCode=1
+    fi
+
+    return ${iReturnCode}
+}
+
+function createOrUpdateUser() {
+    local sUserName=${1}
+    local sUserPassword=${2}
+    local sUserRole=${3}
+    local iReturnCode=0
+    local iCurrentLine
+
+    if [[ ! -f "${sGeoserverWorkingDir}/security/usergroup/default/users.xml" ]]
+    then
+        echo "[ENTRYPOINT] The file '${sGeoserverWorkingDir}/security/usergroup/default/users.xml' does not exist: we bypass the user manipulation"
+        return 0
+    fi
+
+    echo "[ENTRYPOINT] Search if the user '${sUserName}' exists"
+    iCurrentLine=$(grep --line-number "<user.*name=\"${sUserName}\".*" ${sGeoserverWorkingDir}/security/usergroup/default/users.xml | cut --delimiter ':' --fields '1')
+
+    if [[ -z "${iCurrentLine}" ]]
+    then
+        echo "[ENTRYPOINT] The user does not exist"
+        createUser "${sUserName}" "${sUserPassword}"
+
+        if [[ ${?} -eq 0 ]]
+        then
+            associateRoleToUser "${sUserName}" "${sUserRole}"
+
+            if [[ ${?} -ne 0 ]]
+            then
+                iReturnCode=1
+            fi
+        else
+            iReturnCode=1
+        fi
+    else
+        echo "[ENTRYPOINT] The user exists"
+        updateUser "${sUserName}" "${sUserPassword}" "${sUserRole}"
+
+        if [[ ${?} -ne 0 ]]
+        then
+            iReturnCode=1
+        fi
+    fi
+
+    return ${iReturnCode}
+}
+
+
+
+
+# Initialize the default working directory
+sGeoserverWorkingDir=""
+
+if [[ -n "${GEOSERVER_HOME}" ]]
+then
+    echo "[ENTRYPOINT] \${GEOSERVER_HOME} = ${GEOSERVER_HOME}"
+    sGeoserverWorkingDir="${GEOSERVER_HOME}"
+fi
+
+
+# Copy the data from the initial directory 'GEOSERVER_HOME' to 'GEOSERVER_DATA_DIR'
 if [[ -n "${GEOSERVER_DATA_DIR}" ]]
 then
-    echo "[DEBUG] \${GEOSERVER_DATA_DIR} = ${GEOSERVER_DATA_DIR}"
+    echo "[ENTRYPOINT] \${GEOSERVER_DATA_DIR} = ${GEOSERVER_DATA_DIR}"
+    sGeoserverWorkingDir="${GEOSERVER_DATA_DIR}"
 
-    if [[ -d "{{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/data_dir" && -d "${GEOSERVER_DATA_DIR}" ]]
+    if [[ -n "${GEOSERVER_HOME}" && -d "${GEOSERVER_HOME}/data_dir" && -d "${GEOSERVER_DATA_DIR}" ]]
     then
-        echo "[DEBUG] '{{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/data_dir' exists"
-        echo "[DEBUG] '${GEOSERVER_DATA_DIR}' exists"
-
         if [[ -z "$(ls --almost-all ${GEOSERVER_DATA_DIR})" ]]
         then
-            echo "[DEBUG] Copy '{{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/data_dir/' in '${GEOSERVER_DATA_DIR}/'"
-            cp --recursive --preserve {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/data_dir/* ${GEOSERVER_DATA_DIR}/.
+            echo "[ENTRYPOINT] Copy '${GEOSERVER_HOME}/data_dir/' in '${GEOSERVER_DATA_DIR}/'"
+            cp --recursive --preserve ${GEOSERVER_HOME}/data_dir/* ${GEOSERVER_DATA_DIR}/.
+
+            if [[ ${?} -eq 0 ]]
+            then
+                echo "[ENTRYPOINT] OK"
+                rm --recursive --force \
+                    ${GEOSERVER_HOME}/data_dir \
+                    ${GEOSERVER_DATA_DIR}/demo/*
+            else
+                echo "[ENTRYPOINT] ERROR"
+            fi
         fi
     fi
 fi
 
-if [[ -f "${GEOSERVER_DATA_DIR}/security/config.xml" ]]
+# Configure the strenght of password encryption
+if [[ -f "${sGeoserverWorkingDir}/security/config.xml" ]]
 then
-    echo "[DEBUG] Reconfigure ${GEOSERVER_DATA_DIR}/security/config.xml"
-    sed --in-place 's/<configPasswordEncrypterName>pbePasswordEncoder<\/configPasswordEncrypterName>/<configPasswordEncrypterName>strongPbePasswordEncoder<\/configPasswordEncrypterName>/g' ${GEOSERVER_DATA_DIR}/security/config.xml
+    echo "[ENTRYPOINT] Reconfigure ${sGeoserverWorkingDir}/security/config.xml"
+    sed --in-place "s/<configPasswordEncrypterName>pbePasswordEncoder<\/configPasswordEncrypterName>/<configPasswordEncrypterName>strongPbePasswordEncoder<\/configPasswordEncrypterName>/g" ${sGeoserverWorkingDir}/security/config.xml
+
+    if [[ ${?} -eq 0 ]]
+    then
+        echo "[ENTRYPOINT] OK"
+    else
+        echo "[ENTRYPOINT] ERROR"
+    fi
 fi
 
-if [[ -f "${GEOSERVER_DATA_DIR}/security/masterpw.info" ]]
+
+# Delete the masterpw.info file
+if [[ -f "${sGeoserverWorkingDir}/security/masterpw.info" ]]
 then
-    echo "[DEBUG] Delete '${GEOSERVER_DATA_DIR}/security/masterpw.info'"
-    rm --force ${GEOSERVER_DATA_DIR}/security/masterpw.info
+    echo "[ENTRYPOINT] Delete '${sGeoserverWorkingDir}/security/masterpw.info'"
+    rm --force ${sGeoserverWorkingDir}/security/masterpw.info
+
+    if [[ ${?} -eq 0 ]]
+    then
+        echo "[ENTRYPOINT] OK"
+    else
+        echo "[ENTRYPOINT] ERROR"
+    fi
+fi
+
+
+# Reconfigure the default master password
+if [[ -n "${GEOSERVER_MASTER_PASSWORD}" && ! -f "${sGeoserverWorkingDir}/security/masterpw.digest" ]]
+then
+    echo "[ENTRYPOINT] Hash the master password"
+    sGeoserverMasterPasswordHash=$(generateHash "${GEOSERVER_MASTER_PASSWORD}")
+
+    if [[ -n "${sGeoserverMasterPasswordHash}" ]]
+    then
+        echo "[ENTRYPOINT] OK"
+        echo "[ENTRYPOINT] Create the master password in '${sGeoserverWorkingDir}/security/masterpw.digest'"
+        echo ${sGeoserverMasterPasswordHash} > ${sGeoserverWorkingDir}/security/masterpw.digest
+
+        if [[ ${?} -eq 0 ]]
+        then
+            echo "[ENTRYPOINT] OK"
+        else
+            echo "[ENTRYPOINT] ERROR"
+        fi
+    else
+        echo "[ENTRYPOINT] ERROR: unable to get a hash"
+    fi
+fi
+
+
+# Enable the usage of headers for proxy URL
+if [[ -f "${sGeoserverWorkingDir}/global.xml" ]]
+then
+    echo "[ENTRYPOINT] Reconfigure useHeadersProxyURL to enable it in '${sGeoserverWorkingDir}/global.xml'"
+    sed --in-place "s/<useHeadersProxyURL>.*<\/useHeadersProxyURL>/<useHeadersProxyURL>true<\/useHeadersProxyURL>/g" ${sGeoserverWorkingDir}/global.xml
+
+    if [[ ${?} -eq 0 ]]
+    then
+        echo "[ENTRYPOINT] OK"
+    else
+        echo "[ENTRYPOINT] ERROR"
+    fi
+fi
+
+
+# Reconfigure the URL
+if [[ -n "${GEOSERVER_URL}" && -f "${sGeoserverWorkingDir}/global.xml" ]]
+then
+    iCurrentLine=$(grep --line-number "<proxyBaseUrl>.*</proxyBaseUrl>" ${sGeoserverWorkingDir}/global.xml | cut --delimiter ':' --fields '1')
+
+    if [[ -n "${iCurrentLine}" ]]
+    then
+        echo "[ENTRYPOINT] Reconfigure proxyBaseUrl in '${sGeoserverWorkingDir}/global.xml'"
+        sed --in-place "s/<proxyBaseUrl>.*<\/proxyBaseUrl>/<proxyBaseUrl>${GEOSERVER_URL//\//\\/}<\/proxyBaseUrl>/g" ${sGeoserverWorkingDir}/global.xml
+
+        if [[ ${?} -eq 0 ]]
+        then
+            echo "[ENTRYPOINT] OK"
+        else
+            echo "[ENTRYPOINT] ERROR"
+        fi
+    else
+        echo "[ENTRYPOINT] Add an entry proxyBaseUrl in ${sGeoserverWorkingDir}/global.xml"
+        iCurrentLine=$(grep --line-number "<useHeadersProxyURL>.*</useHeadersProxyURL>" ${sGeoserverWorkingDir}/global.xml | cut --delimiter ':' --fields '1')
+
+        if [[ -n "${iCurrentLine}" ]]
+        then
+            sed --in-place "${iCurrentLine}i \    <proxyBaseUrl>${GEOSERVER_URL//\//\\/}</proxyBaseUrl>" ${sGeoserverWorkingDir}/global.xml
+
+            if [[ ${?} -eq 0 ]]
+            then
+                echo "[ENTRYPOINT] OK"
+            else
+                echo "[ENTRYPOINT] ERROR"
+            fi
+        else
+            echo "[ENTRYPOINT] ERROR: unable to get the number of the line which contain 'useHeadersProxyURL'"
+        fi
+    fi
+fi
+
+
+# Configure the contact informations
+if [[ -n "${GEOSERVER_CONTACT_ADDRESS}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<address>.*</address>" \
+        "<address>${GEOSERVER_CONTACT_ADDRESS}</address>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_ADDRESS_CITY}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<addressCity>.*</addressCity>" \
+        "<addressCity>${GEOSERVER_CONTACT_ADDRESS_CITY}</addressCity>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_ADDRESS_COUNTRY}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<addressCountry>.*</addressCountry>" \
+        "<addressCountry>${GEOSERVER_CONTACT_ADDRESS_COUNTRY}</addressCountry>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_ADDRESS_POSTAL_CODE}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<addressPostalCode>.*</addressPostalCode>" \
+        "<addressPostalCode>${GEOSERVER_CONTACT_ADDRESS_POSTAL_CODE}</addressPostalCode>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_ADDRESS_STATE}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<addressState>.*</addressState>" \
+        "<addressState>${GEOSERVER_CONTACT_ADDRESS_STATE}</addressState>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_ADDRESS_TYPE}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<addressType>.*</addressType>" \
+        "<addressType>${GEOSERVER_CONTACT_ADDRESS_TYPE}</addressType>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_EMAIL}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<contactEmail>.*</contactEmail>" \
+        "<contactEmail>${GEOSERVER_CONTACT_EMAIL}</contactEmail>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_ORGANIZATION}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<contactOrganization>.*</contactOrganization>" \
+        "<contactOrganization>${GEOSERVER_CONTACT_ORGANIZATION}</contactOrganization>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_PERSON}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<contactPerson>.*</contactPerson>" \
+        "<contactPerson>${GEOSERVER_CONTACT_PERSON}</contactPerson>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_CONTACT_POSITION}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<contactPosition>.*</contactPosition>" \
+        "<contactPosition>${GEOSERVER_CONTACT_POSITION}</contactPosition>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_ONLINE_RESOURCE}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<onlineResource>.*</onlineResource>" \
+        "<onlineResource>${GEOSERVER_ONLINE_RESOURCE}</onlineResource>" \
+        5
+fi
+
+if [[ -n "${GEOSERVER_WELCOME}" ]]
+then
+    addOrUpdateLine \
+        "${sGeoserverWorkingDir}/global.xml" \
+        "<contact>" \
+        "<welcome>.*</welcome>" \
+        "<welcome>${GEOSERVER_WELCOME}</welcome>" \
+        5
+fi
+
+
+# Reconfigure the administrator credentials (user name and password)
+if [[ -n "${GEOSERVER_USER_ADMINISTRATOR_NAME}" && -n "${GEOSERVER_USER_ADMINISTRATOR_PASSWORD}" && -f "${sGeoserverWorkingDir}/security/usergroup/default/users.xml" ]]
+then
+    createOrUpdateUser "${GEOSERVER_USER_ADMINISTRATOR_NAME}" "${GEOSERVER_USER_ADMINISTRATOR_PASSWORD}" "ADMIN"
+
+    if [[ ${?} -eq 0 && "${GEOSERVER_USER_ADMINISTRATOR_NAME}" != "admin" ]]
+    then
+        deleteUser "admin"
+    fi
+fi
+
+
+# Create the application user
+if [[ -n "${GEOSERVER_USER_APPLICATION_NAME}" && -n "${GEOSERVER_USER_APPLICATION_PASSWORD}" && -n "${GEOSERVER_USER_APPLICATION_ROLE}" ]]
+then
+    createOrUpdateUser "${GEOSERVER_USER_APPLICATION_NAME}" "${GEOSERVER_USER_APPLICATION_PASSWORD}" "${GEOSERVER_USER_APPLICATION_ROLE}"
+fi
+
+
+# Create the additional user
+if [[ -n "${GEOSERVER_USER_ADDITIONAL_NAME}" && -n "${GEOSERVER_USER_ADDITIONAL_PASSWORD}" && -n "${GEOSERVER_USER_ADDITIONAL_ROLE}" ]]
+then
+    createOrUpdateUser "${GEOSERVER_USER_ADDITIONAL_NAME}" "${GEOSERVER_USER_ADDITIONAL_PASSWORD}" "${GEOSERVER_USER_ADDITIONAL_ROLE}"
 fi
 
 exec "$@"
