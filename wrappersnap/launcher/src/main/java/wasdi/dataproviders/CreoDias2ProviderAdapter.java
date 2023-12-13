@@ -1,4 +1,7 @@
+
 package wasdi.dataproviders;
+
+import wasdi.shared.config.DataProviderConfig;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -17,6 +20,7 @@ import org.json.JSONObject;
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.creodias2.ResponseTranslatorCreoDias2;
 import wasdi.shared.utils.HttpUtils;
@@ -52,11 +56,77 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		m_sDataProviderCode = "CREODIAS2";
 	}
 	
+	protected boolean isFileProtocolNew(String sFileURL) {
+		WasdiLog.debugLog("CreoDias2.isFileProtocolNew - test for file access on Creodias. Received url: " + sFileURL);
+		
+		try {
+			
+			String sWorkspaceId = m_oProcessWorkspace.getWorkspaceId();
+			String sUserId = m_oProcessWorkspace.getUserId();
+			String sCloud = getWorkspaceCloud();
+						
+			WasdiLog.debugLog("CreoDias2.isFileProtocolNew - workspace id: " + sWorkspaceId + " on cloud " + sCloud);
+			WasdiLog.debugLog("CreoDias2.isFileProtocolNew - user id: " + sUserId);
+			
+			
+			DataProviderConfig oProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);
+			String sAdapterConfigFile = oProviderConfig.adapterConfig;
+			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(sAdapterConfigFile);
+			boolean bIsFileAccessTestEnabled = oAppConf.optBoolean("fileAccessTestEnabled");
+			JSONArray asTestUsers = oAppConf.optJSONArray("testingUsers");
+			boolean bIsUserEnabledForTest = false;
+			
+			for(int i = 0; i < asTestUsers.length(); i++) {
+				String sTestUser = (String) asTestUsers.get(i);
+				if (sTestUser.equals(sUserId)) {
+					bIsUserEnabledForTest = true;
+					break;
+				}
+			}
+			
+
+			if (!bIsFileAccessTestEnabled || !bIsUserEnabledForTest) {
+				WasdiLog.debugLog("CreoDias2.isFileProtocolNew - file access test flag or user not enabled for testing purposed");
+				return false;
+			}
+			
+			WasdiLog.debugLog("CreoDias2.isFileProtocolNew - file access test is ideally possible");
+			
+			if (!sCloud.equals("CREODIAS")) {
+				WasdiLog.debugLog("CreoDias2.isFileProtocolNew - the workspace is not on CREODIAS. File access not possible.");
+				return false;
+			}
+			
+			WasdiLog.debugLog("CreoDias2.isFileProtocolNew - the workspace is on CREODIAS.");
+			
+			// check that the URL contains the part related to the S3 Path access
+			String[] asParts = sFileURL.split(ResponseTranslatorCreoDias2.SLINK_SEPARATOR_CREODIAS2);
+			
+			if (asParts.length < (ResponseTranslatorCreoDias2.IPOSITIONOF_PRODUCTIDENTIFIER + 1)) {
+				WasdiLog.debugLog("CreoDias2.isFileProtocolNew - length of the URL array is less than the index of the S3 path");
+				return false;
+			}
+			
+			String sS3Path = asParts[ResponseTranslatorCreoDias2.IPOSITIONOF_PRODUCTIDENTIFIER];
+			
+			WasdiLog.debugLog("CreoDias2.isFileProtocolNew - identified file access path: " + sS3Path);
+			
+			if (sS3Path.startsWith("/eodata/")) {
+				WasdiLog.debugLog("CreoDias2.isFileProtocolNew - file access path identied.");
+				return true;
+			}
+			
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("CreoDias2.isFileProtocolNew - exception", oEx);
+			return false;
+		}
+		
+		return false;
+	}
+
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
-		// receives the file URI and must return the size of the file. Useful to give progress to the user
-		// TODO: are we are talking about the overall file size? or just the size has been downloaded until a certain point?
 		
 		WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Retrieving information for product: " + sFileURL);
 		
@@ -64,9 +134,38 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		
 		
 		long lSizeInBytes = 0L;
-
+		
+		// TEST: FILE ACCESS
+		if (isFileProtocolNew(sFileURL)) {
+			WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize - file access protocol detected with NEW method");
+			
+			try {
+			
+				String sFilesystemPath = extractFilePathFromHttpsUrl(sFileURL);
+				
+				WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize - file system path from URL: " + sFilesystemPath);
+				
+				if (!Utils.isNullOrEmpty(sFilesystemPath)) {
+					File oSourceFile = new File(sFilesystemPath);
+					
+					if (oSourceFile.exists()) {
+						lSizeInBytes = getSourceFileLength(oSourceFile);
+						WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize - detected file size: " + lSizeInBytes);
+						return lSizeInBytes;
+					} else {
+						WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize - the file at the provided system path does not exist");
+					}
+				} else {
+					WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize - the file sysyem path is null or empty");
+				}
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("CreoDias2ProviderAdaper.getDownloadFileSize - detected file size: ", oEx);
+			}	
+		}
+		
 		
 		if (isFileProtocol(m_sDefaultProtocol)) {
+			
 			String sPath = null;
 			if (isFileProtocol(sFileURL)) {
 				sPath = removePrefixFile(sFileURL);
@@ -88,8 +187,8 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 				}
 			}
 		}
-		
 
+		
 		if (isHttpsProtocol(sFileURL)) {
 			
 			String sDownloadUrl = getODataDownloadUrl(sFileURL);
@@ -111,16 +210,9 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 				return -1L;
 			}
 			
-			WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Anwer well received from the provider");
-			
-			
-			JSONObject jsonO = new JSONObject(sResponse.getResponseBody());
-			JSONArray arr = jsonO.getJSONArray("value");
-			
-			JSONObject jsonObject = (JSONObject) arr.get(0);
-				
-			
-			
+			WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Answer well received from the provider");
+						
+							
 			JSONObject oJsonBody = new JSONObject(sResponse.getResponseBody());
 			JSONArray aoValues = oJsonBody.optJSONArray("value");
 			if (aoValues == null || aoValues.length() != 1) {
@@ -169,42 +261,11 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			String sProductIdentifier = asParts[ResponseTranslatorCreoDias2.IPOSITIONOF_PRODUCTIDENTIFIER];
 			return sProductIdentifier;
 		} catch (Exception oE) {
-			WasdiLog.errorLog("CREODIASProviderAdapter.extractProductIdentifierFromURL: " + oE);
+			WasdiLog.errorLog("CREODIASProviderAdapter.extractProductIdentifierFromURL: ", oE);
 		}
 		return null;
 	}
-	
-	/**
-	 * Get The length, in bytes, of the source-file.
-	 * @param oSourceFile the source-file
-	 * @return the length, in bytes, of the source-file, or 0L if the file does not exist
-	 */
-	protected long getSourceFileLength(File oSourceFile) {
-		if (oSourceFile == null) {
-			WasdiLog.debugLog("ProviderAdapter.getSourceFileLength: FILE DOES NOT EXISTS");
-			return 0L;
-		}
-		
-		WasdiLog.debugLog("ProviderAdapter.getSourceFileLength: Get file lengh for file " + oSourceFile.getAbsolutePath());
 
-		long lLenght;
-		if (oSourceFile.isDirectory()) {
-			lLenght = 0L;
-
-			for (File f : oSourceFile.listFiles()) {
-				lLenght += getSourceFileLength(f);
-			}
-		} else {
-			lLenght = oSourceFile.length();
-		}
-		
-		if (!oSourceFile.exists()) {
-			WasdiLog.debugLog("ProviderAdapter.getSourceFileLength: FILE DOES NOT EXISTS");
-		}
-		WasdiLog.debugLog("ProviderAdapter.getSourceFileLength: Found length " + lLenght);
-
-		return lLenght;
-	}
 	
 	
 	
@@ -242,13 +303,46 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		
 		WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile. Execute download for file: " + sFileURL);
 		
-		
 		String sResult = null;
+		
+		// TEST: file access
+		if (isFileProtocolNew(sFileURL)) {
+			try {
+				WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile: detected file protocol with NEW method");
+	
+				String sFilesystemPath = extractFilePathFromHttpsUrl(sFileURL);
+				
+				WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile:  file system path from URL: " + sFilesystemPath);
+				
+				if (!Utils.isNullOrEmpty(sFilesystemPath)) {
+					
+					File oSourceFile = new File(sFilesystemPath);
+					
+					if (!oSourceFile.exists()) {
+						WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile: path not found in the file system");
+					} else if (!oSourceFile.isFile()) {
+						WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile: the path does not correspond to that of a file" );
+					} else {
+						WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile: try to copy the file from the file system to the workspace folder.");
+						long lStartTime = System.currentTimeMillis();
+						sResult = copyFile("file:" + sFilesystemPath, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace, iMaxRetry);
+						long lEstimatedEndTime = System.currentTimeMillis() - lStartTime;
+						WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile: file has been copied in " + lEstimatedEndTime + " milliseconds. Path: " + sResult);
+						return sResult;
+					}	
+				}
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("CreoDias2ProviderAdapter.executeDownloadFile: exception ", oEx);
+			}
+
+		}
+		
 
 		if (isFileProtocol(m_sDefaultProtocol)) {
-			WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile: detected file protocol ");
+			WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile: detected file protocol with old method");
 
 			String sFilesystemPath = null;
+			
 			if (isFileProtocol(sFileURL)) {
 				sFilesystemPath = removePrefixFile(sFileURL);
 				WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile:  file system path from file protocol " + sFilesystemPath);
@@ -272,7 +366,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile: no operation was effective for file protocol");
 
 		}
-		
+				
 
 		if(isHttpsProtocol(sFileURL)) { 
 			int iAttemptCount = 0;
@@ -299,6 +393,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	
 				
 				// TODO: understand if I should also pass the name of the file - I think no. The method already parses the "File-disposition" attribute in the header. Should also work for Creodias2
+				long lStartTime = System.currentTimeMillis();
 				String sDownloadedFilePath = downloadViaHttp(sDownloadUrl, Collections.emptyMap(), sSaveDirOnServer);
 				
 				if(Utils.isNullOrEmpty(sDownloadedFilePath)) {
@@ -312,7 +407,8 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 					TimeUnit.SECONDS.sleep(lRandomWaitSeconds);
 				} else {
 					// download completed
-					WasdiLog.debugLog("CreoDias2ProviderAdapter.executeDownloadFile. Download completed: " + sDownloadedFilePath);
+					long lEndTime = System.currentTimeMillis() - lStartTime;
+					WasdiLog.debugLog("CreoDias2ProviderAdapter.executeDownloadFile. Download completed in " + lEndTime + " milliseconds at path " + sDownloadedFilePath);
 					return sDownloadedFilePath;
 				}
 			}
