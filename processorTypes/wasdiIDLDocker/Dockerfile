@@ -113,7 +113,8 @@ COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirecto
 # Install the common PIP libraries
 RUN python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
     pip3 install --no-cache-dir --no-compile \
-        wasdi
+        wasdi && \
+    find {{ sWasdiSystemUserHome }} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
 # From now, all commands executed are executed with the user 'root'
