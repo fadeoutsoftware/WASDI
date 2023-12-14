@@ -49,7 +49,9 @@ services:
 {% if ( aoWasdiClientEnvironmentVariable | length ) > 0 %}
     environment:
 {% for aoWasdiClientCurrentEnvironmentVariable in aoWasdiClientEnvironmentVariable %}
+{% if ( aoWasdiClientCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiClientCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiClientCurrentEnvironmentVariable['key'] }}={{ aoWasdiClientCurrentEnvironmentVariable['value'] }}
+{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiClientServiceName }}:latest"
@@ -101,7 +103,9 @@ services:
 {% if ( aoWasdiClientV2EnvironmentVariable | length ) > 0 %}
     environment:
 {% for aoWasdiClientV2CurrentEnvironmentVariable in aoWasdiClientV2EnvironmentVariable %}
+{% if ( aoWasdiClientV2CurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiClientV2CurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiClientV2CurrentEnvironmentVariable['key'] }}={{ aoWasdiClientV2CurrentEnvironmentVariable['value'] }}
+{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiClientV2ServiceName }}:latest"
@@ -135,7 +139,7 @@ services:
 {% if ( aoWasdiGeoserverEnvironmentVariable | length ) > 0 %}
     environment:
 {% for aoWasdiGeoserverCurrentEnvironmentVariable in aoWasdiGeoserverEnvironmentVariable %}
-{% if 'omitIfEmpty' not in aoWasdiGeoserverCurrentEnvironmentVariable or aoWasdiGeoserverCurrentEnvironmentVariable['omitIfEmpty'] != True %}
+{% if ( aoWasdiGeoserverCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiGeoserverCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiGeoserverCurrentEnvironmentVariable['key'] }}={{ aoWasdiGeoserverCurrentEnvironmentVariable['value'] }}
 {% endif %}
 {% endfor %}
@@ -175,7 +179,9 @@ services:
 {% if ( aoWasdiGrafanaEnvironmentVariable | length ) > 0 %}
     environment:
 {% for aoWasdiGrafanaCurrentEnvironmentVariable in aoWasdiGrafanaEnvironmentVariable %}
+{% if ( aoWasdiGrafanaCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiGrafanaCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiGrafanaCurrentEnvironmentVariable['key'] }}={{ aoWasdiGrafanaCurrentEnvironmentVariable['value'] }}
+{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiGrafanaImageName }}:{{ sWasdiGrafanaVersion }}"
@@ -215,7 +221,9 @@ services:
 {% if ( aoWasdiInfluxDbGrafanaEnvironmentVariable | length ) > 0 %}
     environment:
 {% for aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable in aoWasdiInfluxDbGrafanaEnvironmentVariable %}
+{% if ( aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable['key'] }}={{ aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable['value'] }}
+{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiInfluxDbGrafanaImageName }}:{{ sWasdiInfluxDbGrafanaVersion }}"
@@ -257,7 +265,9 @@ services:
 {% if ( aoWasdiJenkinsEnvironmentVariable | length ) > 0 %}
     environment:
 {% for aoWasdiJenkinsCurrentEnvironmentVariable in aoWasdiJenkinsEnvironmentVariable %}
+{% if ( aoWasdiJenkinsCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiJenkinsCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiJenkinsCurrentEnvironmentVariable['key'] }}={{ aoWasdiJenkinsCurrentEnvironmentVariable['value'] }}
+{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiJenkinsServiceName }}:latest"
@@ -304,7 +314,9 @@ services:
 {% if ( aoWasdiKeycloakEnvironmentVariable | length ) > 0 %}
     environment:
 {% for aoWasdiKeycloakCurrentEnvironmentVariable in aoWasdiKeycloakEnvironmentVariable %}
+{% if ( aoWasdiKeycloakCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiKeycloakCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiKeycloakCurrentEnvironmentVariable['key'] }}={{ aoWasdiKeycloakCurrentEnvironmentVariable['value'] }}
+{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiKeycloakServiceName }}:latest"
@@ -401,7 +413,9 @@ services:
 {% if ( aoWasdiNexusEnvironmentVariable | length ) > 0 %}
     environment:
 {% for aoWasdiNexusCurrentEnvironmentVariable in aoWasdiNexusEnvironmentVariable %}
+{% if ( aoWasdiNexusCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiNexusCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiNexusCurrentEnvironmentVariable['key'] }}={{ aoWasdiNexusCurrentEnvironmentVariable['value'] }}
+{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiNexusImageName }}:{{ sWasdiNexusVersion }}"
@@ -509,16 +523,14 @@ services:
   {{ sWasdiRabbitMqServiceName }}:
     depends_on:
       - {{ sWasdiTraefikServiceName }}
+{% if ( aoWasdiRabbitMqEnvironmentVariable | length ) > 0 %}
     environment:
-      - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
-      - RABBITMQ_DISTRIBUTION_BUFFER_SIZE=128000
-      - RABBITMQ_MNESIA_BASE=/var/lib/rabbitmq/mnesia/
-      - RABBITMQ_USE_LONGNAME=true
-      - RABBITMQ_NODENAME={{ sWasdiRabbitMqNodeName }}
-{% if sWasdiRabbitMqMainInternalPort != '' %}
-      - RABBITMQ_NODE_PORT={{ sWasdiRabbitMqMainInternalPort }}
+{% for aoWasdiRabbitMqCurrentEnvironmentVariable in aoWasdiRabbitMqEnvironmentVariable %}
+{% if ( aoWasdiRabbitMqCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiRabbitMqCurrentEnvironmentVariable['value'] != "" %}
+      - {{ aoWasdiRabbitMqCurrentEnvironmentVariable['key'] }}={{ aoWasdiRabbitMqCurrentEnvironmentVariable['value'] }}
 {% endif %}
-      - RABBITMQ_PID_FILE=/var/run/rabbitmq/rabbitmq.pid
+{% endfor %}
+{% endif %}
     image: "{{ sWasdiRabbitMqServiceName }}:latest"
     labels:
 {% if bWasdiRabbitMqInterfaceEndpointEnabled == True or bWasdiRabbitMqWebStompEndpointEnabled == True %}
@@ -593,7 +605,9 @@ services:
 {% if ( aoWasdiSonarqubeEnvironmentVariable | length ) > 0 %}
     environment:
 {% for aoWasdiSonarqubeCurrentEnvironmentVariable in aoWasdiSonarqubeEnvironmentVariable %}
+{% if ( aoWasdiSonarqubeCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiSonarqubeCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiSonarqubeCurrentEnvironmentVariable['key'] }}={{ aoWasdiSonarqubeCurrentEnvironmentVariable['value'] }}
+{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiSonarqubeImageName }}:{{ sWasdiSonarqubeVersion }}"
@@ -647,7 +661,9 @@ services:
 {% if ( aoWasdiTelegrafEnvironmentVariable | length ) > 0 %}
     environment:
 {% for aoWasdiTelegrafCurrentEnvironmentVariable in aoWasdiTelegrafEnvironmentVariable %}
+{% if ( aoWasdiTelegrafCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiTelegrafCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiTelegrafCurrentEnvironmentVariable['key'] }}={{ aoWasdiTelegrafCurrentEnvironmentVariable['value'] }}
+{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiTelegrafServiceName }}:latest"
@@ -684,9 +700,13 @@ services:
       - {{ sWasdiRabbitMqServiceName }}
 {% endif %}
       - {{ sWasdiTraefikServiceName }}
+{% if ( aoWasdiTomcatOgcProcessesServerEnvironmentVariable | length ) > 0 %}
     environment:
-{% if sWasdiTomcatOgcProcessesServerEnvironmentCatalinaOpts | default('') != '' %}
-      - CATALINA_OPTS={{ sWasdiTomcatOgcProcessesServerEnvironmentCatalinaOpts }}
+{% for aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable in aoWasdiTomcatOgcProcessesServerEnvironmentVariable %}
+{% if ( aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable['value'] != "" %}
+      - {{ aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable['key'] }}={{ aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable['value'] }}
+{% endif %}
+{% endfor %}
 {% endif %}
     image: "{{ sWasdiTomcatOgcProcessesServerServiceName }}:latest"
     labels:
@@ -729,9 +749,13 @@ services:
       - {{ sWasdiRabbitMqServiceName }}
 {% endif %}
       - {{ sWasdiTraefikServiceName }}
+{% if ( aoWasdiTomcatWasdiOpenEoServerEnvironmentVariable | length ) > 0 %}
     environment:
-{% if sWasdiTomcatWasdiOpenEoServerEnvironmentCatalinaOpts | default('') != '' %}
-      - CATALINA_OPTS={{ sWasdiTomcatWasdiOpenEoServerEnvironmentCatalinaOpts }}
+{% for aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable in aoWasdiTomcatWasdiOpenEoServerEnvironmentVariable %}
+{% if ( aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable['value'] != "" %}
+      - {{ aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable['key'] }}={{ aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable['value'] }}
+{% endif %}
+{% endfor %}
 {% endif %}
     image: "{{ sWasdiTomcatWasdiOpenEoServerServiceName }}:latest"
     labels:
@@ -774,9 +798,13 @@ services:
       - {{ sWasdiRabbitMqServiceName }}
 {% endif %}
       - {{ sWasdiTraefikServiceName }}
+{% if ( aoWasdiTomcatWasdiWebServerEnvironmentVariable | length ) > 0 %}
     environment:
-{% if sWasdiTomcatWasdiWebServerEnvironmentCatalinaOpts | default('') != '' %}
-      - CATALINA_OPTS={{ sWasdiTomcatWasdiWebServerEnvironmentCatalinaOpts }}
+{% for aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable in aoWasdiTomcatWasdiWebServerEnvironmentVariable %}
+{% if ( aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable['value'] != "" %}
+      - {{ aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable['key'] }}={{ aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable['value'] }}
+{% endif %}
+{% endfor %}
 {% endif %}
     image: "{{ sWasdiTomcatWasdiWebServerServiceName }}:latest"
     labels:
@@ -879,7 +907,9 @@ services:
 {% if ( aoWasdiUpdateMetricEnvironmentVariable | length ) > 0 %}
     environment:
 {% for aoWasdiUpdateMetricCurrentEnvironmentVariable in aoWasdiUpdateMetricEnvironmentVariable %}
+{% if ( aoWasdiUpdateMetricCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiUpdateMetricCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiUpdateMetricCurrentEnvironmentVariable['key'] }}={{ aoWasdiUpdateMetricCurrentEnvironmentVariable['value'] }}
+{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiUpdateMetricServiceName }}:latest"
