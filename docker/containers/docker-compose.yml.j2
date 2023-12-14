@@ -63,12 +63,10 @@ services:
       - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiClientServiceName }}.loadbalancer.server.port={{ sWasdiClientInternalPort }}"
-{% if sWasdiClientInternalPort | default("") != ""
-    and sWasdiClientExternalPort | default("") != ""
-    and aWasdiClientExternalIp | default([]) | length > 0 %}
+{% if ( aWasdiClientPorts | length ) > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiClientExternalIp | sort %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiClientExternalPort }}:{{ sWasdiClientInternalPort }}"
+{% for sWasdiClientCurrentPort in aWasdiClientPorts %}
+      - "{{ sWasdiClientCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -117,12 +115,10 @@ services:
       - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiClientV2ServiceName }}.loadbalancer.server.port={{ sWasdiClientV2InternalPort }}"
-{% if sWasdiClientV2InternalPort | default("") != ""
-    and sWasdiClientV2ExternalPort | default("") != ""
-    and aWasdiClientV2ExternalIp | default([]) | length > 0 %}
+{% if ( aWasdiClientV2Ports | length ) > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiClientV2ExternalIp | sort %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiClientV2ExternalPort }}:{{ sWasdiClientV2InternalPort }}"
+{% for sWasdiClientV2CurrentPort in aWasdiClientV2Ports %}
+      - "{{ sWasdiClientV2CurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -155,12 +151,10 @@ services:
       - "traefik.http.routers.r_{{ sWasdiGeoserverServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiGeoserverServiceName }}.loadbalancer.server.port={{ sWasdiGeoserverInternalPort }}"
-{% if sWasdiGeoserverInternalPort | default("") != ""
-    and sWasdiGeoserverExternalPort | default("") != ""
-    and aWasdiGeoserverExternalIp | default([]) | length > 0 %}
+{% if ( aWasdiGeoserverPorts | length ) > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiGeoserverExternalIp | sort %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiGeoserverExternalPort }}:{{ sWasdiGeoserverInternalPort }}"
+{% for sWasdiGeoserverCurrentPort in aWasdiGeoserverPorts %}
+      - "{{ sWasdiGeoserverCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -197,12 +191,10 @@ services:
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiGrafanaServiceName }}.loadbalancer.server.port={{ sWasdiGrafanaInternalPort }}"
 {% endif %}
-{% if sWasdiGrafanaInternalPort | default("") != ""
-    and sWasdiGrafanaExternalPort | default("") != ""
-    and aWasdiGrafanaExternalIp | default([]) | length > 0 %}
+{% if ( aWasdiGrafanaPorts | length ) > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiGrafanaExternalIp | sort %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiGrafanaExternalPort }}:{{ sWasdiGrafanaInternalPort }}"
+{% for sWasdiGrafanaCurrentPort in aWasdiGrafanaPorts %}
+      - "{{ sWasdiGrafanaCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
@@ -237,12 +229,10 @@ services:
       - "traefik.http.routers.r_{{ sWasdiInfluxDbGrafanaServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiInfluxDbGrafanaServiceName }}.loadbalancer.server.port={{ sWasdiInfluxDbGrafanaInternalPort }}"
-{% if sWasdiInfluxDbGrafanaInternalPort | default("") != ""
-    and sWasdiInfluxDbGrafanaExternalPort | default("") != ""
-    and aWasdiInfluxDbGrafanaExternalIp | default([]) | length > 0 %}
+{% if ( aWasdiInfluxDbGrafanaPorts | length ) > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiInfluxDbGrafanaExternalIp | sort %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiInfluxDbGrafanaExternalPort }}:{{ sWasdiInfluxDbGrafanaInternalPort }}"
+{% for sWasdiInfluxDbGrafanaCurrentPort in aWasdiInfluxDbGrafanaPorts %}
+      - "{{ sWasdiInfluxDbGrafanaCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
@@ -281,12 +271,10 @@ services:
       - "traefik.http.routers.r_{{ sWasdiJenkinsServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiJenkinsServiceName }}.loadbalancer.server.port={{ sWasdiJenkinsInternalPort }}"
-{% if sWasdiJenkinsInternalPort | default("") != ""
-    and sWasdiJenkinsExternalPort | default("") != ""
-    and aWasdiJenkinsExternalIp | default([]) | length > 0 %}
+{% if ( aWasdiJenkinsPorts | length ) > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiJenkinsExternalIp | sort %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiJenkinsExternalPort }}:{{ sWasdiJenkinsInternalPort }}"
+{% for sWasdiJenkinsCurrentPort in aWasdiJenkinsPorts %}
+      - "{{ sWasdiJenkinsCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -330,25 +318,10 @@ services:
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiKeycloakServiceName }}.loadbalancer.server.port={{ sWasdiKeycloakInternalPort }}"
-{% if 
-    (
-        sWasdiKeycloakInternalPort | default("") != ""
-        and sWasdiKeycloakExternalPort | default("") != ""
-        and aWasdiKeycloakExternalIp | default([]) | length > 0
-    )
-    or
-    (
-        sWasdiKeycloakClusterInternalPort | default("") != ""
-        and sWasdiKeycloakClusterExternalPort | default("") != ""
-        and aWasdiKeycloakClusterExternalIp | default([]) | length > 0
-    )
-%}
+{% if ( aWasdiKeycloakPorts | length ) > 0 %}
     ports:
-{% for sWasdiKeycloakCurrentExternalIp in aWasdiKeycloakExternalIp | sort %}
-      - "{{ sWasdiKeycloakCurrentExternalIp }}:{{ sWasdiKeycloakExternalPort }}:{{ sWasdiKeycloakInternalPort }}"
-{% endfor %}
-{% for sWasdiKeycloakClusterCurrentExternalIp in aWasdiKeycloakClusterExternalIp | sort %}
-      - "{{ sWasdiKeycloakClusterCurrentExternalIp }}:{{ sWasdiKeycloakClusterExternalPort }}:{{ sWasdiKeycloakClusterInternalPort }}"
+{% for sWasdiKeycloakCurrentPort in aWasdiKeycloakPorts %}
+      - "{{ sWasdiKeycloakCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -402,12 +375,10 @@ services:
 {% endif %}
 {% endif %}
     image: "mongo:{{ sWasdiMongoVersion }}"
-{% if sWasdiMongoInternalPort | default("") != ""
-    and sWasdiMongoExternalPort | default("") != ""
-    and aWasdiMongoExternalIp | default([]) | length > 0 %}
+{% if ( aWasdiMongoPorts | length ) > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiMongoExternalIp | sort %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiMongoExternalPort }}:{{ sWasdiMongoInternalPort }}"
+{% for sWasdiMongoCurrentPort in aWasdiMongoPorts %}
+      - "{{ sWasdiMongoCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
@@ -454,12 +425,10 @@ services:
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiNexusServiceName }}_registry{{ loop.index }}.loadbalancer.server.port={{ aoWasdiNexusDockerCurrentRegistry['port'] }}"
 {% endfor %}
-{% if sWasdiNexusInternalPort | default("") != ""
-    and sWasdiNexusExternalPort | default("") != ""
-    and aWasdiNexusExternalIp | default([]) | length > 0 %}
+{% if ( aWasdiNexusPorts | length ) > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiNexusExternalIp | sort %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiNexusExternalPort }}:{{ sWasdiNexusInternalPort }}"
+{% for sWasdiNexusCurrentPort in aWasdiNexusPorts %}
+      - "{{ sWasdiNexusCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
@@ -490,12 +459,10 @@ services:
       - POSTGRES_PASSWORD=${sPostgresqlKeycloakDatabasePassword}
 {% endif %}
     image: "{{ sWasdiPostgresqlKeycloakImageName }}:{{ sWasdiPostgresqlKeycloakVersion }}"
-{% if sWasdiPostgresqlKeycloakInternalPort | default("") != ""
-    and sWasdiPostgresqlKeycloakExternalPort | default("") != ""
-    and aWasdiPostgresqlKeycloakExternalIp | default([]) | length > 0 %}
+{% if ( aWasdiPostgresqlKeycloakPorts | length ) > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiPostgresqlKeycloakExternalIp | sort %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiPostgresqlKeycloakExternalPort }}:{{ sWasdiPostgresqlKeycloakInternalPort }}"
+{% for sWasdiPostgresqlKeycloakCurrentPort in aWasdiPostgresqlKeycloakPorts %}
+      - "{{ sWasdiPostgresqlKeycloakCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
@@ -522,6 +489,12 @@ services:
       - POSTGRES_USER1_PASSWORD=${sPostgresqlSonarqubeUser1Password}
 {% endif %}
     image: "{{ sWasdiPostgresqlSonarqubeImageName }}:{{ sWasdiPostgresqlSonarqubeVersion }}"
+{% if ( aWasdiPostgresqlSonarqubePorts | length ) > 0 %}
+    ports:
+{% for sWasdiPostgresqlSonarqubeCurrentPort in aWasdiPostgresqlSonarqubePorts %}
+      - "{{ sWasdiPostgresqlSonarqubeCurrentPort | regex_replace('^:', '') }}"
+{% endfor %}
+{% endif %}
     pull_policy: "missing"
     restart: "unless-stopped"
     ulimits:
@@ -579,7 +552,7 @@ services:
 {% if ( aWasdiRabbitMqPorts | length ) > 0 %}
     ports:
 {% for sWasdiRabbitMqCurrentPort in aWasdiRabbitMqPorts %}
-      - "{{ sWasdiRabbitMqCurrentPort }}"
+      - "{{ sWasdiRabbitMqCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -634,12 +607,10 @@ services:
       - "traefik.http.routers.r_{{ sWasdiSonarqubeServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiSonarqubeServiceName }}.loadbalancer.server.port={{ sWasdiSonarqubeInternalPort }}"
-{% if sWasdiSonarqubeInternalPort | default("") != ""
-    and sWasdiSonarqubeExternalPort | default("") != ""
-    and aWasdiSonarqubeExternalIp | default([]) | length > 0 %}
+{% if ( aWasdiSonarqubePorts | length ) > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiSonarqubeExternalIp | sort %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiSonarqubeExternalPort }}:{{ sWasdiSonarqubeInternalPort }}"
+{% for sWasdiSonarqubeCurrentPort in aWasdiSonarqubePorts %}
+      - "{{ sWasdiSonarqubeCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
@@ -680,12 +651,10 @@ services:
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiTelegrafServiceName }}:latest"
-{% if sWasdiTelegrafInternalPort | default("") != ""
-    and sWasdiTelegrafExternalPort | default("") != ""
-    and aWasdiTelegrafExternalIp | default([]) | length > 0 %}
+{% if ( aWasdiTelegrafPorts | length ) > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiTelegrafExternalIp | sort %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiTelegrafExternalPort }}:{{ sWasdiTelegrafInternalPort }}"
+{% for sWasdiTelegrafCurrentPort in aWasdiTelegrafPorts %}
+      - "{{ sWasdiTelegrafCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -730,12 +699,10 @@ services:
       - "traefik.http.routers.r_{{ sWasdiTomcatOgcProcessesServerServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiTomcatOgcProcessesServerServiceName }}.loadbalancer.server.port={{ sWasdiTomcatOgcProcessesServerInternalPort }}"
-{% if sWasdiTomcatOgcProcessesServerInternalPort | default("") != ""
-    and sWasdiTomcatOgcProcessesServerExternalPort | default("") != ""
-    and aWasdiTomcatOgcProcessesServerExternalIp | default([]) | length > 0 %}
+{% if ( aWasdiTomcatOgcProcessesServerPorts | length ) > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiTomcatOgcProcessesServerExternalIp | sort %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiTomcatOgcProcessesServerExternalPort }}:{{ sWasdiTomcatOgcProcessesServerInternalPort }}"
+{% for sWasdiTomcatOgcProcessesServerCurrentPort in aWasdiTomcatOgcProcessesServerPorts %}
+      - "{{ sWasdiTomcatOgcProcessesServerCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -777,12 +744,10 @@ services:
       - "traefik.http.routers.r_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.loadbalancer.server.port={{ sWasdiTomcatWasdiOpenEoServerInternalPort }}"
-{% if sWasdiTomcatWasdiOpenEoServerInternalPort | default("") != ""
-    and sWasdiTomcatWasdiOpenEoServerExternalPort | default("") != ""
-    and aWasdiTomcatWasdiOpenEoServerExternalIp | default([]) | length > 0 %}
+{% if ( aWasdiTomcatWasdiOpenEoServerPorts | length ) > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiTomcatWasdiOpenEoServerExternalIp | sort %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiTomcatWasdiOpenEoServerExternalPort }}:{{ sWasdiTomcatWasdiOpenEoServerInternalPort }}"
+{% for sWasdiTomcatWasdiOpenEoServerCurrentPort in aWasdiTomcatWasdiOpenEoServerPorts %}
+      - "{{ sWasdiTomcatWasdiOpenEoServerCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -824,12 +789,10 @@ services:
       - "traefik.http.routers.r_{{ sWasdiTomcatWasdiWebServerServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiTomcatWasdiWebServerServiceName }}.loadbalancer.server.port={{ sWasdiTomcatWasdiWebServerInternalPort }}"
-{% if sWasdiTomcatWasdiWebServerInternalPort | default("") != ""
-    and sWasdiTomcatWasdiWebServerExternalPort | default("") != ""
-    and aWasdiTomcatWasdiWebServerExternalIp | default([]) | length > 0 %}
+{% if ( aWasdiTomcatWasdiWebServerPorts | length ) > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiTomcatWasdiWebServerExternalIp | sort %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiTomcatWasdiWebServerExternalPort }}:{{ sWasdiTomcatWasdiWebServerInternalPort }}"
+{% for sWasdiTomcatWasdiWebServerCurrentPort in aWasdiTomcatWasdiWebServerPorts %}
+      - "{{ sWasdiTomcatWasdiWebServerCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
@@ -878,25 +841,10 @@ services:
 {% if bWasdiSslEnabled == True %}
       - "traefik.http.routers.dashboard.tls=true"
 {% endif %}
-{% if ( sWasdiTraefikHttpInternalPort | default("") != ""
-    and sWasdiTraefikHttpExternalPort | default("") != ""
-    and aWasdiTraefikExternalIp | default([]) | length > 0 )
-    or ( sWasdiTraefikHttpsInternalPort | default("") != ""
-    and sWasdiTraefikHttpsExternalPort | default("") != ""
-    and aWasdiTraefikHttpsExternalIp | default([]) | length > 0 ) %}
+{% if ( aWasdiTraefikPorts | length ) > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiTraefikExternalIp | sort %}
-{% if ( sWasdiTraefikHttpInternalPort | default("") != ""
-    and sWasdiTraefikHttpExternalPort | default("") != ""
-    and aWasdiTraefikExternalIp | default([]) | length > 0 ) %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiTraefikHttpExternalPort }}:{{ sWasdiTraefikHttpInternalPort }}"
-{% endif %}
-{% if bWasdiSslEnabled == True
-    and sWasdiTraefikHttpsInternalPort | default("") != ""
-    and sWasdiTraefikHttpsExternalPort | default("") != ""
-    and aWasdiTraefikExternalIp | default([]) | length > 0 %}
-      - "{% if sCurrentExternalIp != "" %}{{ sCurrentExternalIp }}:{% endif %}{{ sWasdiTraefikHttpsExternalPort }}:{{ sWasdiTraefikHttpsInternalPort }}"
-{% endif %}
+{% for sWasdiTraefikCurrentPort in aWasdiTraefikPorts %}
+      - "{{ sWasdiTraefikCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
