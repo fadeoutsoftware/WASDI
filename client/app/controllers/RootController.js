@@ -509,9 +509,9 @@ var RootController = (function() {
             _this.m_oConstantsService.setActiveWorkspace(null);
 
             _this.m_oConstantsService.logOut();
-            var oLogOutOptions = { redirectUri : this.m_oConstantsService.BASEURL}
+            var oLogOutOptions = { redirectUri : this.m_oConstantsService.BASEURL + "#/home"}
             oKeycloak.logout(oLogOutOptions);
-            _this.m_oState.go("home");
+            // _this.m_oState.go("home");
         }catch(e)
         {
         console.log("RootController - Exception " + e);
