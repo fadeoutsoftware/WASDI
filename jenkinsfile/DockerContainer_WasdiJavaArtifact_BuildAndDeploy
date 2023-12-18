@@ -2,6 +2,7 @@ pipeline {
   agent any
 
   environment {
+    sCurrentAnsibleInventory = env.sAnsibleInventory.split('-')[0].toLowerCase()
     sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
     sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
     sCurrentRevision         = "${env.BUILD_ID}"
@@ -100,7 +101,7 @@ pipeline {
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
             playbooks/buildWasdiDockerContainer.yml \
-            --inventory inventories/wasdi.yml \
+            --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
             --limit ${env.sCurrentEnvironmentLower} \
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiLauncherContainer=true sDeployWasdiSchedulerContainer=true sDeployWasdiTomcatOgcProcessesServerContainer=true sDeployWasdiTomcatOpenEoServerContainer=true sDeployWasdiTomcatWasdiWebServerContainer=true sDeployWasdiTriggerContainer=true'
@@ -118,7 +119,7 @@ pipeline {
                   cd ${env.sWasdiAnsiblePath}
                   ansible-playbook \
                     playbooks/deployDockerContainerWasdiJavaArtifact.yml \
-                    --inventory inventories/wasdi.yml \
+                    --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
                     --limit ${env.sAnsibleLimit} \
                     --diff \
                     --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
@@ -142,7 +143,7 @@ pipeline {
                 cd ${env.sWasdiAnsiblePath}
                 ansible-playbook \
                   playbooks/runDockerContainerWasdiJavaArtifact.yml \
-                  --inventory inventories/wasdi.yml \
+                  --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
                   --limit ${env.sAnsibleLimit} \
                   --diff \
                   --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
