@@ -173,6 +173,10 @@ var HomeController = (function () {
             oController.m_oAuthService.checkSession().then(
                 function (data, status) {
                     if (data) {
+                        if(!utilsIsObjectNullOrUndefined(data.data.type)) {
+                            oUser.type = data.data.type;
+                            oController.m_oConstantsService.setUser(oUser);
+                        }
                         if (!utilsIsObjectNullOrUndefined(data.data.userId)) {
                             // -> go to marketplace
                             oController.m_oState.go("root.marketplace");
