@@ -44,6 +44,9 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 	
 	String m_sShapeMaskPath = "";
 	
+	private static final Object s_oShapeFileLock = new Object();
+
+	
 	public QueryExecutorVIIRS() {
 		
 		m_sProvider="VIIRS";
@@ -212,7 +215,7 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		// Parse the query
 		ArrayList<String> asSections = new ArrayList<>();
 		
-		synchronized (m_sShapeMaskPath) {
+		synchronized (s_oShapeFileLock){
 			
 			try {
 				// Get the Data Store

@@ -31,6 +31,9 @@ public class QueryExecutorJRC extends QueryExecutor {
 
 	private String m_sShapeMaskPath;
 	
+	private static final Object s_oShapeFileLock = new Object();
+
+	
 	public QueryExecutorJRC() {
 		m_sProvider = "JRC";
 		m_oQueryTranslator = new QueryTranslatorJRC();
@@ -112,7 +115,7 @@ public class QueryExecutorJRC extends QueryExecutor {
 		
 		Map<String, String> aooTiles = new LinkedHashMap <String, String>(); // we choose an implementation that maintains the insertion order (useful for paginated queries)
 				
-		synchronized (m_sShapeMaskPath) {
+		synchronized (s_oShapeFileLock) {
 			
 			WasdiLog.debugLog("QueryExecutorJRC.getTilesInArea. Reading shape file: " + m_sShapeMaskPath);
 

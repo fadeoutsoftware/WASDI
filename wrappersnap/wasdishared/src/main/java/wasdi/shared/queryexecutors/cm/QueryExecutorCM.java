@@ -226,7 +226,7 @@ public class QueryExecutorCM extends QueryExecutor {
 			oResult.setFootprint(extractFootprint(oQuery.getQuery()));
 
 
-			Pattern oPattern = Pattern.compile("(\\d\\d+_)+(\\d+)");
+			Pattern oPattern = Pattern.compile("(\\d\\d\\d_)+(\\d\\d\\d)");
 			Matcher oMatcher = oPattern.matcher(oQueryViewModel.productType);
 			String sMode = "";
 
