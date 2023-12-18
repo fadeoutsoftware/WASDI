@@ -2,6 +2,7 @@ pipeline {
   agent any
 
   environment {
+    sCurrentAnsibleInventory = env.sAnsibleInventory.split('-')[0].toLowerCase()
     sCurrentRevision = "${env.BUILD_ID}"
   }
 
@@ -52,7 +53,7 @@ pipeline {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook playbooks/deployWasdiCrontab.yml \
-            --inventory inventories/wasdi.yml \
+            --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'

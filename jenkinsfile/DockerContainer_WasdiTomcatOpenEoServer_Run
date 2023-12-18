@@ -2,6 +2,7 @@ pipeline {
   agent any
 
   environment {
+    sCurrentAnsibleInventory = env.sAnsibleInventory.split('-')[0].toLowerCase()
     sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
     sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
     sCurrentRevision         = "${env.BUILD_ID}"
@@ -69,7 +70,7 @@ pipeline {
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
             playbooks/runDockerContainer.yml \
-            --inventory inventories/wasdi.yml \
+            --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiTomcatOpenEoServerContainer=true'

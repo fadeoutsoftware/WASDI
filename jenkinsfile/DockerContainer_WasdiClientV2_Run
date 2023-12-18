@@ -1,6 +1,10 @@
 pipeline {
   agent any
 
+  environment {
+    sCurrentAnsibleInventory = env.sAnsibleInventory.split('-')[0].toLowerCase()
+  }
+
   options {
     buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
     disableConcurrentBuilds()
@@ -61,7 +65,7 @@ pipeline {
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
             playbooks/runDockerContainerWasdiClientV2.yml \
-            --inventory inventories/wasdi.yml \
+            --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
