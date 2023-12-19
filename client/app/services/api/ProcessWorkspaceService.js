@@ -323,7 +323,7 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
         };
 
         this.getProcessWorkspaceTimeByUser = function(){
-            return this.oHttp.get(this.APIURL + '/process/runningtimeproject/byuser');
+            return this.m_oHttp.get(this.APIURL + '/process/runningtimeproject/byuser');
         }
 
         this.getProcessWorkspaceTimeByProject = function() {

@@ -51,7 +51,7 @@ let SubscriptionProjectsController = (function () {
                             oController.m_oProject = oValue;
                         }
                         oController.m_oProcessWorkspaceService.getProcessWorkspaceTimeByProject().then(oResponse => {
-                            if (FadeoutUtils.utilsIsObjectNullOrUndefined(oResponse) === true) {
+                            if (utilsIsObjectNullOrUndefined(oResponse) === true) {
                                 utilsVexDialogAlertTop(
                                     "Error in getting total processing time for your projects"
                                 );
@@ -59,7 +59,7 @@ let SubscriptionProjectsController = (function () {
                                 return false;
                             } else {
                                 oController.m_aoProjects.forEach(oProject => {
-                                    oResponse.forEach(oProjectInfo => {
+                                    oResponse.data.forEach(oProjectInfo => {
                                         if (oProject.projectId === oProjectInfo.projectId) {
                                             oProject["totalProcessingTime"] = oProjectInfo.computingTime;
                                         }
@@ -69,6 +69,24 @@ let SubscriptionProjectsController = (function () {
                                 return true;
                             }
                         });
+                        oController.m_oProcessWorkspaceService.getProcessWorkspaceTimeByUser().then(oResponse => {
+                            if (utilsIsObjectNullOrUndefined(oResponse) === true) {
+                                utilsVexDialogAlertTop(
+                                    "Error in getting individual processing time for your projects"
+                                );
+                                return false;
+                              } else {
+                                oController.m_aoProjects.forEach(oProject => {
+                                  oResponse.data.forEach(oProjectInfo => {
+                                    if (oProject.projectId === oProjectInfo.projectId) {
+                                      oProject["individualProcessingTime"] = oProjectInfo.computingTime;
+                                    }
+                                  })
+                                })
+                                console.log(oController.m_aoProjects)
+                                return true;
+                              }
+                        })
                     })
                 } else {
                     utilsVexDialogAlertTop(
