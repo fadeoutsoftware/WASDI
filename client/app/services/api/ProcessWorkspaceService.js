@@ -322,6 +322,14 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
             return this.m_oHttp.get(sUrl);
         };
 
+        this.getProcessWorkspaceTimeByUser = function(){
+            return this.oHttp.get(this.APIURL + '/process/runningtimeproject/byuser');
+        }
+
+        this.getProcessWorkspaceTimeByProject = function() {
+            return this.m_oHttp.get(this.APIURL + '/process/runningtimeproject'); 
+        }
+
         this.getQueuesStatus = function(sNodeCode, sStatuses) {
             let sUrl = this.APIURL + '/process/queuesStatus?';
 

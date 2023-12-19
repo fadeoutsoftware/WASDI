@@ -1,5 +1,5 @@
 let SubscriptionProjectsController = (function () {
-    function SubscriptionProjectsController($scope, oClose, oExtras, oSubscriptionService, oProjectService, oModalService, oTranslate) {
+    function SubscriptionProjectsController($scope, oClose, oExtras, oSubscriptionService, oProjectService, oProcessWorkspaceService, oModalService, oTranslate) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
@@ -9,6 +9,7 @@ let SubscriptionProjectsController = (function () {
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oProjectService = oProjectService;
         this.m_oModalService = oModalService;
+        this.m_oProcessWorkspaceService = oProcessWorkspaceService;
 
         this.m_sSelectedSubscriptionId = this.m_oExtras.subscriptionId;
         this.m_sSelectedSubscriptionName = this.m_oExtras.subscriptionName;
@@ -27,7 +28,7 @@ let SubscriptionProjectsController = (function () {
         }
     }
 
-    SubscriptionProjectsController.prototype.initializeProjectsInfo = function() {
+    SubscriptionProjectsController.prototype.initializeProjectsInfo = function () {
         var oController = this;
 
         this.m_oProjectService.getProjectsListBySubscription(this.m_sSelectedSubscriptionId).then(
@@ -49,7 +50,26 @@ let SubscriptionProjectsController = (function () {
                         if (oValue.activeProject) {
                             oController.m_oProject = oValue;
                         }
-                    });
+                        oController.m_oProcessWorkspaceService.getProcessWorkspaceTimeByProject().then(oResponse => {
+                            if (FadeoutUtils.utilsIsObjectNullOrUndefined(oResponse) === true) {
+                                utilsVexDialogAlertTop(
+                                    "Error in getting total processing time for your projects"
+                                );
+
+                                return false;
+                            } else {
+                                oController.m_aoProjects.forEach(oProject => {
+                                    oResponse.forEach(oProjectInfo => {
+                                        if (oProject.projectId === oProjectInfo.projectId) {
+                                            oProject["totalProcessingTime"] = oProjectInfo.computingTime;
+                                        }
+                                    })
+                                })
+                                console.log(oController.m_aoProjects);
+                                return true;
+                            }
+                        });
+                    })
                 } else {
                     utilsVexDialogAlertTop(
                         "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS"
@@ -71,13 +91,13 @@ let SubscriptionProjectsController = (function () {
         );
     }
 
-    SubscriptionProjectsController.prototype.showProjectEditForm = function(sProjectId) {
+    SubscriptionProjectsController.prototype.showProjectEditForm = function (sProjectId) {
         var oController = this;
 
         this.m_oProjectService.getProjectById(sProjectId).then(
             function (response) {
                 if (!utilsIsObjectNullOrUndefined(response)
-                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                    && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
                     oController.m_oModalService.showModal({
                         templateUrl: "dialogs/project_editor/ProjectEditorDialog.html",
                         controller: "ProjectEditorController",
@@ -114,7 +134,7 @@ let SubscriptionProjectsController = (function () {
         )
     }
 
-    SubscriptionProjectsController.prototype.showProjectAddForm = function() {
+    SubscriptionProjectsController.prototype.showProjectAddForm = function () {
         var oController = this;
 
         let oNewProject = {};
@@ -140,13 +160,13 @@ let SubscriptionProjectsController = (function () {
         });
     }
 
-    SubscriptionProjectsController.prototype.deleteProject = function(sProjectId) {
+    SubscriptionProjectsController.prototype.deleteProject = function (sProjectId) {
 
         let sConfirmMsg = "Delete this Project?"
 
         var oController = this;
-        
-        let oCallbackFunction = function(value) {
+
+        let oCallbackFunction = function (value) {
             if (value) {
                 oController.m_oProjectService.deleteProject(sProjectId)
                     .then(function (response) {
@@ -175,7 +195,7 @@ let SubscriptionProjectsController = (function () {
         utilsVexDialogConfirm(sConfirmMsg, oCallbackFunction);
     }
 
-    SubscriptionProjectsController.prototype.cancelEditProjectForm = function() {
+    SubscriptionProjectsController.prototype.cancelEditProjectForm = function () {
         console.log("SubscriptionProjectsController.cancelEditProjectForm");
     }
 
@@ -185,8 +205,9 @@ let SubscriptionProjectsController = (function () {
         "$scope",
         "close",
         "extras",
-        "SubscriptionService", 
-        "ProjectService", 
+        "SubscriptionService",
+        "ProjectService",
+        "ProcessWorkspaceService",
         "ModalService",
         '$translate'
     ];
