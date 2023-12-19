@@ -47,7 +47,7 @@ pipeline {
     stage('UPDATE THE ANSIBLE CODE') {
       steps {
         dir("${env.sWasdiAnsiblePath}") {
-          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloud', url: "${env.sWasdiAnsibleGitRepositoryUrl}"]]])
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloudSsh', url: "${env.sWasdiAnsibleGitRepositoryUrl}"]]])
         }
       }
     }
