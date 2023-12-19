@@ -28,7 +28,8 @@
                                     <th>Project Name</th>
                                     <th>Subscription</th>
                                     <th>Active</th>
-
+                                    <th>My Processing Time</th>
+                                    <th>Total Processing Time</th>
                                     <th></th>
                                     <th></th>
                                     <th></th>
@@ -39,7 +40,13 @@
                                     <td>{{oProject.name}}</td>
                                     <td>{{oProject.subscriptionName}}</td>
                                     <td><span class="text-success" ng-show="oProject.activeProject">Yes</span><span ng-show="!oProject.activeProject">No</span></td>
-
+                                    <td class="text-center" ng-if="oProject.individualProcessingTime">
+                                        {{oProject.individualProcessingTime
+                                        | convertMsToTime }}</td>
+                                    <td class="text-center" ng-if="!oProject.individualProcessingTime">00:00:00</td>
+                                    <td class="text-center" ng-if="oProject.totalProcessingTime">{{oProject.totalProcessingTime |
+                                        convertMsToTime}}</td>
+                                    <td class="text-center" ng-if="!oProject.totalProcessingTime">00:00:00</td>
                                     <td class="over-icon">
                                         <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_PROJECT_EDIT"|translate}}
                                             ng-click="m_oController.showProjectEditForm(oProject.projectId)">
