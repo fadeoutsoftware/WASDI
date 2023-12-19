@@ -499,8 +499,6 @@ services:
       - POSTGRES_DB=${sPostgresqlSonarqubeDatabaseName}
       - POSTGRES_USER=${sPostgresqlSonarqubeDatabaseUsername}
       - POSTGRES_PASSWORD=${sPostgresqlSonarqubeDatabasePassword}
-      - POSTGRES_USER1_NAME=${sPostgresqlSonarqubeUser1Name}
-      - POSTGRES_USER1_PASSWORD=${sPostgresqlSonarqubeUser1Password}
 {% endif %}
     image: "{{ sWasdiPostgresqlSonarqubeImageName }}:{{ sWasdiPostgresqlSonarqubeVersion }}"
 {% if ( aWasdiPostgresqlSonarqubePorts | length ) > 0 %}
