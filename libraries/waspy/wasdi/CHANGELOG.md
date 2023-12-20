@@ -3,6 +3,10 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.8.5.4] - 2023-12-20
+### Fixed
+- changed get Checksum to be compatible with older python versions
+
 ## [0.8.5.3] - 2023-12-05
 ### Fixed
 - local config path for on-line notebooks

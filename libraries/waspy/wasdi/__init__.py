@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.5.3
+Version 0.8.5.4
 
-Last Update: 05/12/2023
+Last Update: 20/12/2023
 
 Tested with: Python 3.7, Python 3.8, Python 3.9, Python 3.10
 
@@ -4517,7 +4517,9 @@ def getMD5Checksum(sFileName):
     oMd5Hash = hashlib.md5()
     with open(sFileName, 'rb') as oFile:
 
-        while oChunk := oFile.read(4096):
+        while True:
+            oChunk = oFile.read(4096)
+            if not oChunk: break
             oMd5Hash.update(oChunk)
 
     return oMd5Hash.hexdigest()
