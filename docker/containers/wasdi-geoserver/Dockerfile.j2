@@ -141,7 +141,7 @@ RUN mkdir --parents \
         /tmp/{{ sWasdiGeoserverSourceUrl | basename }} \
         /tmp/{{ sWasdiGeoserverPluginImagePyramidSourceUrl | basename }} \
         /tmp/geoserverPlugin
-
+ENV GEOSERVER_HOME="{{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}"
 ENV PATH="{{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/bin:${PATH}"
 
 

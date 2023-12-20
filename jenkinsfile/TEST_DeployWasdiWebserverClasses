@@ -30,7 +30,7 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/deployWasdiWebserverClasses.yml --inventory inventories/wasdi.yml --limit test --diff
+          ansible-playbook playbooks/deployWasdiWebserverClasses.yml --inventory inventories/${env.sCurrentAnsibleInventory}.yml --limit test --diff
         """,
         label: "Execute ansible-playbook"
       }
