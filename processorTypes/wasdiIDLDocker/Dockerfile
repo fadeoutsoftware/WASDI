@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:18.04
 
 
 MAINTAINER "WASDI SARL"
@@ -35,9 +35,9 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     apt-get update && \
     apt-get install \
         ca-certificates && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ jammy main restricted universe multiverse"           > /etc/apt/sources.list && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ bionic main restricted universe multiverse"           > /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ bionic-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ bionic-security main restricted universe multiverse" >> /etc/apt/sources.list && \
     apt-get update && \
     apt-get dist-upgrade && \
     apt-get install \
@@ -113,7 +113,8 @@ COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirecto
 # Install the common PIP libraries
 RUN python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
     pip3 install --no-cache-dir --no-compile \
-        wasdi
+        wasdi && \
+    find {{ sWasdiSystemUserHome }} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
 # From now, all commands executed are executed with the user 'root'
