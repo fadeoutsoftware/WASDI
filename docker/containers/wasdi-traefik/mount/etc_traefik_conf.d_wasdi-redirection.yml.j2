@@ -1,0 +1,17 @@
+http:
+  routers:
+    r_{{ sDomainNameUnderscore }}:
+      entrypoints: "websecure"
+      rule: "Host(`{{ sWasdiDomainName }}`)"
+      middlewares: "mw_{{ sDomainNameUnderscore }}@file"
+      service: "s_{{ sDomainNameUnderscore }}_lb"
+      tls: true
+  middlewares:
+    mw_{{ sDomainNameUnderscore }}:
+      redirectregex:
+        regex: "^https?://{{ sWasdiDomainName | replace('.', '\\\.') }}/(.*)"
+        replacement: "https://www.{{ sWasdiDomainName }}/"
+  services:
+    s_{{ sDomainNameUnderscore }}_lb:
+      loadBalancer:
+        passHostHeader: false
