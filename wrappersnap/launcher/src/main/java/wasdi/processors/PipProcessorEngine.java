@@ -74,20 +74,9 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 				// Check if it was included also by the user
 				if (!Utils.isNullOrEmpty(sExistingPackage)) {
 					if (asUserPackages.contains(sExistingPackage)) {
-						
-						if (!sExistingPackage.contains("==")) {
-							// Remove it
-							WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: removing already existing package " + sExistingPackage);
-							asUserPackages.remove(sExistingPackage);							
-						}
-						else {
-							WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: there is an existing package " + sExistingPackage + " but it has a specific version: check if there is the update option");
-							
-							if (!sExistingPackage.contains("--upgrade")) {
-								m_asDockerTemplatePackages[iPackages] = m_asDockerTemplatePackages[iPackages] + " --upgrade";
-								WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: upgrade was not set, added it. Final line: " + m_asDockerTemplatePackages[iPackages]);
-							}
-						}
+						// Remove it
+						WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: removing already existing package " + sExistingPackage);
+						asUserPackages.remove(sExistingPackage);
 					}
 				}
 			}
@@ -147,6 +136,11 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 			
 			if (Utils.isNullOrEmpty(sPackage)) {
 				return false;
+			}
+			
+			if (sPackage.startsWith("--")) {
+				WasdiLog.infoLog("PipProcessorEngine.checkPipPackage: line [" + sPackage + "] looks a pip option, try to keep it");
+				return true;
 			}
 			
 			if (sPackage.contains("==")) {
