@@ -86,7 +86,8 @@ public class ProcessorTypes {
 			aoFiles.add("packagesInfo.json");
 			aoFiles.add("runwasdidocker.sh");
 			aoFiles.add("deploywasdidocker.sh");
-			aoFiles.add("cleanwasdidocker.sh");			
+			aoFiles.add("cleanwasdidocker.sh");
+			aoFiles.add("runServer.sh");
 		}
 		else if (sProcessorType.equals(PIP_ONESHOT)) {
 			aoFiles.add("installUserPackage.sh");
