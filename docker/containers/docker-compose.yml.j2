@@ -362,29 +362,14 @@ services:
 {% endif %}
 {% if bWasdiMongoInitialized == False %}
     environment:
-      - MONGO_INITDB_DATABASE=${sWasdiMongoMainDatabaseName}
+{% if sWasdiServerTypeIsMain == True %}
+      - MONGO_INITDB_DATABASE={{ sWasdiMongoMainDatabaseName }}
+{% endif %}
+{% if sWasdiServerTypeIsComputational == True %}
+      - MONGO_INITDB_DATABASE={{ sWasdiMongoLocalDatabaseName }}
+{% endif %}
       - MONGO_INITDB_ROOT_PASSWORD=${sWasdiAdministratorUserPassword}
       - MONGO_INITDB_ROOT_USERNAME=${sWasdiAdministratorUserName}
-      - sWasdiMongoAdditionalUserBackupUserName=${sWasdiMongoAdditionalUserBackupUserName}
-      - sWasdiMongoAdditionalUserBackupUserPassword=${sWasdiMongoAdditionalUserBackupUserPassword}
-      - sWasdiMongoAdditionalUserMetrologyUserName=${sWasdiMongoAdditionalUserMetrologyUserName}
-      - sWasdiMongoAdditionalUserMetrologyUserPassword=${sWasdiMongoAdditionalUserMetrologyUserPassword}
-{% if sWasdiServerTypeIsMain == True %}
-      - sWasdiMongoEcostressDatabaseName=${sWasdiMongoEcostressDatabaseName}
-      - sWasdiMongoEcostressUserName=${sWasdiMongoEcostressUserName}
-      - sWasdiMongoEcostressUserPassword=${sWasdiMongoEcostressUserPassword}
-      - sWasdiMongoModisDatabaseName=${sWasdiMongoModisDatabaseName}
-      - sWasdiMongoModisUserName=${sWasdiMongoModisUserName}
-      - sWasdiMongoModisUserPassword=${sWasdiMongoModisUserPassword}
-{% endif %}
-      - sWasdiMongoMainDatabaseName=${sWasdiMongoMainDatabaseName}
-      - sWasdiMongoMainUserName=${sWasdiMongoMainUserName}
-      - sWasdiMongoMainUserPassword=${sWasdiMongoMainUserPassword}
-{% if sWasdiServerTypeIsMain == True %}
-      - sWasdiMongoStatisticsDatabaseName=${sWasdiMongoStatisticsDatabaseName}
-      - sWasdiMongoStatisticsUserName=${sWasdiMongoStatisticsUserName}
-      - sWasdiMongoStatisticsUserPassword=${sWasdiMongoStatisticsUserPassword}
-{% endif %}
 {% endif %}
     image: "mongo:{{ sWasdiMongoVersion }}"
 {% if ( aWasdiMongoPorts | length ) > 0 %}

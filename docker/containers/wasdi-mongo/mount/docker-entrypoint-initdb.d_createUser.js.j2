@@ -1,0 +1,34 @@
+print('[{{ sWasdiMongoGeneralDatabaseName }}] Authenticating as administrator...')
+oCurrentDatabase = db.getSiblingDB('admin');
+oCurrentDatabase.auth(
+    {
+        user: _getEnv('MONGO_INITDB_ROOT_USERNAME'),
+        pwd: _getEnv('MONGO_INITDB_ROOT_PASSWORD')
+    }
+);
+print('[{{ sWasdiMongoGeneralDatabaseName }}] OK')
+
+
+
+
+print('[{{ sWasdiMongoGeneralDatabaseName }}] Connecting to the database \'{{ sWasdiMongoGeneralDatabaseName }}\'...')
+oCurrentDatabase = db.getSiblingDB('{{ sWasdiMongoGeneralDatabaseName }}');
+print('[{{ sWasdiMongoGeneralDatabaseName }}] OK')
+
+
+
+
+print('[{{ sWasdiMongoGeneralDatabaseName }}] Creating the user \'{{ sWasdiMongoGeneralUserName }}\'...')
+oCurrentDatabase.createUser(
+    {
+        user: '{{ sWasdiMongoGeneralUserName }}',
+        pwd: '{{ sWasdiMongoGeneralUserPassword }}',
+        roles: [
+            {
+                role: '{{ sWasdiMongoGeneralUserRole }}',
+                db: '{{ sWasdiMongoGeneralDatabaseName }}'
+            }
+        ]
+    }
+);
+print('[{{ sWasdiMongoGeneralDatabaseName }}] OK')
