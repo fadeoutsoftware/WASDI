@@ -26,37 +26,32 @@ RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupNa
     useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }}
 
 
-# RUN generic to update the system and install common packages
-RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
-    echo "APT::Install-Recommends \"0\";" >> /etc/apt/apt.conf.d/99local && \
-    echo "APT::Get::Assume-Yes \"true\";" >> /etc/apt/apt.conf.d/99local && \
-    echo "APT::Keep-Downloaded-Packages \"false\";" >> /etc/apt/apt.conf.d/99local && \
-    echo "Dpkg::Options::--force-confold;" >> /etc/apt/apt.conf.d/99local && \
+# Update the system and install packages
+RUN apt-get update && \
+    apt-get install --assume-yes software-properties-common && \
+    add-apt-repository ppa:nextgis/ppa && \
     apt-get update && \
-    apt-get install \
-        ca-certificates && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ bionic main restricted universe multiverse"           > /etc/apt/sources.list && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ bionic-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ bionic-security main restricted universe multiverse" >> /etc/apt/sources.list && \
-    apt-get update && \
-    apt-get dist-upgrade && \
-    apt-get install \
+    apt-get upgrade -y && \
+    apt-get install -y \
+        build-essential \
         curl \
         gdal-bin \
-        git \
-        gunicorn \
+        libffi-dev \
+        libgdal-dev \
+        libpq-dev \
+        libssl-dev \
+        libxml2-dev \
+        libxslt1-dev \
+        locate \
         nano \
+        openjdk-8-jre \
         python3 \
-        python3-flask \
+        python3-dev \
         python3-gdal \
-        python3-requests \
         python3-pip \
         python3-venv \
-        python3-wheel \
-        wget && \
-    rm --recursive --force /var/lib/apt/lists/* && \
-    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
-
+        wget \
+        zlib1g-dev
 
 # Specific for IDL:
 # - install additional packages
@@ -113,9 +108,20 @@ COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirecto
 # Install the common PIP libraries
 RUN python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
     pip3 install --no-cache-dir --no-compile \
-        wasdi && \
+	flask \
+    gunicorn \
+    requests \
+    numpy \
+    pandas \
+    rasterio \
+    wheel \	
+    wasdi && \
     find {{ sWasdiSystemUserHome }} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
+# [IN OUR VENV] Install needed Python GDAL library
+RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
+    export C_INCLUDE_PATH=/usr/include/gdal && \
+    pip3 install --global-option=build_ext --global-option="-I/usr/include/gdal" GDAL==`gdal-config --version`
 
 # From now, all commands executed are executed with the user 'root'
 USER root

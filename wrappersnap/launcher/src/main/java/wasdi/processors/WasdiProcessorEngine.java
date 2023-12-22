@@ -105,6 +105,10 @@ public abstract class WasdiProcessorEngine {
 			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type PipOneShotProcessorEngine");
 			return new PipOneShotProcessorEngine();
 		}		
+		else if (sType.equals(ProcessorTypes.PYTHON_PIP_2_UBUNTU_20)) {
+			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type PYTHON_PIP_2_UBUNTU_20");
+			return new Ubuntu20Pip2ProcessorEngine();
+		}				
 		else {
 			WasdiLog.warnLog("WasdiProcessorEngine.getProcessorEngine: DEFAULT CASE (type "  + sType+ " not recognized) return processor of type UbuntuPython37ProcessorEngine");
 			return new UbuntuPython37ProcessorEngine();
