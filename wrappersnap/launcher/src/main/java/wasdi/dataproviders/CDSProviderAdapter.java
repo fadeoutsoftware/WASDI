@@ -15,6 +15,7 @@ import java.util.stream.IntStream;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.queryexecutors.cds.CDSUtils;
 import wasdi.shared.queryexecutors.cds.QueryExecutorCDS;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
@@ -224,7 +225,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 	}
 
 	private Map<String, String> extractWasdiPayloadFromUrl(String sUrl) {
-		String sDecodedUrl = deodeUrl(sUrl);
+		String sDecodedUrl = decodeUrl(sUrl);
 
 		String sPayload = null;
 		if (sDecodedUrl != null && sDecodedUrl.startsWith(CDS_URL_SEARCH) && sDecodedUrl.contains("?payload=")) {
@@ -250,7 +251,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		List<String> asVariables = null;
 		if (!Utils.isNullOrEmpty(sVariables)) {
 			asVariables = Arrays.stream(sVariables.split(" "))
-					.map(CDSProviderAdapter::inflateVariable)
+					.map(CDSUtils::inflateVariable)
 					.collect(Collectors.toList());
 		}
 
@@ -274,8 +275,6 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		}
 		
 
-		List<String> oaTimeHours = Arrays.asList("00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00");
-
 		Map<String, Object> aoHashMap = new HashMap<>();
 		if (sProductType != null) aoHashMap.put("product_type", sProductType);
 		if (asVariables != null) {
@@ -283,7 +282,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		}
 		aoHashMap.put("year", sYear);
 		aoHashMap.put("month", sMonth);
-		aoHashMap.put("time", oaTimeHours);
+		aoHashMap.put("time", CDSUtils.s_asTIME_HOURS);
 		aoHashMap.put("format", sFormat);
 		if (sMonthlyAggregation.equalsIgnoreCase("true")) {
 			aoHashMap.put("day", asDays);
@@ -299,61 +298,60 @@ public class CDSProviderAdapter extends ProviderAdapter {
 				aoHashMap.put("area", expandedBbox);
 			}
 		}
-
-		if (sDataset.equalsIgnoreCase("reanalysis-era5-pressure-levels")) {
-			String sPresureLevels = JsonUtils.getProperty(aoWasdiPayload, "presureLevels");
-			List<String> oaPressureLevels = Arrays.asList(sPresureLevels.split(" "));
-
-			aoHashMap.put("pressure_level", oaPressureLevels);
-		}
 		
-        if (sDataset.equalsIgnoreCase("satellite-sea-surface-temperature")) {
-            aoHashMap.put("sensor_on_satellite", "combined_product");
-            aoHashMap.put("version", "2_1");
-            aoHashMap.put("processinglevel", "level_4");
-            aoHashMap.remove("time");
-            aoHashMap.remove("area");
-        }
+		addPressureLevels(sDataset, aoWasdiPayload, aoHashMap);
+		
+		addSeaTemperatureParameters(sDataset, aoHashMap);
 
 		return aoHashMap;
 	}
 
-	private static String inflateVariable(String sVariable) {
-		switch (sVariable) {
-		case "RH":
-			return "relative_humidity";
-		case "U":
-			return "u_component_of_wind";
-		case "V":
-			return "v_component_of_wind";
-		case "SST":
-			return "sea_surface_temperature";
-		case "SP":
-			return "surface_pressure";
-		case "TP":
-			return "total_precipitation";
-		case "10U":
-			return "10m_u_component_of_wind";
-		case "10V":
-			return "10m_v_component_of_wind";
-		case "2DT":
-			return "2m_dewpoint_temperature";
-		case "2T":
-			return "2m_temperature";
-		default:
-			WasdiLog.debugLog("CDSProviderAdapter.inflateVariable: unexpected variable: " + sVariable + ".");
-			return sVariable;
-		}
-	}
 
-	private static String deodeUrl(String sUrlEncoded) {
+
+	private static String decodeUrl(String sUrlEncoded) {
 		try {
 			return URLDecoder.decode(sUrlEncoded, java.nio.charset.StandardCharsets.UTF_8.toString());
 		} catch (UnsupportedEncodingException oE) {
-			WasdiLog.debugLog("Wasdi.deodeUrl: could not decode URL due to " + oE + ".");
+			WasdiLog.debugLog("Wasdi.decodeUrl: could not decode URL due to " + oE + ".");
 		}
 
 		return sUrlEncoded;
+	}
+	
+	/**
+	 * if the dataset is the "ERA5 pressure level", then it adds the corresponding parameters to the ERA5 payload
+	 * @param sDataset code of the dataset
+	 * @param asWasdiPayload payload sent to the provider adapter by the query executor
+	 * @param aoEraPayload payload to be sent to the ERA5 data provider
+	 */
+	private static void addPressureLevels(String sDataset, Map<String, String> asWasdiPayload, Map<String, Object> aoEraPayload) {
+		if (sDataset.equalsIgnoreCase(CDSUtils.s_sPRESSURE_LEVELS_DATASET)) {
+			String sPresureLevels = JsonUtils.getProperty(asWasdiPayload, "presureLevels");
+			
+			List<String> aoPressureLevels = Arrays.asList(sPresureLevels.split(" "));
+			
+			if (aoPressureLevels.size() == 1 && aoPressureLevels.get(0).equals(CDSUtils.s_sALL_PRESSURE_LEVELS)) {
+				aoPressureLevels = CDSUtils.s_asPRESSURE_LEVELS;
+			}
+
+			aoEraPayload.put("pressure_level", aoPressureLevels);
+		}
+	}
+	
+	/**
+	 * if the dataset is the "ERA5 sea surface temperature", then it adds the corresponding parameters to the ERA5 payload
+	 * @param sDataset code of the dataset
+	 * @param asWasdiPayload payload sent to the provider adapter by the query executor
+	 * @param aoEraPayload payload to be sent to the ERA5 data provider
+	 */
+	private static void addSeaTemperatureParameters(String sDataset, Map<String, Object> aoEraPayload) {
+        if (sDataset.equalsIgnoreCase(CDSUtils.s_sSEA_TEMPERATURE_DATASET)) {
+        	aoEraPayload.put("sensor_on_satellite", "combined_product");
+        	aoEraPayload.put("version", "2_1");
+        	aoEraPayload.put("processinglevel", "level_4");
+            aoEraPayload.remove("time");
+            aoEraPayload.remove("area");
+        }
 	}
 
 	@Override
@@ -376,16 +374,22 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		String sExtension = "." + sFormat;
 
 		// filename: reanalysis-era5-pressure-levels_UV_20211201
-		String sFileName = getFileName(sDataset, sVariables, sDate, sStartDate, sEndDate, sExtension, sFootprintForFileName);
+		String sFileName = CDSUtils.getFileName(sDataset, Arrays.asList(sVariables.split(" ")), sDate, sStartDate, sEndDate, sExtension, sFootprintForFileName);
 			
 		return sFileName;
 	}
 	
+	/**
+	 * Return the string representing the bounding box of the data, in the format displayed in the file name
+	 * @param sFootprint the bounding box in the format sent by the query executor
+	 * @param sDatasetName the name of the ERA5 dataset
+	 * @return the string representing the bounding box, in the format used in the file name
+	 */
 	private String getFootprintForFileName(String sFootprint, String sDatasetName) {
 		String sFootprintForFileName = "";
 		
 		if (sFootprint == null || sFootprint.contains("null")) {
-			sFootprintForFileName = QueryExecutorCDS.getFootprintForFileName(null, null, null, null, sDatasetName);
+			sFootprintForFileName = CDSUtils.getFootprintForFileName(null, null, null, null, sDatasetName);
 		} else {
 			String[] asFootprint = sFootprint.split(", ");
 			if (asFootprint.length == 4) {
@@ -393,18 +397,14 @@ public class CDSProviderAdapter extends ProviderAdapter {
 				double dWest = Double.parseDouble(asFootprint[1]);
 				double dSouth = Double.parseDouble(asFootprint[2]);
 				double dEast = Double.parseDouble(asFootprint[3]);
-				sFootprintForFileName = QueryExecutorCDS.getFootprintForFileName(dNorth, dWest, dSouth, dEast, sDatasetName);
+				sFootprintForFileName = CDSUtils.getFootprintForFileName(dNorth, dWest, dSouth, dEast, sDatasetName);
 			}
 		}
 		return sFootprintForFileName;
 	}
 	
-	private String getFileName(String sDataset, String sVariables, String sDailyDate, String sStartDate, String sEndDate, String sExtension, String sFootprint) {
-	return Utils.isNullOrEmpty(sStartDate) || Utils.isNullOrEmpty(sEndDate) 
-			? String.join("_", Platforms.ERA5, sDataset, sVariables, sDailyDate, sFootprint).replaceAll("[\\W]", "_") + sExtension
-			: String.join("_", Platforms.ERA5, sDataset, sVariables, sStartDate, sEndDate, sFootprint).replaceAll("[\\W]", "_") + sExtension;
-	}
 
+	
 
 	@Override
 	protected void internalReadConfig() {

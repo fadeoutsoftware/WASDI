@@ -415,7 +415,7 @@
                 {
                     "indexname": "pressureLevels",
                     "indexlabel": "Pressure levels in hPa",
-                    "indexvalues": "1|2|1+2|1000",
+                    "indexvalues": "1|2|1+2|1000|all_available_pressure_levels",
                     "regex": ".*",
                     "visibilityConditions": "dataset:reanalysis-era5-pressure-levels",
                     "indexvalue":"1000"
@@ -423,7 +423,7 @@
                 {
                     "indexname": "variables",
                     "indexlabel": "Variables",
-                    "indexvalues": "RH|U|V|RH+U+V",
+                    "indexvalues": "RH|U|V|RH+U+V|specific_humidity|temperature|ozone_mass_mixing_ratio|RH+SH+T+OMMR",
                     "regex": ".*",
                     "visibilityConditions": "dataset:reanalysis-era5-pressure-levels",
                     "indexvalue":"RH+U+V"
@@ -431,7 +431,7 @@
                 {
                     "indexname": "variables",
                     "indexlabel": "Variables",
-                    "indexvalues": "SST+SP+TP|10U+10V+2DT+2T+SP",
+                    "indexvalues": "toa_incident_solar_radiation|SST+SP+TP|10U+10V+2DT+2T+SP",
                     "regex": ".*",
                     "visibilityConditions": "dataset:reanalysis-era5-single-levels",
                     "indexvalue":"SST+SP+TP"
