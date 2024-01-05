@@ -431,7 +431,7 @@
                 {
                     "indexname": "variables",
                     "indexlabel": "Variables",
-                    "indexvalues": "toa_incident_solar_radiation|SST+SP+TP|10U+10V+2DT+2T+SP",
+                    "indexvalues": "toa_incident_solar_radiation|total_column_water_vapour|total_sky_direct_solar_radiation_at_surface|SST+SP+TP|10U+10V+2DT+2T+SP|TISR+TCWV+TSDSRAS",
                     "regex": ".*",
                     "visibilityConditions": "dataset:reanalysis-era5-single-levels",
                     "indexvalue":"SST+SP+TP"

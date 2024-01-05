@@ -374,7 +374,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		String sExtension = "." + sFormat;
 
 		// filename: reanalysis-era5-pressure-levels_UV_20211201
-		String sFileName = CDSUtils.getFileName(sDataset, Arrays.asList(sVariables.split(" ")), sDate, sStartDate, sEndDate, sExtension, sFootprintForFileName);
+		String sFileName = CDSUtils.getFileName(sDataset, sVariables, sDate, sStartDate, sEndDate, sExtension, sFootprintForFileName);
 			
 		return sFileName;
 	}

@@ -1,10 +1,7 @@
 package wasdi.shared.queryexecutors.cds;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.Utils;
@@ -36,18 +33,8 @@ public final class CDSUtils {
 			"875", "900", "925", "950", 
 			"975", "1000"); 
 	
-	public static final Map<String, String> s_asVAR_SHORTENER;
 	
-	static {
-		s_asVAR_SHORTENER = new HashMap<String, String>();
-		s_asVAR_SHORTENER.put("specific_humidity", "SH");
-		s_asVAR_SHORTENER.put("temperature", "T");
-		s_asVAR_SHORTENER.put("ozone_mass_mixing_ration", "OMMR");
-	}
-	
-	
-	
-	// private contructor to prevent initialization of the class
+	// private constructor to prevent initialisation of the class
 	private CDSUtils() {
 		throw new java.lang.UnsupportedOperationException("CDSUtils.java is an helper class and it can not be instantiated");
 	}
@@ -61,7 +48,7 @@ public final class CDSUtils {
 	public static String inflateVariable(String sVariable) {
 		switch (sVariable) {
 		case "OMMR":
-			return "ozone_mass_mixing_ration";
+			return "ozone_mass_mixing_ratio";
 		case "RH":
 			return "relative_humidity";
 		case "SH":
@@ -72,10 +59,16 @@ public final class CDSUtils {
 			return "sea_surface_temperature";
 		case "ST":
 			return "skin_temperature";
-		case "TP":
-			return "total_precipitation";
 		case "T":
 			return "temperature";
+		case "TCWV":
+			return "total_column_water_vapour";
+		case "TISR":
+			return "toa_incident_solar_radiation";
+		case "TP":
+			return "total_precipitation";
+		case "TSDSRAS":
+			return "total_sky_direct_solar_radiation_at_surface";
 		case "U":
 			return "u_component_of_wind";
 		case "V":
@@ -162,16 +155,16 @@ public final class CDSUtils {
 					sFormattedCoordinate += sCoordinate;
 				}
 				else {
-					WasdiLog.debugLog("QueryExecutorCDS.getStringRepresentationOfPoint. Cannot find integer and decimal part in the number: " + oValue);
+					WasdiLog.debugLog("CDSUtils.getStringRepresentationOfPoint. Cannot find integer and decimal part in the number: " + oValue);
 					sFormattedCoordinate = "null";
 				}
 			} catch (Exception oE) {
-				WasdiLog.debugLog("QueryExecutorCDS.getStringRepresentationOfPoint.Exception while formatting the value " + oValue);
+				WasdiLog.debugLog("CDSUtils.getStringRepresentationOfPoint.Exception while formatting the value " + oValue);
 				sFormattedCoordinate = "null";
 			}
 		} else {
 			// this is a fallback that should never happen
-			WasdiLog.debugLog("QueryExecutorCDS.getStringRepresentationOfPoint. The coordinate poit is null or not a number " + oValue);
+			WasdiLog.debugLog("CDSUtils.getStringRepresentationOfPoint. The coordinate poit is null or not a number " + oValue);
 			sFormattedCoordinate = "null";
 		}
 		
@@ -179,38 +172,8 @@ public final class CDSUtils {
 		return sFormattedCoordinate;
 	}
 	
-	/**
-	 * Method used to shorten the name of the variables, for displaying purposes
-	 * @param asVariables the list of variables
-	 * @param delimiter the character that should be used as a separator between two consecutive variables, in the resulting string
-	 * @return a string representing the list of variables, separated by the delimiter
-	 */
-	public static String shortenVariables(List<String> asVariables, String delimiter) {
-		String sVariables = "null";
-		
-		if (asVariables.size() == 1) { // if only one variable is selected: in the name, we put the plain name of the variable and we don't try to shorten it
-			sVariables = asVariables.get(0);
-		} else if (asVariables.size() > 1){ // we shorten the names of the variables
-			sVariables = asVariables.stream().map(sVar -> CDSUtils.s_asVAR_SHORTENER.getOrDefault(sVar, sVar)).collect(Collectors.joining(delimiter));
-		}
-		
-		return sVariables;
-		
-	}
 	
-	/*
-	public static String getFileName(String sProductName, List<String> asVariables, String sStartDate, String sEndDate, String sExtension, String sFootprint) {
-		String sVariables = shortenVariables(asVariables, "_");
-		
-		return Utils.isNullOrEmpty(sEndDate) 
-				? String.join("_", Platforms.ERA5, sProductName, sVariables, sStartDate, sFootprint).replaceAll("[\\W]", "_") + sExtension
-				: String.join("_", Platforms.ERA5, sProductName, sVariables, sStartDate, sEndDate, sFootprint).replaceAll("[\\W]", "_") + sExtension;
-	}
-	*/
-	
-	
-	public static String getFileName(String sDataset, List<String> asVariables, String sDailyDate, String sStartDate, String sEndDate, String sExtension, String sFootprint) {
-		String sVariables = shortenVariables(asVariables, "_");
+	public static String getFileName(String sDataset, String sVariables, String sDailyDate, String sStartDate, String sEndDate, String sExtension, String sFootprint) {
 
 		return Utils.isNullOrEmpty(sStartDate) || Utils.isNullOrEmpty(sEndDate) 
 				? String.join("_", Platforms.ERA5, sDataset, sVariables, sDailyDate, sFootprint).replaceAll("[\\W]", "_") + sExtension

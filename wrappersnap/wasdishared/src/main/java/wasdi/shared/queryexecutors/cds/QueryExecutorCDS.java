@@ -1,15 +1,10 @@
 package wasdi.shared.queryexecutors.cds;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.util.Strings;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -298,7 +293,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 		String sExtension = sDataset.equalsIgnoreCase(s_sSEA_SURFACE_TEMPERATURE_DATASET) ? "zip" : oQuery.timeliness;
 		String sFileNameFootprint = CDSUtils.getFootprintForFileName(oQuery.north, oQuery.west, oQuery.south, oQuery.east, sDataset);
 		String sExtensionWithComma = "." +  sExtension;
-		String sFileName = CDSUtils.getFileName(oQuery.productName, Arrays.asList(sVariables.split(" ")), sStartDate, sEndDate, sExtensionWithComma, sFileNameFootprint);
+		String sFileName = CDSUtils.getFileName(oQuery.productName, sVariables, sStartDate, sStartDate, sEndDate, sExtensionWithComma, sFileNameFootprint);
 		String sUrl = s_oDataProviderConfig.link + "?payload=" + sPayload;
 		String sEncodedUrl = StringUtils.encodeUrl(sUrl);
 
@@ -339,7 +334,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 		}
 			
 		if (!Utils.isNullOrEmpty(sMode)) 
-			sSummaryElements.add("Mode: " + CDSUtils.shortenVariables(Arrays.asList(sMode.split(" ")), " "));
+			sSummaryElements.add("Mode: " + sMode);
 		
 		if (!Utils.isNullOrEmpty(sTimeliness))
 			sSummaryElements.add("Instrument: " + sTimeliness);
