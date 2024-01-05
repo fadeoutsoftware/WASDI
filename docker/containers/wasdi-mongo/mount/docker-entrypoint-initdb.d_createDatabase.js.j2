@@ -1,0 +1,23 @@
+print('[{{ sWasdiMongoGeneralDatabaseName }}] Authenticating as administrator...')
+oCurrentDatabase = db.getSiblingDB('admin');
+oCurrentDatabase.auth(
+    {
+        user: _getEnv('MONGO_INITDB_ROOT_USERNAME'),
+        pwd: _getEnv('MONGO_INITDB_ROOT_PASSWORD')
+    }
+);
+print('[{{ sWasdiMongoGeneralDatabaseName }}] OK')
+
+
+
+
+print('[{{ sWasdiMongoGeneralDatabaseName }}] Connecting to the database \'{{ sWasdiMongoGeneralDatabaseName }}\'...')
+oCurrentDatabase = db.getSiblingDB('{{ sWasdiMongoGeneralDatabaseName }}');
+print('[{{ sWasdiMongoGeneralDatabaseName }}] OK')
+
+
+
+
+print('[{{ sWasdiMongoGeneralDatabaseName }}] Creating an empty collection \'_initialized\' to initialize the database...')
+oCurrentDatabase.createCollection('_initialized');
+print('[{{ sWasdiMongoGeneralDatabaseName }}] OK')

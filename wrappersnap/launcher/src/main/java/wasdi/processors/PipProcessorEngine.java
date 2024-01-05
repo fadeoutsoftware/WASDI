@@ -23,7 +23,7 @@ import wasdi.shared.viewmodels.HttpCallResponse;
 public class PipProcessorEngine extends DockerProcessorEngine {
 
 
-	protected String [] m_asDockerTemplatePackages = { "flask", "gunicorn", "requests", "numpy", "pandas", "rasterio", "wheel", "wasdi", "time", "datetime" };
+	protected String [] m_asDockerTemplatePackages = { "flask", "gunicorn", "requests", "numpy", "wheel", "wasdi", "time", "datetime" };
 
 	public PipProcessorEngine() {
 		super();
@@ -74,7 +74,6 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 				// Check if it was included also by the user
 				if (!Utils.isNullOrEmpty(sExistingPackage)) {
 					if (asUserPackages.contains(sExistingPackage)) {
-
 						// Remove it
 						WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: removing already existing package " + sExistingPackage);
 						asUserPackages.remove(sExistingPackage);
@@ -137,6 +136,11 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 			
 			if (Utils.isNullOrEmpty(sPackage)) {
 				return false;
+			}
+			
+			if (sPackage.startsWith("--")) {
+				WasdiLog.infoLog("PipProcessorEngine.checkPipPackage: line [" + sPackage + "] looks a pip option, try to keep it");
+				return true;
 			}
 			
 			if (sPackage.contains("==")) {

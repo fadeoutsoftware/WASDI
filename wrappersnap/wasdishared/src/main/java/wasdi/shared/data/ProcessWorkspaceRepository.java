@@ -419,8 +419,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         try {
 
         	Bson oFilter = buildFilter(sWorkspaceId, eStatus, eOperation, sProductNameSubstring, oDateFrom, oDateTo);
-        	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter)
-        			.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
+        	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter).allowDiskUse(true).sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
