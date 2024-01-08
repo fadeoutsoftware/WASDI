@@ -100,18 +100,17 @@ public class KeycloakService implements AuthProviderService {
 		sPayload += WasdiConfig.Current.keycloack.confidentialClient;
 		sPayload += "&client_secret=" + WasdiConfig.Current.keycloack.clientSecret;
 		sPayload += "&grant_type=password&username=" + sUser;
-		sPayload += "&password=" + sPassword;
-		String sEncodedPayload = new String(sPayload);
-		// Encoding of the payload to avoid problems 
+		// Url Encoding of the password 
 		try{
-		sEncodedPayload = new String(URLEncoder.encode(sPayload, StandardCharsets.UTF_8.toString()));
+		sPayload += "&password=" + URLEncoder.encode(sPassword, StandardCharsets.UTF_8.toString());
 		}
 		catch (Exception e){
 		WasdiLog.debugLog("KeycloakService.login: Exception on encoding URL " + e.getMessage());	
 		}
+		
 		Map<String, String> asHeaders = new HashMap<>();
 		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-		HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sEncodedPayload, asHeaders); 
+		HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, asHeaders); 
 		String sAuthResult = oHttpCallResponse.getResponseBody();
 		WasdiLog.debugLog("KeycloakService.login: auth result: " + sAuthResult);
 		return sAuthResult;
