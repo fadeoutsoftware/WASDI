@@ -57,6 +57,8 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
         tar \
         unzip \
         wget && \
+    sed --in-place /etc/nanorc 's/# set tabsize.*/set tabsize 4/g' && \
+    sed --in-place /etc/nanorc 's/# set tabstospaces/set tabstospaces/g' && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
@@ -143,6 +145,8 @@ RUN mkdir --parents {{ sWasdiToolboxRootDirectoryPath }} \
         jinja2 \
         prettytable \
         pymongo
+
+ENV TOOLBOX_LOG_ON_SCREEN=true
 
 
 # Set the workdir
