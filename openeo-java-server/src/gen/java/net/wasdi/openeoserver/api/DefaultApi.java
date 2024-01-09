@@ -86,7 +86,7 @@ public class DefaultApi  {
 		oEndPoint.setPath("/jobs");
 		aoMethods = new ArrayList<>();
 		aoMethods.add(MethodsEnum.GET);
-		aoMethods.add(MethodsEnum.PUT);
+		aoMethods.add(MethodsEnum.POST);
 		oEndPoint.setMethods(aoMethods);
 		aoEndPoints.add(oEndPoint);
 

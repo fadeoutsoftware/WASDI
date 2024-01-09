@@ -11,36 +11,24 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import net.wasdi.openeoserver.WasdiOpenEoServer;
 import net.wasdi.openeoserver.viewmodels.Error;
 import net.wasdi.openeoserver.viewmodels.FileFormat;
 import net.wasdi.openeoserver.viewmodels.FileFormat.GisDataTypesEnum;
 import net.wasdi.openeoserver.viewmodels.FileFormats;
 import net.wasdi.openeoserver.viewmodels.ResourceParameter;
-import wasdi.shared.business.users.*;
 import wasdi.shared.utils.log.WasdiLog;
 
 @Path("/file_formats")
-
-
 public class FileFormatsApi  {
 
    public FileFormatsApi(@Context ServletConfig servletContext) {
    }
 
     @javax.ws.rs.GET
-    
-    
     @Produces({ "application/json" })
     public Response listFileTypes(@HeaderParam("Authorization") String sAuthorization) {
     	
-    	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
-    	
-    	if (oUser == null) {
-			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
-    	}    	
-    	
+    	// Works also without auth	
     	try {
     		FileFormats oVM = new FileFormats();
     		
