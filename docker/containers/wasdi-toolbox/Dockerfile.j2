@@ -142,6 +142,8 @@ RUN mkdir --parents {{ sWasdiToolboxRootDirectoryPath }} \
     python3 -m venv --system-site-packages {{ sWasdiToolboxRootDirectoryPath }}/pythonVirtualEnvironment && \
     {{ sWasdiToolboxRootDirectoryPath }}/pythonVirtualEnvironment/bin/pip3 install --no-cache-dir --no-compile \
         ConfigArgParse \
+        dateutils \
+        docker \
         jinja2 \
         prettytable \
         pymongo
