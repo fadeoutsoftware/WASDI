@@ -14,6 +14,7 @@ import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
 import wasdi.shared.utils.runtime.ShellExecReturn;
@@ -375,7 +376,7 @@ public class ProcessScheduler {
 							WasdiLog.infoLog(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " is in Timeout");
 							
 							// Stop the process
-							stopProcess(oRunningPws.getPid());
+							stopProcess(sPidOrContainerId);
 							
 							// Update the state
 							oRunningPws.setStatus(ProcessStatus.STOPPED.name());
@@ -719,13 +720,38 @@ public class ProcessScheduler {
 	 * @param iPid
 	 * @return
 	 */
-	private boolean stopProcess(int iPid) {
+	private boolean stopProcess(String sPid) {
+		
 		try {
-			return RunTimeUtils.killProcess(iPid);
-		} catch (Exception oEx) {
+			if (WasdiConfig.Current.shellExecLocally) {
+				int iPid = (int) Integer.parseInt(sPid);
+				
+				if (iPid>1) {
+					RunTimeUtils.killProcess(iPid);
+				}
+			}
+			else { 
+				String sContainerId = sPid;
+				
+				if (Utils.isNullOrEmpty(sContainerId)) {
+					WasdiLog.warnLog(m_sLogPrefix + "stopProcess: container id is null");
+					return false;
+				}
+				
+				DockerUtils oDockerUtils = new DockerUtils();
+				
+				if (!oDockerUtils.stop(sContainerId)) {
+					WasdiLog.warnLog(m_sLogPrefix + "stopProcess: impossible to stop the container");
+					return false;
+				}
+			}
+			
+			return true;
+		} 
+		catch (Exception oEx) {
 			WasdiLog.infoLog(m_sLogPrefix + "stopProcess: exception: " + oEx.getMessage());
 			return false;
-		}
+		}		
 	}
 	
 	
