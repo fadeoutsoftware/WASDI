@@ -1,5 +1,7 @@
 package it.fadeout.services;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -98,7 +100,14 @@ public class KeycloakService implements AuthProviderService {
 		sPayload += WasdiConfig.Current.keycloack.confidentialClient;
 		sPayload += "&client_secret=" + WasdiConfig.Current.keycloack.clientSecret;
 		sPayload += "&grant_type=password&username=" + sUser;
-		sPayload += "&password=" + sPassword;
+		// Url Encoding of the password 
+		try{
+		sPayload += "&password=" + URLEncoder.encode(sPassword, StandardCharsets.UTF_8.toString());
+		}
+		catch (Exception e){
+		WasdiLog.debugLog("KeycloakService.login: Exception on encoding URL " + e.getMessage());	
+		}
+		
 		Map<String, String> asHeaders = new HashMap<>();
 		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 		HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, asHeaders); 
