@@ -97,32 +97,32 @@ RUN apt-get update && \
 USER {{ sWasdiSystemUserName }}
 
 
-# RUN specific to install JRE 8
+# RUN specific to install JDK 8
 RUN mkdir --parents \
-        {{ sWasdiJre8RootDirectoryPath }} \
-        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
-    chown {{ sWasdiJre8RootDirectoryOwner }}:{{ sWasdiJre8RootDirectoryGroup }} \
-        {{ sWasdiJre8RootDirectoryPath }} \
-        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
-    chmod {{ sWasdiJre8RootDirectoryMode }} \
-        {{ sWasdiJre8RootDirectoryPath }} \
-        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
+        {{ sWasdiJdk8RootDirectoryPath }} \
+        {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} && \
+    chown {{ sWasdiJdk8RootDirectoryOwner }}:{{ sWasdiJdk8RootDirectoryGroup }} \
+        {{ sWasdiJdk8RootDirectoryPath }} \
+        {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} && \
+    chmod {{ sWasdiJdk8RootDirectoryMode }} \
+        {{ sWasdiJdk8RootDirectoryPath }} \
+        {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} && \
     wget \
         --no-verbose \
-        --output-document /tmp/{{ sWasdiJre8SourceUrl | basename }} \
+        --output-document /tmp/{{ sWasdiJdk8SourceUrl | basename }} \
         --progress=bar:force:noscroll \
         --show-progress \
-        {{ sWasdiJre8SourceUrl }} --output-document /tmp/{{ sWasdiJre8SourceUrl | basename }} && \
+        {{ sWasdiJdk8SourceUrl }} --output-document /tmp/{{ sWasdiJdk8SourceUrl | basename }} && \
     tar \
-        --directory {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} \
+        --directory {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} \
         --extract \
-        --file /tmp/{{ sWasdiJre8SourceUrl | basename }} \
+        --file /tmp/{{ sWasdiJdk8SourceUrl | basename }} \
         --strip-components=1 && \
     rm --force \
-        /tmp/{{ sWasdiJre8SourceUrl | basename }}
+        /tmp/{{ sWasdiJdk8SourceUrl | basename }}
 
-ENV JAVA_HOME="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}"
-ENV PATH="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin:${PATH}"
+ENV JAVA_HOME="{{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }}"
+ENV PATH="{{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }}/bin:${PATH}"
 
 
 # Set the workdir
