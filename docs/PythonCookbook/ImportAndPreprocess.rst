@@ -2,12 +2,12 @@
    sphinx-quickstart on Mon Apr 19 16:00:28 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
-.. _ImportSearchedImages
+.. _ImportAndPreprocess
 
 
-Import Images after a Search
+Import And Pre-Process
 =========================================
-The following code show how to import the Workspace the results of a search.
+Often you may need to pre-process your images before beeing able to work. This snippets shows a convenient method to automatically pre-process all the imported images
 
 
 Prerequisites
@@ -26,10 +26,10 @@ Recipe
 ------------------------------------------
 
 .. note::
-	We will use Sentinel-1 for this sample but the same code can be used for all the missions and image types
+	We will use Sentinel-1 GRD and the public LISTSinglePreproc2 workflow for this snippet, but can be used with any mission and any compatible workflow.
 
 .. note::
-	In the code you will see different options. Probably in your code you will want to choose and use the one that best fits your needs
+	The LISTSinglePreproc2 is designed to geo reference a Sentinel-1 GRD Image (apply orbit, radiometric calibration, terrain correction...)
 
 
 This is our sample params.json file.
@@ -50,7 +50,8 @@ This is our sample params.json file.
            }
        },
        "MISSION": "S1",
-       "PRODUCT_TYPE": "GRD"
+       "PRODUCT_TYPE": "GRD",
+       "WORKFLOW": "LISTSinglePreproc2"
    }
 
 
@@ -66,38 +67,17 @@ This is our sample params.json file.
    # Read Mission and Product Type
    sMission = wasdi.getParameter("MISSION", "S1")
    sProductType = wasdi.getParameter("PRODUCT_TYPE", "GRD")
+   sWorkflow = wasdi.getParameter("WORKFLOW", "LISTSinglePreproc2")
 
    # Search Images
    aoProductsFound = wasdi.searchEOImages(sMission, sStartDate, sEndDate, sProductType=sProductType, oBoundingBox=oBBox)
 
-   # OPTION 1: Import a single image and wait for the image to be available
-   if len(aoProductsFoundArray) > 0:
-      wasdi.importProduct(aoProductsFoundArray[0])
-   
-   # OPTION 2: Import a single image WITHOUT waiting for it:
-   if len(aoProductsFoundArray) > 0:
-      sProcessId = wasdi.asynchImportProduct(aoProductsFoundArray[0])
-      # Here you can do what you want
-      wasdi.wasdiLog("Started Import of one image, the associated process id is " + sProcessId)
-      # Call this if you need to wait
-      wasdi.waitProcess(sProcessId)
-
-   # OPTION 3: Import All Products and wait for the images to be available
-   wasdi.importProductList(aoProductsFoundArray)
-
-   # OPTION 4: Import All Products without waiting
-   sProcessId = wasdi.asynchImportProductList(aoProductsFoundArray)
-   # Here you can do what you want
-   wasdi.wasdiLog("Started Import of all images, the associated process id is " + sProcessId)
-   # Call this if you need to wait
-   wasdi.waitProcess(sProcessId)
-
+    if len(aoImagesToProcess)>0:
+        # Import and pre-process all the images: '_preproc.tif' is the suffix added to the original file name that will be used as output name of the workflow
+        wasdi.importAndPreprocess(aoProductsFound, sWorkflow, '_preproc.tif')
 
 What it does:
 
  - Read Input Parameters
  - Start Search S1 GRD Images
- - Import 1 Product
- - Asynch Import of 1 Product
- - Import All Products
- - Asynch Import of All Products
+ - Import and run the workflow on all the images
