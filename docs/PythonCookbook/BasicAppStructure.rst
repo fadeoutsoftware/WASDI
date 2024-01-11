@@ -24,12 +24,12 @@ If this is not clear, probably you need to take a look to the `Python Tutorial <
 Recipe 
 ------------------------------------------
 
+This is the basic structure of a WASDI Application. 
+
 .. note::
 	The main file **MUST** be called myProcessor.py. You can add then all the libraries, files and module you may want to code or include
 
 .. code-block:: python
-
-This is the basic structure of a WASDI Application. 
 
    import wasdi   
    
