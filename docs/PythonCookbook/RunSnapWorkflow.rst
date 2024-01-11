@@ -67,6 +67,8 @@ This is our sample params.json file.
    # Read Mission and Product Type
    sMission = wasdi.getParameter("MISSION", "S1")
    sProductType = wasdi.getParameter("PRODUCT_TYPE", "GRD")
+
+   # Read the name of the workflow to start
    sWorkflow = wasdi.getParameter("WORKFLOW", "LISTSinglePreproc2")
 
    # Search Images
