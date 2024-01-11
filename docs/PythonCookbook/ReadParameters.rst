@@ -31,21 +31,22 @@ Recipe
 This is our sample params.json file.
 
 .. code-block:: json
-    {
-        "STRING_PARAM": "SAMPLE",
-        "INT_PARAM": 2,
-        "BBOX": {
-        "northEast": {
-            "lat": 20.1,
-            "lng": -71.4
-            },
-        "southWest": {
-            "lat": 17.9,
-            "lng": -74.9
-            }
-        },
-        "DATE": "2024-01-01"
-    }
+
+   {
+       "STRING_PARAM": "SAMPLE",
+       "INT_PARAM": 2,
+       "BBOX": {
+       "northEast": {
+           "lat": 20.1,
+           "lng": -71.4
+           },
+       "southWest": {
+           "lat": 17.9,
+           "lng": -74.9
+           }
+       },
+       "DATE": "2024-01-01"
+   }
 
 
 This is the code used to read Parameters.
