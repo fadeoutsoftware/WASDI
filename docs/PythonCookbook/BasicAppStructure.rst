@@ -12,18 +12,24 @@ The following code is the basic structure of a Python Application.
 
 Requirement
 ------------------------------------------
+
 To run this code you need:
  - A running Python 3.x Environment
  - A valid WASDI Account
  - A valid Config file
  
-If this is not clear, probably you need to take a look to the `Python Tutorial <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/PythonTutorial.html>` before.
+If this is not clear, probably you need to take a look to the `Python Tutorial <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/PythonTutorial.html>`_ before.
 
 
 Recipe 
 ------------------------------------------
 
 .. code-block:: python
+
+.. note::
+	The main file **MUST** be called myProcessor.py. You can add then all the libraries, files and module you may want to code or include
+
+This is the basic structure of a WASDI Application. 
 
    import wasdi   
    
@@ -35,19 +41,13 @@ Recipe
        wasdi.init("./config.json")
        run()
 
-
-This is the basic structure of a WASDI Application. 
-
-We just need to:
+What it does:
 
  - import the library
  - handle **__main__** in the file
  - define a **run()** method
  - initialize the lib
  - call the **run()** method
-
-.. note::
-	The main file **MUST** be called myProcessor.py. You can add then all the libraries, files and module you may want to code or include
 	
 
 .. note::
