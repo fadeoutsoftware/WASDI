@@ -91,7 +91,7 @@ This is our sample params.json file.
         #OPTION 1: run the workflow and wait for the result
         wasdi.executeWorkflow(asInputImages, asOutputImages, sWorkflow)
 
-        #ALTENRATIVE OPTION 2: run asynch
+        #ALTERNATIVE OPTION 2: run asynch
         sProcessId = wasdi.asynchExecuteWorkflow(asInputImages, asOutputImages, sWorkflow)
         # Here you are free to do what you want
         wasdi.wasdiLog("I started a workflow")

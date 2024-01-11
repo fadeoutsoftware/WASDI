@@ -2,7 +2,7 @@
    sphinx-quickstart on Mon Apr 19 16:00:28 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
-.. _BasicAppStructure
+.. _SearchS3Images
 
 
 Search Sentinel-3 Images
@@ -54,7 +54,7 @@ These are different samples of Sentinel 2 Search. The mandatory fields to search
    sEndDate = wasdi.getParameter("END_DATE", "2023-01-10")
 
    # Start Search S3 Images using the automatic provider selection 
-   aoProductsFoundArray = wasdi.searchEOImages("S3", sDateFrom=sEvent, sDateTo=sEvent, sProvider="AUTO", oBoundingBox=oBb)
+   aoProductsFoundArray = wasdi.searchEOImages("S3", sDateFrom=sEvent, sDateTo=sEvent, sProvider="AUTO", oBoundingBox=oBBox)
 
    # The result is an array of Objects. Each Object is a Dictionary. 
    
