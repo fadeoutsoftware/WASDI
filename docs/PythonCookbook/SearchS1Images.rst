@@ -38,7 +38,7 @@ These are different samples of Sentinel 1 Search. The mandatory fields to search
 .. code-block:: python
 
    # Create the Boundig Box Object: usually you will take if from the parameters
-   oBbox = wasdi.getParameter("BBOX", None)
+   oBBox = wasdi.getParameter("BBOX", None)
 
    # If it is null we show here how to initialize manually
    if oBBox is None:
@@ -54,7 +54,7 @@ These are different samples of Sentinel 1 Search. The mandatory fields to search
    sEndDate = wasdi.getParameter("END_DATE", "2023-01-31")
 
    # Start Search GRD Images
-   ProductsFoundArray = wasdi.searchEOImages("S1", sStartDate, sEventDate, sProductType="GRD", oBoundingBox=oBBox)
+   ProductsFoundArray = wasdi.searchEOImages("S1", sStartDate, sEndDate, sProductType="GRD", oBoundingBox=oBBox)
 
    # The result is an array of Objects. Each Object is a Dictionary. 
    
@@ -62,7 +62,7 @@ These are different samples of Sentinel 1 Search. The mandatory fields to search
    if len(ProductsFoundArray) > 0:
 
         # We just loop on the results and explore some properties
-       for oFoundImage in aoReturnList:
+       for oFoundImage in ProductsFoundArray:
            # This is where to read the relative Orbit
            iOrbit = oFoundImage["properties"]["relativeorbitnumber"]
            # THis is the name of the file
@@ -70,12 +70,12 @@ These are different samples of Sentinel 1 Search. The mandatory fields to search
            # There are many other proprties, depending by the Provider and the Mission, that can be explored
    
    # Now lets search SLC Images
-   SLCFoundArray = wasdi.searchEOImages("S1", sStartDate, sEventDate, sProductType="SLC", oBoundingBox=oBBox)
+   SLCFoundArray = wasdi.searchEOImages("S1", sStartDate, sEndDate, sProductType="SLC", oBoundingBox=oBBox)
    wasdi.wasdiLog("Found " + str(len(SLCFoundArray)) + " SLC Images")
 
    # For Sentinel 1, we can also filter the Relative Orbit
    RelativeOrbit = 43
-   SLCPerOrbitFoundArray = wasdi.searchEOImages("S1", sStartDate, sEventDate, sProductType="SLC", oBoundingBox=oBBox, iOrbitNumber=RelativeOrbit)
+   SLCPerOrbitFoundArray = wasdi.searchEOImages("S1", sStartDate, sEndDate, sProductType="SLC", oBoundingBox=oBBox, iOrbitNumber=RelativeOrbit)
    wasdi.wasdiLog("Found " + str(len(SLCPerOrbitFoundArray)) + " SLC Images in orbit " + str(RelativeOrbit))
 
    # If we have a String Boundig Box...
@@ -83,7 +83,7 @@ These are different samples of Sentinel 1 Search. The mandatory fields to search
    # We can convert it in the object
    oBoundingBox = wasdi.bboxStringToObject(StringBBox)
    # Or we can also use directly lat and lon in the search:
-   SLCWithLatLonFound = wasdi.searchEOImages("S1", sStartDate, sEventDate,  fULLat=20.1, fULLon=43.2, fLRLat=19.3, fLRLon=44.4, sProductType="SLC")
+   SLCWithLatLonFound = wasdi.searchEOImages("S1", sStartDate, sEndDate,  fULLat=20.1, fULLon=43.2, fLRLat=19.3, fLRLon=44.4, sProductType="SLC")
    wasdi.wasdiLog("Found " + str(len(SLCWithLatLonFound)) + " SLC Images")
 
 
