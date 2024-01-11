@@ -100,7 +100,7 @@ The only mandatory params are:
 * sDateFrom: start date of the search. It is a string in the format YYYY-MM-DD (ie "2021-12-15")
 * sDateTo: end date of the search. It is a string in the format YYYY-MM-DD (ie "2021-12-15")
 
-The other highly recommanded parameter is the bounding box. WASDI accepts only rectangle bounding boxes. This method supports two ways to specify the rectangle:
+The other highly recommended parameter is the bounding box. WASDI accepts only rectangle bounding boxes. This method supports two ways to specify the rectangle:
 
 * fULLat, fULLon, fLRLat, fLRLon: four float numbers indicating Upper Left Latitude (North), Upper Left Longitude (West), Lower Right Latitude (South), Lower Right Longitude (East)
 * oBoundingBox: an alternative that is an object that has  these attributes: oBoundingBox["northEast"]["lat"], oBoundingBox["southWest"]["lng"], oBoundingBox["southWest"]["lat"], oBoundingBox["northEast"]["lng"]
@@ -117,7 +117,7 @@ sProductType is not mandatory. Can be specified as the "level of processing" of 
 	#. S2MSI2A
 * S3
 	#. SR_1_SRA___
-	#. SR_1_SRA_A_
+	#. SR_1_SRA_A
 	#. SR_1_SRA_BS
 	#. SR_2_LAN___	
 * S5P
