@@ -10,7 +10,7 @@ Python Application Skeleton
 The following code is the basic structure of a Python Application.
 
 
-Requirement
+Prerequisites
 ------------------------------------------
 
 To run this code you need:
@@ -18,7 +18,7 @@ To run this code you need:
  - A valid WASDI Account
  - A valid Config file
  
-If this is not clear, probably you need to take a look to the `Python Tutorial <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/PythonTutorial.html>`_ before.
+If this is not clear, you probably need to take a look to the `Python Tutorial <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/PythonTutorial.html>`_ before.
 
 
 Recipe 
@@ -27,7 +27,7 @@ Recipe
 This is the basic structure of a WASDI Application. 
 
 .. note::
-	The main file **MUST** be called myProcessor.py. You can add then all the libraries, files and module you may want to code or include
+	The main file **MUST** be called myProcessor.py. You can then add all the libraries, files and module you may want to code or include
 
 .. code-block:: python
 
