@@ -40,7 +40,7 @@ The equation to compute NDVI is: [NIR-RED]/[NIR+RED].
 
 .. note::
 	It is mandatory that at least 1 Landsat image is imported in the workspace (using the WASDI web interface, i.e. Search) BEFORE running this processor.
-	Check `Wasdi Web Platform access and basic usage <https://wasdi.readthedocs.io/en/latest/WasdiTutorial.html>`_ for more general info on this.
+	Check `Wasdi Web Platform access and basic usage <https://wasdi.readthedocs.io/en/latest/GettingStarted/WasdiTutorial.html>`_ for more general info on this.
 
 
 Setup
