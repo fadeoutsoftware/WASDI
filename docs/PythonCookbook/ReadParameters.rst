@@ -54,18 +54,18 @@ This is the code used to read Parameters.
 .. code-block:: python
 
    # Read the String Parameter
-   StringParameter = wasdi.getParameter("STRING_PARAM")
+   sStringParameter = wasdi.getParameter("STRING_PARAM")
    # Read the String Parameter, with a Default value if the param is missing in the params.json file
-   StringParameterWithDefault = wasdi.getParameter("STRING_PARAM", "My Default")
+   sStringParameterWithDefault = wasdi.getParameter("STRING_PARAM", "My Default")
    # Read the Area of Interest
    oBbox = wasdi.getParameter("BBOX", None)
    # Read the integer value without any default
-   IntegerValue = wasdi.getParameter("INT_PARAM")
+   iIntegerValue = wasdi.getParameter("INT_PARAM")
    # Read the string-formatted Date
-   DateString = wasdi.getParameter("DATE")
+   sDateString = wasdi.getParameter("DATE")
 
    #This method return a Key-Value Dictionary with all your parameters
-   AllParametersDictionary = wasdi.getParametersDict()
+   aoAllParametersDictionary = wasdi.getParametersDict()
 
 
 What it does:

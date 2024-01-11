@@ -5,7 +5,7 @@
 .. _BasicAppStructure
 
 
-Search S1 Images
+Search Sentinel-1 Images
 =========================================
 The following code show how to search S1 Images
 
@@ -37,7 +37,7 @@ These are different samples of Sentinel 1 Search. The mandatory fields to search
 
 .. code-block:: python
 
-   # Create the Boundig Box Object: usually you will take if from the parameters
+   # Create the Bounding Box Object: usually you will take if from the parameters
    oBBox = wasdi.getParameter("BBOX", None)
 
    # If it is null we show here how to initialize manually
@@ -54,15 +54,15 @@ These are different samples of Sentinel 1 Search. The mandatory fields to search
    sEndDate = wasdi.getParameter("END_DATE", "2023-01-31")
 
    # Start Search GRD Images
-   ProductsFoundArray = wasdi.searchEOImages("S1", sStartDate, sEndDate, sProductType="GRD", oBoundingBox=oBBox)
+   aoProductsFoundArray = wasdi.searchEOImages("S1", sStartDate, sEndDate, sProductType="GRD", oBoundingBox=oBBox)
 
    # The result is an array of Objects. Each Object is a Dictionary. 
    
    # If we have results 
-   if len(ProductsFoundArray) > 0:
+   if len(aoProductsFoundArray) > 0:
 
         # We just loop on the results and explore some properties
-       for oFoundImage in ProductsFoundArray:
+       for oFoundImage in aoProductsFoundArray:
            # This is where to read the relative Orbit
            iOrbit = oFoundImage["properties"]["relativeorbitnumber"]
            # THis is the name of the file
@@ -70,21 +70,21 @@ These are different samples of Sentinel 1 Search. The mandatory fields to search
            # There are many other proprties, depending by the Provider and the Mission, that can be explored
    
    # Now lets search SLC Images
-   SLCFoundArray = wasdi.searchEOImages("S1", sStartDate, sEndDate, sProductType="SLC", oBoundingBox=oBBox)
-   wasdi.wasdiLog("Found " + str(len(SLCFoundArray)) + " SLC Images")
+   aoSLCFoundArray = wasdi.searchEOImages("S1", sStartDate, sEndDate, sProductType="SLC", oBoundingBox=oBBox)
+   wasdi.wasdiLog("Found " + str(len(aoSLCFoundArray)) + " SLC Images")
 
    # For Sentinel 1, we can also filter the Relative Orbit
-   RelativeOrbit = 43
-   SLCPerOrbitFoundArray = wasdi.searchEOImages("S1", sStartDate, sEndDate, sProductType="SLC", oBoundingBox=oBBox, iOrbitNumber=RelativeOrbit)
-   wasdi.wasdiLog("Found " + str(len(SLCPerOrbitFoundArray)) + " SLC Images in orbit " + str(RelativeOrbit))
+   iRelativeOrbit = 43
+   aoSLCPerOrbitFoundArray = wasdi.searchEOImages("S1", sStartDate, sEndDate, sProductType="SLC", oBoundingBox=oBBox, iOrbitNumber=iRelativeOrbit)
+   wasdi.wasdiLog("Found " + str(len(aoSLCPerOrbitFoundArray)) + " SLC Images in orbit " + str(iRelativeOrbit))
 
    # If we have a String Boundig Box...
-   StringBBox = "20.1,43.2,19.3,44.4"
+   sBBox = "20.1,43.2,19.3,44.4"
    # We can convert it in the object
-   oBoundingBox = wasdi.bboxStringToObject(StringBBox)
+   oBoundingBox = wasdi.bboxStringToObject(sBBox)
    # Or we can also use directly lat and lon in the search:
-   SLCWithLatLonFound = wasdi.searchEOImages("S1", sStartDate, sEndDate,  fULLat=20.1, fULLon=43.2, fLRLat=19.3, fLRLon=44.4, sProductType="SLC")
-   wasdi.wasdiLog("Found " + str(len(SLCWithLatLonFound)) + " SLC Images")
+   aoSLCWithLatLonFound = wasdi.searchEOImages("S1", sStartDate, sEndDate,  fULLat=20.1, fULLon=43.2, fLRLat=19.3, fLRLon=44.4, sProductType="SLC")
+   wasdi.wasdiLog("Found " + str(len(aoSLCWithLatLonFound)) + " SLC Images")
 
 
 
@@ -93,18 +93,18 @@ What it does:
  - Initialize the input varialbe needed. 
  - Start Search S1 GRD Images
  - Loop the results and access some properties
- - Serach SLC Images
+ - Search SLC Images
  - Search SLC Images adding the relative orbit filter
- - Sarch GRD Images using the string-based Bounding Box
+ - Search GRD Images using the lat lon values and not the Bounding Box Object
 
 .. note::
 	The developer can decide whatever is needed in the params.json file. If you will use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
 
 .. note::
-	With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsable to convert your data in your code
+	With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsible to convert your data in your code
 
 .. note::
-	The Boundig Box Format Here Used is the one used by the User Interface when renderAsStrings is missing or false. The Boundig Box fromat when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**
+	The Boundig Box Format Here Used is the one used by the User Interface when renderAsStrings is missing or false. The Boundig Box format when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**
 
 .. note::
 	The Date is formatted by the User Interface as "YYYY-MM-DD"
