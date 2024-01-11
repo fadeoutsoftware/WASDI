@@ -141,6 +141,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    PythonCookbook/SearchS2Images.rst
    PythonCookbook/ImportSearchedImages.rst
    PythonCookbook/ImportAndPreprocess.rst
+   PythonCookbook/RunSnapWorkflow.rst
 
 .. toctree::
    :maxdepth: 2
