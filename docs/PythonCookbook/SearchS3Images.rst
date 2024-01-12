@@ -54,7 +54,7 @@ These are different samples of Sentinel 2 Search. The mandatory fields to search
    sEndDate = wasdi.getParameter("END_DATE", "2023-01-10")
 
    # Start Search S3 Images using the automatic provider selection 
-   aoProductsFoundArray = wasdi.searchEOImages("S3", sDateFrom=sEvent, sDateTo=sEvent, sProvider="AUTO", oBoundingBox=oBBox)
+   aoProductsFoundArray = wasdi.searchEOImages("S3", sDateFrom=sStartDate, sDateTo=sEndDate, sProvider="AUTO", oBoundingBox=oBBox)
 
    # The result is an array of Objects. Each Object is a Dictionary. 
    
