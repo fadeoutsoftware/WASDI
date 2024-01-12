@@ -37,34 +37,32 @@ These are different samples of Sentinel 2 Search. The mandatory fields to search
 
 .. code-block:: python
 
-   # Create the Bounding Box Object: usually you will take if from the parameters
-   oBBox = wasdi.getParameter("BBOX", None)
+    # Create the Bounding Box Object: usually you will take if from the parameters
+    oBBox = wasdi.getParameter("BBOX", None)
 
-   # If it is null we show here how to initialize manually
-   if oBBox is None:
+    # If it is null we show here how to initialize manually
+    if oBBox is None:
         oBBox = {"northEast": {}, "southWest": {}}
         oBBox["northEast"]["lat"] = 20.1
         oBBox["northEast"]["lng"] = 44.4
         oBBox["southWest"]["lat"] = 19.3
         oBBox["southWest"]["lng"] = 43.2
 
-   # Set Start Date getting the parameter from parameters file, fallbacks to 2023-01-01 if value is not specified
-   sStartDate = wasdi.getParameter("START_DATE", "2023-01-01")
-   # Set End Date getting the parameter from parameters file, fallbacks to 2023-01-10 if value is not specified
-   sEndDate = wasdi.getParameter("END_DATE", "2023-01-10")
+    # Set Start Date getting the parameter from parameters file, fallbacks to 2023-01-01 if value is not specified
+    sStartDate = wasdi.getParameter("START_DATE", "2023-01-01")
+    # Set End Date getting the parameter from parameters file, fallbacks to 2023-01-10 if value is not specified
+    sEndDate = wasdi.getParameter("END_DATE", "2023-01-10")
 
-   # Start Search S3 Images using the automatic provider selection 
-   aoProductsFoundArray = wasdi.searchEOImages("S3", sDateFrom=sStartDate, sDateTo=sEndDate, sProvider="AUTO", oBoundingBox=oBBox)
+    # Start Search S3 Images using the automatic provider selection
+    aoProductsFoundArray = wasdi.searchEOImages("S3", sDateFrom=sStartDate, sDateTo=sEndDate, sProvider="AUTO",
+                                                oBoundingBox=oBBox)
 
-   # The result is an array of Objects. Each Object is a Dictionary. 
-   
-   # If we have results 
-   if len(aoProductsFoundArray) > 0:
+    # The result is an array of Objects. Each Object is a Dictionary.
 
-      # We loop on the results and log files reporting land surface temperature
-      for oImage in aoFound:
-         if "SL_2_LST" in oImage["fileName"]:
-           wasdi.wasdiLog("Found LST file: " + sFileName) 
+    # If we have results
+    if len(aoProductsFoundArray) > 0:
+        # as an example, let's print the filename of the first product we found
+        wasdi.wasdiLog(f'{aoProductsFoundArray[0]["fileName"]}')
            
 
 What it does:
