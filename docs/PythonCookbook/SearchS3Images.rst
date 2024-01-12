@@ -59,10 +59,14 @@ These are different samples of Sentinel 2 Search. The mandatory fields to search
 
     # The result is an array of Objects. Each Object is a Dictionary.
 
+    # Let's see how many products correspond to our query
+    wasdi.wasdiLog(f'Your query identified {len(aoProductsFoundArray)} products')
+
     # If we have results
     if len(aoProductsFoundArray) > 0:
         # as an example, let's print the filename of the first product we found
         wasdi.wasdiLog(f'{aoProductsFoundArray[0]["fileName"]}')
+
            
 
 What it does:
