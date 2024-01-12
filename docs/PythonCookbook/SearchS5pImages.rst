@@ -37,7 +37,7 @@ These are different samples of Sentinel-5p Search. The mandatory fields to searc
 
 .. code-block:: python
 
-   # Create the Bounding Box Object: usually you will take if from the parameters
+    # Create the Bounding Box Object: usually you will take if from the parameters
     oBBox = wasdi.getParameter("BBOX", None)
 
     # If it is null we show here how to initialize manually
@@ -57,20 +57,27 @@ These are different samples of Sentinel-5p Search. The mandatory fields to searc
     sProductType = 'L2__NO2___'
 
     # Start Search S3 Images using the automatic provider selection
-    aoProductsFoundArray = wasdi.searchEOImages("S5P", sDateFrom=sStartDate, sDateTo=sEndDate, sProductType=sProductType,
-    sProvider = "AUTO", oBoundingBox = oBBox)
+    aoProductsFoundArray = wasdi.searchEOImages("S5P", sDateFrom=sStartDate, sDateTo=sEndDate,
+                                                sProductType=sProductType,
+                                                sProvider="AUTO", oBoundingBox=oBBox)
 
     # The result is an array of Objects. Each Object is a Dictionary.
 
     # Let's see how many products correspond to our query
     wasdi.wasdiLog(f'Your query identified {len(aoProductsFoundArray)} products')
+
+    # If we have results
+    if len(aoProductsFoundArray) > 0:
+        # as an example, let's print the filename of the first product we found
+        wasdi.wasdiLog(f'{aoProductsFoundArray[0]["fileName"]}')
            
 
 What it does:
 
  - Initialize the input variable needed. 
- - Start Search Sentinel-3 Images choosing automatically the provider
- - Loop the results and print file names of the files reporting Land Surface Temperature `(reference data) <https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-3-slstr/product-types/level-2-lst>`_
+ - Start Searching for Sentinel-5p products choosing automatically the provider
+ - prints the number of results
+ - as an example, prints the filename of the first product found
 
 .. note::
 	The developer can decide whatever is needed in the params.json file. If you will use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
