@@ -7,7 +7,7 @@
 
 Run Another WASDI Application
 =========================================
-This snippet show how to run another WASDI Application from your code
+This snippet shows how to run another WASDI Application from your code.
 
 
 Prerequisites
@@ -25,10 +25,10 @@ Recipe
 ------------------------------------------
 
 .. note::
-	We will use the hellowasdi app, but the same code can be used to call any WASDI Application you can access
+	We will use the hellowasdi app, but the same code can be used to call any WASDI Application that you have access to.
 
 .. note::
-	To call an App, you need to know it. Look the help of the app or the Json Parameter sample in the store, or contact the developer to understand the inputs (and outputs) required.
+	To call an App, you need to understand it. Look to the help section of the app or the Json Parameter sample in the store. Additionallyy, you can contact the developer (if they have provided a contact email address) to understand the inputs (and outputs) required.
 
 
 .. code-block:: python
@@ -52,7 +52,7 @@ Recipe
 
 What it does:
 
- - Read Input Parameters
- - Create the dictionary with the params to pass in input to our application
- - Run the application
- - Wait for the application to finish
+ - Reads Input Parameters
+ - Creates the dictionary with the params to pass in input to our application
+ - Runs the application
+ - Waits for the application to finish

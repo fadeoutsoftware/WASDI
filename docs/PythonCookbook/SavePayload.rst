@@ -7,8 +7,8 @@
 
 Save Payload
 =========================================
-This snippet show how to save a payload as additional output of your application. WASDI apps are mainly meant to create new products that will be added to the workspace. But often you may want to save also other information: the payload is the solution.
-Payloads are just a string you can save. Usually, the payload is in JSON format. The user can see the payload from the WASDI Editor.
+This snippet demonstrates how to save a payload as additional output of your application. WASDI apps are mainly meant to create new products that will be added to the workspace. But often you may want to save also other information: the payload is the solution.
+Payloads are just a string you can save. Usually, the payload is in JSON format. The user can view the payload in the WASDI Editor.
 
 
 Prerequisites
@@ -26,10 +26,10 @@ Recipe
 ------------------------------------------
 
 .. note::
-	We will save a JSON Payload: the payload is really saved only when the app is running in WASDI. When running locally the payload is not really saved.
+	We will save a JSON Payload. The payload is really saved only when the app is running in WASDI. When running locally the payload is not really saved.
 
 .. note::
-	It is not mandatory, but is good practice in the payload to save also the inputs received.
+	It is not mandatory, but is good practice in the payload to also save the inputs received.
 
 .. code-block:: python
 
@@ -54,6 +54,6 @@ Recipe
 
 What it does:
 
- - Read Input Parameters
- - Add some elements to the payload
- - Save the payload
+ - Reads Input Parameters
+ - Adds some elements to the payload
+ - Saves the payload
