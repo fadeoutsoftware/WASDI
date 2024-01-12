@@ -131,7 +131,6 @@ pipeline {
                   cd ${env.sWasdiAnsiblePath}
                   ansible-playbook \
                     playbooks/deployDockerContainerWasdiClientV2.yml \
-                    -vvv \
                     --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
                     --limit ${env.sAnsibleLimit} \
                     --diff \
