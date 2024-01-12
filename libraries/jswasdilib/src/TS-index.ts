@@ -1,4 +1,3 @@
-
 /**
  * Wasdi class expose methods and utilities to interact with WASDI services, using
  * Javascript/Typescript as specification and programming language. The package available
@@ -37,17 +36,17 @@ export class Wasdi {
    * As convention the name "wasdi" is used, both for Javascript and Typescript.
    */
   constructor() {
-    this._m_sUser = "";
-    this._m_sPassword = "";
+    this._m_sUser = undefined;
+    this._m_sPassword = undefined;
 
-    this._m_sActiveWorkspace = "";
+    this._m_sActiveWorkspace = undefined;
     this._m_sWorkspaceOwner = "";
     this._m_sWorkspaceBaseUrl = "";
 
-    this._m_sParametersFilePath = "";
+    this._m_sParametersFilePath = undefined;
     this._m_sSessionId = "";
     this._m_bValidSession = false;
-    this._m_sBasePath = "";
+    this._m_sBasePath = undefined;
 
     this._m_bDownloadActive = true;
     this._m_bUploadActive = true;
@@ -62,7 +61,6 @@ export class Wasdi {
     this._m_sWorkspaceName = "";
     this._m_sWorkspaceId = "";
   }
-
 
   /**
    * Print status utility, prints the information about the current session with WASDI
@@ -120,7 +118,7 @@ export class Wasdi {
    */
   helloWasdiWorld(noOutput: boolean): string {
     var xhr = new XMLHttpRequest();
-    let response = "";
+    let response = undefined;
     xhr.addEventListener("readystatechange", function () {
       if (this.readyState === 4) {
         response = this.responseText;
@@ -398,24 +396,20 @@ export class Wasdi {
     return workspaceList;
   }
 
-    /**
+  /**
    * Returns the workspace Id from the name. It search through the workspaces
    * of the current logged user.
    * @param wsName Workspace name to be searched for
    * @returns A string containing the workspace Id, if the name was found. An empty string otherwise
    */
-    getWorkspaceIdByName(wsName: string): string {
-      let sResult: string = ""
-      this.getWorkspaces().forEach(
-        (a: { workspaceName: string; workspaceId: string }) => {
-          if (a.workspaceName == wsName) {
-            sResult = a.workspaceId;
-            return;
-          }
-        }
-      );
-      return sResult;
-    }
+  getWorkspaceIdByName(wsName: string) {
+    this.getWorkspaces().forEach(
+      (a: { workspaceName: string; workspaceId: string }) => {
+        if (a.workspaceName == wsName) return a.workspaceId;
+      }
+    );
+    return "";
+  }
 
   /**
    * Retrieve a list of workspace of the current logged user.
@@ -679,62 +673,6 @@ export class Wasdi {
   }
 
   /**
-   * Get a filtered paginated list of process workspaces.
-   *
-   * @param sSessionId User session id
-   * @param sWorkspaceId Workspace Id
-   * @param sStatus Status filter
-   * @param sOperationType Operation type filter
-   * @param sNamePattern Name filter
-   * @param sDateFrom Start update date filter
-   * @param sDateTo End update date filter
-   * @param iStartIndex start index
-   * @param iEndIndex end index
-   * @return List of Process Workspace View Models
-   */
-  getProcessesByWorkspace(
-    sWorkspaceId: string,
-    sOperationType: string,
-    sNamePattern: string,
-    dateFrom: string,
-    dateTo: string,
-    iStartIndex: number,
-    iEndIndex: number
-  ) {
-    return this.getObject(
-      this._m_sBaseUrl + "/process/byws",
-      "?workspace=" +
-        sWorkspaceId +
-        "&operationType=" +
-        sOperationType +
-        "&namePattern=" +
-        sNamePattern +
-        "&dateFrom=" +
-        dateFrom +
-        "&dateTo=" +
-        dateTo +
-        "&startIndex=" +
-        iStartIndex +
-        "&endIndex=" +
-        iEndIndex
-    );
-  }
-
-  /**
-   * Get all the process workspaces related to an application.
-   * This API is exposed by the main server that calls the same API on all computing node,
-   * retrieving execution data on all distributed nodes.
-   * @param sProcessorName The name of the processor
-   * @returns
-   */
-  getProcessesByApp(sProcessorName: string) {
-    return this.getObject(
-      this._m_sBaseUrl + "/process/byapp",
-      "?processorName=" + sProcessorName
-    );
-  }
-
-  /**
    * Prints details about the status if the processes launched during the last session
 
   printProcesses() {
@@ -860,5 +798,6 @@ export class Wasdi {
     return this._m_sWorkspaceName;
   }
 }
-let wasdi = new Wasdi;
+
+let wasdi = new Wasdi();
 export default wasdi;
