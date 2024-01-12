@@ -36,6 +36,8 @@ import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class GHSLTilesProductReader extends WasdiProductReader {
+	
+	private static final Object s_oShapeFileLock = new Object();
 
 	public GHSLTilesProductReader(File oProductFile) {
 		super(oProductFile);
@@ -97,8 +99,7 @@ public class GHSLTilesProductReader extends WasdiProductReader {
 		
 		String sRes = "";
 		
-		
-		synchronized (sShapeMaskPath) {
+		synchronized (s_oShapeFileLock) {
 			
 			FileDataStore oStore = null;
 			FeatureIterator<SimpleFeature> aoFeaturesIterator = null;

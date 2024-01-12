@@ -33,14 +33,7 @@ public class CollectionsApi  {
     @Path("/{collection_id}")
     @Produces({ "application/json" })
     public Response describeCollection(@PathParam("collection_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~/]+$") String sCollectionId, @HeaderParam("Authorization") String sAuthorization) {
-    	
-    	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
-    	
-    	if (oUser == null) {
-			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
-    	}
-    	
+    	    	
     	try {
     		OpenEOCollection oConfigCollection = WasdiConfig.Current.openEO.getCollection(sCollectionId);
     		
@@ -64,13 +57,6 @@ public class CollectionsApi  {
     @javax.ws.rs.GET
     @Produces({ "application/json" })
     public Response listCollections(@QueryParam("limit")  @Min(1) Integer iLimit, @HeaderParam("Authorization") String sAuthorization) {
-    	
-    	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
-    	
-    	if (oUser == null) {
-			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
-    	}    	
     	
     	try {
     		

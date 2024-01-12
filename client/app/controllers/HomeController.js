@@ -74,6 +74,7 @@ var HomeController = (function () {
                     'refresh_token': oKeycloak.refreshToken
                 };
             }
+            this.m_bInternalKeycloakFlag = true;
             oController.callbackLogin(aoDataTokens, null, oController);
         }
         else {

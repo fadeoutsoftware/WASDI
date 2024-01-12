@@ -33,7 +33,7 @@
         <sVersionJersey2>2.35</sVersionJersey2>
         <sVersionJersey2SwaggerJaxrs>1.6.5</sVersionJersey2SwaggerJaxrs>
         <sVersionJunit>4.13.2</sVersionJunit>
-        <sVersionLogback>1.2.10</sVersionLogback>
+        <sVersionLogback>1.2.13</sVersionLogback>
         <sVersionMavenCompilerPlugin>3.11.0</sVersionMavenCompilerPlugin>
         <sVersionMavenWarPlugin>3.4.0</sVersionMavenWarPlugin>
         <sVersionMigBase64>2.2</sVersionMigBase64>

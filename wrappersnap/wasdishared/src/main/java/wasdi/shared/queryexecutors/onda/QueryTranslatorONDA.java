@@ -358,20 +358,20 @@ public class QueryTranslatorONDA extends QueryTranslator {
 			sSentinel1 = "( name:S1* AND ";
 
 			//filename:[S1A_*|S1B_*] (optional)
-			if(sQuery.matches(".*filename\\s*\\:\\s*S1A.*")){
+			if(sQuery.contains(" filename:S1A_* ")){
 				sSentinel1 += "name:S1A_*";
-			} else if(sQuery.matches(".*filename\\s*\\:\\s*S1B.*")) {
+			} else if(sQuery.contains(" filename:S1B_* ")) {
 				sSentinel1 += "name:S1B_*";
 			} else {
 				sSentinel1 += "name:*";
 			}
 			sSentinel1+=s_sAND;
 			//producttype:[SLC|GRD|OCN] (optional)
-			if(sQuery.matches(".*producttype\\s*\\:\\s*SLC.*")) {
+			if(sQuery.contains(" producttype:SLC ")) {
 				sSentinel1+= "name:*SLC*";
-			} else if( sQuery.matches(".*producttype\\s*\\:\\s*GRD.*") ) {
+			} else if( sQuery.contains(" producttype:GRD ") ) {
 				sSentinel1+="name:*GRD*";
-			} else if( sQuery.matches(".*producttype\\s*\\:\\s*OCN.*") ) {
+			} else if( sQuery.contains(" producttype:OCN ") ) {
 				sSentinel1+="name:*OCN*";
 			} else {
 				sSentinel1+="name:*";
@@ -404,13 +404,13 @@ public class QueryTranslatorONDA extends QueryTranslator {
 				} 
 			}
 			//Sensor Mode:[SM|IW|EW|WV] (optional)
-			if(sQuery.matches(".*sensoroperationalmode\\s*\\:\\s*SM.*")) {
+			if(sQuery.contains(" sensoroperationalmode:SM ")) {
 				sSentinel1+=" AND sensorOperationalMode:SM";
-			} else if(sQuery.matches(".*sensoroperationalmode\\s*\\:\\s*IW.*")) {
+			} else if(sQuery.contains(" sensoroperationalmode:IW ")) {
 				sSentinel1+=" AND sensorOperationalMode:IW";
-			} else if(sQuery.matches(".*sensoroperationalmode\\s*\\:\\s*EW.*")) {
+			} else if(sQuery.contains(" sensoroperationalmode:EW ")) {
 				sSentinel1+=" AND sensorOperationalMode:EW";
-			} else if(sQuery.matches(".*sensoroperationalmode\\s*\\:\\s*WV.*")) {
+			} else if(sQuery.contains(" sensoroperationalmode:WV ")) {
 				sSentinel1+=" AND sensorOperationalMode:WV";
 			}
 			sSentinel1 +=" )";

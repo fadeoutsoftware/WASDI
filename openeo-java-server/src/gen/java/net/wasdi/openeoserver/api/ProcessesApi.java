@@ -10,10 +10,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import net.wasdi.openeoserver.WasdiOpenEoServer;
 import net.wasdi.openeoserver.viewmodels.Error;
 import net.wasdi.openeoserver.viewmodels.Processes;
-import wasdi.shared.business.users.User;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -30,13 +28,7 @@ public class ProcessesApi  {
     @javax.ws.rs.GET
     @Produces({ "application/json" })
     public Response listProcesses(@QueryParam("limit")  @Min(1) Integer limit,@HeaderParam("Authorization") String sAuthorization) {
-    	
-    	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
-    	
-    	if (oUser == null) {
-			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
-    	} 
+    	 
     	
     	try {
     		String sProcessesDescription  = WasdiConfig.Current.openEO.processes_config;

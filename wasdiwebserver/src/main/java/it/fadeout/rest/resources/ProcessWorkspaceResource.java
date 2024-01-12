@@ -1435,47 +1435,42 @@ public class ProcessWorkspaceResource {
 						WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: send request to computing nodes");
 						HttpCallResponse oHttpCallResponse = sendRequestToNode(oNode.getNodeBaseAddress(), "process/runningtimeproject", sSessionId); 
 						String sResponseBody = oHttpCallResponse.getResponseBody();
-						WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: response code " + oHttpCallResponse.getResponseCode());
-						WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: response body " + sResponseBody);
 						
-						
-						// Create an array of answers
-						JSONArray oResults = new JSONArray(sResponseBody);
-						
-						// Convert the View Models
-						for (int iViewModel = 0; iViewModel < oResults.length(); iViewModel++) {
-							JSONObject oViewModel = oResults.getJSONObject(iViewModel);
-							String sSubscriptionId = oViewModel.optString("subscriptionId");
-							String sProjectId = oViewModel.optString("projectId");
-							String sUserId = oViewModel.optString("userId");
-							Long lComputingTime = oViewModel.optLong("computingTime");
+						if (!Utils.isNullOrEmpty(sResponseBody)) {
+							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: response code " + oHttpCallResponse.getResponseCode());
+							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: response body " + sResponseBody);
 							
-							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: subscription: " + sSubscriptionId + ", project: " + sProjectId + ", user: " + sUserId);
+							// Create an array of answers
+							JSONArray oResults = new JSONArray(sResponseBody);
 							
-//							if (!oUser.getUserId().equals(sUserId)) {
-//								WasdiLog.errorLog("ProcessWorkspaceResource.getOverallRunningTimeProject: mismatch between the user in the main node and the user in the computing node");
-//								return Response.serverError().build();
-//							}
-							
-							if (Utils.isNullOrEmpty(sSubscriptionId) || Utils.isNullOrEmpty(sProjectId)) {
-								WasdiLog.errorLog("ProcessWorkspaceResource.getOverallRunningTimeProject: subscription id or project id not available.");
-								return Response.serverError().build();
+							// Convert the View Models
+							for (int iViewModel = 0; iViewModel < oResults.length(); iViewModel++) {
+								JSONObject oViewModel = oResults.getJSONObject(iViewModel);
+								String sSubscriptionId = oViewModel.optString("subscriptionId");
+								String sProjectId = oViewModel.optString("projectId");
+								String sUserId = oViewModel.optString("userId");
+								Long lComputingTime = oViewModel.optLong("computingTime");
+								
+								WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: subscription: " + sSubscriptionId + ", project: " + sProjectId + ", user: " + sUserId);
+								
+	//							if (!oUser.getUserId().equals(sUserId)) {
+	//								WasdiLog.errorLog("ProcessWorkspaceResource.getOverallRunningTimeProject: mismatch between the user in the main node and the user in the computing node");
+	//								return Response.serverError().build();
+	//							}
+								
+								if (Utils.isNullOrEmpty(sSubscriptionId) || Utils.isNullOrEmpty(sProjectId)) {
+									WasdiLog.errorLog("ProcessWorkspaceResource.getOverallRunningTimeProject: subscription id or project id not available.");
+									return Response.serverError().build();
+								}
+								
+								updateRunningTimesMap(aoRunningTimeBySubscription, sSubscriptionId, sProjectId, lComputingTime);
+								WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: general statistics should be updated with the statistics from node");
+								
 							}
-							
-							updateRunningTimesMap(aoRunningTimeBySubscription, sSubscriptionId, sProjectId, lComputingTime);
-							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: general statistics should be updated with the statistics from node");
-							
 						}
-						
-
-//						if (!Utils.isNullOrEmpty(sResponse)) {
-//							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: got a not-empty answer from node. Updating the computing statistics");
-//							Map<String, Map<String, Long>> aoSubscriptionRunningTimesFromNode = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<Map<String, Map<String, Long>>>(){});
-//							updateRunningTimesMap(aoRunningTimeBySubscription, aoSubscriptionRunningTimesFromNode);
-//						}
-//						else {
-//							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: response body from computing node is empty");
-//						}
+						else {
+							WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: response body from computing node is empty");
+						}
 					} catch (Exception oEx) {
 						WasdiLog.errorLog("ProcessWorkspaceResource.getOverallRunningTimeProject: exception contacting computing node", oEx);
 						return Response.serverError().build();

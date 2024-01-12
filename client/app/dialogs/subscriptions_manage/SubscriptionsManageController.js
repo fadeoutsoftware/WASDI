@@ -44,6 +44,7 @@ SubscriptionsManageController = (function () {
         this.m_oSubscriptionService.getSubscriptionsListByUser().then(function (response) {
             if (!utilsIsObjectNullOrUndefined(response)
                 && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+            console.log(response)
                 oController.m_aoSubscriptions = response.data;
             } else {
                 utilsVexDialogAlertTop(
@@ -90,7 +91,7 @@ SubscriptionsManageController = (function () {
         });
     }
 
-    SubscriptionsManageController.prototype.showProjectsBySubscription = function (sSubscriptionId, sSubscriptionName) {
+    SubscriptionsManageController.prototype.showProjectsBySubscription = function (sSubscriptionId, sSubscriptionName, bIsReadOnly) {
         this.m_oEditSubscription = {};
 
         if (utilsIsStrNullOrEmpty(sSubscriptionId)) {
@@ -105,7 +106,8 @@ SubscriptionsManageController = (function () {
             inputs: {
                 extras: {
                     subscriptionId: sSubscriptionId,
-                    subscriptionName: sSubscriptionName
+                    subscriptionName: sSubscriptionName, 
+                    editMode: bIsReadOnly
                 }
             }
         }).then(function (modal) {

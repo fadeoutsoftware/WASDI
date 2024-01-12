@@ -44,6 +44,7 @@ basic personal information, including your name and contact information;
 PART B – USE OF YOUR INFORMATION
 ---------------------------
 To accomplish any of the purposes listed below, we may combine personal information, Automatic Information, and non-personal information collected through your use of our Services. This information may be used in a variety of ways including, but not limited to:
+
 * to connect you to members of our team;
 
 * to enforce our Terms;
@@ -57,25 +58,6 @@ To accomplish any of the purposes listed below, we may combine personal informat
 * to contact you for the purpose of marketing, promotional offers, updates and any other purpose set out in our Privacy Policy and as permitted by the preferences you have indicated;
 
 * to analyze trends, administer the Services, track your website navigation and gather broad demographic information;
-
-* personalize your experience while using our Services; and
-
-* to provide you with any additional information you may request.
-
-Except as set forth above, your personal information will not be provided to any other users of our Services. We reserve the right to use personal information and Automatic Information as set forth in our Terms, if applicable.
-* to connect you to members of our team;
-
-* to enforce our Terms;
-
-* to prevent, detect and investigate potentially prohibited or illegal activities, fraud and security breaches;
-
-* to collect data on our Services;
-
-* to improve our Services;
-
-* to contact you for the purpose of marketing, promotional offers, updates and any other purpose set out in our Privacy Policy and as permitted by the preferences you have indicated;
-
-* to analyze trends, administer the Services, track your website navigation and gather broad demographic information; 
 
 * personalize your experience while using our Services; and
 
