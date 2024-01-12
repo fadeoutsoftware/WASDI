@@ -430,11 +430,11 @@ services:
       - "{{ sWasdiPostgresqlKeycloakCurrentCommand }}"
 {% endfor %}
 {% endif %}
-{% if bWasdiPostgresqlKeycloakInitialized == False %}
+{% if ( aoWasdiPostgresqlKeycloakEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
-      - POSTGRES_DB=${sPostgresqlKeycloakDatabaseName}
-      - POSTGRES_USER=${sPostgresqlKeycloakDatabaseUsername}
-      - POSTGRES_PASSWORD=${sPostgresqlKeycloakDatabasePassword}
+{% for aoWasdiPostgresqlKeycloakCurrentEnvironmentVariable in aoWasdiPostgresqlKeycloakEnvironmentVariable %}
+      - {{ aoWasdiPostgresqlKeycloakCurrentEnvironmentVariable['key'] }}={{ aoWasdiPostgresqlKeycloakCurrentEnvironmentVariable['value'] }}
+{% endfor %}
 {% endif %}
     image: "{{ sWasdiPostgresqlKeycloakImageName }}:{{ sWasdiPostgresqlKeycloakVersion }}"
 {% if ( aWasdiPostgresqlKeycloakPorts | length ) > 0 %}
@@ -458,11 +458,11 @@ services:
 {% endif %}
 {% if bWasdiSonarqubeEnabled == True %}
   {{ sWasdiPostgresqlSonarqubeServiceName }}:
-{% if bWasdiPostgresqlSonarqubeInitialized == False %}
+{% if ( aoWasdiPostgresqlSonarqubeEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
-      - POSTGRES_DB=${sPostgresqlSonarqubeDatabaseName}
-      - POSTGRES_USER=${sPostgresqlSonarqubeDatabaseUsername}
-      - POSTGRES_PASSWORD=${sPostgresqlSonarqubeDatabasePassword}
+{% for aoWasdiPostgresqlSonarqubeCurrentEnvironmentVariable in aoWasdiPostgresqlSonarqubeEnvironmentVariable %}
+      - {{ aoWasdiPostgresqlSonarqubeCurrentEnvironmentVariable['key'] }}={{ aoWasdiPostgresqlSonarqubeCurrentEnvironmentVariable['value'] }}
+{% endfor %}
 {% endif %}
     image: "{{ sWasdiPostgresqlSonarqubeImageName }}:{{ sWasdiPostgresqlSonarqubeVersion }}"
 {% if ( aWasdiPostgresqlSonarqubePorts | length ) > 0 %}
