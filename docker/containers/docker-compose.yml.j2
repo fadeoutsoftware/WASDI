@@ -46,12 +46,10 @@ services:
       - {{ sWasdiTomcatWasdiWebServerServiceName }}
 {% endif %}
       - {{ sWasdiTraefikServiceName }}
-{% if ( aoWasdiClientEnvironmentVariable | length ) > 0 %}
+{% if ( aoWasdiClientEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiClientCurrentEnvironmentVariable in aoWasdiClientEnvironmentVariable %}
-{% if ( aoWasdiClientCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiClientCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiClientCurrentEnvironmentVariable['key'] }}={{ aoWasdiClientCurrentEnvironmentVariable['value'] }}
-{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiClientServiceName }}:latest"
@@ -100,12 +98,10 @@ services:
       - {{ sWasdiTomcatWasdiWebServerServiceName }}
 {% endif %}
       - {{ sWasdiTraefikServiceName }}
-{% if ( aoWasdiClientV2EnvironmentVariable | length ) > 0 %}
+{% if ( aoWasdiClientV2EnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiClientV2CurrentEnvironmentVariable in aoWasdiClientV2EnvironmentVariable %}
-{% if ( aoWasdiClientV2CurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiClientV2CurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiClientV2CurrentEnvironmentVariable['key'] }}={{ aoWasdiClientV2CurrentEnvironmentVariable['value'] }}
-{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiClientV2ServiceName }}:latest"
@@ -136,12 +132,10 @@ services:
   {{ sWasdiGeoserverServiceName }}:
     depends_on:
       - {{ sWasdiTraefikServiceName }}
-{% if ( aoWasdiGeoserverEnvironmentVariable | length ) > 0 %}
+{% if ( aoWasdiGeoserverEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiGeoserverCurrentEnvironmentVariable in aoWasdiGeoserverEnvironmentVariable %}
-{% if ( aoWasdiGeoserverCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiGeoserverCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiGeoserverCurrentEnvironmentVariable['key'] }}={{ aoWasdiGeoserverCurrentEnvironmentVariable['value'] }}
-{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiGeoserverServiceName }}:latest"
@@ -176,12 +170,10 @@ services:
     depends_on:
       - {{ sWasdiInfluxDbGrafanaServiceName }}
 {% endif %}
-{% if ( aoWasdiGrafanaEnvironmentVariable | length ) > 0 %}
+{% if ( aoWasdiGrafanaEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiGrafanaCurrentEnvironmentVariable in aoWasdiGrafanaEnvironmentVariable %}
-{% if ( aoWasdiGrafanaCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiGrafanaCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiGrafanaCurrentEnvironmentVariable['key'] }}={{ aoWasdiGrafanaCurrentEnvironmentVariable['value'] }}
-{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiGrafanaImageName }}:{{ sWasdiGrafanaVersion }}"
@@ -218,12 +210,10 @@ services:
 {% endif %}
 {% if bWasdiInfluxDbGrafanaEnabled == True %}
   {{ sWasdiInfluxDbGrafanaServiceName }}:
-{% if ( aoWasdiInfluxDbGrafanaEnvironmentVariable | length ) > 0 %}
+{% if ( aoWasdiInfluxDbGrafanaEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable in aoWasdiInfluxDbGrafanaEnvironmentVariable %}
-{% if ( aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable['key'] }}={{ aoWasdiInfluxDbGrafanaCurrentEnvironmentVariable['value'] }}
-{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiInfluxDbGrafanaImageName }}:{{ sWasdiInfluxDbGrafanaVersion }}"
@@ -262,12 +252,10 @@ services:
       - "--httpPort={{ sWasdiJenkinsInternalPort }}"
       - "--prefix={{ sWasdiJenkinsDefaultContextPath.rstrip('/') }}"
       - "--sessionTimeout={{ iWasdiJenkinsSessionTimeout }}"
-{% if ( aoWasdiJenkinsEnvironmentVariable | length ) > 0 %}
+{% if ( aoWasdiJenkinsEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiJenkinsCurrentEnvironmentVariable in aoWasdiJenkinsEnvironmentVariable %}
-{% if ( aoWasdiJenkinsCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiJenkinsCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiJenkinsCurrentEnvironmentVariable['key'] }}={{ aoWasdiJenkinsCurrentEnvironmentVariable['value'] }}
-{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiJenkinsServiceName }}:latest"
@@ -311,12 +299,10 @@ services:
       - {{ sWasdiPostgresqlKeycloakServiceName }}
     entrypoint:
       - {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/bin/kc.sh
-{% if ( aoWasdiKeycloakEnvironmentVariable | length ) > 0 %}
+{% if ( aoWasdiKeycloakEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiKeycloakCurrentEnvironmentVariable in aoWasdiKeycloakEnvironmentVariable %}
-{% if ( aoWasdiKeycloakCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiKeycloakCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiKeycloakCurrentEnvironmentVariable['key'] }}={{ aoWasdiKeycloakCurrentEnvironmentVariable['value'] }}
-{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiKeycloakServiceName }}:latest"
@@ -360,16 +346,11 @@ services:
     expose:
       - "{{ sWasdiMongoInternalPort }}"
 {% endif %}
-{% if bWasdiMongoInitialized == False %}
+{% if ( aoWasdiMongoEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
-{% if sWasdiServerTypeIsMain == True %}
-      - MONGO_INITDB_DATABASE={{ sWasdiMongoMainDatabaseName }}
-{% endif %}
-{% if sWasdiServerTypeIsComputational == True %}
-      - MONGO_INITDB_DATABASE={{ sWasdiMongoLocalDatabaseName }}
-{% endif %}
-      - MONGO_INITDB_ROOT_PASSWORD=${sWasdiAdministratorUserPassword}
-      - MONGO_INITDB_ROOT_USERNAME=${sWasdiAdministratorUserName}
+{% for aoWasdiMongoCurrentEnvironmentVariable in aoWasdiMongoEnvironmentVariable %}
+      - {{ aoWasdiMongoCurrentEnvironmentVariable['key'] }}={{ aoWasdiMongoCurrentEnvironmentVariable['value'] }}
+{% endfor %}
 {% endif %}
     image: "mongo:{{ sWasdiMongoVersion }}"
 {% if ( aWasdiMongoPorts | length ) > 0 %}
@@ -395,12 +376,10 @@ services:
   {{ sWasdiNexusServiceName }}:
     depends_on:
       - {{ sWasdiTraefikServiceName }}
-{% if ( aoWasdiNexusEnvironmentVariable | length ) > 0 %}
+{% if ( aoWasdiNexusEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiNexusCurrentEnvironmentVariable in aoWasdiNexusEnvironmentVariable %}
-{% if ( aoWasdiNexusCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiNexusCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiNexusCurrentEnvironmentVariable['key'] }}={{ aoWasdiNexusCurrentEnvironmentVariable['value'] }}
-{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiNexusImageName }}:{{ sWasdiNexusVersion }}"
@@ -506,12 +485,10 @@ services:
   {{ sWasdiRabbitMqServiceName }}:
     depends_on:
       - {{ sWasdiTraefikServiceName }}
-{% if ( aoWasdiRabbitMqEnvironmentVariable | length ) > 0 %}
+{% if ( aoWasdiRabbitMqEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiRabbitMqCurrentEnvironmentVariable in aoWasdiRabbitMqEnvironmentVariable %}
-{% if ( aoWasdiRabbitMqCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiRabbitMqCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiRabbitMqCurrentEnvironmentVariable['key'] }}={{ aoWasdiRabbitMqCurrentEnvironmentVariable['value'] }}
-{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiRabbitMqServiceName }}:latest"
@@ -585,12 +562,10 @@ services:
     depends_on:
       - {{ sWasdiPostgresqlSonarqubeServiceName }}
       - {{ sWasdiTraefikServiceName }}
-{% if ( aoWasdiSonarqubeEnvironmentVariable | length ) > 0 %}
+{% if ( aoWasdiSonarqubeEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiSonarqubeCurrentEnvironmentVariable in aoWasdiSonarqubeEnvironmentVariable %}
-{% if ( aoWasdiSonarqubeCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiSonarqubeCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiSonarqubeCurrentEnvironmentVariable['key'] }}={{ aoWasdiSonarqubeCurrentEnvironmentVariable['value'] }}
-{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiSonarqubeImageName }}:{{ sWasdiSonarqubeVersion }}"
@@ -641,12 +616,10 @@ services:
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
       - {{ sWasdiTomcatWasdiWebServerServiceName }}
 {% endif %}
-{% if ( aoWasdiTelegrafEnvironmentVariable | length ) > 0 %}
+{% if ( aoWasdiTelegrafEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiTelegrafCurrentEnvironmentVariable in aoWasdiTelegrafEnvironmentVariable %}
-{% if ( aoWasdiTelegrafCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiTelegrafCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiTelegrafCurrentEnvironmentVariable['key'] }}={{ aoWasdiTelegrafCurrentEnvironmentVariable['value'] }}
-{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiTelegrafServiceName }}:latest"
@@ -683,12 +656,10 @@ services:
       - {{ sWasdiRabbitMqServiceName }}
 {% endif %}
       - {{ sWasdiTraefikServiceName }}
-{% if ( aoWasdiTomcatOgcProcessesServerEnvironmentVariable | length ) > 0 %}
+{% if ( aoWasdiTomcatOgcProcessesServerEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable in aoWasdiTomcatOgcProcessesServerEnvironmentVariable %}
-{% if ( aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable['key'] }}={{ aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable['value'] }}
-{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiTomcatOgcProcessesServerServiceName }}:latest"
@@ -732,12 +703,10 @@ services:
       - {{ sWasdiRabbitMqServiceName }}
 {% endif %}
       - {{ sWasdiTraefikServiceName }}
-{% if ( aoWasdiTomcatWasdiOpenEoServerEnvironmentVariable | length ) > 0 %}
+{% if ( aoWasdiTomcatWasdiOpenEoServerEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable in aoWasdiTomcatWasdiOpenEoServerEnvironmentVariable %}
-{% if ( aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable['key'] }}={{ aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable['value'] }}
-{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiTomcatWasdiOpenEoServerServiceName }}:latest"
@@ -781,12 +750,10 @@ services:
       - {{ sWasdiRabbitMqServiceName }}
 {% endif %}
       - {{ sWasdiTraefikServiceName }}
-{% if ( aoWasdiTomcatWasdiWebServerEnvironmentVariable | length ) > 0 %}
+{% if ( aoWasdiTomcatWasdiWebServerEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable in aoWasdiTomcatWasdiWebServerEnvironmentVariable %}
-{% if ( aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable['key'] }}={{ aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable['value'] }}
-{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiTomcatWasdiWebServerServiceName }}:latest"
@@ -887,12 +854,10 @@ services:
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
       - {{ sWasdiTomcatWasdiWebServerServiceName }}
 {% endif %}
-{% if ( aoWasdiUpdateMetricEnvironmentVariable | length ) > 0 %}
+{% if ( aoWasdiUpdateMetricEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiUpdateMetricCurrentEnvironmentVariable in aoWasdiUpdateMetricEnvironmentVariable %}
-{% if ( aoWasdiUpdateMetricCurrentEnvironmentVariable['omitIfEmpty'] | default(False) ) == False or aoWasdiUpdateMetricCurrentEnvironmentVariable['value'] != "" %}
       - {{ aoWasdiUpdateMetricCurrentEnvironmentVariable['key'] }}={{ aoWasdiUpdateMetricCurrentEnvironmentVariable['value'] }}
-{% endif %}
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiUpdateMetricServiceName }}:latest"
