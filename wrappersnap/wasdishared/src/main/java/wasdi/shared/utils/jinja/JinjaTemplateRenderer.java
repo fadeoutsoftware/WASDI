@@ -55,9 +55,11 @@ public class JinjaTemplateRenderer {
 			WasdiLog.debugLog("JinjaTemplateRenderer.translate: sTemplate = " + sTemplateFile);
 			WasdiLog.debugLog("JinjaTemplateRenderer.translate: JsonInput = " + sJsonInputs);
 			
-			Jinjava oJinjava = new Jinjava();
-			String sTemplate = WasdiFileUtils.fileToText(sTemplateFile);
 			Map<String, Object> aoVariables = JsonUtils.jsonToMapOfObjects(sJsonInputs);
+			String sTemplate = WasdiFileUtils.fileToText(sTemplateFile);
+			
+			WasdiLog.infoLog("JinjaTemplateRenderer.translate: creating Jinjava");
+			Jinjava oJinjava = new Jinjava();
 			
 			WasdiLog.infoLog("JinjaTemplateRenderer.translate: calling render");
 			String sRendered = oJinjava.render(sTemplate, aoVariables);
