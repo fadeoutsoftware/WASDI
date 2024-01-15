@@ -272,8 +272,6 @@ public class ConsoleResource {
 			oResult.setStringValue("Error in starting proccess");
 			oResult.setBoolValue(false);
 			
-			oEx.printStackTrace();
-			
 			return oResult;
 		}
 	}
