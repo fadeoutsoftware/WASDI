@@ -266,7 +266,7 @@ public class ConsoleResource {
 				}				
 			}
 
-		} catch (Exception oEx) {
+		} catch (Throwable oEx) {
 			WasdiLog.errorLog("ConsoleResource.create: " + oEx);
 
 			oResult.setStringValue("Error in starting proccess");
