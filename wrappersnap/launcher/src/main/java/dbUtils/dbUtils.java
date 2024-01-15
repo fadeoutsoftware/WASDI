@@ -22,7 +22,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
-import org.esa.snap.engine_utilities.util.PathUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,7 +30,6 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
-import wasdi.shared.business.ParameterEntity;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -73,8 +71,6 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.statistics.JobsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
-import wasdi.shared.parameters.DownloadFileParameter;
-import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.OgcProcessesClient;

@@ -4,7 +4,6 @@ import java.util.Map;
 
 import com.hubspot.jinjava.Jinjava;
 
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
