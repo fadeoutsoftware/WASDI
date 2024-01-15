@@ -34,7 +34,7 @@ For `Java <https://www.wasdi.net/javawasdilib.zip>`_, just download and link our
 
 For `C# <https://www.nuget.org/packages/WasdiLib>`_, install our nuget package.
 
-For `JavaScript <https://www.npmjs.com/package/wasdi>`_, install our Node package, or link our cdn lib `JavaScript <https://cdn.jsdelivr.net/npm/wasdi@0.0.18/build/wasdi-javascript.js>`_.
+For `JavaScript <https://www.npmjs.com/package/wasdi>`_, install our Node package, or link our cdn lib `JavaScript Library <https://cdn.jsdelivr.net/npm/wasdi@0.0.18/build/wasdi-javascript.js>`_.
 
 All the `WASDI libraries are Open Source <https://github.com/fadeoutsoftware/WASDI/tree/master/libraries>`_.
 

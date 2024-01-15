@@ -3,7 +3,7 @@
 
 
 Managing Subscriptions and Organizations
-===========================
+======================================================
 
 WASDI has recently implemented a subscription based usage model. To execute various actions in WASDI, the user must have an a valid subscription and an active project.
 
@@ -44,7 +44,7 @@ If you do not have a WASDI subscription and would like to purchase one - click t
 
 On the purchasing page you will be able to see the distinction between the various tiers of WASDI Subscriptions:
 
-.. image:: ../_static/user_manual_images/subscriptions/purhcase_sub_page.png
+.. image:: ../_static/user_manual_images/subscriptions/purchase_sub_page.png
 
 For this example, we will purchase a 1 Day Standard Subscription for 50 euros. By clicking “Buy Now” we open a dialog box where we can enter a name for this subscription. If we do not enter a name, a standard one will be provided for us (in this case the standard name will be “One Day Standard”).
 
