@@ -58,17 +58,21 @@ public class JinjaTemplateRenderer {
 			Jinjava oJinjava = new Jinjava();
 			String sTemplate = WasdiFileUtils.fileToText(sTemplateFile);
 			Map<String, Object> aoVariables = JsonUtils.jsonToMapOfObjects(sJsonInputs);
+			
+			WasdiLog.infoLog("JinjaTemplateRenderer.translate: calling render");
 			String sRendered = oJinjava.render(sTemplate, aoVariables);
+			
+			WasdiLog.infoLog("JinjaTemplateRenderer.translate: calling write file");
 			
 			WasdiFileUtils.writeFile(sRendered, sOutputFile);
 			
-			WasdiLog.debugLog("JinjaTemplateRenderer.translate: template rendered in = " + sOutputFile);
+			WasdiLog.infoLog("JinjaTemplateRenderer.translate: template rendered in = " + sOutputFile);
 			
 			// Bye bye
 			return true;
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("JinjaTemplateRenderer.translate: exception " + oEx.toString());
+			WasdiLog.errorLog("JinjaTemplateRenderer.translate: exception " + oEx.toString());
 			return false;
 		}
 	}

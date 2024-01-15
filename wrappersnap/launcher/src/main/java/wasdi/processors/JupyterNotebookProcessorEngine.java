@@ -134,17 +134,18 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		
 			processWorkspaceLog("Copy template directory");
 
-			// check if the processor folder exists
-			boolean bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
+			// We will copy in any case so we are sure to use always the most updated one
+			// Copy Docker template files in the processor folder
+			File oDockerTemplateFolder = new File(sProcessorTemplateFolder);
+			File oProcessorFolder = new File(sProcessorFolder);
 			
-			if (!bProcessorFolderExists) {
-				// Copy Docker template files in the processor folder
-				File oDockerTemplateFolder = new File(sProcessorTemplateFolder);
-				File oProcessorFolder = new File(sProcessorFolder);
+			// Check and or create the processor folder
+			if (!oProcessorFolder.exists()) {
+				oProcessorFolder.mkdirs();
+			}			
 
-				WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: creating the ProcessorFolder: " + sProcessorFolder + " and copy the template");
-				FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
-			}
+			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: Updating the ProcessorFolder: " + sProcessorFolder + " with the last template");
+			FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
 			
 			// mkdir **notebook** in the Workspace folder: it will be mounted on the docker that hosts the users' notebook
 			String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
@@ -224,13 +225,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 				}
 				else {
 					WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: image pulled = " + sFullImageName);
-					m_sDockerImageName = sFullImageName;
-					
-					// Check and or create the processor folder
-					File oProcessorFolder = new File(sProcessorFolder);
-					if (!oProcessorFolder.exists()) {
-						oProcessorFolder.mkdirs();
-					}
+					m_sDockerImageName = sFullImageName;					
 				}
 			}
 			
