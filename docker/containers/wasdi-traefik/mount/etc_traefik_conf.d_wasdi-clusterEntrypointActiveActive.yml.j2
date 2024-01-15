@@ -2,7 +2,7 @@ http:
   routers:
     r_{{ sWasdiTraefikGenericServiceName }}:
       entrypoints: "{{ sWasdiTraefikEntrypoint }}"
-      rule: "Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiTraefikGenericDefaultContextPath }}`)"
+      rule: "Host(`{{ sWasdiTraefikGenericRuleHost }}`) && PathPrefix(`{{ sWasdiTraefikGenericDefaultContextPath }}`)"
       service: "s_{{ sWasdiTraefikGenericServiceName }}_lb"
       middlewares: "mw_wasdi-secure-allowFrame@file"
 {% if bWasdiSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
