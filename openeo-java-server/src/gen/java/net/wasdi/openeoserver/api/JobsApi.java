@@ -77,11 +77,16 @@ public class JobsApi  {
     @Produces({ "application/json" })
     public Response createJob(@NotNull @Valid  StoreBatchJobRequest oStoreBatchJobRequest, @HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
-			WasdiLog.debugLog("JobsApi.createJob: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
+			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
     	}
     	
     	try {
@@ -125,11 +130,16 @@ public class JobsApi  {
     @Produces({ "application/json" })
     public Response debugJob(@NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String jobId, @QueryParam("offset")  String offset, @QueryParam("limit")  @Min(1) Integer limit, @HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
-			WasdiLog.debugLog("JobsApi.debugJob: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
+			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
     	}
     	
     	try {
@@ -147,11 +157,16 @@ public class JobsApi  {
     @Produces({ "application/json" })
     public Response deleteJob(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String sJobId, @HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
-			WasdiLog.warnLog("JobsApi.deleteJob: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
+			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
     	}
     	
     	try {
@@ -208,11 +223,16 @@ public class JobsApi  {
     @Produces({ "application/json" })
     public Response describeJob(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String sJobId, @HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
-			WasdiLog.debugLog("JobsApi.describeJob: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
+			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
     	}
     	
     	try {
@@ -264,11 +284,16 @@ public class JobsApi  {
     @Produces({ "application/json" })
     public Response estimateJob(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String jobId, @HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
-			WasdiLog.debugLog("JobsApi.estimateJob: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
+			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
     	}
     	
     	try {
@@ -286,11 +311,16 @@ public class JobsApi  {
     @Produces({ "application/json" })
     public Response listJobs(@QueryParam("limit")  @Min(1) Integer limit, @HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
-			WasdiLog.debugLog("JobsApi.listJobs: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
+			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
     	}
     	
     	try {
@@ -338,11 +368,16 @@ public class JobsApi  {
     @Produces({ "application/json", "application/geo+json" })
     public Response listResults(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String sJobId, @HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
-			WasdiLog.debugLog("JobsApi.listResults: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
+			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
     	}
     	
     	try {
@@ -494,11 +529,16 @@ public class JobsApi  {
     @Produces({ "application/json" })
     public Response startJob(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String sJobId, @HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
-			WasdiLog.debugLog("JobsApi.startJob: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
+			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
     	}
     	
     	try {
@@ -615,12 +655,18 @@ public class JobsApi  {
     @Produces({ "application/json" })
     public Response stopJob(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String sJobId, @HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
-			WasdiLog.debugLog("JobsApi.stopJob: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
+			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
     	}
+    	
     	try {
     		String sSessionId = sAuthorization.substring("Bearer basic//".length());
     		
@@ -663,11 +709,16 @@ public class JobsApi  {
     @javax.ws.rs.PATCH
     public Response updateJob(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String jobId, @NotNull @Valid  UpdateBatchJobRequest updateBatchJobRequest, @HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
-			WasdiLog.debugLog("JobsApi.updateJob: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
+			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
     	}
     	
     	try {
