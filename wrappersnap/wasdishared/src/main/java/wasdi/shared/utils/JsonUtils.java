@@ -66,7 +66,7 @@ public final class JsonUtils {
 			aoJSONMap = s_oMapper.readValue(sJson, new TypeReference<Map<String, Object>>(){});
 
 			return aoJSONMap;
-		} catch (JsonProcessingException oE) {
+		} catch (Throwable oE) {
 			WasdiLog.debugLog("JsonUtils.jsonToMapOfObjects: could not parse the JSON payload due to " + oE + ".");
 		}
 

@@ -36,7 +36,7 @@
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionGeoserverManager>1.7.0</sVersionGeoserverManager>
         <sVersionGson>2.10.1</sVersionGson>
-        <sVersionGuava>29.0-jre</sVersionGuava>
+        <sVersionGuava>33.0.0-jre</sVersionGuava>
         <sVersionJackson>2.14.1</sVersionJackson>
         <sVersionJaxbApi>2.3.1</sVersionJaxbApi>
         <sVersionJson>20230227</sVersionJson>
