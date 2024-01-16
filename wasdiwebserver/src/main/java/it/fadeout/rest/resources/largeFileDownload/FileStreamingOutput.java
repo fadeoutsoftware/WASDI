@@ -15,8 +15,6 @@ import java.io.OutputStream;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
-import com.google.api.client.util.ByteStreams;
-
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -35,6 +33,32 @@ public class FileStreamingOutput implements StreamingOutput {
 		m_oFile = oFile;
 	}
 
+	private static final int BUFFER_SIZE = 8192;
+	
+	public static long copyByteStream(InputStream oInputStream, OutputStream oOutputStream) throws IOException {
+		
+		if (oInputStream == null) {
+			return 0l;
+		}
+		
+		if (oOutputStream == null) {
+			return 0l;
+		}
+		
+		byte[] ayBuffer = new byte[BUFFER_SIZE];
+		long lTotal = 0;
+		while (true) {
+			int iRead = oInputStream.read(ayBuffer);
+		    if (iRead == -1) {
+		    	break;
+		    }
+		    oOutputStream.write(ayBuffer, 0, iRead);
+		    lTotal += iRead;
+		}
+		
+		return lTotal;
+	}
+	  
 	/* (non-Javadoc)
 	 * @see javax.ws.rs.core.StreamingOutput#write(java.io.OutputStream)
 	 */
@@ -49,7 +73,7 @@ public class FileStreamingOutput implements StreamingOutput {
 				try (InputStream oInputStream = new FileInputStream(m_oFile)) {
 					long lCopiedBytes = 0;
 					WasdiLog.debugLog("FileStreamingOutput.write: using guava ByteStreams.copy to copy file");
-					lCopiedBytes = ByteStreams.copy(oInputStream,  oOutputStream);
+					lCopiedBytes = copyByteStream(oInputStream,  oOutputStream);
 					
 					if( oOutputStream!=null ) {
 						oOutputStream.flush();
