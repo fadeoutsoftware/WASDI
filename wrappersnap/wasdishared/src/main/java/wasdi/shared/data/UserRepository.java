@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;

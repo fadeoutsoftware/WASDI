@@ -1,12 +1,9 @@
 package wasdi.shared.queryexecutors.jrc;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 
 import wasdi.shared.queryexecutors.ResponseTranslator;
 import wasdi.shared.utils.Utils;
