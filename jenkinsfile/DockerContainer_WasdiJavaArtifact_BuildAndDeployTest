@@ -51,11 +51,6 @@ def getMavenBuildProject() {
     aMavenBuildProject.add('wasditrigger')
   }
 
-  if ( env.sWasdiUtils.toBoolean() ) {
-    aMavenBuildProject.add('wrappersnap/wasdishared')
-    aMavenBuildProject.add('wrappersnap/launcher/utils_pom.xml')
-  }
-
   aMavenBuildProject.unique()
 
   if ( aMavenBuildProject.size() > 0 ) {
@@ -108,7 +103,6 @@ pipeline {
         echo "env.sWasdiTomcatOpenEoServer         = " + env.sWasdiTomcatOpenEoServer
         echo "env.sWasdiTomcatWasdiWebServer       = " + env.sWasdiTomcatWasdiWebServer
         echo "env.sWasdiTrigger                    = " + env.sWasdiTrigger
-        echo "env.sWasdiUtils                      = " + env.sWasdiUtils
         echo "env.WORKSPACE                        = " + env.WORKSPACE
 
         sh script: "pwd", label: "Current location"
