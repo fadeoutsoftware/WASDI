@@ -21,6 +21,7 @@ import net.wasdi.openeoserver.viewmodels.Error;
 import net.wasdi.openeoserver.viewmodels.StoreSecondaryWebServiceRequest;
 import net.wasdi.openeoserver.viewmodels.UpdateSecondaryWebServiceRequest;
 import wasdi.shared.business.users.*;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 @Path("/services")
@@ -36,12 +37,17 @@ public class ServicesApi  {
     @Produces({ "application/json" })
     public Response createService(@NotNull @Valid  StoreSecondaryWebServiceRequest storeSecondaryWebServiceRequest,@HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
 			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
-    	}  
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
+    	} 
     	
     	try {
     		
@@ -59,11 +65,16 @@ public class ServicesApi  {
     @Produces({ "application/json" })
     public Response debugService(@PathParam("service_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String serviceId,@ApiParam(value = "The last identifier (property `id` of a log entry) the client has received. If provided, the back-ends only sends the entries that occurred after the specified identifier. If not provided or empty, start with the first entry.") @QueryParam("offset")  String offset,@ApiParam(value = "This parameter enables pagination for the endpoint and specifies the maximum number of elements that arrays in the top-level object (e.g. collections, processes, batch jobs, secondary services, log entries, etc.) are allowed to contain. The `links` array MUST NOT be paginated like the resources, but instead contain links related to the paginated resources or the pagination itself (e.g. a link to the next page). If the parameter is not provided or empty, all elements are returned.  Pagination is OPTIONAL: back-ends or clients may not support it. Therefore it MUST be implemented in a way that clients not supporting pagination get all resources regardless. Back-ends not supporting pagination MUST return all resources.  If the response is paginated, the `links` array MUST be used to communicate the links for browsing the pagination with pre-defined `rel` types. See the `links` array schema for supported `rel` types. Backend implementations can, unless specified otherwise, use all kind of pagination techniques, depending on what is supported best by their infrastructure: page-based, offset-based, token-based or something else. The clients SHOULD use whatever is specified in the links with the corresponding `rel` types.") @QueryParam("limit")  @Min(1) Integer limit,@HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
 			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
     	}      	
     	
     	try {
@@ -82,12 +93,17 @@ public class ServicesApi  {
     @Produces({ "application/json" })
     public Response deleteService(@PathParam("service_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String serviceId,@HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
 			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
-    	}      	
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
+    	}    	
     	
     	try {
     		
@@ -105,12 +121,17 @@ public class ServicesApi  {
     @Produces({ "application/json" })
     public Response describeService(@PathParam("service_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String serviceId,@HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
 			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
-    	}      	
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
+    	}    	
     	
     	try {
     		
@@ -127,12 +148,17 @@ public class ServicesApi  {
     @Produces({ "application/json" })
     public Response listServices(@QueryParam("limit")  @Min(1) Integer limit,@HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
 			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
-    	}      	
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
+    	}     	
     	
     	try {
     		
@@ -150,12 +176,17 @@ public class ServicesApi  {
     @Produces({ "application/json" })
     public Response updateService(@PathParam("service_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String serviceId,@NotNull @Valid  UpdateSecondaryWebServiceRequest updateSecondaryWebServiceRequest,@HeaderParam("Authorization") String sAuthorization) {
     	
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
 			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
-    	}      	
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
+    	}     	
     	
     	try {
     		
