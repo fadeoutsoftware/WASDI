@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    sCurrentAnsibleInventory = env.sAnsibleInventory.split('-')[0].toLowerCase()
+    sAnsibleInventoryLower   = env.sAnsibleInventory.split('-')[0].toLowerCase()
     sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
     sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
     sCurrentRevision         = "${env.BUILD_ID}"
@@ -23,6 +23,8 @@ pipeline {
     stage('DEBUG') {
       steps {
         echo "env.GIT_BRANCH               = " + env.GIT_BRANCH
+        echo "env.sAnsibleInventory        = " + env.sAnsibleInventory
+        echo "env.sAnsibleInventoryLower   = " + env.sAnsibleInventoryLower
         echo "env.sAnsibleLimit            = " + env.sAnsibleLimit
         echo "env.sCurrentEnvironmentLower = " + env.sCurrentEnvironmentLower
         echo "env.sCurrentEnvironmentUpper = " + env.sCurrentEnvironmentUpper
@@ -87,9 +89,10 @@ pipeline {
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
             playbooks/buildWasdiDockerContainer.yml \
-            --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
+            --inventory inventories/${env.sAnsibleInventoryLower}.yml \
             --limit ${env.sCurrentEnvironmentLower} \
             --diff \
+            --check \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiLauncherContainer=true sDeployWasdiSchedulerContainer=true sDeployWasdiTomcatOgcProcessesServerContainer=true sDeployWasdiTomcatOpenEoServerContainer=true sDeployWasdiTomcatWasdiWebServerContainer=true sDeployWasdiTriggerContainer=true'
         """,
         label: "Build the containers"
@@ -105,9 +108,10 @@ pipeline {
                   cd ${env.sWasdiAnsiblePath}
                   ansible-playbook \
                     playbooks/deployDockerContainerWasdiJavaArtifact.yml \
-                    --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
+                    --inventory inventories/${env.sAnsibleInventoryLower}.yml \
                     --limit ${env.sAnsibleLimit} \
                     --diff \
+                    --check \
                     --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
               label: "Deploy the containers and their run elements"
@@ -129,9 +133,10 @@ pipeline {
                 cd ${env.sWasdiAnsiblePath}
                 ansible-playbook \
                   playbooks/runDockerContainerWasdiJavaArtifact.yml \
-                  --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
+                  --inventory inventories/${env.sAnsibleInventoryLower}.yml \
                   --limit ${env.sAnsibleLimit} \
                   --diff \
+                  --check \
                   --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
               label: "Start or restart the containers"
