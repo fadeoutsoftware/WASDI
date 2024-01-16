@@ -1,5 +1,9 @@
 #!/bin/bash
 
+sInstanceTime="$(date '+%Y-%m-%d - %H:%M:%S')"
+
+echo "#### BEGIN ${sInstanceTime} ####"
+
 if [[ -z "${USER}" ]]
 then
     echo "[DEBUG] The variable '\${USER}' is empty: we fill it manually with the command 'whoami'"
@@ -9,14 +13,19 @@ fi
 if [[ -z "${USER}" ]]
 then
     echo "[ERROR] The variable '\${USER}' is still empty: we exit here"
+    echo "#### END ${sInstanceTime} ####"
     exit 1
 fi
 
 if [[ "${USER}" != "{{ sWasdiSystemUserName }}" ]]
 then
     echo "[ERROR] You are '${USER}' when should be '{{ sWasdiSystemUserName }}'"
+    echo "#### END ${sInstanceTime} ####"
     exit 1
 fi
+
+echo "\${USER} = ${USER}"
+echo "\${@} = ${@}"
 
 docker \
     run \
@@ -24,7 +33,6 @@ docker \
     --mount type=bind,source={{ sWasdiConfigurationRootDirectoryPath }},destination={{ sWasdiConfigurationRootDirectoryPath }},readonly \
     --mount type=bind,source={{ sWasdiDataRootDirectoryPath }},destination={{ sWasdiDataRootDirectoryPath }} \
     --mount type=bind,source={{ sWasdiDataImagesRootDirectoryPath }},destination={{ sWasdiDataImagesRootDirectoryPath }} \
-    --mount type=bind,source={{ sWasdiDataParamsRootDirectoryPath }},destination={{ sWasdiDataParamsRootDirectoryPath }} \
     --mount type=bind,source={{ sWasdiDataProcessorsRootDirectoryPath }},destination={{ sWasdiDataProcessorsRootDirectoryPath }} \
     --mount type=bind,source={{ sWasdiDataStylesRootDirectoryPath }},destination={{ sWasdiDataStylesRootDirectoryPath }} \
     --mount type=bind,source={{ sWasdiDataWorkflowsRootDirectoryPath }},destination={{ sWasdiDataWorkflowsRootDirectoryPath }} \
@@ -32,3 +40,5 @@ docker \
     --network {{ sWasdiDockerNetworkName }} \
     {{ sWasdiTriggerServiceName }}:latest \
     ${@}
+
+echo "#### END ${sInstanceTime} ####"
