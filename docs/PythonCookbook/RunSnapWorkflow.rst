@@ -26,10 +26,10 @@ Recipe
 ------------------------------------------
 
 .. note::
-	We will use Sentinel-1 GRD and the public LISTSinglePreproc2 workflow for this snippet, but can be used with any mission and any compatible workflow.
+	We will use Sentinel-1 GRD and the public LISTSinglePreproc2 workflow for this snippet, but this method can be used with any mission and any compatible workflow.
 
 .. note::
-	Remember that you can upload in WASDI your own SNAP Workflows. Thake a look `here <https://wasdi.readthedocs.io/en/latest/UserManual/UsingYourWorkspace.html#workflows>`_.
+	Remember that you can upload in WASDI your own SNAP Workflows. For further explaination take a look `here <https://wasdi.readthedocs.io/en/latest/UserManual/UsingYourWorkspace.html#workflows>`_.
 
 
 This is our sample params.json file.
@@ -104,7 +104,7 @@ This is our sample params.json file.
 
 What it does:
 
- - Read Input Parameters
- - Start Search S1 GRD Images
- - Run the workflow waiting for it
- - Run the workflow without waiting for it
+ - Reads Input Parameters
+ - Starts searching for S1 GRD Images
+ - Runs the workflow waiting for it
+ - Runs the workflow without waiting for it

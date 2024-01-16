@@ -30,7 +30,7 @@
         <sVersionCommonsNet>3.9.0</sVersionCommonsNet>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionGenson>1.4</sVersionGenson>
-        <sVersionGoogleApiClient>1.24.1</sVersionGoogleApiClient>
+        <sVersionGoogleApiClient>2.2.0</sVersionGoogleApiClient>
         <sVersionHttpClient>4.5.13</sVersionHttpClient>
         <sVersionJackson>2.14.1</sVersionJackson>
         <sVersionJavaApiForKml>2.2.1</sVersionJavaApiForKml>
@@ -143,12 +143,7 @@
             <version>${sVersionJunit}</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.google.api-client/google-api-client -->
-        <dependency>
-            <groupId>com.google.api-client</groupId>
-            <artifactId>google-api-client</artifactId>
-            <version>${sVersionGoogleApiClient}</version>
-        </dependency>
+
         <!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
         <dependency>
             <groupId>javax.servlet</groupId>

@@ -7,7 +7,7 @@
 
 Import And Pre-Process
 =========================================
-Often you may need to pre-process your images before beeing able to work. This snippets shows a convenient method to automatically pre-process all the imported images
+You may need to pre-process your images before being able to work with them. This snippets shows a convenient method to automatically pre-process all imported images.
 
 
 Prerequisites
@@ -26,13 +26,13 @@ Recipe
 ------------------------------------------
 
 .. note::
-	We will use Sentinel-1 GRD and the public LISTSinglePreproc2 workflow for this snippet, but can be used with any mission and any compatible workflow.
+	We will use Sentinel-1 GRD and the public LISTSinglePreproc2 workflow for this snippet, but this method can be used with any mission and any compatible workflow.
 
 .. note::
-	The LISTSinglePreproc2 is designed to geo reference a Sentinel-1 GRD Image (apply orbit, radiometric calibration, terrain correction...)
+	The LISTSinglePreproc2 is designed to georeference a Sentinel-1 GRD Image (apply orbit, radiometric calibration, terrain correction...)
 
 
-This is our sample params.json file.
+This is our sample params.json file:
 
 .. code-block:: json
 
@@ -78,6 +78,6 @@ This is our sample params.json file.
 
 What it does:
 
- - Read Input Parameters
- - Start Search S1 GRD Images
- - Import and run the workflow on all the images
+ - Reads Input Parameters
+ - Starts searching for S1 GRD Images
+ - Imports and runs the workflow on all the images

@@ -7,7 +7,7 @@
 
 Search Sentinel-2 Images
 =========================================
-The following code show how to search S2 Images
+The following code shows how to search S2 Images
 
 
 Prerequisites
@@ -89,21 +89,21 @@ These are different samples of Sentinel 2 Search. The mandatory fields to search
 
 What it does:
 
- - Initialize the input varialbe needed. 
- - Start Search S2 L1 Images
+ - Initializes the input varialbe needed. 
+ - Starts earching S2 L1 Images
  - Loop the results and print file names
- - Search L2 Images
- - Search L2 Images adding the cloud coverage
- - Search L2 Images using the lat lon values and not the Bounding Box Object
+ - Searches L2 Images
+ - Searches L2 Images; adding the cloud coverage
+ - Searches L2 Images; using the lat lon values and not the Bounding Box Object
 
 .. note::
-	The developer can decide whatever is needed in the params.json file. If you will use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
+	The developer can decide whatever is needed in the params.json file. If you decide to use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
 
 .. note::
-	With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsible to convert your data in your code
+	With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsible fir converting your data in your code.
 
 .. note::
-	The Boundig Box Format Here Used is the one used by the User Interface when renderAsStrings is missing or false. The Boundig Box format when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**
+	The Boundig Box Format used here is the one used by the User Interface when renderAsStrings is missing or false. The Boundig Box format when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**.
 
 .. note::
-	The Date is formatted by the User Interface as "YYYY-MM-DD"
+	The Date is formatted by the User Interface as "YYYY-MM-DD".

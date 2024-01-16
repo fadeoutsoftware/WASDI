@@ -5,9 +5,9 @@
 .. _SearchS3Images
 
 
-Search Sentinel-3 Images
+Search Sentinel-5p products
 =========================================
-The following code shows how to search S3 Images
+The following code shows how to search Sentinel-5p products in WASDI
 
 
 Prerequisites
@@ -27,7 +27,7 @@ Recipe
 .. note::
 	Assume you have at least one workspace and you configured it in the config.json file
 
-These are different samples of Sentinel 2 Search. The mandatory fields to search are:
+These are different samples of Sentinel-5p Search. The mandatory fields to search are:
  - Mission Type
  - Start Date
  - End Date
@@ -53,9 +53,13 @@ These are different samples of Sentinel 2 Search. The mandatory fields to search
     # Set End Date getting the parameter from parameters file, fallbacks to 2023-01-10 if value is not specified
     sEndDate = wasdi.getParameter("END_DATE", "2023-01-10")
 
+    # product type: Nitrogen Dioxide (NO2)
+    sProductType = 'L2__NO2___'
+
     # Start Search S3 Images using the automatic provider selection
-    aoProductsFoundArray = wasdi.searchEOImages("S3", sDateFrom=sStartDate, sDateTo=sEndDate, sProvider="AUTO",
-                                                oBoundingBox=oBBox)
+    aoProductsFoundArray = wasdi.searchEOImages("S5P", sDateFrom=sStartDate, sDateTo=sEndDate,
+                                                sProductType=sProductType,
+                                                sProvider="AUTO", oBoundingBox=oBBox)
 
     # The result is an array of Objects. Each Object is a Dictionary.
 
@@ -66,23 +70,23 @@ These are different samples of Sentinel 2 Search. The mandatory fields to search
     if len(aoProductsFoundArray) > 0:
         # as an example, let's print the filename of the first product we found
         wasdi.wasdiLog(f'{aoProductsFoundArray[0]["fileName"]}')
-
            
 
 What it does:
 
- - Initializes the input variable needed. 
- - Start searching for Sentinel-3 Images - automaitcally selecting the provider
- - Loops over the results and prints the file names of the files reporting Land Surface Temperature `(reference data) <https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-3-slstr/product-types/level-2-lst>`_
+ - Initialize the input variable needed. 
+ - Start Searching for Sentinel-5p products choosing automatically the provider
+ - prints the number of results
+ - as an example, prints the filename of the first product found
 
 .. note::
-	The developer can decide whatever is needed in the params.json file. If you decide to use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
+	The developer can decide whatever is needed in the params.json file. If you will use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
 
 .. note::
-	With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsible for converting your data in your code.
+	With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsible to convert your data in your code
 
 .. note::
-	The Bounding Box Format used here is the one used by the User Interface when renderAsStrings is missing or false. The Boundig Box format when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**.
+	The Bounding Box Format Here Used is the one used by the User Interface when renderAsStrings is missing or false. The Boundig Box format when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**
 
 .. note::
-	The Date is formatted by the User Interface as "YYYY-MM-DD".
+	The Date is formatted by the User Interface as "YYYY-MM-DD"

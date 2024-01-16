@@ -7,7 +7,7 @@
 
 Search Sentinel-1 Images
 =========================================
-The following code show how to search S1 Images
+The following code shows how to search S1 Images.
 
 
 Prerequisites
@@ -25,7 +25,7 @@ Recipe
 ------------------------------------------
 
 .. note::
-	Assume you have at least one workspace and you configured it in the config.json file
+	Assume you have at least one workspace and you have configured it in the config.json file.
 
 These are different samples of Sentinel 1 Search. The mandatory fields to search are:
  - Mission Type
@@ -90,21 +90,21 @@ These are different samples of Sentinel 1 Search. The mandatory fields to search
 
 What it does:
 
- - Initialize the input varialbe needed. 
- - Start Search S1 GRD Images
- - Loop the results and access some properties
- - Search SLC Images
- - Search SLC Images adding the relative orbit filter
- - Search GRD Images using the lat lon values and not the Bounding Box Object
+ - Initializes the input varialbe needed. 
+ - Starts searching for S1 GRD Images
+ - Loops over the results and accesses some properties
+ - Searches for SLC Images
+ - Searches for  SLC Images adding the relative orbit filter
+ - Searches for GRD Images using the lat lon values and not the Bounding Box Object
 
 .. note::
-	The developer can decide whatever is needed in the params.json file. If you will use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
+	The developer can decide what is needed in the params.json file. If you decide to use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
 
 .. note::
-	With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsible to convert your data in your code
+	With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsible to convert your data in your code.
 
 .. note::
-	The Boundig Box Format Here Used is the one used by the User Interface when renderAsStrings is missing or false. The Boundig Box format when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**
+	The Boundig Box Format used here is the one used by the User Interface when renderAsStrings is missing or false. The Boundig Box format when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**.
 
 .. note::
-	The Date is formatted by the User Interface as "YYYY-MM-DD"
+	The Date is formatted by the User Interface as "YYYY-MM-DD".

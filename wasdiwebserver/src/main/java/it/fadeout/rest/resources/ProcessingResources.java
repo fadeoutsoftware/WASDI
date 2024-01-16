@@ -13,7 +13,6 @@ import javax.ws.rs.core.Response.Status;
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.users.User;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.MultiSubsetParameter;
