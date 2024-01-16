@@ -7,7 +7,7 @@
 
 Import Images after a Search
 =========================================
-The following code show how to import the Workspace the results of a search.
+The following code shows how to import the results of a search to a workspace.
 
 
 Prerequisites
@@ -26,10 +26,10 @@ Recipe
 ------------------------------------------
 
 .. note::
-	We will use Sentinel-1 for this sample but the same code can be used for all the missions and image types
+	We will use Sentinel-1 for this sample but the same code can be used for all the missions and image types.
 
 .. note::
-	In the code you will see different options. Probably in your code you will want to choose and use the one that best fits your needs
+	In the code, you will see different options. Most likely, you will want to choose the one that best fits your needs.
 
 
 This is our sample params.json file.
@@ -95,9 +95,9 @@ This is our sample params.json file.
 
 What it does:
 
- - Read Input Parameters
- - Start Search S1 GRD Images
- - Import 1 Product
- - Asynch Import of 1 Product
- - Import All Products
- - Asynch Import of All Products
+ - Reads Input Parameters
+ - Starts searching for S1 GRD Images
+ - Imports 1 Product
+ - Asynchronously imports 1 Product
+ - Imports All Products
+ - Asynchronously imports all Products

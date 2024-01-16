@@ -19,7 +19,7 @@ To run this code you need:
  - A valid Config file
  - A valid params.json file
  
-If this is not clear, you probably need to take a look to the `Python Tutorial <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/PythonTutorial.html>`_ before.
+If this is not clear, you probably need to take a look at the `Python Tutorial <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/PythonTutorial.html>`_ before.
 
 
 Recipe 
@@ -70,17 +70,17 @@ This is the code used to read Parameters.
 
 What it does:
 
- - read different parameters 
- - read the full parameters dictionary at once
+ - reads different parameters 
+ - reads the full parameters dictionary at once
 
 .. note::
-	The developer can decide whatever is needed in the params.json file. If you will use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
+	The developer can decide whatever is needed in the params.json file. If you decide to use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
 
 .. note::
-	With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsable to convert your data in your code
+	With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case, you will be responsible to convert your data in your code.
 
 .. note::
-	The Boundig Box Format Here Used is the one used by the User Interface when renderAsStrings is missing or false. The Boundig Box fromat when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**
+	The Boundig Box Format used here is the same one used by the User Interface when renderAsStrings is missing or false. The Boundig Box fromat when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**.
 
 .. note::
-	The Date is formatted by the User Interface as "YYYY-MM-DD"
+	The Date is formatted by the User Interface as "YYYY-MM-DD".

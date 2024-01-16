@@ -61,7 +61,7 @@ public class ConsoleResource {
 	@POST
 	@Path("/create")
 	public PrimitiveResult create(@Context HttpServletRequest oRequest, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspaceId") String sWorkspaceId) {
-		WasdiLog.debugLog("ConsoleResource.create( WS: " + sWorkspaceId + " )");
+		WasdiLog.infoLog("ConsoleResource.create( WorkspaceId: " + sWorkspaceId + " )");
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -115,7 +115,7 @@ public class ConsoleResource {
 			}
 			
 			String sClientIp = resolveClientIp(oRequest);
-			WasdiLog.debugLog("ConsoleResource.create: client IP: " + sClientIp);
+			WasdiLog.infoLog("ConsoleResource.create: client IP: " + sClientIp);
 
 			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oWorkspace.getUserId(), sWorkspaceId);
 
@@ -124,7 +124,7 @@ public class ConsoleResource {
 
 			if (oJupyterNotebook != null) {
 				
-				WasdiLog.debugLog("ConsoleResource.create: this is an existing notebook");
+				WasdiLog.infoLog("ConsoleResource.create: this is an existing notebook");
 				
 				// We want to be safe
 				if (Utils.isNullOrEmpty(oJupyterNotebook.getAllowedIpAddresses())) {
@@ -136,10 +136,10 @@ public class ConsoleResource {
 				boolean bIsAllowed = isClientIpAllowedForThisUser(oJupyterNotebook.getAllowedIpAddresses(), sUserId, sClientIp);
 				
 				if (bIsAllowed) {
-					WasdiLog.debugLog("ConsoleResource.create: client ip allowed for the notebook");
+					WasdiLog.infoLog("ConsoleResource.create: client ip allowed for the notebook");
 				}
 				else {
-					WasdiLog.debugLog("ConsoleResource.create: client ip NOT allowed for the notebook: add it");
+					WasdiLog.infoLog("ConsoleResource.create: client ip NOT allowed for the notebook: add it");
 					
 					// Take the paths of the template and the output file
 					String sVolumeFolder = WasdiConfig.Current.paths.traefikMountedVolume;
@@ -184,7 +184,7 @@ public class ConsoleResource {
 					oJinjaTemplateRenderer.translate(sTemplateFile, sOutputFile, aoTraefikTemplateParams);
 				}
 				
-				WasdiLog.debugLog("ConsoleResource.create: notebook already exists, check if it is up and running");
+				WasdiLog.infoLog("ConsoleResource.create: notebook already exists, check if it is up and running");
 				
 				// Here we know it is a db: so if it is null is for sure not active
 				JupyterNotebook oNotebook = internalIsJupyterActive(oWorkspace.getUserId(), sWorkspaceId); 
@@ -193,13 +193,13 @@ public class ConsoleResource {
 				
 				if (oNotebook!=null) bIsActive = true;
 				
-				WasdiLog.debugLog("ConsoleResource.create | bIsActive: " + bIsActive);
+				WasdiLog.infoLog("ConsoleResource.create | bIsActive: " + bIsActive);
 				
 				boolean bIsUpToDate = true;
-				WasdiLog.debugLog("ConsoleResource.create | bIsUpToDate: " + bIsUpToDate);
+				WasdiLog.infoLog("ConsoleResource.create | bIsUpToDate: " + bIsUpToDate);
 
 				if (bIsActive && bIsUpToDate) {
-					WasdiLog.debugLog("ConsoleResource.create: JupyterNotebook started");
+					WasdiLog.infoLog("ConsoleResource.create: JupyterNotebook started");
 
 					String sUrl = oNotebook.getUrl();
 
@@ -208,7 +208,7 @@ public class ConsoleResource {
 
 					return oResult;
 				} else {
-					WasdiLog.debugLog("ConsoleResource.create: JupyterNotebook is not started or is out-of-date");
+					WasdiLog.infoLog("ConsoleResource.create: JupyterNotebook is not started or is out-of-date");
 
 					// restart JN instance
 					// update JN instance
@@ -219,7 +219,7 @@ public class ConsoleResource {
 			} 
 			else {
 				
-				WasdiLog.debugLog("ConsoleResource.create: this is an NEW notebook");
+				WasdiLog.infoLog("ConsoleResource.create: this is an NEW notebook");
 				
 				// This is a new notebook!
 				oJupyterNotebook = new JupyterNotebook();
@@ -239,7 +239,7 @@ public class ConsoleResource {
 				// Schedule the process to run the processor
 				String sProcessObjId = Utils.getRandomName();
 
-				WasdiLog.debugLog("ConsoleResource.create: create local operation");
+				WasdiLog.infoLog("ConsoleResource.create: create local operation");
 
 				ProcessorParameter oProcessorParameter = new ProcessorParameter();
 				oProcessorParameter.setName(sJupyterNotebookCode);
@@ -266,12 +266,12 @@ public class ConsoleResource {
 				}				
 			}
 
-		} catch (Exception oEx) {
+		} catch (Throwable oEx) {
 			WasdiLog.errorLog("ConsoleResource.create: " + oEx);
 
 			oResult.setStringValue("Error in starting proccess");
 			oResult.setBoolValue(false);
-
+			
 			return oResult;
 		}
 	}

@@ -65,7 +65,6 @@ import wasdi.shared.viewmodels.monitoring.Timestamp;
 import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceAggregatedViewModel;
 import wasdi.shared.viewmodels.users.RegistrationInfoViewModel;
-import wasdi.shared.viewmodels.users.UserViewModel;
 
 /**
  * Main Class of the WASDI Web Server.
