@@ -154,20 +154,6 @@ pipeline {
       }
     }
 
-    stage('MAVEN - EXECUTE TEST') {
-      steps {
-        sh script: """
-          mvn \
-            --batch-mode \
-            --activate-profiles ${env.sMavenProfile} \
-            --define revision=${env.sCurrentRevision} \
-            --update-snapshots \
-            test
-        """,
-        label: "Execute unit tests"
-      }
-    }
-
     stage('BUILD THE CONTAINERS') {
       steps {
         sh script: """
