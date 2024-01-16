@@ -178,7 +178,7 @@ pipeline {
                   cd ${env.sWasdiAnsiblePath}
                   ansible-playbook \
                     playbooks/deployDockerContainerWasdiJavaArtifact.yml \
-                    --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
+                    --inventory inventories/${env.sAnsibleInventoryLower}.yml \
                     --limit ${env.sAnsibleLimit} \
                     --diff \
                     --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
@@ -202,7 +202,7 @@ pipeline {
                 cd ${env.sWasdiAnsiblePath}
                 ansible-playbook \
                   playbooks/runDockerContainerWasdiJavaArtifact.yml \
-                  --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
+                    --inventory inventories/${env.sAnsibleInventoryLower}.yml \
                   --limit ${env.sAnsibleLimit} \
                   --diff \
                   --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
