@@ -69,7 +69,7 @@ import wasdi.shared.viewmodels.users.UserViewModel;
 
 /**
  * Main Class of the WASDI Web Server.
- * Intilizes the system
+ * Initialises the system
  * Contains different Utility functions to make from this server http calls to the other servers
  * 
  * @author p.campanella
@@ -99,7 +99,7 @@ public class Wasdi extends ResourceConfig {
 	public static String s_sDebugPassword = "password";
 		
 	/**
-	 * Name of the Node-Specific Workpsace
+	 * Name of the Node-Specific Workspace
 	 */
 	public static String s_sLocalWorkspaceName = "wasdi_specific_node_ws_code";
 	
@@ -116,7 +116,7 @@ public class Wasdi extends ResourceConfig {
 	public static String s_KeyBearerSecret = "";
 	
 	/**
-	 * Contructor: bind the clasess and the resources classes
+	 * Constructor: bind the classes and the resources classes
 	 */
 	public Wasdi() {
 		register(new WasdiBinder());
@@ -126,7 +126,7 @@ public class Wasdi extends ResourceConfig {
 	}
 
 	/**
-	 * Web Server intialization: it loads the main web-server configuration
+	 * Web Server initialisation: it loads the main web-server configuration
 	 */
 	@PostConstruct
 	public void initWasdi() {
