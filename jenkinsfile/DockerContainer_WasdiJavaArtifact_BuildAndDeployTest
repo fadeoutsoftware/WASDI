@@ -1,0 +1,240 @@
+def getAnsibleExtraVariableProject() {
+  def aAnsibleExtraVariableProject = []
+
+  aAnsibleExtraVariableProject.add('sDeployWasdiLauncherContainer=' + env.sWasdiLauncher.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiSchedulerContainer=' + env.sWasdiScheduler.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTomcatOgcProcessesServerContainer=' + env.sWasdiTomcatOgcProcessesServer.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTomcatOpenEoServerContainer=' + env.sWasdiTomcatOpenEoServer.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTomcatWasdiWebServerContainer=' + env.sWasdiTomcatWasdiWebServer.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTriggerContainer=' + env.sWasdiTrigger.toString())
+
+  aAnsibleExtraVariableProject.unique()
+
+  if ( aAnsibleExtraVariableProject.size() > 0 ) {
+    return aAnsibleExtraVariableProject.join(' ')
+  }
+
+  return ''
+}
+
+def getMavenBuildProject() {
+  def aMavenBuildProject = []
+
+  if ( env.sWasdiLauncher.toBoolean() ) {
+    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('wrappersnap/launcher')
+  }
+
+  if ( env.sWasdiScheduler.toBoolean() ) {
+    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('scheduler')
+  }
+
+  if ( env.sWasdiTomcatOgcProcessesServer.toBoolean() ) {
+    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('ogcprocesses/processes')
+  }
+
+  if ( env.sWasdiTomcatOpenEoServer.toBoolean() ) {
+    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('openeo-java-server')
+  }
+
+  if ( env.sWasdiTomcatWasdiWebServer.toBoolean() ) {
+    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('wasdiwebserver')
+  }
+
+  if ( env.sWasdiTrigger.toBoolean() ) {
+    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('libraries/jwasdilib/jwasdilib')
+    aMavenBuildProject.add('wasditrigger')
+  }
+
+  aMavenBuildProject.unique()
+
+  if ( aMavenBuildProject.size() > 0 ) {
+    return '--projects ' + aMavenBuildProject.join(',') + ' --also-make'
+  }
+
+  return ''
+}
+
+pipeline {
+  agent any
+
+  environment {
+    sAnsibleExtraVariableProject        = getAnsibleExtraVariableProject()
+    sAnsibleInventoryLower              = env.sAnsibleInventory.split('-')[0].toLowerCase()
+    sCurrentEnvironmentLower            = env.sAnsibleLimit.split('-')[0].toLowerCase()
+    sCurrentEnvironmentUpper            = env.sAnsibleLimit.split('-')[0].toUpperCase()
+    sCurrentRevision                    = "${env.BUILD_ID}"
+    sMavenBuildProject                  = getMavenBuildProject()
+    sMavenProfile                       = "wasdi-${env.sCurrentEnvironmentLower}"
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
+    disableConcurrentBuilds()
+  }
+
+  tools {
+    jdk "WASDI_JDK_8"
+    maven "WASDI_MAVEN"
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        echo "env.GIT_BRANCH                       = " + env.GIT_BRANCH
+        echo "env.sAnsibleExtraVariableProject     = " + env.sAnsibleExtraVariableProject
+        echo "env.sAnsibleInventory                = " + env.sAnsibleInventory
+        echo "env.sAnsibleInventoryLower           = " + env.sAnsibleInventoryLower
+        echo "env.sAnsibleLimit                    = " + env.sAnsibleLimit
+        echo "env.sCurrentEnvironmentLower         = " + env.sCurrentEnvironmentLower
+        echo "env.sCurrentEnvironmentUpper         = " + env.sCurrentEnvironmentUpper
+        echo "env.sCurrentRevision                 = " + env.sCurrentRevision
+        echo "env.sMavenBuildProject               = " + env.sMavenBuildProject
+        echo "env.sSourceBranch                    = " + env.sSourceBranch
+        echo "env.sWasdiAnsiblePath                = " + env.sWasdiAnsiblePath
+        echo "env.sWasdiLauncher                   = " + env.sWasdiLauncher
+        echo "env.sWasdiScheduler                  = " + env.sWasdiScheduler
+        echo "env.sWasdiTomcatOgcProcessesServer   = " + env.sWasdiTomcatOgcProcessesServer
+        echo "env.sWasdiTomcatOpenEoServer         = " + env.sWasdiTomcatOpenEoServer
+        echo "env.sWasdiTomcatWasdiWebServer       = " + env.sWasdiTomcatWasdiWebServer
+        echo "env.sWasdiTrigger                    = " + env.sWasdiTrigger
+        echo "env.WORKSPACE                        = " + env.WORKSPACE
+
+        sh script: "pwd", label: "Current location"
+        sh script: "cat pom.xml", label: "Content of the main pom.xml file"
+
+        sh script: "which mvn", label: "Tool > mvn > path"
+        sh script: "mvn --version", label: "Tool > mvn > current version"
+        sh script: "which java", label: "Tool > java > path"
+        sh script: "java -version", label: "Tool > java > current version"
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          sh script: """
+            mkdir --parents `dirname ${sWasdiAnsibleVaultFile}`
+            echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
+          """,
+          label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloudSsh', url: "${env.sWasdiAnsibleGitRepositorySshUrl}"]]])
+        }
+      }
+    }
+
+    stage('BUILD THE CODE WITH MAVEN') {
+      steps {
+        sh script: """
+          mvn \
+            --batch-mode \
+            --activate-profiles ${env.sMavenProfile} \
+            --define revision=${env.sCurrentRevision} \
+            --define skipTests \
+            --update-snapshots \
+            ${env.sMavenBuildProject} \
+            clean package
+        """,
+        label: "Create the right packages"
+      }
+    }
+
+    stage('MAVEN - EXECUTE TEST') {
+      steps {
+        sh script: """
+          mvn \
+            --batch-mode \
+            --activate-profiles ${env.sMavenProfile} \
+            --define revision=${env.sCurrentRevision} \
+            --update-snapshots \
+            test
+        """,
+        label: "Execute unit tests"
+      }
+    }
+
+    stage('BUILD THE CONTAINERS') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/buildWasdiDockerContainer.yml \
+            --inventory inventories/${env.sAnsibleInventoryLower}.yml \
+            --limit ${env.sCurrentEnvironmentLower} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
+        """,
+        label: "Build the containers"
+      }
+    }
+
+    stage('DEPLOY THE CONTAINERS AND THEIR RUN ELEMENTS') {
+      steps {
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          script {
+            try {
+              sh script: """
+                  cd ${env.sWasdiAnsiblePath}
+                  ansible-playbook \
+                    playbooks/deployDockerContainerWasdiJavaArtifact.yml \
+                    --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
+                    --limit ${env.sAnsibleLimit} \
+                    --diff \
+                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
+              """,
+              label: "Deploy the containers and their run elements"
+            } catch (oError) {
+              echo oError.getMessage()
+              throw oError
+            }
+          }
+        }
+      }
+    }
+
+    stage('START OR RESTART THE CONTAINERS') {
+      steps {
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          script {
+            try {
+              sh script: """
+                cd ${env.sWasdiAnsiblePath}
+                ansible-playbook \
+                  playbooks/runDockerContainerWasdiJavaArtifact.yml \
+                  --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
+                  --limit ${env.sAnsibleLimit} \
+                  --diff \
+                  --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
+              """,
+              label: "Start or restart the containers"
+            } catch (oError) {
+              echo oError.getMessage()
+              throw oError
+            }
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
