@@ -1,0 +1,138 @@
+import jenkins.model.*
+import hudson.model.*
+
+def setEnvironmentVariable() {
+  def aoParameters = Jenkins.instance.getAllItems(Job)
+                          .find {job -> job.fullName == 'DockerContainer_WasdiJavaArtifact_BuildAndDeployTest' }
+                          .getBuildByNumber(5)
+                          .getAction(hudson.model.ParametersAction)
+
+  env.sAnsibleInventory                = aoParameters.getParameter('sAnsibleInventory').value
+  env.sAnsibleLimit                    = aoParameters.getParameter('sAnsibleLimit').value
+  env.sWasdiLauncher                   = aoParameters.getParameter('sWasdiLauncher').value
+  env.sWasdiScheduler                  = aoParameters.getParameter('sWasdiScheduler').value
+  env.sWasdiTomcatOgcProcessesServer   = aoParameters.getParameter('sWasdiTomcatOgcProcessesServer').value
+  env.sWasdiTomcatOpenEoServer         = aoParameters.getParameter('sWasdiTomcatOpenEoServer').value
+  env.sWasdiTomcatWasdiWebServer       = aoParameters.getParameter('sWasdiTomcatWasdiWebServer').value
+  env.sWasdiTrigger                    = aoParameters.getParameter('sWasdiTrigger').value
+}
+
+def getAnsibleExtraVariableProject() {
+  def aAnsibleExtraVariableProject = []
+
+  aAnsibleExtraVariableProject.add('sDeployWasdiLauncherContainer=' + env.sWasdiLauncher.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiSchedulerContainer=' + env.sWasdiScheduler.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTomcatOgcProcessesServerContainer=' + env.sWasdiTomcatOgcProcessesServer.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTomcatOpenEoServerContainer=' + env.sWasdiTomcatOpenEoServer.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTomcatWasdiWebServerContainer=' + env.sWasdiTomcatWasdiWebServer.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTriggerContainer=' + env.sWasdiTrigger.toString())
+
+  aAnsibleExtraVariableProject.unique()
+
+  if ( aAnsibleExtraVariableProject.size() > 0 ) {
+    return aAnsibleExtraVariableProject.join(' ')
+  }
+
+  return ''
+}
+
+pipeline {
+  agent any
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
+    disableConcurrentBuilds()
+  }
+
+  stages {
+    stage('INITIALIZE') {
+      steps {
+        script {
+          setEnvironmentVariable()
+          env.sAnsibleExtraVariableProject = getAnsibleExtraVariableProject()
+        }
+      }
+    }
+
+    stage('DEBUG') {
+      steps {
+        echo "env.GIT_BRANCH                       = " + env.GIT_BRANCH
+        echo "env.sAnsibleExtraVariableProject     = " + env.sAnsibleExtraVariableProject
+        echo "env.sAnsibleInventory                = " + env.sAnsibleInventory
+        echo "env.sAnsibleInventoryLower           = " + env.sAnsibleInventoryLower
+        echo "env.sAnsibleLimit                    = " + env.sAnsibleLimit
+        echo "env.sCurrentEnvironmentLower         = " + env.sCurrentEnvironmentLower
+        echo "env.sCurrentEnvironmentUpper         = " + env.sCurrentEnvironmentUpper
+        echo "env.sCurrentRevision                 = " + env.sCurrentRevision
+        echo "env.sSourceBranch                    = " + env.sSourceBranch
+        echo "env.sWasdiAnsiblePath                = " + env.sWasdiAnsiblePath
+        echo "env.sWasdiLauncher                   = " + env.sWasdiLauncher
+        echo "env.sWasdiScheduler                  = " + env.sWasdiScheduler
+        echo "env.sWasdiTomcatOgcProcessesServer   = " + env.sWasdiTomcatOgcProcessesServer
+        echo "env.sWasdiTomcatOpenEoServer         = " + env.sWasdiTomcatOpenEoServer
+        echo "env.sWasdiTomcatWasdiWebServer       = " + env.sWasdiTomcatWasdiWebServer
+        echo "env.sWasdiTrigger                    = " + env.sWasdiTrigger
+        echo "env.WORKSPACE                        = " + env.WORKSPACE
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          sh script: """
+            mkdir --parents `dirname ${sWasdiAnsibleVaultFile}`
+            echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
+          """,
+          label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloudSsh', url: "${env.sWasdiAnsibleGitRepositorySshUrl}"]]])
+        }
+      }
+    }
+
+    stage('DEPLOY THE CONTAINERS AND THEIR RUN ELEMENTS') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deployDockerContainerWasdiJavaArtifact.yml \
+            --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff --check \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Deploy the containers and their run elements"
+      }
+    }
+
+    stage('START OR RESTART THE CONTAINERS') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/runDockerContainerWasdiJavaArtifact.yml \
+            --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff --check \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Start or restart the containers"
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
