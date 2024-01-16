@@ -55,6 +55,8 @@ public final class CDSUtils {
 			return "specific_humidity";
 		case "SP":
 			return "surface_pressure";
+		case "SSRD":
+			return "surface_solar_radiation_downwards";
 		case "SST":
 			return "sea_surface_temperature";
 		case "ST":
