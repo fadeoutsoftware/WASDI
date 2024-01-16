@@ -8,7 +8,10 @@ def setEnvironmentVariable() {
                           .getAction(hudson.model.ParametersAction)
 
   env.sAnsibleInventory                = aoParameters.getParameter('sAnsibleInventory').value
+  env.sAnsibleInventoryLower           = env.sAnsibleInventory.split('-')[0].toLowerCase()
   env.sAnsibleLimit                    = aoParameters.getParameter('sAnsibleLimit').value
+  env.sCurrentEnvironmentLower         = env.sAnsibleLimit.split('-')[0].toLowerCase()
+  env.sCurrentEnvironmentUpper         = env.sAnsibleLimit.split('-')[0].toUpperCase()
   env.sWasdiLauncher                   = aoParameters.getParameter('sWasdiLauncher').value
   env.sWasdiScheduler                  = aoParameters.getParameter('sWasdiScheduler').value
   env.sWasdiTomcatOgcProcessesServer   = aoParameters.getParameter('sWasdiTomcatOgcProcessesServer').value
@@ -108,7 +111,7 @@ pipeline {
             --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff --check \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
         """,
         label: "Deploy the containers and their run elements"
       }
@@ -123,7 +126,7 @@ pipeline {
             --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff --check \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
         """,
         label: "Start or restart the containers"
       }
