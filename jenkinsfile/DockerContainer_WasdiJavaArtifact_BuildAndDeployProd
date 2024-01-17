@@ -122,7 +122,7 @@ pipeline {
       }
     }
 
-    stage('START OR RESTART THE CONTAINERS') {
+    stage('START OR RESTART THE CONTAINER(S)') {
       steps {
         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
           script {
@@ -137,7 +137,7 @@ pipeline {
                   --check \
                   --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
-              label: "Start or restart the containers"
+              label: "Start or restart the container(s)"
             } catch (oError) {
               echo oError.getMessage()
               throw oError

@@ -189,7 +189,7 @@ pipeline {
       }
     }
 
-    stage('START OR RESTART THE CONTAINERS') {
+    stage('START OR RESTART THE CONTAINER(S)') {
       steps {
         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
           script {
@@ -203,7 +203,7 @@ pipeline {
                   --diff \
                   --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
               """,
-              label: "Start or restart the containers"
+              label: "Start or restart the container(s)"
             } catch (oError) {
               echo oError.getMessage()
               throw oError
