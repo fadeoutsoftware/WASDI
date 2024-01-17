@@ -1,8 +1,12 @@
 pipeline {
   agent any
 
+  environment {
+    sCurrentRevision = "${env.BUILD_ID}"
+  }
+
   options {
-    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '365'))
     disableConcurrentBuilds()
   }
 
