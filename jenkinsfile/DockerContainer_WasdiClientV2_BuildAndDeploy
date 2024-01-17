@@ -101,7 +101,8 @@ pipeline {
       steps {
         sh script: """
           cd client_v2
-          .\node_modules\.bin\ng build --configuration production
+          set NG_FORCE_TTY=false
+          ./node_modules/.bin/ng build --configuration production
         """,
         label: "Build WASDI client"
       }
