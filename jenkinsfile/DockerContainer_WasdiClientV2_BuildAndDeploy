@@ -97,11 +97,11 @@ pipeline {
       }
     }
 
-    stage('NPM - BUILD') {
+    stage('NG - BUILD') {
       steps {
         sh script: """
           cd client_v2
-          ng build --configuration production
+          .\node_modules\.bin\ng build --configuration production
         """,
         label: "Build WASDI client"
       }
