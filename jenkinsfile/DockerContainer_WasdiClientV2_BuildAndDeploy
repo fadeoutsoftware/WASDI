@@ -101,7 +101,7 @@ pipeline {
       steps {
         sh script: """
           cd client_v2
-          npm run build
+          ng build --configuration production
         """,
         label: "Build WASDI client"
       }
