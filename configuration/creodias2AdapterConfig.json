@@ -1,4 +1,4 @@
 {
-    "fileAccessTestEnabled": true,
+    "fileAccessTestEnabled": false,
     "testingUsers": ["user@test.test"]
 }
