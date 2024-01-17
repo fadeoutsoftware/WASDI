@@ -2,10 +2,10 @@ import jenkins.model.*
 import hudson.model.*
 
 def setEnvironmentVariable() {
-  def sJobName = env.JOB_BASE_NAME.replaceAll('_Deploy', '_BuildAndDeploy')
+  sSourceJobName = env.JOB_BASE_NAME.replaceAll('_Deploy', '_BuildAndDeploy')
 
   def aoParameters = Jenkins.instance.getAllItems(Job)
-                          .find { job -> job.fullName == sJobName }
+                          .find { job -> job.fullName == sSourceJobName }
                           .getBuildByNumber(env.sCurrentRevision.toInteger())
                           .getAction(hudson.model.ParametersAction)
 
@@ -17,6 +17,8 @@ def setEnvironmentVariable() {
   env.sWasdiTomcatOpenEoServer         = aoParameters.getParameter('sWasdiTomcatOpenEoServer').value
   env.sWasdiTomcatWasdiWebServer       = aoParameters.getParameter('sWasdiTomcatWasdiWebServer').value
   env.sWasdiTrigger                    = aoParameters.getParameter('sWasdiTrigger').value
+
+  echo "sSourceJobName = " + sSourceJobName
 }
 
 def getAnsibleExtraVariableProject() {
@@ -58,7 +60,6 @@ pipeline {
 
     stage('DEBUG') {
       steps {
-        echo "env.JOB_BASE_NAME                    = " + env.JOB_BASE_NAME
         echo "env.GIT_BRANCH                       = " + env.GIT_BRANCH
         echo "env.sAnsibleExtraVariableProject     = " + env.sAnsibleExtraVariableProject
         echo "env.sAnsibleInventory                = " + env.sAnsibleInventory
