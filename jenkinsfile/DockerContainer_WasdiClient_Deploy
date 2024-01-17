@@ -10,6 +10,7 @@ pipeline {
     stage('DEBUG') {
       steps {
         echo "env.GIT_BRANCH                    = " + env.GIT_BRANCH
+        echo "env.sAnsibleInventory             = " + env.sAnsibleInventory
         echo "env.sAnsibleLimit                 = " + env.sAnsibleLimit
         echo "env.sCurrentRevision              = " + env.sCurrentRevision
         echo "env.sSourceBranch                 = " + env.sSourceBranch

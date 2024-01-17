@@ -64,17 +64,15 @@ pipeline {
   agent any
 
   environment {
-    sAnsibleExtraVariableProject        = getAnsibleExtraVariableProject()
-    sAnsibleInventoryLower              = env.sAnsibleInventory.split('-')[0].toLowerCase()
-    sCurrentEnvironmentLower            = env.sAnsibleLimit.split('-')[0].toLowerCase()
-    sCurrentEnvironmentUpper            = env.sAnsibleLimit.split('-')[0].toUpperCase()
-    sCurrentRevision                    = "${env.BUILD_ID}"
-    sMavenBuildProject                  = getMavenBuildProject()
-    sMavenProfile                       = "wasdi-${env.sCurrentEnvironmentLower}"
+    sAnsibleExtraVariableProject = getAnsibleExtraVariableProject()
+    sCurrentRevision             = "${env.BUILD_ID}"
+    sEnvironmentLower            = env.sAnsibleLimit.split('-')[0].toLowerCase()
+    sMavenBuildProject           = getMavenBuildProject()
+    sMavenProfile                = "wasdi-${env.sEnvironmentLower}"
   }
 
   options {
-    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '365'))
     disableConcurrentBuilds()
   }
 
@@ -89,12 +87,10 @@ pipeline {
         echo "env.GIT_BRANCH                       = " + env.GIT_BRANCH
         echo "env.sAnsibleExtraVariableProject     = " + env.sAnsibleExtraVariableProject
         echo "env.sAnsibleInventory                = " + env.sAnsibleInventory
-        echo "env.sAnsibleInventoryLower           = " + env.sAnsibleInventoryLower
         echo "env.sAnsibleLimit                    = " + env.sAnsibleLimit
-        echo "env.sCurrentEnvironmentLower         = " + env.sCurrentEnvironmentLower
-        echo "env.sCurrentEnvironmentUpper         = " + env.sCurrentEnvironmentUpper
         echo "env.sCurrentRevision                 = " + env.sCurrentRevision
         echo "env.sMavenBuildProject               = " + env.sMavenBuildProject
+        echo "env.sMavenProfile                    = " + env.sMavenProfile
         echo "env.sSourceBranch                    = " + env.sSourceBranch
         echo "env.sWasdiAnsiblePath                = " + env.sWasdiAnsiblePath
         echo "env.sWasdiLauncher                   = " + env.sWasdiLauncher
@@ -160,8 +156,8 @@ pipeline {
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
             playbooks/buildWasdiDockerContainer.yml \
-            --inventory inventories/${env.sAnsibleInventoryLower}.yml \
-            --limit ${env.sCurrentEnvironmentLower} \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
         """,
@@ -178,7 +174,7 @@ pipeline {
                   cd ${env.sWasdiAnsiblePath}
                   ansible-playbook \
                     playbooks/deployDockerContainerWasdiJavaArtifact.yml \
-                    --inventory inventories/${env.sAnsibleInventoryLower}.yml \
+                    --inventory inventories/${env.sAnsibleInventory}.yml \
                     --limit ${env.sAnsibleLimit} \
                     --diff \
                     --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
@@ -202,7 +198,7 @@ pipeline {
                 cd ${env.sWasdiAnsiblePath}
                 ansible-playbook \
                   playbooks/runDockerContainerWasdiJavaArtifact.yml \
-                    --inventory inventories/${env.sAnsibleInventoryLower}.yml \
+                    --inventory inventories/${env.sAnsibleInventory}.yml \
                   --limit ${env.sAnsibleLimit} \
                   --diff \
                   --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
