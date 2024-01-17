@@ -61,23 +61,6 @@ pipeline {
       }
     }
 
-    stage('BUILD THE CODE WITH MAVEN') {
-      steps {
-        sh script: """
-          mvn \
-            --batch-mode \
-            --activate-profiles ${env.sMavenProfile} \
-            --define revision=${env.sCurrentRevision} \
-            --define skipTests \
-            --update-snapshots \
-            --projects wrappersnap/wasdishared,wrappersnap/launcher,scheduler,wasdiwebserver,libraries/jwasdilib/jwasdilib,wasditrigger,ogcprocesses/processes,openeo-java-server \
-            --also-make \
-            clean package
-        """,
-        label: "Create the right packages"
-      }
-    }
-
     stage('ANALYZE THE CODE WITH SONARQUBE') {
       steps {
         script {
