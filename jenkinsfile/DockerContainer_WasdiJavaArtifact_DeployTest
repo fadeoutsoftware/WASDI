@@ -4,7 +4,7 @@ import hudson.model.*
 def setEnvironmentVariable() {
   def aoParameters = Jenkins.instance.getAllItems(Job)
                           .find {job -> job.fullName == 'DockerContainer_WasdiJavaArtifact_BuildAndDeployTest' }
-                          .getBuildByNumber(env.sCurrentRevision)
+                          .getBuildByNumber(env.sCurrentRevision.toInteger())
                           .getAction(hudson.model.ParametersAction)
 
   env.sAnsibleInventory                = aoParameters.getParameter('sAnsibleInventory').value
