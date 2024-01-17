@@ -4,14 +4,11 @@ import hudson.model.*
 def setEnvironmentVariable() {
   def aoParameters = Jenkins.instance.getAllItems(Job)
                           .find {job -> job.fullName == 'DockerContainer_WasdiJavaArtifact_BuildAndDeployTest' }
-                          .getBuildByNumber(5)
+                          .getBuildByNumber(env.sCurrentRevision)
                           .getAction(hudson.model.ParametersAction)
 
   env.sAnsibleInventory                = aoParameters.getParameter('sAnsibleInventory').value
-  env.sAnsibleInventoryLower           = env.sAnsibleInventory.split('-')[0].toLowerCase()
   env.sAnsibleLimit                    = aoParameters.getParameter('sAnsibleLimit').value
-  env.sCurrentEnvironmentLower         = env.sAnsibleLimit.split('-')[0].toLowerCase()
-  env.sCurrentEnvironmentUpper         = env.sAnsibleLimit.split('-')[0].toUpperCase()
   env.sWasdiLauncher                   = aoParameters.getParameter('sWasdiLauncher').value
   env.sWasdiScheduler                  = aoParameters.getParameter('sWasdiScheduler').value
   env.sWasdiTomcatOgcProcessesServer   = aoParameters.getParameter('sWasdiTomcatOgcProcessesServer').value
@@ -59,13 +56,11 @@ pipeline {
 
     stage('DEBUG') {
       steps {
+        echo "env.JOB_BASE_NAME                    = " + env.JOB_BASE_NAME
         echo "env.GIT_BRANCH                       = " + env.GIT_BRANCH
         echo "env.sAnsibleExtraVariableProject     = " + env.sAnsibleExtraVariableProject
         echo "env.sAnsibleInventory                = " + env.sAnsibleInventory
-        echo "env.sAnsibleInventoryLower           = " + env.sAnsibleInventoryLower
         echo "env.sAnsibleLimit                    = " + env.sAnsibleLimit
-        echo "env.sCurrentEnvironmentLower         = " + env.sCurrentEnvironmentLower
-        echo "env.sCurrentEnvironmentUpper         = " + env.sCurrentEnvironmentUpper
         echo "env.sCurrentRevision                 = " + env.sCurrentRevision
         echo "env.sSourceBranch                    = " + env.sSourceBranch
         echo "env.sWasdiAnsiblePath                = " + env.sWasdiAnsiblePath
@@ -76,6 +71,8 @@ pipeline {
         echo "env.sWasdiTomcatWasdiWebServer       = " + env.sWasdiTomcatWasdiWebServer
         echo "env.sWasdiTrigger                    = " + env.sWasdiTrigger
         echo "env.WORKSPACE                        = " + env.WORKSPACE
+
+        sh script: "pwd", label: "Current location"
       }
     }
 
@@ -108,7 +105,7 @@ pipeline {
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
             playbooks/deployDockerContainerWasdiJavaArtifact.yml \
-            --inventory inventories/${env.sAnsibleInventoryLower}.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
@@ -123,7 +120,7 @@ pipeline {
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
             playbooks/runDockerContainerWasdiJavaArtifact.yml \
-            --inventory inventories/${env.sAnsibleInventoryLower}.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'

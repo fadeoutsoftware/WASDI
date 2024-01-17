@@ -2,7 +2,6 @@ pipeline {
   agent any
 
   environment {
-    sCurrentAnsibleInventory = env.sAnsibleInventory.split('-')[0].toLowerCase()
     sCurrentRevision = "${env.BUILD_ID}"
   }
 
@@ -14,12 +13,13 @@ pipeline {
   stages {
     stage('DEBUG') {
       steps {
-        echo "env.GIT_BRANCH          = " + env.GIT_BRANCH
-        echo "env.sAnsibleLimit       = " + env.sAnsibleLimit
-        echo "env.sCurrentRevision    = " + env.sCurrentRevision
-        echo "env.sSourceBranch       = " + env.sSourceBranch
-        echo "env.sWasdiAnsiblePath   = " + env.sWasdiAnsiblePath
-        echo "env.WORKSPACE           = " + env.WORKSPACE
+        echo "env.GIT_BRANCH                    = " + env.GIT_BRANCH
+        echo "env.sAnsibleLimit                 = " + env.sAnsibleLimit
+        echo "env.sCurrentRevision              = " + env.sCurrentRevision
+        echo "env.sSourceBranch                 = " + env.sSourceBranch
+        echo "env.sWasdiAnsibleGitRepositoryUrl = " + env.sWasdiAnsibleGitRepositoryUrl
+        echo "env.sWasdiAnsiblePath             = " + env.sWasdiAnsiblePath
+        echo "env.WORKSPACE                     = " + env.WORKSPACE
 
         sh script: "pwd", label: "Current location"
       }
@@ -53,7 +53,7 @@ pipeline {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook playbooks/deployWasdiTool.yml \
-            --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
