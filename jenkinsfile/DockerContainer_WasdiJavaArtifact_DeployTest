@@ -3,9 +3,9 @@ import hudson.model.*
 
 def setEnvironmentVariable() {
   def sJobName = env.JOB_BASE_NAME.replaceAll('_Deploy', '_BuildAndDeploy')
-  echo sJobName
+
   def aoParameters = Jenkins.instance.getAllItems(Job)
-                          .find { job -> job.fullName == 'DockerContainer_WasdiJavaArtifact_BuildAndDeployTest' }
+                          .find { job -> job.fullName == sJobName }
                           .getBuildByNumber(env.sCurrentRevision.toInteger())
                           .getAction(hudson.model.ParametersAction)
 
