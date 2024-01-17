@@ -4,7 +4,6 @@ import java.util.Map;
 
 import com.hubspot.jinjava.Jinjava;
 
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -55,20 +54,26 @@ public class JinjaTemplateRenderer {
 			WasdiLog.debugLog("JinjaTemplateRenderer.translate: sTemplate = " + sTemplateFile);
 			WasdiLog.debugLog("JinjaTemplateRenderer.translate: JsonInput = " + sJsonInputs);
 			
-			Jinjava oJinjava = new Jinjava();
-			String sTemplate = WasdiFileUtils.fileToText(sTemplateFile);
 			Map<String, Object> aoVariables = JsonUtils.jsonToMapOfObjects(sJsonInputs);
+			String sTemplate = WasdiFileUtils.fileToText(sTemplateFile);
+			
+			WasdiLog.infoLog("JinjaTemplateRenderer.translate: creating Jinjava");
+			Jinjava oJinjava = new Jinjava();
+			
+			WasdiLog.infoLog("JinjaTemplateRenderer.translate: calling render");
 			String sRendered = oJinjava.render(sTemplate, aoVariables);
+			
+			WasdiLog.infoLog("JinjaTemplateRenderer.translate: calling write file");
 			
 			WasdiFileUtils.writeFile(sRendered, sOutputFile);
 			
-			WasdiLog.debugLog("JinjaTemplateRenderer.translate: template rendered in = " + sOutputFile);
+			WasdiLog.infoLog("JinjaTemplateRenderer.translate: template rendered in = " + sOutputFile);
 			
 			// Bye bye
 			return true;
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("JinjaTemplateRenderer.translate: exception " + oEx.toString());
+			WasdiLog.errorLog("JinjaTemplateRenderer.translate: exception " + oEx.toString());
 			return false;
 		}
 	}

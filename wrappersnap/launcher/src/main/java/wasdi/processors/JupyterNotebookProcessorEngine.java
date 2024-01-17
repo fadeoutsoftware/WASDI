@@ -3,7 +3,6 @@ package wasdi.processors;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -15,7 +14,6 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.config.DockerRegistryConfig;
-import wasdi.shared.config.DockersConfig;
 import wasdi.shared.config.EnvironmentVariableConfig;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.ProcessorTypeConfig;
@@ -30,10 +28,8 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
-import wasdi.shared.utils.docker.containersViewModels.constants.ContainerStates;
 import wasdi.shared.utils.jinja.JinjaTemplateRenderer;
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.shared.utils.runtime.RunTimeUtils;
 
 public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
@@ -134,17 +130,18 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		
 			processWorkspaceLog("Copy template directory");
 
-			// check if the processor folder exists
-			boolean bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
+			// We will copy in any case so we are sure to use always the most updated one
+			// Copy Docker template files in the processor folder
+			File oDockerTemplateFolder = new File(sProcessorTemplateFolder);
+			File oProcessorFolder = new File(sProcessorFolder);
 			
-			if (!bProcessorFolderExists) {
-				// Copy Docker template files in the processor folder
-				File oDockerTemplateFolder = new File(sProcessorTemplateFolder);
-				File oProcessorFolder = new File(sProcessorFolder);
+			// Check and or create the processor folder
+			if (!oProcessorFolder.exists()) {
+				oProcessorFolder.mkdirs();
+			}			
 
-				WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: creating the ProcessorFolder: " + sProcessorFolder + " and copy the template");
-				FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
-			}
+			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: Updating the ProcessorFolder: " + sProcessorFolder + " with the last template");
+			FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
 			
 			// mkdir **notebook** in the Workspace folder: it will be mounted on the docker that hosts the users' notebook
 			String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
@@ -224,13 +221,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 				}
 				else {
 					WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: image pulled = " + sFullImageName);
-					m_sDockerImageName = sFullImageName;
-					
-					// Check and or create the processor folder
-					File oProcessorFolder = new File(sProcessorFolder);
-					if (!oProcessorFolder.exists()) {
-						oProcessorFolder.mkdirs();
-					}
+					m_sDockerImageName = sFullImageName;					
 				}
 			}
 			
@@ -437,42 +428,5 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 	}
 
-	// docker-compose [--file </path/to/the/docker-compose/file.yml] stop
-	private static String buildCommandDockerComposeStopJupyterNotebook(String sProcessorFolder, String sJupyterNotebookCode) {
-		StringBuilder oSB = new StringBuilder();
-
-		oSB.append(WasdiConfig.Current.dockers.dockerComposeCommand + " \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --project-name " + sJupyterNotebookCode + "\\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --file " + sProcessorFolder + "docker-compose_" + sJupyterNotebookCode + ".yml \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --env-file " + sProcessorFolder + "var" + s_sFILE_SEPARATOR + "general_common.env \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    stop");
-
-		return oSB.toString();
-	}
-
-	// docker-compose [--file </path/to/the/docker-compose/file.yml] rm
-	private static String buildCommandDockerComposeRmJupyterNotebook(String sProcessorFolder, String sJupyterNotebookCode) {
-		StringBuilder oSB = new StringBuilder();
-
-		oSB.append(WasdiConfig.Current.dockers.dockerComposeCommand + " \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --project-name " + sJupyterNotebookCode + "\\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --file " + sProcessorFolder + "docker-compose_" + sJupyterNotebookCode + ".yml \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --env-file " + sProcessorFolder + "var" + s_sFILE_SEPARATOR + "general_common.env \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    rm \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --stop \\");
-		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --force");
-
-		return oSB.toString();
-	}
 
 }

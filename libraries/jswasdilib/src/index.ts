@@ -6,7 +6,7 @@
  * Object definitions are also provided.
  * Check README and LICENSE for further details
  */
-class Wasdi {
+export class Wasdi {
   _m_sUser: string;
   _m_sPassword: string;
 

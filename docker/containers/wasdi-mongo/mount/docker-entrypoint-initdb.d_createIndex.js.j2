@@ -1,0 +1,45 @@
+print('[{{ sWasdiMongoGeneralDatabaseName }}] Authenticating as administrator...')
+oCurrentDatabase = db.getSiblingDB('admin');
+oCurrentDatabase.auth(
+    {
+        user: _getEnv('MONGO_INITDB_ROOT_USERNAME'),
+        pwd: _getEnv('MONGO_INITDB_ROOT_PASSWORD')
+    }
+);
+print('[{{ sWasdiMongoGeneralDatabaseName }}] OK')
+
+
+
+
+print('[{{ sWasdiMongoGeneralDatabaseName }}] Connecting to the database \'{{ sWasdiMongoGeneralDatabaseName }}\'...')
+oCurrentDatabase = db.getSiblingDB('{{ sWasdiMongoGeneralDatabaseName }}');
+print('[{{ sWasdiMongoGeneralDatabaseName }}] OK')
+
+
+
+
+{% for aoWasdiMongoGeneralCurrentIndex in aoWasdiMongoGeneralIndexes %}
+print('[{{ sWasdiMongoGeneralDatabaseName }}] Create an index on the collection \'{{ aoWasdiMongoGeneralCurrentIndex['collection'] }}\'...')
+oCurrentDatabase.{{ aoWasdiMongoGeneralCurrentIndex['collection'] }}.createIndex(
+    {
+{% for aoWasdiMongoGeneralCurrentIndexKey in aoWasdiMongoGeneralCurrentIndex['keys'] %}
+        '{{ aoWasdiMongoGeneralCurrentIndexKey['name'] }}': {{ aoWasdiMongoGeneralCurrentIndexKey['value'] }}{% if not loop.last %},
+{% endif %}
+
+{% endfor %}
+    },
+    {
+{% for aoWasdiMongoGeneralCurrentIndexOption in aoWasdiMongoGeneralCurrentIndex['options'] %}
+{% for key, value in aoWasdiMongoGeneralCurrentIndexOption.items() %}
+        {{ key }}: '{{ value }}'{% if not loop.last %},
+{% endif %}
+
+{% endfor %}
+{% endfor %}
+    }
+);
+print('[{{ sWasdiMongoGeneralDatabaseName }}] OK')
+{% if not loop.last %}
+
+{% endif %}
+{% endfor %}

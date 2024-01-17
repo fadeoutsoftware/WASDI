@@ -85,8 +85,8 @@ public class OgcProcesses extends ResourceConfig {
 
 			WasdiLog.debugLog("-------Mongo db User " + MongoRepository.DB_USER);
 
-		} catch (Throwable e) {
-			e.printStackTrace();
+		} catch (Throwable oE) {
+			WasdiLog.errorLog("OgcProcesses.initOgcProcesses: error during the initialization of the ogc process" + oE.getMessage());
 		}		
 	}
 	

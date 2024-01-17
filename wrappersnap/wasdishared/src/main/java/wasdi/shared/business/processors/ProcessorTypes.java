@@ -22,6 +22,7 @@ public class ProcessorTypes {
 	public static String EOEPCA = "eoepca";
 	public static String PYTHON_PIP_2 = "python_pip_2";
 	public static String PIP_ONESHOT = "pip_oneshot";
+	public static String PYTHON_PIP_2_UBUNTU_20 = "python_pip_2_ubuntu_20";
 	
 	/**
 	 * Obtains the name of the subfolder where the docker template is stored.
@@ -38,6 +39,7 @@ public class ProcessorTypes {
 		else if (sProcessorType.equals(EOEPCA)) return "eoepca";
 		else if (sProcessorType.equals(PYTHON_PIP_2)) return "python_pip_2";
 		else if (sProcessorType.equals(PIP_ONESHOT)) return "pip_oneshot";
+		else if (sProcessorType.equals(PYTHON_PIP_2_UBUNTU_20)) return "wasdiUbuntuFocalPython";
 		return "";
 	}
 	
@@ -64,7 +66,8 @@ public class ProcessorTypes {
 			aoFiles.add("packagesInfo.json");
 			aoFiles.add("runwasdidocker.sh");
 			aoFiles.add("deploywasdidocker.sh");
-			aoFiles.add("cleanwasdidocker.sh");			
+			aoFiles.add("cleanwasdidocker.sh");
+			aoFiles.add("installUserPackage.sh");
 		}
 		else if (sProcessorType.equals(JUPYTER_NOTEBOOK)) {
 			
@@ -72,12 +75,19 @@ public class ProcessorTypes {
 		else if (sProcessorType.equals(CSHARP)) {
 			aoFiles.add("deploywasdidocker.sh");
 			aoFiles.add("runwasdidocker.sh");
+			aoFiles.add("WasdiLib.dll");
+			aoFiles.add("WasdiLib.nlog.config");
+			aoFiles.add("WasdiRunner.deps.json");
+			aoFiles.add("WasdiRunner.dll");
+			aoFiles.add("WasdiRunner.runtimeconfig.json");
+			aoFiles.add("installUserPackage.sh");
 		}
-		else if (sProcessorType.equals(PYTHON_PIP_2)) {
+		else if (sProcessorType.equals(PYTHON_PIP_2) || sProcessorType.equals(PYTHON_PIP_2_UBUNTU_20)) {
 			aoFiles.add("packagesInfo.json");
 			aoFiles.add("runwasdidocker.sh");
 			aoFiles.add("deploywasdidocker.sh");
-			aoFiles.add("cleanwasdidocker.sh");			
+			aoFiles.add("cleanwasdidocker.sh");
+			aoFiles.add("runServer.sh");
 		}
 		else if (sProcessorType.equals(PIP_ONESHOT)) {
 			aoFiles.add("installUserPackage.sh");

@@ -30,6 +30,4 @@ public class PythonPipProcessorEngine2 extends DockerBuildOnceEngine {
 		m_asDockerTemplatePackages[6] = "time";
 		m_asDockerTemplatePackages[7] = "datetime";
 	}
-	
-
 }

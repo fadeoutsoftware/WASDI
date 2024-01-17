@@ -40,13 +40,13 @@
                                     <!--Show Users-->
                                     <i  class="fa fa-users fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
                                 </button>
-                                <button ng-show="oSubscription.readOnly === false" class="btn btn-primary btn-wasdi"
+                                <button class="btn btn-primary btn-wasdi"
                                     title={{"USER_SUBSCRIPTIONS_SHOW_PROJECTS"|translate}}
-                                    ng-click="m_oController.showProjectsBySubscription(oSubscription.subscriptionId, oSubscription.name)">
+                                    ng-click="m_oController.showProjectsBySubscription(oSubscription.subscriptionId, oSubscription.name, oSubscription.readOnly)">
                                     <!--Show Projects-->
                                     <i class="fa fa-briefcase fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
                                 </button>
-                                <button ng-show="oSubscription.readOnly === false" class="btn btn-primary btn-wasdi"
+                                <button ng-show="oSubscription.readOnly === true" class="btn btn-primary btn-wasdi"
                                     title={{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}
                                     ng-click="m_oController.showSubscriptionEditForm(oSubscription.subscriptionId, false)">
                                     <!--Edit Subscription-->

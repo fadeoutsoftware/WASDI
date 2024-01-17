@@ -5,11 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.io.FileUtils;
@@ -36,6 +33,8 @@ import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class GHSLTilesProductReader extends WasdiProductReader {
+	
+	private static final Object s_oShapeFileLock = new Object();
 
 	public GHSLTilesProductReader(File oProductFile) {
 		super(oProductFile);
@@ -97,8 +96,7 @@ public class GHSLTilesProductReader extends WasdiProductReader {
 		
 		String sRes = "";
 		
-		
-		synchronized (sShapeMaskPath) {
+		synchronized (s_oShapeFileLock) {
 			
 			FileDataStore oStore = null;
 			FeatureIterator<SimpleFeature> aoFeaturesIterator = null;

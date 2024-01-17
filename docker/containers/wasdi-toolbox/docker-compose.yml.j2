@@ -119,6 +119,28 @@ services:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiToolboxServiceName }}/opt_wasdi_toolbox_output:{{ sWasdiToolboxRootDirectoryPath }}/output:rw
       - {{ sWasdiDataSftpRootDirectoryPath }}:/mnt/data:ro
 
+  monitoring-monitorDockerContainerLaunchedSinceMoreThan:
+    command:
+      - --mode-execute
+      - real
+      - --mode-batch
+    environment:
+      - TOOLBOX_LOG_VERBOSE=true
+      - TOOLBOX_LOG_ON_SCREEN=true
+      - TOOLBOX_MODULE_NAME=monitoring
+      - TOOLBOX_SUBMODULE_NAME=monitorDockerContainerLaunchedSinceMoreThan
+    image: {{ sWasdiToolboxServiceName }}:latest
+    restart: "no"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiToolboxUlimitNofile }}
+        hard: {{ sWasdiToolboxUlimitNofile }}
+    user: "root:root"
+    volumes:
+      - {{ sWasdiDockerSocketFilePath }}:{{ sWasdiDockerSocketFilePath }}:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiToolboxServiceName }}/opt_wasdi_toolbox_configuration:{{ sWasdiToolboxRootDirectoryPath }}/configuration:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiToolboxServiceName }}/opt_wasdi_toolbox_output:{{ sWasdiToolboxRootDirectoryPath }}/output:rw
+
   postgresql-backupDatabaseLogicalDump:
     command:
       - --mode-execute

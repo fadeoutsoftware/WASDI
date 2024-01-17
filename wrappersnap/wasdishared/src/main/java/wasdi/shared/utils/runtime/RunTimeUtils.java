@@ -351,7 +351,7 @@ public class RunTimeUtils {
 				return true;
 
 			} else {
-				WasdiLog.errorLog("RunTimeUtils.killProcess: Process pid not <= 1");
+				WasdiLog.errorLog("RunTimeUtils.killProcess: Process pid not >= 1");
 				return false;
 			}
 		} catch (Exception oE) {
