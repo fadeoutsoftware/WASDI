@@ -58,7 +58,7 @@ pipeline {
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
-        label: "Deploy the docker templates"
+        label: "Execute ansible-playbook"
       }
     }
   }

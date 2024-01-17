@@ -59,7 +59,7 @@ pipeline {
       }
     }
 
-    stage('START OR RESTART THE CONTAINERS') {
+    stage('START OR RESTART THE CONTAINER(S)') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
