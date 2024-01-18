@@ -81,18 +81,18 @@ pipeline {
       }
     }
 
-    stage('BUILD THE CONTAINER') {
+    stage('BUILD THE CONTAINER(S)') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
                 playbooks/buildWasdiDockerContainer.yml \
                 --inventory inventories/${env.sAnsibleInventory}.yml \
-                --limit ${env.sAnsibleLimit} \
+                --limit ${env.sEnvironmentLower} \
                 --diff \
                 --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiUtilsContainer=true'
         """,
-        label: "Build the container"
+        label: "Build the container(s)"
       }
     }
 
