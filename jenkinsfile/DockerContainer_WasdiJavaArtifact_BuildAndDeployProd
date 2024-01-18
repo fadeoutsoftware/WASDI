@@ -81,19 +81,19 @@ pipeline {
       }
     }
 
-    stage('BUILD THE CONTAINERS') {
+    stage('BUILD THE CONTAINER(S)') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
             playbooks/buildWasdiDockerContainer.yml \
             --inventory inventories/${env.sAnsibleInventory}.yml \
-            --limit ${env.sAnsibleLimit} \
+            --limit ${env.sEnvironmentLower} \
             --diff \
             --check \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiLauncherContainer=true sDeployWasdiSchedulerContainer=true sDeployWasdiTomcatOgcProcessesServerContainer=true sDeployWasdiTomcatOpenEoServerContainer=true sDeployWasdiTomcatWasdiWebServerContainer=true sDeployWasdiTriggerContainer=true'
         """,
-        label: "Build the containers"
+        label: "Build the container(s)"
       }
     }
 
