@@ -2,7 +2,8 @@ pipeline {
   agent any
 
   environment {
-    sCurrentRevision = "${env.BUILD_ID}"
+    sCurrentRevision  = "${env.BUILD_ID}"
+    sEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
   }
 
   options {
@@ -49,18 +50,18 @@ pipeline {
       }
     }
 
-    stage('BUILD THE CONTAINERS') {
+    stage('BUILD THE CONTAINER(S)') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
             playbooks/buildWasdiDockerContainer.yml \
             --inventory inventories/${env.sAnsibleInventory}.yml \
-            --limit ${env.sAnsibleLimit} \
+            --limit ${env.sEnvironmentLower} \
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiGdalContainer=true sDeployWasdiSen2corContainer=true sDeployWasdiSnaphuContainer=true'
         """,
-        label: "Build the containers"
+        label: "Build the container(s)"
       }
     }
 
