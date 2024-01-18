@@ -2,15 +2,13 @@ pipeline {
   agent any
 
   environment {
-    sCurrentAnsibleInventory = env.sAnsibleInventory.split('-')[0].toLowerCase()
-    sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
-    sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
-    sCurrentRevision         = "${env.BUILD_ID}"
-    sMavenProfile            = "wasdi-${env.sCurrentEnvironmentLower}"
+    sCurrentRevision  = "${env.BUILD_ID}"
+    sEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
+    sMavenProfile     = "wasdi-${env.sEnvironmentLower}"
   }
 
   options {
-    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '365'))
     disableConcurrentBuilds()
   }
 
@@ -22,22 +20,24 @@ pipeline {
   stages {
     stage('DEBUG') {
       steps {
-        echo "env.GIT_BRANCH               = " + env.GIT_BRANCH
-        echo "env.sAnsibleLimit            = " + env.sAnsibleLimit
-        echo "env.sCurrentEnvironmentLower = " + env.sCurrentEnvironmentLower
-        echo "env.sCurrentEnvironmentUpper = " + env.sCurrentEnvironmentUpper
-        echo "env.sCurrentRevision         = " + env.sCurrentRevision
-        echo "env.sSourceBranch            = " + env.sSourceBranch
-        echo "env.sWasdiAnsiblePath        = " + env.sWasdiAnsiblePath
-        echo "env.WORKSPACE                = " + env.WORKSPACE
+        echo "env.GIT_BRANCH                    = " + env.GIT_BRANCH
+        echo "env.sAnsibleInventory             = " + env.sAnsibleInventory
+        echo "env.sAnsibleLimit                 = " + env.sAnsibleLimit
+        echo "env.sCurrentRevision              = " + env.sCurrentRevision
+        echo "env.sSourceBranch                 = " + env.sSourceBranch
+        echo "env.sWasdiAnsibleGitRepositoryUrl = " + env.sWasdiAnsibleGitRepositoryUrl
+        echo "env.sWasdiAnsiblePath             = " + env.sWasdiAnsiblePath
+        echo "env.WORKSPACE                     = " + env.WORKSPACE
 
         sh script: "pwd", label: "Current location"
+
         sh script: "cat pom.xml", label: "Content of the main pom.xml file"
+
+        sh script: "which java", label: "Tool > java > path"
+        sh script: "java -version", label: "Tool > java > current version"
 
         sh script: "which mvn", label: "Tool > mvn > path"
         sh script: "mvn --version", label: "Tool > mvn > current version"
-        sh script: "which java", label: "Tool > java > path"
-        sh script: "java -version", label: "Tool > java > current version"
       }
     }
 
@@ -87,8 +87,8 @@ pipeline {
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
                 playbooks/buildWasdiDockerContainer.yml \
-                --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
-                --limit ${env.sCurrentEnvironmentLower} \
+                --inventory inventories/${env.sAnsibleInventory}.yml \
+                --limit ${env.sAnsibleLimit} \
                 --diff \
                 --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiUtilsContainer=true'
         """,
@@ -105,7 +105,7 @@ pipeline {
                 cd ${env.sWasdiAnsiblePath}
                 ansible-playbook \
                     playbooks/deployDockerContainerWasdiUtils.yml \
-                    --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
+                    --inventory inventories/${env.sAnsibleInventory}.yml \
                     --limit ${env.sAnsibleLimit} \
                     --diff \
                     --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
