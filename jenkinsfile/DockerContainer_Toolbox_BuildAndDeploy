@@ -2,28 +2,25 @@ pipeline {
   agent any
 
   environment {
-    sCurrentAnsibleInventory = env.sAnsibleInventory.split('-')[0].toLowerCase()
-    sCurrentEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
-    sCurrentEnvironmentUpper = env.sAnsibleLimit.split('-')[0].toUpperCase()
-    sCurrentRevision         = "${env.BUILD_ID}"
+    sCurrentRevision = "${env.BUILD_ID}"
   }
 
   options {
-    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '365'))
     disableConcurrentBuilds()
   }
 
   stages {
     stage('DEBUG') {
       steps {
-        echo "env.GIT_BRANCH               = " + env.GIT_BRANCH
-        echo "env.sAnsibleLimit            = " + env.sAnsibleLimit
-        echo "env.sCurrentEnvironmentLower = " + env.sCurrentEnvironmentLower
-        echo "env.sCurrentEnvironmentUpper = " + env.sCurrentEnvironmentUpper
-        echo "env.sCurrentRevision         = " + env.sCurrentRevision
-        echo "env.sSourceBranch            = " + env.sSourceBranch
-        echo "env.sWasdiAnsiblePath        = " + env.sWasdiAnsiblePath
-        echo "env.WORKSPACE                = " + env.WORKSPACE
+        echo "env.GIT_BRANCH                    = " + env.GIT_BRANCH
+        echo "env.sAnsibleInventory             = " + env.sAnsibleInventory
+        echo "env.sAnsibleLimit                 = " + env.sAnsibleLimit
+        echo "env.sCurrentRevision              = " + env.sCurrentRevision
+        echo "env.sSourceBranch                 = " + env.sSourceBranch
+        echo "env.sWasdiAnsibleGitRepositoryUrl = " + env.sWasdiAnsibleGitRepositoryUrl
+        echo "env.sWasdiAnsiblePath             = " + env.sWasdiAnsiblePath
+        echo "env.WORKSPACE                     = " + env.WORKSPACE
 
         sh script: "pwd", label: "Current location"
       }
@@ -58,8 +55,8 @@ pipeline {
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
             playbooks/buildWasdiDockerContainer.yml \
-            --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
-            --limit ${env.sCurrentEnvironmentLower} \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiToolboxContainer=true'
         """,
@@ -76,7 +73,7 @@ pipeline {
                 cd ${env.sWasdiAnsiblePath}
                 ansible-playbook \
                   playbooks/deployDockerContainerToolbox.yml \
-                  --inventory inventories/${env.sCurrentAnsibleInventory}.yml \
+                  --inventory inventories/${env.sAnsibleInventory}.yml \
                   --limit ${env.sAnsibleLimit} \
                   --diff \
                   --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
