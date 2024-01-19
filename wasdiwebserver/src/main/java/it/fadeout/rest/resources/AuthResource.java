@@ -108,14 +108,15 @@ public class AuthResource {
 			
 			// Check if the user exists
 			UserRepository oUserRepository = new UserRepository();
-			User oUser = oUserRepository.getUser(oLoginInfo.getUserId());
+			String sLowerCaseUserId = oLoginInfo.getUserId().toLowerCase();
+			User oUser = oUserRepository.getUser(sLowerCaseUserId);
 			
 			if( oUser == null ) {
 				// User not in the db wasdi db
 				WasdiLog.debugLog("AuthResource.login: user not found: " + oLoginInfo.getUserId() + ", check if this is the first access");
 				
 				// Try to retrive info about this user 
-				String sUserInfo = m_oKeycloakService.getUserData(m_oKeycloakService.getToken(), oLoginInfo.getUserId());
+				String sUserInfo = m_oKeycloakService.getUserData(m_oKeycloakService.getToken(), sLowerCaseUserId);
 				
 				if (Utils.isNullOrEmpty(sUserInfo)) {
 					// No, something did not work well
@@ -154,7 +155,7 @@ public class AuthResource {
 				else {
 					WasdiLog.debugLog("AuthResource.login: user found in keycloak and mail verified: we can register the new user!!");
 					RegistrationInfoViewModel oRegistrationInfoViewModel = new RegistrationInfoViewModel();
-					oRegistrationInfoViewModel.setUserId(oLoginInfo.getUserId());
+					oRegistrationInfoViewModel.setUserId(sLowerCaseUserId);
 					PrimitiveResult oRegistrationResult = this.userRegistration(oRegistrationInfoViewModel);
 
 					if (oRegistrationResult==null) {
@@ -174,7 +175,7 @@ public class AuthResource {
 				}
 				
 				// Read again the user to proceed
-				oUser = oUserRepository.getUser(oLoginInfo.getUserId());
+				oUser = oUserRepository.getUser(sLowerCaseUserId);
 				
 				if (oUser==null) {
 					WasdiLog.warnLog("AuthResource.login: we had a problem reading again the user in the db after registration, return invalid");
@@ -189,7 +190,7 @@ public class AuthResource {
 			}
 
 			// First try to Authenticate using keycloak
-			String sAuthResult = m_oKeycloakService.login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
+			String sAuthResult = m_oKeycloakService.login(sLowerCaseUserId, oLoginInfo.getUserPassword());
 			
 			boolean bLoginSuccess = false;
 			
@@ -595,7 +596,9 @@ public class AuthResource {
 
 			WasdiLog.debugLog("AuthResource.userRegistration: checking if " + oRegistrationInfoViewModel.getUserId() + " is already in wasdi ");
 			UserRepository oUserRepository = new UserRepository();
-			User oWasdiUser = oUserRepository.getUser(oRegistrationInfoViewModel.getUserId());
+			// user id should be unique, independently from the upper and lower case letters they use
+			String sLowerCasedUserId = oRegistrationInfoViewModel.getUserId().toLowerCase();
+			User oWasdiUser = oUserRepository.getUser(sLowerCasedUserId);
 
 			//do we already have this user in our DB?
 			if(oWasdiUser != null){
@@ -610,15 +613,13 @@ public class AuthResource {
 				//no, it's a new user! :)
 				//let's check it's a legit one (against kc)  
 				//otherwise someone might call this api even if the user is not registered on KC
-
-				String sUserId = oRegistrationInfoViewModel.getUserId();
 				
 				if (m_oKeycloakService==null) {
 					WasdiLog.debugLog("AuthResource.userRegistration: m_oKeycloakService is NULL!! Creating it...");
 					m_oKeycloakService = new KeycloakService();
 				}
 				
-				User oNewUser = m_oKeycloakService.getUser(sUserId);
+				User oNewUser = m_oKeycloakService.getUser(sLowerCasedUserId);
 				if(null==oNewUser) {
 					PrimitiveResult oResult = new PrimitiveResult();
 					//not found
@@ -695,8 +696,9 @@ public class AuthResource {
 	public PrimitiveResult validateNewUser(@QueryParam("email") String sUserId, @QueryParam("validationCode") String sToken  ) {
 		WasdiLog.debugLog("AuthResource.validateNewUser UserId: " + sUserId + " Token: " + sToken);
 
-
-		if(! (m_oCredentialPolicy.validUserId(sUserId) && m_oCredentialPolicy.validEmail(sUserId)) ) {
+		String sLowerCaseUser = sUserId.toLowerCase();
+		
+		if(! (m_oCredentialPolicy.validUserId(sUserId) && m_oCredentialPolicy.validEmail(sLowerCaseUser)) ) {
 			WasdiLog.debugLog("AuthResources.validateNewUser: invalid userId");
 			return PrimitiveResult.getInvalid();
 		}
@@ -707,7 +709,7 @@ public class AuthResource {
 		}
 
 		UserRepository oUserRepo = new UserRepository();
-		User oUser = oUserRepo.getUser(sUserId);
+		User oUser = oUserRepo.getUser(sLowerCaseUser);
 		if( null == oUser.getValidAfterFirstAccess()) {
 			WasdiLog.debugLog("AuthResources.validateNewUser: unexpected null first access validation flag");
 			return PrimitiveResult.getInvalid();
