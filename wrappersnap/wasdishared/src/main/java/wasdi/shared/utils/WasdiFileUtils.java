@@ -13,6 +13,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -514,7 +515,7 @@ public class WasdiFileUtils {
 		}
 
 		try {
-			return new StringBuilder((CharSequence) Files.readAllLines(Paths.get(sFilePath))).toString();
+			return FileUtils.readFileToString(file,StandardCharsets.UTF_8.name());
 		} catch (IOException e) {
 			WasdiLog.errorLog("WasdiFileUtils.fileToText: cannot read file");
 			return null;
