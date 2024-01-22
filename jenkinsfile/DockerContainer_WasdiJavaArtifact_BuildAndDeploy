@@ -2,9 +2,11 @@ pipeline {
   agent any
 
   environment {
-    sCurrentRevision  = "${env.BUILD_ID}"
-    sEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
-    sMavenProfile     = "wasdi-${env.sEnvironmentLower}"
+    sAnsibleExtraVariableProject = "sDeployWasdiLauncherContainer=true sDeployWasdiSchedulerContainer=true sDeployWasdiTomcatOgcProcessesServerContainer=true sDeployWasdiTomcatOpenEoServerContainer=true sDeployWasdiTomcatWasdiWebServerContainer=true sDeployWasdiTriggerContainer=true"
+    sCurrentRevision             = "${env.BUILD_ID}"
+    sEnvironmentLower            = env.sAnsibleLimit.split('-')[0].toLowerCase()
+    sMavenBuildProject           = "--projects wrappersnap/wasdishared,wrappersnap/launcher,scheduler,wasdiwebserver,libraries/jwasdilib/jwasdilib,wasditrigger,ogcprocesses/processes,openeo-java-server --also-make"
+    sMavenProfile                = "wasdi-${env.sEnvironmentLower}"
   }
 
   options {
@@ -73,8 +75,7 @@ pipeline {
             --define revision=${env.sCurrentRevision} \
             --define skipTests \
             --update-snapshots \
-            --projects wrappersnap/wasdishared,wrappersnap/launcher,scheduler,wasdiwebserver,libraries/jwasdilib/jwasdilib,wasditrigger,ogcprocesses/processes,openeo-java-server \
-            --also-make \
+            ${env.sMavenBuildProject} \
             clean package
         """,
         label: "Create the right packages"
@@ -90,7 +91,7 @@ pipeline {
             --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sEnvironmentLower} \
             --diff \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiLauncherContainer=true sDeployWasdiSchedulerContainer=true sDeployWasdiTomcatOgcProcessesServerContainer=true sDeployWasdiTomcatOpenEoServerContainer=true sDeployWasdiTomcatWasdiWebServerContainer=true sDeployWasdiTriggerContainer=true'
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
         """,
         label: "Build the container(s)"
       }
@@ -141,6 +142,21 @@ pipeline {
             }
           }
         }
+      }
+    }
+
+    stage('CLEAN THE DOCKER IMAGE(S)') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deleteDockerImage.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sEnvironmentLower} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
+        """,
+        label: "Clean the Docker image(s)"
       }
     }
   }
