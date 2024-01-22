@@ -514,7 +514,7 @@ public class WasdiFileUtils {
 		}
 
 		try {
-			return new String(Files.readAllBytes(Paths.get(sFilePath)));
+			return new StringBuilder((CharSequence) Files.readAllLines(Paths.get(sFilePath))).toString();
 		} catch (IOException e) {
 			WasdiLog.errorLog("WasdiFileUtils.fileToText: cannot read file");
 			return null;
