@@ -54,6 +54,7 @@ import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
+import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ParametersRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
@@ -2206,7 +2207,7 @@ public class dbUtils {
 	private static void subscriptions() {
 		try {
 			
-            System.out.println("This tool will parse the config file and ingest in WASDI the Ecostress data hosted on the creodias S3 Bucket. ");
+            System.out.println("This option allows you to manage subscriptions.");
 
             System.out.println("\t1 - Create New Subscription");
             System.out.println("\t2 - Generate Free Subscription for All the User");
@@ -2260,9 +2261,27 @@ public class dbUtils {
                 }
                 
                 System.out.println("Name - Description:");
-                String sName = s_oScanner.nextLine();                
+                String sName = s_oScanner.nextLine();  
                 
-                createSubscription(sUserId, sSubscriptionType, sName);
+                System.out.println("Do you want to associate an organization with the subscription? (y/n)");
+                String sCreateOrganization = s_oScanner.nextLine();  
+                
+                String sOrganizationId = null;
+                if (sCreateOrganization.equals("y")) {
+                	System.out.println("Insert the organization id");
+                	sOrganizationId = s_oScanner.nextLine();
+                	if (Utils.isNullOrEmpty(sOrganizationId)) {
+                		System.out.println("The id you typed dosn't look like a valid id. Exiting");
+                		return;
+                	}
+                } else if (sCreateOrganization.equals("n")) {
+                	System.out.println("You chose not to associate an organization");
+                } else {
+                	System.out.println("Answer not valid. Exiting the process");
+                	return;
+                }
+                
+                createSubscription(sUserId, sSubscriptionType, sName, sOrganizationId);
             }
             else if (sInputString.equals("2")) {
             	
@@ -2277,7 +2296,7 @@ public class dbUtils {
                     ArrayList<User> aoUsers = oUserRepo.getAllUsers();
 
                     for (User oUser : aoUsers) {
-                    	createSubscription(oUser.getUserId(), "Free", "WASDI Trial");
+                    	createSubscription(oUser.getUserId(), "Free", "WASDI Trial", null);
                     }                	
                 }
                 else {
@@ -2292,7 +2311,7 @@ public class dbUtils {
 		
 	}
 	
-	private static void createSubscription(String sUserId, String sSubscriptionType, String sName) {
+	private static void createSubscription(String sUserId, String sSubscriptionType, String sName, String sOrganizationId) {
         UserRepository oUserRepo = new UserRepository();
         User oUser = oUserRepo.getUser(sUserId);
         
@@ -2306,6 +2325,14 @@ public class dbUtils {
         if (oType == null) {
         	System.out.println("Impossible to find Subscription type " + sSubscriptionType);
         	return;
+        }
+        
+        if (sOrganizationId != null) {
+        	OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+        	if (oOrganizationRepository.getById(sOrganizationId) == null) {
+        		System.out.println("Impossible to find the organization id");
+        		return;
+        	}
         }
         
         int iDays = 1;
@@ -2333,6 +2360,9 @@ public class dbUtils {
 		oSubscription.setStartDate(dStartDate);
 		double dEndDate = dStartDate + ((double)iDays)*24.0*60.0*60.0*1000.0;
 		oSubscription.setEndDate(dEndDate);
+		if (!Utils.isNullOrEmpty(sOrganizationId)) {
+			oSubscription.setOrganizationId(sOrganizationId);
+		}
 		
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 		oSubscriptionRepository.insertSubscription(oSubscription);
