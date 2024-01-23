@@ -86,7 +86,7 @@ pipeline {
           ansible-playbook \
             playbooks/deleteDockerImage.yml \
             --inventory inventories/${env.sAnsibleInventory}.yml \
-            --limit ${env.sEnvironmentLower} \
+            --limit ${env.sAnsibleLimit} \
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiNexusContainer=true'
         """,
