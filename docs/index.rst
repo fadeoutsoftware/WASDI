@@ -146,6 +146,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    PythonCookbook/RunSnapWorkflow.rst
    PythonCookbook/RunApplication.rst
    PythonCookbook/SavePayload.rst
+   PythonCookbook/FindS2Tiles.rst
 
 .. toctree::
    :maxdepth: 2
