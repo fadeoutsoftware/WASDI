@@ -352,7 +352,7 @@ services:
       - {{ aoWasdiMongoCurrentEnvironmentVariable['key'] }}={{ aoWasdiMongoCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
-    image: "mongo:{{ sWasdiMongoVersion }}"
+    image: "{{ sWasdiMongoImageName }}:{{ sWasdiMongoVersion }}"
 {% if ( aWasdiMongoPorts | length ) > 0 %}
     ports:
 {% for sWasdiMongoCurrentPort in aWasdiMongoPorts %}
