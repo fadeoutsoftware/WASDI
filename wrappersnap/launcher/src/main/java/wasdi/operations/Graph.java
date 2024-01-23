@@ -5,6 +5,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.GraphParameter;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.snapopearations.WasdiGraph;
 
@@ -36,6 +37,13 @@ public class Graph extends Operation {
         } catch (Exception oEx) {
             WasdiLog.errorLog("Graph.executeOperation: Exception", oEx);
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+            
+         // P.Campanella 2024/01/23: log the error also on the web user interface
+            if (m_oProcessWorkspaceLogger != null) {
+            	if (!Utils.isNullOrEmpty(sError)) {
+            		m_oProcessWorkspaceLogger.log(sError);
+            	}
+            }
 
             // P.Campanella 2018/03/30: handle exception and close the process
             updateProcessStatus(oProcessWorkspace, ProcessStatus.ERROR, 100);
