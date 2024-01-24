@@ -160,12 +160,7 @@ public class Collections   {
 			oCollectionView.setKeywords(oConfigCollection.keywords);
 			oCollectionView.setStacVersion(oConfigCollection.stac_version);
 			oCollectionView.setTitle(oConfigCollection.id);
-			oCollectionView.setVersion(oConfigCollection.version);
-			
-			for (Object sStacExtension : oConfigCollection.stac_extensions) {
-				oCollectionView.addStacExtensionsItem((StacExtensionsInner)sStacExtension);
-			}
-			
+			oCollectionView.setVersion(oConfigCollection.version);			
 
 			CollectionExtent oExtent = new CollectionExtent();
 
