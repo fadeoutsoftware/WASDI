@@ -16,7 +16,7 @@ Prerequisites
 To run this code you need:
  - A running Python 3.x Environment
  - A valid WASDI Account
- - A valid Config file
+- A `valid Config file <https://wasdi.readthedocs.io/en/latest/PythonCookbook/createConfig.html>`_
  
 If this is not clear, you probably need to take a look to the `Python Tutorial <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/PythonTutorial.html>`_ before.
 

@@ -16,7 +16,7 @@ Prerequisites
 To run this code you need:
  - A running Python 3.x Environment
  - A valid WASDI Account
- - A valid Config file
+- A `valid Config file <https://wasdi.readthedocs.io/en/latest/PythonCookbook/createConfig.html>`_
  
 If this is not clear, you probably need to take a look to the `Python Tutorial <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/PythonTutorial.html>`_ before.
 
@@ -38,7 +38,7 @@ Then, it's also mandatory to provide search parameters specific for Copernicus M
  - dataset
  - variables
 
-Additional parameters may apply, in particular, the protocol: SUBS usually tend to work in most cases, but there may be exceptions, so check case by case and don't hesitate to `reach our for support <https://discord.gg/JYuNhPaZbE>`_.
+Additional parameters may apply, in particular, the protocol: SUBS usually tend to work in most cases, but there may be exceptions, so check case by case and don't hesitate to `reach out for support <https://discord.gg/JYuNhPaZbE>`_.
 
 Let's see an example
 

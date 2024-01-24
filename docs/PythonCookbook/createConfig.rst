@@ -7,7 +7,10 @@
 
 Create a config.json file
 =========================================
-For developing with WASDI in python, you need to create a config.json file. This is necessary just for development, don't upload this file in your application, it contains your credentials!
+For developing with WASDI in python, you need to create a config.json file.
+
+.. note::
+    The configuration file contains your credentials and some additional information to get WASDI started: never share it with others! It is required only for developing on your PC, so do not upload it to WASDI when deploying or updating an application
 
 Prerequisites
 ------------------------------------------
@@ -22,8 +25,8 @@ If this is not clear, you probably need to take a look to the `Python Tutorial <
 Recipe
 ------------------------------------------
 
-.. note::
-    The configuration file contains your credentials and some additional information to get WASDI started:
+The basic config.json file must contain:
+
  - your username, which usually corresponds to the email you used
  - your password (only you are supposed to know this)
  - the workspace ID (suggested) or the workspace name you intend to work in. The workspace ID can be obtained looking at the URL in the editor, it's going to look like this: https://www.wasdi.net/#!/71805896-654b-468c-8fc5-5d2ad6ba61f3/editor -> in this case, `71805896-654b-468c-8fc5-5d2ad6ba61f3` is the string you are looking for
@@ -40,4 +43,4 @@ Recipe
    }
 
 .. note::
-   This is quick, isn't it? Try it and `reach our if you need help <https://discord.gg/JYuNhPaZbE>`_.
+   Quick, wasn't it? Try, and `reach out if you need help <https://discord.gg/JYuNhPaZbE>`_.
