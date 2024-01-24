@@ -38,7 +38,7 @@ Then, it's also mandatory to provide search parameters specific for Copernicus M
  - dataset
  - variables
 
-Additional parameters may apply, in particular, the protocol: SUBS usually tend to work in most cases, but there may be exceptions, so check case by case and don't hesitate to `reach our for support <https://discord.gg/JYuNhPaZbE>`_.
+Additional parameters may apply, in particular, the protocol: SUBS usually tend to work in most cases, but there may be exceptions, so check case by case and don't hesitate to `reach out for support <https://discord.gg/JYuNhPaZbE>`_.
 
 Let's see an example
 
