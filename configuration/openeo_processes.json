@@ -137,9 +137,7 @@
 			"returns": {
 				"description": "The value of the constant",
 				"schema": {
-					"type": [
-						"number"
-					]
+					"type": "number"
 				}
 			},
 			"links": [
