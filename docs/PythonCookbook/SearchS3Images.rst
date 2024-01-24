@@ -16,7 +16,7 @@ Prerequisites
 To run this code you need:
  - A running Python 3.x Environment
  - A valid WASDI Account
- - A valid Config file
+- A `valid Config file <https://wasdi.readthedocs.io/en/latest/PythonCookbook/createConfig.html>`_
  
 If this is not clear, you probably need to take a look to the `Python Tutorial <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/PythonTutorial.html>`_ before.
 
@@ -25,7 +25,7 @@ Recipe
 ------------------------------------------
 
 .. note::
-	Assume you have at least one workspace and you configured it in the config.json file
+   Assume you have at least one workspace and you configured it in the config.json file
 
 These are different samples of Sentinel 2 Search. The mandatory fields to search are:
  - Mission Type
@@ -72,17 +72,17 @@ These are different samples of Sentinel 2 Search. The mandatory fields to search
 What it does:
 
  - Initializes the input variable needed. 
- - Start searching for Sentinel-3 Images - automaitcally selecting the provider
+ - Start searching for Sentinel-3 Images - automatically selecting the provider
  - Loops over the results and prints the file names of the files reporting Land Surface Temperature `(reference data) <https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-3-slstr/product-types/level-2-lst>`_
 
 .. note::
-	The developer can decide whatever is needed in the params.json file. If you decide to use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
+   The developer can decide whatever is needed in the params.json file. If you decide to use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
 
 .. note::
-	With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsible for converting your data in your code.
+   With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsible for converting your data in your code.
 
 .. note::
-	The Bounding Box Format used here is the one used by the User Interface when renderAsStrings is missing or false. The Boundig Box format when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**.
+   The Bounding Box Format used here is the one used by the User Interface when renderAsStrings is missing or false. The Bounding Box format when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**.
 
 .. note::
-	The Date is formatted by the User Interface as "YYYY-MM-DD".
+   The Date is formatted by the User Interface as "YYYY-MM-DD".
