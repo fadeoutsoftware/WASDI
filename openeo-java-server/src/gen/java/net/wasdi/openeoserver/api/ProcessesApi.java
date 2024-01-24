@@ -33,12 +33,12 @@ public class ProcessesApi  {
     	try {
     		String sProcessesDescription  = WasdiConfig.Current.openEO.processes_config;
     		String sProcessesJson = WasdiFileUtils.fileToText(sProcessesDescription);
-    		Processes oProcesses = (Processes) MongoRepository.s_oMapper.readValue(sProcessesJson, Processes.class);
-    		
-    		return Response.ok().entity(oProcesses).build();
+//    		Processes oProcesses = (Processes) MongoRepository.s_oMapper.readValue(sProcessesJson, Processes.class);
+//    		return Response.ok().entity(oProcesses).build();
+    		return Response.ok().entity(sProcessesJson).build();
     	}
     	catch (Exception oEx) {
-    		WasdiLog.errorLog("ProcessesApi.method error: " , oEx);    		    		
+    		WasdiLog.errorLog("ProcessesApi.listProcesses error: " , oEx);    		    		
     		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("ProcessesApi.method", "InternalServerError", oEx.getMessage())).build();
 		}
     }
