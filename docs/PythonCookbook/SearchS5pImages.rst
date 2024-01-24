@@ -25,7 +25,7 @@ Recipe
 ------------------------------------------
 
 .. note::
-	Assume you have at least one workspace and you configured it in the config.json file
+   Assume you have at least one workspace and you configured it in the config.json file
 
 These are different samples of Sentinel-5p Search. The mandatory fields to search are:
  - Mission Type
@@ -80,13 +80,13 @@ What it does:
  - as an example, prints the filename of the first product found
 
 .. note::
-	The developer can decide whatever is needed in the params.json file. If you will use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
+   The developer can decide whatever is needed in the params.json file. If you will use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
 
 .. note::
-	With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsible to convert your data in your code
+   With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsible to convert your data in your code
 
 .. note::
-	The Bounding Box Format Here Used is the one used by the User Interface when renderAsStrings is missing or false. The Bounding Box format when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**
+   The Bounding Box Format Here Used is the one used by the User Interface when renderAsStrings is missing or false. The Bounding Box format when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**
 
 .. note::
-	The Date is formatted by the User Interface as "YYYY-MM-DD"
+   The Date is formatted by the User Interface as "YYYY-MM-DD"
