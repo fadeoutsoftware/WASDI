@@ -109,14 +109,15 @@ public class AuthResource {
 			// Check if the user exists
 			UserRepository oUserRepository = new UserRepository();
 			String sLowerCaseUserId = oLoginInfo.getUserId().toLowerCase();
+			WasdiLog.debugLog("AuthResource.login: user id forced to be lower case: " + sLowerCaseUserId);
 			User oUser = oUserRepository.getUser(sLowerCaseUserId);
 			
 			if( oUser == null ) {
-				// User not in the db wasdi db
-				WasdiLog.debugLog("AuthResource.login: user not found: " + oLoginInfo.getUserId() + ", check if this is the first access");
+				// User not in the wasdi db
+				WasdiLog.debugLog("AuthResource.login: user not found: " + sLowerCaseUserId + ", check if this is the first access");
 				
-				// Try to retrive info about this user 
-				String sUserInfo = m_oKeycloakService.getUserData(m_oKeycloakService.getToken(), sLowerCaseUserId);
+				// Try to retrieve info about this user 
+				String sUserInfo = m_oKeycloakService.getUserData(m_oKeycloakService.getToken(), sLowerCaseUserId); // TODO - not sure if this will still work: for the user with multiple accounts yes, but what about the other two?
 				
 				if (Utils.isNullOrEmpty(sUserInfo)) {
 					// No, something did not work well
@@ -190,7 +191,7 @@ public class AuthResource {
 			}
 
 			// First try to Authenticate using keycloak
-			String sAuthResult = m_oKeycloakService.login(sLowerCaseUserId, oLoginInfo.getUserPassword());
+			String sAuthResult = m_oKeycloakService.login(sLowerCaseUserId, oLoginInfo.getUserPassword());  // not sure
 			
 			boolean bLoginSuccess = false;
 			

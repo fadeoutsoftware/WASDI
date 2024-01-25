@@ -294,7 +294,7 @@ public class Wasdi extends ResourceConfig {
 					oJSON = new JSONObject(sResponse);
 				}
 				if(null!=oJSON) {
-					sUserId = oJSON.optString("preferred_username", null);
+					sUserId = oJSON.optString("preferred_username", null);		// TODO: should I force the lower case here? If we are going to set all the user with lower case in our DB, then I guess so
 				}
 			}
 			catch (Exception oKeyEx) {
@@ -302,6 +302,7 @@ public class Wasdi extends ResourceConfig {
 			}
 
 			if(!Utils.isNullOrEmpty(sUserId)) {
+				sUserId = sUserId.toLowerCase();  // force the user id to be lowercase
 				UserRepository oUserRepo = new UserRepository();
 				oUser = oUserRepo.getUser(sUserId);
 				
@@ -344,6 +345,7 @@ public class Wasdi extends ResourceConfig {
 				}
 				
 				if(!Utils.isNullOrEmpty(sUserId)){
+					sUserId = sUserId.toLowerCase();
 					UserRepository oUserRepository = new UserRepository();
 					oUser = oUserRepository.getUser(sUserId);
 				} 
