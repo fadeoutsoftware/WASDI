@@ -13,6 +13,7 @@ import net.wasdi.openeoserver.WasdiOpenEoServer;
 import net.wasdi.openeoserver.viewmodels.Error;
 import net.wasdi.openeoserver.viewmodels.HTTPBasicAccessToken;
 import wasdi.shared.business.users.*;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 @Path("/credentials")
@@ -27,11 +28,16 @@ public class CredentialsApi  {
 	@Produces({ "application/json" })
 	public Response authenticateBasic(@HeaderParam("Authorization") String sAuthorization) {
 		
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
 		UserSession oUserSession = WasdiOpenEoServer.getLoginFromBasicAuth(sAuthorization);
 		
 		if (oUserSession == null) {
 			WasdiLog.debugLog("CredentialsApi.authenticateBasic: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();
 		}
 		
     	try {

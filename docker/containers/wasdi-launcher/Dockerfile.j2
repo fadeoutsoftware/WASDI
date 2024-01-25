@@ -67,6 +67,7 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
 RUN apt-get update && \
     apt-get install \
         libjhdf4-jni \
+		libgfortran5 \
         libjhdf5-jni && \
     mkdir --parents \
         {{ sWasdiDataPartitionRootDirectoryPath }} \

@@ -16,7 +16,7 @@ Prerequisites
 To run this code you need:
  - A running Python 3.x Environment
  - A valid WASDI Account
- - A valid Config file
+ - A `valid Config file <https://wasdi.readthedocs.io/en/latest/PythonCookbook/createConfig.html>`_
  
 If this is not clear, you probably need to take a look to the `Python Tutorial <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/PythonTutorial.html>`_ before.
 
@@ -25,7 +25,7 @@ Recipe
 ------------------------------------------
 
 .. note::
-	Assume you have at least one workspace and you configured it in the config.json file
+   Assume you have at least one workspace and you configured it in the config.json file
 
 These are different samples of Sentinel 2 Search. The mandatory fields to search are:
  - Mission Type
@@ -66,7 +66,7 @@ These are different samples of Sentinel 2 Search. The mandatory fields to search
            # THis is the name of the file
            sFileName = oFoundImage["fileName"]
            wasdi.wasdiLog("Found " + sFileName)
-           # There are many other proprties, depending by the Provider and the Mission, that can be explored
+           # There are many other properties, depending by the Provider and the Mission, that can be explored
    
    # Now lets search L2 Images
    aoL2FoundArray = wasdi.searchEOImages("S2", sStartDate, sEndDate, sProductType="S2MSI2A", oBoundingBox=oBBox)
@@ -77,7 +77,7 @@ These are different samples of Sentinel 2 Search. The mandatory fields to search
    aoL2CloudCoverFound = wasdi.searchEOImages("S2", sStartDate, sEndDate, sProductType="S2MSI2A", oBoundingBox=oBBox, sCloudCoverage=sCloudCover)
    wasdi.wasdiLog("Found " + str(len(aoL2CloudCoverFound)) + " S2MSI2A Images with CloudCover = " + sCloudCover)
 
-   # If we have a String Boundig Box...
+   # If we have a String Bounding Box...
    sBBox = "20.1,43.2,19.3,44.4"
    # We can convert it in the object
    oBoundingBox = wasdi.bboxStringToObject(sBBox)
@@ -89,21 +89,21 @@ These are different samples of Sentinel 2 Search. The mandatory fields to search
 
 What it does:
 
- - Initializes the input varialbe needed. 
- - Starts earching S2 L1 Images
+ - Initializes the input variable needed.
+ - Starts searching S2 L1 Images
  - Loop the results and print file names
  - Searches L2 Images
  - Searches L2 Images; adding the cloud coverage
  - Searches L2 Images; using the lat lon values and not the Bounding Box Object
 
 .. note::
-	The developer can decide whatever is needed in the params.json file. If you decide to use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
+   The developer can decide whatever is needed in the params.json file. If you decide to use the `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ your parameters will be generated automatically by WASDI.
 
 .. note::
-	With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsible fir converting your data in your code.
+   With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsible fir converting your data in your code.
 
 .. note::
-	The Boundig Box Format used here is the one used by the User Interface when renderAsStrings is missing or false. The Boundig Box format when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**.
+   The Bounding Box Format used here is the one used by the User Interface when renderAsStrings is missing or false. The Bounding Box format when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**.
 
 .. note::
-	The Date is formatted by the User Interface as "YYYY-MM-DD".
+   The Date is formatted by the User Interface as "YYYY-MM-DD".
