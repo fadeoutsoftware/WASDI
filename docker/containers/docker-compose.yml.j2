@@ -295,8 +295,10 @@ services:
 {% if bWasdiKeycloakNewInstance | default(False) == True %}
       - "--import-realm"
 {% endif %}
+{% if bWasdiPostgresqlKeycloakEnabled == True %}
     depends_on:
       - {{ sWasdiPostgresqlKeycloakServiceName }}
+{% endif %}
     entrypoint:
       - {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/bin/kc.sh
 {% if ( aoWasdiKeycloakEnvironmentVariable | default([]) | length ) > 0 %}
@@ -422,7 +424,7 @@ services:
 {% endfor %}
 {% endif %}
 {% endif %}
-{% if bWasdiKeycloakEnabled == True %}
+{% if bWasdiPostgresqlKeycloakEnabled == True %}
   {{ sWasdiPostgresqlKeycloakServiceName }}:
 {% if ( aWasdiPostgresqlKeycloakCommand | length ) > 0 %}
     command:
