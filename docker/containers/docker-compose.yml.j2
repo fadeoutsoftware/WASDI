@@ -458,7 +458,7 @@ services:
 {% endfor %}
 {% endif %}
 {% endif %}
-{% if bWasdiSonarqubeEnabled == True %}
+{% if bWasdiPostgresqlSonarqubeEnabled == True %}
   {{ sWasdiPostgresqlSonarqubeServiceName }}:
 {% if ( aoWasdiPostgresqlSonarqubeEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
@@ -562,7 +562,9 @@ services:
 {% if bWasdiSonarqubeEnabled == True %}
   {{ sWasdiSonarqubeServiceName }}:
     depends_on:
+{% if bWasdiPostgresqlSonarqubeEnabled == True %}
       - {{ sWasdiPostgresqlSonarqubeServiceName }}
+{% endif %}
       - {{ sWasdiTraefikServiceName }}
 {% if ( aoWasdiSonarqubeEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
