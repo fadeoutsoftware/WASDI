@@ -55,7 +55,7 @@ public class CollectionsApi  {
     			return Response.status(Status.NOT_FOUND).entity(Error.getError("CollectionsApi.describeCollection.Invalid", "404", "Invalid Collection")).build();
     		}
     		
-    		Collection oCollection = Collections.getCollectionVMFromConfig(oConfigCollection, true);
+    		Collection oCollection = Collections.getCollectionVMFromConfig(oConfigCollection, false);
     	
     		return Response.ok().entity(oCollection).build();
     	}
