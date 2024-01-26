@@ -108,6 +108,12 @@ public class DefaultApi  {
 		aoEndPoints.add(oEndPoint);
 		
 
+		oEndPoint = new Endpoint();
+		oEndPoint.setPath("/file_formats");
+		aoMethods = new ArrayList<>();
+		aoMethods.add(MethodsEnum.GET);
+		oEndPoint.setMethods(aoMethods);
+		aoEndPoints.add(oEndPoint);
 
 		return aoEndPoints;
 		

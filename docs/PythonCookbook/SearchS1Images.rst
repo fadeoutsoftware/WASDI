@@ -16,7 +16,7 @@ Prerequisites
 To run this code you need:
  - A running Python 3.x Environment
  - A valid WASDI Account
- - A valid Config file
+ - A `valid Config file <https://wasdi.readthedocs.io/en/latest/PythonCookbook/createConfig.html>`_
  
 If this is not clear, you probably need to take a look to the `Python Tutorial <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/PythonTutorial.html>`_ before.
 
@@ -67,7 +67,7 @@ These are different samples of Sentinel 1 Search. The mandatory fields to search
            iOrbit = oFoundImage["properties"]["relativeorbitnumber"]
            # THis is the name of the file
            sFileName = oFoundImage["fileName"]
-           # There are many other proprties, depending by the Provider and the Mission, that can be explored
+           # There are many other properties, depending by the Provider and the Mission, that can be explored
    
    # Now lets search SLC Images
    aoSLCFoundArray = wasdi.searchEOImages("S1", sStartDate, sEndDate, sProductType="SLC", oBoundingBox=oBBox)
@@ -78,7 +78,7 @@ These are different samples of Sentinel 1 Search. The mandatory fields to search
    aoSLCPerOrbitFoundArray = wasdi.searchEOImages("S1", sStartDate, sEndDate, sProductType="SLC", oBoundingBox=oBBox, iOrbitNumber=iRelativeOrbit)
    wasdi.wasdiLog("Found " + str(len(aoSLCPerOrbitFoundArray)) + " SLC Images in orbit " + str(iRelativeOrbit))
 
-   # If we have a String Boundig Box...
+   # If we have a String Bounding Box...
    sBBox = "20.1,43.2,19.3,44.4"
    # We can convert it in the object
    oBoundingBox = wasdi.bboxStringToObject(sBBox)
@@ -90,7 +90,7 @@ These are different samples of Sentinel 1 Search. The mandatory fields to search
 
 What it does:
 
- - Initializes the input varialbe needed. 
+ - Initializes the input variable needed.
  - Starts searching for S1 GRD Images
  - Loops over the results and accesses some properties
  - Searches for SLC Images
@@ -104,7 +104,7 @@ What it does:
 	With the  `WASDI User Interface <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_ you can use the `renderAsStrings <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html#render-as-string>`_ flag to ask WASDI to get all your parameters in String Format. In this case you will be responsible to convert your data in your code.
 
 .. note::
-	The Boundig Box Format used here is the one used by the User Interface when renderAsStrings is missing or false. The Boundig Box format when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**.
+	The Bounding Box Format used here is the one used by the User Interface when renderAsStrings is missing or false. The Bounding Box format when renderAsStrings: true is **"NORTH,WEST,SOUTH,EAST"**.
 
 .. note::
 	The Date is formatted by the User Interface as "YYYY-MM-DD".

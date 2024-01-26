@@ -10,8 +10,11 @@ public class OpenEOCollection {
 	public String title;
 	public String description;
 	public String license;
+	public String version;
 	
 	public OpenEOExtent extent; 
+	
+	public ArrayList<String> stac_extensions;
 	
 	public ArrayList<String> keywords = new ArrayList<>();
 	
@@ -20,4 +23,6 @@ public class OpenEOCollection {
 	public OpenEOCubeDimensions cubeDimensions;
 	
 	public OpenEOCollectionSummary summaries;
+	
+	public ArrayList<OpenEOLink> links = new ArrayList<>();
 }

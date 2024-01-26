@@ -32,6 +32,7 @@ import io.swagger.annotations.ApiModelProperty;
 import net.wasdi.openeoserver.viewmodels.Provider.RolesEnum;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.config.openEO.OpenEOCollection;
+import wasdi.shared.config.openEO.OpenEOLink;
 import wasdi.shared.config.openEO.OpenEOProvider;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -157,6 +158,9 @@ public class Collections   {
 			oCollectionView.setDescription(oConfigCollection.description);
 			oCollectionView.setLicense(oConfigCollection.license);
 			oCollectionView.setKeywords(oConfigCollection.keywords);
+			oCollectionView.setStacVersion(oConfigCollection.stac_version);
+			oCollectionView.setTitle(oConfigCollection.id);
+			oCollectionView.setVersion(oConfigCollection.version);			
 
 			CollectionExtent oExtent = new CollectionExtent();
 
@@ -192,6 +196,7 @@ public class Collections   {
 					}
 
 					oTemporal.addIntervalItem(aoDateValues);
+					oExtent.setTemporal(oTemporal);
 				}					
 			}
 
@@ -262,6 +267,16 @@ public class Collections   {
 				}
 				
 				oCollectionView.setSummaries(aoSummaries);
+				
+				if (oConfigCollection.links != null && !oConfigCollection.links.isEmpty()) {
+					for (OpenEOLink oOpenEOLink : oConfigCollection.links) {
+						Link oLink = new Link();
+						oLink.setRel(oOpenEOLink.rel);
+						oLink.setHref(new URI(oOpenEOLink.href));
+						oCollectionView.addLinksItem(oLink);
+					}
+				}
+				
 			}
 		}
 		catch (Exception oEx) {
