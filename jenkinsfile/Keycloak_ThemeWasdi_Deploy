@@ -53,7 +53,7 @@ pipeline {
             --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} keycloakDeploymentSpecificTheme=True sWasdiKeycloakThemeVersion=${env.sCurrentRevision}'
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sWasdiKeycloakThemeVersion=${env.sCurrentRevision}'
         """,
         label: "Execute ansible-playbook"
       }
