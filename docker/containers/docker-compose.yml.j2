@@ -108,7 +108,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.rule=Host(`testnew.wasdi.net`) && PathPrefix(`/`)"
+      - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.rule=Host(`{{ sWasdiClientV2BaseUrl }}`) && PathPrefix(`/`)"
       - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.service=s_{{ sWasdiClientV2ServiceName }}"
 {% if bWasdiSslEnabled == True %}
@@ -295,8 +295,10 @@ services:
 {% if bWasdiKeycloakNewInstance | default(False) == True %}
       - "--import-realm"
 {% endif %}
+{% if bWasdiPostgresqlKeycloakEnabled == True %}
     depends_on:
       - {{ sWasdiPostgresqlKeycloakServiceName }}
+{% endif %}
     entrypoint:
       - {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/bin/kc.sh
 {% if ( aoWasdiKeycloakEnvironmentVariable | default([]) | length ) > 0 %}
@@ -352,7 +354,7 @@ services:
       - {{ aoWasdiMongoCurrentEnvironmentVariable['key'] }}={{ aoWasdiMongoCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
-    image: "mongo:{{ sWasdiMongoVersion }}"
+    image: "{{ sWasdiMongoImageName }}:{{ sWasdiMongoVersion }}"
 {% if ( aWasdiMongoPorts | length ) > 0 %}
     ports:
 {% for sWasdiMongoCurrentPort in aWasdiMongoPorts %}
@@ -422,7 +424,7 @@ services:
 {% endfor %}
 {% endif %}
 {% endif %}
-{% if bWasdiKeycloakEnabled == True %}
+{% if bWasdiPostgresqlKeycloakEnabled == True %}
   {{ sWasdiPostgresqlKeycloakServiceName }}:
 {% if ( aWasdiPostgresqlKeycloakCommand | length ) > 0 %}
     command:
@@ -456,7 +458,7 @@ services:
 {% endfor %}
 {% endif %}
 {% endif %}
-{% if bWasdiSonarqubeEnabled == True %}
+{% if bWasdiPostgresqlSonarqubeEnabled == True %}
   {{ sWasdiPostgresqlSonarqubeServiceName }}:
 {% if ( aoWasdiPostgresqlSonarqubeEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
@@ -560,7 +562,9 @@ services:
 {% if bWasdiSonarqubeEnabled == True %}
   {{ sWasdiSonarqubeServiceName }}:
     depends_on:
+{% if bWasdiPostgresqlSonarqubeEnabled == True %}
       - {{ sWasdiPostgresqlSonarqubeServiceName }}
+{% endif %}
       - {{ sWasdiTraefikServiceName }}
 {% if ( aoWasdiSonarqubeEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
