@@ -1,6 +1,10 @@
 pipeline {
   agent any
 
+  environment {
+    sCurrentRevision = "${env.BUILD_ID}"
+  }
+
   options {
     buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '365'))
     disableConcurrentBuilds()
@@ -72,6 +76,21 @@ pipeline {
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
         label: "Start or restart the container(s)"
+      }
+    }
+
+    stage('CLEAN THE DOCKER IMAGE(S)') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deleteDockerImage.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiInfluxDbGrafanaContainer=true'
+        """,
+        label: "Clean the Docker image(s)"
       }
     }
   }
