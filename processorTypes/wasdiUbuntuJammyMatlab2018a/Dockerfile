@@ -62,10 +62,8 @@ USER {{ sWasdiSystemUserName }}
 
 
 # Create the application directory
-# Create the virtual environment
 RUN mkdir --parents \
-        {{ sWasdiSystemUserHome }}/application && \
-    python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv
+        {{ sWasdiSystemUserHome }}/application
 
 
 # Set the workdir to {{ sWasdiSystemUserHome }}/application
@@ -84,3 +82,31 @@ RUN mkdir --parents \
         /tmp/mathworks_*
 
 ENV LD_LIBRARY_PATH="{{ sWasdiSystemUserHome }}/matlab/v94/runtime/glnxa64:{{ sWasdiSystemUserHome }}/matlab/v94/bin/glnxa64:{{ sWasdiSystemUserHome }}/matlab/v94/sys/os/glnxa64:{{ sWasdiSystemUserHome }}/matlab/v94/extern/bin/glnxa64"
+
+
+## FROM HERE, THERE IS NO MORE CACHE ##
+# Copy the needed files
+COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} ./ {{ sWasdiSystemUserHome }}/application/
+
+
+# Create the virtual environment
+# Install Python libraries
+RUN python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && 
+    pip3 install --no-cache-dir --no-compile \
+        wasdi
+
+
+# Start the container
+CMD [ \
+    "{{ sWasdiSystemUserHome }}/venv/bin/python3", \
+    "/usr/bin/gunicorn", \
+    "--workers", \
+    "1", \
+    "--max-requests", \
+    "1", \
+    "--timeout", \
+    "3600", \
+    "--bind", \
+    "0.0.0.0:5000", \
+    "wasdiProcessorServer:app" \
+]
