@@ -41,18 +41,18 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     apt-get update && \
     apt-get dist-upgrade && \
     apt-get install \
+    apt-get install \
         curl \
-        gdal-bin \
         git \
         gunicorn \
         nano \
         python3 \
         python3-flask \
-        python3-gdal \
         python3-requests \
         python3-pip \
         python3-venv \
         python3-wheel \
+        unzip \
         wget && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
@@ -63,60 +63,25 @@ USER {{ sWasdiSystemUserName }}
 
 
 # Create the application directory
+# Create the virtual environment
 RUN mkdir --parents \
-        {{ sWasdiSystemUserHome }}/application
+        {{ sWasdiSystemUserHome }}/application && \
+    python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv
 
 
 # Set the workdir to {{ sWasdiSystemUserHome }}/application
 WORKDIR {{ sWasdiSystemUserHome }}/application
 
 
-## FROM HERE, THERE IS NO MORE CACHE ##
-# Copy the needed files
-COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} ./ {{ sWasdiSystemUserHome }}/application/
+# Install the matlab runtime
+RUN mkdir --parents \
+        {{ sWasdiSystemUserHome }}/matlab \
+        /tmp/matlab && \
+    wget --no-verbose --show-progress --progress=bar:force:noscroll https://ssd.mathworks.com/supportfiles/downloads/R2018a/deployment_files/R2018a/installers/glnxa64/MCR_R2018a_glnxa64_installer.zip --output-document /tmp/matlab/matlab.zip && \
+    unzip /tmp/matlab/matlab.zip -d /tmp/matlab && \
+    /tmp/matlab/install -mode silent -agreeToLicense yes -outputFile /tmp/matlab/install_log.txt -agreeToLicense yes -outputFile install_log.txt -destinationFolder {{ sWasdiSystemUserHome }}/matlab/ && \
+    rm -rf \
+        /tmp/matlab \
+        /tmp/mathworks_*
 
-
-# Create the virtual environment
-# Install the common PIP libraries
-RUN python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
-    pip3 install --no-cache-dir --no-compile \
-        numpy \
-        wasdi
-
-
-# From now, all commands executed are executed with the user 'root'
-USER root
-
-
-# Install packages only if {{ sWasdiSystemUserHome }}/application/packages.txt exists
-RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
-        --application-directory {{ sWasdiSystemUserHome }}/application \
-        --home-directory {{ sWasdiSystemUserHome }} \
-        --package-apt
-
-
-# From now, all commands executed are executed as {{ sWasdiSystemUserName }}
-USER {{ sWasdiSystemUserName }}
-
-
-# Install packages only if {{ sWasdiSystemUserHome }}/application/packages.txt exists
-RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
-        --application-directory {{ sWasdiSystemUserHome }}/application \
-        --home-directory {{ sWasdiSystemUserHome }} \
-        --package-pip
-
-
-# Start the container
-CMD [ \
-    "{{ sWasdiSystemUserHome }}/venv/bin/python3", \
-    "/usr/bin/gunicorn", \
-    "--workers", \
-    "1", \
-    "--max-requests", \
-    "1", \
-    "--timeout", \
-    "3600", \
-    "--bind", \
-    "0.0.0.0:5000", \
-    "wasdiProcessorServer:app" \
-]
+ENV LD_LIBRARY_PATH="{{ sWasdiSystemUserHome }}/matlab/v94/runtime/glnxa64:{{ sWasdiSystemUserHome }}/matlab/v94/bin/glnxa64:{{ sWasdiSystemUserHome }}/matlab/v94/sys/os/glnxa64:{{ sWasdiSystemUserHome }}/matlab/v94/extern/bin/glnxa64"
