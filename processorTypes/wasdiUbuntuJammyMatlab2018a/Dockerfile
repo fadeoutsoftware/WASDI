@@ -81,7 +81,18 @@ RUN mkdir --parents \
         /tmp/matlab \
         /tmp/mathworks_*
 
-ENV LD_LIBRARY_PATH="{{ sWasdiSystemUserHome }}/matlab/v94/runtime/glnxa64:{{ sWasdiSystemUserHome }}/matlab/v94/bin/glnxa64:{{ sWasdiSystemUserHome }}/matlab/v94/sys/os/glnxa64:{{ sWasdiSystemUserHome }}/matlab/v94/extern/bin/glnxa64"
+
+# From now, all commands executed are executed with the user 'root'
+USER root
+
+
+#ENV LD_LIBRARY_PATH="{{ sWasdiSystemUserHome }}/matlab/v94/runtime/glnxa64:{{ sWasdiSystemUserHome }}/matlab/v94/bin/glnxa64:{{ sWasdiSystemUserHome }}/matlab/v94/sys/os/glnxa64:{{ sWasdiSystemUserHome }}/matlab/v94/extern/bin/glnxa64"
+RUN echo -e "/home/appwasdi/matlab/v94/runtime/glnxa64\n/home/appwasdi/matlab/v94/bin/glnxa64\n/home/appwasdi/matlab/v94/sys/os/glnxa64\n/home/appwasdi/matlab/v94/extern/bin/glnxa64" > /etc/ld.so.conf.d/z_matlab.conf && \
+    ldconfig
+
+
+# From now, all commands executed are executed as {{ sWasdiSystemUserName }}
+USER {{ sWasdiSystemUserName }}
 
 
 ## FROM HERE, THERE IS NO MORE CACHE ##
@@ -91,7 +102,7 @@ COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirecto
 
 # Create the virtual environment
 # Install Python libraries
-RUN python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && 
+RUN python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
     pip3 install --no-cache-dir --no-compile \
         wasdi
 
