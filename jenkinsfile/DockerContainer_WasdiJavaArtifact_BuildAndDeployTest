@@ -54,7 +54,7 @@ def getMavenBuildProject() {
 
   if ( env.sWasdiUtils.toBoolean() ) {
     aMavenBuildProject.add('wrappersnap/wasdishared')
-    aMavenBuildProject.add('wrappersnap/launcher/utils_pom.xml')
+    aMavenBuildProject.add('wrappersnap/dbUtils')
   }
 
   aMavenBuildProject.unique()
