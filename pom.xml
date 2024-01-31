@@ -14,8 +14,8 @@
     <!-- sub modules -->
     <modules>
         <module>wrappersnap/wasdishared</module>
+        <module>wrappersnap/dbUtils</module>
         <module>wrappersnap/launcher</module>
-        <module>wrappersnap/launcher/utils_pom.xml</module>
         <module>scheduler</module>
         <module>wasdiwebserver</module>
         <module>libraries/jwasdilib/jwasdilib</module>
