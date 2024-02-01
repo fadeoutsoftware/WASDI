@@ -54,7 +54,7 @@ function addOrUpdateLine() {
     then
         echo "[ENTRYPOINT] [${FUNCNAME}] The line exists: we will try to update it"
         echo "[ENTRYPOINT] [${FUNCNAME}] Update the line"
-        sed --in-place "s/${sLineToSearch//\//\\/}/${sLineToAddOrUpdate//\//\\/}/g" ${sGeoserverWorkingDir}/global.xml
+        sed --in-place "s/${sLineToSearch//\//\\/}/${sLineToAddOrUpdate//\//\\/}/g" ${sFile}
 
         if [[ ${?} -eq 0 ]]
         then
