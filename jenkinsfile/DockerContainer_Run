@@ -96,7 +96,7 @@ pipeline {
       steps {
         sh script: """
             echo '{' > DockerContainer_Run_Variables.json
-            echo '  "sDeployWasdiClientContainer": "' + ${env.sDeployWasdiClientContainer} + '",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiClientContainer": "'${env.sDeployWasdiClientContainer}'",' >> DockerContainer_Run_Variables.json
             echo '}' >> DockerContainer_Run_Variables.json
             cat ${WORKSPACE}/DockerContainer_Run_Variables.json
         """
