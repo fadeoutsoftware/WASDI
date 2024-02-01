@@ -139,7 +139,7 @@ RUN mkdir --parents \
       {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryMode }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/webapps/docs \
       {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryMode }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/webapps/examples && \
     sed --in-place 's/127\\.\\d+\\.\\d+\\.\\d+/127\\.\\d+\\.\\d+\\.\\d+|{{ sWasdiDockerNetworkRange.split('.')[0] }}\\.{{ sWasdiDockerNetworkRange.split('.')[1] }}\\.\\d+\\.\\d+/g' {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/webapps/manager/META-INF/context.xml
-
+ENV TOMCAT_HOME="{{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}"
 ENV PATH="{{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/bin:${PATH}"
 
 
@@ -149,11 +149,12 @@ WORKDIR {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasd
 
 # Copy data
 COPY --chown={{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileOwner }}:{{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileGroup }} ./dataToCopy/{{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileName }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/webapps/{{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileName }}
-COPY --chown={{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileOwner }}:{{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileGroup }} ./dataToCopy/conf_server.xml {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/conf/server.xml
-COPY --chown={{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileOwner }}:{{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileGroup }} ./dataToCopy/conf_tomcat-users.xml {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/conf/tomcat-users.xml
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/conf_server.xml {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/conf/server.xml
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/docker-entrypoint.sh /docker-entrypoint.sh
 
 
 # Start the container
+ENTRYPOINT ["/bin/bash", "/docker-entrypoint.sh"]
 CMD [ \
     "{{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/bin/catalina.sh", \
     "run" \
