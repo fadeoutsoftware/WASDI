@@ -1,46 +1,3 @@
-def getContainersToRestart() {
-  def aContainersToRestart = []
-
-  if ( env.sWasdiLauncher.toBoolean() ) {
-    aContainersToRestart.add('wrappersnap/wasdishared')
-    aContainersToRestart.add('wrappersnap/launcher')
-  }
-
-  if ( env.sWasdiScheduler.toBoolean() ) {
-    aContainersToRestart.add('wrappersnap/wasdishared')
-    aContainersToRestart.add('scheduler')
-  }
-
-  if ( env.sWasdiTomcatOgcProcessesServer.toBoolean() ) {
-    aContainersToRestart.add('wrappersnap/wasdishared')
-    aContainersToRestart.add('ogcprocesses/processes')
-  }
-
-  if ( env.sWasdiTomcatOpenEoServer.toBoolean() ) {
-    aContainersToRestart.add('wrappersnap/wasdishared')
-    aContainersToRestart.add('openeo-java-server')
-  }
-
-  if ( env.sWasdiTomcatWasdiWebServer.toBoolean() ) {
-    aContainersToRestart.add('wrappersnap/wasdishared')
-    aContainersToRestart.add('wasdiwebserver')
-  }
-
-  if ( env.sWasdiTrigger.toBoolean() ) {
-    aContainersToRestart.add('wrappersnap/wasdishared')
-    aContainersToRestart.add('libraries/jwasdilib/jwasdilib')
-    aContainersToRestart.add('wasditrigger')
-  }
-
-  aContainersToRestart.unique()
-
-  if ( aContainersToRestart.size() > 0 ) {
-    return '--projects ' + aContainersToRestart.join(',') + ' --also-make'
-  }
-
-  return ''
-}
-
 pipeline {
   agent any
 
@@ -97,6 +54,24 @@ pipeline {
         sh script: """
             echo '{' > DockerContainer_Run_Variables.json
             echo '  "sDeployWasdiClientContainer": "'${env.sDeployWasdiClientContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiClientV2Container": "'${env.sDeployWasdiClientV2Container}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiGeoserverContainer": "'${env.sDeployWasdiGeoserverContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiGrafanaContainer": "'${env.sDeployWasdiGrafanaContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiInfluxDbGrafanaContainer": "'${env.sDeployWasdiInfluxDbGrafanaContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiJenkinsContainer": "'${env.sDeployWasdiJenkinsContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiKeycloakContainer": "'${env.sDeployWasdiKeycloakContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiMongoContainer": "'${env.sDeployWasdiMongoContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiMongoNv5LicenseServerContainer": "'${env.sDeployWasdiMongoNv5LicenseServerContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiNexusContainer": "'${env.sDeployWasdiNexusContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiPostgresqlKeycloakContainer": "'${env.sDeployWasdiPostgresqlKeycloakContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiPostgresqlSonarqubeContainer": "'${env.sDeployWasdiPostgresqlSonarqubeContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiRabbitMqContainer": "'${env.sDeployWasdiRabbitMqContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiSchedulerContainer": "'${env.sDeployWasdiSchedulerContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiSonarqubeContainer": "'${env.sDeployWasdiSonarqubeContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiTelegrafContainer": "'${env.sDeployWasdiTelegrafContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiTomcatOgcProcessesServerContainer": "'${env.sDeployWasdiTomcatOgcProcessesServerContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiTomcatOpenEoServerContainer": "'${env.sDeployWasdiTomcatOpenEoServerContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiTomcatWasdiWebServerContainer": "'${env.sDeployWasdiTomcatWasdiWebServerContainer}'"' >> DockerContainer_Run_Variables.json
             echo '}' >> DockerContainer_Run_Variables.json
             cat ${WORKSPACE}/DockerContainer_Run_Variables.json
         """
