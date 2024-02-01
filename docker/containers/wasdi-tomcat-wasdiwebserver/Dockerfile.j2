@@ -139,7 +139,7 @@ RUN mkdir --parents \
       {{ sWasdiTomcatWasdiWebServerRootDirectoryMode }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/webapps/docs \
       {{ sWasdiTomcatWasdiWebServerRootDirectoryMode }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/webapps/examples && \
     sed --in-place 's/127\\.\\d+\\.\\d+\\.\\d+/127\\.\\d+\\.\\d+\\.\\d+|{{ sWasdiDockerNetworkRange.split('.')[0] }}\\.{{ sWasdiDockerNetworkRange.split('.')[1] }}\\.\\d+\\.\\d+/g' {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/webapps/manager/META-INF/context.xml
-
+ENV TOMCAT_HOME="{{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}"
 ENV PATH="{{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/bin:${PATH}"
 
 
@@ -149,11 +149,12 @@ WORKDIR {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWe
 
 # Copy data
 COPY --chown={{ sWasdiTomcatWasdiWebServerBuildTargetFileOwner }}:{{ sWasdiTomcatWasdiWebServerBuildTargetFileGroup }} ./dataToCopy/{{ sWasdiTomcatWasdiWebServerBuildTargetFileName }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/webapps/{{ sWasdiTomcatWasdiWebServerBuildTargetFileName }}
-COPY --chown={{ sWasdiTomcatWasdiWebServerBuildTargetFileOwner }}:{{ sWasdiTomcatWasdiWebServerBuildTargetFileGroup }} ./dataToCopy/conf_server.xml {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/conf/server.xml
-COPY --chown={{ sWasdiTomcatWasdiWebServerBuildTargetFileOwner }}:{{ sWasdiTomcatWasdiWebServerBuildTargetFileGroup }} ./dataToCopy/conf_tomcat-users.xml {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/conf/tomcat-users.xml
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/conf_server.xml {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/conf/server.xml
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/docker-entrypoint.sh /docker-entrypoint.sh
 
 
 # Start the container
+ENTRYPOINT ["/bin/bash", "/docker-entrypoint.sh"]
 CMD [ \
     "{{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/bin/catalina.sh", \
     "run" \
