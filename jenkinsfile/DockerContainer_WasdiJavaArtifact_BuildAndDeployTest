@@ -197,8 +197,8 @@ pipeline {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
                 ansible-playbook \
-                  playbooks/runDockerContainerWasdiJavaArtifact.yml \
-                    --inventory inventories/${env.sAnsibleInventory}.yml \
+                  playbooks/runDockerContainer.yml \
+                  --inventory inventories/${env.sAnsibleInventory}.yml \
                   --limit ${env.sAnsibleLimit} \
                   --diff \
                   --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'

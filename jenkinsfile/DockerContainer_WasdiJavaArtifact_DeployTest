@@ -122,7 +122,7 @@ pipeline {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
-            playbooks/runDockerContainerWasdiJavaArtifact.yml \
+            playbooks/runDockerContainer.yml \
             --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
