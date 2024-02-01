@@ -58,7 +58,6 @@ pipeline {
             echo '  "sDeployWasdiGeoserverContainer": "'${env.sDeployWasdiGeoserverContainer}'",' >> DockerContainer_Run_Variables.json
             echo '  "sDeployWasdiGrafanaContainer": "'${env.sDeployWasdiGrafanaContainer}'",' >> DockerContainer_Run_Variables.json
             echo '  "sDeployWasdiInfluxDbGrafanaContainer": "'${env.sDeployWasdiInfluxDbGrafanaContainer}'",' >> DockerContainer_Run_Variables.json
-            echo '  "sDeployWasdiJenkinsContainer": "'${env.sDeployWasdiJenkinsContainer}'",' >> DockerContainer_Run_Variables.json
             echo '  "sDeployWasdiKeycloakContainer": "'${env.sDeployWasdiKeycloakContainer}'",' >> DockerContainer_Run_Variables.json
             echo '  "sDeployWasdiMongoContainer": "'${env.sDeployWasdiMongoContainer}'",' >> DockerContainer_Run_Variables.json
             echo '  "sDeployWasdiMongoNv5LicenseServerContainer": "'${env.sDeployWasdiMongoNv5LicenseServerContainer}'",' >> DockerContainer_Run_Variables.json
@@ -71,7 +70,9 @@ pipeline {
             echo '  "sDeployWasdiTelegrafContainer": "'${env.sDeployWasdiTelegrafContainer}'",' >> DockerContainer_Run_Variables.json
             echo '  "sDeployWasdiTomcatOgcProcessesServerContainer": "'${env.sDeployWasdiTomcatOgcProcessesServerContainer}'",' >> DockerContainer_Run_Variables.json
             echo '  "sDeployWasdiTomcatOpenEoServerContainer": "'${env.sDeployWasdiTomcatOpenEoServerContainer}'",' >> DockerContainer_Run_Variables.json
-            echo '  "sDeployWasdiTomcatWasdiWebServerContainer": "'${env.sDeployWasdiTomcatWasdiWebServerContainer}'"' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiTomcatWasdiWebServerContainer": "'${env.sDeployWasdiTomcatWasdiWebServerContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiTraefikContainer": "'${env.sDeployWasdiTraefikContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiUpdateMetricContainer": "'${env.sDeployWasdiUpdateMetricContainer}'"' >> DockerContainer_Run_Variables.json
             echo '}' >> DockerContainer_Run_Variables.json
             cat ${WORKSPACE}/DockerContainer_Run_Variables.json
         """
