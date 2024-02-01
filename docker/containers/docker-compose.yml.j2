@@ -374,6 +374,46 @@ services:
 {% endfor %}
 {% endif %}
 {% endif %}
+{% if bWasdiMongoNv5LicenseServerEnabled == True %}
+  {{ sWasdiMongoNv5LicenseServerServiceName }}:
+{% if ( aWasdiMongoNv5LicenseServerCommand | length ) > 0 %}
+    command:
+{% for sWasdiMongoNv5LicenseServerCurrentCommand in aWasdiMongoNv5LicenseServerCommand %}
+      - "{{ sWasdiMongoNv5LicenseServerCurrentCommand }}"
+{% endfor %}
+{% endif %}
+{% if ( sWasdiMongoNv5LicenseServerInternalPort | default('') ) not in ['', '27017'] %}
+      - "--port"
+      - "{{ sWasdiMongoNv5LicenseServerInternalPort }}"
+    expose:
+      - "{{ sWasdiMongoNv5LicenseServerInternalPort }}"
+{% endif %}
+{% if ( aoWasdiMongoNv5LicenseServerEnvironmentVariable | default([]) | length ) > 0 %}
+    environment:
+{% for aoWasdiMongoNv5LicenseServerCurrentEnvironmentVariable in aoWasdiMongoNv5LicenseServerEnvironmentVariable %}
+      - {{ aoWasdiMongoNv5LicenseServerCurrentEnvironmentVariable['key'] }}={{ aoWasdiMongoNv5LicenseServerCurrentEnvironmentVariable['value'] }}
+{% endfor %}
+{% endif %}
+    image: "{{ sWasdiMongoNv5LicenseServerImageName }}:{{ sWasdiMongoNv5LicenseServerVersion }}"
+{% if ( aWasdiMongoNv5LicenseServerPorts | length ) > 0 %}
+    ports:
+{% for sWasdiMongoNv5LicenseServerCurrentPort in aWasdiMongoNv5LicenseServerPorts %}
+      - "{{ sWasdiMongoNv5LicenseServerCurrentPort | regex_replace('^:', '') }}"
+{% endfor %}
+{% endif %}
+    pull_policy: "missing"
+    restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiMongoNv5LicenseServerUlimitNofile }}
+        hard: {{ sWasdiMongoNv5LicenseServerUlimitNofile }}
+{% if ( aWasdiMongoNv5LicenseServerVolume | length ) > 0 %}
+    volumes:
+{% for sWasdiMongoNv5LicenseServerCurrentVolume in aWasdiMongoNv5LicenseServerVolume %}
+      - "{{ sWasdiMongoNv5LicenseServerCurrentVolume }}"
+{% endfor %}
+{% endif %}
+{% endif %}
 {% if bWasdiNexusEnabled == True %}
   {{ sWasdiNexusServiceName }}:
     depends_on:
