@@ -87,7 +87,6 @@ pipeline {
             --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
-            --check \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}' \
             --extra-vars "@${WORKSPACE}/DockerContainer_Run_Variables.json"
         """,
