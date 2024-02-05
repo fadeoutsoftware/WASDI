@@ -7,6 +7,7 @@ def getAnsibleExtraVariableProject() {
   aAnsibleExtraVariableProject.add('sDeployWasdiTomcatOpenEoServerContainer=' + env.sWasdiTomcatOpenEoServer.toString())
   aAnsibleExtraVariableProject.add('sDeployWasdiTomcatWasdiWebServerContainer=' + env.sWasdiTomcatWasdiWebServer.toString())
   aAnsibleExtraVariableProject.add('sDeployWasdiTriggerContainer=' + env.sWasdiTrigger.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiUtilsContainer=' + env.sWasdiUtils.toString())
 
   aAnsibleExtraVariableProject.unique()
 
@@ -49,6 +50,11 @@ def getMavenBuildProject() {
     aMavenBuildProject.add('wrappersnap/wasdishared')
     aMavenBuildProject.add('libraries/jwasdilib/jwasdilib')
     aMavenBuildProject.add('wasditrigger')
+  }
+
+  if ( env.sWasdiUtils.toBoolean() ) {
+    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('wrappersnap/utils')
   }
 
   aMavenBuildProject.unique()
