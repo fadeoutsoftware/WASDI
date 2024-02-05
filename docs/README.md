@@ -1,4 +1,5 @@
 # WASDI Documentation source
+
 ## Intro
 The content of this directory is the Documentation of the WASDI platform.
 
@@ -6,7 +7,7 @@ All rst files represents the sources for the Sphinx documentation tool. Such fil
 
 The default output directory is /docs/build
 
-##Requirements/Installation
+## Requirements/Installation
 To generate the documentation the following requirements must be satisfied on the dev machine:
 * python 3.8
 * pip
@@ -45,7 +46,7 @@ Otherwise if you have a system installation of python 3.8
 cp .\domain.py [Python3.8 Root Folder]\Lib\site-packages\javasphinx\
 ```
  
-##Generate the documentation
+## Generate the documentation
 To generate the documentation, open a terminal and launch the following command:
 ```
 make html
