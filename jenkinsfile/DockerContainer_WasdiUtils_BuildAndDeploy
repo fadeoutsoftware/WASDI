@@ -73,7 +73,7 @@ pipeline {
                 --define revision=${env.sCurrentRevision} \
                 --define skipTests \
                 --update-snapshots \
-                --projects wrappersnap/launcher/utils_pom.xml \
+                --projects wrappersnap/utils \
                 --also-make \
                 clean package
         """,
