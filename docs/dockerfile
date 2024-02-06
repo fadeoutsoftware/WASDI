@@ -1,0 +1,19 @@
+FROM python:3.8-alpine
+
+WORKDIR /usr/src/app
+COPY . ./
+VOLUME [ "/build:/usr/src/app/build" ]
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN apk add --update nodejs npm
+
+RUN npm install -g typedoc@0.22.18
+
+## still need to fix domain.py for javasphinx :-( 
+
+
+RUN sphinx-build -M html . build
+
+ENTRYPOINT [ "sh" ]
+#ENTRYPOINT [ "sphinx-build -M html . build" ]
