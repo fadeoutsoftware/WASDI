@@ -1168,6 +1168,7 @@ public class DockerUtils {
         		HttpCallResponse oResponse = HttpUtils.httpDelete(sUrl);
         		
         		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
+        			WasdiLog.errorLog("DockerUtils.removeImage: Bad answer..: " + oResponse.getResponseCode() + " Message:" + oResponse.getResponseBody());
         			return false;
         		}
         		else {
