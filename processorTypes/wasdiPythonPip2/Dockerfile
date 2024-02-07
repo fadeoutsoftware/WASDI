@@ -63,7 +63,6 @@ USER {{ sWasdiSystemUserName }}
 
 
 # Create the application directory
-# Create the virtual environment
 RUN mkdir --parents \
         {{ sWasdiSystemUserHome }}/application
 
@@ -100,7 +99,7 @@ RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
 USER {{ sWasdiSystemUserName }}
 
 
-# Install packages only if {{ sWasdiSystemUserHome }}/application/packages.txt exists
+# Install packages only if {{ sWasdiSystemUserHome }}/application/pip.txt exists
 RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
         --application-directory {{ sWasdiSystemUserHome }}/application \
         --home-directory {{ sWasdiSystemUserHome }} \
