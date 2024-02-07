@@ -29,7 +29,6 @@ import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.SubscriptionRepository;
-import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.utils.log.WasdiLog;

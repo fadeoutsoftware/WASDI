@@ -33,16 +33,20 @@ import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.users.User;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ParametersRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.EndMessageProvider;
+import wasdi.shared.utils.MailUtils;
+import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.LoggerWrapper;
@@ -501,6 +505,34 @@ public class LauncherMain  {
         	}
 
         	WasdiLog.debugLog("LauncherMain.executeOperation: Operation Result " + bOperationResult);
+        	
+        	// Check if we have to send a notification
+        	if (s_oProcessWorkspace.isNotifyOwnerByMail()) {
+        		
+        		WasdiLog.debugLog("LauncherMain.executeOperation: Notify the owner about this run with an mail");
+        		
+        		String sTitle = "WASDI Operation Report - " + s_oProcessWorkspace.getProductName() + " - " + s_oProcessWorkspace.getStatus();
+        		
+        		UserRepository oUserRepository = new UserRepository();
+        		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+        		User oUser = oUserRepository.getUser(s_oProcessWorkspace.getUserId());
+        		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(s_oProcessWorkspace.getWorkspaceId());
+        		
+        		
+        		String sMessage = "Hi " + oUser.getSafeUserName()+",\n";
+        		sMessage += "\tYour process of type " + s_oProcessWorkspace.getOperationType() + " - " + s_oProcessWorkspace.getProductName() + " [Operation Id: " + s_oProcessWorkspace.getProcessObjId()+"] ";
+        		sMessage += " in the workspace " + oWorkspace.getName() + " [Workspace Id: " + oWorkspace.getWorkspaceId() + "]";
+        		sMessage += " finished at " + TimeEpochUtils.fromEpochToDateString(Utils.nowInMillis());
+        		sMessage += " with Status " + s_oProcessWorkspace.getStatus() + "\n\n";
+        		sMessage += "You are receiving this mail since you are the ownwer of the Process and a Notification Request has been added.\n";
+        		sMessage += "Check the configuration in WASDI or contact us to stop receiving these mails.\n";
+        		sMessage += "Best Regards\nWASDI";
+        		
+        		
+        		if (!MailUtils.sendEmail(s_oProcessWorkspace.getUserId(), sTitle, sMessage)) {
+        			WasdiLog.errorLog("LauncherMain.executeOperation: error sending mail to the owner of the operation");
+        		}
+        	}
 
         }
         catch (Exception oEx) {

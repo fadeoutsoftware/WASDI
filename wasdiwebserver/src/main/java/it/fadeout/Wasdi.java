@@ -606,6 +606,7 @@ public class Wasdi extends ResourceConfig {
 					oProcess.setProductName(sProductName);
 					oProcess.setWorkspaceId(oParameter.getWorkspace());
 					oProcess.setUserId(sUserId);
+					oProcess.setNotifyOwnerByMail(oParameter.isNotifyOwnerByMail());
 
 					//TODO - enforce the presence of a valid subscription and of an active project
 					if (Utils.isNullOrEmpty(oUser.getActiveProjectId())

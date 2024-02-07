@@ -55,6 +55,7 @@ import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.OperatorParameter;
 import wasdi.shared.parameters.settings.GraphSetting;
+import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -651,7 +652,7 @@ public class WorkflowsResource {
                 String sTitle = "Workflow " + oWorkflow.getName() + " Shared";
                 String sMessage = "The user " + oRequesterUser.getUserId() + " shared with you the Workflow: " + oWorkflow.getName();
                 
-                WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sUserId, sTitle, sMessage);
+                MailUtils.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sUserId, sTitle, sMessage);
             } catch (Exception oEx) {
                 WasdiLog.errorLog("WorkflowsResource.shareWorkflow: notification exception " + oEx.toString());
             }

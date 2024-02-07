@@ -36,6 +36,7 @@ import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.JsonUtils;
+import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -1049,7 +1050,7 @@ public class AuthResource {
 
 		sMessage += "\n\nUSER: " + sAccount + " - PASSWORD: " + sPassword;
 
-		return WasdiResource.sendEmail(WasdiConfig.Current.notifications.pwRecoveryMailSender, sRecipientEmail, sTitle, sMessage);
+		return MailUtils.sendEmail(WasdiConfig.Current.notifications.pwRecoveryMailSender, sRecipientEmail, sTitle, sMessage);
 	}
 	
 	/**
@@ -1080,7 +1081,7 @@ public class AuthResource {
 
 		sMessage += "\n\nUSER: " + sAccount + " - PASSWORD: " + sPassword;
 
-		return WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sRecipientEmail, sTitle, sMessage);
+		return MailUtils.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sRecipientEmail, sTitle, sMessage);
 	}
 
 	/**
@@ -1115,7 +1116,7 @@ public class AuthResource {
 				sWasdiAdminMail = "team@wasdi.cloud";
 			}
 			
-			WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sWasdiAdminMail, sTitle, sMessage);
+			MailUtils.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sWasdiAdminMail, sTitle, sMessage);
 		} catch(Exception oEx) {
 			WasdiLog.errorLog("AuthResource.notifyNewUserInWasdi error "+oEx.getMessage());
 			return false;
