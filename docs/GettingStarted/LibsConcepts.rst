@@ -210,7 +210,7 @@ The folder structure will be something similar:
 * Linux: /home/[your user]/.wasdi/[WASDI_User]/[WorkspaceId]/
 * Windows: C:\\Users\\[your user]\\.wasdi\\[WASDI_User]\\[WorkspaceId]\\
 
-These are your folders, you can do what you want of that folders. Again: only and when needed, WASDI will search there for the needed files and, if not avaiable, will donwload it.
+These are your folders, you can do what you want of that folders. Again: only and when needed, WASDI will search there for the needed files and, if not available, will download it.
 
 
 
@@ -235,4 +235,4 @@ The advanced functionalities are:
 * Send log directly to the web user interface
 * Update the progress of the processing
 * Save a payload associated to each run of the app
-* Search and retrive the execution of other processors and the relative payloads
+* Search and retrieve the execution of other processors and the relative payloads
