@@ -90,7 +90,6 @@ function installPackageApt() {
     if [[ ${iReturnCode} -eq 0 ]]
     then
         echo -e "[INFO] OK"
-        return 0
     else
         echo -e "[ERROR] Please analyse the command output"
         return ${iReturnCode}
