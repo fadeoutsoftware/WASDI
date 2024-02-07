@@ -59,7 +59,7 @@ function getGreatestValue() {
 }
 
 function installPackageApt() {
-    local sFileToParse="${sApplicationirectory}/packages.txt"
+    local sFileToParse="${sApplicationDirectory}/packages.txt"
     local iReturnCode=0
 
     echo "[INFO] Check if the file '${sFileToParse}' exists..."
