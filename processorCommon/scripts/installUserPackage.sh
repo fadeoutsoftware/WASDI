@@ -83,6 +83,19 @@ function installPackageApt() {
         return 0
     fi
 
+    echo "[INFO] Update the local APT cache..."
+    apt-get update
+    iReturnCode=${?}
+
+    if [[ ${iReturnCode} -eq 0 ]]
+    then
+        echo -e "[INFO] OK"
+        return 0
+    else
+        echo -e "[ERROR] Please analyse the command output"
+        return ${iReturnCode}
+    fi
+
     echo "[INFO] Install package..."
     apt-get install --assume-yes --no-install-recommends $(cat ${sFileToParse} | sed 's/^[ \t]*$//' | grep -vE "^$" | tr "\n" " ")
     iReturnCode=${?}
@@ -92,7 +105,7 @@ function installPackageApt() {
         echo -e "[INFO] OK"
         return 0
     else
-        echo -e "[ERROR] Please analyse the installation output"
+        echo -e "[ERROR] Please analyse the command output"
         return ${iReturnCode}
     fi
 }
@@ -141,7 +154,7 @@ function installPackageConda() {
         echo -e "[INFO] OK"
         return 0
     else
-        echo -e "[ERROR] Please analyse the installation output"
+        echo -e "[ERROR] Please analyse the command output"
         return ${iReturnCode}
     fi
 }
@@ -185,7 +198,7 @@ function installPackagePip() {
         echo -e "[INFO] OK"
         return 0
     else
-        echo -e "[ERROR] Please analyse the installation output"
+        echo -e "[ERROR] Please analyse the command output"
         return ${iReturnCode}
     fi
 }
