@@ -756,8 +756,8 @@ The following is an example with 3 tabs: the first tab “Tab Name 1” has 3 co
 .. image:: ../_static/ui_images/37.png
     :scale: 100%
 
-Now, let's try to reproduce together an example. We use the app developed here:
-https://wasdi.readthedocs.io/en/latest/PythonTutorial.html
+Now, let's try to reproduce together an example. We use the app developed here :doc:`Python Tutorial <../ProgrammingTutorials/PythonTutorial>`
+
 The file params.json contains 5 parameters
 
 .. image:: ../_static/ui_images/38.png

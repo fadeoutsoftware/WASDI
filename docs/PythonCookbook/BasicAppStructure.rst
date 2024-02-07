@@ -18,7 +18,8 @@ To run this code you need:
  - A valid WASDI Account
  - A valid Config file
  
-If this is not clear, you probably need to take a look to the `Python Tutorial <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/PythonTutorial.html>`_ before.
+If this is not clear, you probably need to take a look to the :doc:`Python Tutorial <../ProgrammingTutorials/PythonTutorial>` before.
+
 
 
 Recipe 

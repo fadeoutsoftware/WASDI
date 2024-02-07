@@ -127,7 +127,7 @@ Logs verbosity
 ------------------------------------------------------------------------------------------------------------
 Upon execution of the code it is possible to control the verbosity.
 
- Ideally during debugging of your scripts it is useful 
+Ideally during debugging of your scripts it is useful 
 to have more details about the status of the running instance.
 Instead, when the code is effectively deployed, the logs can be disabled 
 by setting this field to false.
