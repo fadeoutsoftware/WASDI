@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # MAINTAINER: WASDI SARL
-# VERSION: 1.2
+# VERSION: 1.3
 
 
 #### FUNCTION ####
@@ -72,12 +72,24 @@ function installPackageApt() {
         return 0
     fi
 
-    echo "[INFO] Check if the file '${sFileToParse}' contains something..."
-    numberOfLine=$(getNumberOfLine "${sFileToParse}")
+    echo "[INFO] Convert the file in the Unix format..."
+    dos2unix ${sFileToParse}
+    iReturnCode=${?}
 
-    if [[ ${numberOfLine} -gt 0 ]]
+    if [[ ${iReturnCode} -eq 0 ]]
     then
-        echo -e "[INFO] There is ${numberOfLine} line so we continue"
+        echo -e "[INFO] OK"
+    else
+        echo -e "[ERROR] Please analyse the command output"
+        return ${iReturnCode}
+    fi
+
+    echo "[INFO] Check if the file '${sFileToParse}' contains something..."
+    iNumberOfLine=$(getNumberOfLine "${sFileToParse}")
+
+    if [[ ${iNumberOfLine} -gt 0 ]]
+    then
+        echo -e "[INFO] There is ${iNumberOfLine} line so we continue"
     else
         echo -e "[INFO] There is no line: we stop now"
         return 0
@@ -133,12 +145,24 @@ function installPackageConda() {
         return 0
     fi
 
-    echo "[INFO] Check if the file '${sFileToParse}' contains something..."
-    numberOfLine=$(getNumberOfLine "${sFileToParse}")
+    echo "[INFO] Convert the file in the Unix format..."
+    dos2unix ${sFileToParse}
+    iReturnCode=${?}
 
-    if [[ ${numberOfLine} -gt 0 ]]
+    if [[ ${iReturnCode} -eq 0 ]]
     then
-        echo -e "[INFO] There is ${numberOfLine} line so we continue"
+        echo -e "[INFO] OK"
+    else
+        echo -e "[ERROR] Please analyse the command output"
+        return ${iReturnCode}
+    fi
+
+    echo "[INFO] Check if the file '${sFileToParse}' contains something..."
+    iNumberOfLine=$(getNumberOfLine "${sFileToParse}")
+
+    if [[ ${iNumberOfLine} -gt 0 ]]
+    then
+        echo -e "[INFO] There is ${iNumberOfLine} line so we continue"
     else
         echo -e "[INFO] There is no line: we stop now"
         return 0
@@ -177,12 +201,24 @@ function installPackagePip() {
         return 0
     fi
 
-    echo "[INFO] Check if the file '${sFileToParse}' contains something..."
-    numberOfLine=$(getNumberOfLine "${sFileToParse}")
+    echo "[INFO] Convert the file in the Unix format..."
+    dos2unix ${sFileToParse}
+    iReturnCode=${?}
 
-    if [[ ${numberOfLine} -gt 0 ]]
+    if [[ ${iReturnCode} -eq 0 ]]
     then
-        echo -e "[INFO] There is ${numberOfLine} line so we continue"
+        echo -e "[INFO] OK"
+    else
+        echo -e "[ERROR] Please analyse the command output"
+        return ${iReturnCode}
+    fi
+
+    echo "[INFO] Check if the file '${sFileToParse}' contains something..."
+    iNumberOfLine=$(getNumberOfLine "${sFileToParse}")
+
+    if [[ ${iNumberOfLine} -gt 0 ]]
+    then
+        echo -e "[INFO] There is ${iNumberOfLine} line so we continue"
     else
         echo -e "[INFO] There is no line: we stop now"
         return 0
