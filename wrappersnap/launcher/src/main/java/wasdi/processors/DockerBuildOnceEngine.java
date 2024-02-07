@@ -166,10 +166,18 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 				while (iVersion>1) {
 					iVersion = iVersion - 1;
 					
+					// Stop and clean running containers
 					if (oDockerUtils.isContainerStarted(oProcessor.getName(), "" + iVersion)) {
 						WasdiLog.debugLog("DockerBuildOnceEngine.run: found version " + iVersion + " running, stop it");
 						oDockerUtils.stop(oProcessor.getName(), "" + iVersion);
-						break;
+					}
+					
+					// Clean also old images
+					if (oDockerUtils.isImageAvailable(oProcessor.getName(), "" + iVersion)) {
+						WasdiLog.debugLog("DockerBuildOnceEngine.run: found Image version " + iVersion + " running, delete it");
+						String sMyImage = "wasdi/" + oProcessor.getName() + ":" + sVersion;
+						oDockerUtils.removeImage(sMyImage, true);
+						
 					}
 				}
 			}

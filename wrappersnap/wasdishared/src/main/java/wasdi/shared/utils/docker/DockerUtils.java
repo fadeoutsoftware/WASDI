@@ -1153,7 +1153,7 @@ public class DockerUtils {
      * @param bForce True to force to delete the image even if there are stopped containers
      * @return True if deleted
      */
-    boolean removeImage(String sImageName, boolean bForce) {
+    public boolean removeImage(String sImageName, boolean bForce) {
        	try {
     		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
                         
