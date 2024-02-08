@@ -60,9 +60,6 @@ A good starting point to search for and executing applications is the tutorial o
    UserManual/SubscriptionsAndOrganizations.rst
    UserManual/Other.rst
 
-   .. UserManual/AppStoreTutorial.rst 
-   .. UserManual/AddAppUIControl.rst
-   .. UserManual/Worksapces.rst
 
   
   
@@ -104,6 +101,7 @@ If you already know WASDI features and you are a Python developer check out the 
    ProgrammingTutorials/PythonTutorial.rst
    ProgrammingTutorials/PythonLandsatTutorial.rst
    ProgrammingTutorials/SearchImport.rst
+   ProgrammingTutorials/ConfigTutorial.rst
    ProgrammingTutorials/LibWorkspaces.rst
    ProgrammingTutorials/SynchAsynch.rst
    ProgrammingTutorials/C#Tutorial.rst
@@ -143,6 +141,8 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    PythonCookbook/SearchS3Images.rst
    PythonCookbook/SearchS5pImages.rst
    PythonCookbook/SearchCMImages.rst
+   PythonCookbook/SearchEcostressProducts.rst
+   PythonCookbook/SearchERA5Images.rst
    PythonCookbook/ImportSearchedImages.rst
    PythonCookbook/ImportAndPreprocess.rst
    PythonCookbook/RunSnapWorkflow.rst
@@ -150,6 +150,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    PythonCookbook/SavePayload.rst
    PythonCookbook/FindS2Tiles.rst
    PythonCookbook/UseLibAsClient.rst
+
 
 .. toctree::
    :maxdepth: 2

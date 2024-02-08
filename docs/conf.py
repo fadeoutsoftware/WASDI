@@ -64,10 +64,7 @@ html_favicon = 'favicon.ico'
 
 html_logo = '_static/logowasdi.svg'
 
-## test to fix the file replacing "_l" with "_"
-##search for "l_,"" and replace it with ""
-##search for "l_("" and replace it with "_("
-##/home/docs/checkouts/readthedocs.org/user_builds/testreadthedocsbymena/envs/latest/lib/python3.7/site-packages/javasphinx/domain.py
+
 import os
 import sys
 #print(sys.path)
