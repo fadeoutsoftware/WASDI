@@ -102,7 +102,6 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
         	}
         }
         
-        
 		// Increment the version of the processor
 		String sNewVersion = oProcessor.getVersion();
 		sNewVersion = StringUtils.incrementIntegerString(sNewVersion);
@@ -120,6 +119,33 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: super class deploy returned false. So we stop here.");
 			return false;
 		}
+		
+		try {
+			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: try to clean old images. Last valid version is " + sNewVersion);
+			
+			String sVersion = oProcessor.getVersion();
+			Integer iVersion = Integer.parseInt(sVersion);
+			
+			while (iVersion>1) {
+				iVersion = iVersion - 1;
+				
+				if (oDockerUtils.isImageAvailable(oProcessor.getName(), "" + iVersion)) {
+					if (oDockerUtils.delete(oProcessor.getName(), "" + iVersion)) {
+						WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: cleaned Version " + iVersion);
+					}
+					else {
+						WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: NOT cleaned Version " + iVersion);
+					}					
+				}
+				else {
+					WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: Version " + iVersion + " not available");
+				}
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("DockerBuildOnceEngine.run error searching old versions: ", oEx);
+		}
+		
 						
 		// Here we save the address of the image
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
