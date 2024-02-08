@@ -126,20 +126,9 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 			String sVersion = oProcessor.getVersion();
 			Integer iVersion = Integer.parseInt(sVersion);
 			
-			while (iVersion>1) {
-				iVersion = iVersion - 1;
-				
-				if (oDockerUtils.isImageAvailable(oProcessor.getName(), "" + iVersion)) {
-					if (oDockerUtils.delete(oProcessor.getName(), "" + iVersion)) {
-						WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: cleaned Version " + iVersion);
-					}
-					else {
-						WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: NOT cleaned Version " + iVersion);
-					}					
-				}
-				else {
-					WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: Version " + iVersion + " not available");
-				}
+			if (iVersion>1) {
+				iVersion = iVersion - 1;				
+				oDockerUtils.delete(oProcessor.getName(), "" + iVersion);
 			}
 		}
 		catch (Exception oEx) {
