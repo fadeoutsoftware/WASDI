@@ -2,6 +2,7 @@ package wasdi.shared.utils.log;
 
 import java.time.LocalDateTime;
 
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -23,6 +24,11 @@ public class WasdiLog {
 	 * Reference to the logger wrapper to use
 	 */
 	protected static LoggerWrapper s_oLoggerWrapper = null;
+	
+	/**
+	 * Prefix to the log strings
+	 */
+	protected static String s_sPrefix = "";
 	
 	/**
 	 * Set the active logger wrapper
@@ -102,6 +108,8 @@ public class WasdiLog {
 		
 		if (s_oLoggerWrapper != null) {
 			
+			s_oLoggerWrapper.setPrefix(s_sPrefix);
+			
 			if (sLevel.equals(WasdiLogLevels.DEBUG.name())) {
 				synchronized (s_oLoggerWrapper) {
 					s_oLoggerWrapper.debug(sMessage);
@@ -129,8 +137,22 @@ public class WasdiLog {
 			}
 		}
 		else {
-			String sFinalLine = sPrefix + oNow + ": " + sMessage;
+			String sFinalLine = sPrefix;
+			
+			if (WasdiConfig.Current.addDateTimeToLogs) {
+				sFinalLine += "" + oNow + " "; 
+			}
+			
+			sFinalLine+= s_sPrefix + ": " + sMessage;
 			System.out.println(sFinalLine);
 		}
+	}
+
+	public static String getPrefix() {
+		return s_sPrefix;
+	}
+
+	public static void setPrefix(String s_sPrefix) {
+		WasdiLog.s_sPrefix = s_sPrefix;
 	}
 }

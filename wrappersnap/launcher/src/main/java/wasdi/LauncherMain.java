@@ -220,7 +220,7 @@ public class LauncherMain  {
             }
 
             // Set the process object id as Logger Prefix: it will help to filter logs
-            s_oLogger.setPrefix("[" + s_oProcessWorkspace.getProcessObjId() + "]");
+            WasdiLog.setPrefix("[" + s_oProcessWorkspace.getProcessObjId() + "]");
             WasdiLog.debugLog("Executing " + sOperation + " Parameter " + sParameter);
 
             // Set the ProcessWorkspace STATUS as running
