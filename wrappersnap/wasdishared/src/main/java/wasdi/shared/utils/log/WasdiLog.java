@@ -139,8 +139,10 @@ public class WasdiLog {
 		else {
 			String sFinalLine = sPrefix;
 			
-			if (WasdiConfig.Current.addDateTimeToLogs) {
-				sFinalLine += "" + oNow + " "; 
+			if (WasdiConfig.Current!=null) {
+				if (WasdiConfig.Current.addDateTimeToLogs) {
+					sFinalLine += "" + oNow + " "; 
+				}				
 			}
 			
 			sFinalLine+= s_sPrefix + ": " + sMessage;
