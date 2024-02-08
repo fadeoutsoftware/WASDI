@@ -1218,16 +1218,22 @@ public class DockerUtils {
     	
     	try {
     		
-    		WasdiLog.debugLog("DockerUtils.isContainerStarted: search the container");
+    		//WasdiLog.debugLog("DockerUtils.isContainerStarted: search the container");
     		ContainerInfo oContainer = getContainerInfoByImageName(sProcessorName, sVersion);
     		
     		if (oContainer == null) {
-    			WasdiLog.debugLog("DockerUtils.isContainerStarted: container not found, so for sure not started");
+    			WasdiLog.debugLog("DockerUtils.isContainerStarted: container not found, so for sure not started " + sProcessorName + " V: " + sVersion);
     			return false;
     		}
     		
-    		if (oContainer.State.equals(ContainerStates.RUNNING)) return true;
-    		else return false;    		
+    		if (oContainer.State.equals(ContainerStates.RUNNING)) {
+    			WasdiLog.debugLog("DockerUtils.isContainerStarted: found running container for " + sProcessorName + " V: " + sVersion);
+    			return true;
+    		}
+    		else {
+    			WasdiLog.debugLog("DockerUtils.isContainerStarted: found NOT RUNNING container for " + sProcessorName + " V: " + sVersion);
+    			return false;    		
+    		}
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("DockerUtils.isContainerStarted: " + oEx.toString());
@@ -1580,6 +1586,8 @@ public class DockerUtils {
 		    		WasdiLog.errorLog("DockerUtils.isImageAvailable: error parsing a container json entity " + oEx.toString());
 		        }
 			}
+            
+            WasdiLog.debugLog("DockerUtils.isImageAvailable: image " + sMyImage + " NOT FOUND");
     		
             // No we did not found the image
     		return false;
