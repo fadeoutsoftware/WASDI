@@ -168,7 +168,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 		
-		DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_sDockerTemplatePath);
+		DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_sDockerTemplatePath, m_sDockerRegistry);
 		
 		if (!oDockerUtils.isContainerStarted(oProcessor)) {
 			
