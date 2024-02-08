@@ -756,16 +756,16 @@ public class DockerUtils {
                 	sDockerName = m_sDockerRegistry + "/" + sDockerName;
                 }
                 
-                WasdiLog.debugLog("DockerUtils.delete: calling get Container Id From Wasdi App Name");
-                
                 String sId = getContainerIdFromWasdiAppName(sProcessorName, sVersion);
                 
-                WasdiLog.debugLog("DockerUtils.delete: call Remove Container");
-                
-                boolean bContainersRemoved = removeContainer(sId, true);
-                
-                if (!bContainersRemoved) {
-                	WasdiLog.errorLog("DockerUtils.delete: Impossible to remove the container (maybe it was not present!!) for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
+                if (!Utils.isNullOrEmpty(sId)) {
+                    WasdiLog.debugLog("DockerUtils.delete: call Remove Container " + sId);
+                    
+                    boolean bContainersRemoved = removeContainer(sId, true);
+                    
+                    if (!bContainersRemoved) {
+                    	WasdiLog.errorLog("DockerUtils.delete: Impossible to remove the container (maybe it was not present!!) for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
+                    }                	
                 }
                 
                 WasdiLog.debugLog("DockerUtils.delete: Removing image for " + sProcessorName + " version "  + sVersion + " Docker Image: " + sDockerName);
@@ -1013,7 +1013,7 @@ public class DockerUtils {
 		        }
 			}
             
-            WasdiLog.debugLog("DockerUtils.getContainerIdFromWasdiAppName: no images found" );
+            WasdiLog.debugLog("DockerUtils.getContainerIdFromWasdiAppName: no images found for " + sMyImage);
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("DockerUtils.getContainerIdFromWasdiAppName: " + oEx.toString());
@@ -1561,7 +1561,7 @@ public class DockerUtils {
 					
 					for (String sTag : asRepoTags) {
 						if (sTag.equals(sMyImage)) {
-							WasdiLog.debugLog("DockerUtils.isImageAvailable: found my image");
+							WasdiLog.debugLog("DockerUtils.isImageAvailable: found my image " + sMyImage);
 							return true;							
 						}
 					}
