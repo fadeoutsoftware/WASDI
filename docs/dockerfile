@@ -1,7 +1,13 @@
 FROM python:3.8-alpine
 
 WORKDIR /usr/src/app
-COPY . ./
+
+# Copy documentation -> TODO must be migrated to mount
+COPY ./docs ./
+
+# Copy JsWasdiLib -> TODO must be migrated to mount
+COPY ./libraries/jswasdilib /usr/src/libraries/jswasdilib
+
 VOLUME [ "/build:/usr/src/app/build" ]
 
 RUN pip install --no-cache-dir -r requirements.txt
@@ -11,9 +17,9 @@ RUN apk add --update nodejs npm
 RUN npm install -g typedoc@0.22.18
 
 ## still need to fix domain.py for javasphinx :-( 
+COPY ./docs/domain.py /usr/local/lib/python3.8/site-packages/javasphinx/domain.py
 
-
-RUN sphinx-build -M html . build
-
-ENTRYPOINT [ "sh" ]
+## TODO Migrate to entrypoijt to execute this command on container (docker run [this image] [mounted volumes])
 #ENTRYPOINT [ "sphinx-build -M html . build" ]
+RUN sphinx-build -M html . build
+#ENTRYPOINT [ "sh" ]
