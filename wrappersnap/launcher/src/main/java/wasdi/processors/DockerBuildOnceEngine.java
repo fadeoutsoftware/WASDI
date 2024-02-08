@@ -175,7 +175,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 					// Clean also old images
 					if (oDockerUtils.isImageAvailable(oProcessor.getName(), "" + iVersion)) {
 						WasdiLog.debugLog("DockerBuildOnceEngine.run: found Image version " + iVersion + " running, delete it");
-						String sMyImage = "wasdi/" + oProcessor.getName() + ":" + sVersion;
+						String sMyImage = "wasdi/" + oProcessor.getName() + ":" + iVersion;
 						oDockerUtils.removeImage(sMyImage, true);
 						
 					}
