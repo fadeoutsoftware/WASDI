@@ -1022,8 +1022,6 @@ public class DockerUtils {
 		    		WasdiLog.errorLog("DockerUtils.getContainerIdFromWasdiAppName: error parsing a container json entity " + oEx.toString());
 		        }
 			}
-            
-            WasdiLog.debugLog("DockerUtils.getContainerIdFromWasdiAppName: no containers found for " + sMyImage);
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("DockerUtils.getContainerIdFromWasdiAppName: " + oEx.toString());
@@ -1587,8 +1585,6 @@ public class DockerUtils {
 		        }
 			}
             
-            WasdiLog.debugLog("DockerUtils.isImageAvailable: image " + sMyImage + " NOT FOUND");
-    		
             // No we did not found the image
     		return false;
     	}
