@@ -1,25 +1,37 @@
 FROM python:3.8-alpine
 
+
+RUN mkdir --parents \
+    /usr/src/app \
+    /usr/src/app/docs \
+    /usr/src/app/build \
+    /usr/src/libraries/jswasdilib && \
+  pip install --no-cache-dir \
+    sphinx==3.5.4 \
+    sphinx-rtd-theme==0.5.2 \
+    javasphinx==0.9.15 \
+    sphinxemoji==0.1.8 \
+    sphinxcontrib-matlabdomain==0.11.8 \
+    myst_parser==0.17.2 \
+    sphinx-js==3.1.2 \
+    MarkupSafe==2.0.1 \
+    sphinxcontrib-youtube==1.2.0 && \
+  apk add --update nodejs npm && \
+  npm install -g typedoc@0.22.18
+
+
 WORKDIR /usr/src/app
 
-# Copy documentation -> TODO must be migrated to mount
-COPY ./docs ./
-
-# Copy JsWasdiLib -> TODO must be migrated to mount
-COPY ./libraries/jswasdilib /usr/src/libraries/jswasdilib
-
-VOLUME [ "/build:/usr/src/app/build" ]
-
-RUN pip install --no-cache-dir -r requirements.txt
-
-RUN apk add --update nodejs npm
-
-RUN npm install -g typedoc@0.22.18
 
 ## still need to fix domain.py for javasphinx :-( 
-COPY ./docs/domain.py /usr/local/lib/python3.8/site-packages/javasphinx/domain.py
+COPY ./domain.py /usr/local/lib/python3.8/site-packages/javasphinx/domain.py
 
-## TODO Migrate to entrypoijt to execute this command on container (docker run [this image] [mounted volumes])
-#ENTRYPOINT [ "sphinx-build -M html . build" ]
-RUN sphinx-build -M html . build
-#ENTRYPOINT [ "sh" ]
+
+# Start the container
+ENTRYPOINT [ \
+    "sphinx-build", \
+    "-M", \
+    "html", \
+    "/usr/src/app/docs", \
+    "build" \
+]
