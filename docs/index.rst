@@ -60,9 +60,6 @@ A good starting point to search for and executing applications is the tutorial o
    UserManual/SubscriptionsAndOrganizations.rst
    UserManual/Other.rst
 
-   .. UserManual/AppStoreTutorial.rst 
-   .. UserManual/AddAppUIControl.rst
-   .. UserManual/Worksapces.rst
 
   
   
@@ -104,6 +101,7 @@ If you already know WASDI features and you are a Python developer check out the 
    ProgrammingTutorials/PythonTutorial.rst
    ProgrammingTutorials/PythonLandsatTutorial.rst
    ProgrammingTutorials/SearchImport.rst
+   ProgrammingTutorials/ConfigTutorial.rst
    ProgrammingTutorials/LibWorkspaces.rst
    ProgrammingTutorials/SynchAsynch.rst
    ProgrammingTutorials/C#Tutorial.rst
