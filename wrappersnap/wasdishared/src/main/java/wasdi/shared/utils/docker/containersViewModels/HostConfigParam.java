@@ -134,8 +134,9 @@ public class HostConfigParam {
 			sReturn += "],\n";			
 			
 			
-			sReturn += "\"RestartPolicy\": {";			
 			if (RestartPolicy.size()>0) {
+				sReturn += "\"RestartPolicy\": {";
+				
 				for (String sKey : RestartPolicy.keySet()) {
 					
 					if (RestartPolicy.get(sKey) instanceof String) {
@@ -148,8 +149,10 @@ public class HostConfigParam {
 				}				
 				
 				sReturn = sReturn.substring(0, sReturn.length()-1);
+				
+				sReturn += "\n}\n";
 			}
-			sReturn += "\n}\n";
+			
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ContainerHostConfigParam.toJson: Exception Converting ContainerHostConfigParam to JSON" ,  oEx);
