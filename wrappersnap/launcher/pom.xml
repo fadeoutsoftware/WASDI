@@ -243,7 +243,16 @@
             <artifactId>snap-land-cover</artifactId>
             <version>${sVersionSnap}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-hdf5-writer</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-rtp-codec</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
 
         <!-- S1 -->
         <dependency>
@@ -364,8 +373,62 @@
             <artifactId>s2tbx-spot6-reader</artifactId>
             <version>${sVersionS2tbx}</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-s2msi-mci</artifactId>
+            <version>${sVersionS2tbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-alosAV2-reader</artifactId>
+            <version>${sVersionS2tbx}</version>
+        </dependency>       
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-coregistration</artifactId>
+            <version>${sVersionS2tbx}</version>
+        </dependency>      
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-deimos-reader</artifactId>
+            <version>${sVersionS2tbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-grm</artifactId>
+            <version>${sVersionS2tbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-ikonos-reader</artifactId>
+            <version>${sVersionS2tbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-jp2-writer</artifactId>
+            <version>${sVersionS2tbx}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-kompsat2-reader</artifactId>
+            <version>${sVersionS2tbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-land-cover</artifactId>
+            <version>${sVersionS2tbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-pleiades-reader</artifactId>
+            <version>${sVersionS2tbx}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-reflectance-to-radiance</artifactId>
+            <version>${sVersionS2tbx}</version>
+        </dependency>
+        
         <!-- S3 -->
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
