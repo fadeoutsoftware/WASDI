@@ -21,6 +21,10 @@ org.esa.s1tbx.io.TAXI.RATProductReaderPlugIn
 org.esa.s1tbx.io.generic.GenericComplexReaderPlugIn
 org.esa.s1tbx.io.generic.GenericReaderPlugIn
 
+org.csa.rstb.io.radarsat1.RadarsatProductReaderPlugIn
+org.csa.rstb.io.radarsat2.Radarsat2ProductReaderPlugIn
+org.csa.rstb.io.rcm.RCMProductReaderPlugIn
+org.csa.rstb.soilmoisture.io.matlab.MatlabReaderPlugIn
 
 org.esa.snap.dataio.bigtiff.BigGeoTiffProductReaderPlugIn
 org.esa.snap.core.dataio.dimap.DimapProductReaderPlugIn

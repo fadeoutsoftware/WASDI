@@ -315,8 +315,39 @@
             <artifactId>s1tbx-op-utilities</artifactId>
             <version>${sVersionS1tbx}</version>
         </dependency>
-
-
+        
+        <!--  Radarsat -->
+        <dependency>
+            <groupId>org.csa.rstb</groupId>
+            <artifactId>rstb-io</artifactId>
+            <version>${sVersionS1tbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.csa.rstb</groupId>
+            <artifactId>rstb-kit</artifactId>
+            <version>${sVersionS1tbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.csa.rstb</groupId>
+            <artifactId>rstb-op-calibration</artifactId>
+            <version>${sVersionS1tbx}</version>
+        </dependency> 
+        <dependency>
+            <groupId>org.csa.rstb</groupId>
+            <artifactId>rstb-op-classification</artifactId>
+            <version>${sVersionS1tbx}</version>
+        </dependency>             
+        <dependency>
+            <groupId>org.csa.rstb</groupId>
+            <artifactId>rstb-op-polarimetric-tools</artifactId>
+            <version>${sVersionS1tbx}</version>
+        </dependency>                        
+        <dependency>
+            <groupId>org.csa.rstb</groupId>
+            <artifactId>rstb-op-soil-moisture</artifactId>
+            <version>${sVersionS1tbx}</version>
+        </dependency>                                
+        
         <!-- S2 -->
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
