@@ -131,11 +131,11 @@ public class HostConfigParam {
 					if (iMounts<Mounts.size()-1) sReturn +=",\n";
 				}
 			}
-			sReturn += "],\n";			
+			sReturn += "]";			
 			
 			
 			if (RestartPolicy.size()>0) {
-				sReturn += "\"RestartPolicy\": {";
+				sReturn += ",\n\"RestartPolicy\": {";
 				
 				for (String sKey : RestartPolicy.keySet()) {
 					
@@ -151,6 +151,9 @@ public class HostConfigParam {
 				sReturn = sReturn.substring(0, sReturn.length()-1);
 				
 				sReturn += "\n}\n";
+			}
+			else {
+				sReturn += "\n";	
 			}
 			
 		}
