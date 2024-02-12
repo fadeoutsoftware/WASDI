@@ -244,8 +244,15 @@ public class RunTimeUtils {
 			oDockerUtils.setDockerNetworkMode(oShellExecItem.dockerNetworkMode);
 		}
 		
+		boolean bAutoRemove = false;
+		
+		if (!bWait && WasdiConfig.Current.dockers.removeDockersAfterShellExec) {
+			WasdiLog.debugLog("RunTimeUtils.dockerShellExec: setting auto remove flag true");
+			bAutoRemove = true;
+		}
+		
 		// Create and run the docker
-		String sContainerId = oDockerUtils.run(oShellExecItem.dockerImage, oShellExecItem.containerVersion, asArgs, true, oShellExecItem.additionalMountPoints);
+		String sContainerId = oDockerUtils.run(oShellExecItem.dockerImage, oShellExecItem.containerVersion, asArgs, true, oShellExecItem.additionalMountPoints, bAutoRemove);
 		
 		// Did we got a Container Name?
 		if (Utils.isNullOrEmpty(sContainerId)) {

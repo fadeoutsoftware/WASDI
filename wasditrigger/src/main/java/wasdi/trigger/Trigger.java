@@ -161,7 +161,7 @@ public class Trigger {
 			WasdiLog.debugLog("wasdi lib initialized");
 			
 			// Trigger the processor
-			String sProcId = oWasdiLib.asynchExecuteProcessor(oSchedule.getProcessorName(), oSchedule.getParams());
+			String sProcId = oWasdiLib.asynchExecuteProcessor(oSchedule.getProcessorName(), oSchedule.getParams(), oSchedule.isNotifyOwnerByMail());
 			
 			WasdiLog.debugLog("PROCESS SCHEDULED: got ProcId " + sProcId);
 		}

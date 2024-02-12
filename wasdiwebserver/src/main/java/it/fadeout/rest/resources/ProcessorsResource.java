@@ -75,6 +75,7 @@ import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.ImageResourceUtils;
+import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
@@ -811,9 +812,9 @@ public class ProcessorsResource  {
 	@Path("/run")
 	public RunningProcessorViewModel runPost(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("workspace") String sWorkspaceId,
-			@QueryParam("parent") String sParentProcessWorkspaceId, String sEncodedJson) throws Exception {
+			@QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("notify") Boolean bNotify, String sEncodedJson) throws Exception {
 		WasdiLog.debugLog("ProcessorsResource.runPost( Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " )");
-		return internalRun(sSessionId, sName, sEncodedJson, sWorkspaceId, sParentProcessWorkspaceId);
+		return internalRun(sSessionId, sName, sEncodedJson, sWorkspaceId, sParentProcessWorkspaceId, bNotify);
 	}
 	
 	/**
@@ -835,11 +836,11 @@ public class ProcessorsResource  {
 	public RunningProcessorViewModel run(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("encodedJson") String sEncodedJson,
 			@QueryParam("workspace") String sWorkspaceId,
-			@QueryParam("parent") String sParentProcessWorkspaceId) throws Exception {
+			@QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("notify") Boolean bNotify) throws Exception {
 		
 		
 		WasdiLog.debugLog("ProcessorsResource.run: run@GET");
-		return internalRun(sSessionId, sName, sEncodedJson, sWorkspaceId, sParentProcessWorkspaceId);
+		return internalRun(sSessionId, sName, sEncodedJson, sWorkspaceId, sParentProcessWorkspaceId, bNotify);
 	}
 	
 	/**
@@ -853,8 +854,10 @@ public class ProcessorsResource  {
 	 * @return Running Processor View Model
 	 * @throws Exception
 	 */
-	public RunningProcessorViewModel internalRun(String sSessionId, String sName, String sEncodedJson, String sWorkspaceId, String sParentProcessWorkspaceId) throws Exception {
+	public RunningProcessorViewModel internalRun(String sSessionId, String sName, String sEncodedJson, String sWorkspaceId, String sParentProcessWorkspaceId, Boolean bNotify) throws Exception {
 		WasdiLog.debugLog("ProcessorsResource.internalRun( Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " )");
+		
+		if (bNotify==null) bNotify = false;
 
 		RunningProcessorViewModel oRunningProcessorViewModel = new RunningProcessorViewModel();
 		
@@ -922,6 +925,7 @@ public class ProcessorsResource  {
 			oProcessorParameter.setProcessorType(oProcessorToRun.getType());
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+			oProcessorParameter.setNotifyOwnerByMail(bNotify);
 			
 			PrimitiveResult oResult = Wasdi.runProcess(sUserId, sSessionId, oProcessorParameter.getLauncherOperation(), sName, oProcessorParameter, sParentProcessWorkspaceId);
 			
@@ -2069,7 +2073,7 @@ public class ProcessorsResource  {
 				String sTitle = "Processor " + oValidateProcessor.getName() + " Shared";
 				String sMessage = "The user " + oRequesterUser.getUserId() +  " shared with you the processor: " + oValidateProcessor.getName();
 				
-				WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sUserId, sTitle, sMessage);
+				MailUtils.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sUserId, sTitle, sMessage);
 			}
 			catch (Exception oEx) {
 				WasdiLog.errorLog("ProcessorsResource.shareProcessor: notification exception " + oEx.toString());

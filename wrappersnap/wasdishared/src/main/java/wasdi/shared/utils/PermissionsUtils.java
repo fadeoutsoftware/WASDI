@@ -9,6 +9,7 @@ package wasdi.shared.utils;
 import java.util.List;
 
 import wasdi.shared.business.ImagesCollections;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.Style;
 import wasdi.shared.business.Subscription;
@@ -17,6 +18,7 @@ import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserAccessRights;
+import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserType;
 import wasdi.shared.data.OrganizationRepository;
@@ -426,13 +428,23 @@ public class PermissionsUtils {
 				return false;
 			}
 
-			ProcessWorkspaceRepository oSubscriptionRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			
-			if (oSubscriptionRepository.isProcessOwnedByUser(sUserId, sProcessWorkspaceId)) {
+			if (oProcessWorkspaceRepository.isProcessOwnedByUser(sUserId, sProcessWorkspaceId)) {
 				return true;
 			}
+						
+			if (UserApplicationRole.isAdmin(sUserId)) {
+				return true;
+			}
+			
+			ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessWorkspaceId);
+			
+			if (oProcessWorkspace == null) {
+				return false;
+			}
 
-			return canUserWriteResource(ResourceTypes.WORKSPACE.getResourceType(), sUserId, sProcessWorkspaceId);
+			return canUserWriteResource(ResourceTypes.WORKSPACE.getResourceType(), sUserId, oProcessWorkspace.getWorkspaceId());
 			
 		} catch (Exception oE) {
 			WasdiLog.errorLog("PermissionsUtils.canUserWriteProcessWorkspace( " + sUserId + ", " + sProcessWorkspaceId + " ): error: " + oE);

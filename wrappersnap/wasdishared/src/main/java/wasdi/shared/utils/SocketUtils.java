@@ -209,7 +209,9 @@ public class SocketUtils {
 		try (Response oResponse = oHttpClient.execute(oRequest)) {
 			int iResponseCode = oResponse.getStatusCode();
 			
-			WasdiLog.debugLog("SocketUtils.httpGet: Response code " + iResponseCode);
+			if (WasdiConfig.Current.logHttpCalls || (iResponseCode<200||iResponseCode>299)) {
+				WasdiLog.debugLog("SocketUtils.httpGet: Response code " + iResponseCode);
+			}
 			
 			oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
 			

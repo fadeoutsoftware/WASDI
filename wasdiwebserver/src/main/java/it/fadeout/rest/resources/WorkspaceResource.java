@@ -53,6 +53,7 @@ import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -863,7 +864,7 @@ public class WorkspaceResource {
 		try {
 			String sTitle = "Workspace " + oWorkspace.getName() + " Shared";
 			String sMessage = "The user " + oRequesterUser.getUserId() +  " shared with you the workspace: " + oWorkspace.getName();
-			WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sDestinationUserId, sTitle, sMessage);
+			MailUtils.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sDestinationUserId, sTitle, sMessage);
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("WorkspaceResource.shareWorkspace: notification exception " + oEx.toString());

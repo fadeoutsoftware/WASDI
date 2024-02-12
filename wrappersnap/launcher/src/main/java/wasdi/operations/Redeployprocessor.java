@@ -51,7 +51,7 @@ public class Redeployprocessor extends Operation {
 	        
 	        if (!oEngine.isProcessorOnNode(oParameter)) {
                 WasdiLog.errorLog("Redeployprocessor.executeOperation: Processor [" + sProcessorName + "] not installed in this node, return");
-                return true;	        	
+                return true;
 	        }
 	        
 	        oEngine.setSendToRabbit(m_oSendToRabbit);
@@ -74,28 +74,37 @@ public class Redeployprocessor extends Operation {
 	        		
 	        		if (oWorkspace != null) {
 	        			
+        				// Prepare the message
+			        	String sName = oParameter.getName();
+			        	
+			        	if (Utils.isNullOrEmpty(sName)) sName = "Your Processor";
+			        	
+			            String sInfo = "Re Deploy Done<br>" + sName + " is now available";
+			            
+			            if (!bRet) {
+			            	sInfo = "GURU MEDITATION<br>There was an error re-deploying " + sName + " :(";
+			            }
+	        			
 	        			String sNodeCode = "wasdi";
 	        			
 	        			if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
 	        				sNodeCode = oWorkspace.getNodeCode();
+	        			}	        			
+	        			
+	        			if (oEngine.isLocalBuild()) {
+		        			// This is the computing node where the request came from?
+		        			if (sNodeCode.equals(WasdiConfig.Current.nodeCode)) {
+					            m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());	        				
+		        			}	        				
 	        			}
-
-	        			// This is the computing node where the request came from?
-	        			if (sNodeCode.equals(WasdiConfig.Current.nodeCode)) {
-	        				
-	        				// Notify the user
-				        	String sName = oParameter.getName();
-				        	
-				        	if (Utils.isNullOrEmpty(sName)) sName = "Your Processor";
-				        	
-				            String sInfo = "Re Deploy Done<br>" + sName + " is now available";
-				            
-				            if (!bRet) {
-				            	sInfo = "GURU MEDITATION<br>There was an error re-deploying " + sName + " :(";
-				            }
-				            
-				            m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());	        				
+	        			else {
+	        				// This is the main node?
+	        				if (WasdiConfig.Current.isMainNode()) {
+	        					m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());
+	        				}
 	        			}
+	        			
+	        			
 	        		}	        		
 	        	}
 	        	

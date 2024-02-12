@@ -23,6 +23,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
+import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ClientMessageCodes;
 import wasdi.shared.viewmodels.NodeSharingViewModel;
@@ -232,7 +233,7 @@ public class NodeResource {
 
 			String sMessage = "The user " + sRequesterUserId +  " shared with you the node: " + sNodeName;
 
-			WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sDestinationUserId, sTitle, sMessage);
+			MailUtils.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sDestinationUserId, sTitle, sMessage);
 
 		}
 		catch (Exception oEx) {
