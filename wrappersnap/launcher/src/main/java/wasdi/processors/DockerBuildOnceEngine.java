@@ -102,7 +102,6 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
         	}
         }
         
-        
 		// Increment the version of the processor
 		String sNewVersion = oProcessor.getVersion();
 		sNewVersion = StringUtils.incrementIntegerString(sNewVersion);
@@ -120,6 +119,22 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: super class deploy returned false. So we stop here.");
 			return false;
 		}
+		
+		try {
+			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: try to clean old images. Last valid version is " + sNewVersion);
+			
+			String sVersion = oProcessor.getVersion();
+			Integer iVersion = Integer.parseInt(sVersion);
+			
+			if (iVersion>1) {
+				iVersion = iVersion - 1;				
+				oDockerUtils.delete(oProcessor.getName(), "" + iVersion);
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("DockerBuildOnceEngine.run error searching old versions: ", oEx);
+		}
+		
 						
 		// Here we save the address of the image
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
@@ -153,7 +168,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 		
-		DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_sDockerTemplatePath);
+		DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_sDockerTemplatePath, m_sDockerRegistry);
 		
 		if (!oDockerUtils.isContainerStarted(oProcessor)) {
 			
@@ -163,14 +178,9 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 				String sVersion = oProcessor.getVersion();
 				Integer iVersion = Integer.parseInt(sVersion);
 				
-				while (iVersion>1) {
+				if (iVersion>1) {
 					iVersion = iVersion - 1;
-					
-					if (oDockerUtils.isContainerStarted(oProcessor.getName(), "" + iVersion)) {
-						WasdiLog.debugLog("DockerBuildOnceEngine.run: found version " + iVersion + " running, stop it");
-						oDockerUtils.stop(oProcessor.getName(), "" + iVersion);
-						break;
-					}
+					oDockerUtils.delete(oProcessor.getName(), ""+iVersion);
 				}
 			}
 			catch (Exception oEx) {

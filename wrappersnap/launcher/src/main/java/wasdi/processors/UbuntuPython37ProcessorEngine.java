@@ -8,6 +8,6 @@ public class UbuntuPython37ProcessorEngine extends PipProcessorEngine {
 		super();
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
 		m_sDockerTemplatePath += ProcessorTypes.getTemplateFolder(ProcessorTypes.UBUNTU_PYTHON37_SNAP);
-		
+		m_bLocalBuild = true;
 	}
 }

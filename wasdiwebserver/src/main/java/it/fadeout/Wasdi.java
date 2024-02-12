@@ -826,6 +826,7 @@ public class Wasdi extends ResourceConfig {
 				
 				// By config we can decide to use also the main node as computing node, or not
 				if (WasdiConfig.Current.loadBalancer.includeMainClusterAsNode) {
+					WasdiLog.debugLog("Wasdi.getNodesSortedByScore: Adding main node to the available list");
 					Node oNodeWasdi = new Node();
 					oNodeWasdi.setNodeCode("wasdi");
 					aoNodes.add(oNodeWasdi);				
@@ -836,7 +837,10 @@ public class Wasdi extends ResourceConfig {
 			for (Node oNode : aoNodes) {
 				
 				// This should not be needed: all here should be active. But just to be more sure
-				if (!oNode.getActive()) continue;
+				if (!oNode.getActive()) {
+					WasdiLog.debugLog("Wasdi.getNodesSortedByScore: node " + oNode.getNodeCode() + " not active");
+					continue;
+				}
 				
 				// Read the metrics of the node
 				String sNodeCode = oNode.getNodeCode();
@@ -947,6 +951,7 @@ public class Wasdi extends ResourceConfig {
 						aoOrderedNodeList.add(oViewModel);
 					}
 					else {
+						WasdiLog.debugLog("Wasdi.getNodesSortedByScore: Node " + oNode.getNodeCode() + " excluded because of space problem ( full > " + WasdiConfig.Current.loadBalancer.diskOccupiedSpaceMaxPercentage + "%)");
 						aoExcludedNodeList.add(oViewModel);
 					}
 				}

@@ -60,6 +60,11 @@ public abstract class WasdiProcessorEngine {
 	protected boolean m_bRunAfterDeploy = true;
 	
 	/**
+	 * Flag to understand if the Processor must be built locally or not
+	 */
+	protected boolean m_bLocalBuild = false;
+	
+	/**
 	 * Create an instance of a Processor Engine
 	 * @param sType Type of Processor
 	 * @return
@@ -504,5 +509,21 @@ public abstract class WasdiProcessorEngine {
 	 */
 	public void setRunAfterDeploy(boolean bRunAfterDeploy) {
 		this.m_bRunAfterDeploy = bRunAfterDeploy;
+	}
+
+	/**
+	 * Flag to understand if the processor must be build locally or not
+	 * @return
+	 */
+	public boolean isLocalBuild() {
+		return m_bLocalBuild;
+	}
+
+	/**
+	 * Flag to understand if the processor must be build locally or not
+	 * @param bLocalBuild
+	 */
+	public void setLocalBuild(boolean bLocalBuild) {
+		this.m_bLocalBuild = bLocalBuild;
 	}	
 }

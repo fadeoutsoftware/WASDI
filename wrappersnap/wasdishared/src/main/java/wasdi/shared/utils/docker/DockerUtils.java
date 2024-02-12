@@ -756,43 +756,53 @@ public class DockerUtils {
                 	sDockerName = m_sDockerRegistry + "/" + sDockerName;
                 }
                 
-                WasdiLog.debugLog("DockerUtils.delete: calling get Container Id From Wasdi App Name");
-                
                 String sId = getContainerIdFromWasdiAppName(sProcessorName, sVersion);
                 
-                WasdiLog.debugLog("DockerUtils.delete: call Remove Container");
-                
-                boolean bContainersRemoved = removeContainer(sId, true);
-                
-                if (!bContainersRemoved) {
-                	WasdiLog.errorLog("DockerUtils.delete: Impossible to remove the container (maybe it was not present!!) for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
+                if (!Utils.isNullOrEmpty(sId)) {
+                    WasdiLog.debugLog("DockerUtils.delete: call Remove Container " + sId);
+                    
+                    boolean bContainersRemoved = removeContainer(sId, true);
+                    
+                    if (!bContainersRemoved) {
+                    	WasdiLog.errorLog("DockerUtils.delete: Impossible to remove the container (maybe it was not present!!) for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
+                    }                	
+                }
+                else {
+                	WasdiLog.debugLog("DockerUtils.delete: no container found for " + sProcessorName + " version "  + sVersion);
                 }
                 
-                WasdiLog.debugLog("DockerUtils.delete: Removing image for " + sProcessorName + " version "  + sVersion + " Docker Image: " + sDockerName);
-                
-                boolean bImageRemoved = removeImage(sDockerName, true);
-                
-                if (!bImageRemoved) {
-                	WasdiLog.errorLog("DockerUtils.delete: error removing the image for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
-                }
-                
-                if (!sBaseDockerName.equals(sDockerName)) {
-                    WasdiLog.debugLog("DockerUtils.delete: Removing also local image for " + sProcessorName + " version "  + sVersion + " Docker Image: " + sBaseDockerName);
-                    bImageRemoved = removeImage(sBaseDockerName, true);
+                if (isImageAvailable(sProcessorName,sVersion)) {
+
+                    WasdiLog.debugLog("DockerUtils.delete: Removing image for " + sProcessorName + " version "  + sVersion + " Docker Image: " + sDockerName);
+                    
+                    boolean bImageRemoved = removeImage(sDockerName, true);
+                    
                     if (!bImageRemoved) {
-                    	WasdiLog.warnLog("DockerUtils.delete: error removing the local image for " + sProcessorName + " Version: " +  sVersion  + " Docker Image: " + sBaseDockerName);
-                    }                    
-                }                
-                
-                if (WasdiConfig.Current.isMainNode()) {            	
-                    if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
-                    	WasdiLog.infoLog("DockerUtils.delete: This is a registry stored docker: clean all our registers");
-                    	for (DockerRegistryConfig oRegistryConfig : WasdiConfig.Current.dockers.registers) {
-                    		this.removeImageFromRegistry(sBaseDockerName, sVersion, oRegistryConfig);					
-        				}
+                    	WasdiLog.errorLog("DockerUtils.delete: error removing the image for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
                     }
-                }                
-        		
+                    
+                    if (!sBaseDockerName.equals(sDockerName)) {
+                        WasdiLog.debugLog("DockerUtils.delete: Removing also local image for " + sProcessorName + " version "  + sVersion + " Docker Image: " + sBaseDockerName);
+                        bImageRemoved = removeImage(sBaseDockerName, true);
+                        if (!bImageRemoved) {
+                        	WasdiLog.warnLog("DockerUtils.delete: error removing the local image for " + sProcessorName + " Version: " +  sVersion  + " Docker Image: " + sBaseDockerName);
+                        }                    
+                    }                
+                    
+                    if (WasdiConfig.Current.isMainNode()) {            	
+                        if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
+                        	WasdiLog.infoLog("DockerUtils.delete: This is a registry stored docker: clean all our registers");
+                        	for (DockerRegistryConfig oRegistryConfig : WasdiConfig.Current.dockers.registers) {
+                        		this.removeImageFromRegistry(sBaseDockerName, sVersion, oRegistryConfig);					
+            				}
+                        }
+                    }                
+
+                }
+                else {
+                	WasdiLog.debugLog("DockerUtils.delete: no image found for " + sProcessorName + " version "  + sVersion);
+                }
+                        		
                 sVersion = StringUtils.decrementIntegerString(sVersion);
                 iVersion = StringUtils.getAsInteger(sVersion);
         	}
@@ -1012,8 +1022,6 @@ public class DockerUtils {
 		    		WasdiLog.errorLog("DockerUtils.getContainerIdFromWasdiAppName: error parsing a container json entity " + oEx.toString());
 		        }
 			}
-            
-            WasdiLog.debugLog("DockerUtils.getContainerIdFromWasdiAppName: no images found" );
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("DockerUtils.getContainerIdFromWasdiAppName: " + oEx.toString());
@@ -1153,7 +1161,7 @@ public class DockerUtils {
      * @param bForce True to force to delete the image even if there are stopped containers
      * @return True if deleted
      */
-    boolean removeImage(String sImageName, boolean bForce) {
+    public boolean removeImage(String sImageName, boolean bForce) {
        	try {
     		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
                         
@@ -1168,6 +1176,7 @@ public class DockerUtils {
         		HttpCallResponse oResponse = HttpUtils.httpDelete(sUrl);
         		
         		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
+        			WasdiLog.errorLog("DockerUtils.removeImage: Bad answer..: " + oResponse.getResponseCode() + " Message:" + oResponse.getResponseBody());
         			return false;
         		}
         		else {
@@ -1207,16 +1216,22 @@ public class DockerUtils {
     	
     	try {
     		
-    		WasdiLog.debugLog("DockerUtils.isContainerStarted: search the container");
+    		//WasdiLog.debugLog("DockerUtils.isContainerStarted: search the container");
     		ContainerInfo oContainer = getContainerInfoByImageName(sProcessorName, sVersion);
     		
     		if (oContainer == null) {
-    			WasdiLog.debugLog("DockerUtils.isContainerStarted: container not found, so for sure not started");
+    			WasdiLog.debugLog("DockerUtils.isContainerStarted: container not found, so for sure not started " + sProcessorName + " V: " + sVersion);
     			return false;
     		}
     		
-    		if (oContainer.State.equals(ContainerStates.RUNNING)) return true;
-    		else return false;    		
+    		if (oContainer.State.equals(ContainerStates.RUNNING)) {
+    			WasdiLog.debugLog("DockerUtils.isContainerStarted: found running container for " + sProcessorName + " V: " + sVersion);
+    			return true;
+    		}
+    		else {
+    			WasdiLog.debugLog("DockerUtils.isContainerStarted: found NOT RUNNING container for " + sProcessorName + " V: " + sVersion);
+    			return false;    		
+    		}
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("DockerUtils.isContainerStarted: " + oEx.toString());
@@ -1560,7 +1575,7 @@ public class DockerUtils {
 					
 					for (String sTag : asRepoTags) {
 						if (sTag.equals(sMyImage)) {
-							WasdiLog.debugLog("DockerUtils.isImageAvailable: found my image");
+							WasdiLog.debugLog("DockerUtils.isImageAvailable: found my image " + sMyImage);
 							return true;							
 						}
 					}
@@ -1569,7 +1584,7 @@ public class DockerUtils {
 		    		WasdiLog.errorLog("DockerUtils.isImageAvailable: error parsing a container json entity " + oEx.toString());
 		        }
 			}
-    		
+            
             // No we did not found the image
     		return false;
     	}
@@ -1661,7 +1676,7 @@ public class DockerUtils {
      * @param asArg Args to be passed as CMD parameter
      * @return The Id of the container if created, empty string in case of problems
      */
-    public String run(String sImageName, String sImageVersion, List<String> asArg, boolean bAlwaysRecreateContainer,  ArrayList<String> asAdditionalMountPoints) {
+    public String run(String sImageName, String sImageVersion, List<String> asArg, boolean bAlwaysRecreateContainer,  ArrayList<String> asAdditionalMountPoints, boolean bAutoRemove) {
 
         try {
         	
@@ -1765,9 +1780,14 @@ public class DockerUtils {
             				oContainerCreateParams.HostConfig.Binds.add(sMountPoint);
 						}
             		}
-            		
-            		oContainerCreateParams.HostConfig.RestartPolicy.put("Name", "no");
-            		oContainerCreateParams.HostConfig.RestartPolicy.put("MaximumRetryCount", 0);
+            		            		
+            		if (bAutoRemove) {
+            			oContainerCreateParams.HostConfig.AutoRemove = true;
+            		}
+            		else {
+                		oContainerCreateParams.HostConfig.RestartPolicy.put("Name", "no");
+                		oContainerCreateParams.HostConfig.RestartPolicy.put("MaximumRetryCount", 0);            			
+            		}
             		
             		if (asArg!=null) oContainerCreateParams.Cmd.addAll(asArg);
             		

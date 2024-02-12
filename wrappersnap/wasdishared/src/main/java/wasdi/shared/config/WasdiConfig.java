@@ -101,6 +101,11 @@ public class WasdiConfig {
 	 */
 	public boolean logHttpCalls=true;
 	
+	/**
+	 * Set to true to add date time to log lines
+	 */
+	public boolean addDateTimeToLogs=false;
+	
 	
 	/**
 	 * Set true to NOT filter the internal http calls (keycloak, docker..).
