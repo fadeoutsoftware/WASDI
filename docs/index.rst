@@ -124,6 +124,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
 
    Libraries/c#/WasdiLib.rst
    Libraries/java/WasdiLib.rst
+   Libraries/matlab/matlab.rst
    Libraries/octave/octave.rst
    Libraries/python/waspy.rst
    Libraries/typescript/wasdi.rst
