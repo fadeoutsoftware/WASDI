@@ -59,7 +59,7 @@ pipeline {
             --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sEnvironmentLower} \
             --diff \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployBaseImageeWasdiLauncher=true'
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployBaseImageWasdiLauncher=true'
         """,
         label: "Build the container(s)"
       }
@@ -77,7 +77,7 @@ pipeline {
                     --inventory inventories/${env.sAnsibleInventory}.yml \
                     --limit ${env.sAnsibleLimit} \
                     --diff \
-                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployBaseImageeWasdiLauncher=true'
+                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployBaseImageWasdiLauncher=true'
               """,
               label: "Deploy the container and its run elements"
             } catch (oError) {
@@ -98,7 +98,7 @@ pipeline {
             --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployBaseImageeWasdiLauncher=true'
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployBaseImageWasdiLauncher=true'
         """,
         label: "Clean the Docker image(s)"
       }
