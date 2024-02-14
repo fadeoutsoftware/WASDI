@@ -108,6 +108,8 @@ RUN apt-get update && \
     cd /tmp/gdal && \
     ./configure \
         --prefix=/usr \
+        --with-jp2mrsid=yes \
+        --with-j2lura=yes \
         --with-openjpeg=yes && \
     make -j16 && \
     make install && \
