@@ -4,6 +4,11 @@ FROM wasdi-base-launcher:latest
 MAINTAINER "WASDI SARL"
 
 
+USER root
+RUN rm --force /usr/lib/libgdal.a
+USER appwasdi
+
+
 # Set the workdir
 WORKDIR {{ sWasdiLauncherRootDirectoryPath }}
 
