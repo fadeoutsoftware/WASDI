@@ -116,9 +116,11 @@ RUN apt-get update && \
     make install && \
     cd / && \
     apt-get --purge remove \
+        gcc \
         g++ \
         make \
         pkg-config && \
+    apt autoremove && \
     rm --recursive --force \
         /tmp/{{ sWasdiGdalCompiledSourceUrl | basename }} \
         /tmp/gdal \
