@@ -158,3 +158,7 @@ ENV PATH="{{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }}/bin:${PATH}"
 
 # Set the workdir
 WORKDIR {{ sWasdiLauncherRootDirectoryPath }}
+
+
+# Add a marker
+RUN echo "{{ sCurrentRevision }}" > {{ sWasdiSystemUserHome }}/dockerImageVersion.txt
