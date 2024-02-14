@@ -77,6 +77,8 @@ public class RunTimeUtils {
 	 * 
 	 * @param asArgs List of arguments
 	 * @param bWait True to wait the process to finish, false to not wait
+	 * @param bReadOutput True to read the output of the process
+	 * @param bRedirectError True to redirect also the error stream
 	 * @param bLogCommandLine  True to log the command line false to jump
 	 * @return True if the process is executed
 	 */
