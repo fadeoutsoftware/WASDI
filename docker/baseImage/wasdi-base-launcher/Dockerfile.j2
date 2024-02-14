@@ -72,7 +72,8 @@ RUN apt-get update && \
         libjhdf5-jni \
         libopenjp2-7-dev \
         libproj-dev \
-        make && \
+        make \
+        pkg-config && \
     mkdir --parents \
         {{ sWasdiDataPartitionRootDirectoryPath }} \
         {{ sWasdiDataRootDirectoryPath }} \
