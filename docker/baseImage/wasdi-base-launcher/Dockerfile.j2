@@ -117,10 +117,12 @@ RUN apt-get update && \
     cd / && \
     apt-get --purge remove \
         g++ \
-        make && \
+        make \
+        pkg-config && \
     rm --recursive --force \
         /tmp/{{ sWasdiGdalCompiledSourceUrl | basename }} \
         /tmp/gdal \
+        /usr/lib/libgdal.a \
         /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
