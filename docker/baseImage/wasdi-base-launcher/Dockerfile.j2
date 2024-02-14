@@ -70,6 +70,7 @@ RUN apt-get update && \
         libgfortran5 \
         libjhdf4-jni \
         libjhdf5-jni \
+        libopenjp2-7-dev \
         libproj-dev \
         make && \
     mkdir --parents \
@@ -109,7 +110,7 @@ RUN apt-get update && \
     ./configure \
         --prefix=/usr \
         --with-jp2mrsid=yes \
-        --with-j2lura=yes \
+        --with-jp2lura=yes \
         --with-openjpeg=yes && \
     make -j16 && \
     make install && \
