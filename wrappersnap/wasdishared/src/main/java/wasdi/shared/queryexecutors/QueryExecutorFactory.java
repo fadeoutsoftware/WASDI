@@ -35,6 +35,7 @@ import wasdi.shared.queryexecutors.sobloo.QueryExecutorSOBLOO;
 import wasdi.shared.queryexecutors.statics.QueryExecutorSTATICS;
 import wasdi.shared.queryexecutors.terrascope.QueryExecutorTerrascope;
 import wasdi.shared.queryexecutors.viirs.QueryExecutorVIIRS;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -72,9 +73,22 @@ public class QueryExecutorFactory {
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
 		
-		WasdiLog.debugLog("QueryExecutorFactory.static constructor, s_aoExecutors content:");
-		for (String sKey : s_aoExecutors.keySet()) {
-			WasdiLog.debugLog("QueryExecutorFactory.s_aoExecutors key: " + sKey);
+		try {
+			WasdiLog.debugLog("QueryExecutorFactory.static constructor, s_aoExecutors content:");
+			String sExecutors = "";
+			
+			for (String sKey : s_aoExecutors.keySet()) {
+				sExecutors += sKey + " - ";
+			}
+			if (!Utils.isNullOrEmpty(sExecutors)) {
+				if (sExecutors.length()>3) {
+					sExecutors = sExecutors.substring(0, sExecutors.length()-3);
+				}
+			}
+			WasdiLog.debugLog("QueryExecutorFactory.s_aoExecutors key: " + sExecutors);			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("QueryExecutorFactory.static constructor exception " + oEx.toString());
 		}
 	}
 
