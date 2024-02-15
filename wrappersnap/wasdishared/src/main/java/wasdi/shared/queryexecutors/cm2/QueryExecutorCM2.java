@@ -1,5 +1,6 @@
 package wasdi.shared.queryexecutors.cm2;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,7 +30,13 @@ public class QueryExecutorCM2 extends QueryExecutor {
 	@Override
 	public int executeCount(String sQuery) {
 		// TODO Auto-generated method stub
-		List<String> asArgs = Arrays.asList("data_provider_sample.py", "1", "input_file.json", "output_file.json");
+		List<String> asArgs = new ArrayList<>();
+		
+		asArgs.add("C:/Temp/wasdi/PythonDataProviders/data_provider_sample.py");
+		asArgs.add("1");
+		asArgs.add("input_file.json");
+		asArgs.add("output_file.json");
+		
 		ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
 		WasdiLog.debugLog("output = " + oShellExecReturn.getOperationLogs());
 		return 0;

@@ -241,8 +241,9 @@ public class Wasdi extends ResourceConfig {
 		
 		try {
 			// Can be useful for debug
-			WasdiLog.debugLog("******************************Environment Vars*****************************"); Map<String, String> enviorntmentVars = System.getenv();
-			for (String string : enviorntmentVars.keySet()) { WasdiLog.debugLog(string + ": " + enviorntmentVars.get(string)); }
+			WasdiLog.debugLog("******************************Environment Vars*****************************"); 
+			Map<String, String> aoEnviorntmentVars = System.getenv();
+			for (String string : aoEnviorntmentVars.keySet()) { WasdiLog.debugLog(string + ": " + aoEnviorntmentVars.get(string)); }
 			 			
 		}
 		catch (Exception oEx) {
