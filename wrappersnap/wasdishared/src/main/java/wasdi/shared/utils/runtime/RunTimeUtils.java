@@ -142,6 +142,17 @@ public class RunTimeUtils {
 			File oLogFile = null;
 			if (bReadOutput) oLogFile = createLogFile();
 			
+			// Get the shell exec item
+			ShellExecItemConfig oShellExecItem = WasdiConfig.Current.dockers.getShellExecItem(asArgs.get(0));
+			
+			if (oShellExecItem != null) {
+				// Check if we need to add a prefix to our command
+				if (!Utils.isNullOrEmpty(oShellExecItem.addPrefixToCommand)) {
+					WasdiLog.debugLog("RunTimeUtils.localShellExec: adding prefix to the command line - " + oShellExecItem.addPrefixToCommand);
+					asArgs.add(0, oShellExecItem.addPrefixToCommand);
+				}
+			}
+			
 			// Create the process builder
 			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
 			
@@ -237,6 +248,12 @@ public class RunTimeUtils {
 			WasdiLog.warnLog("RunTimeUtils.dockerShellExec: command " + asArgs.get(0)+ " has force Local flag true: run locally");
 			return localShellExec(asArgs, bWait, bReadOutput, bRedirectError, bLogCommandLine);			
 		}
+		
+		// Check if we need to add a prefix to our command
+		if (!Utils.isNullOrEmpty(oShellExecItem.addPrefixToCommand)) {
+			WasdiLog.debugLog("RunTimeUtils.dockerShellExec: adding prefix to the command line - " + oShellExecItem.addPrefixToCommand);
+			asArgs.add(0, oShellExecItem.addPrefixToCommand);
+		}		
 		
 		if (oShellExecItem.overrideDockerConfig) {
 			oDockerUtils.setWasdiSystemGroupId(oShellExecItem.systemGroupId);
