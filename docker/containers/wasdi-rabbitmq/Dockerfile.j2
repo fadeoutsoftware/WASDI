@@ -83,7 +83,11 @@ WORKDIR /home/{{ sWasdiRabbitMqSystemUserName }}
 
 # Copy data
 COPY --chown={{ sWasdiRabbitMqSystemUserName }}:{{ sWasdiRabbitMqSystemGroupName }} ./dataToCopy/etc_rabbitmq_rabbitmq.conf /etc/rabbitmq/rabbitmq.conf
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/docker-entrypoint.sh /docker-entrypoint.sh
 
 
 # Start the container
-CMD ["/usr/lib/rabbitmq/bin/rabbitmq-server"]
+ENTRYPOINT ["/bin/bash", "/docker-entrypoint.sh"]
+CMD [ \
+    "/usr/lib/rabbitmq/bin/rabbitmq-server" \
+]
