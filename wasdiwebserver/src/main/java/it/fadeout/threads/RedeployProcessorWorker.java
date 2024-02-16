@@ -7,6 +7,7 @@ import java.util.Map;
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.ProcessorAPIClient;
 
 /**
  * Thread that calls all the computing nodes to ask to redeploy a processor
@@ -76,25 +77,8 @@ public class RedeployProcessorWorker extends Thread  {
 			// The node must be active			
 			if (oNode.getActive() == false) continue;
 			
-			try {
-				// Get the url
-				String sUrl = oNode.getNodeBaseAddress();
-				
-				// Safe programming				
-				if (!sUrl.endsWith("/")) sUrl += "/";
-				
-				// Compose the API string				
-				sUrl += "processors/redeploy?processorId="+m_sProcessorId+"&workspace="+m_sWorkspaceId;
-				
-				// Add the auth header				
-				Map<String, String> asHeaders = new HashMap<String, String>();
-				asHeaders.put("x-session-token", m_sSessionId);
-				
-				WasdiLog.debugLog("RedeployProcessorWorker.run: calling url: " + sUrl);
-				
-				// It is a get call				
-				HttpUtils.httpGet(sUrl, asHeaders);
-				
+			try {				
+				ProcessorAPIClient.redeploy(oNode, m_sSessionId, m_sProcessorId, m_sWorkspaceId);
 				WasdiLog.debugLog("RedeployProcessorWorker.run: redeployed on node " + oNode.getNodeCode());
 				
 			}

@@ -28,6 +28,7 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.CatalogAPIClient;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
 /**
@@ -150,17 +151,8 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 				
 				NodeRepository oNodeRepository = new NodeRepository();
 				Node oOriginNode = oNodeRepository.getNodeByCode(sOriginNode);
-				String sDownloadUrl = oOriginNode.getNodeBaseAddress();
 				
-				if (!sDownloadUrl.endsWith("/")) sDownloadUrl += "/";
-				
-				sDownloadUrl += "catalog/downloadbyname?filename=" +  oParameter.getProductName();
-				sDownloadUrl += "&workspace=" + sOriginWorkspace;
-				sDownloadUrl += "&token="+oParameter.getSessionID();
-				
-				WasdiLog.errorLog("Share.executeOperation: download url " + sDownloadUrl);
-				
-				String sOutputPath = HttpUtils.downloadFile(sDownloadUrl, HttpUtils.getStandardHeaders(oParam.getSessionID()), oDestinationFile.getPath());
+				String sOutputPath = CatalogAPIClient.downloadFileByName(oOriginNode, oParameter.getSessionID(), oParameter.getProductName(), sOriginWorkspace, oDestinationFile.getPath());
 				
 				if (Utils.isNullOrEmpty(sOutputPath)) {
 					WasdiLog.errorLog("Share.executeOperation: impossible to download the file");

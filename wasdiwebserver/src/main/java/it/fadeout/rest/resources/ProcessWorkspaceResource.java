@@ -52,6 +52,7 @@ import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.ProcessWorkspaceAPIClient;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.processors.AppStatsViewModel;
 import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
@@ -357,19 +358,7 @@ public class ProcessWorkspaceResource {
 					if (oNode.getActive() == false) continue;
 					
 					try {
-						String sUrl = oNode.getNodeBaseAddress();
-						
-						if (!sUrl.endsWith("/")) sUrl += "/";
-						
-						sUrl += "process/byapp?processorName="+sProcessorName;
-						
-						Map<String, String> asHeaders = new HashMap<String, String>();
-						asHeaders.put("x-session-token", sSessionId);
-						
-						WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: calling url: " + sUrl);
-						
-						
-						HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+						HttpCallResponse oHttpCallResponse = ProcessWorkspaceAPIClient.getByApplication(oNode, sSessionId, sProcessorName); 
 						String sResponse = oHttpCallResponse.getResponseBody(); 
 						
 						if (Utils.isNullOrEmpty(sResponse)==false) {
@@ -495,20 +484,8 @@ public class ProcessWorkspaceResource {
 					if (oNode.getNodeCode().equals("wasdi")) continue;					
 					if (oNode.getActive() == false) continue;
 					
-					try {
-						String sUrl = oNode.getNodeBaseAddress();
-						
-						if (!sUrl.endsWith("/")) sUrl += "/";
-						
-						sUrl += "process/appstats?processorName="+sProcessorName;
-						
-						Map<String, String> asHeaders = new HashMap<String, String>();
-						asHeaders.put("x-session-token", sSessionId);
-						
-						WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics: calling url: " + sUrl);
-						
-						
-						HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+					try {						
+						HttpCallResponse oHttpCallResponse = ProcessWorkspaceAPIClient.getAppStats(oNode, sSessionId, sProcessorName);
 						String sResponse = oHttpCallResponse.getResponseBody();
 						
 						if (Utils.isNullOrEmpty(sResponse)==false) {
@@ -1250,16 +1227,7 @@ public class ProcessWorkspaceResource {
 					if (oNode.getActive() == false) continue;
 
 					try {
-						String sUrl = oNode.getNodeBaseAddress();
-						if (!sUrl.endsWith("/")) sUrl += "/";
-						sUrl += "process/runningTime/UI?userId=" + sTargetUserId +"&dateFrom=" + sDateFrom + "&dateTo=" + sDateTo;
-
-						Map<String, String> asHeaders = new HashMap<String, String>();
-						asHeaders.put("x-session-token", sSessionId);
-
-						WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeByUserAndInterval: calling url: " + sUrl);
-
-						HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+						HttpCallResponse oHttpCallResponse = ProcessWorkspaceAPIClient.getRunningTimeUI(oNode, sSessionId, sTargetUserId, sDateFrom, sDateTo); 
 						String sResponse = oHttpCallResponse.getResponseBody();
 
 						if (!Utils.isNullOrEmpty(sResponse)) {
@@ -1332,16 +1300,8 @@ public class ProcessWorkspaceResource {
 					if (oNode.getActive() == false) continue;
 
 					try {
-						String sUrl = oNode.getNodeBaseAddress();
-						if (!sUrl.endsWith("/")) sUrl += "/";
-						sUrl += "process/runningTime/SP";
 
-						Map<String, String> asHeaders = new HashMap<String, String>();
-						asHeaders.put("x-session-token", sSessionId);
-
-						WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: calling url: " + sUrl);
-
-						HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+						HttpCallResponse oHttpCallResponse = ProcessWorkspaceAPIClient.getRunningTimeBySubscriptionAndProject(oNode, sSessionId); 
 						String sResponse = oHttpCallResponse.getResponseBody();
 
 						if (!Utils.isNullOrEmpty(sResponse)) {
@@ -1430,7 +1390,7 @@ public class ProcessWorkspaceResource {
 
 					try {
 						WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: send request to computing nodes");
-						HttpCallResponse oHttpCallResponse = sendRequestToNode(oNode.getNodeBaseAddress(), "process/runningtimeproject", sSessionId); 
+						HttpCallResponse oHttpCallResponse = ProcessWorkspaceAPIClient.getRunningTimePerProject(oNode, sSessionId); 
 						String sResponseBody = oHttpCallResponse.getResponseBody();
 						
 						if (!Utils.isNullOrEmpty(sResponseBody)) {
@@ -1526,7 +1486,7 @@ public class ProcessWorkspaceResource {
 
 					try {
 						WasdiLog.debugLog("ProcessWorkspaceResource.getProjectRunningTimeByUser: response body from computing node is empty");
-						HttpCallResponse oHttpCallResponse = sendRequestToNode(oNode.getNodeBaseAddress(), "process/runningtimeproject/byuser", sSessionId); 
+						HttpCallResponse oHttpCallResponse = ProcessWorkspaceAPIClient.getRunningTimePerProjectPerUser(oNode, sSessionId); 
 						String sResponse = oHttpCallResponse.getResponseBody();
 
 						if (!Utils.isNullOrEmpty(sResponse)) {
@@ -1827,12 +1787,8 @@ public class ProcessWorkspaceResource {
 				WasdiLog.debugLog("ProcessWorkspaceResource.getNodeQueuesStatus: working on remote node, call API to " + sNodeCode);
 				
 				// Ask to the node!!
-				try {
-					String sUrl = oNode.getNodeBaseAddress();
-					if (sUrl.endsWith("/") == false) sUrl += "/";
-					sUrl += "process/queuesStatus?nodeCode=" + sNodeCode + "&statuses=" + sStatuses;
-					
-					HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId)); 
+				try {					
+					HttpCallResponse oHttpCallResponse = ProcessWorkspaceAPIClient.getQueueStatus(oNode, sSessionId, sStatuses); 
 					String sNodeResponse = oHttpCallResponse.getResponseBody();
 					
 					// Create an array of answers

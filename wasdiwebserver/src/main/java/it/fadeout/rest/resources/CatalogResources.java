@@ -7,7 +7,9 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.stream.Stream;
@@ -23,22 +25,39 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.Node;
+import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.S3Volume;
+import wasdi.shared.business.Workspace;
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.users.User;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
+import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.NodeRepository;
+import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.CatalogAPIClient;
+import wasdi.shared.utils.wasdiAPI.ProcessWorkspaceAPIClient;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
+import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
 import wasdi.shared.viewmodels.products.FtpTransferViewModel;
 import wasdi.shared.viewmodels.products.ProductPropertiesViewModel;
 
@@ -194,7 +213,7 @@ public class CatalogResources {
 	@GET
 	@Path("checkdownloadavaialibitybyname")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId)
+	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId, @QueryParam("procws") String sProcessObjId)
 	{
 		try {
 			WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName");
@@ -210,10 +229,104 @@ public class CatalogResources {
 				WasdiLog.warnLog("CatalogResources.checkDownloadEntryAvailabilityByName: user cannot access workspace");
 				return Response.status(Status.FORBIDDEN).build();			
 			}
-
+			
+			// Try to see if the file is in the wasdi db and present
 			File oFile = this.getEntryFile(sFileName,sWorkspaceId);
 			
 			if(oFile == null) {
+				// The file is not in the WASDI db. Can be a file on an S3 Volume?
+				
+				// Split the file: if it is a S3 Volume MUST have at least one folder
+				String [] asFileParts = sFileName.split("/");
+				
+				if (asFileParts == null) {
+					// Strange
+					return Response.serverError().build();				
+				}
+
+				if (asFileParts.length == 1) {
+					// It is a normal file, cannot be a volume
+					return Response.serverError().build();					
+				}
+				
+				// We take the root part that MAY be a Volume
+				String sRootPart = asFileParts[0];
+				
+				// Get the local path
+				String sTargetFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sRootPart;
+				
+				// If exists in the workspace a folder with the same name, we stop here.
+				File oFolderFile = new File(sTargetFilePath);
+				
+				if (oFolderFile.exists()) {
+					WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: " + sRootPart + " is a subfolder of the workspace. We stop here and do not verify Volumes");
+					return Response.serverError().build();
+				}
+				
+				
+				// We need to understand if this request is related to a processor
+				String sProcessorId = "";
+				
+				// if we have a process obj id
+				if (!Utils.isNullOrEmpty(sProcessObjId)) {
+					try {
+						
+						// Try to read it
+						ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+						ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessObjId);
+						
+						if (oProcessWorkspace != null) {
+							// If it is an app
+							if (oProcessWorkspace.getOperationType().equals(LauncherOperations.RUNPROCESSOR.toString()) || oProcessWorkspace.getOperationType().equals(LauncherOperations.RUNIDL.toString())) {
+								// Take the name
+								String sProcessorName = oProcessWorkspace.getProductName();
+								
+								// Search for the app
+								ProcessorRepository oProcessorRepository = new ProcessorRepository();
+								Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
+								
+								// If we fuond it
+								if (oProcessor != null) {
+									// We can get the id!!
+									sProcessorId = oProcessor.getProcessorId();
+									WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: found processor " + sProcessorId);
+								}
+							}
+						}
+					}
+					catch (Exception oEx) {
+						WasdiLog.errorLog("CatalogResources.checkDownloadEntryAvailabilityByName: error trying to detect the application ", oEx);
+					}
+				}
+				
+				List<S3Volume> aoVolumes = PermissionsUtils.getVolumesToMount(sWorkspaceId,sProcessorId,oUser.getUserId());
+				
+				if (aoVolumes == null) {
+					return Response.serverError().build();
+				}
+				
+				if (aoVolumes.size()<=0) {
+					return Response.serverError().build();
+				}
+				
+				for (S3Volume oS3Volume : aoVolumes) {
+					if (oS3Volume.getMountingFolderName().equals(sRootPart)) {
+						
+						String sFileInVolume = sFileName;
+						if (!sFileInVolume.startsWith("/")) sFileInVolume = "/" + sFileInVolume;
+						
+						WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: found Volume " + oS3Volume.getMountingFolderName() + " test file " + sFileInVolume);
+						
+						// Check if the file exists
+						File oFileInVolume = new File(sFileInVolume);
+						if (oFileInVolume.exists()) {
+							PrimitiveResult oResult = new PrimitiveResult();
+							oResult.setBoolValue(true);
+							return Response.ok(oResult).build();									
+						}
+					}
+				}
+				
 				return Response.serverError().build();	
 			}
 

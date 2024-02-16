@@ -822,12 +822,32 @@ public class PermissionsUtils {
 		}
 	}
 	
+	
 	/**
 	 * Return a list of S3 Volumes to be mounted on the workspace given the ProcessorParameter
 	 * @param oProcessorParameter ProcessorParameter in input
 	 * @return List of volumes to mount
 	 */
+
 	public static List<S3Volume> getVolumesToMount(ProcessorParameter oProcessorParameter) {
+		
+		// Here we save the ones to return for this app
+		List<S3Volume> aoOutputList = new ArrayList<>();
+		
+		if (oProcessorParameter == null) {
+			return aoOutputList;
+		}
+		else {
+			return getVolumesToMount(oProcessorParameter.getWorkspace(), oProcessorParameter.getProcessorID(), oProcessorParameter.getUserId());
+		}
+	}
+	
+	/**
+	 * Return a list of S3 Volumes to be mounted on the workspace given the ProcessorParameter
+	 * @param oProcessorParameter ProcessorParameter in input
+	 * @return List of volumes to mount
+	 */
+	public static List<S3Volume> getVolumesToMount(String sWorkspaceId, String sProcessorId, String sRequestingUserId) {
 		
 		// Here we save the ones to return for this app
 		List<S3Volume> aoOutputList = new ArrayList<>();
@@ -842,14 +862,20 @@ public class PermissionsUtils {
 			// Get the list of all volumes
 			List<S3Volume> aoAllVolumes = oS3VolumeRepository.getVolumes();
 						
-			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oProcessorParameter.getWorkspace());
-			Processor oProcessor = oProcessorRepository.getProcessor(oProcessorParameter.getProcessorID());
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+			
+			Processor oProcessor = null;
+			
+			if (!Utils.isNullOrEmpty(sProcessorId)) {
+				oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			}
+			
 			
 			// For all the volumes
 			for (S3Volume oS3Volume : aoAllVolumes) {
 				
 				// If is a volume of the user starting the app ok
-				if (oS3Volume.getUserId().equals(oProcessorParameter.getUserId())) {
+				if (oS3Volume.getUserId().equals(sRequestingUserId)) {
 					aoOutputList.add(oS3Volume);
 					continue;
 				}
@@ -861,14 +887,16 @@ public class PermissionsUtils {
 				}
 				
 				// If the owner of the volume has the workspace shared is ok 
-				if (oUserResourcePermissionRepository.isWorkspaceSharedWithUser(oS3Volume.getUserId(), oProcessorParameter.getWorkspace())) {
+				if (oUserResourcePermissionRepository.isWorkspaceSharedWithUser(oS3Volume.getUserId(), sWorkspaceId)) {
 					aoOutputList.add(oS3Volume);
 					continue;
 				}
 				
-				if (oProcessor.getUserId().equals(oS3Volume.getUserId())) {
-					aoOutputList.add(oS3Volume);
-					continue;					
+				if (oProcessor!=null) {
+					if (oProcessor.getUserId().equals(oS3Volume.getUserId())) {
+						aoOutputList.add(oS3Volume);
+						continue;					
+					}					
 				}
 			}
 			
