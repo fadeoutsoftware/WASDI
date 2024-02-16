@@ -4,6 +4,10 @@ WASDI python programming library CHANGELOG.md, according to the
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
 ## [0.8.5.5] - 2023-12-20
+### Fixed
+- type error to detect mount of single folder
+
+## [0.8.5.5] - 2023-12-20
 ### Added
 - env variable to enable mount of single workspace folder
 

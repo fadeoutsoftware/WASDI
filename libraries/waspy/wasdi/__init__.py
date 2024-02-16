@@ -34,7 +34,7 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.5.5
+Version 0.8.5.6
 
 Last Update: 20/12/2023
 
@@ -674,7 +674,7 @@ def init(sConfigFilePath=None):
 
     sOnlyWsFolderMounted = _getEnvironmentVariable('WASDI_ONLY_WS_FOLDER')
 
-    if sOnlyWsFolderMounted == 1:
+    if sOnlyWsFolderMounted == "1":
         print('[INFO] Only Workspace Folder detect from  WASDI_ONLY_WS_FOLDER')
         setOnlyWorkspaceFolderMounted(True)
 
