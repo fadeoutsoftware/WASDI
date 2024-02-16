@@ -34,7 +34,7 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.5.4
+Version 0.8.5.5
 
 Last Update: 20/12/2023
 

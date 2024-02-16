@@ -3,6 +3,10 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.8.5.5] - 2023-12-20
+### Added
+- env variable to enable mount of single workspace folder
+
 ## [0.8.5.4] - 2023-12-20
 ### Fixed
 - changed get Checksum to be compatible with older python versions

@@ -588,9 +588,8 @@ public class DockerUtils {
             		// Do we need to mount all data or only the workspace?
             		if (oProcessorTypeConfig.mountOnlyWorkspaceFolder) {
             			sMountWorkspaceFolder = PathsConfig.getWorkspacePath(m_oProcessorParameter);
-            			sOnContainerDataFolder = PathsConfig.getWorkspacePath(m_oProcessorParameter, sOnContainerDataFolder);
             			if (sOnContainerDataFolder.endsWith("/")) sOnContainerDataFolder = sOnContainerDataFolder.substring(0,sOnContainerDataFolder.length()-1);
-            			WasdiLog.debugLog("DockerUtils.start: mounting only workspace folder " + sOnContainerDataFolder);
+            			WasdiLog.debugLog("DockerUtils.start: mounting only workspace folder in " + sOnContainerDataFolder);
             		}
             		
             		// Mount the data folder
@@ -610,10 +609,17 @@ public class DockerUtils {
             				WasdiLog.debugLog("DockerUtils.start: Found " + aoVolumesToMount.size() + " S3 Volumes to mount");
             				
             				for (S3Volume oS3Volume : aoVolumesToMount) {
-            					String sRemoteVolume = PathsConfig.getWorkspacePath(m_oProcessorParameter, sOnContainerDataFolder);
+            					
+            					String sRemoteVolume = sOnContainerDataFolder;
+            					
+            					if (!oProcessorTypeConfig.mountOnlyWorkspaceFolder) {
+            						sRemoteVolume = PathsConfig.getWorkspacePath(m_oProcessorParameter, sOnContainerDataFolder);
+            					}
+            					
             					if (!sRemoteVolume.endsWith( "/")) sRemoteVolume+= "/";
+            					
 								String sMountingVolume = "/"+oS3Volume.getMountingFolderName() + ":" + sRemoteVolume + oS3Volume.getMountingFolderName();
-								WasdiLog.debugLog("DockerUtils.start: Adding " + sMountingVolume);
+								WasdiLog.debugLog("DockerUtils.start: Adding Volume " + sMountingVolume);
 								oContainerCreateParams.HostConfig.Binds.add(sMountingVolume);
 							}
             			}
