@@ -610,7 +610,7 @@ public class DockerUtils {
             				WasdiLog.debugLog("DockerUtils.start: Found " + aoVolumesToMount.size() + " S3 Volumes to mount");
             				
             				for (S3Volume oS3Volume : aoVolumesToMount) {
-								String sMountingVolume = oS3Volume.getMountingFolderName() + ":" + sOnContainerDataFolder + "/" + oS3Volume.getMountingFolderName();
+								String sMountingVolume = oS3Volume.getMountingFolderName() + ":" + PathsConfig.getWorkspacePath(m_oProcessorParameter, sOnContainerDataFolder) + "/" + oS3Volume.getMountingFolderName();
 								WasdiLog.debugLog("DockerUtils.start: Adding " + sMountingVolume);
 								oContainerCreateParams.HostConfig.Binds.add(sMountingVolume);
 							}

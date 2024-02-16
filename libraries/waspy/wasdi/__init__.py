@@ -562,6 +562,21 @@ def getEnableChecksum():
     global m_bEnableChecksumTest
     return m_bEnableChecksumTest
 
+
+def setOnlyWorkspaceFolderMounted(bOnlyWorkspaceFolderMounted):
+    """
+    :param bOnlyWorkspaceFolderMounted: true if only the workspace folder is mounted
+    """
+    global m_bOnlyWorkspaceFolderMounted
+    m_bOnlyWorkspaceFolderMounted = bOnlyWorkspaceFolderMounted
+
+def getOnlyWorkspaceFolderMounted():
+    """
+    Get the value of the Only Workspace Folder Mounted Flag
+    """
+    global m_bOnlyWorkspaceFolderMounted
+    return m_bOnlyWorkspaceFolderMounted
+
 def refreshParameters():
     """
     Refresh parameters, reading the file again
@@ -656,6 +671,12 @@ def init(sConfigFilePath=None):
                     sEnvBasePath = sEnvBasePath + "/"
                 m_sBasePath = sEnvBasePath
                 print('[INFO] Base Path read by WASDI_BASE_PATH: ' + m_sBasePath)
+
+    sOnlyWsFolderMounted = _getEnvironmentVariable('WASDI_ONLY_WS_FOLDER')
+
+    if sOnlyWsFolderMounted == 1:
+        print('[INFO] Only Workspace Folder detect from  WASDI_ONLY_WS_FOLDER')
+        setOnlyWorkspaceFolderMounted(True)
 
     # Check if we have the session id in env
     if not m_sSessionId or m_sSessionId=='':
