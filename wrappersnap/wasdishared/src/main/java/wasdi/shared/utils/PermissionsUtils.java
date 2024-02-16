@@ -6,9 +6,11 @@
  */
 package wasdi.shared.utils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.S3Volume;
@@ -23,6 +25,7 @@ import wasdi.shared.business.users.UserAccessRights;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserType;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;
@@ -36,6 +39,7 @@ import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**
  * @author c.nattero
@@ -907,6 +911,106 @@ public class PermissionsUtils {
 			WasdiLog.errorLog("PermissionsUtils.getVolumesToMount error: " + oEx);
 			return aoOutputList;
 		}		
+	}
+	
+	public static File getFileFromS3Volume(String sUserId, String sFileName, String sWorkspaceId, String sProcessObjId) {
+		// The file is not in the WASDI db. Can be a file on an S3 Volume?
+		
+		// Split the file: if it is a S3 Volume MUST have at least one folder
+		String [] asFileParts = sFileName.split("/");
+		
+		if (asFileParts == null) {
+			// Strange
+			return null;				
+		}
+
+		if (asFileParts.length == 1) {
+			// It is a normal file, cannot be a volume
+			return null;					
+		}
+		
+		// We take the root part that MAY be a Volume
+		String sRootPart = asFileParts[0];
+		
+		// Get the local path
+		String sTargetFilePath = PathsConfig.getWorkspacePath(sUserId,sWorkspaceId) + sRootPart;
+		
+		// If exists in the workspace a folder with the same name, we stop here.
+		File oFolderFile = new File(sTargetFilePath);
+		
+		if (oFolderFile.exists()) {
+			WasdiLog.debugLog("PermissionsUtils.getFileFromS3Volume: " + sRootPart + " is a subfolder of the workspace. We stop here and do not verify Volumes");
+			return null;
+		}
+		
+		
+		// We need to understand if this request is related to a processor
+		String sProcessorId = "";
+		
+		// if we have a process obj id
+		if (!Utils.isNullOrEmpty(sProcessObjId)) {
+			try {
+				
+				// Try to read it
+				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+				ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessObjId);
+				
+				if (oProcessWorkspace != null) {
+					// If it is an app
+					if (oProcessWorkspace.getOperationType().equals(LauncherOperations.RUNPROCESSOR.toString()) || oProcessWorkspace.getOperationType().equals(LauncherOperations.RUNIDL.toString())) {
+						// Take the name
+						String sProcessorName = oProcessWorkspace.getProductName();
+						
+						// Search for the app
+						ProcessorRepository oProcessorRepository = new ProcessorRepository();
+						Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
+						
+						// If we fuond it
+						if (oProcessor != null) {
+							// We can get the id!!
+							sProcessorId = oProcessor.getProcessorId();
+							WasdiLog.debugLog("PermissionsUtils.getFileFromS3Volume: found processor " + sProcessorId);
+						}
+					}
+				}
+			}
+			catch (Exception oEx) {
+				WasdiLog.errorLog("PermissionsUtils.getFileFromS3Volume: error trying to detect the application ", oEx);
+			}
+		}
+		
+		List<S3Volume> aoVolumes = PermissionsUtils.getVolumesToMount(sWorkspaceId,sProcessorId,sUserId);
+		
+		if (aoVolumes == null) {
+			return null;
+		}
+		
+		if (aoVolumes.size()<=0) {
+			return null;
+		}
+		
+		for (S3Volume oS3Volume : aoVolumes) {
+			if (oS3Volume.getMountingFolderName().equals(sRootPart)) {
+				
+				String sFileInVolume = sFileName;
+				if (!sFileInVolume.startsWith("/")) sFileInVolume = "/" + sFileInVolume;
+				
+				WasdiLog.debugLog("PermissionsUtils.getFileFromS3Volume: found Volume " + oS3Volume.getMountingFolderName() + " test file " + sFileInVolume);
+				
+				// Check if the file exists
+				File oFileInVolume = new File(sFileInVolume);
+				if (oFileInVolume.exists()) {
+					PrimitiveResult oResult = new PrimitiveResult();
+					oResult.setBoolValue(true);
+					return oFileInVolume;									
+				}
+				else {
+					WasdiLog.debugLog("PermissionsUtils.getFileFromS3Volume: no, we cannot read it");
+				}
+			}
+		}
+		
+		return null;
 	}
 }
  

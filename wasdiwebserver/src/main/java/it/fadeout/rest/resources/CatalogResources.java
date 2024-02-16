@@ -90,7 +90,9 @@ public class CatalogResources {
 	public Response downloadEntryByName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("token") String sTokenSessionId,
 			@QueryParam("filename") String sFileName,
-			@QueryParam("workspace") String sWorkspaceId)
+			@QueryParam("workspace") String sWorkspaceId,
+			@QueryParam("procws") String sProcessObjId
+			)
 	{			
 
 		WasdiLog.debugLog("CatalogResources.downloadEntryByName( FileName: " + sFileName + ", Ws: " + sWorkspaceId);
@@ -119,7 +121,11 @@ public class CatalogResources {
 			
 			ResponseBuilder oResponseBuilder = null;
 			
-			if(oFile == null) {
+			if (oFile == null) {
+				oFile = PermissionsUtils.getFileFromS3Volume(oUser.getUserId(), sFileName, sWorkspaceId, sProcessObjId);
+			}
+			
+			if(oFile == null) {				
 				// File invalid
 				WasdiLog.debugLog("CatalogResources.downloadEntryByName: file not readable");
 				oResponseBuilder = Response.serverError();	
@@ -235,99 +241,17 @@ public class CatalogResources {
 			
 			if(oFile == null) {
 				// The file is not in the WASDI db. Can be a file on an S3 Volume?
+				File oFileInVolume = PermissionsUtils.getFileFromS3Volume(oUser.getUserId(), sFileName, sWorkspaceId, sProcessObjId);
 				
-				// Split the file: if it is a S3 Volume MUST have at least one folder
-				String [] asFileParts = sFileName.split("/");
-				
-				if (asFileParts == null) {
-					// Strange
-					return Response.serverError().build();				
+				if (oFileInVolume.exists()) {
+					PrimitiveResult oResult = new PrimitiveResult();
+					oResult.setBoolValue(true);
+					return Response.ok(oResult).build();									
 				}
-
-				if (asFileParts.length == 1) {
-					// It is a normal file, cannot be a volume
-					return Response.serverError().build();					
+				else {
+					WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: no, we cannot read it");
 				}
-				
-				// We take the root part that MAY be a Volume
-				String sRootPart = asFileParts[0];
-				
-				// Get the local path
-				String sTargetFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sRootPart;
-				
-				// If exists in the workspace a folder with the same name, we stop here.
-				File oFolderFile = new File(sTargetFilePath);
-				
-				if (oFolderFile.exists()) {
-					WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: " + sRootPart + " is a subfolder of the workspace. We stop here and do not verify Volumes");
-					return Response.serverError().build();
-				}
-				
-				
-				// We need to understand if this request is related to a processor
-				String sProcessorId = "";
-				
-				// if we have a process obj id
-				if (!Utils.isNullOrEmpty(sProcessObjId)) {
-					try {
-						
-						// Try to read it
-						ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-						ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessObjId);
-						
-						if (oProcessWorkspace != null) {
-							// If it is an app
-							if (oProcessWorkspace.getOperationType().equals(LauncherOperations.RUNPROCESSOR.toString()) || oProcessWorkspace.getOperationType().equals(LauncherOperations.RUNIDL.toString())) {
-								// Take the name
-								String sProcessorName = oProcessWorkspace.getProductName();
-								
-								// Search for the app
-								ProcessorRepository oProcessorRepository = new ProcessorRepository();
-								Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
-								
-								// If we fuond it
-								if (oProcessor != null) {
-									// We can get the id!!
-									sProcessorId = oProcessor.getProcessorId();
-									WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: found processor " + sProcessorId);
-								}
-							}
-						}
-					}
-					catch (Exception oEx) {
-						WasdiLog.errorLog("CatalogResources.checkDownloadEntryAvailabilityByName: error trying to detect the application ", oEx);
-					}
-				}
-				
-				List<S3Volume> aoVolumes = PermissionsUtils.getVolumesToMount(sWorkspaceId,sProcessorId,oUser.getUserId());
-				
-				if (aoVolumes == null) {
-					return Response.serverError().build();
-				}
-				
-				if (aoVolumes.size()<=0) {
-					return Response.serverError().build();
-				}
-				
-				for (S3Volume oS3Volume : aoVolumes) {
-					if (oS3Volume.getMountingFolderName().equals(sRootPart)) {
-						
-						String sFileInVolume = sFileName;
-						if (!sFileInVolume.startsWith("/")) sFileInVolume = "/" + sFileInVolume;
-						
-						WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: found Volume " + oS3Volume.getMountingFolderName() + " test file " + sFileInVolume);
-						
-						// Check if the file exists
-						File oFileInVolume = new File(sFileInVolume);
-						if (oFileInVolume.exists()) {
-							PrimitiveResult oResult = new PrimitiveResult();
-							oResult.setBoolValue(true);
-							return Response.ok(oResult).build();									
-						}
-					}
-				}
-				
-				return Response.serverError().build();	
+				return Response.serverError().build();
 			}
 
 			PrimitiveResult oResult = new PrimitiveResult();
