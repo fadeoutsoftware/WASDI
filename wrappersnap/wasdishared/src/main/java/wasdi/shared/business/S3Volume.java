@@ -24,6 +24,11 @@ public class S3Volume {
 	 * User owner
 	 */
 	private String userId;
+	
+	/**
+	 * Is it a read only volume or not?
+	 */
+	private boolean readOnly = true;
 
 	public String getMountingFolderName() {
 		return mountingFolderName;
@@ -55,6 +60,14 @@ public class S3Volume {
 
 	public void setVolumeId(String volumeId) {
 		this.volumeId = volumeId;
+	}
+
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
 }

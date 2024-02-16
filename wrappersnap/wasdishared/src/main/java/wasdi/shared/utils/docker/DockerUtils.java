@@ -619,6 +619,11 @@ public class DockerUtils {
             					if (!sRemoteVolume.endsWith( "/")) sRemoteVolume+= "/";
             					
 								String sMountingVolume = "/"+oS3Volume.getMountingFolderName() + ":" + sRemoteVolume + oS3Volume.getMountingFolderName();
+								
+								if (oS3Volume.isReadOnly()) {
+									sMountingVolume += ":ro";
+								}
+								
 								WasdiLog.debugLog("DockerUtils.start: Adding Volume " + sMountingVolume);
 								oContainerCreateParams.HostConfig.Binds.add(sMountingVolume);
 							}
