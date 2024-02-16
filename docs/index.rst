@@ -99,6 +99,7 @@ If you already know WASDI features and you are a Python developer check out the 
    :caption: Programming tutorials
 
    ProgrammingTutorials/PythonTutorial.rst
+   ProgrammingTutorials/JupyterNotebookTutorial.rst
    ProgrammingTutorials/PythonLandsatTutorial.rst
    ProgrammingTutorials/SearchImport.rst
    ProgrammingTutorials/ConfigTutorial.rst
