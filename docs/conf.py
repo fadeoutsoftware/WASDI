@@ -31,13 +31,12 @@ extensions = ['javasphinx',
 'sphinxemoji.sphinxemoji',
 'sphinx.ext.autodoc',
 'sphinxcontrib.matlab',
-'myst_parser',
 'sphinx_js',
 'sphinxcontrib.youtube']
 
-js_language = 'typescript'
-js_source_path = '../libraries/jswasdilib/src/index.ts'
-jsdoc_config_path = '../libraries/jswasdilib/src/tsconfig.json'
+#js_language = 'javascript'
+js_source_path = '../libraries/jswasdilib/src/index.js'
+#jsdoc_config_path = '../libraries/jswasdilib/src/tsconfig.json'
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
