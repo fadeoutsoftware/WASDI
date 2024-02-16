@@ -32,6 +32,7 @@ import wasdi.operations.Operation;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.S3Volume;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.users.User;
 import wasdi.shared.config.WasdiConfig;
@@ -39,6 +40,7 @@ import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ParametersRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.S3VolumeRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
@@ -235,7 +237,7 @@ public class LauncherMain  {
             } else {
                 WasdiLog.debugLog("LauncherMain: RUNNING state and operationStartDate updated");
             }
-
+            
             // Run the operation
             oLauncher.executeOperation(sOperation, oBaseParameter);
 

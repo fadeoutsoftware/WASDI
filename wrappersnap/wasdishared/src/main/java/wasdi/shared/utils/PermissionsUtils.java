@@ -6,10 +6,12 @@
  */
 package wasdi.shared.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.S3Volume;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.Style;
 import wasdi.shared.business.Subscription;
@@ -26,11 +28,13 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProjectRepository;
+import wasdi.shared.data.S3VolumeRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -816,6 +820,65 @@ public class PermissionsUtils {
 			WasdiLog.errorLog("PermissionsUtils.canUserWriteResource error: " + oEx);
 			return false;
 		}
+	}
+	
+	/**
+	 * Return a list of S3 Volumes to be mounted on the workspace given the ProcessorParameter
+	 * @param oProcessorParameter ProcessorParameter in input
+	 * @return List of volumes to mount
+	 */
+	public static List<S3Volume> getVolumesToMount(ProcessorParameter oProcessorParameter) {
+		
+		// Here we save the ones to return for this app
+		List<S3Volume> aoOutputList = new ArrayList<>();
+		
+		try {
+			// Repo for S3 Volumes and Resource Permissions
+			S3VolumeRepository oS3VolumeRepository = new S3VolumeRepository();
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			
+			// Get the list of all volumes
+			List<S3Volume> aoAllVolumes = oS3VolumeRepository.getVolumes();
+						
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oProcessorParameter.getWorkspace());
+			Processor oProcessor = oProcessorRepository.getProcessor(oProcessorParameter.getProcessorID());
+			
+			// For all the volumes
+			for (S3Volume oS3Volume : aoAllVolumes) {
+				
+				// If is a volume of the user starting the app ok
+				if (oS3Volume.getUserId().equals(oProcessorParameter.getUserId())) {
+					aoOutputList.add(oS3Volume);
+					continue;
+				}
+				
+				// If we are in a workspace of the owner
+				if (oWorkspace.getUserId().equals(oS3Volume.getUserId())) {
+					aoOutputList.add(oS3Volume);
+					continue;					
+				}
+				
+				// If the owner of the volume has the workspace shared is ok 
+				if (oUserResourcePermissionRepository.isWorkspaceSharedWithUser(oS3Volume.getUserId(), oProcessorParameter.getWorkspace())) {
+					aoOutputList.add(oS3Volume);
+					continue;
+				}
+				
+				if (oProcessor.getUserId().equals(oS3Volume.getUserId())) {
+					aoOutputList.add(oS3Volume);
+					continue;					
+				}
+			}
+			
+			
+			return aoOutputList;			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PermissionsUtils.getVolumesToMount error: " + oEx);
+			return aoOutputList;
+		}		
 	}
 }
  

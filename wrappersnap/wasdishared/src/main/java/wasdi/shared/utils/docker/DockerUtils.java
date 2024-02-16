@@ -18,6 +18,7 @@ import org.apache.commons.io.FileUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import wasdi.shared.business.S3Volume;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.EnvironmentVariableConfig;
@@ -25,8 +26,10 @@ import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.ProcessorTypeConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.TarUtils;
 import wasdi.shared.utils.Utils;
@@ -53,6 +56,11 @@ public class DockerUtils {
      * Wasdi Processor
      */
     protected Processor m_oProcessor;
+    
+    /**
+     * Processor Parameter
+     */
+    protected ProcessorParameter m_oProcessorParameter;
 
     /**
      * Folder of the processor
@@ -83,6 +91,7 @@ public class DockerUtils {
      * Network mode
      */
     protected String m_sDockerNetworkMode = "net-wasdi";
+    
     /**
      * Docker registry in use
      */
@@ -119,6 +128,16 @@ public class DockerUtils {
         m_sProcessorFolder = sProcessorFolder; 
     }    
     
+    
+    public DockerUtils(Processor oProcessor, ProcessorParameter oProcessorParameter, String sProcessorFolder) {
+    	// Initialize the members
+    	this();
+    	// and override with the ones provided
+        m_oProcessor = oProcessor;
+        m_oProcessorParameter = oProcessorParameter;
+        m_sProcessorFolder = sProcessorFolder; 
+    }    
+    
     /**
      * Create a new instance
      * 
@@ -135,6 +154,15 @@ public class DockerUtils {
         m_sDockerRegistry = sDockerRegistry;
     }    
     
+    public DockerUtils(Processor oProcessor, ProcessorParameter oProcessorParameter, String sProcessorFolder, String sDockerRegistry) {
+    	// Initialize the members
+    	this();
+    	// and override with the ones provided
+        m_oProcessor = oProcessor;
+        m_oProcessorParameter = oProcessorParameter;
+        m_sProcessorFolder = sProcessorFolder;
+        m_sDockerRegistry = sDockerRegistry;	
+    }
     /**
      * Get the processor entity
      * @return Processor
@@ -545,13 +573,50 @@ public class DockerUtils {
             		// Create the Payload to send to create the container
             		CreateParams oContainerCreateParams = new CreateParams();
             		
+                    String sProcessorType = m_oProcessor.getType();
+                    ProcessorTypeConfig oProcessorTypeConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig(sProcessorType);            		
+            		
             		// Set the user
             		oContainerCreateParams.User = m_sWasdiSystemUserName+":"+m_sWasdiSystemGroupName;
             		
             		// Set the image
-            		oContainerCreateParams.Image = sImageName;            		
+            		oContainerCreateParams.Image = sImageName;
+            		
+            		// Default Container base data folder
+            		String sOnContainerDataFolder = "/data/wasdi";
+            		
+            		// Do we need to mount all data or only the workspace?
+            		if (oProcessorTypeConfig.mountOnlyWorkspaceFolder) {
+            			sMountWorkspaceFolder = PathsConfig.getWorkspacePath(m_oProcessorParameter);
+            			sOnContainerDataFolder = PathsConfig.getWorkspacePath(m_oProcessorParameter, sOnContainerDataFolder);
+            			if (sOnContainerDataFolder.endsWith("/")) sOnContainerDataFolder = sOnContainerDataFolder.substring(0,sOnContainerDataFolder.length()-1);
+            			WasdiLog.debugLog("DockerUtils.start: mounting only workspace folder " + sOnContainerDataFolder);
+            		}
+            		
             		// Mount the data folder
-            		oContainerCreateParams.HostConfig.Binds.add(sMountWorkspaceFolder+":"+"/data/wasdi");
+            		oContainerCreateParams.HostConfig.Binds.add(sMountWorkspaceFolder+":"+ sOnContainerDataFolder);            		
+            		
+            		// Do we have additional mount points configured?
+            		if (oProcessorTypeConfig.additionalMountPoints!=null) {
+            			for (String sMountPoint : oProcessorTypeConfig.additionalMountPoints) {
+            				oContainerCreateParams.HostConfig.Binds.add(sMountPoint);
+						}
+            		}
+            		
+            		List<S3Volume> aoVolumesToMount = PermissionsUtils.getVolumesToMount(m_oProcessorParameter);
+            		
+            		if (aoVolumesToMount != null) {
+            			if (aoVolumesToMount.size()>0) {
+            				WasdiLog.debugLog("DockerUtils.start: Found " + aoVolumesToMount.size() + " S3 Volumes to mount");
+            				
+            				for (S3Volume oS3Volume : aoVolumesToMount) {
+								String sMountingVolume = oS3Volume.getMountingFolderName() + ":" + sOnContainerDataFolder + "/" + oS3Volume.getMountingFolderName();
+								WasdiLog.debugLog("DockerUtils.start: Adding " + sMountingVolume);
+								oContainerCreateParams.HostConfig.Binds.add(sMountingVolume);
+							}
+            			}
+            		}
+            		
             		// Set the network mode
             		oContainerCreateParams.HostConfig.NetworkMode = m_sDockerNetworkMode;
             		
@@ -585,18 +650,14 @@ public class DockerUtils {
                     if (WasdiConfig.Current.dockers.extraHosts != null) {
                     	
                     	if (WasdiConfig.Current.dockers.extraHosts.size()>0) {
-                    		WasdiLog.debugLog("DockerUtils.start adding configured extra host mapping to the run arguments");
+                    		WasdiLog.debugLog("DockerUtils.start: adding configured extra host mapping to the run arguments");
                         	for (int iExtraHost = 0; iExtraHost<WasdiConfig.Current.dockers.extraHosts.size(); iExtraHost ++) {
                         		String sExtraHost = WasdiConfig.Current.dockers.extraHosts.get(iExtraHost);
                         		oContainerCreateParams.HostConfig.ExtraHosts.add(sExtraHost);
                         	}
                     	}
                     }
-                    
-                    
-                    String sProcessorType = m_oProcessor.getType();
-                    ProcessorTypeConfig oProcessorTypeConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig(sProcessorType);
-                    
+                                        
                     if (oProcessorTypeConfig != null) {
                     	if (oProcessorTypeConfig.environmentVariables != null) {
                     		

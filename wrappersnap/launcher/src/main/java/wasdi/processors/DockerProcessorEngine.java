@@ -196,7 +196,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             processWorkspaceLog("Start building Image");
 
             // Create Docker Util and deploy the docker
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, m_sDockerRegistry);
             m_sDockerImageName = oDockerUtils.build();
             
             if (Utils.isNullOrEmpty(m_sDockerImageName)) {
@@ -377,7 +377,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             // Create the Docker Utils Object
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
             
             // Check if is started otherwise start it
             String sContainerName = startContainerAndGetName(oDockerUtils,oProcessor, oParameter);
@@ -558,7 +558,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
     		ProcessorRepository oProcessorRepository = new ProcessorRepository();
     		Processor oProcessorToKill = oProcessorRepository.getProcessorByName(sProcessorName);
     		
-    		DockerUtils oDockerUtils = new DockerUtils(oProcessorToKill, sProcessorName);
+    		DockerUtils oDockerUtils = new DockerUtils(oProcessorToKill, m_oParameter, sProcessorName);
     		ContainerInfo oContainer = oDockerUtils.getContainerInfoByImageName(sProcessorName, oProcessorToKill.getVersion());
     		
     		if (oContainer == null) {
@@ -700,7 +700,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             processWorkspaceLog("Delete Processor Docker");
 
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder);
             // Set also the docker registry
             oDockerUtils.setDockerRegistry(m_sDockerRegistry);
             // Give the name of the processor to delete to be sure that it works also if oProcessor is already null
@@ -825,7 +825,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             onAfterCopyTemplate(sProcessorFolder, oProcessor);
             
             // Create utils
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, m_sDockerRegistry);
 
             if (bDeleteOldImage) {
                 // Delete the image
@@ -897,7 +897,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             WasdiLog.infoLog("DockerProcessorEngine.libraryUpdate: update lib for " + sProcessorName);
             
             // Create the docker utils
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
             // Get or start the container: we will reconstruct the env later
             String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter, false);
             
@@ -1226,7 +1226,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 				String sUpdateCommand = (String) oUpdateCommand;
 				WasdiLog.debugLog("DockerProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
 				
-				DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+				DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
 				String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter);
 				
 				String sUrl = getProcessorUrl(oProcessor, sContainerName);
@@ -1290,7 +1290,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		int iPort = oProcessor.getPort();
 
         // Create the Docker Utils Object
-        DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+        DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
         
         String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter, false);
         
@@ -1361,7 +1361,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 				ProcessorRepository oProcessorRepository = new ProcessorRepository();
 				Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 	            // Create the Docker Utils Object
-	            DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(oProcessor.getName()), m_sDockerRegistry);
+	            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor.getName()), m_sDockerRegistry);
 	            
 	            // Check if is started otherwise start it
 	            String sContainerName = startContainerAndGetName(oDockerUtils,oProcessor, oParameter, false);
@@ -1410,7 +1410,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			String sProcessorFolder = PathsConfig.getProcessorFolder(oProcessor.getName());
 			
 			// Create the docker utils
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder);
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder);
 			
 			// Here we keep track of how many registers we tried
 			int iAvailableRegisters=0;
