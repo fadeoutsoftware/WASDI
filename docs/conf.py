@@ -82,8 +82,11 @@ os.system("mv domain.py /home/docs/checkouts/readthedocs.org/user_builds/wasdi/e
 
 os.system("npm list -g;")
 
-os.system("echo --- FIX for npm version ---")
-os.system("cd ~ ;npm install -g typedoc@0.22.18;")
+os.system("echo --- Installation of JsDoc---")
+os.system("cd ~ ;npm install -g jsdoc@3.6.10;")
+
+#os.system("echo --- FIX for npm version ---")
+#os.system("cd ~ ;npm install -g typedoc@0.22.18;")
 
 os.system("echo --- Python version ---")
 os.system("python --version")
