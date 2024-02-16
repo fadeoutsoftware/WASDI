@@ -12,7 +12,7 @@ You will need:
 - a valid WASDI user
 - a workspace
 
-You don't have them? Then `go get them <../WasdiTutorial.rst>`_!
+You don't have them? Then `go get them <../GettingStarted/WasdiTutorial.rst>`_!
 
 Create and Open Jupyter Lab
 ---------------------------
