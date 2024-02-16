@@ -82,8 +82,6 @@ WORKDIR /home/{{ sWasdiRabbitMqSystemUserName }}
 
 
 # Copy data
-COPY --chown={{ sWasdiRabbitMqSystemUserName }}:{{ sWasdiRabbitMqSystemGroupName }} ./dataToCopy/etc_rabbitmq_definitions.json /etc/rabbitmq/definitions.json
-COPY --chown={{ sWasdiRabbitMqSystemUserName }}:{{ sWasdiRabbitMqSystemGroupName }} ./dataToCopy/etc_rabbitmq_enabled_plugins /etc/rabbitmq/enabled_plugins
 COPY --chown={{ sWasdiRabbitMqSystemUserName }}:{{ sWasdiRabbitMqSystemGroupName }} ./dataToCopy/etc_rabbitmq_rabbitmq.conf /etc/rabbitmq/rabbitmq.conf
 
 
