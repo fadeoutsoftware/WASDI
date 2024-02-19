@@ -17,6 +17,7 @@ def setEnvironmentVariable() {
   env.sWasdiTomcatOpenEoServer         = aoParameters.getParameter('sWasdiTomcatOpenEoServer').value
   env.sWasdiTomcatWasdiWebServer       = aoParameters.getParameter('sWasdiTomcatWasdiWebServer').value
   env.sWasdiTrigger                    = aoParameters.getParameter('sWasdiTrigger').value
+  env.sWasdiUtils                      = aoParameters.getParameter('sWasdiUtils').value
 
   echo "sSourceJobName = " + sSourceJobName
 }
@@ -30,6 +31,7 @@ def getAnsibleExtraVariableProject() {
   aAnsibleExtraVariableProject.add('sDeployWasdiTomcatOpenEoServerContainer=' + env.sWasdiTomcatOpenEoServer.toString())
   aAnsibleExtraVariableProject.add('sDeployWasdiTomcatWasdiWebServerContainer=' + env.sWasdiTomcatWasdiWebServer.toString())
   aAnsibleExtraVariableProject.add('sDeployWasdiTriggerContainer=' + env.sWasdiTrigger.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiUtilsContainer=' + env.sWasdiUtils.toString())
 
   aAnsibleExtraVariableProject.unique()
 
@@ -73,6 +75,7 @@ pipeline {
         echo "env.sWasdiTomcatOpenEoServer         = " + env.sWasdiTomcatOpenEoServer
         echo "env.sWasdiTomcatWasdiWebServer       = " + env.sWasdiTomcatWasdiWebServer
         echo "env.sWasdiTrigger                    = " + env.sWasdiTrigger
+        echo "env.sWasdiUtils                      = " + env.sWasdiUtils
         echo "env.WORKSPACE                        = " + env.WORKSPACE
 
         sh script: "pwd", label: "Current location"
@@ -102,7 +105,7 @@ pipeline {
       }
     }
 
-    stage('DEPLOY THE CONTAINERS AND THEIR RUN ELEMENTS') {
+    stage('DEPLOY THE CONTAINER(S) AND THEIR RUN ELEMENTS') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
@@ -113,7 +116,7 @@ pipeline {
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
         """,
-        label: "Deploy the containers and their run elements"
+        label: "Deploy the container(s) and their run elements"
       }
     }
 
