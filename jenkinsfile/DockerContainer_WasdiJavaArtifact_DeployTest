@@ -17,6 +17,7 @@ def setEnvironmentVariable() {
   env.sWasdiTomcatOpenEoServer         = aoParameters.getParameter('sWasdiTomcatOpenEoServer').value
   env.sWasdiTomcatWasdiWebServer       = aoParameters.getParameter('sWasdiTomcatWasdiWebServer').value
   env.sWasdiTrigger                    = aoParameters.getParameter('sWasdiTrigger').value
+  env.sWasdiUtils                      = aoParameters.getParameter('sWasdiUtils').value
 
   echo "sSourceJobName = " + sSourceJobName
 }
@@ -30,6 +31,7 @@ def getAnsibleExtraVariableProject() {
   aAnsibleExtraVariableProject.add('sDeployWasdiTomcatOpenEoServerContainer=' + env.sWasdiTomcatOpenEoServer.toString())
   aAnsibleExtraVariableProject.add('sDeployWasdiTomcatWasdiWebServerContainer=' + env.sWasdiTomcatWasdiWebServer.toString())
   aAnsibleExtraVariableProject.add('sDeployWasdiTriggerContainer=' + env.sWasdiTrigger.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiUtilsContainer=' + env.sWasdiUtils.toString())
 
   aAnsibleExtraVariableProject.unique()
 
