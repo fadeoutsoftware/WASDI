@@ -64,3 +64,19 @@ The project has a direct connection, through a webhook, from the feature/Docs br
 After an event on feature/Docs, like a commit or a merge, the documentation compile is triggered 
 and the resulting webpages are published on https://wasdi.readthedocs.io/
 
+## Docker local compilation 
+To preview the content of the documentation it is possible to compile it on dev machine by leveraging on 
+The command used to build the image is
+
+```
+docker build -t wasdidoc -f .\docs\dockerfile .
+```
+
+**NOTE** this command **MUST** be launched from WASDI root directory
+
+The builded image has the compiled page available inside the file system.
+
+- Add a docker ignore for output directories
+- Mount instead of copying the file and launch the sphinx build command
+
+docker run --mount type=bind,src=C:\WASDI\GIT\WASDI\docs,dst=/usr/src/app/docs --mount type=bind,src=C:\WASDI\GIT\WASDI\libraries\jswasdilib,dst=/usr/src/app/libraries/jswasdilib --mount type=bind,src=C:\WASDI\DOCS_BUILDED,dst=/usr/src/app/build wasdidoc:latest 
