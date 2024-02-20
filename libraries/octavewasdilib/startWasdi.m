@@ -2,8 +2,7 @@
 %
 %:param config_path: The path to be used to import the configuration. 
 %
-%:Returns:
-%  :Wasdi: The object to be used to invoke all the following call to Wasdi services
+%:returns: ``Wasdi`` The object to be used to invoke all the following call to Wasdi services  
 
 % Check if there is the wasdipath varialbe
 iPathExists = exist("wasdipath");

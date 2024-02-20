@@ -1,15 +1,13 @@
-function [asWorkspaceNames, asWorkspaceIds]=getWorkspaces(Wasdi);
+
+function [asWorkspaceNames, asWorkspaceIds]=getWorkspaces(Wasdi)
 % Get the List of Workspace of the actual User
 % Syntax
 % [asWorkspaceNames, asWorkspaceIds]=getWorkspaces(Wasdi);
 % 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
-%  
-%
-% OUTPUT
-%   asWorkspaceNames: array of strings that are the names of the workspaces
-%   asWorkspaceIds: array of strings that are the id of the workspaces
+% :param Wasdi: Wasdi object created after the wasdilib call
+% :returns:  ``asWorkspaceNames`` array of strings that are the names of the workspaces
+% :returns: ``asWorkspaceIds`` array of strings that are the id of the workspaces
+;
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not existst')

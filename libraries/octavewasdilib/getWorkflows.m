@@ -1,15 +1,14 @@
-function [asWorkflowNames, asWorkflowIds]=getWorkflows(Wasdi);
+function [asWorkflowNames, asWorkflowIds]=getWorkflows(Wasdi)
 % Get the List of Workflows of the actual User
 % Syntax
 % [asWorkflowNames, asWorkflowIds]=getWorkflows(Wasdi);
 % 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
+% :param Wasdi: Wasdi object created after the wasdilib call
 %  
-%
-% OUTPUT
-%   asWorkflowNames: array of strings that are the names of the workflows
-%   asWorkflowIds: array of strings that are the id of the workflows
+% :returns: ``asWorkflowNames`` array of strings that are the names of the workflows
+% :returns: ``asWorkflowIds`` array of strings that are the id of the workflows
+
+;
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not existst')
     return

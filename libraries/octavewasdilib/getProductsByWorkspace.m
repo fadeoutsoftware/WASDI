@@ -1,16 +1,12 @@
-function asProducts=getProductsByWorkspace(Wasdi, sWorkspaceName);
+function asProducts=getProductsByWorkspace(Wasdi, sWorkspaceName)
 % Get the List of Products in a Workspace 
 % Syntax
 % asProducts=getProductsByWorkspace(Wasdi, sWorkspaceName);
-% 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
-%    sWorkspaceName: name of the workspace
+% :param Wasdi: Wasdi object created after the wasdilib call
+% :param sWorkspaceName: name of the workspace
 %  
-%
-% OUTPUT
-%   asProducts: array of strings that are the names of the products
-
+%  :returns: ``asProducts`` array of strings that are the names of the products 
+;
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not existst')

@@ -14,16 +14,50 @@ startWasdi
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  .. mat:autofunction:: octavewasdilib::startWasdi
 
+addFileToWASDI
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ .. mat:autofunction:: octavewasdilib::addFileToWASDI
+
 executeWorkflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  .. mat:autofunction:: octavewasdilib::executeWorkflow
 
-example
+getFullProductPath
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: octavewasdilib::f_example
+ .. mat:autofunction:: octavewasdilib::getFullProductPath
 
-
-
-further test
+getProcessStatus
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. mat:autofunction:: octavewasdilib::my_static_function
+ .. mat:autofunction:: octavewasdilib::getProcessStatus
+
+getProductsByWorkspace
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ .. mat:autofunction:: octavewasdilib::getProductsByWorkspace
+
+getSavePath
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ .. mat:autofunction:: octavewasdilib::getSavePath
+
+getWorkflows
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ .. mat:autofunction:: octavewasdilib::getWorkflows
+
+getWorkspaces
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ .. mat:autofunction:: octavewasdilib::getWorkspaces
+
+openWorkspace
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ .. mat:autofunction:: octavewasdilib::openWorkspace
+
+setProcessPayload
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ .. mat:autofunction:: octavewasdilib::setProcessPayload
+
+updateProcessStatus
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ .. mat:autofunction:: octavewasdilib::updateProcessStatus
+
+waitProcess
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ .. mat:autofunction:: octavewasdilib::waitProcess
