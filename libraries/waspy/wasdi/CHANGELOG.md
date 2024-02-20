@@ -3,7 +3,9 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
-## [0.8.5.5] - 2023-12-20
+## [0.8.5.7] - 2023-12-20
+### Added
+- enable auto donwnload from S3 Volumes
 ### Fixed
 - type error to detect mount of single folder
 

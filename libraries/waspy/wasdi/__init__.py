@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.5.6
+Version 0.8.5.7
 
-Last Update: 20/12/2023
+Last Update: 16/02/2024
 
 Tested with: Python 3.7, Python 3.8, Python 3.9, Python 3.10
 
@@ -1250,7 +1250,9 @@ def getFullProductPath(sProductName):
     global m_sWorkspaceOwner
 
     # Normalize the path and extract the name
-    sProductName = os.path.basename(os.path.normpath(sProductName))
+    if sProductName.startswith(getSavePath()):
+        sProductName = sProductName.replace(getSavePath(),"")
+    #sProductName = os.path.basename(os.path.normpath(sProductName))
 
     # Get the full path
     sFullPath = _internalGetPath(sProductName)
@@ -1917,6 +1919,8 @@ def _downloadFile(sFileName):
     sUrl += sFileName
     sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
+    sUrl += "&procws="
+    sUrl += getProcId()
 
     _log('[INFO] waspy.downloadfile: send request to configured url ' + sUrl)
 
@@ -1961,6 +1965,17 @@ def _downloadFile(sFileName):
                     else:
                         bLoop = False
         sSavePath = getSavePath()
+
+        asParts = sFileName.split("/")
+        sFolders = ""
+        if asParts is not  None:
+            if len(asParts) > 1:
+                for sPart in asParts[:-1]:
+                    sFolders +=  sPart + "/"
+
+        if sFolders != "":
+            sAttachmentName = sFolders + sAttachmentName
+
         sSavePath = os.path.join(sSavePath, sAttachmentName)
 
         if os.path.exists(os.path.dirname(sSavePath)) == False:
@@ -2402,6 +2417,8 @@ def fileExistsOnWasdi(sFileName):
     sUrl += sFileName
     sUrl += "&workspace="
     sUrl += sActiveWorkspace
+    sUrl += "&procws="
+    sUrl += getProcId()
 
     asHeaders = _getStandardHeaders()
 
