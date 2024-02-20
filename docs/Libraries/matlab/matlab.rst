@@ -2,17 +2,13 @@
    sphinx-quickstart on Mon Apr 19 16:00:28 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
-.. _Octave WasdiLib:
+.. _Matlab WasdiLib:
 
 Matlab WasdiLib
 ===========================================
 
 Methods
 ------------------------------------------
-
-startWasdi
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: octavewasdilib::startWasdi
 
 startWasdi
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

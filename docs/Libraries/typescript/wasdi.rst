@@ -31,7 +31,7 @@ createWorkspace
 ^^^^^^^^^^^^^^^^^^^^^^^
 .. js:autofunction:: createWorkspace
 
- openWorkspaceById
+openWorkspaceById
 ^^^^^^^^^^^^^^^^^^^^^^^
 .. js:autofunction:: openWorkspaceById
 
