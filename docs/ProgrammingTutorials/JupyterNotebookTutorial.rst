@@ -2,7 +2,11 @@
 Jupyter Notebook Tutorial
 ===========================
 
-This tutorial will guide you through the creation and usage of Python Jupyter Notebooks in WASDI.
+This tutorial will guide you through the creation and usage of `Python Jupyter Notebooks in WASDI <https://wasdi.readthedocs.io/en/latest/UserManual/UsingYourWorkspace.html#open-jupyter>`_.
+
+It follows the webinar we did for the ESA NoR:
+
+.. youtube:: eNkWPD7nehY
 
 Prerequisites
 ---------------------------
