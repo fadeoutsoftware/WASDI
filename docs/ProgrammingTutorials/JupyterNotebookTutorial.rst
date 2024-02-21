@@ -74,7 +74,7 @@ Run the cell. Pay attention to the output and enter your username and password w
 
 .. note::
 
-    If you don't get a valid session, you probably inserted the wrong username and password. No problem: re-execute the cell and try again.
+    If you don't get a valid session, you probably inserted the wrong username and password. No problem: re-execute the cell and try again. Can't insert the new credentials? No panic: Kernel -> Restart Kernel. Try again ;)
 
 Let's now see how to log to WASDI, create a new cell, type the following code and run it:
 
