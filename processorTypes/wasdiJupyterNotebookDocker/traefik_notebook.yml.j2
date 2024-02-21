@@ -1,14 +1,14 @@
 http:
-{%- if aWasdiJupyterNotebookFirewallAllowedIps is defined %}
+{% if aWasdiJupyterNotebookFirewallAllowedIps is defined %}
   middlewares:
     mw_{{ sWasdiJupyterNotebookId }}:
       ipWhiteList:
         sourceRange:
-{%- for sWasdiNotebookFirewallCurrentAllowedIp in aWasdiJupyterNotebookFirewallAllowedIps %}
+{% for sWasdiNotebookFirewallCurrentAllowedIp in aWasdiJupyterNotebookFirewallAllowedIps %}
           - "{{ sWasdiNotebookFirewallCurrentAllowedIp }}"
-{%- endfor %}
+{% endfor %}
         ipStrategy:
-          depth: 1
+          depth: 0
 {% endif %}
   routers:
     r_{{ sWasdiJupyterNotebookId }}:
