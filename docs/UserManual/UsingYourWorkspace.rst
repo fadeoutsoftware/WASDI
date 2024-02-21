@@ -209,7 +209,9 @@ When the Jupyter Notebook workspace has been prepared, you will receive a notifi
 
 .. image:: ../_static/user_manual_images/workspaces/jupyter-notebook.png
 
-Here's `a more comprehensive tutorial on Jupyter notebooks in WASDI<../ProgrammingTutorials/JupyterNotebookTutorial.rst>`_
+.. note::
+    Learn more in the `tutorial about working with Jupyter notebooks in WASDI<../ProgrammingTutorials/JupyterNotebookTutorial.rst>`_
+
 
 Styles
 ------------------------------------------
