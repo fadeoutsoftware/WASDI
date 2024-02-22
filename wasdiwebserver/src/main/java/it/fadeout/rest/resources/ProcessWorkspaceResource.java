@@ -889,7 +889,7 @@ public class ProcessWorkspaceResource {
 			WasdiLog.errorLog("ProcessWorkspaceResource.getStatusProcessesById error: " + oEx);
 		}
 
-		return asReturnStatusList;
+		return asFullReturnStatusList;
 	}
 	
 	/**
