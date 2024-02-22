@@ -116,6 +116,8 @@ m_iUploadTimeout = 10 * 60
 m_sPayload = ""
 # True to enable the test of the checksum when determining when a file should be downloaded locally or not
 m_bEnableChecksumTest = False
+# Time spent in sleep while polling for API like wait Process
+m_iPollingSleepSeconds = 3
 
 def printStatus():
     """Prints status
@@ -590,6 +592,21 @@ def _getEnvironmentVariable(sVariable):
         return sValue
     except KeyError:
         return None
+
+def getPollingSleepSeconds():
+    """
+    :return: the number of seconds to sleep between polling http calls
+    """
+    global m_iPollingSleepSeconds
+    return m_iPollingSleepSeconds
+
+
+def setPollingSleepSeconds(iPollingSleepSeconds):
+    """
+    :param iPollingSleepSeconds: the number of seconds to sleep between polling http calls
+    """
+    global m_iPollingSleepSeconds
+    m_iPollingSleepSeconds = iPollingSleepSeconds
 
 def init(sConfigFilePath=None):
     """
@@ -1475,6 +1492,11 @@ def waitProcess(sProcessId, sDestinationWorkspaceUrl=None):
              '  ******************************************************************************')
         return "ERROR"
 
+    if sProcessId in {"DONE", "STOPPED", "ERROR"}:
+        _log('[INFO] waspy.waitProcess: process ID is indeed alrady a status, returning it' +
+             '  ******************************************************************************')
+        return sProcessId
+
     # Put this processor in WAITING
     updateStatus("WAITING")
 
@@ -1487,7 +1509,7 @@ def waitProcess(sProcessId, sDestinationWorkspaceUrl=None):
             if sStatus in {"DONE", "STOPPED", "ERROR"}:
                 break
 
-            time.sleep(5)
+            time.sleep(getPollingSleepSeconds())
     except:
         _log("[ERROR] Exception in the waitProcess")
 
@@ -1507,9 +1529,6 @@ def waitProcesses(asProcIdList):
     
     :return: list of strings with the same number of elements in input, with the exit status of the processes
     """
-
-    global m_sBaseUrl
-    global m_sSessionId
 
     asHeaders = _getStandardHeaders()
 
@@ -1532,6 +1551,30 @@ def waitProcesses(asProcIdList):
 
     iTotalTime = 0
 
+    # Pre-filter the list: skip None, empty or "status" processes Id
+    asFilteredProcs = []
+    asFilteredIndexes = []
+
+    iIndex = 0
+
+    for sProcId in asProcIdList:
+        iIndex = iIndex + 1
+        if sProcId is None:
+            # Not valid
+            continue
+        if sProcId is "":
+            # Empty
+            continue
+        if sProcId in  {"DONE", "STOPPED", "ERROR"}:
+            # This is already a resutl
+            continue
+        asFilteredProcs.append(str(sProcId))
+        asFilteredIndexes.append(iIndex-1)
+
+    if len(asFilteredProcs) == 0:
+        wasdiLog("[INFO] waitProcesses asProcIdList are all empty, None or already status. Return immediatly")
+        return  asProcIdList
+
     # Put this process in WAITING
     updateStatus("WAITING")
 
@@ -1541,7 +1584,7 @@ def waitProcesses(asProcIdList):
 
         oResult = None
         try:
-            oResult = requests.post(sUrl, data=json.dumps(asProcIdList), headers=asHeaders, timeout=m_iRequestsTimeout)
+            oResult = requests.post(sUrl, data=json.dumps(asFilteredProcs), headers=asHeaders, timeout=m_iRequestsTimeout)
 
         except Exception as oEx:
             wasdiLog("[ERROR] waitProcesses: there was an error contacting the API " + str(oEx))
@@ -1572,15 +1615,23 @@ def waitProcesses(asProcIdList):
 
         if not bAllDone:
             # Sleep a little bit
-            sleep(5)
+            sleep(getPollingSleepSeconds())
             # Trace the time needed
-            iTotalTime = iTotalTime + 5
+            iTotalTime = iTotalTime + getPollingSleepSeconds()
 
     # Wait to be resumed
     _waitForResume()
 
+    asFullReturnStatus = []
+
+    for iIndex in range(len(asProcIdList)):
+        if iIndex in asFilteredIndexes:
+            asFullReturnStatus.append(str(asReturnStatus[asFilteredIndexes.index(iIndex)]))
+        else:
+            asFullReturnStatus.append(str(asProcIdList[iIndex]))
+
     # Return the list of status
-    return asReturnStatus
+    return asFullReturnStatus
 
 
 def updateProgressPerc(iPerc):
@@ -2496,47 +2547,11 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
 
     sReturn = "ERROR"
 
-    if sProvider is None:
-        sProvider = "AUTO"
-
-    sUrl = getBaseUrl()
-    sUrl += "/filebuffer/download?fileUrl="
-    sUrl += urllib.parse.quote(sFileUrl)
-    sUrl += "&provider=" + sProvider
-    sUrl += "&workspace="
-    sUrl += getActiveWorkspaceId()
-
-    if sBoundingBox is not None:
-        sUrl += "&bbox="
-        sUrl += urllib.parse.quote(sBoundingBox)
-
-    if sName is not None:
-        sUrl += "&name=" + urllib.parse.quote(sName)
-
-    if getIsOnServer() is True or getIsOnExternalServer() is True:
-        sUrl += "&parent="
-        sUrl += getProcId()
-
-    asHeaders = _getStandardHeaders()
-
     try:
-        oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+        sProcessId = asynchImportProductByFileUrl(sFileUrl, sName, sBoundingBox, sProvider)
+        sReturn = waitProcess(sProcessId)
     except Exception as oEx:
-        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
-
-    if oResponse is None:
-        wasdiLog('[ERROR] waspy.importProductByFileUrl: cannot import product' +
-                 '  ******************************************************************************')
-    elif oResponse.ok is not True:
-        wasdiLog('[ERROR] waspy.importProductByFileUrl: cannot import product, server returned: ' + str(
-            oResponse.status_code) +
-                 '  ******************************************************************************')
-    else:
-        oJsonResponse = oResponse.json()
-        if ("boolValue" in oJsonResponse) and (oJsonResponse["boolValue"] is True):
-            if "stringValue" in oJsonResponse:
-                sProcessId = str(oJsonResponse["stringValue"])
-                sReturn = waitProcess(sProcessId)
+        wasdiLog("[ERROR] there was an error importing a product " + str(oEx))
 
     return sReturn
 
@@ -2562,28 +2577,23 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
         sProvider = "AUTO"
 
     sUrl = getBaseUrl()
-    sUrl += "/filebuffer/download?fileUrl="
-    sUrl += urllib.parse.quote(sFileUrl)
-    sUrl += "&provider="
-    sUrl += sProvider
-    sUrl += "&workspace="
-    sUrl += getActiveWorkspaceId()
-
-    if sBoundingBox is not None:
-        sUrl += "&bbox="
-        sUrl += urllib.parse.quote(sBoundingBox)
-
-    if sName is not None:
-        sUrl += "&name=" + urllib.parse.quote(sName)
-
-    if getIsOnServer() is True or getIsOnExternalServer() is True:
-        sUrl += "&parent="
-        sUrl += getProcId()
+    sUrl += "/filebuffer/download"
 
     asHeaders = _getStandardHeaders()
 
+    oImageImportViewModel = {}
+    oImageImportViewModel["fileUrl"] = sFileUrl
+    oImageImportViewModel["name"] = sName
+    oImageImportViewModel["provider"] = sProvider
+    oImageImportViewModel["workspace"] = getActiveWorkspaceId()
+    oImageImportViewModel["bbox"] = sBoundingBox
+
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
+        oImageImportViewModel["parent"] = getProcId()
+
     try:
-        oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+        sEncodedBody = json.dumps(oImageImportViewModel)
+        oResponse = requests.post(sUrl,data=sEncodedBody, headers=asHeaders, timeout=m_iRequestsTimeout)
     except Exception as oEx:
         wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
 
@@ -2816,7 +2826,7 @@ def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvid
             asOriginalFiles.append(sFile)
 
     # Flag to know if we are waiting for a donwload
-    bWaitingDonwload = True;
+    bWaitingDonwload = True
 
     # While there are download to wait for
     while bWaitingDonwload:
@@ -2858,7 +2868,7 @@ def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvid
                 bWaitingDonwload = True
 
         if bWaitingDonwload:
-            time.sleep(5)
+            time.sleep(getPollingSleepSeconds())
 
             # Checkpoint: wait for all asynch workflows to finish
     _log("[INFO] All image imported, waiting for all workflows to finish")
@@ -2938,7 +2948,7 @@ def executeProcessor(sProcessorName, aoProcessParams):
             wasdiLog('[ERROR] waspy.executeProcessor: server returned status ' + str(oResult.status_code))
 
         wasdiLog("[ERROR]: Error triggering the new process.")
-        time.sleep(5)
+        time.sleep(getPollingSleepSeconds())
 
     wasdiLog("[ERROR]: process not triggered, too many errors")
 
@@ -3733,6 +3743,8 @@ def _loadConfig(sConfigFilePath):
                 setProcId(oJson['MYPROCID'])
             if 'ENABLECHECKSUM' in oJson:
                 setEnableChecksum(bool(oJson["ENABLECHECKSUM"]))
+            if 'POLLINGSLEEPSECONDS' in oJson:
+                setPollingSleepSeconds(int(oJson['POLLINGSLEEPSECONDS']))
 
         return True, sTempWorkspaceName, sTempWorkspaceID
 
@@ -3809,7 +3821,7 @@ def _waitForResume():
 
             while sStatus not in {"RUNNING", "DONE", "STOPPED", "ERROR"}:
                 sStatus = getProcessStatus(getProcId())
-                time.sleep(5)
+                time.sleep(getPollingSleepSeconds())
 
             _log("[INFO] Process Resumed, let's go!")
         except:
@@ -4258,7 +4270,7 @@ def getlayerWMS(sProduct, sBand):
             wasdiLog('[ERROR] getlayerWMS: reached the maximum number of attempt ( ' + str(type(iCountRetries)) + ') Aborting operation')
             return
         oPublishedBandResponse = asynchPublishBand(sProduct, sBand)
-        time.sleep(3)
+        time.sleep(getPollingSleepSeconds())
         iCountRetries -= 1
         wasdiLog('[INFO] getlayerWMS: waiting for the band to be available... (' + str(type(iCountRetries)) + ' attempts left before aborting)')
     oPayload = oPublishedBandResponse["payload"]
