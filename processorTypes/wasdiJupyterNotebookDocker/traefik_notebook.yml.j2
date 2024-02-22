@@ -1,21 +1,21 @@
 http:
-{%- if aWasdiJupyterNotebookFirewallAllowedIps is defined %}
+{% if aWasdiJupyterNotebookFirewallAllowedIps is defined %}
   middlewares:
     mw_{{ sWasdiJupyterNotebookId }}:
       ipWhiteList:
         sourceRange:
-{%- for sWasdiNotebookFirewallCurrentAllowedIp in aWasdiJupyterNotebookFirewallAllowedIps %}
+{% for sWasdiNotebookFirewallCurrentAllowedIp in aWasdiJupyterNotebookFirewallAllowedIps %}
           - "{{ sWasdiNotebookFirewallCurrentAllowedIp }}"
-{%- endfor %}
+{% endfor %}
         ipStrategy:
-          depth: 1
+          depth: 0
 {% endif %}
   routers:
     r_{{ sWasdiJupyterNotebookId }}:
       entrypoints: "websecure"
       rule: "PathPrefix(`/notebook/{{ sWasdiJupyterNotebookId }}`)"
       service: "s_{{ sWasdiJupyterNotebookId }}"
-      middlewares: "mw_wasdi-secure-allowFrame@file"
+      middlewares: "mw_wasdi-secure-allowFrame@file{% if aWasdiJupyterNotebookFirewallAllowedIps is defined %},mw_{{ sWasdiJupyterNotebookId }}{% endif %}"
       tls: true
   services:
     s_{{ sWasdiJupyterNotebookId }}:

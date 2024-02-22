@@ -56,7 +56,7 @@ pipeline {
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
-        label: "Deploy the containers and their run elements"
+        label: "Deploy the container(s) and their run elements"
       }
     }
 

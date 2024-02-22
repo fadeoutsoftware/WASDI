@@ -4,6 +4,10 @@ FROM ubuntu:22.04
 MAINTAINER "WASDI SARL"
 
 
+# Labels used to search our containers and/or images
+LABEL docker-image-name={{ sWasdiRabbitMqServiceName }}
+
+
 # From now, all commands executed are executed with the user 'root'
 USER root
 
@@ -82,10 +86,12 @@ WORKDIR /home/{{ sWasdiRabbitMqSystemUserName }}
 
 
 # Copy data
-COPY --chown={{ sWasdiRabbitMqSystemUserName }}:{{ sWasdiRabbitMqSystemGroupName }} ./dataToCopy/etc_rabbitmq_definitions.json /etc/rabbitmq/definitions.json
-COPY --chown={{ sWasdiRabbitMqSystemUserName }}:{{ sWasdiRabbitMqSystemGroupName }} ./dataToCopy/etc_rabbitmq_enabled_plugins /etc/rabbitmq/enabled_plugins
 COPY --chown={{ sWasdiRabbitMqSystemUserName }}:{{ sWasdiRabbitMqSystemGroupName }} ./dataToCopy/etc_rabbitmq_rabbitmq.conf /etc/rabbitmq/rabbitmq.conf
+COPY --chown={{ sWasdiRabbitMqSystemUserName }}:{{ sWasdiRabbitMqSystemGroupName }} ./dataToCopy/docker-entrypoint.sh /docker-entrypoint.sh
 
 
 # Start the container
-CMD ["/usr/lib/rabbitmq/bin/rabbitmq-server"]
+ENTRYPOINT ["/bin/bash", "/docker-entrypoint.sh"]
+CMD [ \
+    "/usr/lib/rabbitmq/bin/rabbitmq-server" \
+]
