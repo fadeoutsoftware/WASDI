@@ -846,18 +846,18 @@ public class ProcessWorkspaceResource {
 				String sProcId = asProcessesWorkspaceId.get(iIndex);
 				
 				if (Utils.isNullOrEmpty(sProcId)) {
-					WasdiLog.warnLog("ProcessWorkspaceResource.getStatusProcessesById: requesting proc id is null or empty");
+					WasdiLog.warnLog("ProcessWorkspaceResource.getStatusProcessesById: requesting proc id is null or empty index "+ iIndex);
 					asProcessesWorkspaceId.set(iIndex, ProcessStatus.ERROR.name());
 					continue;
 				}
 				
 				if (sProcId.equals(ProcessStatus.DONE.name()) ||  sProcId.equals(ProcessStatus.ERROR.name()) || sProcId.equals(ProcessStatus.STOPPED.name()) ) {
-					WasdiLog.warnLog("ProcessWorkspaceResource.getStatusProcessesById: requesting proc id is already a status jump it");
+					WasdiLog.warnLog("ProcessWorkspaceResource.getStatusProcessesById: requesting proc id is already a status jump it index " + iIndex);
 					continue;					
 				}
 				
 				if (!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcId)) {
-					WasdiLog.warnLog("ProcessWorkspaceResource.getStatusProcessesById: requesting proc id that cannot be accessed");
+					WasdiLog.warnLog("ProcessWorkspaceResource.getStatusProcessesById: requesting proc id that cannot be accessed index " + iIndex);
 					asProcessesWorkspaceId.set(iIndex, ProcessStatus.ERROR.name());
 					continue;
 				}				

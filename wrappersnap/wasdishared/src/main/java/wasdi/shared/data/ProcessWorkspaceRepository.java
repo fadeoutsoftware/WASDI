@@ -1353,8 +1353,19 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oInQuery);
             fillList(aoProcessesList, oWSDocuments, ProcessWorkspace.class);
             
-            for (int i=0; i<aoProcessesList.size(); i++) {
-            	asReturnStatus.add(aoProcessesList.get(i).getStatus());
+            // We need to return the list in the right order and MONGO does not provide it!
+            for(int iProcIndex = 0; iProcIndex<asProcessesObjId.size(); iProcIndex++) {
+            	
+            	boolean bAdded = false;
+            	for (ProcessWorkspace oProcessWorkspace: aoProcessesList) {
+            		if (oProcessWorkspace.getProcessObjId().equals(asProcessesObjId.get(iProcIndex))) {
+            			asReturnStatus.add(oProcessWorkspace.getStatus());
+            			bAdded = true;
+            			break;
+            		}
+				}
+            	
+            	if (!bAdded) asReturnStatus.add(ProcessStatus.ERROR.name());
             }
         } 
         catch (Exception oEx) {
