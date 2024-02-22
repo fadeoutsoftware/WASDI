@@ -103,8 +103,6 @@ public class Redeployprocessor extends Operation {
 	        					m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());
 	        				}
 	        			}
-	        			
-	        			
 	        		}	        		
 	        	}
 	        	
