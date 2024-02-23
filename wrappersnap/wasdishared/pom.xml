@@ -28,7 +28,7 @@
         <sVersionAmqpClient>5.18.0</sVersionAmqpClient>
         <sVersionAssertjCore>3.18.1</sVersionAssertjCore>
         <sVersionAwsJavaSdkS3>1.12.392</sVersionAwsJavaSdkS3>
-        <sVersionCommonsCompress>1.26.0</sVersionCommonsCompress>
+        <sVersionCommonsCompress>1.21</sVersionCommonsCompress>
         <sVersionCommonsLang>2.6</sVersionCommonsLang>
         <sVersionCommonsLang3>3.12.0</sVersionCommonsLang3>
         <sVersionCommonsNet>3.9.0</sVersionCommonsNet>
