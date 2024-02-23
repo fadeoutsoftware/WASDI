@@ -532,6 +532,7 @@
 
                 ],
 {% endif %}
+                "mountOnlyWorkspaceFolder": {{ aoCurrentProcessorType['mountOnlyWorkspaceFolder'] | bool | lower }},
                 "version": "{{ aoCurrentProcessorType['version'] }}"
             }{% if not loop.last %},
 {% endif %}
