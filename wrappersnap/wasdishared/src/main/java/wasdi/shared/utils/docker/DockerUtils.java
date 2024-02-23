@@ -618,7 +618,7 @@ public class DockerUtils {
             					
             					if (!sRemoteVolume.endsWith( "/")) sRemoteVolume+= "/";
             					
-								String sMountingVolume = "/"+oS3Volume.getMountingFolderName() + ":" + sRemoteVolume + oS3Volume.getMountingFolderName();
+								String sMountingVolume = PathsConfig.getS3VolumesBasePath()+oS3Volume.getMountingFolderName() + ":" + sRemoteVolume + oS3Volume.getMountingFolderName();
 								
 								if (oS3Volume.isReadOnly()) {
 									sMountingVolume += ":ro";
@@ -1980,10 +1980,6 @@ public class DockerUtils {
     			String sResponseBody = oResponse.getResponseBody();
     			sResponseBody = sResponseBody.replaceAll("[\\x00-\\x09\\x11\\x12\\x14-\\x1F\\x7F]", "");
     			sResponseBody = sResponseBody.replaceAll("[^\\p{ASCII}]", "");
-    			
-    			//String sEncoded = StringUtils.encodeUrl(sResponseBody);
-    			//WasdiLog.debugLog("DockerUtils.getContainerLogsByContainerName: Encoded String");
-    			//WasdiLog.debugLog(sEncoded);
     			
     			return sResponseBody;
     		}    		

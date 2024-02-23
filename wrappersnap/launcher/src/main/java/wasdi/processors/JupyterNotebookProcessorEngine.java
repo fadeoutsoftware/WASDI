@@ -266,7 +266,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
     					
     					if (!sRemoteVolume.endsWith( "/")) sRemoteVolume+= "/";
     					
-						String sMountingVolume = "/"+oS3Volume.getMountingFolderName() + ":" + sRemoteVolume + oS3Volume.getMountingFolderName();
+						String sMountingVolume = PathsConfig.getS3VolumesBasePath()+oS3Volume.getMountingFolderName() + ":" + sRemoteVolume + oS3Volume.getMountingFolderName();
 						
 						if (oS3Volume.isReadOnly()) {
 							sMountingVolume += ":ro";

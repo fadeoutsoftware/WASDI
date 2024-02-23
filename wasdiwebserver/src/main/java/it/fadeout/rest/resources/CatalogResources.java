@@ -7,9 +7,7 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.stream.Stream;
@@ -26,39 +24,22 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-
 import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
-import wasdi.shared.business.Node;
-import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.S3Volume;
-import wasdi.shared.business.Workspace;
-import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.users.User;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
-import wasdi.shared.data.MongoRepository;
-import wasdi.shared.data.NodeRepository;
-import wasdi.shared.data.ProcessWorkspaceRepository;
-import wasdi.shared.data.ProcessorRepository;
-import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.shared.utils.wasdiAPI.CatalogAPIClient;
-import wasdi.shared.utils.wasdiAPI.ProcessWorkspaceAPIClient;
-import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
-import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
 import wasdi.shared.viewmodels.products.FtpTransferViewModel;
 import wasdi.shared.viewmodels.products.ProductPropertiesViewModel;
 
@@ -112,6 +93,7 @@ public class CatalogResources {
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
+			// Check if the user can access the workspace
 			if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
 				WasdiLog.warnLog("CatalogResources.downloadEntryByName: user cannot access workspace");
 				return Response.status(Status.FORBIDDEN).build();				
@@ -221,7 +203,7 @@ public class CatalogResources {
 	@GET
 	@Path("checkdownloadavaialibitybyname")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId, @QueryParam("procws") String sProcessObjId, @QueryParam("volumepath") String sVolumePath)
+ 	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId, @QueryParam("procws") String sProcessObjId, @QueryParam("volumepath") String sVolumePath)
 	{
 		try {
 			WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName");
@@ -757,6 +739,11 @@ public class CatalogResources {
 		}
 	}
 	
+	/**
+	 * Generate MD5 of a File
+	 * @param oFile File
+	 * @return MD5 checksum
+	 */
 	protected String generateMD5(File oFile){
 		
 	    if(oFile==null){
@@ -1077,7 +1064,6 @@ public class CatalogResources {
 			return (
 					//dim files are the output of SNAP operations
 					sName.endsWith(".dim") ||
-					//sName.endsWith(".shp") ||
 					WasdiFileUtils.isShapeFile(oFile) ||
 					WasdiFileUtils.isSentinel3Directory(oFile)
 					);

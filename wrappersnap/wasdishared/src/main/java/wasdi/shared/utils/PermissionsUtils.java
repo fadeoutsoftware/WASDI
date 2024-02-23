@@ -995,6 +995,8 @@ public class PermissionsUtils {
 				String sFileInVolume = sFileName;
 				if (!sFileInVolume.startsWith("/")) sFileInVolume = "/" + sFileInVolume;
 				
+				sFileInVolume = PathsConfig.getS3VolumesBasePath() + sFileInVolume;
+				
 				WasdiLog.debugLog("PermissionsUtils.getFileFromS3Volume: found Volume " + oS3Volume.getMountingFolderName() + " test file " + sFileInVolume);
 				
 				// Check if the file exists
