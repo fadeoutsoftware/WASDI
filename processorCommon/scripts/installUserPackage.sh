@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # MAINTAINER: WASDI SARL
-# VERSION: 1.3
+# VERSION: 1.4
 
 
 #### FUNCTION ####
