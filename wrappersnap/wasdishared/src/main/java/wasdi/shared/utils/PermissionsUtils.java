@@ -932,16 +932,20 @@ public class PermissionsUtils {
 		// We take the root part that MAY be a Volume
 		String sRootPart = asFileParts[0];
 		
+		// Here I wanted to manage the situation where there is a folder with the same name of a volume.
+		// But does not work beacuse in any case the docker creates the folder when the volume is mounted 
+		// So the folder is always there.
+		
 		// Get the local path
-		String sTargetFilePath = PathsConfig.getWorkspacePath(sUserId,sWorkspaceId) + sRootPart;
+//		String sTargetFilePath = PathsConfig.getWorkspacePath(sUserId,sWorkspaceId) + sRootPart;
 		
 		// If exists in the workspace a folder with the same name, we stop here.
-		File oFolderFile = new File(sTargetFilePath);
-		
-		if (oFolderFile.exists()) {
-			WasdiLog.debugLog("PermissionsUtils.getFileFromS3Volume: " + sRootPart + " is a subfolder of the workspace. We stop here and do not verify Volumes");
-			return null;
-		}
+//		File oFolderFile = new File(sTargetFilePath);
+//		
+//		if (oFolderFile.exists()) {
+//			WasdiLog.debugLog("PermissionsUtils.getFileFromS3Volume: " + sRootPart + " is a subfolder of the workspace. We stop here and do not verify Volumes");
+//			return null;
+//		}
 		
 		
 		// We need to understand if this request is related to a processor

@@ -626,6 +626,15 @@ public class DockerUtils {
 								
 								WasdiLog.debugLog("DockerUtils.start: Adding Volume " + sMountingVolume);
 								oContainerCreateParams.HostConfig.Binds.add(sMountingVolume);
+								
+								// When we mount, the docker creates a folder, and it becomes of root. 
+								// So we need to create it here, at least is of the right user..
+								String sHostWorkspacePath = PathsConfig.getWorkspacePath(m_oProcessorParameter);
+								sHostWorkspacePath += PathsConfig.getS3VolumesBasePath();
+								File oHostS3Folder = new File(sHostWorkspacePath);
+								if (!oHostS3Folder.exists()) {
+									oHostS3Folder.mkdirs();
+								}
 							}
             			}
             		}
