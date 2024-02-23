@@ -104,7 +104,14 @@ USER root
 
 
 # RUN specific to Tomcat
-RUN apt-get update && \
+RUN mkdir --parents \
+        {{ sWasdiMountedVolumeRootDirectoryPath }} \
+        {{ sWasdiMountedUserVolumeRootDirectoryPath }} && \
+    chown {{ sWasdiMountedVolumeRootDirectoryOwner }}:{{ sWasdiMountedVolumeRootDirectoryGroup }} {{ sWasdiMountedVolumeRootDirectoryPath }} && \
+    chmod {{ sWasdiMountedVolumeRootDirectoryMode }} {{ sWasdiMountedVolumeRootDirectoryPath }} && \
+    chown {{ sWasdiMountedUserVolumeRootDirectoryOwner }}:{{ sWasdiMountedUserVolumeRootDirectoryGroup }} {{ sWasdiMountedUserVolumeRootDirectoryPath }} && \
+    chmod {{ sWasdiMountedUserVolumeRootDirectoryMode }} {{ sWasdiMountedUserVolumeRootDirectoryPath }} && \
+    apt-get update && \
     apt-get install \
         libjhdf4-jni \
         libjhdf5-jni && \

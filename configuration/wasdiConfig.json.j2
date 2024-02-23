@@ -349,6 +349,7 @@
         "metadataPath": "{{ aoWasdiConfiguration['paths']['metadataPath'] }}",
         "missionsConfigFilePath": "{{ aoWasdiConfiguration['paths']['missionsConfigFilePath'] }}",
         "pythonExecPath": "{{ aoWasdiConfiguration['paths']['pythonExecPath'] }}",
+        "s3VolumesBasePath": "{{ aoWasdiConfiguration['paths']['s3VolumesBasePath'] }}",
         "sen2CorePath": "{{ aoWasdiConfiguration['paths']['sen2CorePath'] }}",
         "sftpRootPath": "{{ aoWasdiConfiguration['paths']['sftpRootPath'] }}",
         "traefikMountedVolume": "{{ aoWasdiConfiguration['paths']['traefikMountedVolume'] }}",
@@ -532,6 +533,7 @@
 
                 ],
 {% endif %}
+                "mountOnlyWorkspaceFolder": {{ aoCurrentProcessorType['mountOnlyWorkspaceFolder'] | bool | lower }},
                 "version": "{{ aoCurrentProcessorType['version'] }}"
             }{% if not loop.last %},
 {% endif %}

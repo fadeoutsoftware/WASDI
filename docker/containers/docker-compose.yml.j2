@@ -729,9 +729,12 @@ services:
       nofile:
         soft: {{ sWasdiTomcatOgcProcessesServerUlimitNofile }}
         hard: {{ sWasdiTomcatOgcProcessesServerUlimitNofile }}
+{% if ( aoWasdiTomcatOgcProcessesServerVolume | length ) > 0 %}
     volumes:
-      - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
-      - {{ sWasdiConfigurationRootDirectoryPath }}:{{ sWasdiConfigurationRootDirectoryPath }}:ro
+{% for aoWasdiTomcatOgcProcessesServerCurrentVolume in aoWasdiTomcatOgcProcessesServerVolume %}
+      - {{ aoWasdiTomcatOgcProcessesServerCurrentVolume }}
+{% endfor %}
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
   {{ sWasdiTomcatWasdiOpenEoServerServiceName }}:
@@ -776,9 +779,12 @@ services:
       nofile:
         soft: {{ sWasdiTomcatWasdiOpenEoServerUlimitNofile }}
         hard: {{ sWasdiTomcatWasdiOpenEoServerUlimitNofile }}
+{% if ( aoWasdiTomcatWasdiOpenEoServerVolume | length ) > 0 %}
     volumes:
-      - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
-      - {{ sWasdiConfigurationRootDirectoryPath }}:{{ sWasdiConfigurationRootDirectoryPath }}:ro
+{% for aoWasdiTomcatWasdiOpenEoServerCurrentVolume in aoWasdiTomcatWasdiOpenEoServerVolume %}
+      - {{ aoWasdiTomcatWasdiOpenEoServerCurrentVolume }}
+{% endfor %}
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
   {{ sWasdiTomcatWasdiWebServerServiceName }}:
