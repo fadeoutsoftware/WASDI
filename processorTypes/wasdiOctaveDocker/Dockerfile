@@ -44,6 +44,7 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
         curl \
         dos2unix \
         gdal-bin \
+        libgdal-dev \
         git \
         gunicorn \
         nano \
