@@ -4,12 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.json.JSONObject;
+
+import wasdi.shared.business.S3Volume;
 import wasdi.shared.business.ecostress.EcoStressItemForReading;
+import wasdi.shared.data.S3VolumeRepository;
 import wasdi.shared.data.ecostress.EcoStressRepository;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.TimeEpochUtils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
@@ -139,6 +144,20 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 
 		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
 		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
+		
+		JSONObject oParseConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
+		
+		if (oParseConf!=null) {
+			if(!oParseConf.has("volumeId")) {
+				String sVolumeId = oParseConf.optString("volumeId");
+				S3VolumeRepository oS3VolumeRepository = new S3VolumeRepository();
+				S3Volume oS3Volume = oS3VolumeRepository.getVolume(sVolumeId);
+				
+				if (oS3Volume!=null) {
+					((ResponseTranslatorCloudferro) this.m_oResponseTranslator).setVolumeName(oS3Volume.getMountingFolderName());
+				}
+			}
+		}
 
 
 		List<EcoStressItemForReading> aoItemList = oEcoStressRepository

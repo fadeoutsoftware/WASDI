@@ -28,6 +28,8 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 	private static final String SSELF = "self";
 	private static final String STITLE = "title";
 	private static final String SPRODUCTIDENTIFIER = "productIdentifier";
+	
+	protected String m_sVolumeName="ecostress_fast";
 
 	@Override
 	public List<QueryResultViewModel> translateBatch(String sResponse, boolean bFullViewModel) {
@@ -54,9 +56,9 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		buildLink(oResult);
 		buildSummary(oResult);
 		
-		String sVolumePath = "TEST_ECOSTRESS_FAST/"+oItem.getS3Path();
+		String sVolumePath = m_sVolumeName + "/"+oItem.getS3Path();
 		sVolumePath = sVolumePath.replace(oItem.getFileName(), "");
-		oResult.setVolumeName("TEST_ECOSTRESS_FAST");
+		oResult.setVolumeName(m_sVolumeName);
 		oResult.setVolumePath(sVolumePath);
 
 		return oResult;
@@ -233,6 +235,14 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 
 		oResult.getProperties().put(SLINK, oLink.toString());
 		oResult.setLink(oLink.toString());
+	}
+
+	public String geVolumeName() {
+		return m_sVolumeName;
+	}
+
+	public void setVolumeName(String sVolumeName) {
+		this.m_sVolumeName = sVolumeName;
 	}
 
 }
