@@ -381,42 +381,54 @@ public class FileBufferResource {
 
 			WasdiLog.debugLog("FileBufferResource.imageImport, provider: " + oProvider.getName());
 			
-			// Check if the file is already available
+			// Check if the file is already available: get the workspace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+			
+			// Find the node of interest
 			String sNode = oWorkspace.getNodeCode();
 			if (Utils.isNullOrEmpty(sNode)) sNode = "wasdi";
 			
 			PrimitiveResult oFileOnNode = null;
 			
 			if (sNode.equals(WasdiConfig.Current.nodeCode)) {
+				// Local Node: no need to make any API
 				CatalogResources oCatalogResources = new CatalogResources();
-				Response oCallResponse = oCatalogResources.checkFileByNode(sSessionId, sFileName, sWorkspaceId);
+				//Response oCallResponse = oCatalogResources.checkFileByNode(sSessionId, sFileName, sWorkspaceId);
+				Response oCallResponse = oCatalogResources.checkDownloadEntryAvailabilityByName(sSessionId, sFileName, sWorkspaceId, oImageImportViewModel.getParent(), oImageImportViewModel.getVolumePath());
 				if (oCallResponse.getStatus()>=200 && oCallResponse.getStatus()<299) {
 					oFileOnNode = (PrimitiveResult) oCallResponse.getEntity();
 				}
 			}
-			else {				
+			else {
+				// Remote Node: ask there
 				NodeRepository oNodeRepository = new NodeRepository();
 				Node oNode = oNodeRepository.getNodeByCode(sNode);
-				HttpCallResponse oResponse = CatalogAPIClient.checkFileByNode(oNode, sSessionId, sFileName, sWorkspaceId);
-				
+				//HttpCallResponse oResponse = CatalogAPIClient.checkFileByNode(oNode, sSessionId, sFileName, sWorkspaceId);
+				HttpCallResponse oResponse = CatalogAPIClient.checkDownloadAvaialibityNyName(oNode, sSessionId, sFileName, sWorkspaceId, oImageImportViewModel.getParent(), oImageImportViewModel.getVolumePath());
 				
 				if (oResponse.getResponseCode()>=200 && oResponse.getResponseCode()<299) {
 					oFileOnNode = MongoRepository.s_oMapper.readValue(oResponse.getResponseBody(), new TypeReference<PrimitiveResult>(){});
 				}				
 			}
 			
+			// Did we got an answer
 			if (oFileOnNode!=null) {
+				// How it was?
 				if (oFileOnNode.getBoolValue()) {
 					
+					// Oh good, we already have the file
 					WasdiLog.infoLog("The file is already available in the workspace, return DONE");
+					
 					oFileOnNode.setStringValue(ProcessStatus.DONE.name());
 					oFileOnNode.setIntValue(200);
 					
 					return oFileOnNode;
 				}
 			}
+			
+			
+			
 			
 			String sProcessObjId = Utils.getRandomName();
 			

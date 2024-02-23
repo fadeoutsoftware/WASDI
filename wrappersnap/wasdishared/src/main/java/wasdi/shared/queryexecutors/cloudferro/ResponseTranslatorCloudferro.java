@@ -16,18 +16,15 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 
 	private static final String SLINK_SEPARATOR = ",";
 	private static final String SLINK = "link";
-
 	private static final String SSIZE_IN_BYTES = "sizeInBytes";
 	private static final String SHREF = "href";
 	private static final String SURL = "url";
-//	private static final String SPOLARISATION = "polarisation";
 	private static final String SRELATIVEORBITNUMBER = "relativeOrbitNumber";
 	private static final String SSIZE = "size";
 	private static final String SPLATFORM = "platform";
 	private static final String SSENSOR_MODE = "sensorMode";
 	private static final String SINSTRUMENT = "instrument";
 	private static final String SDATE = "date";
-//	private static final String STYPE = "type";
 	private static final String SSELF = "self";
 	private static final String STITLE = "title";
 	private static final String SPRODUCTIDENTIFIER = "productIdentifier";
@@ -52,11 +49,14 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		parseFootPrint(oItem.getLocation(), oResult);
 		parseProperties(oItem, oResult);
 
-//		oResult.setPreview(null);
-//		protected String summary;
-
+		
 		buildLink(oResult);
 		buildSummary(oResult);
+		
+		String sVolumePath = "TEST_ECOSTRESS_FAST/"+oItem.getS3Path();
+		sVolumePath = sVolumePath.replace(oItem.getFileName(), "");
+		oResult.setVolumeName("TEST_ECOSTRESS_FAST");
+		oResult.setVolumePath(oItem.getS3Path());
 
 		return oResult;
 	}

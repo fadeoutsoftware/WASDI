@@ -64,10 +64,8 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
 			return -1;
 		}
-
-		String sProtocol = oQueryViewModel.productLevel;
+		
 		String sService = oQueryViewModel.productType;
-		String sProduct = oQueryViewModel.productName;
 		int iRelativeOrbit = oQueryViewModel.relativeOrbit;
 		String sDayNightFlag = oQueryViewModel.timeliness;
 
@@ -123,10 +121,8 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
 			return aoResults;
 		}
-
-		String sProtocol = oQueryViewModel.productLevel;
+		
 		String sService = oQueryViewModel.productType;
-		String sProduct = oQueryViewModel.productName;
 		int iRelativeOrbit = oQueryViewModel.relativeOrbit;
 		String sDayNightFlag = oQueryViewModel.timeliness;
 

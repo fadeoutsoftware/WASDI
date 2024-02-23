@@ -221,7 +221,7 @@ public class CatalogResources {
 	@GET
 	@Path("checkdownloadavaialibitybyname")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId, @QueryParam("procws") String sProcessObjId)
+	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId, @QueryParam("procws") String sProcessObjId, @QueryParam("volumepath") String sVolumePath)
 	{
 		try {
 			WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName");
@@ -242,6 +242,18 @@ public class CatalogResources {
 			File oFile = this.getEntryFile(sFileName,sWorkspaceId);
 			
 			if(oFile == null) {
+				
+				if (!Utils.isNullOrEmpty(sVolumePath)) {
+					
+					WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: adding volume path " + sVolumePath);
+					
+					if (!sVolumePath.endsWith("/")) {
+						sVolumePath += "/";
+					}
+					
+					sFileName = sVolumePath+sFileName;
+				}
+				
 				// The file is not in the WASDI db. Can be a file on an S3 Volume?
 				File oFileInVolume = PermissionsUtils.getFileFromS3Volume(oUser.getUserId(), sFileName, sWorkspaceId, sProcessObjId);
 				

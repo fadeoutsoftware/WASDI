@@ -2,6 +2,7 @@ package wasdi.shared.utils.wasdiAPI;
 
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
@@ -42,6 +43,14 @@ public class CatalogAPIClient {
 		return "";
 	}
 	
+	/**
+	 * Check the physical availability of a file in a Node
+	 * @param oNode
+	 * @param sSessionId
+	 * @param sFileName
+	 * @param sWorkspaceId
+	 * @return
+	 */
 	public static HttpCallResponse checkFileByNode(Node oNode, String sSessionId, String sFileName,String  sWorkspaceId) {
 		try {
 			
@@ -63,5 +72,46 @@ public class CatalogAPIClient {
 		}
 		
 		return new HttpCallResponse();		
+	}
+	
+	/**
+	 * Check the availability of a file in a node/workspace
+	 * @param oNode
+	 * @param sSessionId
+	 * @param sFileName
+	 * @param sWorkspaceId
+	 * @param sProcessObjId
+	 * @param sVolumePath
+	 * @return
+	 */
+	public static HttpCallResponse checkDownloadAvaialibityNyName(Node oNode, String sSessionId, String sFileName, String sWorkspaceId, String sProcessObjId, String sVolumePath) {
+		try {
+			
+			// Get the url
+			String sUrl = oNode.getNodeBaseAddress();
+			
+			// Safe programming				
+			if (!sUrl.endsWith("/")) sUrl += "/";
+			
+			// Compose the API string				
+			sUrl += "catalog/checkdownloadavaialibitybyname?filename="+sFileName+"&workspace="+sWorkspaceId+"&token="+sSessionId;
+			
+			if (!Utils.isNullOrEmpty(sProcessObjId)) {
+				sUrl+="&procws="+sProcessObjId;
+			}
+			
+			if (!Utils.isNullOrEmpty(sVolumePath)) {
+				sUrl+="&volumepath="+sVolumePath;
+			}
+			
+			WasdiLog.debugLog("CatalogAPIClient.checkDownloadAvaialibityNyName: calling url: " + sUrl);
+			
+			return HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId)); 
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogAPIClient.checkFileByNode: error ", oEx);
+		}
+		
+		return new HttpCallResponse();
 	}
 }
