@@ -325,7 +325,7 @@ public class FileBufferResource {
 		
 		try {
 			
-			WasdiLog.debugLog("FileBufferResource.imageImport, session: " + sSessionId);
+			WasdiLog.debugLog("FileBufferResource.imageImport");
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 

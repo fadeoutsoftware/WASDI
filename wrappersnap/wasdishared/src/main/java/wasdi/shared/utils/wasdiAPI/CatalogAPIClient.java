@@ -52,9 +52,9 @@ public class CatalogAPIClient {
 			if (!sUrl.endsWith("/")) sUrl += "/";
 			
 			// Compose the API string				
-			sUrl += "catalog/fileOnNode?filename="+sFileName+"&workspace="+sWorkspaceId;
+			sUrl += "catalog/fileOnNode?filename="+sFileName+"&workspace="+sWorkspaceId+"&token="+sSessionId;
 			
-			WasdiLog.debugLog("CatalogAPIClient.checkFileByNode: calling url: " + sUrl + " with sessionId: " + sSessionId);
+			WasdiLog.debugLog("CatalogAPIClient.checkFileByNode: calling url: " + sUrl);
 			
 			return HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId)); 
 		}

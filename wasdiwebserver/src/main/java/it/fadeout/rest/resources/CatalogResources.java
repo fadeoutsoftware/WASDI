@@ -175,7 +175,7 @@ public class CatalogResources {
 	@Consumes({"application/xml", "application/json", "text/xml"})
 	public Response checkFileByNode(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId)
 	{	
-		WasdiLog.debugLog("CatalogResources.checkFileByNode "+ sSessionId);
+		WasdiLog.debugLog("CatalogResources.checkFileByNode");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
