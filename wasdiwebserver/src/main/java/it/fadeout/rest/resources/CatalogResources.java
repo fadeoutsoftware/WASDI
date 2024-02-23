@@ -243,6 +243,8 @@ public class CatalogResources {
 			
 			if(oFile == null) {
 				
+				WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found, check if it is in a Volume");
+				
 				if (!Utils.isNullOrEmpty(sVolumePath)) {
 					
 					WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: adding volume path " + sVolumePath);
@@ -257,14 +259,20 @@ public class CatalogResources {
 				// The file is not in the WASDI db. Can be a file on an S3 Volume?
 				File oFileInVolume = PermissionsUtils.getFileFromS3Volume(oUser.getUserId(), sFileName, sWorkspaceId, sProcessObjId);
 				
-				if (oFileInVolume.exists()) {
-					PrimitiveResult oResult = new PrimitiveResult();
-					oResult.setBoolValue(true);
-					return Response.ok(oResult).build();									
+				if (oFileInVolume!=null) {
+					if (oFileInVolume.exists()) {
+						PrimitiveResult oResult = new PrimitiveResult();
+						oResult.setBoolValue(true);
+						return Response.ok(oResult).build();									
+					}
+					else {
+						WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: no, we cannot read it");
+					}					
 				}
 				else {
-					WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: no, we cannot read it");
-				}
+					WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found in any volume");
+				}				
+
 				return Response.serverError().build();
 			}
 
@@ -794,31 +802,37 @@ public class CatalogResources {
 	private File getEntryFile(String sFileName, String sWorkspace)
 	{
 		WasdiLog.debugLog("CatalogResources.getEntryFile( fileName : " + sFileName + " )");
-				
-		String sTargetFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
+		try {
+			String sTargetFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
 
-		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
-		DownloadedFile oDownloadedFile = oRepo.getDownloadedFileByPath(sTargetFilePath);
+			DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
+			DownloadedFile oDownloadedFile = oRepo.getDownloadedFileByPath(sTargetFilePath);
 
-		if (oDownloadedFile == null) {
-			oDownloadedFile = oRepo.getDownloadedFileByPath(WasdiFileUtils.fixPathSeparator(sTargetFilePath));
+			if (oDownloadedFile == null) {
+				oDownloadedFile = oRepo.getDownloadedFileByPath(WasdiFileUtils.fixPathSeparator(sTargetFilePath));
+			}
+
+			if (oDownloadedFile == null) 
+			{
+				WasdiLog.debugLog("CatalogResources.getEntryFile: file " + sFileName + " not found in path " + sTargetFilePath);
+				return null;
+			}
+			
+			File oFile = new File(sTargetFilePath);
+
+			if( oFile.canRead() == true) {
+				return oFile;
+			}
+			else {
+				WasdiLog.debugLog("CatalogResources.getEntryFile: cannot read file " + sFileName + " from " + sTargetFilePath + ", returning null");
+				return null; 
+			}			
 		}
-
-		if (oDownloadedFile == null) 
-		{
-			WasdiLog.debugLog("CatalogResources.getEntryFile: file " + sFileName + " not found in path " + sTargetFilePath);
-			return null;
+		catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogResources.getEntryFile: exception: ", oEx);
 		}
 		
-		File oFile = new File(sTargetFilePath);
-
-		if( oFile.canRead() == true) {
-			return oFile;
-		}
-		else {
-			WasdiLog.debugLog("CatalogResources.getEntryFile: cannot read file " + sFileName + " from " + sTargetFilePath + ", returning null");
-			return null; 
-		}
+		return null;
 	}
 	
 	/**

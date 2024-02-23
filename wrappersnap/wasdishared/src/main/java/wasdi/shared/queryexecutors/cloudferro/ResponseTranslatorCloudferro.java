@@ -45,7 +45,8 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		QueryResultViewModel oResult = new QueryResultViewModel();
 		oResult.setProvider("CLOUDFERRO");
 
-		parseMainInfo(oItem, oResult);
+		oResult.setId(oItem.getFileName());
+		oResult.setTitle(oItem.getFileName());
 		parseFootPrint(oItem.getLocation(), oResult);
 		parseProperties(oItem, oResult);
 
@@ -59,11 +60,6 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		oResult.setVolumePath(sVolumePath);
 
 		return oResult;
-	}
-
-	private void parseMainInfo(EcoStressItemForReading oItem, QueryResultViewModel oResult) {
-		oResult.setId(oItem.getFileName());
-		oResult.setTitle(oItem.getFileName());
 	}
 
 	private void parseFootPrint(EcoStressLocation sLocation, QueryResultViewModel oResult) {
@@ -140,8 +136,6 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		oResult.getProperties().put((SSENSOR_MODE), oItem.getSensor());
 		oResult.getProperties().put("sensoroperationalmode", oItem.getSensor());
 
-//		oResult.getProperties().put(SPLATFORM, oItem.getPlatform());
-//		oResult.getProperties().put("platformname", oItem.getPlatform());
 		oResult.getProperties().put(SPLATFORM, "ECOSTRESS");
 		oResult.getProperties().put("platformname", "ECOSTRESS");
 
