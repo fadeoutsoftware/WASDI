@@ -49,7 +49,7 @@ pipeline {
       }
     }
 
-    stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
+    stage('DEPLOY THE CONTAINER(S) AND THEIR RUN ELEMENTS') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
@@ -60,7 +60,7 @@ pipeline {
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
-        label: "Deploy the container and its run element"
+        label: "Deploy the container(s) and their run elements"
       }
     }
 
