@@ -3,6 +3,7 @@ package it.fadeout.rest.resources;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -14,11 +15,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import it.fadeout.Wasdi;
 import it.fadeout.services.ProvidersCatalog;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DataProvider;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.Node;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.Workspace;
@@ -26,6 +31,8 @@ import wasdi.shared.business.users.User;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
+import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.WorkspaceRepository;
@@ -36,6 +43,8 @@ import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.CatalogAPIClient;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
 import wasdi.shared.viewmodels.processors.ImageImportViewModel;
@@ -309,10 +318,11 @@ public class FileBufferResource {
 	@POST
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult imageImport(@HeaderParam("x-session-token") String sSessionId, ImageImportViewModel oImageImportViewModel)
-			throws IOException {
+	public PrimitiveResult imageImport(@HeaderParam("x-session-token") String sSessionId, ImageImportViewModel oImageImportViewModel) {
+		
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
+		
 		try {
 			
 			WasdiLog.debugLog("FileBufferResource.imageImport, session: " + sSessionId);
@@ -332,8 +342,6 @@ public class FileBufferResource {
 			}
 
 			String sUserId = oUser.getUserId();
-			
-			String sProcessObjId = Utils.getRandomName();
 
 			if (oImageImportViewModel == null) {
 				WasdiLog.warnLog("FileBufferResource.imageImport: request is not valid");
@@ -372,7 +380,46 @@ public class FileBufferResource {
 			}
 
 			WasdiLog.debugLog("FileBufferResource.imageImport, provider: " + oProvider.getName());
-
+			
+			// Check if the file is already available
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+			String sNode = oWorkspace.getNodeCode();
+			if (Utils.isNullOrEmpty(sNode)) sNode = "wasdi";
+			
+			PrimitiveResult oFileOnNode = null;
+			
+			if (sNode.equals(WasdiConfig.Current.nodeCode)) {
+				CatalogResources oCatalogResources = new CatalogResources();
+				Response oCallResponse = oCatalogResources.checkFileByNode(sSessionId, sFileName, sWorkspaceId);
+				if (oCallResponse.getStatus()>=200 && oCallResponse.getStatus()<299) {
+					oFileOnNode = (PrimitiveResult) oCallResponse.getEntity();
+				}
+			}
+			else {				
+				NodeRepository oNodeRepository = new NodeRepository();
+				Node oNode = oNodeRepository.getNodeByCode(sNode);
+				HttpCallResponse oResponse = CatalogAPIClient.checkFileByNode(oNode, sSessionId, sFileName, sWorkspaceId);
+				
+				
+				if (oResponse.getResponseCode()>=200 && oResponse.getResponseCode()<299) {
+					oFileOnNode = MongoRepository.s_oMapper.readValue(oResponse.getResponseBody(), new TypeReference<PrimitiveResult>(){});
+				}				
+			}
+			
+			if (oFileOnNode!=null) {
+				if (oFileOnNode.getBoolValue()) {
+					
+					WasdiLog.infoLog("The file is already available in the workspace, return DONE");
+					oFileOnNode.setStringValue(ProcessStatus.DONE.name());
+					oFileOnNode.setIntValue(200);
+					
+					return oFileOnNode;
+				}
+			}
+			
+			String sProcessObjId = Utils.getRandomName();
+			
 			DownloadFileParameter oParameter = new DownloadFileParameter();
 			oParameter.setQueue(sSessionId);
 			oParameter.setUrl(sFileUrl);
