@@ -992,10 +992,7 @@ public class PermissionsUtils {
 		for (S3Volume oS3Volume : aoVolumes) {
 			if (oS3Volume.getMountingFolderName().equals(sRootPart)) {
 				
-				String sFileInVolume = sFileName;
-				if (!sFileInVolume.startsWith("/")) sFileInVolume = "/" + sFileInVolume;
-				
-				sFileInVolume = PathsConfig.getS3VolumesBasePath() + sFileInVolume;
+				String sFileInVolume = PathsConfig.getS3VolumesBasePath() + sFileName;
 				
 				WasdiLog.debugLog("PermissionsUtils.getFileFromS3Volume: found Volume " + oS3Volume.getMountingFolderName() + " test file " + sFileInVolume);
 				

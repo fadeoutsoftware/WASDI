@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.5.7
+Version 0.8.6.0
 
-Last Update: 16/02/2024
+Last Update: 23/02/2024
 
 Tested with: Python 3.7, Python 3.8, Python 3.9, Python 3.10
 
@@ -1241,12 +1241,9 @@ def _internalGetPath(sProductName):
     """
     Iternal get path. Resolve the path of a Product
     """
-    global m_bIsOnServer
-    global m_bIsOnExternalServer
-    global m_bOnlyWorkspaceFolderMounted
     global m_sActiveWorkspace
     global m_sWorkspaceOwner
-    if m_bOnlyWorkspaceFolderMounted and (m_bIsOnServer or m_bIsOnExternalServer):
+    if getOnlyWorkspaceFolderMounted() and (getIsOnServer() or getIsOnExternalServer()):
         return os.path.join(getBasePath(), sProductName)
     else:
         return os.path.join(getBasePath(), m_sWorkspaceOwner, m_sActiveWorkspace, sProductName)
@@ -1260,9 +1257,7 @@ def getFullProductPath(sProductName):
     :param sProductName: name of the product to get the path open (WITH the final extension)
     :return: local path of the Product File
     """
-    global m_sBasePath
     global m_sActiveWorkspace
-    global m_sUser
     global m_bDownloadActive
     global m_sWorkspaceOwner
 
@@ -1323,9 +1318,6 @@ def getSavePath():
 
     :return: local path to use to save files (with '/' as last char)
     """
-    global m_sBasePath
-    global m_sActiveWorkspace
-    global m_sUser
 
     sFullPath = _internalGetPath("")
 
@@ -2530,7 +2522,7 @@ def getProductBBOX(sFileName):
     return ""
 
 
-def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None):
+def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None):
     """
     Imports a product from a Provider in WASDI, starting from the File URL.
 
@@ -2541,6 +2533,10 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
     :param sBoundingBox: declared bounding box of the file to import
 
     :param sProvider: WASDI Data Provider to use. Use None for Default
+
+    :param sVolumeName: if the file is in a Volume, the name of the volume
+
+    :param sVolumePath: if the file is in a Volume, the path of the file in the volume
     
     :return: execution status as a STRING. Can be DONE, ERROR, STOPPED.
     """
@@ -2548,7 +2544,7 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
     sReturn = "ERROR"
 
     try:
-        sProcessId = asynchImportProductByFileUrl(sFileUrl, sName, sBoundingBox, sProvider)
+        sProcessId = asynchImportProductByFileUrl(sFileUrl, sName, sBoundingBox, sProvider, sVolumeName, sVolumePath)
         sReturn = waitProcess(sProcessId)
     except Exception as oEx:
         wasdiLog("[ERROR] there was an error importing a product " + str(oEx))
@@ -2556,7 +2552,7 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
     return sReturn
 
 
-def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None):
+def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None):
     """
     Asynch Import of a product from a Provider in WASDI, starting from file URL
 
@@ -2567,8 +2563,12 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
     :param sBoundingBox: declared bounding box of the file to import
 
     :param sProvider: WASDI Data Provider. Use None for default
+
+    :param sVolumeName: if the file is in a Volume, the name of the volume
+
+    :param sVolumePath: if the file is in a Volume, the path of the file in the volume
     
-    :return: ProcessId of the Download Operation or "ERROR" if there is any problem
+    :return: ProcessId of the Download Operation, "DONE" if the file is imported or "ERROR" if there is any problem
     """
 
     sReturn = "ERROR"
@@ -2587,6 +2587,8 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
     oImageImportViewModel["provider"] = sProvider
     oImageImportViewModel["workspace"] = getActiveWorkspaceId()
     oImageImportViewModel["bbox"] = sBoundingBox
+    oImageImportViewModel["volumeName"] = sVolumeName
+    oImageImportViewModel["volumePath"] = sVolumePath
 
     if getIsOnServer() is True or getIsOnExternalServer() is True:
         oImageImportViewModel["parent"] = getProcId()
@@ -2645,7 +2647,7 @@ def importProduct(oProduct, sProvider=None):
         if "title" in oProduct:
             sName = oProduct['title']
 
-        return importProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider)
+        return importProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
     except Exception as e:
         wasdiLog("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
@@ -2684,7 +2686,7 @@ def asynchImportProduct(oProduct, sProvider=None):
             sName = oProduct["title"]
 
         return asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
-                                            sProvider=sProvider)
+                                            sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
     except Exception as e:
         wasdiLog("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
@@ -2729,7 +2731,7 @@ def importProductList(aoProducts, sProvider=None):
 
             # Start the download propagating the Asynch Flag
             sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
-                                                   sProvider=sActualProvider)
+                                                   sProvider=sActualProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
 
             # Append the process id to the list
             asReturnList.append(sReturn)
@@ -2780,7 +2782,7 @@ def asynchImportProductList(aoProducts, sProvider=None):
 
             # Start the download propagating the Asynch Flag
             sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
-                                                   sProvider=sProvider)
+                                                   sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
             # Append the process id to the list
             asReturnList.append(sReturn)
         except Exception as e:
