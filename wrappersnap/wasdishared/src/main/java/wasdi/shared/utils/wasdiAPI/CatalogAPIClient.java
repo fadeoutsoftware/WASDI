@@ -5,9 +5,20 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
+/**
+ * Client of the WASDI Catalog Resource API 
+ */
 public class CatalogAPIClient {
 	
-	
+	/**
+	 * Download a file from WASDI Node
+	 * @param oNode Target Node
+	 * @param sSessionId Session Id
+	 * @param sProductName Name of the product to download
+	 * @param sWorkspaceId Workspace Id
+	 * @param sDestinationPath Local Destination Path to save the file
+	 * @return
+	 */
 	public static String downloadFileByName(Node oNode, String sSessionId, String sProductName, String sWorkspaceId, String sDestinationPath)  {
 		try {
 			
@@ -43,7 +54,7 @@ public class CatalogAPIClient {
 			// Compose the API string				
 			sUrl += "catalog/fileOnNode?filename="+sFileName+"&workspace="+sWorkspaceId;
 			
-			WasdiLog.debugLog("CatalogAPIClient.checkFileByNode: calling url: " + sUrl);
+			WasdiLog.debugLog("CatalogAPIClient.checkFileByNode: calling url: " + sUrl + " with sessionId: " + sSessionId);
 			
 			return HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId)); 
 		}

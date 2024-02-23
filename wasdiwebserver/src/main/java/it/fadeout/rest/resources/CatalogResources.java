@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.stream.Stream;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
@@ -171,9 +172,10 @@ public class CatalogResources {
 	@GET
 	@Path("fileOnNode")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Consumes({"application/xml", "application/json", "text/xml"})
 	public Response checkFileByNode(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId)
 	{	
-		WasdiLog.debugLog("CatalogResources.checkFileByNode");
+		WasdiLog.debugLog("CatalogResources.checkFileByNode "+ sSessionId);
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 

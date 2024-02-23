@@ -2214,9 +2214,9 @@ def searchEOImages(sPlatform, sDateFrom=None, sDateTo=None,
                     '  ******************************************************************************')
 
     if sDateFrom is None:
-        wasdiLog("[WARNING] waspy.searchEOImages: sDateFrom is None, assume very old one 01/01/1900" +
+        wasdiLog("[WARNING] waspy.searchEOImages: sDateFrom is None, assume very old one 04/10/1957" +
                  '  ******************************************************************************')
-        sDateFrom = "1900-01-01"
+        sDateFrom = "1957-10-04"
 
     # if (len(sDateFrom) < 10) or (sDateFrom[4] != '-') or (sDateFrom[7] != '-'):
     if not bool(re.match(r"\d\d\d\d\-\d\d\-\d\d", sDateFrom)):
