@@ -195,5 +195,11 @@ public class QueryExecutorCM2 extends QueryExecutor {
 		}
 		return aoReturnList;
 	}
+		
+	@Override
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+		return sOriginalUrl;
+	}
+	
 
 }
