@@ -45,11 +45,11 @@ public class CatalogAPIClient {
 	
 	/**
 	 * Check the physical availability of a file in a Node
-	 * @param oNode
-	 * @param sSessionId
-	 * @param sFileName
-	 * @param sWorkspaceId
-	 * @return
+	 * @param oNode Target Node
+	 * @param sSessionId Active Session
+	 * @param sFileName File to search
+	 * @param sWorkspaceId Workspace where to search
+	 * @return Primitive Result embedded in the HttpCallResponse
 	 */
 	public static HttpCallResponse checkFileByNode(Node oNode, String sSessionId, String sFileName,String  sWorkspaceId) {
 		try {
@@ -76,13 +76,13 @@ public class CatalogAPIClient {
 	
 	/**
 	 * Check the availability of a file in a node/workspace
-	 * @param oNode
-	 * @param sSessionId
-	 * @param sFileName
-	 * @param sWorkspaceId
-	 * @param sProcessObjId
-	 * @param sVolumePath
-	 * @return
+	 * @param oNode Target Node
+	 * @param sSessionId Active Session
+	 * @param sFileName File to search
+	 * @param sWorkspaceId Workspace where to search
+	 * @param sProcessObjId Parent Process Id
+	 * @param sVolumePath Path in the volume if and as returned by the search API
+	 * @return Primitive Result embedded in the HttpCallResponse
 	 */
 	public static HttpCallResponse checkDownloadAvaialibityNyName(Node oNode, String sSessionId, String sFileName, String sWorkspaceId, String sProcessObjId, String sVolumePath) {
 		try {

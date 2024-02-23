@@ -56,7 +56,7 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		String sVolumePath = "TEST_ECOSTRESS_FAST/"+oItem.getS3Path();
 		sVolumePath = sVolumePath.replace(oItem.getFileName(), "");
 		oResult.setVolumeName("TEST_ECOSTRESS_FAST");
-		oResult.setVolumePath(oItem.getS3Path());
+		oResult.setVolumePath(sVolumePath);
 
 		return oResult;
 	}
