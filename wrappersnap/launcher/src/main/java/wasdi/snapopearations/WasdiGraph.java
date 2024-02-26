@@ -132,7 +132,6 @@ public class WasdiGraph {
 				
 				sGraphXML = sGraphXML.replace(sParameterKey, sValue);
 			}
-			
 		}
 		
 		//build snap graph object

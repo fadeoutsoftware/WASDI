@@ -227,12 +227,14 @@ public class CatalogResources {
 				
 				// Often we do not have the extension for S1 and S2 files. Try to help
 				String sExtension = Utils.getFileNameExtension(sFileName);
+				WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: the extension is " + sExtension);
 				
 				boolean bRetry = false;
 				
 				if (Utils.isNullOrEmpty(sExtension)) {
 					// We are without extension, is it a S1 or S2 ?
 					if (sFileName.startsWith("S1") || sFileName.startsWith("S2")) {
+						WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file starts with S1 or S2, try to add .zip" );
 						// Yes! Retry with extension
 						sFileName += ".zip";
 						bRetry = true;
