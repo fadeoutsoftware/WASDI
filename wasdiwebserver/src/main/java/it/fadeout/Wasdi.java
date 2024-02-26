@@ -238,8 +238,6 @@ public class Wasdi extends ResourceConfig {
 		WasdiLog.debugLog("--------        Welcome to space        -------");
 		WasdiLog.debugLog("-----------------------------------------------\n\n");
 		
-		
-		
 		try {
 			// Can be useful for debug
 			WasdiLog.debugLog("******************************Environment Vars*****************************"); Map<String, String> enviorntmentVars = System.getenv();

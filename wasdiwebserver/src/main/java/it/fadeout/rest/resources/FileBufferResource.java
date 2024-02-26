@@ -39,6 +39,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.ShareFileParameter;
+import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -48,6 +49,7 @@ import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
 import wasdi.shared.viewmodels.processors.ImageImportViewModel;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
 
 
@@ -423,12 +425,25 @@ public class FileBufferResource {
 					oFileOnNode.setStringValue(ProcessStatus.DONE.name());
 					oFileOnNode.setIntValue(200);
 					
+					// Search for exchange name
+					String sExchange = WasdiConfig.Current.rabbit.exchange;
+					
+					// Set default if is empty
+					if (Utils.isNullOrEmpty(sExchange)) {
+						sExchange = "amq.topic";
+					}
+					
+					ProductViewModel oProductViewModel = new ProductViewModel();
+					oProductViewModel.setName(oImageImportViewModel.getName());
+					oProductViewModel.setFileName(oImageImportViewModel.getName());
+					// Send the Asynch Message to the clients
+					Send oSendToRabbit = new Send(sExchange);
+					oSendToRabbit.SendRabbitMessage(true, LauncherOperations.DOWNLOAD.name(), sWorkspaceId, oProductViewModel, sExchange);
+					oSendToRabbit.Free();
+					
 					return oFileOnNode;
 				}
 			}
-			
-			
-			
 			
 			String sProcessObjId = Utils.getRandomName();
 			
