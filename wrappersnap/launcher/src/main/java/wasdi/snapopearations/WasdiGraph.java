@@ -120,8 +120,23 @@ public class WasdiGraph {
 		
 		m_oProcessWorkspaceLogger.log("Execute SNAP graph " + oGraphSettings.getWorkflowName());
 		
+		String sGraphXML = ((GraphSetting)(oParams.getSettings())).getGraphXml();
+		
+		if (oGraphSettings.getTemplateParams() != null) {
+			WasdiLog.infoLog("WasdiGraph: there are parameters in this graph!");
+			
+			for (String sParameterKey : oGraphSettings.getTemplateParams().keySet()) {
+				String sValue = oGraphSettings.getTemplateParams().get(sParameterKey);
+				
+				WasdiLog.infoLog("WasdiGraph: setting " + sParameterKey + " to " + sValue);
+				
+				sGraphXML = sGraphXML.replace(sParameterKey, sValue);
+			}
+			
+		}
+		
 		//build snap graph object
-		m_oGraph = GraphIO.read(new StringReader(((GraphSetting)(oParams.getSettings())).getGraphXml()));
+		m_oGraph = GraphIO.read(new StringReader(sGraphXML));
 		
 		//retrieve wasdi process
         m_oProcessRepository = new ProcessWorkspaceRepository();

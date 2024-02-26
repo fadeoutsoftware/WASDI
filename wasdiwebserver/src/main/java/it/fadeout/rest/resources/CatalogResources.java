@@ -226,8 +226,7 @@ public class CatalogResources {
 			if(oFile == null) {
 				
 				// Often we do not have the extension for S1 and S2 files. Try to help
-				
-				String sExtension = Utils.getFileNameWithoutLastExtension(sFileName);
+				String sExtension = Utils.getFileNameExtension(sFileName);
 				
 				boolean bRetry = false;
 				

@@ -3294,7 +3294,7 @@ def _internalExecuteSen2Cor(sProductName, sWorkspaceId, bAsynch):
         return ''
 
 
-def executeWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
+def executeWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, aoTemplateParams = None):
     """
     Execute a SNAP Workflow available in WASDI (you can use WASDI to upload your SNAP Graph XML and use from remote)
 
@@ -3303,12 +3303,16 @@ def executeWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
     :param asOutputFileNames: array of the  outputs of the workflow. Must correspond to the number of inputs of the workflow.
 
     :param sWorkflowName: Name of the workflow to run
+
+    :param aoTemplateParams: Dictionary with strings KEY-VALUE that will be used to fill potential parameters in the Workflow XML.
+     Wasdi will search the XML for the strings in the keys and replace with the value here provided
+
     :return: final status of the executed Workflow
     """
-    return _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, False)
+    return _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, False, aoTemplateParams)
 
 
-def asynchExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
+def asynchExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, aoTemplateParams = None):
     """
     Trigger the asynch execution of a SNAP Workflow available in WASDI (you can use WASDI to upload your SNAP Graph XML and use from remote)
 
@@ -3317,9 +3321,13 @@ def asynchExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
     :param asOutputFileNames: array of the  outputs of the workflow. Must correspond to the number of inputs of the workflow.
 
     :param sWorkflowName: Name of the workflow to run
+
+    :param aoTemplateParams: Dictionary with strings KEY-VALUE that will be used to fill potential parameters in the Workflow XML.
+     Wasdi will search the XML for the strings in the keys and replace with the value here provided
+
     :return: Process Id of the started workflow
     """
-    return _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, True)
+    return _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, True, aoTemplateParams)
 
 
 def asynchMosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None, fPixelSizeX=None,
@@ -3963,7 +3971,7 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None, sStyle=""):
     return sResult
 
 
-def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, bAsynch=False):
+def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, bAsynch=False, aoTemplateParams = None):
     """
     Internal call to execute workflow
 
@@ -3975,6 +3983,10 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
     :param sWorkflowName: name of the SNAP workflow uploaded in WASDI
 
     :param bAsynch: true to run asynch, false to run synch
+
+    :param aoTemplateParams: Dictionary with strings KEY-VALUE that will be used to fill potential parameters in the Workflow XML.
+     Wasdi will search the XML for the strings in the keys and replace with the value here provided
+
     :return: processID if asynch, status of the executed process if synch, empty string in case of failure
     """
 
@@ -4054,6 +4066,9 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
     try:
         aoDictPayload["inputFileNames"] = asInputFileNames
         aoDictPayload["outputFileNames"] = asOutputFileNames
+
+        if aoTemplateParams is not None:
+            aoDictPayload["templateParams"] = aoTemplateParams
     except:
         wasdiLog('[ERROR] waspy._internalExecuteWorkflow: payload could not be generated, aborting' +
                  '  ******************************************************************************')
