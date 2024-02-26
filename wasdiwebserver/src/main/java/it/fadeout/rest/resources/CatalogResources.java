@@ -227,7 +227,6 @@ public class CatalogResources {
 				
 				// Often we do not have the extension for S1 and S2 files. Try to help
 				String sExtension = Utils.getFileNameExtension(sFileName);
-				WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: the extension is " + sExtension);
 				
 				boolean bRetry = false;
 				

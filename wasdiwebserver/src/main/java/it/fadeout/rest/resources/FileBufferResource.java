@@ -439,7 +439,7 @@ public class FileBufferResource {
 					// Send the Asynch Message to the clients
 					Send oSendToRabbit = new Send(sExchange);
 					WasdiLog.infoLog("FileBufferResource.imageImport: sending rabbit notification");
-					oSendToRabbit.SendRabbitMessage(true, LauncherOperations.DOWNLOAD.name(), sWorkspaceId, oProductViewModel, sExchange);
+					oSendToRabbit.SendRabbitMessage(true, LauncherOperations.DOWNLOAD.name(), sWorkspaceId, oProductViewModel, sWorkspaceId);
 					oSendToRabbit.Free();
 					
 					return oFileOnNode;
