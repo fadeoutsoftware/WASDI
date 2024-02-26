@@ -283,7 +283,14 @@ function installPackageOctave() {
 
 
     echo "[INFO] Install packages..."
-    octave --eval \"pkg install -nodeps -forge $(cat ${sFileToParse} | sed 's/^[ \t]*$//' | grep -vE "^$" | tr "\n" " ")\"
+    # octave --eval \"pkg install -nodeps -forge $(cat ${sFileToParse} | sed 's/^[ \t]*$//' | grep -vE "^$" | tr "\n" " ")\"
+    # going from list installation to list of eval 
+    cat ${sFileToParse} | grep -vE "([^;]*;){2,}[^;]*" | grep -vE "^$|^#" | while read sCurrentLine
+    do
+    echo "Executing command octave --eval \"pkg install ${sCurrentLine}\""
+    octave --eval \"pkg install ${sCurrentLine}\"
+    done
+    
     iReturnCode=${?}
 
     if [[ ${iReturnCode} -eq 0 ]]
