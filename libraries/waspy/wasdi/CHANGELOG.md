@@ -8,6 +8,7 @@ WASDI python programming library CHANGELOG.md, according to the
 - sleep parameter to control the waiting time while polling api
 - support for import operations returning DONE in case of existing file
 - support of S3 Volumes in serachEO Images and import
+- support for custom template parameters in the SNAP workflows XML
 ### Fixed
 - moved import methods in the POST version
 
