@@ -277,7 +277,7 @@ public class WorkflowsResource {
     @Produces(MediaType.APPLICATION_XML)
     public Response getXML(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId) {
 
-        WasdiLog.debugLog("WorkflowsResource.getXML( Workspace Id : " + sWorkflowId + ");");
+        WasdiLog.debugLog("WorkflowsResource.getXML( Workflow Id : " + sWorkflowId + ");");
         String sXml = "";
         
         try {
@@ -486,8 +486,7 @@ public class WorkflowsResource {
      */
     @GET
     @Path("/delete")
-    public Response delete(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String
-            sWorkflowId) {
+    public Response delete(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId) {
         WasdiLog.debugLog("WorkflowsResource.delete( Workflow: " + sWorkflowId + " )");
         try {
             // Check User

@@ -206,7 +206,7 @@ public class CatalogResources {
  	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId, @QueryParam("procws") String sProcessObjId, @QueryParam("volumepath") String sVolumePath)
 	{
 		try {
-			WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName");
+			WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName " + sFileName);
 
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -281,6 +281,7 @@ public class CatalogResources {
 				}
 			}
 
+			WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file found!");
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(oFile != null);
 			return Response.ok(oResult).build();			

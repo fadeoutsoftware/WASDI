@@ -381,7 +381,7 @@ public class FileBufferResource {
 				oProvider = m_oDataProviderCatalog.getProvider(sProvider);
 			}
 
-			WasdiLog.debugLog("FileBufferResource.imageImport, provider: " + oProvider.getName());
+			WasdiLog.debugLog("FileBufferResource.imageImport: provider: " + oProvider.getName());
 			
 			// Check if the file is already available: get the workspace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
@@ -420,7 +420,7 @@ public class FileBufferResource {
 				if (oFileOnNode.getBoolValue()) {
 					
 					// Oh good, we already have the file
-					WasdiLog.infoLog("The file is already available in the workspace, return DONE");
+					WasdiLog.infoLog("FileBufferResource.imageImport: The file is already available in the workspace, return DONE");
 					
 					oFileOnNode.setStringValue(ProcessStatus.DONE.name());
 					oFileOnNode.setIntValue(200);
@@ -438,6 +438,7 @@ public class FileBufferResource {
 					oProductViewModel.setFileName(oImageImportViewModel.getName());
 					// Send the Asynch Message to the clients
 					Send oSendToRabbit = new Send(sExchange);
+					WasdiLog.infoLog("FileBufferResource.imageImport: sending rabbit notification");
 					oSendToRabbit.SendRabbitMessage(true, LauncherOperations.DOWNLOAD.name(), sWorkspaceId, oProductViewModel, sExchange);
 					oSendToRabbit.Free();
 					
