@@ -142,7 +142,12 @@ public class Utils {
 		return sReturn;
 	}
 
-	public static String GetFileNameExtension(String sInputFile) {
+	/**
+	 * Extracts the extension fro a file name
+	 * @param sInputFile Input File Name
+	 * @return Extension or empty string
+	 */
+	public static String getFileNameExtension(String sInputFile) {
 		String sReturn = "";
 		File oFile = new File(sInputFile);
 		String sInputFileNameOnly = oFile.getName();

@@ -901,7 +901,7 @@ public class WorkflowsResource {
 
                 if (oSnapWorkflowViewModel.getInputFileNames().size() > 0) {
                     sSourceProductName = oSnapWorkflowViewModel.getInputFileNames().get(0);
-                    sDestinationProdutName = Utils.getFileNameWithoutLastExtension(sSourceProductName) + "_" + sWorkFlowName + Utils.GetFileNameExtension(sSourceProductName); 
+                    sDestinationProdutName = Utils.getFileNameWithoutLastExtension(sSourceProductName) + "_" + sWorkFlowName + Utils.getFileNameExtension(sSourceProductName); 
                 }
                 
                 if (oGraphSettings.getOutputFileNames().size()>0) {

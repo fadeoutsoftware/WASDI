@@ -219,43 +219,66 @@ public class CatalogResources {
 				WasdiLog.warnLog("CatalogResources.checkDownloadEntryAvailabilityByName: user cannot access workspace");
 				return Response.status(Status.FORBIDDEN).build();			
 			}
-			
+						
 			// Try to see if the file is in the wasdi db and present
 			File oFile = this.getEntryFile(sFileName,sWorkspaceId);
 			
 			if(oFile == null) {
 				
-				WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found, check if it is in a Volume");
+				// Often we do not have the extension for S1 and S2 files. Try to help
 				
-				if (!Utils.isNullOrEmpty(sVolumePath)) {
-					
-					WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: adding volume path " + sVolumePath);
-					
-					if (!sVolumePath.endsWith("/")) {
-						sVolumePath += "/";
+				String sExtension = Utils.getFileNameWithoutLastExtension(sFileName);
+				
+				boolean bRetry = false;
+				
+				if (Utils.isNullOrEmpty(sExtension)) {
+					// We are without extension, is it a S1 or S2 ?
+					if (sFileName.startsWith("S1") || sFileName.startsWith("S2")) {
+						// Yes! Retry with extension
+						sFileName += ".zip";
+						bRetry = true;
 					}
-					
-					sFileName = sVolumePath+sFileName;
 				}
 				
-				// The file is not in the WASDI db. Can be a file on an S3 Volume?
-				File oFileInVolume = PermissionsUtils.getFileFromS3Volume(oUser.getUserId(), sFileName, sWorkspaceId, sProcessObjId);
+				if (bRetry) {
+					WasdiLog.warnLog("CatalogResources.checkDownloadEntryAvailabilityByName: retry adding extension new file name = " + sFileName);
+					oFile = this.getEntryFile(sFileName,sWorkspaceId);
+				}
 				
-				if (oFileInVolume!=null) {
-					if (oFileInVolume.exists()) {
-						PrimitiveResult oResult = new PrimitiveResult();
-						oResult.setBoolValue(true);
-						return Response.ok(oResult).build();									
+				// Here we check again maybe something changed due to the retry
+				if (oFile == null) {
+					WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found, check if it is in a Volume");
+					
+					if (!Utils.isNullOrEmpty(sVolumePath)) {
+						
+						WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: adding volume path " + sVolumePath);
+						
+						if (!sVolumePath.endsWith("/")) {
+							sVolumePath += "/";
+						}
+						
+						sFileName = sVolumePath+sFileName;
+					}
+					
+					// The file is not in the WASDI db. Can be a file on an S3 Volume?
+					File oFileInVolume = PermissionsUtils.getFileFromS3Volume(oUser.getUserId(), sFileName, sWorkspaceId, sProcessObjId);
+					
+					if (oFileInVolume!=null) {
+						if (oFileInVolume.exists()) {
+							PrimitiveResult oResult = new PrimitiveResult();
+							oResult.setBoolValue(true);
+							return Response.ok(oResult).build();									
+						}
+						else {
+							WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: no, we cannot read it");
+						}					
 					}
 					else {
-						WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: no, we cannot read it");
-					}					
-				}
-				else {
-					WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found in any volume");
-				}				
+						WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found in any volume");
+					}				
 
-				return Response.serverError().build();
+					return Response.serverError().build();					
+				}
 			}
 
 			PrimitiveResult oResult = new PrimitiveResult();
