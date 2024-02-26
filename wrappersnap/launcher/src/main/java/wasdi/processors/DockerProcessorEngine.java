@@ -1572,6 +1572,13 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 // Try to start Again the docker
                 if (Utils.isNullOrEmpty(sContainerName)) {
                 	WasdiLog.errorLog("DockerProcessorEngine.startContainerAndGetName: Impossible to start the application docker");
+                	m_oProcessWorkspaceLogger.log("There was an error starting the application.");
+                	m_oProcessWorkspaceLogger.log("Usually this can happen for these reasons:");
+                	m_oProcessWorkspaceLogger.log("\tThere was a problem in the last build of the App");
+                	m_oProcessWorkspaceLogger.log("\tThere was a problem contacting the Docker Regsitry");
+                	m_oProcessWorkspaceLogger.log("\tThe docker image is not available");
+                	m_oProcessWorkspaceLogger.log("If a build is ongoing we can try again in few minutes.");
+                	m_oProcessWorkspaceLogger.log("Otherwise please contact our support channel in Discord providing the Process Workspace Id: " + m_oProcessWorkspace.getProcessObjId());
                 	return "";
                 }
                 

@@ -691,9 +691,10 @@ def init(sConfigFilePath=None):
 
     sOnlyWsFolderMounted = _getEnvironmentVariable('WASDI_ONLY_WS_FOLDER')
 
-    if sOnlyWsFolderMounted == "1":
-        print('[INFO] Only Workspace Folder detect from  WASDI_ONLY_WS_FOLDER')
-        setOnlyWorkspaceFolderMounted(True)
+    if sOnlyWsFolderMounted is not None:
+        if sOnlyWsFolderMounted == "1":
+            print('[INFO] Only Workspace Folder detect from  WASDI_ONLY_WS_FOLDER')
+            setOnlyWorkspaceFolderMounted(True)
 
     # Check if we have the session id in env
     if not m_sSessionId or m_sSessionId=='':
