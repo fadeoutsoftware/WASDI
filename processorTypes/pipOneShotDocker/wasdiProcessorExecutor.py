@@ -12,6 +12,13 @@ import traceback
 
 m_sProcId = ""
 
+def _getEnvironmentVariable(sVariable):
+    try:
+        sValue = os.environ[sVariable]
+        return sValue
+    except KeyError:
+        return None
+
 def log(sLogString):
 	print("[" + m_sProcId + "] wasdiProcessorExecutor PIP One Shot Engine v.2.1.3 - " + sLogString)
 
@@ -55,7 +62,7 @@ def executeProcessor(bIsOnServer = True):
 if __name__ == '__main__':
     try:
         # Read the process Id
-        sProcId = os.environ['WASDI_PROCESS_WORKSPACE_ID']
+        sProcId = _getEnvironmentVariable('WASDI_PROCESS_WORKSPACE_ID')
 
         if sProcId is not None:
             m_sProcId = sProcId
@@ -65,7 +72,7 @@ if __name__ == '__main__':
         log("Starting Proc Id " + m_sProcId)
 
         # Read the encoded parameters
-        sEncodedParams = os.environ['WASDI_ONESHOT_ENCODED_PARAMS']
+        sEncodedParams = _getEnvironmentVariable('WASDI_ONESHOT_ENCODED_PARAMS')
 
         if sEncodedParams is None:
             log("no params available")
@@ -79,19 +86,19 @@ if __name__ == '__main__':
         log("Added parameters")
 
         # Read the User
-        sUserId = os.environ['WASDI_USER']
+        sUserId = _getEnvironmentVariable('WASDI_USER')
 
         if sUserId is None:
             log("User Id not available")
 
         # Read the Session Id
-        sSessionId = os.environ['WASDI_SESSION_ID']
+        sSessionId = _getEnvironmentVariable('WASDI_SESSION_ID')
 
         if sSessionId is None:
             log("Session Id not available")
 
         # Read the Workspace Id
-        sWorkspaceId = os.environ['WASDI_WORKSPACE_ID']
+        sWorkspaceId = _getEnvironmentVariable('WASDI_WORKSPACE_ID')
 
         if sWorkspaceId is None:
             log("Workspace Id not available")
@@ -107,7 +114,7 @@ if __name__ == '__main__':
 
         # Read the on-server flag
         bIsOnServer = True
-        sOnServer = os.environ['WASDI_ONESHOT_ON_SERVER']
+        sOnServer = _getEnvironmentVariable('WASDI_ONESHOT_ON_SERVER')
 
         if sOnServer is not None:
             if sOnServer == "0" or sOnServer.lower() == "false":
