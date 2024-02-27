@@ -258,6 +258,9 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 		return null;
 	}
 
+	/**
+	 * Override of the wait for application to start
+	 */
 	@Override
 	public void waitForApplicationToStart(ProcessorParameter oParameter) {
 		try {
