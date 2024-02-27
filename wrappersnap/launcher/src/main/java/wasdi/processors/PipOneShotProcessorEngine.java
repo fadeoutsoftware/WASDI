@@ -15,6 +15,8 @@ import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.docker.DockerUtils;
+import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
+import wasdi.shared.utils.docker.containersViewModels.constants.ContainerStates;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
@@ -218,10 +220,14 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
             // we can also handle a timeout, that is a property (with default) of the processor
             String sStatus = oProcessWorkspace.getStatus();
 
-            WasdiLog.debugLog("PipOneShotProcessorEngine.run: process Status: " + sStatus);
+            WasdiLog.debugLog("PipOneShotProcessorEngine.run: process Status after start: " + sStatus);
+            
+            if (sStatus.equals(ProcessStatus.DONE.name())==false && sStatus.equals(ProcessStatus.ERROR.name())==false && sStatus.equals(ProcessStatus.STOPPED.name())==false) {
+            	sStatus = waitForApplicationToFinish(oProcessor, oProcessWorkspace.getProcessObjId(), sStatus, oProcessWorkspace);
+            }
 
-            sStatus = waitForApplicationToFinish(oProcessor, oProcessWorkspace.getProcessObjId(), sStatus, oProcessWorkspace);
-
+            WasdiLog.debugLog("PipOneShotProcessorEngine.run: process finished with status " + sStatus);
+            
             // Check and set the operation end-date
             if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
                 oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
@@ -252,4 +258,38 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 		return null;
 	}
 
+	@Override
+	public void waitForApplicationToStart(ProcessorParameter oParameter) {
+		try {
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
+			
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor.getName()), m_sDockerRegistry);
+			
+	        WasdiLog.debugLog("PipOneShotProcessorEngine.waitForApplicationToStart: wait to let docker start");
+
+	        Integer iNumberOfAttemptsToPingTheServer = WasdiConfig.Current.dockers.numberOfAttemptsToPingTheServer;
+	        Integer iMillisBetweenAttmpts = WasdiConfig.Current.dockers.millisBetweenAttmpts;
+
+	        for (int i = 0; i < iNumberOfAttemptsToPingTheServer; i++) {
+	        	
+	        	ContainerInfo oContainer = oDockerUtils.getContainerInfoByImageName(oProcessor.getName(), oProcessor.getVersion());
+	        	
+	        	if (oContainer.State.equals(ContainerStates.RUNNING) || oContainer.State.equals(ContainerStates.EXITED) || oContainer.State.equals(ContainerStates.DEAD)) {
+	        		return;
+	        	}
+	        	
+	        	Thread.sleep(iMillisBetweenAttmpts);
+	        }
+	        
+	        WasdiLog.debugLog("PipOneShotProcessorEngine.waitForApplicationToStart: attemps finished.. probably did not started!");
+		}
+    	catch (InterruptedException oEx) {
+    		Thread.currentThread().interrupt();
+    		WasdiLog.errorLog("PipOneShotProcessorEngine.waitForApplicationToStart: current thread was interrupted ", oEx);
+    	}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PipOneShotProcessorEngine.waitForApplicationToStart: exception ", oEx);
+		}
+	}
 }
