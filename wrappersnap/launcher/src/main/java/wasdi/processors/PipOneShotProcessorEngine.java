@@ -187,7 +187,17 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
             	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
             }
             
-            oEnvVariable.value = oParameter.getWorkspace();            
+            oEnvVariable.value = oParameter.getWorkspace();
+            
+//            oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_ONESHOT_ON_SERVER");
+//            
+//            if (oEnvVariable == null) {
+//            	oEnvVariable = new EnvironmentVariableConfig();
+//            	oEnvVariable.key = "WASDI_ONESHOT_ON_SERVER";
+//            	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
+//            }
+//            
+//            oEnvVariable.value = "1";
             
             // Create the Docker Utils Object
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
