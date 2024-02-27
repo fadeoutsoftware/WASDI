@@ -142,7 +142,8 @@ public class Environmentupdate extends Operation {
 									continue;
 								}
 								
-								byte[] ayBytes = sActualLine.getBytes();
+								String sWriteLine = sActualLine + "\n";
+								byte[] ayBytes = sWriteLine.getBytes();
 								oOutStream.write(ayBytes);
 								
 								sLastLine = sActualLine;
