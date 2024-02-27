@@ -178,6 +178,7 @@ public class ProcessorsResource  {
 				// Error
 				oResult.setIntValue(500);
 				oResult.setStringValue("Processor Name MUST be lower case and without any space");
+				WasdiLog.warnLog("ProcessorsResource.uploadProcessor: name contains spaces");
 				return oResult;				
 			}
 			
@@ -188,6 +189,7 @@ public class ProcessorsResource  {
 				catch (Exception oJsonEx) {
 					oResult.setIntValue(500);
 					oResult.setStringValue("Parameter Sample is not a valid JSON");
+					WasdiLog.warnLog("ProcessorsResource.uploadProcessor: not valid parameter sample");
 					return oResult;
 				}
 			}
@@ -203,6 +205,7 @@ public class ProcessorsResource  {
 				// If the path exists, the name of the processor is already used
 				oResult.setIntValue(500);
 				oResult.setStringValue("Processor Name Already in Use");
+				WasdiLog.warnLog("ProcessorsResource.uploadProcessor: the folder of the app already exists");
 				return oResult;
 			}
 			
@@ -270,8 +273,7 @@ public class ProcessorsResource  {
 			oProcessorRepository.insertProcessor(oProcessor);
 			
 			// We need to deploy the processor in the main node
-			
-			WasdiLog.debugLog("ProcessorsResource.uploadProcessor: Forcing Update Lib");
+			WasdiLog.debugLog("ProcessorsResource.uploadProcessor: starting deploy on main node");
 			
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, "wasdi");
@@ -294,15 +296,17 @@ public class ProcessorsResource  {
 			if (oRes.getBoolValue()) {
 				oResult.setIntValue(200);
 				oResult.setBoolValue(true);
+				WasdiLog.debugLog("ProcessorsResource.uploadProcessor: done with success");
 				return oResult;
 			}
 			else {
 				oResult.setIntValue(500);
+				WasdiLog.debugLog("ProcessorsResource.uploadProcessor: finished with error");
 				return oResult;				
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.uploadProcessor error:" + oEx);
+			WasdiLog.errorLog("ProcessorsResource.uploadProcessor error: " + oEx);
 			oResult.setIntValue(500);
 			return oResult;
 		}
