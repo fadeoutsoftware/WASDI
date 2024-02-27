@@ -3,8 +3,13 @@ package wasdi.operations;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.json.JSONObject;
+
+import com.mongodb.connection.Stream;
 
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
@@ -117,11 +122,31 @@ public class Environmentupdate extends Operation {
 					
 						// Add carriage return
 						sUpdateCommand += "\n";
+
+						// we re-read all the actions line per line
+						ArrayList<String> asActionLines = new ArrayList<>(); 
+
+				        try (java.util.stream.Stream<String> oLinesStream = Files.lines(oActionsLogFile.toPath())) {
+				        	oLinesStream.forEach(sLine -> {
+				        		asActionLines.add(sLine);
+				            });
+				        }
+				        
+				        String sLastLine = "";
 					
-						// Add this action to the list
-						try (OutputStream oOutStream = new FileOutputStream(oActionsLogFile, true)) {
-							byte[] ayBytes = sUpdateCommand.getBytes();
-							oOutStream.write(ayBytes);
+						// Add this action to the list and re-write avoiding duplicates
+						try (OutputStream oOutStream = new FileOutputStream(oActionsLogFile, false)) {
+							for (String sActualLine : asActionLines) {
+								if (sActualLine.equals(sLastLine)) {
+									WasdiLog.debugLog("Environmentupdate.executeOperation: jump duplicate " + sActualLine + " in to envActionsList");
+									continue;
+								}
+								
+								byte[] ayBytes = sActualLine.getBytes();
+								oOutStream.write(ayBytes);
+								
+								sLastLine = sActualLine;
+							}
 						}
 					}
 				}
