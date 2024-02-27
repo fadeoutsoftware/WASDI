@@ -1403,10 +1403,14 @@ public class DockerUtils {
             	sMyImage = m_sDockerRegistry + "/" + sMyImage;
             }
             
+            WasdiLog.debugLog("DockerUtils.getContainerInfoByImageName: search a container based on this image = " + sMyImage);
+            
             for (Object oContainer : aoOutputJsonMap) {
 				try {
 					LinkedHashMap<String, Object> oContainerMap = (LinkedHashMap<String, Object>) oContainer;
 					String sImageName = (String) oContainerMap.get("Image");
+					String sId = (String) oContainerMap.get("Id");
+					WasdiLog.debugLog("DockerUtils.getContainerInfoByImageName: Id: " + sId + " Image: " + sImageName);
 					
 					if (sImageName.endsWith(sMyImage)) {
 						WasdiLog.debugLog("DockerUtils.getContainerInfoByImageName: found my container " + sMyImage + " Docker Image = " +sImageName);
