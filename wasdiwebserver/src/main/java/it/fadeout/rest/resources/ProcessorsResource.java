@@ -1835,7 +1835,8 @@ public class ProcessorsResource  {
 					
 					// Create the processor Parameter
 					ProcessorParameter oProcessorParameter = new ProcessorParameter();
-					oProcessorParameter.setExchange(oWorkspace.getWorkspaceId());
+					// We set the exchange to the actual workspace
+					oProcessorParameter.setExchange(sWorkspaceId);
 					oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
 					oProcessorParameter.setName(oProcessorToUpdate.getName());
 					oProcessorParameter.setProcessObjId(Utils.getRandomName());
