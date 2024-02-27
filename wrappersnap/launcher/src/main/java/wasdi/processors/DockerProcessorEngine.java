@@ -1558,6 +1558,20 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
      * @return Name of the started container
      */
     public String startContainerAndGetName(DockerUtils oDockerUtils, Processor oProcessor, ProcessorParameter oParameter, boolean bReconstructEnvironment) {
+    	return startContainerAndGetName(oDockerUtils, oProcessor, oParameter, bReconstructEnvironment, false);
+    }
+    
+    /**
+     * Check if a container is started. If not it starts it.
+     * In both cases returns the name of the running container or empyt string in case of problems
+     * @param oDockerUtils Docker Utils
+     * @param oProcessor Processor 
+     * @param oParameter Processor Parameter
+     * @param bReconstructEnvironment True to reconstruct the environment after the start
+     * @param bAutoRemove True to autoremove the docker after is done
+     * @return Name of the started container
+     */
+    public String startContainerAndGetName(DockerUtils oDockerUtils, Processor oProcessor, ProcessorParameter oParameter, boolean bReconstructEnvironment, boolean bAutoRemove) {
     	try {
             // Check if the container is started
             boolean bIsContainerStarted = oDockerUtils.isContainerStarted(oProcessor.getName(), oProcessor.getVersion());

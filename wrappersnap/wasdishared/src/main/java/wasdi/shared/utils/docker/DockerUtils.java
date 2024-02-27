@@ -482,6 +482,16 @@ public class DockerUtils {
      * @param iProcessorPort Port to use
      */
     public String start(String sMountWorkspaceFolder, int iProcessorPort) {
+    	return start(sMountWorkspaceFolder, iProcessorPort, false);
+    }
+    /**
+     * Run the docker at the specified port
+     *
+     * @param sMountWorkspaceFolder workspace folder to mount
+     * @param iProcessorPort Port to use
+     * @param bAutoRemove true to autoremove the container once is done
+     */
+    public String start(String sMountWorkspaceFolder, int iProcessorPort, boolean bAutoRemove) {
 
         try {
         	
@@ -655,9 +665,15 @@ public class DockerUtils {
                 		
                 		oContainerCreateParams.HostConfig.Mounts.add(oProcessorPath);            			
             		}
-            		            		
-            		oContainerCreateParams.HostConfig.RestartPolicy.put("Name", "no");
-            		oContainerCreateParams.HostConfig.RestartPolicy.put("MaximumRetryCount", 0);
+            		    
+            		
+            		if (bAutoRemove) {
+            			oContainerCreateParams.HostConfig.AutoRemove = true;
+            		}
+            		else {
+                		oContainerCreateParams.HostConfig.RestartPolicy.put("Name", "no");
+                		oContainerCreateParams.HostConfig.RestartPolicy.put("MaximumRetryCount", 0);            			
+            		}
             		
             		// Expose the TCP Port
             		oContainerCreateParams.ExposedPorts.add("" + WasdiConfig.Current.dockers.processorsInternalPort + "/tcp");
