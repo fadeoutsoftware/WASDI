@@ -138,6 +138,7 @@ public class ProcessorsResource  {
 
 		sName = URLDecoder.decode(sName, StandardCharsets.UTF_8.name());
 		sDescription = URLDecoder.decode(sDescription, StandardCharsets.UTF_8.name());
+		sParamsSample = URLDecoder.decode(sParamsSample, StandardCharsets.UTF_8.name());
 
 		try {
 			if(sName.contains("/") || sName.contains("\\") || sName.contains("#")) {
