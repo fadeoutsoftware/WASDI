@@ -1581,7 +1581,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             if (!bIsContainerStarted) {
             	WasdiLog.debugLog("DockerProcessorEngine.startContainerAndGetName: the container must be started");
             	
-            	sContainerName = oDockerUtils.start();
+            	sContainerName = oDockerUtils.start("", oProcessor.getPort(), bAutoRemove);
             	
                 // Try to start Again the docker
                 if (Utils.isNullOrEmpty(sContainerName)) {

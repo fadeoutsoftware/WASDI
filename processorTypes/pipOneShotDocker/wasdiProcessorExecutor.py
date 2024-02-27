@@ -108,8 +108,8 @@ if __name__ == '__main__':
             log("There was an error in init, we try to execute but it will likely not work")
             wasdi.wasdiLog("There was an error in init, we try to execute but it will likely not work")
         else:
-            log("Init done, staring processor")
-            wasdi.wasdiLog("Init done, staring processor")
+            log("Init done, starting processor")
+            wasdi.wasdiLog("Init done, starting processor")
 
 
         # Read the on-server flag
