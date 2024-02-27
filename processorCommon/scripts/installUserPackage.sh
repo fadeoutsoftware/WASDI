@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # MAINTAINER: WASDI SARL
-# VERSION: 1.3
+# VERSION: 1.4
 
 
 #### FUNCTION ####
@@ -15,6 +15,7 @@ function showHelp() {
     echo -e "\t- system package for Debian / Ubuntu: you have to provide '--package-apt' on the command line"
     echo -e "\t- conda package: you have to provide '--package-conda' on the command line"
     echo -e "\t- pip package: you have to provide '--package-pip' on the command line"
+    echo -e "\t- octave package: you have to provide '--package-octave' on the command line"
     echo
     echo "Usage: /bin/bash ${0} --home-directory <directory> [--package-apt] [--package-conda] [--package-pip] [--failure-is-ok]"
     echo
@@ -242,6 +243,68 @@ function cleanCachePip() {
     find ${sHomeDirectory} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
     return ${?}
 }
+
+function installPackageOctave() {
+    local sFileToParse="${sApplicationDirectory}/octave-packages.txt"
+    local iReturnCode=0
+
+    echo "[INFO] Check if the file '${sFileToParse}' exists..."
+
+    if [[ -f "${sFileToParse}" ]]
+    then
+        echo -e "[INFO] The file exists: we continue"
+    else
+        echo -e "[INFO] The file doesn't exists: we stop now"
+        return 0
+    fi
+
+    echo "[INFO] Convert the file in the Unix format..."
+    dos2unix ${sFileToParse}
+    iReturnCode=${?}
+
+    if [[ ${iReturnCode} -eq 0 ]]
+    then
+        echo -e "[INFO] OK"
+    else
+        echo -e "[ERROR] Please analyse the command output"
+        return ${iReturnCode}
+    fi
+
+    echo "[INFO] Check if the file '${sFileToParse}' contains something..."
+    iNumberOfLine=$(getNumberOfLine "${sFileToParse}")
+
+    if [[ ${iNumberOfLine} -gt 0 ]]
+    then
+        echo -e "[INFO] There is ${iNumberOfLine} line so we continue"
+    else
+        echo -e "[INFO] There is no line: we stop now"
+        return 0
+    fi
+
+
+    echo "[INFO] Install packages..."
+    # octave --eval \"pkg install -nodeps -forge $(cat ${sFileToParse} | sed 's/^[ \t]*$//' | grep -vE "^$" | tr "\n" " ")\"
+    # going from list installation to list of eval 
+    cat ${sFileToParse} | grep -vE "([^;]*;){2,}[^;]*" | grep -vE "^$|^#" | while read sCurrentLine
+    do
+    echo "Executing command octave --eval \"pkg install ${sCurrentLine}\""
+    octave --eval \"pkg install ${sCurrentLine}\"
+    done
+    
+    iReturnCode=${?}
+
+    if [[ ${iReturnCode} -eq 0 ]]
+    then
+        echo -e "[INFO] OK"
+        return 0
+    else
+        echo -e "[ERROR] Please analyse the command output"
+        return ${iReturnCode}
+    fi
+}
+
+
+
 #### /FUNCTION ####
 
 
@@ -289,6 +352,11 @@ do
 
         --package-pip)
             sInstallUserPackagePip="true"
+            shift
+        ;;
+
+        --package-octave)
+            sInstallUserPackageOctave="true"
             shift
         ;;
 
@@ -392,11 +460,28 @@ then
     echo "==== /PIP ===="
 fi
 
+if [[ "${sInstallUserPackageOctave,,}" == "true" ]]
+then
+    echo "==== OCTAVE ===="
+    installPackageOctave
+    iReturnCodeInstallPackageOctave=${?}
+
+    
+
+    if [[ "${sFailureIsOk}" == "true" ]]
+    then
+        iReturnCodeInstallPackageOctave=0
+    fi
+
+    echo "==== /OCTAVE ===="
+fi
+
 
 iReturnCodeList=(
     "${iReturnCodeInstallPackageApt}"
     "${iReturnCodeInstallPackageConda}"
     "${iReturnCodeInstallPackagePip}"
+    "${iReturnCodeInstallPackageOctave}"
 )
 getGreatestValue "${iReturnCodeList[@]}"
 exit ${?}

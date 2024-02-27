@@ -71,4 +71,4 @@ else
 end
 
 %Log
-disp('WASDI: WASDI MATLAB LIB INITIALIZED (v.0.07.01). Welcome to Space')
+disp('WASDI: WASDI MATLAB LIB INITIALIZED (v.0.07.02). Welcome to Space')
