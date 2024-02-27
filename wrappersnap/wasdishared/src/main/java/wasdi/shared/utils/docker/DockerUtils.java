@@ -1065,26 +1065,8 @@ public class DockerUtils {
      */
     protected String getContainerIdFromWasdiAppName(String sProcessorName, String sVersion) {
     	try {
-    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-    		if (!sUrl.endsWith("/")) sUrl += "/";
     		
-    		sUrl += "containers/json";
-    		
-    		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
-    		
-    		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
-    			WasdiLog.warnLog("DockerUtils.getContainerIdFromWasdiAppName: get returned " + oResponse.getResponseCode());
-    			return "";
-    		}
-    		
-    		List<Object> aoOutputJsonMap = null;
-
-            try {
-                aoOutputJsonMap = JsonUtils.s_oMapper.readValue(oResponse.getResponseBody(), new TypeReference<List<Object>>(){});
-            } catch (Exception oEx) {
-                WasdiLog.errorLog("DockerUtils.getContainerIdFromWasdiAppName: exception converting API result " + oEx);
-                return "";
-            }
+    		List<Object> aoOutputJsonMap = getContainersInfo(true);
             
             String sMyImage = "wasdi/" + sProcessorName + ":" + sVersion;
             String sId = "";
@@ -1395,7 +1377,7 @@ public class DockerUtils {
 	public ContainerInfo getContainerInfoByImageName(String sProcessorName, String sVersion) {
     	
     	try {
-    		List<Object> aoOutputJsonMap = getContainersInfo();
+    		List<Object> aoOutputJsonMap = getContainersInfo(true);
             
             String sMyImage = "wasdi/" + sProcessorName + ":" + sVersion;
             
