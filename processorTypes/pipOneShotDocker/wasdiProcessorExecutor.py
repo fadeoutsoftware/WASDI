@@ -53,7 +53,6 @@ def executeProcessor(bIsOnServer = True):
     return
 
 if __name__ == '__main__':
-    global m_sProcId
     try:
         # Read the process Id
         sProcId = os.environ['WASDI_PROCESS_WORKSPACE_ID']
