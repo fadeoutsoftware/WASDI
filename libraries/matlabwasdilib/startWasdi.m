@@ -1,4 +1,10 @@
 function Wasdi = startWasdi(config_path)
+%Initialize the Wasdi object 
+%
+%:param config_path: The path to be used to import the configuration. 
+%
+%:Returns:
+%  :Wasdi: The object to be used to invoke all the following call to Wasdi services
 
 %find out what the library path is:
 sFileName = 'startWasdi.m';
