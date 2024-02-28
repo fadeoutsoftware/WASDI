@@ -65,8 +65,14 @@ def pm_list_packages(flag: str):
     dependencies: list = __parse_list_command_output(output)
     sFullPath = wasdi.getPath("packagesInfo.json")
 
-    with open(sFullPath, 'w') as f:
-        json.dump(dependencies, f)
+    log('writing in ' + sFullPath)
+
+    log(dependencies)
+
+    with open(sFullPath, 'w') as oFile:
+        json.dump(dependencies, oFile)
+
+    log('File written ')
 
 def __execute_pip_command_and_get_output(command: str) -> str:
     log('__execute_pip_command_and_get_output: ' + command)
