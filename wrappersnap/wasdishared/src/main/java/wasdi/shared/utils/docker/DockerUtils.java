@@ -799,7 +799,7 @@ public class DockerUtils {
     		}
     		else {
     			// Error!
-    			WasdiLog.errorLog("DockerUtils.start: Impossible to start Container " + sContainerName);
+    			WasdiLog.errorLog("DockerUtils.start: Impossible to start Container " + sContainerName + " Message: " + oResponse.getResponseBody());
     			return "";
     		}
             
