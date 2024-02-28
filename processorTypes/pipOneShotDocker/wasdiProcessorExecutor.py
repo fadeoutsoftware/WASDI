@@ -9,7 +9,7 @@ import os
 import urllib.parse
 import json
 import traceback
-import sys
+import subprocess
 
 m_sProcId = ""
 
@@ -21,7 +21,7 @@ def _getEnvironmentVariable(sVariable):
         return None
 
 def log(sLogString):
-	print("[" + m_sProcId + "] wasdiProcessorExecutor PIP One Shot Engine v.2.1.3 - " + sLogString)
+    print("[" + m_sProcId + "] wasdiProcessorExecutor PIP One Shot Engine v.2.1.3 - " + sLogString)
 
 def executeProcessor():
     # We need the proc id for logs
@@ -31,13 +31,13 @@ def executeProcessor():
 
     #Run the processor
     try:
-        import myProcessor        
+        import myProcessor
         wasdi.wasdiLog("wasdi.executeProcessor RUN " + m_sProcId)
         myProcessor.run()
         wasdi.wasdiLog("wasdi.executeProcessor Done")
-        
+
         sForceStatus = 'DONE'
-        
+
     except Exception as oEx2:
         wasdi.wasdiLog("wasdi.executeProcessor EXCEPTION")
         wasdi.wasdiLog(repr(oEx2))
@@ -46,12 +46,74 @@ def executeProcessor():
         wasdi.wasdiLog("wasdi.executeProcessor generic EXCEPTION")
     finally:
         sFinalStatus = wasdi.getProcessStatus(m_sProcId)
-        
+
         if sFinalStatus != 'STOPPED' and sFinalStatus != 'DONE' and sFinalStatus != 'ERROR':
             wasdi.wasdiLog("wasdi.executeProcessor Process finished. Forcing status to " + sForceStatus)
             wasdi.updateProcessStatus(m_sProcId, sForceStatus, 100)
 
     return
+
+
+def pm_list_packages(flag: str):
+    log('/packageManager/listPackages/' + flag)
+
+    command: str = 'pip list'
+    if flag != '':
+        command = command + ' -' + flag
+
+    output: str = __execute_pip_command_and_get_output(command)
+    dependencies: list = __parse_list_command_output(output)
+    sFullPath = wasdi.getPath("packagesInfo.json")
+
+    with open(sFullPath, 'w') as f:
+        json.dump(dependencies, f)
+
+def __execute_pip_command_and_get_output(command: str) -> str:
+    log('__execute_pip_command_and_get_output: ' + command)
+
+    oPipProcess = subprocess.run(command + ' > tmp', shell=True, capture_output=True)
+
+    sOutput = open('tmp', 'r').read()
+    os.remove('tmp')
+
+    stderr: str = oPipProcess.stderr.decode("utf-8")
+
+    if stderr != '':
+        if sOutput == '':
+            sOutput = stderr
+        else:
+            sOutput += stderr
+
+    return sOutput
+
+def __parse_list_command_output(output: str) -> list:
+    asLines: list = output.splitlines()
+
+    sHeader: str = asLines[0]
+    asHeaders: list = sHeader.split()
+
+    for i in range(len(asHeaders)):
+        asHeaders[i] = asHeaders[i].lower()
+
+    aoDependencies: list = []
+
+    for sLine in asLines[2:]:
+        asColumns = sLine.split()
+
+        if len(asHeaders) == 2:
+            aoDependencies.append({
+                "manager": "pip",
+                asHeaders[0]: asColumns[0],
+                asHeaders[1]: asColumns[1]})
+        elif len(asHeaders) == 4:
+            aoDependencies.append({
+                "manager": "pip",
+                asHeaders[0]: asColumns[0],
+                asHeaders[1]: asColumns[1],
+                asHeaders[2]: asColumns[2],
+                asHeaders[3]: asColumns[3]})
+
+    return aoDependencies
 
 if __name__ == '__main__':
     try:
@@ -130,6 +192,7 @@ if __name__ == '__main__':
         if sRefreshPackageList is not None:
             if sRefreshPackageList == "1":
                 log("Now I refresh my package list")
+                pm_list_packages('')
                 bRun = True
 
         if bRun:
