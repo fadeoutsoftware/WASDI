@@ -306,7 +306,7 @@ public class PackageManagerResource {
 			
 			WasdiLog.debugLog("PackageManagerResource.environmentupdate: create local operation");
 			String sUserId = oUser.getUserId();
-			
+
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(oProcessorToForceUpdate.getName());
 			oProcessorParameter.setProcessorID(oProcessorToForceUpdate.getProcessorId());
@@ -314,7 +314,7 @@ public class PackageManagerResource {
 			oProcessorParameter.setUserId(sUserId);
 			oProcessorParameter.setExchange(sWorkspaceId);
 			oProcessorParameter.setProcessObjId(sProcessObjId);
-
+			
 			Map<String, String> asCommand = new HashMap<>();
 			asCommand.put("updateCommand", sUpdateCommand);
 			String sJson = MongoRepository.s_oMapper.writeValueAsString(asCommand);
@@ -323,11 +323,11 @@ public class PackageManagerResource {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
+			// Trigger the action
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.ENVIRONMENTUPDATE.name(), oProcessorToForceUpdate.getName(), oProcessorParameter);
-			
-			if (WasdiConfig.Current.isMainNode()) {
-				
-				// In the main node: start a thread to update all the computing nodes
+
+			if (!Utils.isNullOrEmpty(sUpdateCommand) && WasdiConfig.Current.isMainNode()) {
+				// In the main node with a real action: start a thread to update all the computing nodes
 				try {
 					WasdiLog.debugLog("PackageManagerResource.environmentupdate: this is the main node, starting Worker to update computing nodes");
 					
@@ -344,8 +344,11 @@ public class PackageManagerResource {
 				}
 				catch (Exception oEx) {
 					WasdiLog.errorLog("PackageManagerResource.environmentupdate: error starting UpdateProcessorEnvironmentWorker " + oEx.toString());
-				}
-			}			
+				}				
+			}
+			else {
+				WasdiLog.debugLog("PackageManagerResource.environmentupdate: this is only a refresh, run only on main node");
+			}
 			
 			if (oRes.getBoolValue()) {
 				return Response.ok().build();
