@@ -72,6 +72,10 @@ if __name__ == '__main__':
             log("no params available")
             sEncodedParams = "%7B%7D"
 
+        if sEncodedParams == "":
+            log("no params available")
+            sEncodedParams = "%7B%7D"
+
         sDecodedParams = urllib.parse.unquote(sEncodedParams)
         aoParameters = json.loads(sDecodedParams)
 
