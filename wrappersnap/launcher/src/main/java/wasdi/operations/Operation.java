@@ -9,14 +9,18 @@ import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.DownloadedFileCategory;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
+import wasdi.shared.business.Workspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.payloads.OperationPayload;
 import wasdi.shared.rabbit.Send;
@@ -112,11 +116,14 @@ public abstract class Operation {
 	 */
 	public abstract boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace);
 	
-
-    public void updateProcessStatus(ProcessWorkspace oProcessWorkspace, ProcessStatus oProcessStatus, int iProgressPerc) {
-    	
+	/**
+	 * Updates the process status and progress 
+	 * @param oProcessWorkspace
+	 * @param oProcessStatus
+	 * @param iProgressPerc
+	 */
+    public void updateProcessStatus(ProcessWorkspace oProcessWorkspace, ProcessStatus oProcessStatus, int iProgressPerc) {    	
     	LauncherMain.updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, oProcessStatus, iProgressPerc);
-
     }
     
     /**
@@ -408,7 +415,7 @@ public abstract class Operation {
         } catch (Exception oPayloadEx) {
             WasdiLog.errorLog("Operation.setPayload: payload exception: " + oPayloadEx.toString());
         }
-    	
     }
+    
 
 }

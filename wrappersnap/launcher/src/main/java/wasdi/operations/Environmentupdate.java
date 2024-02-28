@@ -120,9 +120,6 @@ public class Environmentupdate extends Operation {
 						
 						WasdiLog.debugLog("Environmentupdate.executeOperation: adding " + sUpdateCommand + " to the envActionsList");
 					
-						// Add carriage return
-						sUpdateCommand += "\n";
-
 						// we re-read all the actions line per line
 						ArrayList<String> asActionLines = new ArrayList<>(); 
 
@@ -131,6 +128,8 @@ public class Environmentupdate extends Operation {
 				        		asActionLines.add(sLine);
 				            });
 				        }
+				        
+				        asActionLines.add(sUpdateCommand);
 				        
 				        String sLastLine = "";
 					
