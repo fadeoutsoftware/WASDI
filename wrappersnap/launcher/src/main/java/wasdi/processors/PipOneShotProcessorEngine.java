@@ -19,6 +19,7 @@ import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.packagemanagers.PipOneShotPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
 import wasdi.shared.utils.docker.containersViewModels.constants.ContainerStates;
@@ -456,7 +457,12 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 	        
 	        waitForApplicationToFinish(oProcessor, oParameter.getProcessObjId(), "", m_oProcessWorkspace);
 	        
+	        String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
+	        sWorkspacePath += "packagesInfo.json";
+	        
 	        String sFileFullPath = sProcessorFolder + "packagesInfo.json";
+	        
+	        WasdiFileUtils.moveFile2(sWorkspacePath, sFileFullPath);
 
 			return true;
 		} catch (Exception oEx) {
