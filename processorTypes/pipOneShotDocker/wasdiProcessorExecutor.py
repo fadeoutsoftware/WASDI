@@ -62,6 +62,7 @@ def pm_list_packages(flag: str):
         command = command + ' -' + flag
 
     output: str = __execute_pip_command_and_get_output(command)
+    log("Got output " + output)
     dependencies: list = __parse_list_command_output(output)
     sFullPath = wasdi.getPath("packagesInfo.json")
 
