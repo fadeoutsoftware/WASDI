@@ -375,7 +375,7 @@ public class PackageManagerResource {
 	@GET
 	@Path("/reset")
 	public Response resetActionList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("workspace") String sWorkspaceId) {
-		WasdiLog.debugLog("PackageManagerResource.resetActionList( " + "Name: " + sName + ", " + " )");
+		WasdiLog.debugLog("PackageManagerResource.resetActionList( " + "processorId: " + sProcessorId + ", " + " )");
 		
 		// Check session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
