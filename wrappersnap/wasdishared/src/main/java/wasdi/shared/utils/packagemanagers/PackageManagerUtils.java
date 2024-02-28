@@ -30,7 +30,7 @@ public class PackageManagerUtils {
 			}
 			
 			if (sPackage.startsWith("--")) {
-				WasdiLog.infoLog("PipProcessorEngine.checkPipPackage: line [" + sPackage + "] looks a pip option, try to keep it");
+				WasdiLog.infoLog("PackageManagerUtils.checkPipPackage: line [" + sPackage + "] looks a pip option, try to keep it");
 				return true;
 			}
 			
@@ -57,7 +57,7 @@ public class PackageManagerUtils {
 			}
 		}
 		catch (Exception oExtEx) {
-			WasdiLog.infoLog("PipProcessorEngine.checkPipPackage: exception " + oExtEx.toString());
+			WasdiLog.infoLog("PackageManagerUtils.checkPipPackage: exception " + oExtEx.toString());
 		}
 
 		return false;
@@ -81,7 +81,7 @@ public class PackageManagerUtils {
 		} else if (sType.equals(ProcessorTypes.CONDA)) {
 			oPackageManager = new CondaPackageManagerImpl(sIp, iPort);
 		} else {
-			WasdiLog.warnLog("Package Manager not supported for type " + sType);
+			WasdiLog.warnLog("PackageManagerUtils.getPackageManagerByProcessor: Package Manager not supported for type " + sType);
 		}
 
 		return oPackageManager;

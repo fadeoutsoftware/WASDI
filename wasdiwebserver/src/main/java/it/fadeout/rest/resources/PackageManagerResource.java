@@ -304,11 +304,11 @@ public class PackageManagerResource {
 			IPackageManager oPackageManager = PackageManagerUtils.getPackageManagerByProcessor(oProcessorToForceUpdate);
 			
 			if (!Utils.isNullOrEmpty(sUpdateCommand)) {
-				String [] asParts = sUpdateCommand.split("\\");
+				String [] asParts = sUpdateCommand.split("/");
 				if (asParts != null) {
 					if (asParts.length>1) {
 						String sPackage = asParts[1];
-						WasdiLog.debugLog("Action on package " + sPackage);
+						WasdiLog.debugLog("PackageManagerResource.environmentupdate: Action on package " + sPackage);
 						
 						if (oPackageManager.isValidPackage(sPackage)==false) {
 							WasdiLog.warnLog("PackageManagerResource.environmentupdate: " + sPackage + " is not recognized as valid");
