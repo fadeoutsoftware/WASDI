@@ -1286,9 +1286,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			return false;
 		}
 
-		String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
-		int iPort = oProcessor.getPort();
-
         // Create the Docker Utils Object
         DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
         

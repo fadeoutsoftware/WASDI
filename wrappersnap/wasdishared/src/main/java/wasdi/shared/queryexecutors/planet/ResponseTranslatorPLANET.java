@@ -14,6 +14,7 @@ import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 public class ResponseTranslatorPLANET extends ResponseTranslator {
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<QueryResultViewModel> translateBatch(String sResponse, boolean bFullViewModel) {
 		

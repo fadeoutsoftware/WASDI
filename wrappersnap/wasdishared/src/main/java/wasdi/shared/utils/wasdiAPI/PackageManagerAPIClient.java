@@ -1,8 +1,5 @@
 package wasdi.shared.utils.wasdiAPI;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.log.WasdiLog;

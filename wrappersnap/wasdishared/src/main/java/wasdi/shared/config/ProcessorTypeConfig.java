@@ -23,7 +23,7 @@ public class ProcessorTypeConfig {
 	public ArrayList<String> additionalMountPoints = new ArrayList<>();
 
 	/**
-	 * List of strings that are additional moung points for this specific docker
+	 * List of strings that are additional commands for this specific docker
 	 */
 	public ArrayList<String> commands = new ArrayList<>();
 	
@@ -54,6 +54,11 @@ public class ProcessorTypeConfig {
 	 * the /data/wasdi/[usr]/[wsid]/ folder
 	 */
 	public boolean mountOnlyWorkspaceFolder = false;
+	
+	/**
+	 * List of names of files that must not be downloaded when zipping the processor
+	 */
+	public ArrayList<String> templateFilesToExcludeFromDownload = new ArrayList<>();
 	
 	/**
 	 * Return the EnvironmentVariableConfig with the specified key

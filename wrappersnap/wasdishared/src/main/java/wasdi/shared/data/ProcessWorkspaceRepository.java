@@ -225,7 +225,8 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      * @param aoChildProcesses a list of child processes
      * @return a list of fathers
      */
-    public List<ProcessWorkspace> getFathers(List<ProcessWorkspace> aoChildProcesses){
+    @SuppressWarnings("unchecked")
+	public List<ProcessWorkspace> getFathers(List<ProcessWorkspace> aoChildProcesses){
 
     	//check inputs
     	if(null == aoChildProcesses) {

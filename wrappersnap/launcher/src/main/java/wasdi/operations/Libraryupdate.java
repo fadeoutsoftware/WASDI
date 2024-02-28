@@ -1,14 +1,9 @@
 package wasdi.operations;
 
 import wasdi.processors.WasdiProcessorEngine;
-import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Workspace;
-import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class Libraryupdate extends Operation {
@@ -34,7 +29,6 @@ public class Libraryupdate extends Operation {
 	        ProcessorParameter oParameter = (ProcessorParameter) oParam;
 	        
 	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
-	        
 	        
 	        if (!oEngine.isProcessorOnNode(oParameter)) {
                 WasdiLog.errorLog("Libraryupdate.executeOperation: Processor [" + oParameter.getName() + "] not installed in this node, return");

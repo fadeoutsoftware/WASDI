@@ -2200,7 +2200,8 @@ public class dbUtils {
 		ProcessList oProcList = oOgcProcessesClient.getProcesses();
 		
 		// Call the deploy function: is a post of the App Deploy Body
-		boolean bApiAnswer = oOgcProcessesClient.deployProcess(sDeployBody);    	
+		boolean bApiAnswer = oOgcProcessesClient.deployProcess(sDeployBody);
+		WasdiLog.infoLog("Deploy Process answer " + bApiAnswer);
     }
     
 

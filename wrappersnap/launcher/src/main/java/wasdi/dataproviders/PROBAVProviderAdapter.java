@@ -27,12 +27,9 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 
 	HashMap<String, LocalFileDescriptor> m_asCollectionsFolders = new HashMap<>();
 
-	@SuppressWarnings("unchecked")
 	public PROBAVProviderAdapter() {
-		super();
-		
+		super();		
 		m_sDataProviderCode = "PROBAV";
-		
 	}
 
 	@Override
@@ -418,6 +415,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 		return "";
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void internalReadConfig() {
 		try {

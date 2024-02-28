@@ -131,7 +131,7 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 	 * @param sPackage
 	 * @return
 	 */
-	protected boolean checkPipPackage(String sPackage) {
+	public static boolean checkPipPackage(String sPackage) {
 		try {
 			
 			if (Utils.isNullOrEmpty(sPackage)) {

@@ -60,6 +60,7 @@ import wasdi.shared.business.users.UserAccessRights;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.config.PathsConfig;
+import wasdi.shared.config.ProcessorTypeConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CounterRepository;
@@ -2499,7 +2500,14 @@ public class ProcessorsResource  {
 				}
 			}
 			
-			ArrayList<String> asAdditionalFilter = ProcessorTypes.getAdditionalTemplateGeneratedFiles(oProcessor.getType());
+			ProcessorTypeConfig oProcessorTypeConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig(oProcessor.getType()); 
+			ArrayList<String> asAdditionalFilter = new ArrayList<>();
+			
+			if (oProcessorTypeConfig != null) {
+				if (oProcessorTypeConfig.templateFilesToExcludeFromDownload != null) {
+					asAdditionalFilter.addAll(oProcessorTypeConfig.templateFilesToExcludeFromDownload);
+				}
+			}
 			
 			if (asAdditionalFilter.size()>0) {
 				WasdiLog.debugLog("ProcessorsResource.zipProcessor: adding more proc type filter file names ");

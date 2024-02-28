@@ -359,6 +359,73 @@ public class PackageManagerResource {
 			return Response.serverError().build();
 		}
 	}	
+	
+	
+	/**
+	 * Get the list of actions executed on an application
+	 * 
+	 * @param sSessionId Session Id
+	 * @param sName Name of the application
+	 * @return List of strings
+	 * @throws Exception
+	 */
+	@GET
+	@Path("/reset")
+	public Response resetActionList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName, @QueryParam("workspace") String sWorkspaceId) {
+		WasdiLog.debugLog("PackageManagerResource.resetActionList( " + "Name: " + sName + ", " + " )");
+		
+		// Check session
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
+		if (oUser == null) {
+			WasdiLog.warnLog("PackageManagerResource.resetActionList: invalid session");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		try {
+			
+			if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+				WasdiLog.warnLog("PackageManagerResource.resetActionList: user cannot access the workspace");
+				return Response.status(Status.FORBIDDEN).build();
+			}
+			
+			if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
+				WasdiLog.warnLog("PackageManagerResource.resetActionList: user cannot access the processor");
+				return Response.status(Status.FORBIDDEN).build();			
+			}		
+			
+			if (WasdiConfig.Current.isMainNode() == false) {
+				WasdiLog.warnLog("PackageManagerResource.resetActionList: this API is for the main node");
+				return Response.status(Status.BAD_REQUEST).build();			
+			}
+			
+			String sProcessorPath = PathsConfig.getProcessorFolder(sName);
+			String sEnvActionFile = sProcessorPath + "/envActionsList.txt";
+			
+			File oEnvActionFile = new File(sEnvActionFile);
+			
+			if (oEnvActionFile.exists()) {
+				WasdiLog.debugLog("PackageManagerResource.resetActionList: envActionsList for app " + sName + " found");
+				
+				if (oEnvActionFile.delete()) {
+					WasdiLog.debugLog("PackageManagerResource.resetActionList: envActionsList for app " + sName + " deleted");
+				}
+				else {
+					WasdiLog.errorLog("PackageManagerResource.getEnvironmentActionsList: impossible to delete the envActionsList file!");
+					return Response.serverError().build();					
+				}
+			}
+			else {
+				WasdiLog.warnLog("PackageManagerResource.resetActionList: envActionsList for app " + sName + " NOT found");
+			}
+
+			return Response.ok().build();			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PackageManagerResource.getEnvironmentActionsList: exception ", oEx);
+			return Response.serverError().build();
+		}
+	}
 
 	/**
 	 * Get the appropriate Package Manager Instance from the Processor (type)
