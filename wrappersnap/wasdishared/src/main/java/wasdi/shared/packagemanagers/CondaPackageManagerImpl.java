@@ -161,4 +161,9 @@ public class CondaPackageManagerImpl implements IPackageManager {
 			return false;
 		}
 	}
+
+	@Override
+	public boolean isValidPackage(String sPackageName) {
+		return true;
+	}
 }

@@ -111,7 +111,6 @@ if __name__ == '__main__':
             log("Init done, starting processor")
             wasdi.wasdiLog("Init done, starting processor")
 
-
         # Read the on-server flag
         bIsOnServer = True
         sOnServer = _getEnvironmentVariable('WASDI_ONESHOT_ON_SERVER')

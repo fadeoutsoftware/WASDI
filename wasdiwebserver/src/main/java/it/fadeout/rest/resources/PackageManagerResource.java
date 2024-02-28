@@ -39,6 +39,7 @@ import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.packagemanagers.PackageManagerUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.processors.PackageManagerFullInfoViewModel;
 import wasdi.shared.viewmodels.processors.PackageManagerViewModel;
@@ -242,8 +243,11 @@ public class PackageManagerResource {
 			PackageManagerViewModel oPackageManagerVM = null;
 
 			try {
-				IPackageManager oPackageManager = getPackageManager(oProcessorToRun);
-
+				IPackageManager oPackageManager = PackageManagerUtils.getPackageManagerByProcessor(oProcessorToRun);
+				
+				if (oPackageManager == null) {
+					return Response.ok().build();
+				}
 				oPackageManagerVM = oPackageManager.getManagerVersion();
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("PackageManagerResource.getManagerVersion: " + oEx);
@@ -295,7 +299,24 @@ public class PackageManagerResource {
 			if (!PermissionsUtils.canUserWriteProcessor(oUser.getUserId(), oProcessorToForceUpdate.getProcessorId())) {
 				WasdiLog.warnLog("PackageManagerResource.environmentupdate: user cannot write the processor");
 				return Response.status(Status.FORBIDDEN).build();			
-			}			
+			}
+			
+			IPackageManager oPackageManager = PackageManagerUtils.getPackageManagerByProcessor(oProcessorToForceUpdate);
+			
+			if (!Utils.isNullOrEmpty(sUpdateCommand)) {
+				String [] asParts = sUpdateCommand.split("\\");
+				if (asParts != null) {
+					if (asParts.length>1) {
+						String sPackage = asParts[1];
+						WasdiLog.debugLog("Action on package " + sPackage);
+						
+						if (oPackageManager.isValidPackage(sPackage)==false) {
+							WasdiLog.warnLog("PackageManagerResource.environmentupdate: " + sPackage + " is not recognized as valid");
+							return Response.status(Status.BAD_REQUEST).build();
+						}
+					}
+				}
+			}
 			
 			// Schedule the process to run the operation in the environment
 			String sProcessObjId = Utils.getRandomName();
@@ -431,30 +452,6 @@ public class PackageManagerResource {
 			WasdiLog.errorLog("PackageManagerResource.getEnvironmentActionsList: exception ", oEx);
 			return Response.serverError().build();
 		}
-	}
-
-	/**
-	 * Get the appropriate Package Manager Instance from the Processor (type)
-	 * @param oProcessor The Processor we want to access the Package Manager
-	 * @return Package Manager Instance
-	 */
-	private IPackageManager getPackageManager(Processor oProcessor) {
-		IPackageManager oPackageManager = null;
-
-		String sType = oProcessor.getType();
-
-		String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
-		int iPort = oProcessor.getPort();
-
-		if (sType.equals(ProcessorTypes.UBUNTU_PYTHON37_SNAP) || sType.equals(ProcessorTypes.PIP_ONESHOT) || sType.equals(ProcessorTypes.PYTHON_PIP_2) || sType.equals(ProcessorTypes.PYTHON_PIP_2_UBUNTU_20)) {
-			oPackageManager = new PipPackageManagerImpl(sIp, iPort);
-		} else if (sType.equals(ProcessorTypes.CONDA)) {
-			oPackageManager = new CondaPackageManagerImpl(sIp, iPort);
-		} else {
-			throw new UnsupportedOperationException("The functionality is not yet implemented for this processor engine!");
-		}
-
-		return oPackageManager;
 	}
 	
 	/**
