@@ -8,6 +8,7 @@ import java.util.Map;
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.ProcessorAPIClient;
 
 /**
  * Thread that calls all the computing nodes to ask to update the files of a processor
@@ -65,24 +66,9 @@ public class UpdateProcessorFilesWorker extends Thread {
 			if (oNode.getActive() == false) continue;
 			
 			try {
-				
 				File oFile = new File(m_sFilePath);
-				
-				String sUrl = oNode.getNodeBaseAddress();
-				
-				if (!sUrl.endsWith("/")) sUrl += "/";
-				
-				sUrl += "processors/updatefiles?processorId="+m_sProcessorId+"&workspace="+m_sWorkspaceId+"&file=" + oFile.getName();
-				
-				Map<String, String> asHeaders = new HashMap<String, String>();
-				asHeaders.put("x-session-token", m_sSessionId);
-				
-				WasdiLog.debugLog("UpdateProcessorFilesWorker.run: calling url: " + sUrl);
-				
-				HttpUtils.httpPostFile(sUrl, m_sFilePath, asHeaders);
-				
+				ProcessorAPIClient.updateProcessorFiles(oNode, m_sSessionId, m_sProcessorId, m_sWorkspaceId, oFile, m_sFilePath);
 				WasdiLog.debugLog("UpdateProcessorFilesWorker.run: node updated " + oNode.getNodeCode());
-				
 			}
 			catch (Exception oEx) {
 				WasdiLog.debugLog("UpdateProcessorFilesWorker.run: Exception " + oEx.toString());

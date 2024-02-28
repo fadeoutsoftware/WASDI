@@ -7,6 +7,7 @@ import java.util.Map;
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.ProcessorAPIClient;
 
 /**
  * Thread that calls all the computing nodes to ask to delete a processor
@@ -83,27 +84,8 @@ public class DeleteProcessorWorker extends Thread  {
 			if (oNode.getActive() == false) continue;
 			
 			try {
-				
-				// Get the url
-				String sUrl = oNode.getNodeBaseAddress();
-				
-				// Safe programming
-				if (!sUrl.endsWith("/")) sUrl += "/";
-				
-				// Compose the API string
-				sUrl += "processors/nodedelete?processorId="+m_sProcessorId+"&workspace="+m_sWorkspaceId+"&processorName="+m_sProcessorName+"&processorType="+m_sProcessorType+"&version="+m_sVersion;
-				
-				// Add the auth header
-				Map<String, String> asHeaders = new HashMap<String, String>();
-				asHeaders.put("x-session-token", m_sSessionId);
-				
-				WasdiLog.debugLog("DeleteProcessorWorker.run: calling url: " + sUrl);
-				
-				// It is a get call
-				HttpUtils.httpGet(sUrl, asHeaders);
-				
+				ProcessorAPIClient.nodeDelete(oNode, m_sSessionId, m_sProcessorId, m_sWorkspaceId, m_sProcessorName, m_sProcessorType, m_sVersion);				
 				WasdiLog.debugLog("DeleteProcessorWorker.run: deleted on node " + oNode.getNodeCode());
-				
 			}
 			catch (Exception oEx) {
 				WasdiLog.debugLog("DeleteProcessorWorker.run: Exception " + oEx.toString());

@@ -39,6 +39,8 @@ import wasdi.shared.utils.log.WasdiLog;
 public class WasdiFileUtils {
 	
 	static List<String> asShapeFileExtensions;
+	static List<String> asDocumentFileExtensions;
+	
 	static{
 		
 		//populate shapefiles extensions as found here:
@@ -58,10 +60,24 @@ public class WasdiFileUtils {
 						"ixs",
 						"mxs",
 						"prj",
-//						"xml", //commented out since it is a too common extension
 						"cpg"
 				)
 		);
+		
+		asDocumentFileExtensions = new ArrayList<>(
+				Arrays.asList(
+						"doc",
+						"docx",
+						"pdf",
+						"txt",
+						"log",
+						"dot",
+						"dotx",
+						"rtf",
+						"odt"
+				)
+		);
+		
 	}
 
 	/**
@@ -599,11 +615,7 @@ public class WasdiFileUtils {
 		return (sName.equalsIgnoreCase("packagesInfo"))
 				&& (sExtension.equalsIgnoreCase("json"));
 	}
-	
-	public static List<String> getShapefileExtensions(){
-		return null;
-	}
-	
+		
 	public static boolean isShapeFile(String sFileName) {
 		try {
 			if(Utils.isNullOrEmpty(sFileName)) {
@@ -651,7 +663,32 @@ public class WasdiFileUtils {
 			}					
 		}
 		catch (Exception oE) {
-			WasdiLog.errorLog("WasdiFileUtils.isImageFile( File ): ", oE);
+			WasdiLog.errorLog("WasdiFileUtils.isImageFile exception: ", oE);
+		}
+
+		return false;
+	}
+	
+	/**
+	 * Check if the file is some form of document.
+	 * We support at the moment doc, docx, pdf, txt, log
+	 * @param oFile
+	 * @return
+	 */
+	public static boolean isDocumentFormatFile(File oFile) {
+		try {
+			String sFileName = oFile.getName();
+			String sExt = FilenameUtils.getExtension(sFileName);
+			sExt = sExt.toLowerCase();
+			
+			for (String sExtension : asDocumentFileExtensions) {
+				if(sExt.equals(sExtension)) {
+					return true;
+				}
+			}
+		}
+		catch (Exception oE) {
+			WasdiLog.errorLog("WasdiFileUtils.isDocumentFormatFile exception: ", oE);
 		}
 
 		return false;

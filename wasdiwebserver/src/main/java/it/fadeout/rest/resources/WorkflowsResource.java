@@ -277,7 +277,7 @@ public class WorkflowsResource {
     @Produces(MediaType.APPLICATION_XML)
     public Response getXML(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId) {
 
-        WasdiLog.debugLog("WorkflowsResource.getXML( Workspace Id : " + sWorkflowId + ");");
+        WasdiLog.debugLog("WorkflowsResource.getXML( Workflow Id : " + sWorkflowId + ");");
         String sXml = "";
         
         try {
@@ -486,8 +486,7 @@ public class WorkflowsResource {
      */
     @GET
     @Path("/delete")
-    public Response delete(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String
-            sWorkflowId) {
+    public Response delete(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId) {
         WasdiLog.debugLog("WorkflowsResource.delete( Workflow: " + sWorkflowId + " )");
         try {
             // Check User
@@ -870,7 +869,7 @@ public class WorkflowsResource {
             File oWorkflowFile = new File(sWorkflowPath);
 
             if (!oWorkflowFile.exists()) {
-                WasdiLog.debugLog("WorkflowsResource.run: Workflow file not on this node. Try 	to download it");
+                WasdiLog.debugLog("WorkflowsResource.run: Workflow file not on this node. Try to download it");
 
                 String sDownloadedWorkflowPath = Wasdi.downloadWorkflow(oWF.getNodeUrl(), oWF.getWorkflowId(), sSessionId);
 
@@ -895,13 +894,17 @@ public class WorkflowsResource {
                 oGraphSettings.setInputNodeNames(oSnapWorkflowViewModel.getInputNodeNames());
                 oGraphSettings.setOutputFileNames(oSnapWorkflowViewModel.getOutputFileNames());
                 oGraphSettings.setOutputNodeNames(oSnapWorkflowViewModel.getOutputNodeNames());
+                
+                if (oSnapWorkflowViewModel.getTemplateParams() != null) {
+                	oGraphSettings.setTemplateParams(oSnapWorkflowViewModel.getTemplateParams());
+                }
 
                 String sSourceProductName = "";
                 String sDestinationProdutName = "";
 
                 if (oSnapWorkflowViewModel.getInputFileNames().size() > 0) {
                     sSourceProductName = oSnapWorkflowViewModel.getInputFileNames().get(0);
-                    sDestinationProdutName = Utils.getFileNameWithoutLastExtension(sSourceProductName) + "_" + sWorkFlowName + Utils.GetFileNameExtension(sSourceProductName); 
+                    sDestinationProdutName = Utils.getFileNameWithoutLastExtension(sSourceProductName) + "_" + sWorkFlowName + Utils.getFileNameExtension(sSourceProductName); 
                 }
                 
                 if (oGraphSettings.getOutputFileNames().size()>0) {

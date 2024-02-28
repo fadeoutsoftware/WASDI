@@ -91,7 +91,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
 		// Create utils
-        DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry);
+        DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry);
         
         if (oDockerUtils.isContainerStarted(oProcessor.getName(), oProcessor.getVersion())) {
         	WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: There is the previous version running, stop it");
@@ -168,7 +168,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 		
-		DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_sDockerTemplatePath, m_sDockerRegistry);
+		DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, m_sDockerTemplatePath, m_sDockerRegistry);
 		
 		if (!oDockerUtils.isContainerStarted(oProcessor)) {
 			
@@ -198,7 +198,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 			
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry);
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry);
 			
 	        WasdiLog.debugLog("DockerBuildOnceEngine.waitForApplicationToStart: wait to let docker start");
 

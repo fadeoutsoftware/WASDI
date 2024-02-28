@@ -52,16 +52,12 @@ public class WasdiProductReaderFactory {
 			return new CmNcProductReader(oFile);
 		}
 		
-		if (oFile.getName().toLowerCase().endsWith(".pdf")) { 
-			return new PdfProductReader(oFile);
+		if (WasdiFileUtils.isDocumentFormatFile(oFile)) { 
+			return new DocumentFormatsProductReader(oFile);
 		}
 		
 		if (WasdiFileUtils.isImageFile(oFile)) {
 			return new ImagesProductReader(oFile);
-		}
-
-		if (oFile.getName().toLowerCase().endsWith(".hdf")) {
-			return new ModisProductReader(oFile);
 		}
 
 		if (oFile.getName().toLowerCase().endsWith(".hdf")) {

@@ -48,6 +48,14 @@ public class ProcessorTypeConfig {
 	public ArrayList<String> extraHosts = new ArrayList<>();
 	
 	/**
+	 * Flag to decide if we need to mount on the docker 
+	 * the all /data/wasdi folder
+	 * or
+	 * the /data/wasdi/[usr]/[wsid]/ folder
+	 */
+	public boolean mountOnlyWorkspaceFolder = false;
+	
+	/**
 	 * Return the EnvironmentVariableConfig with the specified key
 	 * @param sKey Key to search for
 	 * @return EnvironmentVariableConfig or null

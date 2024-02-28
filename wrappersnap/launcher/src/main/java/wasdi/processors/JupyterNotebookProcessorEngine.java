@@ -3,6 +3,7 @@ package wasdi.processors;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -11,6 +12,7 @@ import wasdi.LauncherMain;
 import wasdi.shared.business.JupyterNotebook;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.S3Volume;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.config.DockerRegistryConfig;
@@ -24,6 +26,7 @@ import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.JsonUtils;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.docker.DockerUtils;
@@ -251,6 +254,29 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: adding mount folder " + sWorkspaceFolderMount);
 			asAdditionalMountPointsCopy.add(sWorkspaceFolderMount);
 			
+    		List<S3Volume> aoVolumesToMount = PermissionsUtils.getVolumesToMount(oParameter);
+    		
+    		if (aoVolumesToMount != null) {
+    			if (aoVolumesToMount.size()>0) {
+    				WasdiLog.debugLog("DockerUtils.start: Found " + aoVolumesToMount.size() + " S3 Volumes to mount");
+    				
+    				for (S3Volume oS3Volume : aoVolumesToMount) {
+    					
+    					String sRemoteVolume = sContainerWorkspacePath;
+    					
+    					if (!sRemoteVolume.endsWith( "/")) sRemoteVolume+= "/";
+    					
+						String sMountingVolume = PathsConfig.getS3VolumesBasePath()+oS3Volume.getMountingFolderName() + ":" + sRemoteVolume + oS3Volume.getMountingFolderName();
+						
+						if (oS3Volume.isReadOnly()) {
+							sMountingVolume += ":ro";
+						}
+						
+						WasdiLog.debugLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: Adding Volume " + sMountingVolume);
+						asAdditionalMountPointsCopy.add(sMountingVolume);
+					}
+    			}
+    		}
 			// Add the folder of the notebook
 			String sWorkspaceNotebookFolderMount = PathsConfig.getWorkspacePath(oParameter) + "notebook";
 			String sContainerNotebookFolderPath = "/home/"  + WasdiConfig.Current.systemUserName + "/notebook";

@@ -76,6 +76,11 @@ public class PathsConfig {
 	 * Local node path of the folder that is mounted on the traefik docker to share configurations
 	 */
 	public String traefikMountedVolume;
+
+	/**
+	 * Local path of the S3 volumes mount folder
+	 */
+	public String s3VolumesBasePath="/mnt/wasdi/users-volumes/";
 	
     /**
      * Get the full workspace path for this parameter
@@ -240,5 +245,15 @@ public class PathsConfig {
 		sDockerTemplatePath += ProcessorTypes.getTemplateFolder(sProcessorType);
 		sDockerTemplatePath += "/";
 		return sDockerTemplatePath;
+	}
+	
+	/**
+	 * Get the base folder of the S3 mounted volumes
+	 * @return
+	 */
+	public static String getS3VolumesBasePath() {
+		String sVolumesBasePath = WasdiConfig.Current.paths.s3VolumesBasePath;
+		if (!sVolumesBasePath.endsWith("/")) sVolumesBasePath += "/";
+		return sVolumesBasePath;
 	}
 }

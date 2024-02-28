@@ -3,6 +3,25 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.8.6.0] - 2024-02-22
+### Added
+- sleep parameter to control the waiting time while polling api
+- support for import operations returning DONE in case of existing file
+- support of S3 Volumes in serachEO Images and import
+- support for custom template parameters in the SNAP workflows XML
+### Fixed
+- moved import methods in the POST version
+
+## [0.8.5.7] - 2023-12-20
+### Added
+- enable auto donwnload from S3 Volumes
+### Fixed
+- type error to detect mount of single folder
+
+## [0.8.5.5] - 2023-12-20
+### Added
+- env variable to enable mount of single workspace folder
+
 ## [0.8.5.4] - 2023-12-20
 ### Fixed
 - changed get Checksum to be compatible with older python versions
@@ -10,7 +29,7 @@ WASDI python programming library CHANGELOG.md, according to the
 ## [0.8.5.3] - 2023-12-05
 ### Fixed
 - local config path for on-line notebooks
-- 
+
 ## [0.8.5.2] - 2023-11-24
 ### Added
 - methods to get file properties

@@ -16,21 +16,20 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 
 	private static final String SLINK_SEPARATOR = ",";
 	private static final String SLINK = "link";
-
 	private static final String SSIZE_IN_BYTES = "sizeInBytes";
 	private static final String SHREF = "href";
 	private static final String SURL = "url";
-//	private static final String SPOLARISATION = "polarisation";
 	private static final String SRELATIVEORBITNUMBER = "relativeOrbitNumber";
 	private static final String SSIZE = "size";
 	private static final String SPLATFORM = "platform";
 	private static final String SSENSOR_MODE = "sensorMode";
 	private static final String SINSTRUMENT = "instrument";
 	private static final String SDATE = "date";
-//	private static final String STYPE = "type";
 	private static final String SSELF = "self";
 	private static final String STITLE = "title";
 	private static final String SPRODUCTIDENTIFIER = "productIdentifier";
+	
+	protected String m_sVolumeName="ecostress_fast";
 
 	@Override
 	public List<QueryResultViewModel> translateBatch(String sResponse, boolean bFullViewModel) {
@@ -48,22 +47,21 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		QueryResultViewModel oResult = new QueryResultViewModel();
 		oResult.setProvider("CLOUDFERRO");
 
-		parseMainInfo(oItem, oResult);
+		oResult.setId(oItem.getFileName());
+		oResult.setTitle(oItem.getFileName());
 		parseFootPrint(oItem.getLocation(), oResult);
 		parseProperties(oItem, oResult);
 
-//		oResult.setPreview(null);
-//		protected String summary;
-
+		
 		buildLink(oResult);
 		buildSummary(oResult);
+		
+		String sVolumePath = m_sVolumeName + "/"+oItem.getS3Path();
+		sVolumePath = sVolumePath.replace(oItem.getFileName(), "");
+		oResult.setVolumeName(m_sVolumeName);
+		oResult.setVolumePath(sVolumePath);
 
 		return oResult;
-	}
-
-	private void parseMainInfo(EcoStressItemForReading oItem, QueryResultViewModel oResult) {
-		oResult.setId(oItem.getFileName());
-		oResult.setTitle(oItem.getFileName());
 	}
 
 	private void parseFootPrint(EcoStressLocation sLocation, QueryResultViewModel oResult) {
@@ -140,8 +138,6 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		oResult.getProperties().put((SSENSOR_MODE), oItem.getSensor());
 		oResult.getProperties().put("sensoroperationalmode", oItem.getSensor());
 
-//		oResult.getProperties().put(SPLATFORM, oItem.getPlatform());
-//		oResult.getProperties().put("platformname", oItem.getPlatform());
 		oResult.getProperties().put(SPLATFORM, "ECOSTRESS");
 		oResult.getProperties().put("platformname", "ECOSTRESS");
 
@@ -239,6 +235,14 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 
 		oResult.getProperties().put(SLINK, oLink.toString());
 		oResult.setLink(oLink.toString());
+	}
+
+	public String geVolumeName() {
+		return m_sVolumeName;
+	}
+
+	public void setVolumeName(String sVolumeName) {
+		this.m_sVolumeName = sVolumeName;
 	}
 
 }
