@@ -1,5 +1,5 @@
 '''
-Created on 24 Nov 2022
+Created on 24 Feb 2024
 
 @author: p.campanella
 '''
@@ -9,6 +9,7 @@ import os
 import urllib.parse
 import json
 import traceback
+import sys
 
 m_sProcId = ""
 
@@ -22,16 +23,9 @@ def _getEnvironmentVariable(sVariable):
 def log(sLogString):
 	print("[" + m_sProcId + "] wasdiProcessorExecutor PIP One Shot Engine v.2.1.3 - " + sLogString)
 
-def executeProcessor(bIsOnServer = True):
+def executeProcessor():
     # We need the proc id for logs
     global m_sProcId
-    
-    #Init Wasdi
-    log("wasdi.executeProcessor: init waspy lib")
-    wasdi.setIsOnServer(bIsOnServer)
-    wasdi.setIsOnExternalServer(not bIsOnServer)
-    wasdi.setDownloadActive(True)
-    wasdi.setUploadActive(True)
 
     sForceStatus = 'ERROR'
 
@@ -103,14 +97,6 @@ if __name__ == '__main__':
         if sWorkspaceId is None:
             log("Workspace Id not available")
 
-        # The lib will read all the data from env
-        if not wasdi.init():
-            log("There was an error in init, we try to execute but it will likely not work")
-            wasdi.wasdiLog("There was an error in init, we try to execute but it will likely not work")
-        else:
-            log("Init done, starting processor")
-            wasdi.wasdiLog("Init done, starting processor")
-
         # Read the on-server flag
         bIsOnServer = True
         sOnServer = _getEnvironmentVariable('WASDI_ONESHOT_ON_SERVER')
@@ -119,7 +105,31 @@ if __name__ == '__main__':
             if sOnServer == "0" or sOnServer.lower() == "false":
                 bIsOnServer = False
 
-        executeProcessor(bIsOnServer)
+        # set the server flags
+        wasdi.setIsOnServer(bIsOnServer)
+        wasdi.setIsOnExternalServer(not bIsOnServer)
+        wasdi.setDownloadActive(True)
+        wasdi.setUploadActive(True)
+
+        log("wasdi.executeProcessor: init waspy lib")
+        # The lib will read all the data from env
+        if not wasdi.init():
+            log("There was an error in init, we try to execute but it will likely not work")
+            wasdi.wasdiLog("There was an error in init, we try to execute but it will likely not work")
+        else:
+            log("Init done, starting processor")
+            wasdi.wasdiLog("Init done, starting processor")
+
+        bRun = True
+        sRefreshPackageList = _getEnvironmentVariable('WASDI_ONESHOT_REFRESH_PACKAGE_LIST')
+
+        if sRefreshPackageList is not None:
+            if sRefreshPackageList == "1":
+                log("Now I refresh my package list")
+                bRun = True
+
+        if bRun:
+            executeProcessor()
 
     except Exception as oEx:
         wasdi.wasdiLog("pipOneShot: EXCEPTION")

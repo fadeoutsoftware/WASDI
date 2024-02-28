@@ -8,18 +8,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-
-import wasdi.shared.data.MongoRepository;
 import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.packagemanagers.PipPackageManagerImpl;
-import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.packagemanagers.PackageManagerUtils;
-import wasdi.shared.viewmodels.HttpCallResponse;
 
 public class PipProcessorEngine extends DockerProcessorEngine {
 

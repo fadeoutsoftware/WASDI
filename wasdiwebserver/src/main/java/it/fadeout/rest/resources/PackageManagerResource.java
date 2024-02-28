@@ -23,7 +23,6 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.processors.Processor;
-import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.business.users.User;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
@@ -31,9 +30,7 @@ import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.WorkspaceRepository;
-import wasdi.shared.packagemanagers.CondaPackageManagerImpl;
 import wasdi.shared.packagemanagers.IPackageManager;
-import wasdi.shared.packagemanagers.PipPackageManagerImpl;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
@@ -303,6 +300,11 @@ public class PackageManagerResource {
 			
 			IPackageManager oPackageManager = PackageManagerUtils.getPackageManagerByProcessor(oProcessorToForceUpdate);
 			
+			if (oPackageManager==null) {
+				WasdiLog.warnLog("PackageManagerResource.environmentupdate: processor " + sProcessorId + " does not has a Package Manager");
+				return Response.status(Status.BAD_REQUEST).build();				
+			}
+			
 			if (!Utils.isNullOrEmpty(sUpdateCommand)) {
 				String [] asParts = sUpdateCommand.split("/");
 				if (asParts != null) {
@@ -464,9 +466,6 @@ public class PackageManagerResource {
 		String sOutput = "{\"warning\": \"the packagesInfo.json file for the processor " + sProcessorName + " was not found\"}";
 
 		try {
-
-			WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: read Processor " + sProcessorName);
-
 			// Take path of the processor
 			String sProcessorPath = PathsConfig.getProcessorFolder(sProcessorName);
 			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();

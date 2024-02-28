@@ -1,5 +1,9 @@
 package wasdi.processors;
 
+import java.io.File;
+
+import org.json.JSONObject;
+
 import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -12,6 +16,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.packagemanagers.IPackageManager;
+import wasdi.shared.packagemanagers.PipOneShotPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.docker.DockerUtils;
@@ -68,6 +73,94 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 		}
 		
         return true;		
+	}
+	
+	protected void addEnvironmentVariablesToProcessorType(ProcessorTypeConfig oProcessorTypeConfig, String sEncodedJson, ProcessorParameter oParameter) {
+		addEnvironmentVariablesToProcessorType(oProcessorTypeConfig, sEncodedJson, oParameter, false);
+	}
+	
+	protected void addEnvironmentVariablesToProcessorType(ProcessorTypeConfig oProcessorTypeConfig, String sEncodedJson, ProcessorParameter oParameter, boolean bRefreshPackageList) {
+        EnvironmentVariableConfig oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_ONESHOT_ENCODED_PARAMS");
+        
+        if (oEnvVariable == null) {
+        	oEnvVariable = new EnvironmentVariableConfig();
+        	oEnvVariable.key = "WASDI_ONESHOT_ENCODED_PARAMS";
+        	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
+        }
+        
+        oEnvVariable.value = sEncodedJson;
+        
+        oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_WEBSERVER_URL");
+        
+        if (oEnvVariable == null) {
+        	oEnvVariable = new EnvironmentVariableConfig();
+        	oEnvVariable.key = "WASDI_WEBSERVER_URL";
+        	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
+        }
+        
+        oEnvVariable.value = WasdiConfig.Current.baseUrl;
+        
+        oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_USER");
+        
+        if (oEnvVariable == null) {
+        	oEnvVariable = new EnvironmentVariableConfig();
+        	oEnvVariable.key = "WASDI_USER";
+        	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
+        }
+        
+        oEnvVariable.value = oParameter.getUserId();
+        
+        oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_SESSION_ID");
+        
+        if (oEnvVariable == null) {
+        	oEnvVariable = new EnvironmentVariableConfig();
+        	oEnvVariable.key = "WASDI_SESSION_ID";
+        	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
+        }
+        
+        oEnvVariable.value = oParameter.getSessionID();
+        
+        oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_PROCESS_WORKSPACE_ID");
+        
+        if (oEnvVariable == null) {
+        	oEnvVariable = new EnvironmentVariableConfig();
+        	oEnvVariable.key = "WASDI_PROCESS_WORKSPACE_ID";
+        	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
+        }
+        
+        oEnvVariable.value = oParameter.getProcessObjId();
+        
+        oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_WORKSPACE_ID");
+        
+        if (oEnvVariable == null) {
+        	oEnvVariable = new EnvironmentVariableConfig();
+        	oEnvVariable.key = "WASDI_WORKSPACE_ID";
+        	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
+        }
+        
+        oEnvVariable.value = oParameter.getWorkspace();
+        
+//        oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_ONESHOT_ON_SERVER");
+//        
+//        if (oEnvVariable == null) {
+//        	oEnvVariable = new EnvironmentVariableConfig();
+//        	oEnvVariable.key = "WASDI_ONESHOT_ON_SERVER";
+//        	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
+//        }
+//        
+//        oEnvVariable.value = "1";
+        
+        if (bRefreshPackageList) {
+            oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_ONESHOT_REFRESH_PACKAGE_LIST");
+            
+            if (oEnvVariable == null) {
+            	oEnvVariable = new EnvironmentVariableConfig();
+            	oEnvVariable.key = "WASDI_ONESHOT_REFRESH_PACKAGE_LIST";
+            	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
+            }
+            
+            oEnvVariable.value = "1";        	
+        }
 	}
 	
 	@Override
@@ -131,75 +224,7 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
             	WasdiConfig.Current.dockers.processorTypes.add(oProcessorTypeConfig);
             }
             
-            EnvironmentVariableConfig oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_ONESHOT_ENCODED_PARAMS");
-            
-            if (oEnvVariable == null) {
-            	oEnvVariable = new EnvironmentVariableConfig();
-            	oEnvVariable.key = "WASDI_ONESHOT_ENCODED_PARAMS";
-            	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
-            }
-            
-            oEnvVariable.value = sEncodedJson;
-            
-            oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_WEBSERVER_URL");
-            
-            if (oEnvVariable == null) {
-            	oEnvVariable = new EnvironmentVariableConfig();
-            	oEnvVariable.key = "WASDI_WEBSERVER_URL";
-            	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
-            }
-            
-            oEnvVariable.value = WasdiConfig.Current.baseUrl;
-            
-            oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_USER");
-            
-            if (oEnvVariable == null) {
-            	oEnvVariable = new EnvironmentVariableConfig();
-            	oEnvVariable.key = "WASDI_USER";
-            	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
-            }
-            
-            oEnvVariable.value = oParameter.getUserId();
-            
-            oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_SESSION_ID");
-            
-            if (oEnvVariable == null) {
-            	oEnvVariable = new EnvironmentVariableConfig();
-            	oEnvVariable.key = "WASDI_SESSION_ID";
-            	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
-            }
-            
-            oEnvVariable.value = oParameter.getSessionID();
-            
-            oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_PROCESS_WORKSPACE_ID");
-            
-            if (oEnvVariable == null) {
-            	oEnvVariable = new EnvironmentVariableConfig();
-            	oEnvVariable.key = "WASDI_PROCESS_WORKSPACE_ID";
-            	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
-            }
-            
-            oEnvVariable.value = oParameter.getProcessObjId();
-            
-            oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_WORKSPACE_ID");
-            
-            if (oEnvVariable == null) {
-            	oEnvVariable = new EnvironmentVariableConfig();
-            	oEnvVariable.key = "WASDI_WORKSPACE_ID";
-            	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
-            }
-            
-            oEnvVariable.value = oParameter.getWorkspace();
-            
-//            oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_ONESHOT_ON_SERVER");
-//            
-//            if (oEnvVariable == null) {
-//            	oEnvVariable = new EnvironmentVariableConfig();
-//            	oEnvVariable.key = "WASDI_ONESHOT_ON_SERVER";
-//            	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
-//            }
-//            
-//            oEnvVariable.value = "1";
+            addEnvironmentVariablesToProcessorType(oProcessorTypeConfig,sEncodedJson,oParameter);
             
             // Create the Docker Utils Object
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
@@ -255,7 +280,10 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 
 	@Override
 	protected IPackageManager getPackageManager(String sUrl) {
-		return null;
+		
+		PipOneShotPackageManager oPipOneShotPackageManager = new PipOneShotPackageManager(sUrl);
+		
+		return oPipOneShotPackageManager;
 	}
 
 	/**
@@ -295,4 +323,147 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 			WasdiLog.errorLog("PipOneShotProcessorEngine.waitForApplicationToStart: exception ", oEx);
 		}
 	}
+	
+    /**
+     * Updates the processor environment
+     */
+	@Override
+	public boolean environmentUpdate(ProcessorParameter oParameter) {
+
+		if (oParameter == null) {
+			WasdiLog.errorLog("PipOneShotProcessorEngine.environmentUpdate: oParameter is null");
+			return false;
+		}
+
+		if (Utils.isNullOrEmpty(oParameter.getJson())) {
+			WasdiLog.errorLog("PipOneShotProcessorEngine.environmentUpdate: update command is null or empty");
+			return false;
+		}
+
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
+		ProcessWorkspace oProcessWorkspace = null;
+
+		try {
+			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			oProcessWorkspace = m_oProcessWorkspace;
+
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+
+			// First Check if processor exists
+			String sProcessorName = oParameter.getName();
+			String sProcessorId = oParameter.getProcessorID();
+
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+
+			// Check processor
+			if (oProcessor == null) {
+				WasdiLog.errorLog("PipOneShotProcessorEngine.environmentUpdate: oProcessor is null [" + sProcessorId + "]");
+				return false;
+			}
+
+			WasdiLog.infoLog("PipOneShotProcessorEngine.environmentUpdate: update env for " + sProcessorName);
+
+			String sJson = oParameter.getJson();
+			WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: sJson: " + sJson);
+			JSONObject oJsonItem = new JSONObject(sJson);
+
+			Object oUpdateCommand = oJsonItem.get("updateCommand");
+
+			if (oUpdateCommand == null || oUpdateCommand.equals(org.json.JSONObject.NULL)) {
+				// This will be done in the Operation code
+				WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: refresh of the list of libraries.");
+			} else {
+				String sUpdateCommand = (String) oUpdateCommand;
+				WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
+				
+				DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+				String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter);
+				
+				String sUrl = getProcessorUrl(oProcessor, sContainerName);
+				
+				IPackageManager oPackageManager = getPackageManager(sUrl);
+				oPackageManager.operatePackageChange(sUpdateCommand);
+			}
+
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+
+			return true;
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("PipOneShotProcessorEngine.environmentUpdate Exception", oEx);
+			try {
+
+				if (oProcessWorkspace != null) {
+					// Check and set the operation end-date
+					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+						oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
+					}
+
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				}
+			} catch (Exception e) {
+				WasdiLog.errorLog("PipOneShotProcessorEngine.environmentUpdate Exception", e);
+			}
+
+			return false;
+		}
+	}
+	
+	public boolean refreshPackagesInfo(ProcessorParameter oParameter) {
+		if (oParameter == null) {
+			WasdiLog.errorLog("PipOneShotProcessorEngine.refreshPackagesInfo: oParameter is null");
+			return false;
+		}
+		
+		try {
+			
+			String sProcessorName = oParameter.getName();
+			String sProcessorId = oParameter.getProcessorID();
+	
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+	
+			// Set the processor path
+			String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
+			File oProcessorFolder = new File(sProcessorFolder);
+	
+			// Is the processor installed in this node?
+			if (!oProcessorFolder.exists()) {
+				WasdiLog.errorLog("PipOneShotProcessorEngine.refreshPackagesInfo: Processor [" + sProcessorName + "] environment not updated in this node, return");
+				return false;
+			}
+	
+	        // Create the Docker Utils Object
+	        DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+	        
+	        ProcessorTypeConfig oProcessorTypeConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig(oProcessor.getType());
+	        
+	        if (oProcessorTypeConfig == null) {
+	        	oProcessorTypeConfig = new ProcessorTypeConfig();
+	        	oProcessorTypeConfig.processorType = oProcessor.getType();
+	        	WasdiConfig.Current.dockers.processorTypes.add(oProcessorTypeConfig);
+	        }
+	        
+	        addEnvironmentVariablesToProcessorType(oProcessorTypeConfig, "", oParameter, true);
+	        
+	        String sContainerName = oDockerUtils.start("", oProcessor.getPort(), true);
+	        
+	        // Try to start Again the docker
+	        if (Utils.isNullOrEmpty(sContainerName)) {
+	        	WasdiLog.errorLog("PipOneShotProcessorEngine.refreshPackagesInfo: Impossible to start the application docker");
+	        	return false;
+	        }
+	        
+	        waitForApplicationToFinish(oProcessor, oParameter.getProcessObjId(), "", m_oProcessWorkspace);
+	        
+	        String sFileFullPath = sProcessorFolder + "packagesInfo.json";
+
+			return true;
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("PipOneShotProcessorEngine.refreshPackagesInfo: ", oEx);
+		}
+
+		return false;
+	}
+	
 }

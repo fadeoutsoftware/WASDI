@@ -21,11 +21,6 @@ import wasdi.shared.viewmodels.processors.PackageViewModel;
 
 public class PipPackageManagerImpl implements IPackageManager {
 
-	/**
-	 * Static logger reference
-	 */
-	public static LoggerWrapper s_oLogger = new LoggerWrapper(LogManager.getLogger(PipPackageManagerImpl.class));
-
 	private String m_sTargetIp;
 	private int m_iTargetPort;
 	private String m_sBaseUrl = "";

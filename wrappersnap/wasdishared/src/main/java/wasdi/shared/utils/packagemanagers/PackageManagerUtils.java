@@ -10,6 +10,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.packagemanagers.CondaPackageManagerImpl;
 import wasdi.shared.packagemanagers.IPackageManager;
+import wasdi.shared.packagemanagers.PipOneShotPackageManager;
 import wasdi.shared.packagemanagers.PipPackageManagerImpl;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
@@ -53,11 +54,12 @@ public class PackageManagerUtils {
 					}
 				}
 				catch (Exception oEx) {
+					WasdiLog.errorLog("PackageManagerUtils.checkPipPackage: exception " + oEx.toString());
 				}
 			}
 		}
 		catch (Exception oExtEx) {
-			WasdiLog.infoLog("PackageManagerUtils.checkPipPackage: exception " + oExtEx.toString());
+			WasdiLog.errorLog("PackageManagerUtils.checkPipPackage: exception " + oExtEx.toString());
 		}
 
 		return false;
@@ -76,11 +78,15 @@ public class PackageManagerUtils {
 		String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
 		int iPort = oProcessor.getPort();
 
-		if (sType.equals(ProcessorTypes.UBUNTU_PYTHON37_SNAP) || sType.equals(ProcessorTypes.PIP_ONESHOT) || sType.equals(ProcessorTypes.PYTHON_PIP_2) || sType.equals(ProcessorTypes.PYTHON_PIP_2_UBUNTU_20)) {
+		if (sType.equals(ProcessorTypes.UBUNTU_PYTHON37_SNAP) || sType.equals(ProcessorTypes.PYTHON_PIP_2) || sType.equals(ProcessorTypes.PYTHON_PIP_2_UBUNTU_20)) {
 			oPackageManager = new PipPackageManagerImpl(sIp, iPort);
 		} else if (sType.equals(ProcessorTypes.CONDA)) {
 			oPackageManager = new CondaPackageManagerImpl(sIp, iPort);
-		} else {
+		}
+		else if (sType.equals(ProcessorTypes.PIP_ONESHOT)) {
+			oPackageManager = new PipOneShotPackageManager(sIp, iPort);
+		}
+		else {
 			WasdiLog.warnLog("PackageManagerUtils.getPackageManagerByProcessor: Package Manager not supported for type " + sType);
 		}
 

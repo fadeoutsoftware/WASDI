@@ -1,7 +1,5 @@
 package wasdi.shared.business.processors;
 
-import java.util.ArrayList;
-
 /**
  * Processor Type static definition
  * @author p.campanella

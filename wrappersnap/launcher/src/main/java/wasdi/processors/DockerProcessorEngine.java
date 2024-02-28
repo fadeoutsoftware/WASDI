@@ -1166,8 +1166,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
     /**
      * Get the specific instance of the Package Manager compatible with this instance
-     * @param sIp
-     * @param iPort
+     * @param sUrl
      * @return
      */
     protected abstract IPackageManager getPackageManager(String sUrl);
