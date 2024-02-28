@@ -31,6 +31,8 @@ public class QueryExecutorCM2 extends QueryExecutor {
 	protected String m_sPythonScript = "";
 	protected String m_sExchangeFolder = "";
 	
+	private static final Object s_oTempFolderLock = new Object();
+	
 	public QueryExecutorCM2() {
 		m_sProvider = "COPERNICUSMARINE";
 		
@@ -42,7 +44,7 @@ public class QueryExecutorCM2 extends QueryExecutor {
 		try {
 			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
 			m_sPythonScript = oAppConf.getString("pythonScript");
-			m_sExchangeFolder = oAppConf.getString("exchangeFolder");
+			m_sExchangeFolder = WasdiConfig.Current.paths.wasdiTempFolder; // oAppConf.getString("exchangeFolder");
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("QueryExecutorCM2.executeCount(): exception reading parser config file " + m_sParserConfigPath);
@@ -56,26 +58,61 @@ public class QueryExecutorCM2 extends QueryExecutor {
 		String sInputFullPath = "";
 		String sOutputFullPath = "";
 		
+		
+		
 		try {
 			
-	
-			String sInputFile = Utils.getRandomName();
-			String sOutputFile = Utils.getRandomName();
-			
+				
 			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
 			String sQueryViewModel = JsonUtils.stringify(oQueryViewModel);
 			
-			if (!Utils.isNullOrEmpty(m_sExchangeFolder)) {
-				sInputFullPath = m_sExchangeFolder;
-				sOutputFullPath = m_sExchangeFolder;
-				if (!m_sExchangeFolder.endsWith("/")) {
-					sInputFullPath += "/";
-					sOutputFullPath += "/";
+			
+			String sInputFile = Utils.getRandomName();
+			String sOutputFile = Utils.getRandomName();
+			
+			
+			synchronized (s_oTempFolderLock) {
+				if (!Utils.isNullOrEmpty(m_sExchangeFolder)) {
+					
+					boolean bIsInputFileUnique = false;
+					
+					while (!bIsInputFileUnique) {
+						sInputFullPath = m_sExchangeFolder;
+						if (!m_sExchangeFolder.endsWith("/")) {
+							sInputFullPath += "/";
+						}
+						sInputFullPath += sInputFile;
+						
+						if (new File(sInputFullPath).exists()) {
+							sInputFile = Utils.getRandomName();
+						} else {
+							bIsInputFileUnique = true;
+						}
+					}
+					
+					WasdiFileUtils.writeFile(sQueryViewModel, sInputFullPath);
+					
+					boolean bOutputFileUnique = false;
+					
+					while (!bOutputFileUnique) {
+						sOutputFullPath = m_sExchangeFolder;
+						if (!m_sExchangeFolder.endsWith("/")) {
+							sOutputFullPath += "/";
+						}
+						sOutputFullPath += sOutputFile;
+						
+						if (new File(sOutputFullPath).exists()) {
+							sOutputFile = Utils.getRandomName();
+						} else {
+							bOutputFileUnique = true;
+						}
+					}	
+					
+					File oOutputFile = new File(sOutputFullPath);
+					oOutputFile.createNewFile();
 				}
 			}
-			
-			sInputFullPath += sInputFile;
-			sOutputFullPath += sOutputFile;
+
 			
 			String sJsonDataProviderConfig = JsonUtils.stringify(s_oDataProviderConfig);
 		

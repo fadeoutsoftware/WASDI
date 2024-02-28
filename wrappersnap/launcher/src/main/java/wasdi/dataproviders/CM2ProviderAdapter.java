@@ -20,8 +20,11 @@ public class CM2ProviderAdapter extends ProviderAdapter {
 	
 	private static final String s_sDatasetId = "datasetId";
 	
-	protected String m_sPythonScript = "C:/Temp/wasdi/PythonDataProviders/data_provider_sample.py";  // TODO: to delete in the final version of the code
-	protected String m_sExchangeFolder = "C:/Temp/";	// TODO: to delete in the final version of the code
+	private static final Object s_oTempFolderLock = new Object();
+
+	
+	protected String m_sPythonScript = "";
+	protected String m_sExchangeFolder = ""; 
 	
 	public CM2ProviderAdapter() {
 		m_sDataProviderCode = "COPERNICUSMARINE";
@@ -35,7 +38,7 @@ public class CM2ProviderAdapter extends ProviderAdapter {
 			sAdapterConfigPath = m_oDataProviderConfig.adapterConfig;
 			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(sAdapterConfigPath);
 			m_sPythonScript = oAppConf.getString("pythonScript");
-			m_sExchangeFolder = oAppConf.getString("exchangeFolder");
+			m_sExchangeFolder = WasdiConfig.Current.paths.wasdiTempFolder;
 		} catch(Exception oEx) {
 			WasdiLog.errorLog("CM2ProviderAdapter.internalReadConfig: exception reading parser config file " + sAdapterConfigPath);
 		}
@@ -62,19 +65,49 @@ public class CM2ProviderAdapter extends ProviderAdapter {
 			String sInputFile = Utils.getRandomName();
 			String sOutputFile = Utils.getRandomName();
 			
-			if (!Utils.isNullOrEmpty(m_sExchangeFolder)) {
-				sInputFullPath = m_sExchangeFolder;
-				sOutputFullPath = m_sExchangeFolder;
-				if (!m_sExchangeFolder.endsWith("/")) {
-					sInputFullPath += "/";
-					sOutputFullPath += "/";
+			
+			synchronized (s_oTempFolderLock) {
+				if (!Utils.isNullOrEmpty(m_sExchangeFolder)) {
+					
+					boolean bIsInputFileUnique = false;
+					
+					while (!bIsInputFileUnique) {
+						sInputFullPath = m_sExchangeFolder;
+						if (!m_sExchangeFolder.endsWith("/")) {
+							sInputFullPath += "/";
+						}
+						sInputFullPath += sInputFile;
+						
+						if (new File(sInputFullPath).exists()) {
+							sInputFile = Utils.getRandomName();
+						} else {
+							bIsInputFileUnique = true;
+						}
+					}
+					
+					WasdiFileUtils.writeFile(sSubsetJsonParameters, sInputFullPath);
+					
+					boolean bOutputFileUnique = false;
+					
+					while (!bOutputFileUnique) {
+						sOutputFullPath = m_sExchangeFolder;
+						if (!m_sExchangeFolder.endsWith("/")) {
+							sOutputFullPath += "/";
+						}
+						sOutputFullPath += sOutputFile;
+						
+						if (new File(sOutputFullPath).exists()) {
+							sOutputFile = Utils.getRandomName();
+						} else {
+							bOutputFileUnique = true;
+						}
+					}	
+					
+					File oOutputFile = new File(sOutputFullPath);
+					oOutputFile.createNewFile();
 				}
 			}
 			
-			sInputFullPath += sInputFile;
-			sOutputFullPath += sOutputFile;
-			
-			WasdiFileUtils.writeFile(sSubsetJsonParameters, sInputFullPath);
 			
 			String sJsonDataProviderConfig = JsonUtils.stringify(m_oDataProviderConfig);
 			
@@ -93,7 +126,7 @@ public class CM2ProviderAdapter extends ProviderAdapter {
 	@Override
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
-		
+				
 		String sResultDownloadedFilePath = null;
 		
 		String sInputFullPath = "";
