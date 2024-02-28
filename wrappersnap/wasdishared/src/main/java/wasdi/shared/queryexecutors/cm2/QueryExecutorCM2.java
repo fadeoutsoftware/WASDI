@@ -76,6 +76,8 @@ public class QueryExecutorCM2 extends QueryExecutor {
 			
 			sInputFullPath += sInputFile;
 			sOutputFullPath += sOutputFile;
+			
+			String sJsonDataProviderConfig = JsonUtils.stringify(s_oDataProviderConfig);
 		
 			WasdiFileUtils.writeFile(sQueryViewModel, sInputFullPath);
 		
@@ -83,7 +85,7 @@ public class QueryExecutorCM2 extends QueryExecutor {
 			asArgs.add(sCommand);
 			asArgs.add(sInputFullPath);
 			asArgs.add(sOutputFullPath);
-			asArgs.add(WasdiConfig.Current.myPath);
+			asArgs.add(sJsonDataProviderConfig);
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("QueryExecutorCM2.getCommandLineArgs: error ",oEx);
 		}

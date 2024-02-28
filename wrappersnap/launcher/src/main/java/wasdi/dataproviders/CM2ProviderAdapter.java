@@ -76,11 +76,13 @@ public class CM2ProviderAdapter extends ProviderAdapter {
 			
 			WasdiFileUtils.writeFile(sSubsetJsonParameters, sInputFullPath);
 			
+			String sJsonDataProviderConfig = JsonUtils.stringify(m_oDataProviderConfig);
+			
 			asArgs.add(m_sPythonScript); 				// arg[1] - name of the python data provider
 			asArgs.add("2"); 							// arg[2] - code for the download operation
 			asArgs.add(sInputFullPath); 				// arg[3] - path of the input file
 			asArgs.add(sOutputFullPath);				// arg[4] - path of the output file
-			asArgs.add(""/*WasdiConfig.Current.myPath*/);		// arg[5] - path of the wasdiConfig file (not sure)
+			asArgs.add(sJsonDataProviderConfig);		// arg[5] - config of the data provider
 			
 		} catch(Exception oEx) {
 			WasdiLog.errorLog("CM2ProviderAdapter.executeDownloadFile: error ", oEx);
