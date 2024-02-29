@@ -37,17 +37,22 @@ public class QueryExecutorCM2 extends QueryExecutor {
 		m_sProvider = "COPERNICUSMARINE";
 		
 		s_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sProvider);
+		WasdiLog.debugLog("QueryExecutorCM2: got data provider config");
+		
 		m_sParserConfigPath = s_oDataProviderConfig.parserConfig;
+		WasdiLog.debugLog("QueryExecutorCM2:  parser config path is " + m_sParserConfigPath );
 		
 		m_oQueryTranslator = new ConcreteQueryTranslator();
 		
 		try {
 			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
 			m_sPythonScript = oAppConf.getString("pythonScript");
+			WasdiLog.debugLog("QueryExecutorCM2: python script path " + m_sPythonScript);
 			m_sExchangeFolder = WasdiConfig.Current.paths.wasdiTempFolder; // oAppConf.getString("exchangeFolder");
+			WasdiLog.debugLog("QueryExecutorCM2: exchange folder: " + m_sExchangeFolder);
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("QueryExecutorCM2.executeCount(): exception reading parser config file " + m_sParserConfigPath);
+			WasdiLog.errorLog("QueryExecutorCM2: exception reading config files ", oEx);
 		}
 	}
 	
