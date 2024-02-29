@@ -518,7 +518,6 @@
 
                 ],
 {% endif %}
-                "image": "{{ aoWasdiConfiguration['dockers']['processorTypes'][sCurrentProcessorType]['image'] }}",
 {% if aoWasdiConfiguration['dockers']['processorTypes'][sCurrentProcessorType]['environmentVariables'] == [] %}
                 "environmentVariables": [],
 {% else %}
@@ -533,7 +532,19 @@
 
                 ],
 {% endif %}
+                "image": "{{ aoWasdiConfiguration['dockers']['processorTypes'][sCurrentProcessorType]['image'] }}",
                 "mountOnlyWorkspaceFolder": {{ aoWasdiConfiguration['dockers']['processorTypes'][sCurrentProcessorType]['mountOnlyWorkspaceFolder'] | bool | lower }},
+{% if aoWasdiConfiguration['dockers']['processorTypes'][sCurrentProcessorType]['templateFilesToExcludeFromDownload'] == [] %}
+                "templateFilesToExcludeFromDownload": [],
+{% else %}
+                "templateFilesToExcludeFromDownload": [
+{% for sCurrentTemplateFileToExcludeFromDownload in aoWasdiConfiguration['dockers']['processorTypes'][sCurrentProcessorType]['templateFilesToExcludeFromDownload'] | sort %}
+                    "{{ sCurrentTemplateFileToExcludeFromDownload }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                ],
+{% endif %}
                 "version": "{{ aoWasdiConfiguration['dockers']['processorTypes'][sCurrentProcessorType]['version'] }}"
             }{% if not loop.last %},
 {% endif %}
@@ -565,25 +576,26 @@
         "shellExecCommands": {}
 {% else %}
         "shellExecCommands": {
-{% for sCurrentDockerRegistry in aoWasdiConfiguration['dockers']['shellExecCommands'] | sort %}
-            "{{ sCurrentDockerRegistry }}": {
-{% if aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['additionalMountPoints'] | length == 0 %}
+{% for sCurrentShellExecCommand in aoWasdiConfiguration['dockers']['shellExecCommands'] | sort %}
+            "{{ sCurrentShellExecCommand }}": {
+{% if aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentShellExecCommand]['additionalMountPoints'] | length == 0 %}
                 "additionalMountPoints": [],
 {% else %}
                 "additionalMountPoints": [
-{% for sCurrentAdditionalMountPoint in aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['additionalMountPoints'] %}
+{% for sCurrentAdditionalMountPoint in aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentShellExecCommand]['additionalMountPoints'] %}
                     "{{ sCurrentAdditionalMountPoint }}"{% if not loop.last %},
 {% endif %}
 {% endfor %}
 
                 ],
 {% endif %}
-                "containerVersion": "{{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['containerVersion'] }}",
-                "dockerImage": "{{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['dockerImage'] }}",
-                "forceLocal": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['forceLocal'] | lower }},
-                "includeFirstCommand": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['includeFirstCommand'] | lower }},
-                "overrideDockerConfig": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['overrideDockerConfig'] | lower }},
-                "removePathFromFirstArg": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['removePathFromFirstArg'] | lower }}
+                "addPrefixToCommand": "{{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentShellExecCommand]['addPrefixToCommand'] }}",
+                "containerVersion": "{{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentShellExecCommand]['containerVersion'] }}",
+                "dockerImage": "{{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentShellExecCommand]['dockerImage'] }}",
+                "forceLocal": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentShellExecCommand]['forceLocal'] | lower }},
+                "includeFirstCommand": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentShellExecCommand]['includeFirstCommand'] | lower }},
+                "overrideDockerConfig": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentShellExecCommand]['overrideDockerConfig'] | lower }},
+                "removePathFromFirstArg": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentShellExecCommand]['removePathFromFirstArg'] | lower }}
             }{% if not loop.last %},
 {% endif %}
 {% endfor %}
