@@ -799,7 +799,7 @@ public class DockerUtils {
     		}
     		else {
     			// Error!
-    			WasdiLog.errorLog("DockerUtils.start: Impossible to start Container " + sContainerName);
+    			WasdiLog.errorLog("DockerUtils.start: Impossible to start Container " + sContainerName + " Message: " + oResponse.getResponseBody());
     			return "";
     		}
             
@@ -1079,7 +1079,8 @@ public class DockerUtils {
      * @param sVersion
      * @return
      */
-    protected String getContainerIdFromWasdiAppName(String sProcessorName, String sVersion) {
+    @SuppressWarnings("unchecked")
+	protected String getContainerIdFromWasdiAppName(String sProcessorName, String sVersion) {
     	try {
     		
     		List<Object> aoOutputJsonMap = getContainersInfo(true);
@@ -1405,7 +1406,6 @@ public class DockerUtils {
 				try {
 					LinkedHashMap<String, Object> oContainerMap = (LinkedHashMap<String, Object>) oContainer;
 					String sImageName = (String) oContainerMap.get("Image");
-					String sId = (String) oContainerMap.get("Id");
 					
 					if (sImageName.endsWith(sMyImage)) {
 						WasdiLog.debugLog("DockerUtils.getContainerInfoByImageName: found my container " + sMyImage + " Docker Image = " +sImageName);

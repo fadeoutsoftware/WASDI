@@ -24,7 +24,6 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ShareFileParameter;
 import wasdi.shared.payloads.DownloadPayload;
 import wasdi.shared.utils.EndMessageProvider;
-import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;

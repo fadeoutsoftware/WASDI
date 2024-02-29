@@ -1,7 +1,5 @@
 package wasdi.shared.business.processors;
 
-import java.util.ArrayList;
-
 /**
  * Processor Type static definition
  * @author p.campanella
@@ -43,59 +41,4 @@ public class ProcessorTypes {
 		return "";
 	}
 	
-	public static ArrayList<String> getAdditionalTemplateGeneratedFiles(String sProcessorType) {
-		ArrayList<String> aoFiles = new ArrayList<>();
-
-		if (sProcessorType.equals(IDL)) {
-			aoFiles.add("wasdi_wrapper.pro");
-			aoFiles.add("runwasdidocker.sh");
-			aoFiles.add("deploywasdidocker.sh");
-			aoFiles.add("cleanwasdidocker.sh");
-			aoFiles.add("call_idl.pro");
-		}
-		else if (sProcessorType.equals(UBUNTU_PYTHON37_SNAP)) {
-			aoFiles.add("packagesInfo.json");
-			aoFiles.add("runwasdidocker.sh");
-			aoFiles.add("deploywasdidocker.sh");
-			aoFiles.add("cleanwasdidocker.sh");			
-		}
-		else if (sProcessorType.equals(OCTAVE)) {
-			
-		}
-		else if (sProcessorType.equals(CONDA)) {
-			aoFiles.add("packagesInfo.json");
-			aoFiles.add("runwasdidocker.sh");
-			aoFiles.add("deploywasdidocker.sh");
-			aoFiles.add("cleanwasdidocker.sh");
-			aoFiles.add("installUserPackage.sh");
-		}
-		else if (sProcessorType.equals(JUPYTER_NOTEBOOK)) {
-			
-		}
-		else if (sProcessorType.equals(CSHARP)) {
-			aoFiles.add("deploywasdidocker.sh");
-			aoFiles.add("runwasdidocker.sh");
-			aoFiles.add("WasdiLib.dll");
-			aoFiles.add("WasdiLib.nlog.config");
-			aoFiles.add("WasdiRunner.deps.json");
-			aoFiles.add("WasdiRunner.dll");
-			aoFiles.add("WasdiRunner.runtimeconfig.json");
-			aoFiles.add("installUserPackage.sh");
-		}
-		else if (sProcessorType.equals(PYTHON_PIP_2) || sProcessorType.equals(PYTHON_PIP_2_UBUNTU_20)) {
-			aoFiles.add("packagesInfo.json");
-			aoFiles.add("runwasdidocker.sh");
-			aoFiles.add("deploywasdidocker.sh");
-			aoFiles.add("cleanwasdidocker.sh");
-			aoFiles.add("runServer.sh");
-		}
-		else if (sProcessorType.equals(PIP_ONESHOT)) {
-			aoFiles.add("installUserPackage.sh");
-		}
-		else if (sProcessorType.equals(EOEPCA)) {
-			aoFiles.add("installUserPackage.sh");
-		}		
-
-		return aoFiles;
-	}
 }

@@ -21,7 +21,6 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 
 	private static final String SSIZE_IN_BYTES = "sizeInBytes";
 	private static final String SHREF = "href";
-	private static final String SURL = "url";
 	private static final String SSIZE = "size";
 	private static final String SPLATFORM = "platform";
 	private static final String SSENSOR_MODE = "sensorMode";

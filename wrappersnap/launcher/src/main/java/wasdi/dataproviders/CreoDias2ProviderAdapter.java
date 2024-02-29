@@ -28,12 +28,10 @@ import wasdi.shared.viewmodels.HttpCallResponse;
 
 public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	
-	private static final String SODATA_ATTRIBUTES = "Attributes";
 	private static final String SODATA_NAME = "Name";
 	private static final String SODATA_VALUE = "Value";
 	
 	private static final String SAUTHENTICATION_URL = "https://identity.cloudferro.com/auth/realms/wekeo-elasticity/protocol/openid-connect/token";
-	private static final String SDOWNLOAD_URL_START = "https://zipper.dataspace.copernicus.eu/odata/v1/Products(";
 	private static final String SDOWNLOAD_URL_END = "?token=";
 	
 	private static final String SODATA_FILE_URL_START = "https://datahub.creodias.eu/odata/v1/Products(";
@@ -112,14 +110,6 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			}
 			
 			WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Anwer well received from the provider");
-			
-			
-			JSONObject jsonO = new JSONObject(sResponse.getResponseBody());
-			JSONArray arr = jsonO.getJSONArray("value");
-			
-			JSONObject jsonObject = (JSONObject) arr.get(0);
-				
-			
 			
 			JSONObject oJsonBody = new JSONObject(sResponse.getResponseBody());
 			JSONArray aoValues = oJsonBody.optJSONArray("value");
@@ -493,9 +483,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			return DataProviderScores.LTA.getValue();
 		}
 		else if (sPlatformType.equals(Platforms.SENTINEL2)) {
-			String sType = WasdiFileUtils.getProductTypeSatelliteImageFileName(sFileName);
-			
-			
+			//String sType = WasdiFileUtils.getProductTypeSatelliteImageFileName(sFileName);
 			if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
 			else return DataProviderScores.DOWNLOAD.getValue();				
 		}

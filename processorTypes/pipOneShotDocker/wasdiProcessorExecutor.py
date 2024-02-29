@@ -1,5 +1,5 @@
 '''
-Created on 24 Nov 2022
+Created on 24 Feb 2024
 
 @author: p.campanella
 '''
@@ -9,6 +9,7 @@ import os
 import urllib.parse
 import json
 import traceback
+import subprocess
 
 m_sProcId = ""
 
@@ -20,30 +21,23 @@ def _getEnvironmentVariable(sVariable):
         return None
 
 def log(sLogString):
-	print("[" + m_sProcId + "] wasdiProcessorExecutor PIP One Shot Engine v.2.1.3 - " + sLogString)
+    print("[" + m_sProcId + "] wasdiProcessorExecutor PIP One Shot Engine v.2.1.3 - " + sLogString)
 
-def executeProcessor(bIsOnServer = True):
+def executeProcessor():
     # We need the proc id for logs
     global m_sProcId
-    
-    #Init Wasdi
-    log("wasdi.executeProcessor: init waspy lib")
-    wasdi.setIsOnServer(bIsOnServer)
-    wasdi.setIsOnExternalServer(not bIsOnServer)
-    wasdi.setDownloadActive(True)
-    wasdi.setUploadActive(True)
 
     sForceStatus = 'ERROR'
 
     #Run the processor
     try:
-        import myProcessor        
+        import myProcessor
         wasdi.wasdiLog("wasdi.executeProcessor RUN " + m_sProcId)
         myProcessor.run()
         wasdi.wasdiLog("wasdi.executeProcessor Done")
-        
+
         sForceStatus = 'DONE'
-        
+
     except Exception as oEx2:
         wasdi.wasdiLog("wasdi.executeProcessor EXCEPTION")
         wasdi.wasdiLog(repr(oEx2))
@@ -52,12 +46,81 @@ def executeProcessor(bIsOnServer = True):
         wasdi.wasdiLog("wasdi.executeProcessor generic EXCEPTION")
     finally:
         sFinalStatus = wasdi.getProcessStatus(m_sProcId)
-        
+
         if sFinalStatus != 'STOPPED' and sFinalStatus != 'DONE' and sFinalStatus != 'ERROR':
             wasdi.wasdiLog("wasdi.executeProcessor Process finished. Forcing status to " + sForceStatus)
             wasdi.updateProcessStatus(m_sProcId, sForceStatus, 100)
 
     return
+
+
+def pm_list_packages(flag: str):
+    log('/packageManager/listPackages/' + flag)
+
+    command: str = 'pip list'
+    if flag != '':
+        command = command + ' -' + flag
+
+    output: str = __execute_pip_command_and_get_output(command)
+    log("Got output " + output)
+    dependencies: list = __parse_list_command_output(output)
+    sFullPath = wasdi.getPath("packagesInfo.json")
+
+    log('writing in ' + sFullPath)
+
+    log(dependencies)
+
+    with open(sFullPath, 'w') as oFile:
+        json.dump(dependencies, oFile)
+
+    log('File written ')
+
+def __execute_pip_command_and_get_output(command: str) -> str:
+    log('__execute_pip_command_and_get_output: ' + command)
+
+    oPipProcess = subprocess.run(command + ' > tmp', shell=True, capture_output=True)
+
+    sOutput = open('tmp', 'r').read()
+    os.remove('tmp')
+
+    stderr: str = oPipProcess.stderr.decode("utf-8")
+
+    if stderr != '':
+        if sOutput == '':
+            sOutput = stderr
+        else:
+            sOutput += stderr
+
+    return sOutput
+
+def __parse_list_command_output(output: str) -> list:
+    asLines: list = output.splitlines()
+
+    sHeader: str = asLines[0]
+    asHeaders: list = sHeader.split()
+
+    for i in range(len(asHeaders)):
+        asHeaders[i] = asHeaders[i].lower()
+
+    aoDependencies: list = []
+
+    for sLine in asLines[2:]:
+        asColumns = sLine.split()
+
+        if len(asHeaders) == 2:
+            aoDependencies.append({
+                "manager": "pip",
+                asHeaders[0]: asColumns[0],
+                asHeaders[1]: asColumns[1]})
+        elif len(asHeaders) == 4:
+            aoDependencies.append({
+                "manager": "pip",
+                asHeaders[0]: asColumns[0],
+                asHeaders[1]: asColumns[1],
+                asHeaders[2]: asColumns[2],
+                asHeaders[3]: asColumns[3]})
+
+    return aoDependencies
 
 if __name__ == '__main__':
     try:
@@ -75,6 +138,10 @@ if __name__ == '__main__':
         sEncodedParams = _getEnvironmentVariable('WASDI_ONESHOT_ENCODED_PARAMS')
 
         if sEncodedParams is None:
+            log("no params available")
+            sEncodedParams = "%7B%7D"
+
+        if sEncodedParams == "":
             log("no params available")
             sEncodedParams = "%7B%7D"
 
@@ -103,15 +170,6 @@ if __name__ == '__main__':
         if sWorkspaceId is None:
             log("Workspace Id not available")
 
-        # The lib will read all the data from env
-        if not wasdi.init():
-            log("There was an error in init, we try to execute but it will likely not work")
-            wasdi.wasdiLog("There was an error in init, we try to execute but it will likely not work")
-        else:
-            log("Init done, starting processor")
-            wasdi.wasdiLog("Init done, starting processor")
-
-
         # Read the on-server flag
         bIsOnServer = True
         sOnServer = _getEnvironmentVariable('WASDI_ONESHOT_ON_SERVER')
@@ -120,7 +178,32 @@ if __name__ == '__main__':
             if sOnServer == "0" or sOnServer.lower() == "false":
                 bIsOnServer = False
 
-        executeProcessor(bIsOnServer)
+        # set the server flags
+        wasdi.setIsOnServer(bIsOnServer)
+        wasdi.setIsOnExternalServer(not bIsOnServer)
+        wasdi.setDownloadActive(True)
+        wasdi.setUploadActive(True)
+
+        log("wasdi.executeProcessor: init waspy lib")
+        # The lib will read all the data from env
+        if not wasdi.init():
+            log("There was an error in init, we try to execute but it will likely not work")
+            wasdi.wasdiLog("There was an error in init, we try to execute but it will likely not work")
+        else:
+            log("Init done, starting processor")
+            wasdi.wasdiLog("Init done, starting processor")
+
+        bRun = True
+        sRefreshPackageList = _getEnvironmentVariable('WASDI_ONESHOT_REFRESH_PACKAGE_LIST')
+
+        if sRefreshPackageList is not None:
+            if sRefreshPackageList == "1":
+                log("Now I refresh my package list")
+                pm_list_packages('')
+                bRun = True
+
+        if bRun:
+            executeProcessor()
 
     except Exception as oEx:
         wasdi.wasdiLog("pipOneShot: EXCEPTION")

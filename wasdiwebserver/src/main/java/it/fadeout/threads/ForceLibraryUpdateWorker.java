@@ -1,11 +1,8 @@
 package it.fadeout.threads;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import wasdi.shared.business.Node;
-import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.wasdiAPI.ProcessorAPIClient;
 

@@ -3,7 +3,6 @@ package it.fadeout.rest.resources;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;

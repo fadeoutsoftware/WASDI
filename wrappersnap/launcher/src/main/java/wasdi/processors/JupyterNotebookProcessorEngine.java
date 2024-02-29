@@ -385,8 +385,6 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 		ProcessWorkspace oProcessWorkspace = m_oProcessWorkspace;
 
-		String sProcessorName = ProcessorTypes.JUPYTER_NOTEBOOK;
-
 		try {
 			processWorkspaceLog("Start termination of the notebook in the workspace " + oParameter.getWorkspace());
 

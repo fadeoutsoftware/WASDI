@@ -374,7 +374,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	}
 
 	public static void main(String[]args) throws Exception {
-		String clientString = "( beginPosition:[2023-06-29T00:00:00.000Z TO 2023-07-06T23:59:59.999Z] AND endPosition:[2023-06-29T00:00:00.000Z TO 2023-07-06T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:SLC AND polarisationmode:VV AND sensoroperationalmode:EW AND relativeorbitnumber:123)";
+		
 		QueryTranslatorCreoDias2 tr = new QueryTranslatorCreoDias2();
 		tr.setAppconfigPath("C:/WASDI/GIT/WASDI/client/app/config/appconfig.json");
 		tr.setParserConfigPath("C:/WASDI/GIT/WASDI/configuration/creodias2ParserConfig.json");

@@ -527,8 +527,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Check and set the operation end-date
             if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
                 oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
-                // P.Campanella 20200115: I think this is to add, but I cannot test it now :( ...
-                //LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.valueOf(oProcessWorkspace.getStatus()), oProcessWorkspace.getProgressPerc());
             }
         } catch (Exception oEx) {
             WasdiLog.errorLog("DockerProcessorEngine.run Exception", oEx);
@@ -1168,8 +1166,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
     /**
      * Get the specific instance of the Package Manager compatible with this instance
-     * @param sIp
-     * @param iPort
+     * @param sUrl
      * @return
      */
     protected abstract IPackageManager getPackageManager(String sUrl);
@@ -1286,9 +1283,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			return false;
 		}
 
-		String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
-		int iPort = oProcessor.getPort();
-
         // Create the Docker Utils Object
         DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
         
@@ -1307,16 +1301,24 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			String sUrl = getProcessorUrl(oProcessor, sContainerName);
 			
 			IPackageManager oPackageManager = getPackageManager(sUrl);
+			
+			boolean bResult = true;
+			
+			if (oPackageManager!=null) {
+				Map<String, Object> aoPackagesInfo = oPackageManager.getPackagesInfo();
 
-			Map<String, Object> aoPackagesInfo = oPackageManager.getPackagesInfo();
+				String sFileFullPath = sProcessorFolder + "packagesInfo.json";
 
-			String sFileFullPath = sProcessorFolder + "packagesInfo.json";
+				bResult= WasdiFileUtils.writeMapAsJsonFile(aoPackagesInfo, sFileFullPath);
 
-			boolean bResult = WasdiFileUtils.writeMapAsJsonFile(aoPackagesInfo, sFileFullPath);
-
-			if (!bResult) {
-				WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: the packagesInfo.json file was not created.");
+				if (!bResult) {
+					WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: the packagesInfo.json file was not created.");
+				}				
 			}
+			else {
+				WasdiLog.warnLog("DockerProcessorEngine.refreshPackagesInfo: this processor engine does not have a package manager");
+			}
+
 
 			return bResult;
 		} catch (Exception oEx) {

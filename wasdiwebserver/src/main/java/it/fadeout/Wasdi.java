@@ -52,7 +52,6 @@ import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.SerializationUtils;
-import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.wasdiAPI.ProcessingAPIClient;

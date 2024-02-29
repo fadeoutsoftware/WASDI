@@ -14,16 +14,12 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.LoggerWrapper;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.packagemanagers.PackageManagerUtils;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.processors.PackageManagerViewModel;
 import wasdi.shared.viewmodels.processors.PackageViewModel;
 
 public class PipPackageManagerImpl implements IPackageManager {
-
-	/**
-	 * Static logger reference
-	 */
-	public static LoggerWrapper s_oLogger = new LoggerWrapper(LogManager.getLogger(PipPackageManagerImpl.class));
 
 	private String m_sTargetIp;
 	private int m_iTargetPort;
@@ -160,6 +156,11 @@ public class PipPackageManagerImpl implements IPackageManager {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public boolean isValidPackage(String sPackageName) {
+		return PackageManagerUtils.checkPipPackage(sPackageName);
 	}
 
 }
