@@ -306,17 +306,13 @@ public class SocketUtils {
 		if (sBaseAddress.endsWith("/")) sBaseAddress = sBaseAddress.substring(0, sBaseAddress.length()-1);
 		sPath = sPath.substring(sBaseAddress.length());
 		
-		WasdiLog.debugLog("SocketUtils.httpPost: computed path " + sPath);
+		// WasdiLog.debugLog("SocketUtils.httpPost: computed path " + sPath);
 		
 		Request oRequest = createRequest(Request.Method.POST, sPath, asHeaders, ayBytes);
-		
-		WasdiLog.debugLog("SocketUtils.httpPost: requst executed");
-		
+				
 		try (Response oResponse = oHttpClient.execute(oRequest)) {
 			int iResponseCode = oResponse.getStatusCode();
-			
-			WasdiLog.debugLog("SocketUtils.httpPost: response status code: " + iResponseCode);
-			
+						
 			oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
 			
 			if (aoOutputHeaders != null) {
@@ -327,18 +323,14 @@ public class SocketUtils {
 			InputStream oInputStream = oResponse.getBody();
 			
 			ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-			
-			WasdiLog.debugLog("SocketUtils.httpPost: preparing input stream");
-			
+						
 			if (oInputStream != null) {
 				Util.copyStream(oInputStream, oBytearrayOutputStream);
 				sResult = oBytearrayOutputStream.toString();
 				oHttpCallResponse.setResponseBody(sResult);
 				oInputStream.close();
 			}
-			
-			WasdiLog.debugLog("SocketUtils.httpPost: end");
-			
+						
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("SocketUtils.httpPost: Exception " + oEx.getMessage());
 		} finally {

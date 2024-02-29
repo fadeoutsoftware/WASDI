@@ -112,11 +112,6 @@ public class WasdiConfig {
 	 * If the general logHttpCalls is False, this does not change
 	 */
 	public boolean filterInternalHttpCalls=true;
-	
-	/**
-	 * Link to the path of the config file
-	 */
-	public String myPath = "";
 
 	
 	/**
@@ -279,7 +274,7 @@ public class WasdiConfig {
         	oLinesStream = Files.lines(Paths.get(sConfigFilePath), StandardCharsets.UTF_8);
 			String sJson = oLinesStream.collect(Collectors.joining(System.lineSeparator()));
 			Current = MongoRepository.s_oMapper.readValue(sJson,WasdiConfig.class);
-			Current.myPath = sConfigFilePath;
+			Current.paths.wasdiConfigFilePath = sConfigFilePath;
 			bRes = true;
 			
 		} catch (Exception oEx) {

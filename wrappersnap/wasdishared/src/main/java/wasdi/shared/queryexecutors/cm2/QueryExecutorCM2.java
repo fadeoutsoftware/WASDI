@@ -21,7 +21,6 @@ import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
 import wasdi.shared.utils.runtime.ShellExecReturn;
-import wasdi.shared.viewmodels.processors.PackageManagerFullInfoViewModel;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -48,6 +47,7 @@ public class QueryExecutorCM2 extends QueryExecutor {
 			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
 			m_sPythonScript = oAppConf.getString("pythonScript");
 			WasdiLog.debugLog("QueryExecutorCM2: python script path " + m_sPythonScript);
+			
 			m_sExchangeFolder = WasdiConfig.Current.paths.wasdiTempFolder; // oAppConf.getString("exchangeFolder");
 			WasdiLog.debugLog("QueryExecutorCM2: exchange folder: " + m_sExchangeFolder);
 		}
@@ -63,18 +63,13 @@ public class QueryExecutorCM2 extends QueryExecutor {
 		String sInputFullPath = "";
 		String sOutputFullPath = "";
 		
-		
-		
 		try {
-			
 				
 			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
 			String sQueryViewModel = JsonUtils.stringify(oQueryViewModel);
 			
-			/*
 			String sInputFile = Utils.getRandomName();
 			String sOutputFile = Utils.getRandomName();
-			
 			
 			synchronized (s_oTempFolderLock) {
 				if (!Utils.isNullOrEmpty(m_sExchangeFolder)) {
@@ -116,21 +111,14 @@ public class QueryExecutorCM2 extends QueryExecutor {
 					File oOutputFile = new File(sOutputFullPath);
 					oOutputFile.createNewFile();
 				}
-			}
-
+			}			
+		
+			asArgs.add(m_sPythonScript);									// arg[1] - name of the python data provider
+			asArgs.add(sCommand);											// arg[2] - code for the download operation
+			asArgs.add(sInputFullPath);										// arg[3] - path of the input file
+			asArgs.add(sOutputFullPath);									// arg[4] - path of the output file
+			asArgs.add(WasdiConfig.Current.paths.wasdiConfigFilePath);		// arg[5] - wasdiConfig file path
 			
-			String sJsonDataProviderConfig = JsonUtils.stringify(s_oDataProviderConfig);
-		
-			WasdiFileUtils.writeFile(sQueryViewModel, sInputFullPath);
-			*/
-		
-			asArgs.add(m_sPythonScript);
-			/*
-			asArgs.add(sCommand);
-			asArgs.add(sInputFullPath);
-			asArgs.add(sOutputFullPath);
-			asArgs.add(sJsonDataProviderConfig);
-			*/
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("QueryExecutorCM2.getCommandLineArgs: error ",oEx);
 		}
@@ -147,7 +135,7 @@ public class QueryExecutorCM2 extends QueryExecutor {
 		try {
 			List<String> asArgs = getCommandLineArgs("1", sQuery);
 			
-			/*
+			
 			if (asArgs == null) {
 				WasdiLog.errorLog("QueryExecutorCM2.executeCount: no args!!");
 				return -1;
@@ -160,11 +148,11 @@ public class QueryExecutorCM2 extends QueryExecutor {
 			
 			sInputFullPath = asArgs.get(2);
 			sOutputFullPath = asArgs.get(3);
-			*/
+			
 			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
 			WasdiLog.debugLog("QueryExecutorCM2.executeCount: python output = = " + oShellExecReturn.getOperationLogs());
 			
-			/*
+			
 			File oOutputFile = new File(sOutputFullPath);
 			
 			if (!oOutputFile.exists()) {
@@ -181,8 +169,7 @@ public class QueryExecutorCM2 extends QueryExecutor {
 			WasdiLog.debugLog("QueryExecutorCM2.executeCount: return count " + iCount);
 			
 			return iCount;
-			*/
-			return -100; 
+			
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("QueryExecutorCM2.executeCount: error ",oEx);
 		}		
@@ -209,23 +196,22 @@ public class QueryExecutorCM2 extends QueryExecutor {
 				return aoReturnList;
 			}
 			
-			/*
+			
 			if (asArgs.size()<5) {
 				WasdiLog.errorLog("QueryExecutorCM2.executeAndRetrieve: not enough args");
 				return aoReturnList;				
 			}
-			*/
 			
-			/*
+			
 			sInputFullPath = asArgs.get(2);
 			sOutputFullPath = asArgs.get(3);
-			*/
+			
 			
 			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
 			
 			WasdiLog.debugLog("QueryExecutorCM2.executeAndRetrieve: python output = " + oShellExecReturn.getOperationLogs());
 			
-			/*
+			
 			File oOutputFile = new File(sOutputFullPath);
 			
 			if (!oOutputFile.exists()) {
@@ -240,7 +226,7 @@ public class QueryExecutorCM2 extends QueryExecutor {
 			aoReturnList = MongoRepository.s_oMapper.readValue(sOutput, new TypeReference<List<QueryResultViewModel>>(){});			
 			
 			WasdiLog.debugLog("QueryExecutorCM2.executeAndRetrieve: return elements list " + aoReturnList.size() );
-			*/
+			
 			return aoReturnList;
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("QueryExecutorCM2.executeAndRetrieve: error ",oEx);
