@@ -456,6 +456,7 @@ def createResultViewModel(sCMProductId, sCMDatasetId, oWasdiJsonQuery, oMatching
     oLinkMap = createLink(sCMDatasetId,
                           sVariables, sStartDateTime, sEndDateTime, sNorth, sSouth, sWest, sEast, sMinDepth, sMaxDepth)
     sJsonLink = json.dumps(oLinkMap)
+    sJsonLink = "https://payload=" + sJsonLink
     # get summary
     sSummary = createSummary(sStartDateTime, sEndDateTime, sCMProductId)
 
