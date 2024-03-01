@@ -4,20 +4,25 @@ import json
 import os
 import re
 import logging
+from datetime import datetime
 
-
+s_sDataProviderName = 'COPERNICUSMARINE'
 def executeCount(sInputFilePath, sOutputFilePath):
     if not os.path.isfile(sInputFilePath):
         logging.warning('executeCount: input file not found')
 
-    with open(sInputFilePath) as oJsonFile:
-        aoInputQuery = json.load(oJsonFile)
-
-    if aoInputQuery is None:
-        logging.warning(f'executeCount: there was an error reading the input file: {sInputFilePath}')
+    try:
+        with open(sInputFilePath) as oJsonFile:
+            aoInputQuery = json.load(oJsonFile)
+    except Exception as oEx:
+        logging.error(f'executeCount: error reading the input file: {sInputFilePath}, {oEx}')
         sys.exit(1)
 
-    oResult = 1 #TODO put this back: searchOnCopernicusMarine(aoInputQuery)
+    if aoInputQuery is None:
+        logging.warning(f'executeCount: input file {sInputFilePath} is None')
+        sys.exit(1)
+
+    oResult = searchOnCopernicusMarine(aoInputQuery)
 
     aoReturnObject = {}
     if oResult is None:
@@ -25,65 +30,86 @@ def executeCount(sInputFilePath, sOutputFilePath):
     else:
         aoReturnObject["count"] = 1
 
-    with open(sOutputFilePath, 'w') as oFile:
-        json.dump(aoReturnObject, oFile)
-
+    try:
+        with open(sOutputFilePath, 'w') as oFile:
+            json.dump(aoReturnObject, oFile)
+    except Exception as oEx:
+        logging.warning(f'executeCount: error trying to write the output file {sOutputFilePath}, {oEx}')
+        sys.exit(1)
 
 def executeAndRetrieve(sInputFilePath, sOutputFilePath):
-    '''
     if not os.path.isfile(sInputFilePath):
         logging.warning('executeAndRetrieve: input file not found')
 
     aoInputQuery = None
-    with open(sInputFilePath) as oJsonFile:
-        aoInputQuery = json.load(oJsonFile)
+    try:
+        with open(sInputFilePath) as oJsonFile:
+            aoInputQuery = json.load(oJsonFile)
+    except Exception as oEx:
+        logging.error(f'executeAndRetrieve: error reading the input file: {sInputFilePath}, {oEx}')
+        return sys.exit(-1)
 
     if aoInputQuery is None:
-        logging.warning(f'executeAndRetrieve: there was an error reading the input file: {sInputFilePath}')
+        logging.warning(f'executeAndRetrieve: input file: {sInputFilePath} is None')
         sys.exit(1)
 
     oResult = searchOnCopernicusMarine(aoInputQuery)
     logging.debug(f'executeAndRetrieve: result {oResult}')
 
     aoReturnList = [oResult]
-    '''
 
-    aoReturnList = []
-
-    oResult1 = {}
-    oResult1["title"] = "myfile1.tif"
-    oResult1["summary"] = "My nice result"
-    oResult1["id"] = "myfile1"
-    oResult1["link"] = "http://thisisalink.com"
-    oResult1["footprint"] = "POLYGON"
-    oResult1["provider"] = "CM"
-
-    aoReturnList.append(oResult1)
-
-    with open(sOutputFilePath, 'w') as oFile:
-        json.dump(aoReturnList, oFile)
-
-
-def executeDownloadFile(sInputFilePath, sOutputFilePath, sJsonDataProviderConfig):
+    try:
+        with open(sOutputFilePath, 'w') as oFile:
+            json.dump(aoReturnList, oFile)
+    except Exception as oEx:
+        logging.warning(f'executeAndRetrieve: error trying to write the output file {sOutputFilePath}, {oEx}')
+        sys.exit(1)
+def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
     if not os.path.isfile(sInputFilePath):
         logging.warning('executeDownloadFile: input file not found')
 
     aoInputParameters = None
-    with open(sInputFilePath) as oJsonFile:
-        aoInputParameters = json.load(oJsonFile)
+    try:
+        with open(sInputFilePath) as oJsonFile:
+            aoInputParameters = json.load(oJsonFile)
+    except Exception as oEx:
+        logging.error(f'executeDownloadFile: error reading the input file: {sInputFilePath}, {oEx}')
+        return sys.exit(-1)
 
     if aoInputParameters is None:
-        logging.warning(f'executeDownloadFile: there was an error reading the input file: {sInputFilePath}')
+        logging.warning(f'executeDownloadFile: there was an error reading the input file: {sWasdiConfigFilePath}')
         sys.exit(1)
 
-    if sJsonDataProviderConfig is None or sJsonDataProviderConfig == "":
-        logging.warning(f'executeDownloadFile: data provider configuration is None or empty string: {sJsonDataProviderConfig}')
+    if stringIsNullOrEmpty(sWasdiConfigFilePath):
+        logging.warning(f'executeDownloadFile: data provider configuration is None or empty string: {sWasdiConfigFilePath}')
         sys.exit(1)
 
-    aoDataProviderConfig = json.loads(sJsonDataProviderConfig)
+    aoDataProviderConfig = None
+    try:
+        with open(sWasdiConfigFilePath) as oWasdiConfigJsonFile:
+            aoDataProviderConfig = json.load(oWasdiConfigJsonFile)
+    except Exception as oEx:
+        logging.warning(f'executeDownloadFile: error reading the wasdiConfig file: {sWasdiConfigFilePath}, {oEx}')
+        sys.exit(1)
 
-    sUsername = aoDataProviderConfig.get('user', None)
-    sPassword = aoDataProviderConfig.get('password', None)
+    if aoDataProviderConfig is None:
+        logging.warning(f'executeDownloadFile:  wasdiConfig file is None: {sWasdiConfigFilePath}')
+
+    # find the configuration for the data provider
+    asCMDataProviderConfig = None
+
+    aoWasdiDataProviders = aoDataProviderConfig.get('dataProviders', [])
+    for oProvider in aoWasdiDataProviders:
+        if oProvider['name'] == s_sDataProviderName:
+            asCMDataProviderConfig = oProvider
+            break
+
+    if asCMDataProviderConfig is None:
+        logging.warning(f"executeDownloadFile: no configuration found for {s_sDataProviderName}. Impossible to continue")
+        sys.exit(1)
+
+    sUsername = asCMDataProviderConfig.get('user', None)
+    sPassword = asCMDataProviderConfig.get('password', None)
 
     sDownloadedFilePath = executeDownloadFromCopernicusMarine(aoInputParameters, sUsername, sPassword)
 
@@ -93,9 +119,13 @@ def executeDownloadFile(sInputFilePath, sOutputFilePath, sJsonDataProviderConfig
         'outputFile': sDownloadedFilePath
     }
 
-    with open(sOutputFilePath, 'w') as oFile:
-        json.dump(oRes, oFile)
-        logging.debug(f"path to the downloaded file written in the output file")
+    try:
+        with open(sOutputFilePath, 'w') as oFile:
+            json.dump(oRes, oFile)
+            logging.debug(f"path to the downloaded file written in the output file")
+    except Exception as oEx:
+        logging.error(f'executeDownloadFile: error trying to write the output file {sOutputFilePath}, {oEx}')
+        sys.exit(1)
 
 
 def searchOnCopernicusMarine(oJsonQuery):
@@ -138,6 +168,7 @@ def searchOnCopernicusMarine(oJsonQuery):
         logging.warning(f"searchOnCopernicusMarine: the catalogue doesn't contain products")
         sys.exit(1)
 
+    logging.warning(f"searchOnCopernicusMarine: found {len(aoCatalogue['products'])} products")
     oResult = findFirstMatchingResults(oJsonQuery, aoCatalogue['products'])
     logging.debug(f"searchOnCopernicusMarine: first matching result {oResult}")
     return oResult
@@ -153,9 +184,6 @@ def findFirstMatchingResults(oWasdiJsonQuery, aoCatalogue):
     # check the name of the product
     sWasdiProductId = oWasdiJsonQuery['productType']
 
-    sVariablesFromSensorMode = oWasdiJsonQuery['sensorMode']
-    asWasdiVariables = sVariablesFromSensorMode.split(" ")
-
     for aoProductMap in aoCatalogue:
         # it looks like the toolbox does not need the "-TDS" suffix anymore, so we remove it
         if sWasdiProductId.endswith("-TDS"):
@@ -163,8 +191,6 @@ def findFirstMatchingResults(oWasdiJsonQuery, aoCatalogue):
 
         sCMProductId = aoProductMap.get('product_id', '')
         if sCMProductId != sWasdiProductId:
-            logging.debug(f'findFirstMatchingResults: '
-                  f'product id {sWasdiProductId} from WASDI doesnt match product id {sCMProductId} from CM')
             continue
 
         # check the datasets
@@ -175,17 +201,14 @@ def findFirstMatchingResults(oWasdiJsonQuery, aoCatalogue):
             sCMDatasetId = aoDatasetMap.get('dataset_id', '')
 
             if sWasdiDatasetId != sCMDatasetId:
-                logging.debug(
-                    f'findFirstMatchingResults: '
-                    f'dataset id {sWasdiDatasetId} from WASDI does not match dataset id {sCMProductId} from CM')
                 continue
 
+            logging.debug(
+                f'findFirstMatchingResults: found dataset {sWasdiDatasetId}')
             aoVersionsList = aoDatasetMap.get('versions', [])
             for oVersion in aoVersionsList:
                 # TODO: should I return some default value if the coordinates or the depth is not specified?
-                oMatchingServiceMap = getServiceMatchingVariables(oVersion, asWasdiVariables, oWasdiJsonQuery['north'],
-                                            oWasdiJsonQuery['west'], oWasdiJsonQuery['south'], oWasdiJsonQuery['east'],
-                                            oWasdiJsonQuery['cloudCoverageFrom'], oWasdiJsonQuery['cloudCoverageTo'])
+                oMatchingServiceMap = getServiceMatchingVariables(oVersion, oWasdiJsonQuery)
 
                 if oMatchingServiceMap is not None:
                     # if we find a matching service, we can then use the information in the wasdi query VM and in the
@@ -193,16 +216,13 @@ def findFirstMatchingResults(oWasdiJsonQuery, aoCatalogue):
                     return createResultViewModel(sCMProductId, sCMDatasetId, oWasdiJsonQuery, oMatchingServiceMap)
 
 
-def getServiceMatchingVariables(oVersion, asWasdiVariables, sNorth, sWest, sSouth, sEast, sMinDepth, sMaxDepth):
+def getServiceMatchingVariables(oVersion, oWasdiJsonQuery):
+                                # , asWasdiVariables, sNorth, sWest, sSouth, sEast, sMinDepth, sMaxDepth, sStartDate, sEndDate):
     """
     Get the first service storing the dataset and matching the search parameters in the WASDI query, i.e. the variables
     and the bounding box
     :param oVersion: the map representing one version of the dataset
-    :param asWasdiVariables: list of strings representing the names of the variables coming from the WASDI query
-    param sNorth: north coordinate provided in the WASDI query
-    :param sWest: west coordinate provided in the WASDI query
-    :param sSouth: south coordinate provided in the WASDI query
-    :param sEast: east coordinate provided in the WASDI query
+    :param oWasdiJsonQuery:  the WASDI query map
     :return: the map representing the first service that was found matching all the search parameters in the WASDI query
     """
     oFirstMatchingService = None
@@ -223,8 +243,7 @@ def getServiceMatchingVariables(oVersion, asWasdiVariables, sNorth, sWest, sSout
 
             # let's check if the dataset available in that service contains all the variables
             # selected in the wasdi query
-            bServiceContainsVariables = checkVariablesAndCoordinates(aoCMVariablesList, asWasdiVariables,
-                                                                     sNorth, sWest, sSouth, sEast, sMinDepth, sMaxDepth)
+            bServiceContainsVariables = checkVariables(aoCMVariablesList, oWasdiJsonQuery)
 
             if bServiceContainsVariables:
                 # the dataset provided by this service contains all the information selected in the WASDI query
@@ -235,21 +254,39 @@ def getServiceMatchingVariables(oVersion, asWasdiVariables, sNorth, sWest, sSout
     return oFirstMatchingService
 
 
-def checkVariablesAndCoordinates(aoCMVariablesList, asWasdiVariables, sNorth, sWest, sSouth, sEast, sMinDepth, sMaxDepth):
+def checkVariables(aoCMVariablesList, oWasdiJsonQuery):
     """
     Check if all the variables that were selected in the WASDI are present in the dataset
     :param aoCMVariablesList: list of CM objects representing the variables
-    :param asWasdiVariables: list of strings representing the names of the variables coming from the WASDI query
-    :param sNorth: north coordinate provided in the WASDI query
-    :param sWest: west coordinate provided in the WASDI query
-    :param sSouth: south coordinate provided in the WASDI query
-    :param sEast: east coordinate provided in the WASDI query
-    :return: True if all the variables selected in the WASDI query are present in the dataset and have values in
     the bounding box selected in WASDI, False otherwise
     """
-    logging.debug(f'checkVariablesAndCoordinates: variables received from wasdi {asWasdiVariables}')
+    sVariablesFromSensorMode = oWasdiJsonQuery['sensorMode']
+    asWasdiVariables = sVariablesFromSensorMode.split(" ")
+
+    logging.debug(f'checkVariables: variables received from wasdi {asWasdiVariables}')
     # array of booleans used to track the presence, in the dataset, of the variable selected in WASDI .
     # For a given element 'i', bIsVariableInCM[i] = True if the variable is present in the dataset
+
+    sNorth = oWasdiJsonQuery.get('north', None)
+    sWest = oWasdiJsonQuery.get('west', None)
+    sSouth = oWasdiJsonQuery.get('south', None)
+    sEast = oWasdiJsonQuery.get('east', None)
+
+    if sNorth is None or sWest is None or sSouth is None or sEast is None:
+        logging.warning(f'one of more points of the bounding box are not specified')
+        return False
+
+    # depth could miss from the query: that's ok
+    sMinDepth = oWasdiJsonQuery.get('cloudCoverageFrom', None)
+    sMaxDepth = oWasdiJsonQuery.get('cloudCoverageTo', None)
+
+    sStartDate = oWasdiJsonQuery.get('startFromDate', None)
+    sEndDate = oWasdiJsonQuery.get('endToDate', None)
+
+    if sStartDate is None or sEndDate is None:
+        logging.warning(f'temporal filters are not well specified, one or more is null')
+        return False
+
     bIsVariableInCM = [False] * len(asWasdiVariables)
 
     for oVariableMap in aoCMVariablesList:
@@ -257,9 +294,9 @@ def checkVariablesAndCoordinates(aoCMVariablesList, asWasdiVariables, sNorth, sW
         try:
             # if the index is not in the asWasdiVariables, the method .index() will throw an exception
             iIndex = asWasdiVariables.index(sVariableShortName)
-            logging.debug(f'checkVariablesAndCoordinates: checking variable {sVariableShortName}:')
-            bIsBBoxMatching = isWasdiBBoxIncludedInCMCoordinates(oVariableMap, sNorth, sWest, sSouth, sEast)
-            if bIsBBoxMatching:
+            bIsWasdiQueryCompliant = isWasdiQueryCompliantWithCMCoordinate(oVariableMap, sNorth, sWest, sSouth, sEast,
+                                                                           sMinDepth, sMaxDepth, sStartDate, sEndDate)
+            if bIsWasdiQueryCompliant:
                 bIsVariableInCM[iIndex] = True
         except ValueError:
             logging.error(f'CM variable {sVariableShortName} not among the one in the WASDI query. Continue to search')
@@ -269,53 +306,129 @@ def checkVariablesAndCoordinates(aoCMVariablesList, asWasdiVariables, sNorth, sW
     i = 0
     while i < len(bIsVariableInCM):
         if bIsVariableInCM[i] is False:
-            logging.warning(f"checkVariablesAndCoordinates: variable {asWasdiVariables[i]} not found")
+            logging.warning(f"checkVariables: variable {asWasdiVariables[i]} not found")
         i += 1
 
     return all(bIsVariableInCM)
 
-
-def isWasdiBBoxIncludedInCMCoordinates(oVariableMap, sNorth, sWest, sSouth, sEast):
+def isWasdiQueryCompliantWithCMCoordinate(oVariableMap, sNorth, sWest, sSouth, sEast, sMinDepth, sMaxDepth, sStartDate, sEndDate):
     """
-    Check if the values of a variable are available with the bounding box provided by the WASDI query
-    :param oVariableMap: the map containing the metadata about a dataset's variable
+    Each variable in copernicus marine is a map containing a set of 'coordinates' (e.g. time, depth,
+    latitude, longitude) describing the dimensions of the data. This method checks that the filters in the WASDI
+    query (temporal filter, bounding box and depth filters) are included in the values associated to the coordinates
+    of the variable.
+    :param oVariableMap: the map structure describing a CM variable
     :param sNorth: north coordinate provided in the WASDI query
     :param sWest: west coordinate provided in the WASDI query
     :param sSouth: south coordinate provided in the WASDI query
     :param sEast: east coordinate provided in the WASDI query
-    :return: True if the variable's coordinates are included in the bounding box provided by the WASDI query
+    :param sMinDepth: min depth specified in the WASDI query
+    :param sMaxDepth: max depth specified in the WASDI query
+    :param sStartDate: start date specified in the WASDI query
+    :param sEndDate: end date specified in the WASDI query
+    :return: True if the filters selected in wasdi query are consistent with the coordinates of the variable
     """
-    bLatitudeMatch = False
-    bLongitudeMatch = False
-    if 'coordinates' in oVariableMap:
+    if 'coordinates' not in oVariableMap:
+        logging.warning('no coordinates')
+        return False
 
-        for oCoordinateMap in oVariableMap['coordinates']:
+    for oCoordinateMap in oVariableMap['coordinates']:
+        sCoordinateName = oCoordinateMap.get('coordinates_id', None)
 
-            if 'minimum_value' not in oCoordinateMap or 'maximum_value' not in oCoordinateMap:
-                logging.debug(f"isWasdiBBoxIncludedInCMCoordinates: coordinates miss the min or the max value")
-                continue
+        if sCoordinateName == 'latitude':
+            if not isGeoReferenceValid(oCoordinateMap, sSouth, sNorth):
+                logging.warning(f"checkCoordinates: latitude not included in CM values")
+                return False
+            else:
+                logging.debug(f"checkCoordinates: latitude included in CM values")
 
-            sGeoReference = oCoordinateMap['coordinates_id']
+        if sCoordinateName == 'longitude':
+            if not isGeoReferenceValid(oCoordinateMap, sWest, sEast):
+                logging.warning(f"checkCoordinates: longitude not included in CM values")
+                return False
+            else:
+                logging.debug(f"checkCoordinates: longitude included in CM values")
 
-            if sGeoReference == 'latitude':
-                fMax = oCoordinateMap['maximum_value']
-                fMin = oCoordinateMap['minimum_value']
-                logging.debug(f"isWasdiBBoxIncludedInCMCoordinates: CM North {fMax}")
-                logging.debug(f"isWasdiBBoxIncludedInCMCoordinates: CM South {fMin}")
-                if sNorth <= fMax and sNorth >= fMin and sSouth <= fMax and sSouth >= fMin:
-                    logging.debug(f"isWasdiBBoxIncludedInCMCoordinates: latitude values available")
-                    bLatitudeMatch = True
+        if sCoordinateName == 'depth':
+            afDepthValues = oCoordinateMap.get('values', [])
+            # if a depth was specified, then we need to put it to its negative value, as it is specified in CM
+            if sMinDepth is not None and float(-sMinDepth) not in afDepthValues:
+                logging.warning(f"checkCoordinates: min depth not available in CM")
+                return False
+            else:
+                logging.debug(f"checkCoordinates: min depth included in CM values")
+            if sMaxDepth is not None and float(-sMaxDepth) not in afDepthValues:
+                logging.warning(f"checkCoordinates: max depth not available in CM")
+                return False
+            else:
+                logging.debug(f"checkCoordinates: max depth included in CM values")
 
-            if sGeoReference == 'longitude':
-                fMax = oCoordinateMap['maximum_value']
-                fMin = oCoordinateMap['minimum_value']
-                logging.debug(f"isWasdiBBoxIncludedInCMCoordinates: CM East {fMax}")
-                logging.debug(f"isWasdiBBoxIncludedInCMCoordinates: CM West {fMin}")
-                if sWest <= fMax and sWest >= fMin and sEast <= fMax and sEast >= fMin:
-                    logging.debug(f"isWasdiBBoxIncludedInCMCoordinates: longitude values available")
-                    bLongitudeMatch = True
+        if sCoordinateName == 'time':
+            if not isTimeRangeValid(oCoordinateMap, sStartDate, sEndDate):
+                logging.warning(f"checkCoordinates: time range not available in CM")
+                return False
+            else:
+                logging.debug(f"checkCoordinates: time range included in CM values")
+    return True
 
-    return bLatitudeMatch and bLongitudeMatch
+
+def isTimeRangeValid(oTimeMap, sStartDate, sEndDate):
+    """
+    Checks if the time range specified in WASDI query is included in the time range of the dataset
+    :param oTimeMap: the map describing the temporal range in CM
+    :param sStartDate: starting date time as specified in WASDI
+    :param sEndDate: ending date time as specified in WASDI
+    :return: True if the date-time range specified in WASDI is consistent with the date-time range of the CM dataset
+    """
+    if 'minimum_value' not in oTimeMap or 'maximum_value' not in oTimeMap:
+        logging.debug(f"isTimeRangeValid: temporal coordinates miss the min or the max value")
+        return False
+    try:
+        sWasdiDateFormat = '%Y-%m-%dT%H:%M:%S.%fZ'
+        oWasdiStartDate = datetime.strptime(sStartDate, sWasdiDateFormat)
+        oWasdiEndDate = datetime.strptime(sEndDate, sWasdiDateFormat)
+
+        if oWasdiStartDate > oWasdiEndDate:
+            logging.warning(f"isTimeRangeValid: invalid time interval. start date {sStartDate} comes after {sEndDate}")
+
+        sCMDateFormat = '%Y-%m-%dT%H:%M:%SZ'
+        oCMEndDate = datetime.strptime(oTimeMap['maximum_value'], sCMDateFormat)
+        oCMStartDate = datetime.strptime(oTimeMap['minimum_value'], sCMDateFormat)
+
+        return oWasdiStartDate >= oCMStartDate \
+            and oWasdiStartDate <= oCMEndDate \
+            and oWasdiEndDate >= oCMStartDate \
+            and oWasdiEndDate <= oCMEndDate
+
+    except ValueError as oEx:
+        logging.error(f"isTimeRangeValid: exception {oEx}")
+
+    return False
+
+def isGeoReferenceValid(oGeoReferenceMap, sWasdiMinGeoRef, sWasdiMaxGeoRef):
+    """
+    Checks if the spatial range (either latitude or longitude) specified in WASDI query is included
+    in the spatial range of the dataset
+    :param oGeoReferenceMap: the map describing the spatial range (either latitude or longitude) in CM
+    :param sWasdiMinGeoRef: minimum latitude or longitude as specified in WASDI
+    :param sWasdiMaxGeoRef: maximum latitude or longitude as specified in WASDI
+    :return: True if the spatial range specified in WASDI is consistent with the spatial range of the CM dataset
+    """
+    if 'minimum_value' not in oGeoReferenceMap or 'maximum_value' not in oGeoReferenceMap:
+        logging.debug(f"isGeoReferenceValid: coordinates miss the min or the max value")
+        return False
+
+    fWasdiMax = float(sWasdiMaxGeoRef)
+    fWasdiMin = float(sWasdiMinGeoRef)
+
+    fMax = oGeoReferenceMap['maximum_value']
+    fMin = oGeoReferenceMap['minimum_value']
+
+    if fWasdiMax <= fMax and fWasdiMax >= fMin and fWasdiMin <= fMax and fWasdiMin >= fMin:
+        logging.debug(f"isGeoReferenceValid: latitude values available")
+        return True
+
+    return False
 
 
 def createResultViewModel(sCMProductId, sCMDatasetId, oWasdiJsonQuery, oMatchingServiceMap):
@@ -331,9 +444,15 @@ def createResultViewModel(sCMProductId, sCMDatasetId, oWasdiJsonQuery, oMatching
     sStartDateTime = oWasdiJsonQuery['startFromDate']
     sEndDateTime = oWasdiJsonQuery['endToDate']
 
+    # get the depth, if present, otherwise get None
+    sMinDepth = oWasdiJsonQuery.get('cloudCoverageFrom', None)
+    sMaxDepth = oWasdiJsonQuery.get('cloudCoverageTo', None)
+
     # create the link
     sVariables = oWasdiJsonQuery['sensorMode']
-    oLinkMap = createLink(sCMDatasetId, sVariables, sStartDateTime, sEndDateTime, sNorth, sSouth, sWest, sEast)
+
+    oLinkMap = createLink(sCMDatasetId,
+                          sVariables, sStartDateTime, sEndDateTime, sNorth, sSouth, sWest, sEast, sMinDepth, sMaxDepth)
     sJsonLink = json.dumps(oLinkMap)
     # get summary
     sSummary = createSummary(sStartDateTime, sEndDateTime, sCMProductId)
@@ -395,7 +514,7 @@ def createSummary(sStartDate, sEndDate, sProductId):
     return ', '.join(asSummaryElements)
 
 
-def createLink(sDatasetId, sVariables, sStartDateTime, sEndDateTime, sNorth, sSouth, sWest, sEast):
+def createLink(sDatasetId, sVariables, sStartDateTime, sEndDateTime, sNorth, sSouth, sWest, sEast, sMinDepth, sMaxDepth):
     oDownloadJsonParameters = {
         'datasetId': sDatasetId,
         'variables': sVariables,
@@ -406,6 +525,13 @@ def createLink(sDatasetId, sVariables, sStartDateTime, sEndDateTime, sNorth, sSo
         'west': sWest,
         'east': sEast
     }
+
+    if sMinDepth is not None:
+        oDownloadJsonParameters['minDepth'] = -float(sMinDepth)
+
+    if sMaxDepth is not None:
+        oDownloadJsonParameters['maxDepth'] = -float(sMaxDepth)
+
     return oDownloadJsonParameters
 
 def stringIsNullOrEmpty(sString):
@@ -485,7 +611,6 @@ def executeDownloadFromCopernicusMarine(aoInputParameters, sUsername, sPassword)
 if __name__ == '__main__':
     logging.basicConfig(encoding='utf-8', format='[%(levelname)s] %(message)s', level=logging.DEBUG)
 
-    logging.debug('__main__: this is the very start of the data provider')
     sOperation = None
     sInputFile = None
     sOutputFile = None
@@ -501,14 +626,13 @@ if __name__ == '__main__':
         sOperation = asArgs[1]
         sInputFile = asArgs[2]
         sOutputFile = asArgs[3]
-        sJsonDataProviderConfig = asArgs[4]
+        sWasdiConfigFile = asArgs[4]
 
-        # TODO: we can remove all those logs
-        logging.debug('__main__: first argument is the name of the file - we are not interested:' + asArgs[0])
+        # first argument asArgs[0] is the name of the file - we are not interested in it
         logging.debug('__main__: operation ' + sOperation)
         logging.debug('__main__: input file ' + sInputFile)
         logging.debug('__main__: output file: ' + sOutputFile)
-        logging.debug('__main__: data provider config ' + sJsonDataProviderConfig)
+        logging.debug('__main__: wasdi config path: ' + sWasdiConfigFile)
 
     except Exception as oE:
         logging.error('__main__: Exception ' + str(oE))
@@ -522,11 +646,10 @@ if __name__ == '__main__':
         executeCount(sInputFile, sOutputFile)
     elif sOperation == "2":
         logging.debug('__main__: chosen operation is DOWNLOAD')
-        executeDownloadFile(sInputFile, sOutputFile, sJsonDataProviderConfig)
+        executeDownloadFile(sInputFile, sOutputFile, sWasdiConfigFile)
     else:
         logging.debug('__main__: unknown operation. Script will exit')
         sys.exit(1)
-
 
     # print(copernicusmarine.__version__)  # version 1.0.1
 
