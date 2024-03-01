@@ -80,6 +80,10 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 		addEnvironmentVariablesToProcessorType(oProcessorTypeConfig, sEncodedJson, oParameter, false);
 	}
 	
+	protected void addEnvironmentVariablesToProcessorType(ProcessorTypeConfig oProcessorTypeConfig, String sEncodedJson, ProcessorParameter oParameter, boolean bRefreshPackageList) {
+		addEnvironmentVariablesToProcessorType(oProcessorTypeConfig, sEncodedJson, oParameter, bRefreshPackageList, "");
+	}
+	
 	protected void addEnvironmentVariablesToProcessorType(ProcessorTypeConfig oProcessorTypeConfig, String sEncodedJson, ProcessorParameter oParameter, boolean bRefreshPackageList, String sPackageListFileName) {
         EnvironmentVariableConfig oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_ONESHOT_ENCODED_PARAMS");
         
