@@ -1,0 +1,121 @@
+def getAnsibleExtraVariableProject() {
+  def aAnsibleExtraVariableProject = []
+
+  aAnsibleExtraVariableProject.add('sDeployDataProviderImageCopernicusMarine=' + env.sWasdiDataProviderCopernicusMarine.toString())
+
+  aAnsibleExtraVariableProject.unique()
+
+  if ( aAnsibleExtraVariableProject.size() > 0 ) {
+    return aAnsibleExtraVariableProject.join(' ')
+  }
+
+  return ''
+}
+
+pipeline {
+  agent any
+
+  environment {
+    sAnsibleExtraVariableProject = getAnsibleExtraVariableProject()
+    sCurrentRevision             = "${env.BUILD_ID}"
+    sEnvironmentLower            = env.sAnsibleLimit.split('-')[0].toLowerCase()
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '365'))
+    disableConcurrentBuilds()
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        echo "env.GIT_BRANCH                          = " + env.GIT_BRANCH
+        echo "env.sAnsibleExtraVariableProject        = " + env.sAnsibleExtraVariableProject
+        echo "env.sAnsibleInventory                   = " + env.sAnsibleInventory
+        echo "env.sAnsibleLimit                       = " + env.sAnsibleLimit
+        echo "env.sCurrentRevision                    = " + env.sCurrentRevision
+        echo "env.sSourceBranch                       = " + env.sSourceBranch
+        echo "env.sWasdiAnsibleGitRepositoryUrl       = " + env.sWasdiAnsibleGitRepositoryUrl
+        echo "env.sWasdiAnsiblePath                   = " + env.sWasdiAnsiblePath
+        echo "env.sWasdiDataProviderCopernicusMarine" = + env.sWasdiDataProviderCopernicusMarine
+        echo "env.WORKSPACE                           = " + env.WORKSPACE
+
+        sh script: "pwd", label: "Current location"
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          sh script: """
+            mkdir --parents `dirname ${sWasdiAnsibleVaultFile}`
+            echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
+          """,
+          label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloudSsh', url: "${env.sWasdiAnsibleGitRepositorySshUrl}"]]])
+        }
+      }
+    }
+
+    stage('BUILD THE CONTAINER(S)') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/buildWasdiDockerContainer.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sEnvironmentLower} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
+        """,
+        label: "Build the container(s)"
+      }
+    }
+
+    stage('DEPLOY THE CONTAINERS AND THEIR RUN ELEMENTS') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deployDockerContainer.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
+        """,
+        label: "Deploy the container(s) and their run elements"
+      }
+    }
+
+    stage('CLEAN THE DOCKER IMAGE(S)') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deleteDockerImage.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
+        """,
+        label: "Clean the Docker image(s)"
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
