@@ -64,6 +64,8 @@ def executeAndRetrieve(sInputFilePath, sOutputFilePath):
     except Exception as oEx:
         logging.warning(f'executeAndRetrieve: error trying to write the output file {sOutputFilePath}, {oEx}')
         sys.exit(1)
+
+
 def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
     if not os.path.isfile(sInputFilePath):
         logging.warning('executeDownloadFile: input file not found')
@@ -100,7 +102,7 @@ def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
 
     aoWasdiDataProviders = aoDataProviderConfig.get('dataProviders', [])
     for oProvider in aoWasdiDataProviders:
-        if oProvider['name'] == s_sDataProviderName:
+        if oProvider.get('name', "") == s_sDataProviderName:
             asCMDataProviderConfig = oProvider
             break
 
@@ -474,7 +476,7 @@ def createResultViewModel(sCMProductId, sCMDatasetId, oWasdiJsonQuery, oMatching
 
     oResultViewModel = {
         'id': sCMProductId,
-        'title': sCMDatasetId,
+        'title': sCMDatasetId + ".nc",
         'footprint': sWasdiCoordinatesFormat,
         'link': sJsonLink,
         'summary': sSummary,
@@ -548,6 +550,8 @@ def executeDownloadFromCopernicusMarine(aoInputParameters, sUsername, sPassword)
     sWest = aoInputParameters.get('west', None)
     sDownloadDirectory = aoInputParameters.get('downloadDirectory', None)
     sDownloadFileName = aoInputParameters.get('downloadFileName', None)
+    sMinDepth = aoInputParameters.get('minDepth', None)
+    sMaxDepth = aoInputParameters.get('maxDepth', None)
 
     if stringIsNullOrEmpty(sDatasetId) or stringIsNullOrEmpty(sVariables):
         logging.warning("executeDownloadFromCopernicusMarine: datasetId or variables missing")
@@ -594,6 +598,8 @@ def executeDownloadFromCopernicusMarine(aoInputParameters, sUsername, sPassword)
             maximum_longitude=sEast,
             minimum_latitude=sSouth,
             maximum_latitude=sNorth,
+            minimum_depth=float(sMinDepth),
+            maximum_depth=float(sMaxDepth),
             output_filename=sDownloadFileName,
             output_directory=sDownloadDirectory,
             force_download=True,     # forcing the download avoids a prompt which is asking for confirmation before the download
