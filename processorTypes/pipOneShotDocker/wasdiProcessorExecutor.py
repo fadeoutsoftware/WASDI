@@ -54,24 +54,24 @@ def executeProcessor():
     return
 
 
-def pm_list_packages(flag: str):
-    log('/packageManager/listPackages/' + flag)
+def pm_list_packages(sFlag: str):
+    log('/packageManager/listPackages/' + sFlag)
 
-    command: str = 'pip list'
-    if flag != '':
-        command = command + ' -' + flag
+    sCommand: str = 'pip list'
+    if sFlag != '':
+        sCommand = sCommand + ' -' + sFlag
 
-    output: str = __execute_pip_command_and_get_output(command)
-    log("Got output " + output)
-    dependencies: list = __parse_list_command_output(output)
+    sOutput: str = __execute_pip_command_and_get_output(sCommand)
+    log("Got output " + sOutput)
+    aoDependencies: list = __parse_list_command_output(sOutput)
     sFullPath = wasdi.getPath("packagesInfo.json")
 
     log('writing in ' + sFullPath)
 
-    log(dependencies)
+    log(aoDependencies)
 
     with open(sFullPath, 'w') as oFile:
-        json.dump(dependencies, oFile)
+        json.dump(aoDependencies, oFile)
 
     log('File written ')
 
@@ -97,22 +97,29 @@ def __parse_list_command_output(output: str) -> list:
     asLines: list = output.splitlines()
 
     sHeader: str = asLines[0]
+
+    log('__parse_list_command_output: Header ' + sHeader)
+
     asHeaders: list = sHeader.split()
 
     for i in range(len(asHeaders)):
         asHeaders[i] = asHeaders[i].lower()
+        log('__parse_list_command_output: asHeaders[i] ' + asHeaders[i])
 
     aoDependencies: list = []
 
     for sLine in asLines[2:]:
+        log('__parse_list_command_output: parsing line ' + sLine)
         asColumns = sLine.split()
 
         if len(asHeaders) == 2:
+            log('__parse_list_command_output: 2 headers')
             aoDependencies.append({
                 "manager": "pip",
                 asHeaders[0]: asColumns[0],
                 asHeaders[1]: asColumns[1]})
         elif len(asHeaders) == 4:
+            log('__parse_list_command_output: 4 headers')
             aoDependencies.append({
                 "manager": "pip",
                 asHeaders[0]: asColumns[0],
@@ -120,6 +127,7 @@ def __parse_list_command_output(output: str) -> list:
                 asHeaders[2]: asColumns[2],
                 asHeaders[3]: asColumns[3]})
 
+    log('__parse_list_command_output: found ' +str(len(aoDependencies)) )
     return aoDependencies
 
 if __name__ == '__main__':
