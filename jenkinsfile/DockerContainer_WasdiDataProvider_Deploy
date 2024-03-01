@@ -92,7 +92,7 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          echo ansible-playbook \
+          ansible-playbook \
             playbooks/deployDockerContainer.yml \
             --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
