@@ -54,7 +54,7 @@ def executeProcessor():
     return
 
 
-def pm_list_packages(sFlag: str):
+def pm_list_packages(sFlag: str, sPackageFileName: str):
     sCommand: str = 'pip list'
     if sFlag != '':
         sCommand = sCommand + ' -' + sFlag
@@ -62,18 +62,13 @@ def pm_list_packages(sFlag: str):
     sOutput: str = __execute_pip_command_and_get_output(sCommand)
     log("Got output\n " + sOutput)
     aoDependencies: list = __parse_list_command_output(sOutput)
-    sFullPath = wasdi.getPath("packagesInfo.json")
+    sFullPath = wasdi.getPath(sPackageFileName)
 
     log('Saving Packages Info file in ' + sFullPath)
 
     with open(sFullPath, 'w') as oFile:
         json.dump(aoDependencies, oFile)
-
-    if os.path.exists(sFullPath):
-        log("File exists :)")
-    else:
-        log("Fine does not exists :(")
-
+    
     log('Packages list done')
 
 def __execute_pip_command_and_get_output(command: str) -> str:
@@ -199,9 +194,9 @@ if __name__ == '__main__':
         sRefreshPackageList = _getEnvironmentVariable('WASDI_ONESHOT_REFRESH_PACKAGE_LIST')
 
         if sRefreshPackageList is not None:
-            if sRefreshPackageList == "1":
+            if sRefreshPackageList != "":
                 log("Refreshing package list")
-                pm_list_packages('')
+                pm_list_packages(sRefreshPackageList)
                 bRun = True
 
         if bRun:
