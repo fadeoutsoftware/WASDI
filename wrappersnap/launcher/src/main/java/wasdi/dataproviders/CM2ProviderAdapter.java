@@ -2,6 +2,8 @@ package wasdi.dataproviders;
 
 import java.util.*;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
@@ -130,18 +132,17 @@ public class CM2ProviderAdapter extends ProviderAdapter {
 		String sInputFullPath = "";
 		String sOutputFullPath = "";
 		
-		WasdiLog.debugLog("CM2ProviderAdapter.executeDownloadFile: product name " + oProcessWorkspace.getProductName());
+		WasdiLog.debugLog("CM2ProviderAdapter.executeDownloadFile: product name " + oProcessWorkspace.getProductName());	
 		
-		// let's add the additional information to the json passed to the Python data provider
-		Map<String, Object> oMap = JsonUtils.jsonToMapOfObjects(sFileURL);
-		oMap.put("downloadDirectory", sSaveDirOnServer);
-		oMap.put("downloadFileName", oProcessWorkspace.getProductName());
-		oMap.put("maxRetry", iMaxRetry); // not sure I need
-		
-		String sEnrichedJsonParameters = JsonUtils.stringify(oMap);
-		
-		
-		try {
+		try {		
+			// let's add the additional information to the json passed to the Python data provider
+			Map<String, Object> oMap = extractWasdiPayloadFromUrl(sFileURL);
+			oMap.put("downloadDirectory", sSaveDirOnServer);
+			oMap.put("downloadFileName", oProcessWorkspace.getProductName());
+			oMap.put("maxRetry", iMaxRetry); // not sure I need
+			
+			String sEnrichedJsonParameters = JsonUtils.stringify(oMap);
+			
 			// get the parameters to pass to the shell execute
 			List<String> asArgs = getCommandLineArgsForDownload(sEnrichedJsonParameters);
 			
@@ -155,7 +156,6 @@ public class CM2ProviderAdapter extends ProviderAdapter {
 			
 			sInputFullPath = asArgs.get(2);
 			sOutputFullPath = asArgs.get(3);
-			
 			
 			
 			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
@@ -195,20 +195,48 @@ public class CM2ProviderAdapter extends ProviderAdapter {
 
 	@Override
 	public String getFileName(String sFileURL) throws Exception {
-		// TODO: this will need to be rewritten! Most probably I need to add put the filename already in th 
+		WasdiLog.debugLog("CM2ProviderAdapter.getFileName: received url " + sFileURL);
+		
 		String sFileName = "dataset.nc";
 		
-		// the link is a JSON string that we can parse into a map
-		Map<String, Object> oJsonMap = JsonUtils.jsonToMapOfObjects(sFileURL);
-		String sDatasetId = (String) oJsonMap.getOrDefault(s_sDatasetId, "");
-		
-		if (!Utils.isNullOrEmpty(sDatasetId)) {
-			sFileName = sDatasetId + "_" + Utils.nowInMillis().longValue() + ".nc";
+		try {
+			// the link is a JSON string that we can parse into a map
+			Map<String, Object> oJsonMap = extractWasdiPayloadFromUrl(sFileURL);
+			String sDatasetId = (String) oJsonMap.getOrDefault(s_sDatasetId, "");
+			
+			if (!Utils.isNullOrEmpty(sDatasetId)) {
+				sFileName = sDatasetId + "_" + Utils.nowInMillis().longValue() + ".nc";
+			}
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("CM2ProviderAdapter.getFileName: exception retrieving thefile name ", oEx);
 		}
 		
 		WasdiLog.debugLog("CM2ProviderAdapter.getFileName: file name for CM subset file " + sFileName);
 		return sFileName;
 	}
+	
+	private Map<String, Object> extractWasdiPayloadFromUrl(String sUrl) {
+		String sDecodedUrl = decodeUrl(sUrl);
+
+		String sPayload = null;
+		if (sDecodedUrl != null && sDecodedUrl.startsWith("https://payload=")) {
+			sPayload = sDecodedUrl.replace("https://payload=", "");
+			WasdiLog.debugLog("CM2ProviderAdapter.extractWasdiPayloadFromUrl json string: " + sPayload);
+			return JsonUtils.jsonToMapOfObjects(sPayload);
+		}
+
+		return null;
+	}
+	
+	private static String decodeUrl(String sUrlEncoded) {
+		try {
+			return URLDecoder.decode(sUrlEncoded, java.nio.charset.StandardCharsets.UTF_8.toString());
+		} catch (UnsupportedEncodingException oE) {
+			WasdiLog.warnLog("CM2ProviderAdapter.decodeUrl: could not decode URL " + oE);
+			return null;
+		}
+	}
+	
 
 	@Override
 	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
@@ -219,11 +247,5 @@ public class CM2ProviderAdapter extends ProviderAdapter {
 		return 0;
 	}
 
-	
-	public static void main(String[]args) throws Exception {
-		String sJsonLink = "{\"datasetId\": \"c3s_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M\", \"variables\": \"CHL_count\", \"startDateTime\": \"2024-02-15T00:00:00.000Z\", \"endDateTime\": \"2024-02-22T23:59:59.999Z\", \"north\": 48.087771923697254, \"south\": 37.130148163649544, \"west\": 7.103214466564759, \"east\": 18.539381759128183}";
-		CM2ProviderAdapter cm2 = new CM2ProviderAdapter();
-		
-		cm2.executeDownloadFile(sJsonLink, "user", "password", "C:/temp", null, 3);
-	}
+
 }
