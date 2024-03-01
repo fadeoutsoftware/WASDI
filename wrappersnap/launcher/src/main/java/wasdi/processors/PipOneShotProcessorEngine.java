@@ -80,7 +80,7 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 		addEnvironmentVariablesToProcessorType(oProcessorTypeConfig, sEncodedJson, oParameter, false);
 	}
 	
-	protected void addEnvironmentVariablesToProcessorType(ProcessorTypeConfig oProcessorTypeConfig, String sEncodedJson, ProcessorParameter oParameter, boolean bRefreshPackageList) {
+	protected void addEnvironmentVariablesToProcessorType(ProcessorTypeConfig oProcessorTypeConfig, String sEncodedJson, ProcessorParameter oParameter, boolean bRefreshPackageList, String sPackageListFileName) {
         EnvironmentVariableConfig oEnvVariable = oProcessorTypeConfig.getEnvironmentVariableConfig("WASDI_ONESHOT_ENCODED_PARAMS");
         
         if (oEnvVariable == null) {
@@ -160,7 +160,7 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
             	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
             }
             
-            oEnvVariable.value = "1";        	
+            oEnvVariable.value = "sPackageListFileName";        	
         }
 	}
 	
@@ -445,7 +445,9 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 	        	WasdiConfig.Current.dockers.processorTypes.add(oProcessorTypeConfig);
 	        }
 	        
-	        addEnvironmentVariablesToProcessorType(oProcessorTypeConfig, "", oParameter, true);
+	        String sRandomName = Utils.getRandomName();
+	        
+	        addEnvironmentVariablesToProcessorType(oProcessorTypeConfig, "", oParameter, true, sRandomName);
 	        
 	        String sContainerName = oDockerUtils.start("", oProcessor.getPort(), false);
 	        
@@ -458,11 +460,13 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 	        waitForApplicationToFinish(oProcessor, oParameter.getProcessObjId(), "", m_oProcessWorkspace);
 	        
 	        String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
-	        sWorkspacePath += "packagesInfo.json";
+	        sWorkspacePath += sRandomName;
 	        
-	        String sFileFullPath = sProcessorFolder + "packagesInfo.json";
+	        WasdiLog.debugLog("PipOneShotProcessorEngine.refreshPackagesInfo: moving packages file in the processor folder");
+	        WasdiFileUtils.moveFile2(sWorkspacePath, sProcessorFolder);
+	        WasdiFileUtils.renameFile(sProcessorFolder + sRandomName, sProcessorFolder + "packagesInfo.json");
 	        
-	        WasdiFileUtils.moveFile2(sWorkspacePath, sFileFullPath);
+	        WasdiLog.debugLog("PipOneShotProcessorEngine.refreshPackagesInfo: packages list updated");
 
 			return true;
 		} catch (Exception oEx) {
