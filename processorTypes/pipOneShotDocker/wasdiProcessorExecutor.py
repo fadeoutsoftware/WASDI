@@ -55,25 +55,26 @@ def executeProcessor():
 
 
 def pm_list_packages(sFlag: str):
-    log('/packageManager/listPackages/' + sFlag)
-
     sCommand: str = 'pip list'
     if sFlag != '':
         sCommand = sCommand + ' -' + sFlag
 
     sOutput: str = __execute_pip_command_and_get_output(sCommand)
-    log("Got output " + sOutput)
+    log("Got output\n " + sOutput)
     aoDependencies: list = __parse_list_command_output(sOutput)
     sFullPath = wasdi.getPath("packagesInfo.json")
 
-    log('writing in ' + sFullPath)
-
-    log(aoDependencies)
+    log('Saving Packages Info file in ' + sFullPath)
 
     with open(sFullPath, 'w') as oFile:
         json.dump(aoDependencies, oFile)
 
-    log('File written ')
+    if os.path.exists(sFullPath):
+        log("File exists :)")
+    else:
+        log("Fine does not exists :(")
+
+    log('Packages list done')
 
 def __execute_pip_command_and_get_output(command: str) -> str:
     log('__execute_pip_command_and_get_output: ' + command)
@@ -98,28 +99,24 @@ def __parse_list_command_output(output: str) -> list:
 
     sHeader: str = asLines[0]
 
-    log('__parse_list_command_output: Header ' + sHeader)
+    log('__parse_list_command_output')
 
     asHeaders: list = sHeader.split()
 
     for i in range(len(asHeaders)):
         asHeaders[i] = asHeaders[i].lower()
-        log('__parse_list_command_output: asHeaders[i] ' + asHeaders[i])
 
     aoDependencies: list = []
 
     for sLine in asLines[2:]:
-        log('__parse_list_command_output: parsing line ' + sLine)
         asColumns = sLine.split()
 
         if len(asHeaders) == 2:
-            log('__parse_list_command_output: 2 headers')
             aoDependencies.append({
                 "manager": "pip",
                 asHeaders[0]: asColumns[0],
                 asHeaders[1]: asColumns[1]})
         elif len(asHeaders) == 4:
-            log('__parse_list_command_output: 4 headers')
             aoDependencies.append({
                 "manager": "pip",
                 asHeaders[0]: asColumns[0],
@@ -127,7 +124,6 @@ def __parse_list_command_output(output: str) -> list:
                 asHeaders[2]: asColumns[2],
                 asHeaders[3]: asColumns[3]})
 
-    log('__parse_list_command_output: found ' +str(len(aoDependencies)) )
     return aoDependencies
 
 if __name__ == '__main__':
@@ -140,25 +136,23 @@ if __name__ == '__main__':
         else:
             m_sProcId = "N.A."
 
-        log("Starting Proc Id " + m_sProcId)
+        log("Assigned Proc Id " + m_sProcId)
 
         # Read the encoded parameters
         sEncodedParams = _getEnvironmentVariable('WASDI_ONESHOT_ENCODED_PARAMS')
 
         if sEncodedParams is None:
-            log("no params available")
+            log("No params available, use empty one")
             sEncodedParams = "%7B%7D"
 
         if sEncodedParams == "":
-            log("no params available")
+            log("No params available, use empty one")
             sEncodedParams = "%7B%7D"
 
         sDecodedParams = urllib.parse.unquote(sEncodedParams)
         aoParameters = json.loads(sDecodedParams)
 
         wasdi.setParametersDict(aoParameters)
-
-        log("Added parameters")
 
         # Read the User
         sUserId = _getEnvironmentVariable('WASDI_USER')
@@ -206,7 +200,7 @@ if __name__ == '__main__':
 
         if sRefreshPackageList is not None:
             if sRefreshPackageList == "1":
-                log("Refresh package list")
+                log("Refreshing package list")
                 pm_list_packages('')
                 bRun = True
 
