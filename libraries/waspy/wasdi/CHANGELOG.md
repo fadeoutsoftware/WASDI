@@ -3,7 +3,7 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
-## [0.8.6.0] - 2024-02-22
+## [0.8.6.1] - 2024-02-22
 ### Added
 - sleep parameter to control the waiting time while polling api
 - support for import operations returning DONE in case of existing file
@@ -11,6 +11,7 @@ WASDI python programming library CHANGELOG.md, according to the
 - support for custom template parameters in the SNAP workflows XML
 ### Fixed
 - moved import methods in the POST version
+- internal get path for the workspace specific node or in general for workspace without user
 
 ## [0.8.5.7] - 2023-12-20
 ### Added

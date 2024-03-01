@@ -199,18 +199,19 @@ if __name__ == '__main__':
             wasdi.wasdiLog("There was an error in init, we try to execute but it will likely not work")
         else:
             log("Init done, starting processor")
-            wasdi.wasdiLog("Init done, starting processor")
+            wasdi.wasdiLog("Init done")
 
         bRun = True
         sRefreshPackageList = _getEnvironmentVariable('WASDI_ONESHOT_REFRESH_PACKAGE_LIST')
 
         if sRefreshPackageList is not None:
             if sRefreshPackageList == "1":
-                log("Now I refresh my package list")
+                log("Refresh package list")
                 pm_list_packages('')
                 bRun = True
 
         if bRun:
+            wasdi.wasdiLog("Starting Processor")
             executeProcessor()
 
     except Exception as oEx:

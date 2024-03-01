@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.6.0
+Version 0.8.6.1
 
-Last Update: 23/02/2024
+Last Update: 29/02/2024
 
 Tested with: Python 3.7, Python 3.8, Python 3.9, Python 3.10
 
@@ -708,7 +708,7 @@ def init(sConfigFilePath=None):
     if not m_sMyProcId or m_sMyProcId == '':
         m_sMyProcId = _getEnvironmentVariable("WASDI_PROCESS_WORKSPACE_ID")
         if m_sMyProcId is not None:
-            print('[INFO] waspy.init: session id read in the env WASDI_SESSION_ID variable')
+            print('[INFO] waspy.init: process workspace id read in the env WASDI_SESSION_ID variable')
         if m_sMyProcId is None:
             m_sMyProcId = ""
 
@@ -1247,7 +1247,13 @@ def _internalGetPath(sProductName):
     if getOnlyWorkspaceFolderMounted() and (getIsOnServer() or getIsOnExternalServer()):
         return os.path.join(getBasePath(), sProductName)
     else:
-        return os.path.join(getBasePath(), m_sWorkspaceOwner, m_sActiveWorkspace, sProductName)
+        sWorkspaceOwner = m_sWorkspaceOwner
+        if sWorkspaceOwner is None:
+            sWorkspaceOwner = ""
+        if sWorkspaceOwner == "":
+            sWorkspaceOwner = m_sUser
+
+        return os.path.join(getBasePath(), sWorkspaceOwner, m_sActiveWorkspace, sProductName)
 
 
 def getFullProductPath(sProductName):
