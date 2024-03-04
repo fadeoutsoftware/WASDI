@@ -6,13 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.log.LoggerWrapper;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.packagemanagers.PackageManagerUtils;
 import wasdi.shared.viewmodels.HttpCallResponse;
