@@ -10,6 +10,7 @@ import urllib.parse
 import json
 import traceback
 import subprocess
+import re
 
 m_sProcId = ""
 
@@ -53,8 +54,32 @@ def executeProcessor():
 
     return
 
+def refresh_package_list(sRefreshPackageList: str):
+    aoPackagesList = {}
 
-def pm_list_packages(sFlag: str, sPackageFileName: str):
+    log("Get Outdated packages")
+    aoOutdatedDependencies = pm_list_packages("o")
+    aoPackagesList["outdated"] = aoOutdatedDependencies
+
+    log("Get Updated packages")
+    aoUpdatedDependencies = pm_list_packages("u")
+    aoPackagesList["uptodate"] = aoUpdatedDependencies
+
+    log("Get Manager Version")
+    aoManagerVersion = pm_manager_version()
+    aoPackagesList["packageManager"] = aoManagerVersion
+
+    sFullPath = wasdi.getPath(sRefreshPackageList)
+
+    log('Saving Packages Info file in ' + sFullPath)
+
+    with open(sFullPath, 'w') as oFile:
+        json.dump(aoPackagesList, oFile)
+
+    log('Packages list done')
+
+
+def pm_list_packages(sFlag: str):
     sCommand: str = 'pip list'
     if sFlag != '':
         sCommand = sCommand + ' -' + sFlag
@@ -62,14 +87,30 @@ def pm_list_packages(sFlag: str, sPackageFileName: str):
     sOutput: str = __execute_pip_command_and_get_output(sCommand)
     log("Got output\n " + sOutput)
     aoDependencies: list = __parse_list_command_output(sOutput)
-    sFullPath = wasdi.getPath(sPackageFileName)
+    return  aoDependencies
 
-    log('Saving Packages Info file in ' + sFullPath)
+def pm_manager_version():
+    log('/packageManager/managerVersion/')
 
-    with open(sFullPath, 'w') as oFile:
-        json.dump(aoDependencies, oFile)
-    
-    log('Packages list done')
+    command: str = 'pip -V'
+
+    sCommandOutput: str = __execute_pip_command_and_get_output(command)
+
+    start: str = 'pip '
+    end: str = ' from '
+
+    sVersionFromOutput = re.search('%s(.*)%s' % (start, end), sCommandOutput).group(1)
+
+    asVersion: list = sVersionFromOutput.split('.')
+    oVersion: dict = {
+        "name": "pip",
+        "version": sVersionFromOutput,
+        "major": asVersion[0],
+        "minor": asVersion[1],
+        "patch": asVersion[2]
+    }
+
+    return json.dumps(oVersion), 200, {'Content-Type': 'application/json'}
 
 def __execute_pip_command_and_get_output(command: str) -> str:
     log('__execute_pip_command_and_get_output: ' + command)
@@ -196,7 +237,7 @@ if __name__ == '__main__':
         if sRefreshPackageList is not None:
             if sRefreshPackageList != "":
                 log("Refreshing package list in temp file " + sRefreshPackageList)
-                pm_list_packages("",sRefreshPackageList)
+                refresh_package_list(sRefreshPackageList)
                 bRun = False
 
         if bRun:
