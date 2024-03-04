@@ -158,7 +158,7 @@ public class PathsConfig {
 	 */
 	public static String getProcessorFolder(String sProcessorName) {
 		// Set the processor path
-		String sDownloadRootPath = getWasdiBasePath();;
+		String sDownloadRootPath = getWasdiBasePath();
 		String sProcessorFolder = sDownloadRootPath + "processors" + File.separator + sProcessorName + File.separator;
 		return sProcessorFolder;
 	}

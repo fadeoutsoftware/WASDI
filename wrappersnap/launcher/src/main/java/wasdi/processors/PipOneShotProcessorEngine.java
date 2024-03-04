@@ -4,6 +4,8 @@ import java.io.File;
 
 import org.json.JSONObject;
 
+import com.google.common.io.Files;
+
 import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -465,17 +467,20 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 	        waitForApplicationToFinish(oProcessor, oParameter.getProcessObjId(), "", m_oProcessWorkspace);
 	        
 	        String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
-	        sWorkspacePath += sRandomName;
+	        String sOriginFile = sWorkspacePath + sRandomName;
 	        
-	        WasdiLog.debugLog("PipOneShotProcessorEngine.refreshPackagesInfo: moving packages file " + sWorkspacePath + "in the processor folder " + sProcessorFolder);
-	        WasdiFileUtils.moveFile2(sWorkspacePath, sProcessorFolder);
-	        WasdiFileUtils.renameFile(sProcessorFolder + sRandomName, sProcessorFolder + "packagesInfo.json");
+	        String sDestinationFile = sProcessorFolder + "packagesInfo.json";
+	        
+	        WasdiLog.debugLog("PipOneShotProcessorEngine.refreshPackagesInfo: moving packages file " + sOriginFile + " in the processor folder " + sDestinationFile);
+
+	        Files.copy(new File(sOriginFile), new File(sDestinationFile));
 	        
 	        WasdiLog.debugLog("PipOneShotProcessorEngine.refreshPackagesInfo: packages list updated");
 
 			return true;
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("PipOneShotProcessorEngine.refreshPackagesInfo: ", oEx);
+		} 
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PipOneShotProcessorEngine.refreshPackagesInfo: exception ", oEx);
 		}
 
 		return false;
