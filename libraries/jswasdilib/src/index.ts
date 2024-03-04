@@ -1,4 +1,4 @@
-
+import {WorkspaceListInfoViewModel} from "./viewModels/WorkspaceListInfoViewModel"
 /**
  * Wasdi class expose methods and utilities to interact with WASDI services, using
  * Javascript/Typescript as specification and programming language. The package available
@@ -389,7 +389,7 @@ class Wasdi {
   /**
    * Retrieves the list of Workspace of the current logged user.
    */
-  getWorkspaces() {
+  getWorkspaces() : WorkspaceListInfoViewModel[]{
     var workspaceList = this.getObject(this._m_sBaseUrl + "/ws/byuser", "");
     console.log("[INFO] jswasdilib.workspaceList: Available workspaces : ");
     workspaceList.forEach((a: { workspaceName: string; workspaceId: string }) =>
@@ -407,7 +407,7 @@ class Wasdi {
     getWorkspaceIdByName(wsName: string): string {
       let sResult: string = ""
       this.getWorkspaces().forEach(
-        (a: { workspaceName: string; workspaceId: string }) => {
+        (a) => {
           if (a.workspaceName == wsName) {
             sResult = a.workspaceId;
             return;
