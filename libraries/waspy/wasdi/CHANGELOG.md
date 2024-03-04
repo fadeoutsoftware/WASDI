@@ -3,7 +3,7 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
-## [0.8.6.1] - 2024-02-22
+## [0.8.6.2] - 2024-03-04
 ### Added
 - sleep parameter to control the waiting time while polling api
 - support for import operations returning DONE in case of existing file

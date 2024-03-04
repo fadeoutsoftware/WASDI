@@ -164,7 +164,8 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
             	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
             }
             
-            oEnvVariable.value = "sPackageListFileName";        	
+            WasdiLog.debugLog("PipOneShotProcessorEngine.addEnvironmentVariablesToProcessorType: adding a temp file name to force the package refresh operation " + sPackageListFileName);
+            oEnvVariable.value = sPackageListFileName;        	
         }
 	}
 	
@@ -466,7 +467,7 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 	        String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
 	        sWorkspacePath += sRandomName;
 	        
-	        WasdiLog.debugLog("PipOneShotProcessorEngine.refreshPackagesInfo: moving packages file in the processor folder");
+	        WasdiLog.debugLog("PipOneShotProcessorEngine.refreshPackagesInfo: moving packages file " + sWorkspacePath + "in the processor folder " + sProcessorFolder);
 	        WasdiFileUtils.moveFile2(sWorkspacePath, sProcessorFolder);
 	        WasdiFileUtils.renameFile(sProcessorFolder + sRandomName, sProcessorFolder + "packagesInfo.json");
 	        

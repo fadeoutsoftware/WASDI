@@ -187,7 +187,7 @@ if __name__ == '__main__':
             log("There was an error in init, we try to execute but it will likely not work")
             wasdi.wasdiLog("There was an error in init, we try to execute but it will likely not work")
         else:
-            log("Init done, starting processor")
+            log("Init done")
             wasdi.wasdiLog("Init done")
 
         bRun = True
@@ -195,16 +195,16 @@ if __name__ == '__main__':
 
         if sRefreshPackageList is not None:
             if sRefreshPackageList != "":
-                log("Refreshing package list")
-                pm_list_packages(sRefreshPackageList)
-                bRun = True
+                log("Refreshing package list in temp file " + sRefreshPackageList)
+                pm_list_packages("",sRefreshPackageList)
+                bRun = False
 
         if bRun:
             wasdi.wasdiLog("Starting Processor")
             executeProcessor()
 
     except Exception as oEx:
-        wasdi.wasdiLog("pipOneShot: EXCEPTION")
+        wasdi.wasdiLog("wasdi.executeProcessor: EXCEPTION")
         wasdi.wasdiLog(repr(oEx))
         wasdi.wasdiLog(traceback.format_exc())
     except:

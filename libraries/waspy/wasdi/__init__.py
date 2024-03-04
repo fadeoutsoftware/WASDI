@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.6.1
+Version 0.8.6.2
 
-Last Update: 29/02/2024
+Last Update: 04/03/2024
 
 Tested with: Python 3.7, Python 3.8, Python 3.9, Python 3.10
 
@@ -1561,7 +1561,7 @@ def waitProcesses(asProcIdList):
         if sProcId is None:
             # Not valid
             continue
-        if sProcId is "":
+        if sProcId == "":
             # Empty
             continue
         if sProcId in  {"DONE", "STOPPED", "ERROR"}:
