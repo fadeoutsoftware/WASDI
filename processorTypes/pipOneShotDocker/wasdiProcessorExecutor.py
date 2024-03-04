@@ -75,6 +75,12 @@ def refresh_package_list(sRefreshPackageList: str):
 
     with open(sFullPath, 'w') as oFile:
         json.dump(aoPackagesList, oFile)
+        oFile.flush()
+
+    if os.path.exists(sFullPath):
+        log("Packages File written")
+    else:
+        log("ERROR Packages File NOT written")
 
     log('Packages list done')
 
