@@ -581,20 +581,26 @@ def executeDownloadFromCopernicusMarine(aoInputParameters, sUsername, sPassword)
     logging.debug(f"executeDownloadFromCopernicusMarine: download directory {sDownloadDirectory}")
     logging.debug(f"executeDownloadFromCopernicusMarine: download file name {sDownloadFileName}")
 
-    asVariables = sVariables.split()  # TODO: this needs to be verified (are we splitting according to blank spaces)?
+    asVariables = sVariables.split()
 
-    '''
-    # TODO: this I need to check
-    minimum_depth = 0,
-    maximum_depth = 5,
-    '''
+    sCMStartDateTime = sStartDateTime
+    sCMEndDateTime = sEndDateTime
+    try:
+        oWasdiStartDateTime = datetime.strptime(sStartDateTime, "%Y-%m-%dT%H:%M:%S.%fZ")
+        oWasdiEndDateTime = datetime.strptime(sEndDateTime, "%Y-%m-%dT%H:%M:%S")
+
+        sCMStartDateTime = oWasdiStartDateTime.strftime("%Y-%m-%dT%H:%M:%S")
+        sCMEndDateTime = oWasdiEndDateTime.strftime("%Y-%m-%dT%H:%M:%S")
+    except Exception as oEx:
+        logging.warning(f"executeDownloadFromCopernicusMarine: exception while converting time filter to CM format {oEx}")
+
     sDownloadedFilePath = ""
     try:
         sDownloadedFilePath = copernicusmarine.subset(
             dataset_id=sDatasetId,
             variables=asVariables,
-            start_datetime=sStartDateTime,
-            end_datetime=sEndDateTime,
+            start_datetime=sCMStartDateTime,
+            end_datetime=sCMEndDateTime,
             minimum_longitude=sWest,
             maximum_longitude=sEast,
             minimum_latitude=sSouth,
@@ -603,7 +609,7 @@ def executeDownloadFromCopernicusMarine(aoInputParameters, sUsername, sPassword)
             maximum_depth=sMaxDepth,
             output_filename=sDownloadFileName,
             output_directory=sDownloadDirectory,
-            force_download=True,     # forcing the download avoids a prompt which is asking for confirmation before the download
+            force_download=True, # this parameter avoids the display of a prompt asking for confirmation before the download
             username=sUsername,
             password=sPassword
         )
@@ -658,41 +664,4 @@ if __name__ == '__main__':
         logging.debug('__main__: unknown operation. Script will exit')
         sys.exit(1)
 
-    # print(copernicusmarine.__version__)  # version 1.0.1
-
-    # try to log-in executing the following command:
-    # copernicusmarine.login(username='user_name', passoword='****')
-    # output of the command: Credentials file stored in C:/Users/valentina.leone/.copernicusmarine/.copernicusmarine-credentials.
-    # this command must be executed only one time. After that, the credentials will be taken from the credential file
-
-
-    '''
-    print("Number of products found: " + str(len(catalogue['products'])))
-    product = catalogue['products'][0]
-    print("Product title: " + product['title'])
-    print("Product id: " + product['product_id'])
-    print("Number of datasets: " + str(len(product['datasets'])))
-    dataset = product['datasets'][0]
-    print("Dataset id: " + dataset['dataset_id'])
-    print("Number of versions: " + str(len(dataset['versions'])))
-    version = dataset['versions'][0]
-    print("Number of parts: " + str(len(version['parts'])))
-    part = version['parts'][0]
-    print("Number of services: " + str(len(part['services'])))
-    services = part['services']
-    for service in services:
-        print("*** Service: " + service['service_type']['service_name'])
-        variables = service['variables']
-        for variable in variables:
-            print("\t" + variable['short_name'] + ", " + variable['standard_name'])
-            print("\t\tbbox: " + str(variable['bbox']))
-            coordinates = variable["coordinates"]
-            for coordinate in coordinates:
-                print("\t\tcoordinate: " + coordinate["coordinates_id"])
-                if coordinate['coordinates_id'] == "time":
-                    print("\t\t\tmin value" + str(coordinate['minimum_value']))
-                    print("\t\t\tmax value" + str(coordinate['maximum_value']))
-                    print("\t\t\tnum values" + str(len(coordinate['values'])))
-    print("the end")
-    '''
     sys.exit(0)
