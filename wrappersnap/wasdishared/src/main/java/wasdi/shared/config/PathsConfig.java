@@ -82,6 +82,11 @@ public class PathsConfig {
 	 */
 	public String s3VolumesBasePath="/mnt/wasdi/users-volumes/";
 	
+	/**
+	 * Path to the wasdiConfig.json file
+	 */
+	public String wasdiConfigFilePath = "";
+	
     /**
      * Get the full workspace path for this parameter
      *

@@ -40,7 +40,7 @@ public class ProviderAdapterFactory {
 		aoDownloaders.put("TERRASCOPE", TerrascopeProviderAdapter::new);
 		aoDownloaders.put("STATICS", STATICSProviderAdapter::new);
 		aoDownloaders.put("GPM", GPMProviderAdapter::new);
-		aoDownloaders.put("COPERNICUSMARINE", CMProviderAdapter::new);
+		aoDownloaders.put("COPERNICUSMARINE", CM2ProviderAdapter::new);
 		aoDownloaders.put("CLOUDFERRO", CloudferroProviderAdapter::new);
 		aoDownloaders.put("SKYWATCH", SkywatchProviderAdapter::new);
 		aoDownloaders.put("LPDAAC", LpDaacProviderAdapter::new);

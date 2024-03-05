@@ -18,6 +18,7 @@ import wasdi.shared.queryexecutors.ads.QueryExecutorADS;
 import wasdi.shared.queryexecutors.cds.QueryExecutorCDS;
 import wasdi.shared.queryexecutors.cloudferro.QueryExecutorCloudferro;
 import wasdi.shared.queryexecutors.cm.QueryExecutorCM;
+import wasdi.shared.queryexecutors.cm2.QueryExecutorCM2;
 import wasdi.shared.queryexecutors.creodias.QueryExecutorCREODIAS;
 import wasdi.shared.queryexecutors.creodias2.QueryExecutorCreoDias2;
 import wasdi.shared.queryexecutors.eodc.QueryExecutorEODC;
@@ -65,7 +66,7 @@ public class QueryExecutorFactory {
 		aoMap.put("STATICS", QueryExecutorSTATICS::new);
 		aoMap.put("JRC", QueryExecutorJRC::new);
 		aoMap.put("GPM", QueryExecutorGPM::new);
-		aoMap.put("COPERNICUSMARINE", QueryExecutorCM::new);
+		aoMap.put("COPERNICUSMARINE", QueryExecutorCM2::new);
 		aoMap.put("CLOUDFERRO", QueryExecutorCloudferro::new);
 		aoMap.put("SKYWATCH", QueryExecutorSkywatch::new);
 		aoMap.put("LPDAAC", QueryExecutorLpDaac::new);
