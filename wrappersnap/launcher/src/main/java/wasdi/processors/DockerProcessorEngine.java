@@ -1037,6 +1037,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
 
                 sStatus = oProcessWorkspace.getStatus();
+                WasdiLog.infoLog("DockerProcessorEngine.waitForApplicationToFinish: READ STATUS " + sStatus + " For PWS: " + oProcessWorkspace.getProcessObjId());
                 try {
                     Thread.sleep(iThreadSleepMs);
                 } 
