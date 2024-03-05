@@ -530,10 +530,10 @@ def createLink(sDatasetId, sVariables, sStartDateTime, sEndDateTime, sNorth, sSo
     }
 
     if sMinDepth is not None:
-        oDownloadJsonParameters['minDepth'] = -float(sMinDepth)
+        oDownloadJsonParameters['minDepth'] = float(sMinDepth)
 
     if sMaxDepth is not None:
-        oDownloadJsonParameters['maxDepth'] = -float(sMaxDepth)
+        oDownloadJsonParameters['maxDepth'] = float(sMaxDepth)
 
     return oDownloadJsonParameters
 
@@ -580,7 +580,8 @@ def executeDownloadFromCopernicusMarine(aoInputParameters, sUsername, sPassword)
     logging.debug(f"executeDownloadFromCopernicusMarine: selected bounding box N:{sNorth}, E:{sEast}, S:{sSouth}, W:{sWest}")
     logging.debug(f"executeDownloadFromCopernicusMarine: download directory {sDownloadDirectory}")
     logging.debug(f"executeDownloadFromCopernicusMarine: download file name {sDownloadFileName}")
-
+    logging.debug(f"executeDownloadFromCopernicusMarine: min depth {sMinDepth}")
+    logging.debug(f"executeDownloadFromCopernicusMarine: max depth {sMaxDepth}")
     asVariables = sVariables.split()
 
     sCMStartDateTime = sStartDateTime
