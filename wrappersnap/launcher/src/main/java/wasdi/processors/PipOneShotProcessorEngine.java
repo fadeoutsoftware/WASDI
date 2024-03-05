@@ -426,7 +426,7 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 				File oPipFile = new File(sProcessorPath+"pip.txt");
 				
 				// we re-read all the actions line per line
-				ArrayList<String> asPipLines = new ArrayList<>(); ù
+				ArrayList<String> asPipLines = new ArrayList<>();
 				
 				if (oPipFile.exists()) {
 			        try (java.util.stream.Stream<String> oLinesStream = java.nio.file.Files.lines(oPipFile.toPath())) {
