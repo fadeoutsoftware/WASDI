@@ -70,9 +70,25 @@ RUN mkdir --parents \
     chmod {{ sWasdiJre8RootDirectoryMode }} \
         {{ sWasdiJre8RootDirectoryPath }} \
         {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
-    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiJre8SourceUrl }} --output-document /tmp/{{ sWasdiJre8SourceUrl | basename }} && \
-    tar --directory {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} --extract --file /tmp/{{ sWasdiJre8SourceUrl | basename }} --directory {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} --strip-components=1 && \
-    rm --force /tmp/{{ sWasdiJre8SourceUrl | basename }}
+    wget \
+        --no-verbose \
+        --output-document /tmp/{{ sWasdiJre8SourceUrl | basename }} \
+        --progress=bar:force:noscroll \
+        --show-progress \
+        {{ sWasdiJre8SourceUrl }} && \
+    tar \
+        --directory {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} \
+        --extract \
+        --file /tmp/{{ sWasdiJre8SourceUrl | basename }} \
+        --strip-components=1 && \
+    ln \
+        --symbolic \
+        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} \
+        {{ sWasdiJre8RootDirectoryPath }}/latest && \
+    chown --no-dereference {{ sWasdiJre8RootDirectoryOwner }}:{{ sWasdiJre8RootDirectoryGroup }} \
+        {{ sWasdiJre8RootDirectoryPath }}/latest && \
+    rm --force \
+        /tmp/{{ sWasdiJre8SourceUrl | basename }}
 
 ENV JAVA_HOME="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}"
 ENV PATH="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin:${PATH}"

@@ -148,12 +148,18 @@ RUN mkdir --parents \
         --output-document /tmp/{{ sWasdiJdk8SourceUrl | basename }} \
         --progress=bar:force:noscroll \
         --show-progress \
-        {{ sWasdiJdk8SourceUrl }} --output-document /tmp/{{ sWasdiJdk8SourceUrl | basename }} && \
+        {{ sWasdiJdk8SourceUrl }} && \
     tar \
         --directory {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} \
         --extract \
         --file /tmp/{{ sWasdiJdk8SourceUrl | basename }} \
         --strip-components=1 && \
+    ln \
+        --symbolic \
+        {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} \
+        {{ sWasdiJdk8RootDirectoryPath }}/latest && \
+    chown --no-dereference {{ sWasdiJdk8RootDirectoryOwner }}:{{ sWasdiJdk8RootDirectoryGroup }} \
+        {{ sWasdiJdk8RootDirectoryPath }}/latest && \
     rm --force \
         /tmp/{{ sWasdiJdk8SourceUrl | basename }}
 
