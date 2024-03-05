@@ -599,8 +599,8 @@ def executeDownloadFromCopernicusMarine(aoInputParameters, sUsername, sPassword)
             maximum_longitude=sEast,
             minimum_latitude=sSouth,
             maximum_latitude=sNorth,
-            minimum_depth=float(sMinDepth),
-            maximum_depth=float(sMaxDepth),
+            minimum_depth=sMinDepth,
+            maximum_depth=sMaxDepth,
             output_filename=sDownloadFileName,
             output_directory=sDownloadDirectory,
             force_download=True,     # forcing the download avoids a prompt which is asking for confirmation before the download
