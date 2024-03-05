@@ -182,16 +182,16 @@ def __parse_list_command_output(output: str) -> list:
 
         if len(asHeaders) == 2:
             aoDependencies.append({
-                "manager": "pip",
-                asHeaders[0]: asColumns[0],
-                asHeaders[1]: asColumns[1]})
+                "managerName": "pip",
+                "packageName": asColumns[0],
+                "currentVersion": asColumns[1]})
         elif len(asHeaders) == 4:
             aoDependencies.append({
-                "manager": "pip",
-                asHeaders[0]: asColumns[0],
-                asHeaders[1]: asColumns[1],
-                asHeaders[2]: asColumns[2],
-                asHeaders[3]: asColumns[3]})
+                "managerName": "pip",
+                "packageName": asColumns[0],
+                "currentVersion": asColumns[1],
+                "latestVersion": asColumns[2],
+                "type": asColumns[3]})
 
     return aoDependencies
 
