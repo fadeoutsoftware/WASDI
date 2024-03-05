@@ -476,10 +476,12 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 	        
 	        if (!oOriginalFile.exists()) {
 	        	WasdiLog.debugLog("PipOneShotProcessorEngine.refreshPackagesInfo: looks that original file does not exist, strange, wait a little bit");
-	        	Thread.sleep(1000);
 	        }
 
 	        Files.copy(oOriginalFile, oDestinationFile);
+	        
+	        WasdiLog.debugLog("PipOneShotProcessorEngine.refreshPackagesInfo: cleaning temp file");
+	        oOriginalFile.delete();
 	        
 	        WasdiLog.debugLog("PipOneShotProcessorEngine.refreshPackagesInfo: packages list updated");
 

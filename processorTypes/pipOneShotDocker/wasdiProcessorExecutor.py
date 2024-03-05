@@ -64,8 +64,6 @@ def refresh_package_list(sRefreshPackageList: str):
 
     #Run the processor
     try:
-        time.sleep(30)
-
         aoPackagesList = {}
 
         log("Get Outdated packages")
@@ -77,8 +75,8 @@ def refresh_package_list(sRefreshPackageList: str):
         aoPackagesList["uptodate"] = aoUpdatedDependencies
 
         log("Get Manager Version")
-        aoManagerVersion = pm_manager_version()
-        aoPackagesList["packageManager"] = aoManagerVersion
+        oManagerVersion = pm_manager_version()
+        aoPackagesList["packageManager"] = oManagerVersion
 
         sFullPath = wasdi.getPath(sRefreshPackageList)
 
@@ -137,15 +135,15 @@ def pm_manager_version():
     sVersionFromOutput = re.search('%s(.*)%s' % (start, end), sCommandOutput).group(1)
 
     asVersion: list = sVersionFromOutput.split('.')
-    oVersion: dict = {
-        "name": "pip",
-        "version": sVersionFromOutput,
-        "major": asVersion[0],
-        "minor": asVersion[1],
-        "patch": asVersion[2]
-    }
 
-    return json.dumps(oVersion), 200, {'Content-Type': 'application/json'}
+    oVersion = {}
+    oVersion["name"] = "pip"
+    oVersion["version"] = sVersionFromOutput
+    oVersion["major"] = asVersion[0]
+    oVersion["minor"] = asVersion[1]
+    oVersion["patch"] = asVersion[2]
+
+    return oVersion
 
 def __execute_pip_command_and_get_output(command: str) -> str:
     log('__execute_pip_command_and_get_output: ' + command)
