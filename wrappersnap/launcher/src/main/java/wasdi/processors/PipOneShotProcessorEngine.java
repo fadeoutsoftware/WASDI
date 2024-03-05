@@ -401,7 +401,7 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 				
 				if (asParts != null) {
 					if (asParts.length>=2) {
-						sPackage = asParts[0];
+						sPackage = asParts[1];
 						
 						if (asParts[0].equals("removePackage")) {
 							bAdd = false;
@@ -415,8 +415,8 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 				}
 				
 				String sMessage = "PipOneShotProcessorEngine.environmentUpdate: ";
-				if (bAdd) sMessage += "Removing Package ";
-				else sMessage += "Adding Package ";
+				if (bAdd) sMessage += "Adding Package ";
+				else sMessage += "Removing Package ";
 				sMessage += sPackage;
 				
 				WasdiLog.debugLog(sMessage);
@@ -426,13 +426,15 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 				File oPipFile = new File(sProcessorPath+"pip.txt");
 				
 				// we re-read all the actions line per line
-				ArrayList<String> asPipLines = new ArrayList<>(); 
-
-		        try (java.util.stream.Stream<String> oLinesStream = java.nio.file.Files.lines(oPipFile.toPath())) {
-		        	oLinesStream.forEach(sLine -> {
-		        		asPipLines.add(sLine);
-		            });
-		        }
+				ArrayList<String> asPipLines = new ArrayList<>(); ù
+				
+				if (oPipFile.exists()) {
+			        try (java.util.stream.Stream<String> oLinesStream = java.nio.file.Files.lines(oPipFile.toPath())) {
+			        	oLinesStream.forEach(sLine -> {
+			        		asPipLines.add(sLine);
+			            });
+			        }					
+				}
 		        
 		        ArrayList<String> asCleanPipLines = Utils.removeDuplicates(asPipLines);
 		        
