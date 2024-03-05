@@ -454,7 +454,7 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 	        
 	        addEnvironmentVariablesToProcessorType(oProcessorTypeConfig, "", oParameter, true, sRandomName);
 	        
-	        String sContainerName = oDockerUtils.start("", oProcessor.getPort(), false);
+	        String sContainerName = oDockerUtils.start("", oProcessor.getPort(), true);
 	        
 	        // Try to start Again the docker
 	        if (Utils.isNullOrEmpty(sContainerName)) {
