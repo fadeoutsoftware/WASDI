@@ -394,8 +394,6 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 				oPackageManager.operatePackageChange(sUpdateCommand);
 			}
 
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
-
 			return true;
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("PipOneShotProcessorEngine.environmentUpdate Exception", oEx);

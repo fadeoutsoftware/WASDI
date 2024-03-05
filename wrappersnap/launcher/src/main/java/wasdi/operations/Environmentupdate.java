@@ -8,8 +8,10 @@ import java.util.ArrayList;
 
 import org.json.JSONObject;
 
+import wasdi.LauncherMain;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.PathsConfig;
@@ -156,7 +158,7 @@ public class Environmentupdate extends Operation {
 			try {
 				// We need to refresh the package list if we are in the main node
 				if (WasdiConfig.Current.isMainNode()) {
-					//Thread.sleep(2000);
+					
 					oEngine.refreshPackagesInfo(oParameter);
 					
 					// Notify the user
@@ -170,12 +172,15 @@ public class Environmentupdate extends Operation {
 					
 				}
 			} 
-//			catch (InterruptedException oEx) {
-//				Thread.currentThread().interrupt();
-//				WasdiLog.errorLog("Environmentupdate.executeOperation: current thread was interrupted", oEx);
-//			}
 			catch (Exception oRabbitException) {
 				WasdiLog.errorLog("Environmentupdate.executeOperation: exception sending Rabbit Message", oRabbitException);
+			}
+			
+			if (bRet) {
+				LauncherMain.updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+			}
+			else {
+				LauncherMain.updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 			}
 
 			return bRet;
