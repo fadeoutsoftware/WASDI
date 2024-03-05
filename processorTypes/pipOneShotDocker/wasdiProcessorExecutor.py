@@ -11,6 +11,7 @@ import json
 import traceback
 import subprocess
 import re
+import time
 
 m_sProcId = ""
 
@@ -55,37 +56,62 @@ def executeProcessor():
     return
 
 def refresh_package_list(sRefreshPackageList: str):
-    aoPackagesList = {}
 
-    log("Get Outdated packages")
-    aoOutdatedDependencies = pm_list_packages("o")
-    aoPackagesList["outdated"] = aoOutdatedDependencies
+    # We need the proc id for logs
+    global m_sProcId
 
-    log("Get Updated packages")
-    aoUpdatedDependencies = pm_list_packages("u")
-    aoPackagesList["uptodate"] = aoUpdatedDependencies
+    sForceStatus = 'ERROR'
 
-    log("Get Manager Version")
-    aoManagerVersion = pm_manager_version()
-    aoPackagesList["packageManager"] = aoManagerVersion
+    #Run the processor
+    try:
+        time.sleep(30)
 
-    sFullPath = wasdi.getPath(sRefreshPackageList)
+        aoPackagesList = {}
 
-    log('Saving Packages Info file in ' + sFullPath)
+        log("Get Outdated packages")
+        aoOutdatedDependencies = pm_list_packages("o")
+        aoPackagesList["outdated"] = aoOutdatedDependencies
 
-    with open(sFullPath, 'w') as oFile:
-        sJsonContent=json.dumps(aoPackagesList)
-        oFile.write(sJsonContent)
-        oFile.flush()
-        oFile.close()
-        log("Check closed: " + str(oFile.closed))
+        log("Get Updated packages")
+        aoUpdatedDependencies = pm_list_packages("u")
+        aoPackagesList["uptodate"] = aoUpdatedDependencies
 
-    if os.path.exists(sFullPath):
-        log("Packages File written")
-    else:
-        log("ERROR Packages File NOT written")
+        log("Get Manager Version")
+        aoManagerVersion = pm_manager_version()
+        aoPackagesList["packageManager"] = aoManagerVersion
 
-    log('Packages list done')
+        sFullPath = wasdi.getPath(sRefreshPackageList)
+
+        log('Saving Packages Info file in ' + sFullPath)
+
+        with open(sFullPath, 'w') as oFile:
+            sJsonContent = json.dumps(aoPackagesList)
+            oFile.write(sJsonContent)
+            oFile.flush()
+            oFile.close()
+            log("Check closed: " + str(oFile.closed))
+
+        if os.path.exists(sFullPath):
+            log("Packages File written")
+        else:
+            log("ERROR Packages File NOT written")
+
+        log('Packages list done')
+
+        sForceStatus = 'DONE'
+
+    except Exception as oEx2:
+        wasdi.wasdiLog("wasdi.executeProcessor EXCEPTION")
+        wasdi.wasdiLog(repr(oEx2))
+        wasdi.wasdiLog(traceback.format_exc())
+    except:
+        wasdi.wasdiLog("wasdi.executeProcessor generic EXCEPTION")
+    finally:
+        sFinalStatus = wasdi.getProcessStatus(m_sProcId)
+
+        if sFinalStatus != 'STOPPED' and sFinalStatus != 'DONE' and sFinalStatus != 'ERROR':
+            wasdi.wasdiLog("wasdi.executeProcessor Process finished. Forcing status to " + sForceStatus)
+            wasdi.updateProcessStatus(m_sProcId, sForceStatus, 100)
 
 
 def pm_list_packages(sFlag: str):
