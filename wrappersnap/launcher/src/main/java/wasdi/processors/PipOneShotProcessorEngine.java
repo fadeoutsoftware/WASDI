@@ -472,8 +472,16 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 	        String sDestinationFile = sProcessorFolder + "packagesInfo.json";
 	        
 	        WasdiLog.debugLog("PipOneShotProcessorEngine.refreshPackagesInfo: moving packages file " + sOriginFile + " in the processor folder " + sDestinationFile);
+	        
+	        File oOriginalFile = new File(sOriginFile);
+	        File oDestinationFile = new File(sDestinationFile);
+	        
+	        if (!oOriginalFile.exists()) {
+	        	WasdiLog.debugLog("PipOneShotProcessorEngine.refreshPackagesInfo: looks that original file does not exist, strange, wait a little bit");
+	        	Thread.sleep(1000);
+	        }
 
-	        Files.copy(new File(sOriginFile), new File(sDestinationFile));
+	        Files.copy(oOriginalFile, oDestinationFile);
 	        
 	        WasdiLog.debugLog("PipOneShotProcessorEngine.refreshPackagesInfo: packages list updated");
 
