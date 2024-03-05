@@ -587,7 +587,7 @@ def executeDownloadFromCopernicusMarine(aoInputParameters, sUsername, sPassword)
     sCMEndDateTime = sEndDateTime
     try:
         oWasdiStartDateTime = datetime.strptime(sStartDateTime, "%Y-%m-%dT%H:%M:%S.%fZ")
-        oWasdiEndDateTime = datetime.strptime(sEndDateTime, "%Y-%m-%dT%H:%M:%S")
+        oWasdiEndDateTime = datetime.strptime(sEndDateTime, "%Y-%m-%dT%H:%M:%S.%fZ")
 
         sCMStartDateTime = oWasdiStartDateTime.strftime("%Y-%m-%dT%H:%M:%S")
         sCMEndDateTime = oWasdiEndDateTime.strftime("%Y-%m-%dT%H:%M:%S")
