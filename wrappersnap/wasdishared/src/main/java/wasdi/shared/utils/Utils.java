@@ -9,11 +9,13 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -610,5 +612,31 @@ public class Utils {
 	public static Double nowInMillis() {
 		return (double) new Date().getTime();
 	}
+	
+    /**
+     * Function to remove duplicates from an ArrayList 
+     * @param <T> Type
+     * @param aoOriginalList
+     * @return
+     */
+    public static <T> ArrayList<T> removeDuplicates(ArrayList<T> aoOriginalList) 
+    { 
+  
+        // Create a new LinkedHashSet 
+        Set<T> oUniqueSet = new LinkedHashSet<>(); 
+  
+        // Add the elements to set 
+        oUniqueSet.addAll(aoOriginalList); 
+  
+        // Clear the list 
+        aoOriginalList.clear(); 
+  
+        // add the elements of set 
+        // with no duplicates to the list 
+        aoOriginalList.addAll(oUniqueSet); 
+  
+        // return the list 
+        return aoOriginalList; 
+    }	
 
 }

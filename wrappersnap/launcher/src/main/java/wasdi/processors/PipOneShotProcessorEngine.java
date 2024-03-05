@@ -1,6 +1,9 @@
 package wasdi.processors;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 
 import org.json.JSONObject;
 
@@ -347,6 +350,11 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 			WasdiLog.errorLog("PipOneShotProcessorEngine.environmentUpdate: update command is null or empty");
 			return false;
 		}
+		
+		if (!WasdiConfig.Current.isMainNode()) {
+			WasdiLog.errorLog("PipOneShotProcessorEngine.environmentUpdate: this processor manipulate environment only on the main node");
+			return true;			
+		}
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
 		ProcessWorkspace oProcessWorkspace = null;
@@ -381,20 +389,89 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 			if (oUpdateCommand == null || oUpdateCommand.equals(org.json.JSONObject.NULL)) {
 				// This will be done in the Operation code
 				WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: refresh of the list of libraries.");
-			} else {
+			} 
+			else {
 				String sUpdateCommand = (String) oUpdateCommand;
 				WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
 				
-				DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
-				String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter);
+				String [] asParts = sUpdateCommand.split("/");
 				
-				String sUrl = getProcessorUrl(oProcessor, sContainerName);
+				String sPackage = "";
+				boolean bAdd = true;
 				
-				IPackageManager oPackageManager = getPackageManager(sUrl);
-				oPackageManager.operatePackageChange(sUpdateCommand);
+				if (asParts != null) {
+					if (asParts.length>=2) {
+						sPackage = asParts[0];
+						
+						if (asParts[0].equals("removePackage")) {
+							bAdd = false;
+						}
+					}
+				}
+				
+				if (Utils.isNullOrEmpty(sPackage)) {
+					WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: cannot extract the name of the package, error");
+					return false;
+				}
+				
+				String sMessage = "PipOneShotProcessorEngine.environmentUpdate: ";
+				if (bAdd) sMessage += "Removing Package ";
+				else sMessage += "Adding Package ";
+				sMessage += sPackage;
+				
+				WasdiLog.debugLog(sMessage);
+				
+				String sProcessorPath = PathsConfig.getProcessorFolder(sProcessorName);
+				
+				File oPipFile = new File(sProcessorPath+"pip.txt");
+				
+				// we re-read all the actions line per line
+				ArrayList<String> asPipLines = new ArrayList<>(); 
+
+		        try (java.util.stream.Stream<String> oLinesStream = java.nio.file.Files.lines(oPipFile.toPath())) {
+		        	oLinesStream.forEach(sLine -> {
+		        		asPipLines.add(sLine);
+		            });
+		        }
+		        
+		        ArrayList<String> asCleanPipLines = Utils.removeDuplicates(asPipLines);
+		        
+		        if (bAdd) {
+		        	if (asCleanPipLines.contains(sPackage)) {
+		        		WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: the package " +  sPackage + " already exists, move last");
+		        		asCleanPipLines.remove(sPackage);
+		        	}
+		        	else {
+		        		WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: package " +  sPackage + " added");
+		        	}
+		        	asCleanPipLines.add(sPackage);
+		        }
+		        else {
+		        	if (asCleanPipLines.contains(sPackage)) {
+		        		WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: removing package " +  sPackage);
+		        		asCleanPipLines.remove(sPackage);
+		        	}
+		        	else {
+		        		WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: the package " +  sPackage + " is not in the list, nothing to remove");
+		        	}
+		        }
+		        
+		        // Re-write pip.txt
+		        WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: writing new pip.txt");
+				try (OutputStream oOutStream = new FileOutputStream(oPipFile, false)) {
+					for (String sActualLine : asCleanPipLines) {
+						String sWriteLine = sActualLine + "\n";
+						byte[] ayBytes = sWriteLine.getBytes();
+						oOutStream.write(ayBytes);
+					}
+				}		        
+		        
+		        WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: starting re-deploy");
+		        this.redeploy(oParameter);
 			}
 
 			return true;
+			
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("PipOneShotProcessorEngine.environmentUpdate Exception", oEx);
 			try {
@@ -492,6 +569,32 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 		}
 
 		return false;
+	}
+	
+	@Override
+	protected void onAfterUnzipProcessor(String sProcessorFolder) {
+		WasdiLog.infoLog("PipOneShotProcessorEngine.onAfterUnzipProcessor: calling base class method");
+		
+		super.onAfterUnzipProcessor(sProcessorFolder);
+		
+		try {
+
+			// Check the pip file
+			File oPipFile = new File(sProcessorFolder+"pip.txt");
+
+			if (!oPipFile.exists()) {
+				WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: pip file not present, done");
+				return;
+			}
+			else {
+				WasdiLog.infoLog("PipOneShotProcessorEngine.onAfterUnzipProcessor: Make a copy of orginal/adjusted pip file");
+				File oDestinationPipFile = new File(sProcessorFolder + "pip_original.txt");
+				Files.copy(oPipFile, oDestinationPipFile);
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PipOneShotProcessorEngine.onAfterUnzipProcessor: exception ", oEx);
+		}
 	}
 	
 }
