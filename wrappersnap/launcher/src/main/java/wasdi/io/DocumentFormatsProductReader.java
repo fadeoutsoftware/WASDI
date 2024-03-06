@@ -11,9 +11,9 @@ import wasdi.shared.viewmodels.products.MetadataViewModel;
 import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
-public class PdfProductReader extends WasdiProductReader {
+public class DocumentFormatsProductReader extends WasdiProductReader {
 
-	public PdfProductReader(File oProductFile) {
+	public DocumentFormatsProductReader(File oProductFile) {
 		super(oProductFile);
 	}
 

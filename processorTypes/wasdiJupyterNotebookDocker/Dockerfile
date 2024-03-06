@@ -72,7 +72,8 @@ RUN mkdir --parents {{ sWasdiSystemUserHome }}/notebook && \
     python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
     pip3 install --no-cache-dir --no-compile \
         jupyterlab \
-        numpy \
+        numpy && \
+    pip3 install --no-cache-dir --no-compile {{ sPythonPipLibraryWasdiRepository }} \
         wasdi && \
     jupyter labextension disable "@jupyterlab/apputils-extension:announcements" && \
     find {{ sWasdiSystemUserHome }} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +

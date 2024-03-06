@@ -140,7 +140,7 @@ public class ImagesResource {
 				
 				WasdiLog.debugLog("ImagesResource.uploadImage: cleaning old image");
 				
-			    File oOldImage = new File(sPath.replace(Utils.GetFileNameExtension(sPath), sExtensionOfSavedImage));
+			    File oOldImage = new File(sPath.replace(Utils.getFileNameExtension(sPath), sExtensionOfSavedImage));
 			    
 			    if (oOldImage.exists()) {
 			    	WasdiLog.debugLog("ImagesResource.uploadImage: delete old image with same name and different extension");

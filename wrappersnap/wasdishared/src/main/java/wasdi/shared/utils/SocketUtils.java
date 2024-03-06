@@ -306,13 +306,13 @@ public class SocketUtils {
 		if (sBaseAddress.endsWith("/")) sBaseAddress = sBaseAddress.substring(0, sBaseAddress.length()-1);
 		sPath = sPath.substring(sBaseAddress.length());
 		
-		//WasdiLog.errorLog("SocketUtils.httpPost: computed path " + sPath);
+		// WasdiLog.debugLog("SocketUtils.httpPost: computed path " + sPath);
 		
 		Request oRequest = createRequest(Request.Method.POST, sPath, asHeaders, ayBytes);
-		
+				
 		try (Response oResponse = oHttpClient.execute(oRequest)) {
 			int iResponseCode = oResponse.getStatusCode();
-			
+						
 			oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
 			
 			if (aoOutputHeaders != null) {
@@ -323,14 +323,14 @@ public class SocketUtils {
 			InputStream oInputStream = oResponse.getBody();
 			
 			ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-			
+						
 			if (oInputStream != null) {
 				Util.copyStream(oInputStream, oBytearrayOutputStream);
 				sResult = oBytearrayOutputStream.toString();
 				oHttpCallResponse.setResponseBody(sResult);
 				oInputStream.close();
 			}
-			
+						
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("SocketUtils.httpPost: Exception " + oEx.getMessage());
 		} finally {

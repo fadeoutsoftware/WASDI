@@ -112,11 +112,14 @@ public abstract class Operation {
 	 */
 	public abstract boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace);
 	
-
-    public void updateProcessStatus(ProcessWorkspace oProcessWorkspace, ProcessStatus oProcessStatus, int iProgressPerc) {
-    	
+	/**
+	 * Updates the process status and progress 
+	 * @param oProcessWorkspace
+	 * @param oProcessStatus
+	 * @param iProgressPerc
+	 */
+    public void updateProcessStatus(ProcessWorkspace oProcessWorkspace, ProcessStatus oProcessStatus, int iProgressPerc) {    	
     	LauncherMain.updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, oProcessStatus, iProgressPerc);
-
     }
     
     /**
@@ -408,7 +411,7 @@ public abstract class Operation {
         } catch (Exception oPayloadEx) {
             WasdiLog.errorLog("Operation.setPayload: payload exception: " + oPayloadEx.toString());
         }
-    	
     }
+    
 
 }

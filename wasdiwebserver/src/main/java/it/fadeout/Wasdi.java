@@ -52,9 +52,9 @@ import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.SerializationUtils;
-import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.ProcessingAPIClient;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.monitoring.Disk;
@@ -237,12 +237,11 @@ public class Wasdi extends ResourceConfig {
 		WasdiLog.debugLog("--------        Welcome to space        -------");
 		WasdiLog.debugLog("-----------------------------------------------\n\n");
 		
-		
-		
 		try {
 			// Can be useful for debug
-			WasdiLog.debugLog("******************************Environment Vars*****************************"); Map<String, String> enviorntmentVars = System.getenv();
-			for (String string : enviorntmentVars.keySet()) { WasdiLog.debugLog(string + ": " + enviorntmentVars.get(string)); }
+			WasdiLog.debugLog("******************************Environment Vars*****************************"); 
+			Map<String, String> aoEnviorntmentVars = System.getenv();
+			for (String string : aoEnviorntmentVars.keySet()) { WasdiLog.debugLog(string + ": " + aoEnviorntmentVars.get(string)); }
 			 			
 		}
 		catch (Exception oEx) {
@@ -518,31 +517,8 @@ public class Wasdi extends ResourceConfig {
 				WasdiLog.debugLog("Wasdi.runProcess: serializing parameter to XML");
 				String sPayload = SerializationUtils.serializeObjectToStringXML(oParameter);
 
-				// Get the URL of the destination Node
-				String sUrl = oDestinationNode.getNodeBaseAddress();
-				WasdiLog.debugLog("Wasdi.runProcess: base url is: " + sUrl );
-				if (sUrl.endsWith("/") == false) sUrl += "/";
-				sUrl += "processing/run?operation=" + sOperationType + "&name=" + StringUtils.encodeUrl(sProductName);
-				
-				// Is there a parent?
-				if (!Utils.isNullOrEmpty(sParentId)) {
-					WasdiLog.debugLog("Wasdi.runProcess: adding parent " + sParentId);
-					sUrl += "&parent=" + StringUtils.encodeUrl(sParentId);
-				}
-				
-				// Is there a subType?
-				if (!Utils.isNullOrEmpty(sOperationSubId)) {
-					WasdiLog.debugLog("Wasdi.runProcess: adding sub type " + sOperationSubId);
-					sUrl += "&subtype=" + sOperationSubId;
-				}
-
-				WasdiLog.debugLog("Wasdi.runProcess: URL: " + sUrl);
-				//WasdiLog.debugLog("Wasdi.runProcess: PAYLOAD: " + sPayload);
-				
-				// call the API on the destination node 
-				HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, HttpUtils.getStandardHeaders(sSessionId)); 
+				HttpCallResponse oHttpCallResponse = ProcessingAPIClient.runProcess(oDestinationNode, sSessionId, sOperationType, sProductName, sParentId, sOperationSubId, sPayload);
 				String sResult = oHttpCallResponse.getResponseBody();
-				
 				
 		        try {
 		        	// Get back the primitive result

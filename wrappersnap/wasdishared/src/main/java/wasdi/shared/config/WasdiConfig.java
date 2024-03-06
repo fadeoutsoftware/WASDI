@@ -27,7 +27,7 @@ import wasdi.shared.utils.log.WasdiLog;
  *
  */
 public class WasdiConfig {
-	
+		
 	/**
 	 * Node Code
 	 */
@@ -112,6 +112,8 @@ public class WasdiConfig {
 	 * If the general logHttpCalls is False, this does not change
 	 */
 	public boolean filterInternalHttpCalls=true;
+
+	
 	/**
 	 * Mongo db Configuration for the main node
 	 */
@@ -272,6 +274,7 @@ public class WasdiConfig {
         	oLinesStream = Files.lines(Paths.get(sConfigFilePath), StandardCharsets.UTF_8);
 			String sJson = oLinesStream.collect(Collectors.joining(System.lineSeparator()));
 			Current = MongoRepository.s_oMapper.readValue(sJson,WasdiConfig.class);
+			Current.paths.wasdiConfigFilePath = sConfigFilePath;
 			bRes = true;
 			
 		} catch (Exception oEx) {

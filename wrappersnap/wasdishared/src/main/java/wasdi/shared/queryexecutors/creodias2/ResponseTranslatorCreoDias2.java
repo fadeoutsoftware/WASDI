@@ -29,14 +29,10 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	private static final String SODATA_INSTRUMENT = "instrumentShortName";
 	private static final String SODATA_MODE = "operationalMode";
 	private static final String SODATA_NAME = "Name";
-	private static final String SODATA_ORBIT_NUMBER = "orbitNumber";
-	private static final String SODATA_ORBIT_DIRECTION  = "orbitDirection";
 	private static final String SODATA_PLATFORM_SERIAL_ID = "platformSerialIdentifier";
 	private static final String SODATA_PLATFORM_SHORT_NAME = "platformShortName";
-	private static final String SODATA_POLARISATION  = "polarisationChannels";
 	private static final String SODATA_POLYGON = "Polygon";
 	private static final String SODATA_PRODUCT_ID = "Id";
-	private static final String SODATA_PRODUCT_TYPE = "productType";
 	private static final String SODATA_RELATIVE_ORBIT = "relativeOrbitNumber";
 	private static final String SODATA_S3_PATH = "S3Path";
 	public static final String  SODATA_SIZE = "ContentLength";

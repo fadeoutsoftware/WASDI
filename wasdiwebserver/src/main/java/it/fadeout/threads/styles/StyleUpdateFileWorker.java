@@ -1,12 +1,10 @@
 package it.fadeout.threads.styles;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import wasdi.shared.business.Node;
-import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.StyleAPIClient;
 
 /**
  * Thread that calls all the computing nodes to ask to update the file of a style
@@ -42,23 +40,10 @@ public class StyleUpdateFileWorker extends Thread {
 			}
 
 			try {
-				String sUrl = oNode.getNodeBaseAddress();
-
-				if (!sUrl.endsWith("/")) {
-					sUrl += "/";
-				}
-
-				sUrl += "styles/updatefile?styleId=" + m_sStyleId+"&zipped=true";
-
-				Map<String, String> asHeaders = new HashMap<>();
-				asHeaders.put("x-session-token", m_sSessionId);
-
-				WasdiLog.debugLog("StyleUpdateFileWorker.run: calling url: " + sUrl);
-
-				HttpUtils.httpPostFile(sUrl, m_sFilePath, asHeaders);
-
+				StyleAPIClient.updateFile(oNode, m_sSessionId, m_sStyleId, m_sFilePath);
 				WasdiLog.debugLog("StyleUpdateFileWorker.run: node updated " + oNode.getNodeCode());
-			} catch (Exception oEx) {
+			} 
+			catch (Exception oEx) {
 				WasdiLog.debugLog("StyleUpdateFileWorker.run: Exception " + oEx.getMessage());
 			}
 		}

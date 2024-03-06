@@ -105,8 +105,10 @@ RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
 
 # Install the common PIP libraries
 RUN pip3 install --no-cache-dir --no-compile \
-    numpy \
-    wasdi
+        numpy && \
+    pip3 install --no-cache-dir --no-compile {{ sPythonPipLibraryWasdiRepository }} \
+        wasdi && \
+    find {{ sWasdiSystemUserHome }} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
 # Start the container

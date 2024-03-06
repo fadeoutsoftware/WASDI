@@ -9,341 +9,55 @@ Octave WasdiLib
 
 Methods
 ------------------------------------------
+
 startWasdi
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::startWasdi
+ .. mat:autofunction:: octavewasdilib::startWasdi
 
-wAddFileToWASDI
+addFileToWASDI
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wAddFileToWASDI
+ .. mat:autofunction:: octavewasdilib::addFileToWASDI
 
-wAddParam
+executeWorkflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wAddParam
+ .. mat:autofunction:: octavewasdilib::executeWorkflow
 
-wAsynchAddFileToWASDI
+getFullProductPath
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wAsynchAddFileToWASDI
+ .. mat:autofunction:: octavewasdilib::getFullProductPath
 
-wAsynchCopyFileToSftp
+getProcessStatus
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wAsynchCopyFileToSftp
+ .. mat:autofunction:: octavewasdilib::getProcessStatus
 
-wAsynchExecuteProcessor
+getProductsByWorkspace
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wAsynchExecuteProcessor
+ .. mat:autofunction:: octavewasdilib::getProductsByWorkspace
 
-wAsynchExecuteWorkflow
+getSavePath
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wAsynchExecuteWorkflow
+ .. mat:autofunction:: octavewasdilib::getSavePath
 
-wAsynchImportProduct
+getWorkflows
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wAsynchImportProduct
+ .. mat:autofunction:: octavewasdilib::getWorkflows
 
-wAsynchImportProductList
+getWorkspaces
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wAsynchImportProductList
+ .. mat:autofunction:: octavewasdilib::getWorkspaces
 
-wAsynchMosaic
+openWorkspace
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wAsynchMosaic
+ .. mat:autofunction:: octavewasdilib::openWorkspace
 
-wAsynchMultiSubset
+setProcessPayload
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wAsynchMultiSubset
+ .. mat:autofunction:: octavewasdilib::setProcessPayload
 
-wCopyFileToSftp
+updateProcessStatus
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wCopyFileToSftp
+ .. mat:autofunction:: octavewasdilib::updateProcessStatus
 
-wCreateWorkspace
+waitProcess
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wCreateWorkspace
-
-wDeleteProduct
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wDeleteProduct
-
-wDeleteWorkspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wDeleteWorkspace
-
-wExecuteProcessor
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wExecuteProcessor
-
-wExecuteWorkflow
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wExecuteWorkflow
-
-wGetActiveWorkspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetActiveWorkspace
-
-wGetBasePath
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetBasePath
-
-wGetBaseUrl
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetBaseUrl
-
-wGetDownloadActive
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetDownloadActive
-
-wGetFullProductPath
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetFullProductPath
-
-wGetMyProcId
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetMyProcId
-
-wGetParameter
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetParameter
-
-wGetParametersFilePath
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetParametersFilePath
-
-wGetParams
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetParams
-
-wGetPassword
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetPassword
-
-wGetPath
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetPath
-
-wGetProcessStatus
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetProcessStatus
-
-wGetProcessesByWorkspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetProcessesByWorkspace
-
-wGetProcessorPath
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetProcessorPath
-
-wGetProcessorPayload
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetProcessorPayload
-
-wGetProcessorPayloadAsJSON
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetProcessorPayloadAsJSON
-
-wGetProductBbox
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetProductBbox
-
-wGetProductsByActiveWorkspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetProductsByActiveWorkspace
-
-wGetProductsByWorkspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetProductsByWorkspace
-
-wGetSavePath
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetSavePath
-
-wGetSessionId
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetSessionId
-
-wGetUploadActive
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetUploadActive
-
-wGetUser
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetUser
-
-wGetVerbose
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetVerbose
-
-wGetWorkflows
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetWorkflows
-
-wGetWorkspaceBaseUrl
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetWorkspaceBaseUrl
-
-wGetWorkspaceIdByName
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetWorkspaceIdByName
-
-wGetWorkspaceOwnerByName
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetWorkspaceOwnerByName
-
-wGetWorkspaceUrlByWsId
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetWorkspaceUrlByWsId
-
-wGetWorkspaces
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wGetWorkspaces
-
-wImportAndPreprocess
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wImportAndPreprocess
-
-wImportProduct
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wImportProduct
-
-wImportProductList
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wImportProductList
-
-wLog
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wLog
-
-wMosaic
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wMosaic
-
-wMultiSubset
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wMultiSubset
-
-wOpenWorkspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wOpenWorkspace
-
-wOpenWorkspaceById
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wOpenWorkspaceById
-
-wPrintStatus
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wPrintStatus
-
-wRefreshParameters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wRefreshParameters
-
-wSearchEOImages
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSearchEOImages
-
-wSetActiveWorkspaceId
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetActiveWorkspaceId
-
-wSetBasePath
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetBasePath
-
-wSetBaseUrl
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetBaseUrl
-
-wSetDownloadActive
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetDownloadActive
-
-wSetIsOnServer
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetIsOnServer
-
-wSetMyProcId
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetMyProcId
-
-wSetParameter
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetParameter
-
-
-wSetPassword
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetPassword
-
-wSetPayload
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetPayload
-
-wSetProcessPayload
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetProcessPayload
-
-wSetSessionId
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetSessionId
-
-wSetSubPid
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetSubPid
-
-wSetUploadActive
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetUploadActive
-
-wSetUser
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetUser
-
-wSetVerbose
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetVerbose
-
-wSetWorkspaceBaseUrl
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetWorkspaceBaseUrl
-
-wSubset
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSubset
-
-wUpdateProcessStatus
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wUpdateProcessStatus
-
-wUpdateProgress
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wUpdateProgress
-
-wUpdateProgressPerc
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wUpdateProgressPerc
-
-wUpdateStatus
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wUpdateStatus
-
-wUrlEncode
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wUrlEncode
-
-wWaitProcess
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wWaitProcess
-
-wasdiHello
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wasdiHello
-
-wasdiLog
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wasdiLog
-
-
-
-
-
-
+ .. mat:autofunction:: octavewasdilib::waitProcess

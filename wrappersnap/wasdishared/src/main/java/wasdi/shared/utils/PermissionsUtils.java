@@ -6,10 +6,14 @@
  */
 package wasdi.shared.utils;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.S3Volume;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.Style;
 import wasdi.shared.business.Subscription;
@@ -21,17 +25,21 @@ import wasdi.shared.business.users.UserAccessRights;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserType;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProjectRepository;
+import wasdi.shared.data.S3VolumeRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**
  * @author c.nattero
@@ -816,6 +824,196 @@ public class PermissionsUtils {
 			WasdiLog.errorLog("PermissionsUtils.canUserWriteResource error: " + oEx);
 			return false;
 		}
+	}
+	
+	
+	/**
+	 * Return a list of S3 Volumes to be mounted on the workspace given the ProcessorParameter
+	 * @param oProcessorParameter ProcessorParameter in input
+	 * @return List of volumes to mount
+	 */
+
+	public static List<S3Volume> getVolumesToMount(ProcessorParameter oProcessorParameter) {
+		
+		// Here we save the ones to return for this app
+		List<S3Volume> aoOutputList = new ArrayList<>();
+		
+		if (oProcessorParameter == null) {
+			return aoOutputList;
+		}
+		else {
+			return getVolumesToMount(oProcessorParameter.getWorkspace(), oProcessorParameter.getProcessorID(), oProcessorParameter.getUserId());
+		}
+	}
+	
+	/**
+	 * Return a list of S3 Volumes to be mounted on the workspace given the ProcessorParameter
+	 * @param oProcessorParameter ProcessorParameter in input
+	 * @return List of volumes to mount
+	 */
+	public static List<S3Volume> getVolumesToMount(String sWorkspaceId, String sProcessorId, String sRequestingUserId) {
+		
+		// Here we save the ones to return for this app
+		List<S3Volume> aoOutputList = new ArrayList<>();
+		
+		try {
+			// Repo for S3 Volumes and Resource Permissions
+			S3VolumeRepository oS3VolumeRepository = new S3VolumeRepository();
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			
+			// Get the list of all volumes
+			List<S3Volume> aoAllVolumes = oS3VolumeRepository.getVolumes();
+						
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+			
+			Processor oProcessor = null;
+			
+			if (!Utils.isNullOrEmpty(sProcessorId)) {
+				oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			}
+			
+			
+			// For all the volumes
+			for (S3Volume oS3Volume : aoAllVolumes) {
+				
+				// If is a volume of the user starting the app ok
+				if (oS3Volume.getUserId().equals(sRequestingUserId)) {
+					aoOutputList.add(oS3Volume);
+					continue;
+				}
+				
+				// If we are in a workspace of the owner
+				if (oWorkspace.getUserId().equals(oS3Volume.getUserId())) {
+					aoOutputList.add(oS3Volume);
+					continue;					
+				}
+				
+				// If the owner of the volume has the workspace shared is ok 
+				if (oUserResourcePermissionRepository.isWorkspaceSharedWithUser(oS3Volume.getUserId(), sWorkspaceId)) {
+					aoOutputList.add(oS3Volume);
+					continue;
+				}
+				
+				if (oProcessor!=null) {
+					if (oProcessor.getUserId().equals(oS3Volume.getUserId())) {
+						aoOutputList.add(oS3Volume);
+						continue;					
+					}					
+				}
+			}
+			
+			
+			return aoOutputList;			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PermissionsUtils.getVolumesToMount error: " + oEx);
+			return aoOutputList;
+		}		
+	}
+	
+	public static File getFileFromS3Volume(String sUserId, String sFileName, String sWorkspaceId, String sProcessObjId) {
+		// The file is not in the WASDI db. Can be a file on an S3 Volume?
+		
+		// Split the file: if it is a S3 Volume MUST have at least one folder
+		String [] asFileParts = sFileName.split("/");
+		
+		if (asFileParts == null) {
+			// Strange
+			return null;				
+		}
+
+		if (asFileParts.length == 1) {
+			// It is a normal file, cannot be a volume
+			return null;					
+		}
+		
+		// We take the root part that MAY be a Volume
+		String sRootPart = asFileParts[0];
+		
+		// Here I wanted to manage the situation where there is a folder with the same name of a volume.
+		// But does not work beacuse in any case the docker creates the folder when the volume is mounted 
+		// So the folder is always there.
+		
+		// Get the local path
+//		String sTargetFilePath = PathsConfig.getWorkspacePath(sUserId,sWorkspaceId) + sRootPart;
+		
+		// If exists in the workspace a folder with the same name, we stop here.
+//		File oFolderFile = new File(sTargetFilePath);
+//		
+//		if (oFolderFile.exists()) {
+//			WasdiLog.debugLog("PermissionsUtils.getFileFromS3Volume: " + sRootPart + " is a subfolder of the workspace. We stop here and do not verify Volumes");
+//			return null;
+//		}
+		
+		
+		// We need to understand if this request is related to a processor
+		String sProcessorId = "";
+		
+		// if we have a process obj id
+		if (!Utils.isNullOrEmpty(sProcessObjId)) {
+			try {
+				
+				// Try to read it
+				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+				ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessObjId);
+				
+				if (oProcessWorkspace != null) {
+					// If it is an app
+					if (oProcessWorkspace.getOperationType().equals(LauncherOperations.RUNPROCESSOR.toString()) || oProcessWorkspace.getOperationType().equals(LauncherOperations.RUNIDL.toString())) {
+						// Take the name
+						String sProcessorName = oProcessWorkspace.getProductName();
+						
+						// Search for the app
+						ProcessorRepository oProcessorRepository = new ProcessorRepository();
+						Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
+						
+						// If we fuond it
+						if (oProcessor != null) {
+							// We can get the id!!
+							sProcessorId = oProcessor.getProcessorId();
+							WasdiLog.debugLog("PermissionsUtils.getFileFromS3Volume: found processor " + sProcessorId);
+						}
+					}
+				}
+			}
+			catch (Exception oEx) {
+				WasdiLog.errorLog("PermissionsUtils.getFileFromS3Volume: error trying to detect the application ", oEx);
+			}
+		}
+		
+		List<S3Volume> aoVolumes = PermissionsUtils.getVolumesToMount(sWorkspaceId,sProcessorId,sUserId);
+		
+		if (aoVolumes == null) {
+			return null;
+		}
+		
+		if (aoVolumes.size()<=0) {
+			return null;
+		}
+		
+		for (S3Volume oS3Volume : aoVolumes) {
+			if (oS3Volume.getMountingFolderName().equals(sRootPart)) {
+				
+				String sFileInVolume = PathsConfig.getS3VolumesBasePath() + sFileName;
+				
+				WasdiLog.debugLog("PermissionsUtils.getFileFromS3Volume: found Volume " + oS3Volume.getMountingFolderName() + " test file " + sFileInVolume);
+				
+				// Check if the file exists
+				File oFileInVolume = new File(sFileInVolume);
+				if (oFileInVolume.exists()) {
+					PrimitiveResult oResult = new PrimitiveResult();
+					oResult.setBoolValue(true);
+					return oFileInVolume;									
+				}
+				else {
+					WasdiLog.debugLog("PermissionsUtils.getFileFromS3Volume: no, we cannot read it");
+				}
+			}
+		}
+		
+		return null;
 	}
 }
  

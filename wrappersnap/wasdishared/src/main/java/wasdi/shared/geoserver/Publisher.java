@@ -212,7 +212,7 @@ public class Publisher {
         
         for (String sShapeFile : asShapeFiles) {
         	
-        	String sExtension = Utils.GetFileNameExtension(sShapeFile);
+        	String sExtension = Utils.getFileNameExtension(sShapeFile);
         	String sNewName = sShapeFile.replace(sBaseName+"."+sExtension, sStore+"."+sExtension);
         	File oNewFile = new File(sNewName);
         	
@@ -220,7 +220,7 @@ public class Publisher {
         	asRenamedShapeFiles.add(sNewName);
 		}
         
-        String sExtension = Utils.GetFileNameExtension(sFileName);
+        String sExtension = Utils.getFileNameExtension(sFileName);
         sFileName = sFileName.replace(sBaseName+"."+sExtension, sStore+"."+sExtension);
         
         String sZipFile = sFileName.replace(".shp", ".zip");

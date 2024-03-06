@@ -336,7 +336,7 @@ public class SnapProductReader extends WasdiProductReader {
 				if (oGdalInfoResult.coordinateSystemWKT.contains("Mollweide")) {
 					WasdiLog.debugLog("SnapProductReader.addPrjToMollweidTiffFiles: this is a Mollweide file, try to convert");
 					
-					String sExtension = Utils.GetFileNameExtension(m_oProductFile.getName());
+					String sExtension = Utils.getFileNameExtension(m_oProductFile.getName());
 					String sOutputFile = m_oProductFile.getAbsolutePath().replace("." +sExtension, ".prj");
 					
 		            File oPrjFile = new File(sOutputFile);

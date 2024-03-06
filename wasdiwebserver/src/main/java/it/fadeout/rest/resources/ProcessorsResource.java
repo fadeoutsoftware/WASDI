@@ -60,6 +60,7 @@ import wasdi.shared.business.users.UserAccessRights;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.config.PathsConfig;
+import wasdi.shared.config.ProcessorTypeConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CounterRepository;
@@ -138,6 +139,7 @@ public class ProcessorsResource  {
 
 		sName = URLDecoder.decode(sName, StandardCharsets.UTF_8.name());
 		sDescription = URLDecoder.decode(sDescription, StandardCharsets.UTF_8.name());
+		sParamsSample = URLDecoder.decode(sParamsSample, StandardCharsets.UTF_8.name());
 
 		try {
 			if(sName.contains("/") || sName.contains("\\") || sName.contains("#")) {
@@ -178,6 +180,7 @@ public class ProcessorsResource  {
 				// Error
 				oResult.setIntValue(500);
 				oResult.setStringValue("Processor Name MUST be lower case and without any space");
+				WasdiLog.warnLog("ProcessorsResource.uploadProcessor: name contains spaces");
 				return oResult;				
 			}
 			
@@ -188,6 +191,7 @@ public class ProcessorsResource  {
 				catch (Exception oJsonEx) {
 					oResult.setIntValue(500);
 					oResult.setStringValue("Parameter Sample is not a valid JSON");
+					WasdiLog.warnLog("ProcessorsResource.uploadProcessor: not valid parameter sample");
 					return oResult;
 				}
 			}
@@ -203,6 +207,7 @@ public class ProcessorsResource  {
 				// If the path exists, the name of the processor is already used
 				oResult.setIntValue(500);
 				oResult.setStringValue("Processor Name Already in Use");
+				WasdiLog.warnLog("ProcessorsResource.uploadProcessor: the folder of the app already exists");
 				return oResult;
 			}
 			
@@ -270,8 +275,7 @@ public class ProcessorsResource  {
 			oProcessorRepository.insertProcessor(oProcessor);
 			
 			// We need to deploy the processor in the main node
-			
-			WasdiLog.debugLog("ProcessorsResource.uploadProcessor: Forcing Update Lib");
+			WasdiLog.debugLog("ProcessorsResource.uploadProcessor: starting deploy on main node");
 			
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, "wasdi");
@@ -294,15 +298,17 @@ public class ProcessorsResource  {
 			if (oRes.getBoolValue()) {
 				oResult.setIntValue(200);
 				oResult.setBoolValue(true);
+				WasdiLog.debugLog("ProcessorsResource.uploadProcessor: done with success");
 				return oResult;
 			}
 			else {
 				oResult.setIntValue(500);
+				WasdiLog.debugLog("ProcessorsResource.uploadProcessor: finished with error");
 				return oResult;				
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.uploadProcessor error:" + oEx);
+			WasdiLog.errorLog("ProcessorsResource.uploadProcessor error: " + oEx);
 			oResult.setIntValue(500);
 			return oResult;
 		}
@@ -1830,7 +1836,8 @@ public class ProcessorsResource  {
 					
 					// Create the processor Parameter
 					ProcessorParameter oProcessorParameter = new ProcessorParameter();
-					oProcessorParameter.setExchange(oWorkspace.getWorkspaceId());
+					// We set the exchange to the actual workspace
+					oProcessorParameter.setExchange(sWorkspaceId);
 					oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
 					oProcessorParameter.setName(oProcessorToUpdate.getName());
 					oProcessorParameter.setProcessObjId(Utils.getRandomName());
@@ -2493,7 +2500,14 @@ public class ProcessorsResource  {
 				}
 			}
 			
-			ArrayList<String> asAdditionalFilter = ProcessorTypes.getAdditionalTemplateGeneratedFiles(oProcessor.getType());
+			ProcessorTypeConfig oProcessorTypeConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig(oProcessor.getType()); 
+			ArrayList<String> asAdditionalFilter = new ArrayList<>();
+			
+			if (oProcessorTypeConfig != null) {
+				if (oProcessorTypeConfig.templateFilesToExcludeFromDownload != null) {
+					asAdditionalFilter.addAll(oProcessorTypeConfig.templateFilesToExcludeFromDownload);
+				}
+			}
 			
 			if (asAdditionalFilter.size()>0) {
 				WasdiLog.debugLog("ProcessorsResource.zipProcessor: adding more proc type filter file names ");

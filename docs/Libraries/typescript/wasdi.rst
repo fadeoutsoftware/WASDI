@@ -1,11 +1,6 @@
 Javascript WasdiLib
 =============================
 
-Constructor
-------------
-
-.. js:autofunction:: constructor
-
 Methods
 ----------------------------
 loadConfig
@@ -36,8 +31,8 @@ createWorkspace
 ^^^^^^^^^^^^^^^^^^^^^^^
 .. js:autofunction:: createWorkspace
 
- openWorkspaceById
- ^^^^^^^^^^^^^^^^^^^^^^^
+openWorkspaceById
+^^^^^^^^^^^^^^^^^^^^^^^
 .. js:autofunction:: openWorkspaceById
 
 getWorkspaces

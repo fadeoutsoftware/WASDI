@@ -191,7 +191,7 @@ public class Ingest extends Operation {
                 	if (asFiles!=null) {
                 		if (asFiles.size() == 1) {
                 			String sFile = asFiles.get(0);
-                			String sExt = Utils.GetFileNameExtension(sFile);
+                			String sExt = Utils.getFileNameExtension(sFile);
                 			if (sExt.toLowerCase().equals("nc")) {
                 				WasdiLog.infoLog("Ingest.executeOperation: this looks a zip file with only on netcdf inside. We set the name with the .zip extension");
                 				oImportProductViewModel.setName(oImportProductViewModel.getFileName());

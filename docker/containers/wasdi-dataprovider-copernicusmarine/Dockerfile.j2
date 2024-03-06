@@ -4,6 +4,10 @@ FROM ubuntu:22.04
 MAINTAINER "WASDI SARL"
 
 
+# Labels used to search our containers and/or images
+LABEL docker-image-name={{ sWasdiDataProviderCopernicusMarineServiceName }}
+
+
 # From now, all commands executed are executed with the user 'root'
 USER root
 
@@ -17,13 +21,27 @@ ENV PYTHONDONTWRITEBYTECODE="False"
 # This variable is setted to force the 'print' method of Python to flush message directly
 ENV PYTHONUNBUFFERED="True"
 
+# This variable is setted to set the default editor
+ENV EDITOR="nano"
+
 # This variable is setted to use binaries from our virtual environment
 ENV PATH="{{ sWasdiSystemUserHome }}/venv/bin:${PATH}"
 
 
 # RUN generic to create user, group, directories, etc
 RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
-    useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }}
+    useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
+    mkdir --parents \
+        {{ sWasdiSystemUserHome }}/.ssh \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} \
+        {{ sWasdiSystemUserHome }}/.ssh && \
+    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chmod 700 \
+        {{ sWasdiSystemUserHome }}/.ssh && \
+    chmod {{ sWasdiSoftwareRootDirectoryMode }} \
+        {{ sWasdiSoftwareRootDirectoryPath }}
 
 
 # RUN generic to update the system and install common packages
@@ -35,92 +53,46 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     apt-get update && \
     apt-get install \
         ca-certificates && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ jammy main restricted universe multiverse"           > /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy main restricted universe multiverse"          > /etc/apt/sources.list && \
     echo "deb https://mirror.ubuntu.ikoula.com/ jammy-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
     echo "deb https://mirror.ubuntu.ikoula.com/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list && \
     apt-get update && \
     apt-get dist-upgrade && \
     apt-get install \
         curl \
-        dos2unix \
-        gdal-bin \
-        git \
-        gunicorn \
         nano \
-        python3 \
-        python3-flask \
-        python3-gdal \
-        python3-requests \
-        python3-pip \
-        python3-venv \
-        python3-wheel \
+        tar \
+        unzip \
         wget && \
+    sed --in-place "s/# set tabsize.*/set tabsize 4/g" /etc/nanorc && \
+    sed --in-place "s/# set tabstospaces/set tabstospaces/g" /etc/nanorc && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
-# RUN specific to install the .NET runtime
+# RUN specific to install COPERNICUS MARINE library
 RUN apt-get update && \
     apt-get install \
-        aspnetcore-runtime-6.0 && \
+        python3 \
+        python3-venv && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
-# From now, all commands executed are executed as {{ sWasdiSystemUserName }}
+# From now, all commands executed are executed with the user '{{ sWasdiSystemUserName }}'
 USER {{ sWasdiSystemUserName }}
 
 
-# Create the application directory
-RUN mkdir --parents \
-        {{ sWasdiSystemUserHome }}/application
-
-
-# Set the workdir to {{ sWasdiSystemUserHome }}/application
-WORKDIR {{ sWasdiSystemUserHome }}/application
-
-
-## FROM HERE, THERE IS NO MORE CACHE ##
-# Copy the needed files
-COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} ./ {{ sWasdiSystemUserHome }}/application/
-
-
-# Create the virtual environment
-# Install the common PIP libraries
+# RUN specific to install COPERNICUS MARINE library
 RUN python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
     pip3 install --no-cache-dir --no-compile \
-        numpy && \
-    pip3 install --no-cache-dir --no-compile {{ sPythonPipLibraryWasdiRepository }} \
-        wasdi && \
+        copernicusmarine && \
     find {{ sWasdiSystemUserHome }} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
-# From now, all commands executed are executed with the user 'root'
-USER root
+# Set the workdir
+WORKDIR {{ sWasdiSystemUserHome }}
 
 
-# Install packages only if {{ sWasdiSystemUserHome }}/application/packages.txt exists
-RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
-        --application-directory {{ sWasdiSystemUserHome }}/application \
-        --home-directory {{ sWasdiSystemUserHome }} \
-        --package-apt
-
-
-# From now, all commands executed are executed as {{ sWasdiSystemUserName }}
-USER {{ sWasdiSystemUserName }}
-
-
-# Start the container
-CMD [ \
-    "{{ sWasdiSystemUserHome }}/venv/bin/python3", \
-    "/usr/bin/gunicorn", \
-    "--workers", \
-    "1", \
-    "--max-requests", \
-    "1", \
-    "--timeout", \
-    "3600", \
-    "--bind", \
-    "0.0.0.0:5000", \
-    "wasdiProcessorServer:app" \
-]
+# Copy data
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/data_provider_cm.py {{ sWasdiSystemUserHome }}/data_provider_cm.py

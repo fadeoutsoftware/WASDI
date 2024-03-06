@@ -44,6 +44,11 @@ public class ShellExecItemConfig {
 	public boolean removePathFromFirstArg = false;
 	
 	/**
+	 * Here we can add a prefix that will be added as arg[0] of our shell execute
+	 */
+	public String addPrefixToCommand = "";
+	
+	/**
 	 * List of strings that are additional moung points for this specific docker
 	 */
 	public ArrayList<String> additionalMountPoints = new ArrayList<>();

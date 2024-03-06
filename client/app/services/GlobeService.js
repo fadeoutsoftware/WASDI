@@ -58,7 +58,7 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
                 this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, oGlobeOptions);
 
                 // Select OpenLayers and Cesium DEM Terrain by default
-                this.m_oWasdiGlobe.baseLayerPicker.viewModel.selectedImagery  = this.m_oWasdiGlobe.baseLayerPicker.viewModel.imageryProviderViewModels[6];
+                this.m_oWasdiGlobe.baseLayerPicker.viewModel.selectedImagery  = this.m_oWasdiGlobe.baseLayerPicker.viewModel.imageryProviderViewModels[12];
                 this.m_oWasdiGlobe.baseLayerPicker.viewModel.selectedTerrain = this.m_oWasdiGlobe.baseLayerPicker.viewModel.terrainProviderViewModels[1];
 
                 this.m_aoLayers = this.m_oWasdiGlobe.imageryLayers;
@@ -578,12 +578,12 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
                 label : "LS8",
                 description : "NASA LANDSAT 8"
             },
-            {
+/*            {
                 name : "PROBAV",
                 icon : "assets/icons/sat_05.svg",
                 label : "PROBA-V",
                 description : "PROBA VEGETATION"
-            },
+            },*/
             {
                 name : "GEOEYE",
                 icon : "assets/icons/sat_06.svg",

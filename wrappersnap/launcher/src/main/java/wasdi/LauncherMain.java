@@ -235,7 +235,7 @@ public class LauncherMain  {
             } else {
                 WasdiLog.debugLog("LauncherMain: RUNNING state and operationStartDate updated");
             }
-
+            
             // Run the operation
             oLauncher.executeOperation(sOperation, oBaseParameter);
 
