@@ -112,6 +112,13 @@ public class WasdiConfig {
 	 * If the general logHttpCalls is False, this does not change
 	 */
 	public boolean filterInternalHttpCalls=true;
+	
+	/**
+	 * Set true if the wasdi tomcat node web server must use the internal docker name instead
+	 * of the public http address of the Jupyter Notebook container.
+	 * Is due to the configuration of Adwaiseo that does not resolve the public ip of the server.
+	 */
+	public boolean useNotebooksDockerAddress = false;
 
 	
 	/**
