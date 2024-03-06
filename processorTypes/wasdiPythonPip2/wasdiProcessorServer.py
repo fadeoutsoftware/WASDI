@@ -15,7 +15,7 @@ app = Flask(__name__)
 m_sProcId = ""
 
 def log(sLogString):
-	print("[" + m_sProcId + "] wasdiProcessorServer PIP2 Engine v.2.1.3 - " + sLogString)
+	print("[" + m_sProcId + "] wasdiProcessorServer PIP2 Engine v.2.1.4 - " + sLogString)
 
 @app.route('/run/<string:processId>', methods=['POST'])
 def run(processId):
