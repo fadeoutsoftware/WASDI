@@ -448,7 +448,7 @@ public class ConsoleResource {
 			String sUrl = oJupyterNotebook.getUrl();
 			
 			if (WasdiConfig.Current.useNotebooksDockerAddress) {
-				sUrl = "http://nb_" + oJupyterNotebook.getCode() + ":8888";
+				sUrl = "http://nb_" + oJupyterNotebook.getCode() + ":8888/notebook/" + oJupyterNotebook.getCode();
 				WasdiLog.warnLog("ConsoleResource.internalIsJupyterActive: changing Notebook URL to docker internal address " + sUrl);
 			}
 			
