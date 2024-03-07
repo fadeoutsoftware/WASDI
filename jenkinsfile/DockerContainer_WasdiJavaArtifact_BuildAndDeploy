@@ -1,11 +1,79 @@
+def getAnsibleExtraVariableProject() {
+  def aAnsibleExtraVariableProject = []
+
+  aAnsibleExtraVariableProject.add('sDeployWasdiLauncherContainer=' + env.sWasdiLauncher.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiSchedulerContainer=' + env.sWasdiScheduler.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTomcatOgcProcessesServerContainer=' + env.sWasdiTomcatOgcProcessesServer.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTomcatOpenEoServerContainer=' + env.sWasdiTomcatOpenEoServer.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTomcatWasdiWebServerContainer=' + env.sWasdiTomcatWasdiWebServer.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTriggerContainer=' + env.sWasdiTrigger.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiUtilsContainer=' + env.sWasdiUtils.toString())
+
+  aAnsibleExtraVariableProject.unique()
+
+  if ( aAnsibleExtraVariableProject.size() > 0 ) {
+    return aAnsibleExtraVariableProject.join(' ')
+  }
+
+  return ''
+}
+
+def getMavenBuildProject() {
+  def aMavenBuildProject = []
+
+  if ( env.sWasdiLauncher.toBoolean() ) {
+    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('wrappersnap/launcher')
+  }
+
+  if ( env.sWasdiScheduler.toBoolean() ) {
+    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('scheduler')
+  }
+
+  if ( env.sWasdiTomcatOgcProcessesServer.toBoolean() ) {
+    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('ogcprocesses/processes')
+  }
+
+  if ( env.sWasdiTomcatOpenEoServer.toBoolean() ) {
+    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('openeo-java-server')
+  }
+
+  if ( env.sWasdiTomcatWasdiWebServer.toBoolean() ) {
+    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('wasdiwebserver')
+  }
+
+  if ( env.sWasdiTrigger.toBoolean() ) {
+    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('libraries/jwasdilib/jwasdilib')
+    aMavenBuildProject.add('wasditrigger')
+  }
+
+  if ( env.sWasdiUtils.toBoolean() ) {
+    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('wrappersnap/utils')
+  }
+
+  aMavenBuildProject.unique()
+
+  if ( aMavenBuildProject.size() > 0 ) {
+    return '--projects ' + aMavenBuildProject.join(',') + ' --also-make'
+  }
+
+  return ''
+}
+
 pipeline {
   agent any
 
   environment {
-    sAnsibleExtraVariableProject = "sDeployWasdiLauncherContainer=true sDeployWasdiSchedulerContainer=true sDeployWasdiTomcatOgcProcessesServerContainer=true sDeployWasdiTomcatOpenEoServerContainer=true sDeployWasdiTomcatWasdiWebServerContainer=true sDeployWasdiTriggerContainer=true"
+    sAnsibleExtraVariableProject = getAnsibleExtraVariableProject()
     sCurrentRevision             = "${env.BUILD_ID}"
     sEnvironmentLower            = env.sAnsibleLimit.split('-')[0].toLowerCase()
-    sMavenBuildProject           = "--projects wrappersnap/wasdishared,wrappersnap/launcher,scheduler,wasdiwebserver,libraries/jwasdilib/jwasdilib,wasditrigger,ogcprocesses/processes,openeo-java-server --also-make"
+    sMavenBuildProject           = getMavenBuildProject()
     sMavenProfile                = "wasdi-${env.sEnvironmentLower}"
   }
 
@@ -22,24 +90,31 @@ pipeline {
   stages {
     stage('DEBUG') {
       steps {
-        echo "env.GIT_BRANCH                    = " + env.GIT_BRANCH
-        echo "env.sAnsibleInventory             = " + env.sAnsibleInventory
-        echo "env.sAnsibleLimit                 = " + env.sAnsibleLimit
-        echo "env.sCurrentRevision              = " + env.sCurrentRevision
-        echo "env.sSourceBranch                 = " + env.sSourceBranch
-        echo "env.sWasdiAnsibleGitRepositoryUrl = " + env.sWasdiAnsibleGitRepositoryUrl
-        echo "env.sWasdiAnsiblePath             = " + env.sWasdiAnsiblePath
-        echo "env.WORKSPACE                     = " + env.WORKSPACE
+        echo "env.GIT_BRANCH                       = " + env.GIT_BRANCH
+        echo "env.sAnsibleExtraVariableProject     = " + env.sAnsibleExtraVariableProject
+        echo "env.sAnsibleInventory                = " + env.sAnsibleInventory
+        echo "env.sAnsibleLimit                    = " + env.sAnsibleLimit
+        echo "env.sCurrentRevision                 = " + env.sCurrentRevision
+        echo "env.sMavenBuildProject               = " + env.sMavenBuildProject
+        echo "env.sMavenProfile                    = " + env.sMavenProfile
+        echo "env.sSourceBranch                    = " + env.sSourceBranch
+        echo "env.sWasdiAnsiblePath                = " + env.sWasdiAnsiblePath
+        echo "env.sWasdiLauncher                   = " + env.sWasdiLauncher
+        echo "env.sWasdiScheduler                  = " + env.sWasdiScheduler
+        echo "env.sWasdiTomcatOgcProcessesServer   = " + env.sWasdiTomcatOgcProcessesServer
+        echo "env.sWasdiTomcatOpenEoServer         = " + env.sWasdiTomcatOpenEoServer
+        echo "env.sWasdiTomcatWasdiWebServer       = " + env.sWasdiTomcatWasdiWebServer
+        echo "env.sWasdiTrigger                    = " + env.sWasdiTrigger
+        echo "env.sWasdiUtils                      = " + env.sWasdiUtils
+        echo "env.WORKSPACE                        = " + env.WORKSPACE
 
         sh script: "pwd", label: "Current location"
-
         sh script: "cat pom.xml", label: "Content of the main pom.xml file"
-
-        sh script: "which java", label: "Tool > java > path"
-        sh script: "java -version", label: "Tool > java > current version"
 
         sh script: "which mvn", label: "Tool > mvn > path"
         sh script: "mvn --version", label: "Tool > mvn > current version"
+        sh script: "which java", label: "Tool > java > path"
+        sh script: "java -version", label: "Tool > java > current version"
       }
     }
 
@@ -97,7 +172,7 @@ pipeline {
       }
     }
 
-    stage('DEPLOY THE CONTAINERS AND THEIR RUN ELEMENTS') {
+    stage('DEPLOY THE CONTAINER(S) AND THEIR RUN ELEMENTS') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
@@ -106,7 +181,7 @@ pipeline {
             --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
         """,
         label: "Deploy the container(s) and their run elements"
       }
@@ -121,7 +196,7 @@ pipeline {
             --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiSchedulerContainer=true sDeployWasdiTomcatOgcProcessesServerContainer=true sDeployWasdiTomcatOpenEoServerContainer=true sDeployWasdiTomcatWasdiWebServerContainer=true'
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
         """,
         label: "Start or restart the container(s)"
       }
@@ -134,7 +209,7 @@ pipeline {
           ansible-playbook \
             playbooks/deleteDockerImage.yml \
             --inventory inventories/${env.sAnsibleInventory}.yml \
-            --limit ${env.sAnsibleLimit} \
+            --limit ${env.sEnvironmentLower} \
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
         """,
