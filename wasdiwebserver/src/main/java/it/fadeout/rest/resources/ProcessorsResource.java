@@ -378,6 +378,8 @@ public class ProcessorsResource  {
 				oDeployedProcessorViewModel.setIsPublic(oProcessor.getIsPublic());
 				oDeployedProcessorViewModel.setType(oProcessor.getType());
 				oDeployedProcessorViewModel.setMinuteTimeout((int) (oProcessor.getTimeoutMs()/60000l));
+				oDeployedProcessorViewModel.setImgLink(ImageResourceUtils.getProcessorLogoPlaceholderPath(oProcessor));
+				oDeployedProcessorViewModel.setLogo(oProcessor.getLogo());
 				
 				aoRet.add(oDeployedProcessorViewModel);
 			}
