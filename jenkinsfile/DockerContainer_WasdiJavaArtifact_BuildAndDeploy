@@ -90,6 +90,7 @@ pipeline {
   stages {
     stage('DEBUG') {
       steps {
+        echo "env.bDeployConfigurationFile         = " + env.bDeployConfigurationFile
         echo "env.GIT_BRANCH                       = " + env.GIT_BRANCH
         echo "env.sAnsibleExtraVariableProject     = " + env.sAnsibleExtraVariableProject
         echo "env.sAnsibleInventory                = " + env.sAnsibleInventory
@@ -181,7 +182,7 @@ pipeline {
             --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject} sDeployWasdiConfigurationFileAll=${env.bDeployConfigurationFile}'
         """,
         label: "Deploy the container(s) and their run elements"
       }
