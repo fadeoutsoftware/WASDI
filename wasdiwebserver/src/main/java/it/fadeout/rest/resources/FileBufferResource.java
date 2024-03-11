@@ -14,11 +14,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import it.fadeout.Wasdi;
 import it.fadeout.services.ProvidersCatalog;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DataProvider;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.Node;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.Workspace;
@@ -26,19 +30,25 @@ import wasdi.shared.business.users.User;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
+import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.ShareFileParameter;
+import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.CatalogAPIClient;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
 import wasdi.shared.viewmodels.processors.ImageImportViewModel;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
 
 
@@ -309,13 +319,14 @@ public class FileBufferResource {
 	@POST
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult imageImport(@HeaderParam("x-session-token") String sSessionId, ImageImportViewModel oImageImportViewModel)
-			throws IOException {
+	public PrimitiveResult imageImport(@HeaderParam("x-session-token") String sSessionId, ImageImportViewModel oImageImportViewModel) {
+		
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
+		
 		try {
 			
-			WasdiLog.debugLog("FileBufferResource.imageImport, session: " + sSessionId);
+			WasdiLog.debugLog("FileBufferResource.imageImport");
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -332,8 +343,6 @@ public class FileBufferResource {
 			}
 
 			String sUserId = oUser.getUserId();
-			
-			String sProcessObjId = Utils.getRandomName();
 
 			if (oImageImportViewModel == null) {
 				WasdiLog.warnLog("FileBufferResource.imageImport: request is not valid");
@@ -371,8 +380,73 @@ public class FileBufferResource {
 				oProvider = m_oDataProviderCatalog.getProvider(sProvider);
 			}
 
-			WasdiLog.debugLog("FileBufferResource.imageImport, provider: " + oProvider.getName());
-
+			WasdiLog.debugLog("FileBufferResource.imageImport: provider: " + oProvider.getName());
+			
+			// Check if the file is already available: get the workspace
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+			
+			// Find the node of interest
+			String sNode = oWorkspace.getNodeCode();
+			if (Utils.isNullOrEmpty(sNode)) sNode = "wasdi";
+			
+			PrimitiveResult oFileOnNode = null;
+			
+			if (sNode.equals(WasdiConfig.Current.nodeCode)) {
+				// Local Node: no need to make any API
+				CatalogResources oCatalogResources = new CatalogResources();
+				//Response oCallResponse = oCatalogResources.checkFileByNode(sSessionId, sFileName, sWorkspaceId);
+				Response oCallResponse = oCatalogResources.checkDownloadEntryAvailabilityByName(sSessionId, sFileName, sWorkspaceId, oImageImportViewModel.getParent(), oImageImportViewModel.getVolumePath());
+				if (oCallResponse.getStatus()>=200 && oCallResponse.getStatus()<299) {
+					oFileOnNode = (PrimitiveResult) oCallResponse.getEntity();
+				}
+			}
+			else {
+				// Remote Node: ask there
+				NodeRepository oNodeRepository = new NodeRepository();
+				Node oNode = oNodeRepository.getNodeByCode(sNode);
+				//HttpCallResponse oResponse = CatalogAPIClient.checkFileByNode(oNode, sSessionId, sFileName, sWorkspaceId);
+				HttpCallResponse oResponse = CatalogAPIClient.checkDownloadAvaialibityNyName(oNode, sSessionId, sFileName, sWorkspaceId, oImageImportViewModel.getParent(), oImageImportViewModel.getVolumePath());
+				
+				if (oResponse.getResponseCode()>=200 && oResponse.getResponseCode()<299) {
+					oFileOnNode = MongoRepository.s_oMapper.readValue(oResponse.getResponseBody(), new TypeReference<PrimitiveResult>(){});
+				}				
+			}
+			
+			// Did we got an answer
+			if (oFileOnNode!=null) {
+				// How it was?
+				if (oFileOnNode.getBoolValue()) {
+					
+					// Oh good, we already have the file
+					WasdiLog.infoLog("FileBufferResource.imageImport: The file is already available in the workspace, return DONE");
+					
+					oFileOnNode.setStringValue(ProcessStatus.DONE.name());
+					oFileOnNode.setIntValue(200);
+					
+					// Search for exchange name
+					String sExchange = WasdiConfig.Current.rabbit.exchange;
+					
+					// Set default if is empty
+					if (Utils.isNullOrEmpty(sExchange)) {
+						sExchange = "amq.topic";
+					}
+					
+					ProductViewModel oProductViewModel = new ProductViewModel();
+					oProductViewModel.setName(oImageImportViewModel.getName());
+					oProductViewModel.setFileName(oImageImportViewModel.getName());
+					// Send the Asynch Message to the clients
+					Send oSendToRabbit = new Send(sExchange);
+					WasdiLog.infoLog("FileBufferResource.imageImport: sending rabbit notification");
+					oSendToRabbit.SendRabbitMessage(true, LauncherOperations.DOWNLOAD.name(), sWorkspaceId, oProductViewModel, sWorkspaceId);
+					oSendToRabbit.Free();
+					
+					return oFileOnNode;
+				}
+			}
+			
+			String sProcessObjId = Utils.getRandomName();
+			
 			DownloadFileParameter oParameter = new DownloadFileParameter();
 			oParameter.setQueue(sSessionId);
 			oParameter.setUrl(sFileUrl);

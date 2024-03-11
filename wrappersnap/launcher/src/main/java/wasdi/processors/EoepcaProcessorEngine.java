@@ -263,6 +263,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	 * @param oProcessor Processor that takes the inputs
 	 * @return String with yaml representation of these inputs
 	 */
+	@SuppressWarnings("unchecked")
 	protected List<Map<String,Object>> getParametersInputDescription(Processor oProcessor) {
 		// Prepare the args for the j2 template
 		
@@ -348,6 +349,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	/**
 	 * Executes an EOEPCA Processor
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean run(ProcessorParameter oParameter) {
 		
@@ -426,7 +428,6 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			
             long lTimeSpentMs = 0;
             int iThreadSleepMs = 2000;
-            boolean bForcedError = false;
 			
 			while(true) {
 				
@@ -472,7 +473,6 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 
                         // Update process and rabbit users
                         LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-                        bForcedError = true;
                         break;
                     }
                 }				

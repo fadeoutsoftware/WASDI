@@ -19,8 +19,6 @@ public class QueryTranslatorPLANET extends QueryTranslator {
 		
 		QueryViewModel oQuery = parseWasdiClientQuery(sQuery);
 		
-		
-		
 		return null;
 	}
 

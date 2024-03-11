@@ -1,0 +1,112 @@
+import jenkins.model.*
+import hudson.model.*
+
+def setEnvironmentVariable() {
+  sSourceJobName = env.JOB_BASE_NAME.replaceAll('_Deploy', '_BuildAndDeploy')
+
+  def aoParameters = Jenkins.instance.getAllItems(Job)
+                          .find { job -> job.fullName == sSourceJobName }
+                          .getBuildByNumber(env.sCurrentRevision.toInteger())
+                          .getAction(hudson.model.ParametersAction)
+
+  env.sAnsibleInventory                  = aoParameters.getParameter('sAnsibleInventory').value
+  env.sAnsibleLimit                      = aoParameters.getParameter('sAnsibleLimit').value
+  env.sWasdiDataProviderCopernicusMarine = aoParameters.getParameter('sWasdiDataProviderCopernicusMarine').value
+
+  echo "sSourceJobName = " + sSourceJobName
+}
+
+def getAnsibleExtraVariableProject() {
+  def aAnsibleExtraVariableProject = []
+
+  aAnsibleExtraVariableProject.add('sDeployDataProviderImageCopernicusMarine=' + env.sWasdiDataProviderCopernicusMarine.toString())
+
+  aAnsibleExtraVariableProject.unique()
+
+  if ( aAnsibleExtraVariableProject.size() > 0 ) {
+    return aAnsibleExtraVariableProject.join(' ')
+  }
+
+  return ''
+}
+
+pipeline {
+  agent any
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '365'))
+    disableConcurrentBuilds()
+  }
+
+  stages {
+    stage('INITIALIZE') {
+      steps {
+        script {
+          setEnvironmentVariable()
+          env.sAnsibleExtraVariableProject = getAnsibleExtraVariableProject()
+        }
+      }
+    }
+
+    stage('DEBUG') {
+      steps {
+        echo "env.GIT_BRANCH                         = " + env.GIT_BRANCH
+        echo "env.sAnsibleExtraVariableProject       = " + env.sAnsibleExtraVariableProject
+        echo "env.sAnsibleInventory                  = " + env.sAnsibleInventory
+        echo "env.sAnsibleLimit                      = " + env.sAnsibleLimit
+        echo "env.sCurrentRevision                   = " + env.sCurrentRevision
+        echo "env.sSourceBranch                      = " + env.sSourceBranch
+        echo "env.sWasdiAnsibleGitRepositoryUrl      = " + env.sWasdiAnsibleGitRepositoryUrl
+        echo "env.sWasdiAnsiblePath                  = " + env.sWasdiAnsiblePath
+        echo "env.sWasdiDataProviderCopernicusMarine = " + env.sWasdiDataProviderCopernicusMarine
+        echo "env.WORKSPACE                          = " + env.WORKSPACE
+
+        sh script: "pwd", label: "Current location"
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          sh script: """
+            mkdir --parents `dirname ${sWasdiAnsibleVaultFile}`
+            echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
+          """,
+          label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloudSsh', url: "${env.sWasdiAnsibleGitRepositorySshUrl}"]]])
+        }
+      }
+    }
+
+    stage('DEPLOY THE CONTAINERS AND THEIR RUN ELEMENTS') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deployDockerContainer.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} ${env.sAnsibleExtraVariableProject}'
+        """,
+        label: "Deploy the container(s) and their run elements"
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}

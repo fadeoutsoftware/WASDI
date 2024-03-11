@@ -65,6 +65,11 @@ public class Schedule {
 	 * Cron dow param [Not used yet]
 	 */
 	private String dayOfWeek;
+	
+	/**
+	 * Flag to define if we want to notify the user by mail or not
+	 */	
+	private boolean notifyOwnerByMail = false;
 
 	public String getScheduleId() {
 		return scheduleId;
@@ -145,4 +150,12 @@ public class Schedule {
 	public void setDayOfWeek(String dayOfWeek) {
 		this.dayOfWeek = dayOfWeek;
 	}
+	
+	public boolean isNotifyOwnerByMail() {
+		return notifyOwnerByMail;
+	}
+
+	public void setNotifyOwnerByMail(boolean notifyOwnerByMail) {
+		this.notifyOwnerByMail = notifyOwnerByMail;
+	}	
 }

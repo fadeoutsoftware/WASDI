@@ -37,6 +37,7 @@ import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.OpenEOJobRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.products.ProductPropertiesViewModel;
@@ -51,11 +52,16 @@ public class FilesApi  {
 	@Produces({ "application/json" })
 	public Response listFiles(@QueryParam("limit")  @Min(1) Integer limit,@HeaderParam("Authorization") String sAuthorization) {
 		
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
 			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
     	}
     	
     	WorkspaceFiles oWorkspaceFiles = new WorkspaceFiles();
@@ -155,11 +161,16 @@ public class FilesApi  {
 	@Produces({ "application/json" })
 	public Response deleteFile(@PathParam("path") @NotNull  String path, @HeaderParam("Authorization") String sAuthorization) {
 		
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
 			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
     	}
 
     	try {
@@ -179,11 +190,16 @@ public class FilesApi  {
 	@Produces({ "application/octet-stream", "application/json" })
 	public Response downloadFile(@PathParam("path") @NotNull  String path,@HeaderParam("Authorization") String sAuthorization) {
 		
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
 			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
     	}
     	
     	try {
@@ -203,11 +219,16 @@ public class FilesApi  {
 	@Produces({ "application/json" })
 	public Response uploadFile(@PathParam("path") @NotNull  String path,@ApiParam(value = "", required = true) @NotNull  File body,@HeaderParam("Authorization") String sAuthorization) {
 		
+		if (Utils.isNullOrEmpty(sAuthorization)) {
+			WasdiLog.debugLog("CredentialsApi.authenticateBasic: no credentials");
+			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();			
+		}
+		
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
 			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
-			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
+			return Response.status(Status.FORBIDDEN).entity(Error.getForbideenError()).build();    		
     	}
 		
     	try {

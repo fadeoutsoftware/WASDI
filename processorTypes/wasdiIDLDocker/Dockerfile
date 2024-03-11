@@ -34,6 +34,7 @@ RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y \
         build-essential \
+        dos2unix \
         curl \
         gdal-bin \
         libffi-dev \
@@ -108,14 +109,15 @@ COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirecto
 # Install the common PIP libraries
 RUN python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
     pip3 install --no-cache-dir --no-compile \
-	flask \
-    gunicorn \
-    requests \
-    numpy \
-    pandas \
-    rasterio \
-    wheel \	
-    wasdi && \
+      flask \
+      gunicorn \
+      requests \
+      numpy \
+      pandas \
+      rasterio \
+      wheel && \
+    pip3 install --no-cache-dir --no-compile {{ sPythonPipLibraryWasdiRepository }} \
+      wasdi && \
     find {{ sWasdiSystemUserHome }} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 # [IN OUR VENV] Install needed Python GDAL library

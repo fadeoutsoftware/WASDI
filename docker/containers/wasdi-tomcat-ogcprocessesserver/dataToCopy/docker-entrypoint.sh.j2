@@ -1,0 +1,297 @@
+#!/bin/bash
+
+function addOrUpdateLine() {
+    local sFile="${1}"
+    local sLineReference="${2}"
+
+    # 'after' or 'before'
+    local sLineReferenceDirection="${3,,}"
+
+    local sLineToSearch="${4}"
+    local sLineToAddOrUpdate="${5}"
+    local iIndentation="${6}"
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '${sFile}' exists"
+
+    if [[ -f "${sFile}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the file does not exist"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '\${sLineReferenceDirection}' is properly filled"
+
+    if [[ -n "${sLineReferenceDirection}" ]] && [[ "${sLineReferenceDirection}" == "before" || "${sLineReferenceDirection}" == "after" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the variable is not filled"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '\${sLineToSearch}' is filled"
+
+    if [[ -n "${sLineToSearch}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the variable is not filled"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '\${sLineToAddOrUpdate}' is filled"
+
+    if [[ -n "${sLineToAddOrUpdate}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the variable is not filled"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Search if the line '${sLineToSearch}' exists"
+    iPositionLineWeSearch=$(grep --line-number "${sLineToSearch}" ${sFile} | cut --delimiter ':' --fields '1')
+
+    if [[ -n "${iPositionLineWeSearch}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] The line exists: we will try to update it"
+        echo "[ENTRYPOINT] [${FUNCNAME}] Update the line"
+        sed --in-place "s/${sLineToSearch//\//\\/}/${sLineToAddOrUpdate//\//\\/}/g" ${sFile}
+
+        if [[ ${?} -eq 0 ]]
+        then
+            echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+        else
+            echo "[ENTRYPOINT] [${FUNCNAME}] ERROR"
+        fi
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] The line does not exist: we will try to insert it"
+        echo "[ENTRYPOINT] [${FUNCNAME}] We requested an insertion ${sLineReferenceDirection} the line '${sLineReference}': search if the line exists"
+        iPositionLineReference=$(grep --line-number "${sLineReference}" ${sFile} | cut --delimiter ':' --fields '1')
+
+        if [[ -n "${iPositionLineReference}" ]]
+        then
+            echo "[ENTRYPOINT] [${FUNCNAME}] OK: the line exists"
+            sSpace="$(generateSpace ${iIndentation})"
+
+            if [[ "${sLineReferenceDirection}" == "after" ]]
+            then
+                iPositionInsertion=$(( ${iPositionLineReference} + 1 ))
+            else
+                iPositionInsertion=${iPositionLineReference}
+            fi
+
+            echo "[ENTRYPOINT] [${FUNCNAME}] Insert the line '${sLineToAddOrUpdate}'"
+            sed --in-place "${iPositionInsertion}i \ ${sSpace}${sLineToAddOrUpdate//\//\\/}" ${sFile}
+
+            if [[ ${?} -eq 0 ]]
+            then
+                echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+            else
+                echo "[ENTRYPOINT] [${FUNCNAME}] ERROR"
+            fi
+        else
+            return 1
+        fi
+    fi
+
+    return 0
+}
+
+function createUser() {
+    local sUserName=${1}
+    local sUserPassword=${2}
+    local sUserRoles=${3}
+    local iCurrentLine
+
+    if [[ ! -f "${sTomcatUserConfigurationFile}" ]]
+    then
+        echo "[ENTRYPOINT] The file '${sTomcatUserConfigurationFile}' does not exist: we bypass the user manipulation"
+        return 0
+    fi
+
+    echo "[ENTRYPOINT] Create the user '${sUserName}' adding an entry in '${sTomcatUserConfigurationFile}'"
+    iCurrentLine=$(grep --line-number "</tomcat-users>" ${sTomcatUserConfigurationFile} | cut --delimiter ':' --fields '1')
+
+    if [[ -n "${iCurrentLine}" ]]
+    then
+        sed --in-place "${iCurrentLine}i \  <user username=\"${sUserName}\" password=\"${sUserPassword//\//\\/}\" roles=\"${sUserRoles}\" />" ${sTomcatUserConfigurationFile}
+
+        if [[ ${?} -eq 0 ]]
+        then
+            echo "[ENTRYPOINT] OK"
+            return 0
+        else
+            echo "[ENTRYPOINT] ERROR"
+            return 1
+        fi
+    fi
+}
+
+function generateSpace() {
+    local sNumber="${1}"
+    local sCounter=0
+    local sSpace=""
+
+    while [[ ${sCounter} -lt ${sNumber} ]]
+    do
+        sSpace="${sSpace} "
+        sCounter=$(( ${sCounter} + 1 ))
+    done
+
+    echo "${sSpace}"
+}
+
+function updateUser() {
+    local sUserName=${1}
+    local sUserPassword=${2}
+    local sUserRole=${3}
+    local iReturnCode=0
+
+    if [[ ! -f "${sTomcatUserConfigurationFile}" ]]
+    then
+        echo "[ENTRYPOINT] The file '${sTomcatUserConfigurationFile}' does not exist: we bypass the user manipulation"
+        return 0
+    fi
+
+    echo "[ENTRYPOINT] Update the user '${sUserName}' in '${sTomcatUserConfigurationFile}'"
+    sed --in-place "s/<user.*username=\"${sUserName}\".*>/<user username=\"${sUserName}\" password=\"${sUserPassword//\//\\/}\" roles=\"${sUserRoles}\" \/>/g" ${sTomcatUserConfigurationFile}
+
+    if [[ ${?} -eq 0 ]]
+    then
+        echo "[ENTRYPOINT] OK"
+    else
+        echo "[ENTRYPOINT] ERROR"
+        iReturnCode=1
+    fi
+
+    return ${iReturnCode}
+}
+
+function createOrUpdateUser() {
+    local sUserName=${1}
+    local sUserPassword=${2}
+    local sUserRole=${3}
+    local iReturnCode=0
+    local iCurrentLine
+
+    if [[ ! -f "${sTomcatUserConfigurationFile}" ]]
+    then
+        echo "[ENTRYPOINT] The file '${sTomcatUserConfigurationFile}' does not exist: we bypass the user manipulation"
+        return 0
+    fi
+
+    echo "[ENTRYPOINT] Search if the user '${sUserName}' exists"
+    iCurrentLine=$(grep --line-number "<user.*name=\"${sUserName}\".*" ${sTomcatUserConfigurationFile} | cut --delimiter ':' --fields '1')
+
+    if [[ -z "${iCurrentLine}" ]]
+    then
+        echo "[ENTRYPOINT] The user does not exist"
+        createUser "${sUserName}" "${sUserPassword}" "${sUserRoles}"
+        iReturnCode=${?}
+    else
+        echo "[ENTRYPOINT] The user exists"
+        updateUser "${sUserName}" "${sUserPassword}" "${sUserRole}"
+        iReturnCode=${?}
+    fi
+
+    return ${iReturnCode}
+}
+
+
+
+
+# Initialize the default working directory
+iNumberUserSupported=10
+sTomcatWorkingDir="${TOMCAT_HOME}"
+sTomcatUserConfigurationFile="${sTomcatWorkingDir}/conf/tomcat-users.xml"
+
+if [[ -z "${TOMCAT_HOME}" ]]
+then
+    echo "[ENTRYPOINT] ERROR: \${TOMCAT_HOME} is empty"
+fi
+
+
+# Add a marker for roles
+addOrUpdateLine \
+    "${sTomcatUserConfigurationFile}" \
+    "</tomcat-users>" \
+    "before" \
+    "<!-- WASDI MARKER: ROLES -->" \
+    "<!-- WASDI MARKER: ROLES -->" \
+    1
+
+
+# Add a marker for users
+addOrUpdateLine \
+    "${sTomcatUserConfigurationFile}" \
+    "</tomcat-users>" \
+    "before" \
+    "<!-- WASDI MARKER: USERS -->" \
+    "<!-- WASDI MARKER: USERS -->" \
+    1
+
+
+# Create roles explicitl requested
+if [[ -n "${TOMCAT_ROLES}" ]]
+then
+    echo "${TOMCAT_ROLES}" | sed 's/ //g' | tr "," "\n" | sort --reverse --unique | while read sCurrentRole
+    do
+        addOrUpdateLine \
+            "${sTomcatUserConfigurationFile}" \
+            "<!-- WASDI MARKER: ROLES -->" \
+            "after" \
+            "<role rolename=\"${sCurrentRole}\".*" \
+            "<role rolename=\"${sCurrentRole}\" />" \
+            1
+    done
+fi
+
+
+# Create the roles dynamically (we support ${iNumberUserSupported} roles)
+for iCurrentPosition in $(seq 1 ${iNumberUserSupported})
+do
+    sUserNameTemporary="TOMCAT_USER_NAME_${iCurrentPosition}"
+    sUserPasswordTemporary="TOMCAT_USER_PASSWORD_${iCurrentPosition}"
+    sUserRolesTemporary="TOMCAT_USER_ROLES_${iCurrentPosition}"
+
+    sUserName="${!sUserNameTemporary}"
+    sUserPassword="${!sUserPasswordTemporary}"
+    sUserRoles="${!sUserRolesTemporary}"
+
+    if [[ -n "${sUserName}" && -n "${sUserPassword}" && -n "${sUserRoles}" ]]
+    then
+        echo "${sUserRoles}" | sed 's/ //g' | tr "," "\n" | sort --reverse --unique | while read sCurrentRole
+        do
+            addOrUpdateLine \
+                "${sTomcatUserConfigurationFile}" \
+                "<!-- WASDI MARKER: ROLES -->" \
+                "after" \
+                "<role rolename=\"${sCurrentRole}\".*" \
+                "<role rolename=\"${sCurrentRole}\" />" \
+                1
+        done
+    fi
+done
+
+
+# Create the users (we support ${iNumberUserSupported} users)
+for iCurrentPosition in $(seq 1 ${iNumberUserSupported})
+do
+    sUserNameTemporary="TOMCAT_USER_NAME_${iCurrentPosition}"
+    sUserPasswordTemporary="TOMCAT_USER_PASSWORD_${iCurrentPosition}"
+    sUserRolesTemporary="TOMCAT_USER_ROLES_${iCurrentPosition}"
+
+    sUserName="${!sUserNameTemporary}"
+    sUserPassword="${!sUserPasswordTemporary}"
+    sUserRoles="${!sUserRolesTemporary}"
+
+    if [[ -n "${sUserName}" && -n "${sUserPassword}" && -n "${sUserRoles}" ]]
+    then
+        createOrUpdateUser "${sUserName}" "${sUserPassword}" "${sUserRoles}"
+    fi
+done
+
+exec "$@"

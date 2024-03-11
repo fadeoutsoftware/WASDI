@@ -38,15 +38,47 @@ import wasdi.shared.utils.Utils;
 @XmlRootElement
 public class QueryResultViewModel {
 	
+	/**
+	 * Encoded Image Preview
+	 */
 	protected String preview;
+	/**
+	 * File Name
+	 */
 	protected String title;
+	/**
+	 * Description. Supports a sort of std like: "Date: 2021-12-25T18:25:03.242Z, Instrument: SAR, Mode: IW, Satellite: S1A, Size: 0.95 GB" but is not mandatory
+	 */
 	protected String summary;
+	/**
+	 * Provider Id
+	 */
 	protected String id;
+	/**
+	 * Link (or equivalent) to access the file
+	 */
 	protected String link;
+	/**
+	 * WKT Footprint
+	 */
 	protected String footprint;
+	/**
+	 * Data Provider that found this item
+	 */
 	protected String provider;
-	
+	/**
+	 * Dictionary of additional properties	
+	 */
 	protected Map<String, String> properties = new HashMap<String, String>();
+	/**
+	 * If this is accessible in a Volume, here we have the name
+	 */
+	protected String volumeName;
+	/**
+	 * If this is accessible in a Volume, here we have the path in the volume
+	 */
+	protected String volumePath;
+	
 	
 	@Override
 	public boolean equals(Object arg0) {
@@ -124,5 +156,21 @@ public class QueryResultViewModel {
 	}
 	public void setProvider(String provider) {
 		this.provider = provider;
+	}
+
+	public String getVolumeName() {
+		return volumeName;
+	}
+
+	public void setVolumeName(String volumeName) {
+		this.volumeName = volumeName;
+	}
+
+	public String getVolumePath() {
+		return volumePath;
+	}
+
+	public void setVolumePath(String volumePath) {
+		this.volumePath = volumePath;
 	}	
 }

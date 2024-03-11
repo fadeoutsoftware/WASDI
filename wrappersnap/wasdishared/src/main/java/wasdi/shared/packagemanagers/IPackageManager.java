@@ -41,5 +41,12 @@ public interface IPackageManager {
 	 * @param sUpdateCommand Commands can be: [addPackage|upgradePackage|removePackage]/[name]/[version]. Version is optional: by default it means latest.
 	 */
 	boolean operatePackageChange(String sUpdateCommand);
+	
+	/**
+	 * Check if it is a valid package name
+	 * @param sPackageName
+	 * @return
+	 */
+	boolean isValidPackage(String sPackageName);
 
 }

@@ -4,6 +4,10 @@ FROM ubuntu:22.04
 MAINTAINER "WASDI SARL"
 
 
+# Labels used to search our containers and/or images
+LABEL docker-image-name={{ sWasdiSen2corServiceName }}
+
+
 # From now, all commands executed are executed with the user 'root'
 USER root
 

@@ -41,7 +41,6 @@
         <sVersionLombok>1.18.22</sVersionLombok>
         <sVersionMavenCompilerPlugin>3.11.0</sVersionMavenCompilerPlugin>
         <sVersionMavenWarPlugin>3.4.0</sVersionMavenWarPlugin>
-        <sVersionMercurius>1.0</sVersionMercurius>
         <sVersionOrbit>1.0.0</sVersionOrbit>
         <sVersionServletApi>2.5</sVersionServletApi>
         <sVersionStripeJava>22.0.0</sVersionStripeJava>
@@ -242,12 +241,7 @@
             <artifactId>orbit</artifactId>
             <version>${sVersionOrbit}</version>
         </dependency>
-        <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
-        <dependency>
-            <groupId>it.fadeout</groupId>
-            <artifactId>mercurius</artifactId>
-            <version>${sVersionMercurius}</version>
-        </dependency>
+
         <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
         <dependency>
             <groupId>fadeout.software.wasdi</groupId>

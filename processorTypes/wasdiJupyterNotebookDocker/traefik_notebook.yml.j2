@@ -8,14 +8,14 @@ http:
           - "{{ sWasdiNotebookFirewallCurrentAllowedIp }}"
 {%- endfor %}
         ipStrategy:
-          depth: 1
-{% endif %}
+          depth: 0
+{%- endif %}
   routers:
     r_{{ sWasdiJupyterNotebookId }}:
       entrypoints: "websecure"
       rule: "PathPrefix(`/notebook/{{ sWasdiJupyterNotebookId }}`)"
       service: "s_{{ sWasdiJupyterNotebookId }}"
-      middlewares: "mw_wasdi-secure-allowFrame@file"
+      middlewares: "mw_wasdi-secure-allowFrame@file{% if aWasdiJupyterNotebookFirewallAllowedIps is defined %},mw_{{ sWasdiJupyterNotebookId }}{% endif %}"
       tls: true
   services:
     s_{{ sWasdiJupyterNotebookId }}:

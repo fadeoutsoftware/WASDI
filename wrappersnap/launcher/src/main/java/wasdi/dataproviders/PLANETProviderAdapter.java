@@ -213,6 +213,7 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 	 * @param sUrl Asset url
 	 * @return true if ready, false otherwise
 	 */
+	@SuppressWarnings("unchecked")
 	protected String isAssetReady(String sUrl) {
 		
 		try {
@@ -255,6 +256,7 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 	 * Put the request to activate the asset
 	 * @param sUrl Asset url
 	 */
+	@SuppressWarnings("unchecked")
 	public void activateAsset(String sUrl) {
 		
 		try {

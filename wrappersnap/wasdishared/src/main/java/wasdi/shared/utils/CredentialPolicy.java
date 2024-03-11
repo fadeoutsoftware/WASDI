@@ -1,6 +1,5 @@
 package wasdi.shared.utils;
 
-//import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import wasdi.shared.business.users.User;

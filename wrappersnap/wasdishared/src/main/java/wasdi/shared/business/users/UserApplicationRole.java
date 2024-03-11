@@ -1,5 +1,6 @@
 package wasdi.shared.business.users;
 
+import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.Utils;
 
 public enum UserApplicationRole {
@@ -25,6 +26,15 @@ public enum UserApplicationRole {
 		if (sRole.equals(USER.getRole())) return true;
 		
 		return false;
+	}
+	
+	public static boolean isAdmin(String sUserId) {
+		if (Utils.isNullOrEmpty(sUserId)) return false;
+		
+		UserRepository oUserRepository = new UserRepository();
+		User oUser = oUserRepository.getUser(sUserId);
+		
+		return isAdmin(oUser);
 	}
 	
 	public static boolean isAdmin(User oUser) {

@@ -221,8 +221,8 @@ public class Publishband extends Operation {
             if (asFilesToCopy.size()>0) {
     			for (String sFileToCopy : asFilesToCopy) {
     				String sOtherOutputFile = oOutputFile.getPath();
-    				String sOtherOutputExtension = Utils.GetFileNameExtension(sOtherOutputFile);
-    				String sNewExtension = Utils.GetFileNameExtension(sFileToCopy);
+    				String sOtherOutputExtension = Utils.getFileNameExtension(sOtherOutputFile);
+    				String sNewExtension = Utils.getFileNameExtension(sFileToCopy);
     				
     				sOtherOutputFile = sOtherOutputFile.replace(sOtherOutputExtension, sNewExtension);
     				

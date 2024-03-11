@@ -1,6 +1,7 @@
 package wasdi.shared.viewmodels.workflows;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import wasdi.shared.business.SnapWorkflow;
 /**
@@ -10,27 +11,87 @@ import wasdi.shared.business.SnapWorkflow;
  *
  */
 public class SnapWorkflowViewModel {
+	
+	/**
+	 * Workflow Unique Id
+	 */
 	private String workflowId;
+	/**
+	 * Name
+	 */
 	private String name;
+	/**
+	 * Description
+	 */
 	private String description;
+	/**
+	 * Is public flag
+	 */
 	private boolean isPublic;
+	/**
+	 * User Owner of the workflow
+	 */
 	private String userId;
+	/**
+	 * Url of the node where was uploaded
+	 */
 	private String nodeUrl;
-	// This field should be initialized before return the view model checking in the workflow sharing
-	// through the repositories 
-	// default value to false;
+	
+	/**
+	 * Flag to know if this is shared with the requesting user
+	 * This field should be initialized before return the view model checking in the workflow sharing through the repositories
+	 * default value to false
+	 */
 	private boolean sharedWithMe = false;
+	
+	/**
+	 * Read only flag in case is shared read only or public
+	 */
 	private boolean readOnly = false;
 
+	/**
+	 * List of the input node names
+	 */
 	private ArrayList<String> inputNodeNames = new ArrayList<>();
+	/**
+	 * List of the files to associate to the input nodes
+	 */
 	private ArrayList<String> inputFileNames = new ArrayList<>();
 	
+	/**
+	 * List of the output node names
+	 */
 	private ArrayList<String> outputNodeNames = new ArrayList<>();
+	/**
+	 * List of the files to associate to the output nodes
+	 */
 	private ArrayList<String> outputFileNames = new ArrayList<>();
+	
+	/**
+	 * Map of parameters: KEY-VALUE that will be used to fill potential parameters in the Workflow XML 
+	 */
+	private HashMap<String, String> templateParams = new HashMap<>();
  
-	//Default constructor
-	public SnapWorkflowViewModel() {};
-	// Parameterized constructor with all fields except sharing  
+	/**
+	 * Default constructor
+	 */
+	public SnapWorkflowViewModel() {
+		
+	};
+	
+	/**
+	 * Parameterized constructor with all fields except sharing  
+	 * @param workflowId
+	 * @param name
+	 * @param description
+	 * @param isPublic
+	 * @param userId
+	 * @param nodeUrl
+	 * @param inputNodeNames
+	 * @param inputFileNames
+	 * @param outputNodeNames
+	 * @param outputFileNames
+	 */
 	public SnapWorkflowViewModel(String workflowId, String name, String description, boolean isPublic, String userId,
 			String nodeUrl, ArrayList<String> inputNodeNames, ArrayList<String> inputFileNames,
 			ArrayList<String> outputNodeNames, ArrayList<String> outputFileNames) {
@@ -132,6 +193,12 @@ public class SnapWorkflowViewModel {
 	}
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
+	}
+	public HashMap<String, String> getTemplateParams() {
+		return templateParams;
+	}
+	public void setTemplateParams(HashMap<String, String> templateParams) {
+		this.templateParams = templateParams;
 	}
 	
 }

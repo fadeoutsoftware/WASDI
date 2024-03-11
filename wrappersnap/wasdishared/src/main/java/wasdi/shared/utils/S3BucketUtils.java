@@ -359,17 +359,14 @@ public final class S3BucketUtils {
 			
 			String [] asFiles;
 			
-			EcoStressRepository oEcoStressRepository = new EcoStressRepository();
-			
 			File oXmlFolder = new File(sFolder);
 			
 			asFiles = oXmlFolder.list();
 			
 			for (String sFile : asFiles) {
 				
-				File oActualFile = new File(sFolder+sFile);
-				
-				Map<String, String> asProperties = parseXmlFile(sFolder+sFile);
+				parseXmlFile(sFolder+sFile);
+				//Map<String, String> asProperties = parseXmlFile(sFolder+sFile);
 				//EcoStressItem oItem = buildEcoStressItem(asProperties, sFileName, sH5FilePath, sUrl);
 			}
 		} 

@@ -13,11 +13,6 @@ http:
     mw_wasdi-secure-allowFrame:
       headers:
         frameDeny: false
-{% if bWasdiSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
-        sslRedirect: true
-{% else %}
-        sslRedirect: false
-{% endif %}
         browserXssFilter: true
         contentTypeNosniff: true
         stsIncludeSubdomains: true
@@ -28,11 +23,6 @@ http:
     mw_wasdi-secure-denyFrame:
       headers:
         frameDeny: true
-{% if bWasdiSslEnabled == True and aoWasdiTraefikSslCertificates | default([]) | length > 0 %}
-        sslRedirect: true
-{% else %}
-        sslRedirect: false
-{% endif %}
         browserXssFilter: true
         contentTypeNosniff: true
         stsIncludeSubdomains: true

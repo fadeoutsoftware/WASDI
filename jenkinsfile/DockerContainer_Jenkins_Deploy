@@ -45,7 +45,7 @@ pipeline {
       }
     }
 
-    stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
+    stage('DEPLOY THE CONTAINER(S) AND THEIR RUN ELEMENTS') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
@@ -56,26 +56,17 @@ pipeline {
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
-        label: "Deploy the container and its run element"
+        label: "Deploy the container(s) and their run elements"
       }
     }
 
     stage('PLEASE READ LOGS') {
       steps {
-        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-          script {
-            try {
-              sh script: """
-                echo "Please execute manually this command in the right directory:"
-                echo "docker compose up --detach --force-recreate wasdi-jenkins"
-              """,
-              label: "Command to start or restart the container"
-            } catch (oError) {
-              echo oError.getMessage()
-              throw oError
-            }
-          }
-        }
+        sh script: """
+          echo "Please execute manually this command in the right directory:"
+          echo "docker compose up --detach --force-recreate wasdi-jenkins"
+        """,
+        label: "Command to start or restart the container"
       }
     }
   }

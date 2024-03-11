@@ -209,7 +209,7 @@ ${kcSanitize(msg("emailVerificationBodyHtml",link, linkExpiration, realmName, li
 <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%;min-width:100%;border-collapse:collapse" width="100%" class="m_-7155935123294076310mcnTextContentContainer">
 <tbody><tr>
 <td valign="top" class="m_-7155935123294076310mcnTextContent" style="padding-top:0;padding-right:18px;padding-bottom:9px;padding-left:18px;word-break:break-word;color:#656565;font-family:Helvetica;font-size:12px;line-height:150%;text-align:center">
-<em>Copyright © 2021 Fadeout Software, All rights reserved.</em>
+<em>Copyright © 2024 Wasdi Sarl, All rights reserved.</em>
 <br>
 
 <br>

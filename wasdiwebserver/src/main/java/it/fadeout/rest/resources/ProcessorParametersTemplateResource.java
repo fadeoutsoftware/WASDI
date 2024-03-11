@@ -33,6 +33,7 @@ import wasdi.shared.data.ProcessorParametersTemplateRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
+import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -487,7 +488,7 @@ public class ProcessorParametersTemplateResource {
 			
 			String sMessage = "The user " + oRequesterUser.getUserId() + " shared with you the parameters " + oProcessorParametersTemplate.getName() + " of " + sProcessorName + " WASDI Application.";
 			
-			WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sDestinationUserId, sTitle, sMessage);
+			MailUtils.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sDestinationUserId, sTitle, sMessage);
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessorParametersTemplateResource.sendNotificationEmail: notification exception " + oEx.toString());

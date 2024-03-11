@@ -39,6 +39,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import wasdi.jwasdilib.utils.MosaicSetting;
 
 /**
+ * 
+ * [0.8.0] - 2024-02-07
+ * ### Added 
+ * 
+ * ### Fixed
+ *  - Use Post for execute Processor
+ * 
  * [0.7.4] - 2022-01-01
  * 
  * ### Added
@@ -100,6 +107,16 @@ public class WasdiLib {
 	 * Flag to know if we are on the real server
 	 */
 	private boolean m_bIsOnServer = false;
+	
+	/**
+	 * The launcher set this flag true when working on a cloud that is not a wasdi node
+	 */
+	private boolean m_bIsOnExternalServer = false;
+	
+	/**
+	 * Set true if the app is on server and the data folder mounted is only for the workspace folder
+	 */
+	private boolean m_bOnlyWorkspaceFolderMounted = false;
 
 	/**
 	 * Flag to activate the automatic local download
@@ -1055,25 +1072,7 @@ public class WasdiLib {
 	 * @return List of Strings representing the product names
 	 */
 	public List <String> getProductsByActiveWorkspace() {
-
-		List<String> asProducts = new ArrayList<String>();
-		try {
-
-			String sUrl = m_sBaseUrl + "/product/byws?workspace=" + m_sActiveWorkspace;
-
-			String sResponse = httpGet(sUrl, getStandardHeaders());
-			List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){});
-
-			for (Map<String, Object> oProduct : aoJSONMap) {
-				asProducts.add(oProduct.get("fileName").toString());
-			}
-
-			return asProducts;
-		}
-		catch (Exception oEx) {
-			System.out.println("WasdiLib error " + oEx.toString());
-			return asProducts;
-		}
+		return getProductsByWorkspaceId(m_sActiveWorkspace);
 	}
 
 	/**
@@ -1107,7 +1106,27 @@ public class WasdiLib {
 		return internalGetFullProductPath(sProductName);
 	}
 
+	/**
+	 * Compose the path of a file in WASDI
+	 * @param sProductName
+	 * @return
+	 */
+	protected String internalGetPath(String sProductName) {
+		String sFullPath = m_sBasePath;
 
+		if (! (sFullPath.endsWith("\\") || sFullPath.endsWith("/") ) ){
+			sFullPath +=File.separator;
+		}
+		
+		if (m_bOnlyWorkspaceFolderMounted && (m_bIsOnExternalServer || m_bIsOnServer)) {
+			sFullPath = sFullPath + sProductName;
+		}
+		else {
+			sFullPath = sFullPath +m_sWorkspaceOwner + File.separator + m_sActiveWorkspace + File.separator + sProductName;
+		}
+
+		return sFullPath;
+	}
 	/**
 	 * Get the full local path of a product given the product name. Use the output of this API to open the file
 	 * @param sProductName Product Name
@@ -1120,32 +1139,35 @@ public class WasdiLib {
 			return "";
 		}
 		try {
-			String sFullPath = m_sBasePath;
-
-			if (! (sFullPath.endsWith("\\") || sFullPath.endsWith("/") ) ){
-				sFullPath +=File.separator;
-			}
-
-			sFullPath = sFullPath +m_sWorkspaceOwner + File.separator + m_sActiveWorkspace + File.separator + sProductName;
+			String sFullPath = internalGetPath(sProductName);
 			File oFile = new File(sFullPath);
 			boolean bFileExists = oFile.exists();
-
-			if (m_bIsOnServer==false) {
-				if (m_bDownloadActive && !bFileExists) {
-					System.out.println("Local file Missing. Start WASDI download. Please wait");
-					downloadFile(sProductName);
-					System.out.println("File Downloaded on Local PC, keep on working!");
-				}
+			
+			boolean bDownloadFile = false;
+			
+			if (bFileExists) {
+				bDownloadFile = false;
+				// TODO: check the checksum
 			}
 			else {
-				if (!bFileExists) {
-					if (fileExistsOnWasdi(sProductName)) {
-						System.out.println("Local file Missing. Start WASDI download. Please wait");
-						downloadFile(sProductName);
-						System.out.println("File Downloaded on Local Node, keep on working!");						
+				if (!m_bIsOnServer) {
+					if (m_bDownloadActive) {
+						if (fileExistsOnWasdi(sProductName)) {
+							bDownloadFile = true;
+						}
 					}
 				}
+				else {
+					if (fileExistsOnWasdi(sProductName)) {
+						bDownloadFile = true;
+					}
+				}				
+			}
 
+			if (bDownloadFile) {
+				System.out.println("Local file Missing. Start WASDI download. Please wait");
+				downloadFile(sProductName);
+				System.out.println("File Downloaded Locally, keep on working!");				
 			}
 
 			return sFullPath;
@@ -1284,15 +1306,7 @@ public class WasdiLib {
 	 */
 	public String getSavePath() {
 		try {
-			String sFullPath = m_sBasePath;
-
-			if (! (sFullPath.endsWith("\\") || sFullPath.endsWith("/") || sFullPath.endsWith(File.separator)) ){
-				sFullPath += File.separator;
-			}
-
-			sFullPath = sFullPath +m_sWorkspaceOwner + File.separator + m_sActiveWorkspace + File.separator;
-
-			return sFullPath;
+			return internalGetPath("");
 		}
 		catch (Exception oEx) {
 			System.out.println("WasdiLib error " + oEx.toString());
@@ -2665,24 +2679,66 @@ public class WasdiLib {
 		}		
 	}
 
-
 	/**
 	 * Executes a synchronous process, i.e., runs the process and waits for it to complete
 	 * @param sProcessorName the name of the processor
 	 * @param aoParams a Map of parameters
-	 * @return the WASDI processor ID
+	 * @return the output status
 	 */
 	public String executeProcessor(String sProcessorName, Map<String, Object> aoParams) {
-		return waitProcess(asynchExecuteProcessor(sProcessorName, aoParams));
+		return waitProcess(asynchExecuteProcessor(sProcessorName, aoParams, false));
+	}
+	
+	/**
+	 * Executes a synchronous process, i.e., runs the process and waits for it to complete
+	 * @param sProcessorName the name of the processor
+	 * @param aoParams a Map of parameters
+	 * @param bNotifyMail True to send an email to the owner when is finished.
+	 * @return the output status
+	 */
+	public String executeProcessor(String sProcessorName, Map<String, Object> aoParams, boolean bNotifyMail) {
+		return waitProcess(asynchExecuteProcessor(sProcessorName, aoParams, bNotifyMail));
+	}	
+	
+	/**
+	 * Executes a synchronous process, i.e., runs the process and waits for it to complete
+	 * @param sProcessorName the name of the processor 
+	 * @param sEncodedParams Encoded json params
+	 * @return the output status
+	 */
+	public String executeProcessor(String sProcessorName, String sEncodedParams) {
+		return executeProcessor(sProcessorName, sEncodedParams, false);
 	}
 
 	/**
+	 * Executes a synchronous process, i.e., runs the process and waits for it to complete
+	 * @param sProcessorName the name of the processor
+	 * @param sEncodedParams a JSON formatted string of parameters for the processor
+	 * @return the WASDI processor ID
+	 */
+	public String executeProcessor(String sProcessorName, String sEncodedParams, boolean bNotifyMail) {
+		return waitProcess(asynchExecuteProcessor(sProcessorName, sEncodedParams, bNotifyMail));
+	}
+	
+	/**
+	 * 
 	 * Execute a WASDI processor in Asynch way
 	 * @param sProcessorName Processor Name
 	 * @param aoParams Dictionary of Params
 	 * @return ProcessWorkspace Id
 	 */
 	public String asynchExecuteProcessor(String sProcessorName, Map<String, Object> aoParams) {
+		return asynchExecuteProcessor(sProcessorName,aoParams,false);
+	}
+
+	/**
+	 * Execute a WASDI processor in Asynch way
+	 * @param sProcessorName Processor Name
+	 * @param aoParams Dictionary of Params
+	 * @param bNotifyMail True to send an email to the owner when is finished.
+	 * @return ProcessWorkspace Id
+	 */
+	public String asynchExecuteProcessor(String sProcessorName, Map<String, Object> aoParams, boolean bNotifyMail) {
 		log("WasdiLib.asynchExecuteProcessor( " + sProcessorName + ", Map<String, Object> aoParams )");
 		try {
 			// Initialize
@@ -2697,7 +2753,7 @@ public class WasdiLib {
 			sParamsJson = URLEncoder.encode(sParamsJson, java.nio.charset.StandardCharsets.UTF_8.toString());
 
 			// Use the string version
-			return asynchExecuteProcessor(sProcessorName, sParamsJson);
+			return asynchExecuteProcessor(sProcessorName, sParamsJson, bNotifyMail);
 		}
 		catch (Exception oEx) {
 			System.out.println("WasdiLib error " + oEx.toString());
@@ -2705,17 +2761,7 @@ public class WasdiLib {
 		}
 
 	}
-
-	/**
-	 * Executes a synchronous process, i.e., runs the process and waits for it to complete
-	 * @param sProcessorName the name of the processor
-	 * @param sEncodedParams a JSON formatted string of parameters for the processor
-	 * @return the WASDI processor ID
-	 */
-	public String executeProcessor(String sProcessorName, String sEncodedParams) {
-		return waitProcess(asynchExecuteProcessor(sProcessorName, sEncodedParams));
-	}
-
+	
 	/**
 	 * Execute a WASDI processor in Asynch way
 	 * @param sProcessorName Processor Name
@@ -2723,6 +2769,17 @@ public class WasdiLib {
 	 * @return ProcessWorkspace Id
 	 */
 	public String asynchExecuteProcessor(String sProcessorName, String sEncodedParams) {
+		return asynchExecuteProcessor(sProcessorName, sEncodedParams, false);
+	}
+
+	/**
+	 * Execute a WASDI processor in Asynch way
+	 * @param sProcessorName Processor Name
+	 * @param sEncodedParams Already JSON Encoded Params
+	 * @param bNotifyMail True to send an email to the owner when is finished.
+	 * @return ProcessWorkspace Id
+	 */
+	public String asynchExecuteProcessor(String sProcessorName, String sEncodedParams, boolean bNotifyMail) {
 
 		log("WasdiLib.asynchExecuteProcessor( " + sProcessorName + ", " +  sEncodedParams + " )"); 
 		//Domain check
@@ -2744,10 +2801,19 @@ public class WasdiLib {
 		try {
 
 			// Build API URL
-			String sUrl = m_sBaseUrl + "/processors/run?workspace="+m_sActiveWorkspace+"&name="+sProcessorName+"&encodedJson="+sEncodedParams;
-			log("WasdiLib.asynchExecuteProcessor: GET: " + sUrl );
+			String sUrl = m_sBaseUrl + "/processors/run?workspace="+m_sActiveWorkspace+"&name="+sProcessorName;
+			
+			if (m_bIsOnExternalServer || m_bIsOnServer) {
+				sUrl+="&parent="+m_sMyProcId;
+			}
+			
+			if (bNotifyMail) {
+				sUrl+="&notify=true";
+			}
+			
+			log("WasdiLib.asynchExecuteProcessor: POST: " + sUrl );
 			// Call API
-			String sResponse = httpGet(sUrl, getStandardHeaders());
+			String sResponse = httpPost(sUrl, sEncodedParams, getStandardHeaders());
 			log("WasdiLib.asynchExecuteProcessor: response: " + sResponse );
 			// Read the result
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});

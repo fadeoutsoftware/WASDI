@@ -23,7 +23,6 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.processors.Processor;
-import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.business.users.User;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
@@ -31,14 +30,13 @@ import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.WorkspaceRepository;
-import wasdi.shared.packagemanagers.CondaPackageManagerImpl;
 import wasdi.shared.packagemanagers.IPackageManager;
-import wasdi.shared.packagemanagers.PipPackageManagerImpl;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.packagemanagers.PackageManagerUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.processors.PackageManagerFullInfoViewModel;
 import wasdi.shared.viewmodels.processors.PackageManagerViewModel;
@@ -242,8 +240,11 @@ public class PackageManagerResource {
 			PackageManagerViewModel oPackageManagerVM = null;
 
 			try {
-				IPackageManager oPackageManager = getPackageManager(oProcessorToRun);
-
+				IPackageManager oPackageManager = PackageManagerUtils.getPackageManagerByProcessor(oProcessorToRun);
+				
+				if (oPackageManager == null) {
+					return Response.ok().build();
+				}
 				oPackageManagerVM = oPackageManager.getManagerVersion();
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("PackageManagerResource.getManagerVersion: " + oEx);
@@ -295,7 +296,29 @@ public class PackageManagerResource {
 			if (!PermissionsUtils.canUserWriteProcessor(oUser.getUserId(), oProcessorToForceUpdate.getProcessorId())) {
 				WasdiLog.warnLog("PackageManagerResource.environmentupdate: user cannot write the processor");
 				return Response.status(Status.FORBIDDEN).build();			
-			}			
+			}
+			
+			IPackageManager oPackageManager = PackageManagerUtils.getPackageManagerByProcessor(oProcessorToForceUpdate);
+			
+			if (oPackageManager==null) {
+				WasdiLog.warnLog("PackageManagerResource.environmentupdate: processor " + sProcessorId + " does not has a Package Manager");
+				return Response.status(Status.BAD_REQUEST).build();				
+			}
+			
+			if (!Utils.isNullOrEmpty(sUpdateCommand)) {
+				String [] asParts = sUpdateCommand.split("/");
+				if (asParts != null) {
+					if (asParts.length>1) {
+						String sPackage = asParts[1];
+						WasdiLog.debugLog("PackageManagerResource.environmentupdate: Action on package " + sPackage);
+						
+						if (oPackageManager.isValidPackage(sPackage)==false) {
+							WasdiLog.warnLog("PackageManagerResource.environmentupdate: " + sPackage + " is not recognized as valid");
+							return Response.status(Status.BAD_REQUEST).build();
+						}
+					}
+				}
+			}
 			
 			// Schedule the process to run the operation in the environment
 			String sProcessObjId = Utils.getRandomName();
@@ -306,7 +329,7 @@ public class PackageManagerResource {
 			
 			WasdiLog.debugLog("PackageManagerResource.environmentupdate: create local operation");
 			String sUserId = oUser.getUserId();
-			
+
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(oProcessorToForceUpdate.getName());
 			oProcessorParameter.setProcessorID(oProcessorToForceUpdate.getProcessorId());
@@ -314,7 +337,7 @@ public class PackageManagerResource {
 			oProcessorParameter.setUserId(sUserId);
 			oProcessorParameter.setExchange(sWorkspaceId);
 			oProcessorParameter.setProcessObjId(sProcessObjId);
-
+			
 			Map<String, String> asCommand = new HashMap<>();
 			asCommand.put("updateCommand", sUpdateCommand);
 			String sJson = MongoRepository.s_oMapper.writeValueAsString(asCommand);
@@ -323,11 +346,11 @@ public class PackageManagerResource {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
+			// Trigger the action
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.ENVIRONMENTUPDATE.name(), oProcessorToForceUpdate.getName(), oProcessorParameter);
-			
-			if (WasdiConfig.Current.isMainNode()) {
-				
-				// In the main node: start a thread to update all the computing nodes
+
+			if (!Utils.isNullOrEmpty(sUpdateCommand) && WasdiConfig.Current.isMainNode()) {
+				// In the main node with a real action: start a thread to update all the computing nodes
 				try {
 					WasdiLog.debugLog("PackageManagerResource.environmentupdate: this is the main node, starting Worker to update computing nodes");
 					
@@ -344,8 +367,11 @@ public class PackageManagerResource {
 				}
 				catch (Exception oEx) {
 					WasdiLog.errorLog("PackageManagerResource.environmentupdate: error starting UpdateProcessorEnvironmentWorker " + oEx.toString());
-				}
-			}			
+				}				
+			}
+			else {
+				WasdiLog.debugLog("PackageManagerResource.environmentupdate: this is only a refresh, run only on main node");
+			}
 			
 			if (oRes.getBoolValue()) {
 				return Response.ok().build();
@@ -359,29 +385,75 @@ public class PackageManagerResource {
 			return Response.serverError().build();
 		}
 	}	
-
+	
+	
 	/**
-	 * Get the appropriate Package Manager Instance from the Processor (type)
-	 * @param oProcessor The Processor we want to access the Package Manager
-	 * @return Package Manager Instance
+	 * Get the list of actions executed on an application
+	 * 
+	 * @param sSessionId Session Id
+	 * @param sName Name of the application
+	 * @return List of strings
+	 * @throws Exception
 	 */
-	private IPackageManager getPackageManager(Processor oProcessor) {
-		IPackageManager oPackageManager = null;
-
-		String sType = oProcessor.getType();
-
-		String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
-		int iPort = oProcessor.getPort();
-
-		if (sType.equals(ProcessorTypes.UBUNTU_PYTHON37_SNAP)) {
-			oPackageManager = new PipPackageManagerImpl(sIp, iPort);
-		} else if (sType.equals(ProcessorTypes.CONDA)) {
-			oPackageManager = new CondaPackageManagerImpl(sIp, iPort);
-		} else {
-			throw new UnsupportedOperationException("The functionality is not yet implemented for this processor engine!");
+	@GET
+	@Path("/reset")
+	public Response resetActionList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("workspace") String sWorkspaceId) {
+		WasdiLog.debugLog("PackageManagerResource.resetActionList( " + "processorId: " + sProcessorId + ", " + " )");
+		
+		// Check session
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
+		if (oUser == null) {
+			WasdiLog.warnLog("PackageManagerResource.resetActionList: invalid session");
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
+		
+		try {
+			
+			if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+				WasdiLog.warnLog("PackageManagerResource.resetActionList: user cannot access the workspace");
+				return Response.status(Status.FORBIDDEN).build();
+			}
+			
+			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), sProcessorId)) {
+				WasdiLog.warnLog("PackageManagerResource.resetActionList: user cannot access the processor");
+				return Response.status(Status.FORBIDDEN).build();			
+			}		
+			
+			if (WasdiConfig.Current.isMainNode() == false) {
+				WasdiLog.warnLog("PackageManagerResource.resetActionList: this API is for the main node");
+				return Response.status(Status.BAD_REQUEST).build();			
+			}
+			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			
+			String sProcessorPath = PathsConfig.getProcessorFolder(oProcessor);
+			String sEnvActionFile = sProcessorPath + "/envActionsList.txt";
+			
+			File oEnvActionFile = new File(sEnvActionFile);
+			
+			if (oEnvActionFile.exists()) {
+				WasdiLog.debugLog("PackageManagerResource.resetActionList: envActionsList for app " + oProcessor.getName() + " found");
+				
+				if (oEnvActionFile.delete()) {
+					WasdiLog.debugLog("PackageManagerResource.resetActionList: envActionsList for app " + oProcessor.getName() + " deleted");
+				}
+				else {
+					WasdiLog.errorLog("PackageManagerResource.getEnvironmentActionsList: impossible to delete the envActionsList file!");
+					return Response.serverError().build();					
+				}
+			}
+			else {
+				WasdiLog.warnLog("PackageManagerResource.resetActionList: envActionsList for app " + oProcessor.getName() + " NOT found");
+			}
 
-		return oPackageManager;
+			return Response.ok().build();			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PackageManagerResource.getEnvironmentActionsList: exception ", oEx);
+			return Response.serverError().build();
+		}
 	}
 	
 	/**
@@ -394,9 +466,6 @@ public class PackageManagerResource {
 		String sOutput = "{\"warning\": \"the packagesInfo.json file for the processor " + sProcessorName + " was not found\"}";
 
 		try {
-
-			WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: read Processor " + sProcessorName);
-
 			// Take path of the processor
 			String sProcessorPath = PathsConfig.getProcessorFolder(sProcessorName);
 			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
