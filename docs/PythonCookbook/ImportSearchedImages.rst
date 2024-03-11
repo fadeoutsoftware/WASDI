@@ -68,7 +68,7 @@ This is our sample params.json file.
    sProductType = wasdi.getParameter("PRODUCT_TYPE", "GRD")
 
    # Search Images
-   aoProductsFound = wasdi.searchEOImages(sMission, sStartDate, sEndDate, sProductType=sProductType, oBoundingBox=oBBox)
+   aoProductsFoundArray = wasdi.searchEOImages(sMission, sStartDate, sEndDate, sProductType=sProductType, oBoundingBox=oBBox)
 
    # OPTION 1: Import a single image and wait for the image to be available
    if len(aoProductsFoundArray) > 0:
