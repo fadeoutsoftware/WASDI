@@ -360,7 +360,7 @@ public class dbUtils {
                 
                 List<DownloadedFile> aoFiles = oDownloadedFilesRepository.getByWorkspace(sWorkspaceId);
                 
-                System.out.println("Updating Product Workspaces");
+                System.out.println("Updating Downloaded Files");
                 
                 for (DownloadedFile oFile : aoFiles) {
                 	if (oFile.getFilePath().contains(sOldUser)) {
