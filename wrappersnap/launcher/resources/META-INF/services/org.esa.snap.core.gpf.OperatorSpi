@@ -78,6 +78,17 @@ org.esa.s1tbx.fex.gpf.ChangeDetectionOp$Spi
 org.esa.s1tbx.fex.gpf.SubGraphOp$Spi
 org.esa.s1tbx.fex.gpf.decisiontree.DecisionTreeOp$Spi
 
+org.jlinda.nest.gpf.RangeFilterOp$Spi
+org.jlinda.nest.gpf.AzimuthFilterOp$Spi
+org.jlinda.nest.gpf.SubtRefDemOp$Spi
+org.jlinda.nest.gpf.SimulateAmplitudeOp$Spi
+org.jlinda.nest.gpf.DInSAROp$Spi
+org.jlinda.nest.gpf.Slant2HeightOp$Spi
+org.jlinda.nest.dataio.SnaphuImportOp$Spi
+org.jlinda.nest.dataio.SnaphuExportOp$Spi
+org.jlinda.nest.gpf.CrossResamplingOp$Spi
+
+
 org.esa.snap.core.gpf.common.ReadOp$Spi
 org.esa.snap.core.gpf.common.MergeOp$Spi
 org.esa.snap.core.gpf.common.WriteOp$Spi
