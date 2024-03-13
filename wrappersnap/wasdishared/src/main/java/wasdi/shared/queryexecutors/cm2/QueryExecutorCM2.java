@@ -227,6 +227,11 @@ public class QueryExecutorCM2 extends QueryExecutor {
 			
 			for (QueryResultViewModel oResult : aoReturnList) {
 				oResult.setLink("");
+				if (oResult.getProperties()!=null) {
+					if (oResult.getProperties().containsKey("link")) {
+						oResult.getProperties().remove("link");
+					}
+				}
 			}
 			
 			WasdiLog.debugLog("QueryExecutorCM2.executeAndRetrieve: return elements list " + aoReturnList.size() );
