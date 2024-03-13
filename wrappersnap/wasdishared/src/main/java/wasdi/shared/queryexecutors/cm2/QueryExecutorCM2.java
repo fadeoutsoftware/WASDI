@@ -223,7 +223,11 @@ public class QueryExecutorCM2 extends QueryExecutor {
 			
 			String sOutput = WasdiFileUtils.fileToText(sOutputFullPath);
 			
-			aoReturnList = MongoRepository.s_oMapper.readValue(sOutput, new TypeReference<List<QueryResultViewModel>>(){});			
+			aoReturnList = MongoRepository.s_oMapper.readValue(sOutput, new TypeReference<List<QueryResultViewModel>>(){});
+			
+			for (QueryResultViewModel oResult : aoReturnList) {
+				oResult.setLink("");
+			}
 			
 			WasdiLog.debugLog("QueryExecutorCM2.executeAndRetrieve: return elements list " + aoReturnList.size() );
 			
