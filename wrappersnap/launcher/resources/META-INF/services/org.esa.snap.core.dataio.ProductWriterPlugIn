@@ -17,6 +17,8 @@ org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamNetCdfWriterPlugIn
 org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn
 org.esa.snap.dataio.rtp.RawTiledPyramidsProductCodecSpi
 
+org.jlinda.nest.dataio.SnaphuWriterPlugIn
+
 #Sentinel-2
 org.esa.s2tbx.dataio.gdal.writer.plugins.COGDriverProductWriterPlugIn
 org.esa.s2tbx.dataio.gdal.writer.plugins.BMPDriverProductWriterPlugIn
