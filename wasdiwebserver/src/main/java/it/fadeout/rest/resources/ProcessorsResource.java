@@ -1903,6 +1903,31 @@ public class ProcessorsResource  {
 				WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: user cannot access the processor");
 				return Response.status(Status.FORBIDDEN).build();				
 			}
+			
+			// MANAGE STRIPE PRODUCT
+			Float fOldOnDemandPrice = oProcessorToUpdate.getOndemandPrice();
+			Float fNewOnDemandPrice = oUpdatedProcessorVM.getOndemandPrice();
+			
+			if (fNewOnDemandPrice < 0) {
+				WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the ondemand price is a negative value. Information on Stripe won't be updated");
+			} 
+			else if (fOldOnDemandPrice != fNewOnDemandPrice) { // TODO: should we update those prices only if the showInStore == true? or in any case?
+				// the user updated the on-demand price of the app.
+				
+				if (fOldOnDemandPrice > 0 && fNewOnDemandPrice == 0) {
+					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the app has been set for free. Removing the Stripe product");
+
+				}
+				else if (fOldOnDemandPrice <= 0 && fNewOnDemandPrice > 0) {
+					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the app has been set for sale. Adding the Stripe product");
+
+				}
+				else if (fOldOnDemandPrice > 0 && fNewOnDemandPrice > 0 && fOldOnDemandPrice != fNewOnDemandPrice) {
+					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the price of the app changed. Updating the correspoding Stripe product");
+				}
+				
+				
+			}
 						
 			oProcessorToUpdate.setCategories(oUpdatedProcessorVM.getCategories());
 			oProcessorToUpdate.setEmail(oUpdatedProcessorVM.getEmail());
