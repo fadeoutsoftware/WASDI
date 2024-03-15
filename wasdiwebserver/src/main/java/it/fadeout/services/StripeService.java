@@ -136,7 +136,21 @@ public class StripeService {
 			try {
 				JSONObject oJsonResponseBody = new JSONObject(oHttpResponse.getResponseBody());
 				String sProductId = oJsonResponseBody.optString("id", null);
+				
+				if (Utils.isNullOrEmpty(sProductId)) {
+					WasdiLog.warnLog("StripeService.createAppProdict: product id not found in the Stripe response. An error might have occured");
+					return null;
+					
+				}
 				WasdiLog.debugLog("StripeService.createAppProduct: product created on Stripe with id: " + sProductId);
+				
+				String sPriceId = createAppPrice(sProductId, fPrice);
+				
+				if (Utils.isNullOrEmpty(sPriceId)) {
+					// TODO: at this point, I probably need to remove the product from Stripe
+					return null;
+				}
+				
 				return sProductId;
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("StripeService.createAppProduct: there was an error reading the json response ", oEx);
@@ -149,17 +163,91 @@ public class StripeService {
 
 	}
 	
+	public String createAppPrice(String sProductId, Float fPrice) {
+		
+		if (Utils.isNullOrEmpty(sProductId)) {
+			WasdiLog.errorLog("StripeService.createAppPrice: product id is null or empty. Impossible to add the price to the product.");
+			return null;
+		}
+		
+		List<String> asParameters = new ArrayList<>();
+		
+		int iPriceInCents = (int) (fPrice * 100);
+		
+		try {
+			asParameters.add("currency=eur");
+			asParameters.add("product=" + URLEncoder.encode(sProductId, StandardCharsets.UTF_8.toString()));
+			asParameters.add("unit_amount=" + URLEncoder.encode(Integer.toString(iPriceInCents), StandardCharsets.UTF_8.toString()));
+		} catch (UnsupportedEncodingException oEx) {
+			WasdiLog.errorLog("StripeService.createAppPrice: can't create product on Stripe. Error in encoding the request parameters", oEx);
+			return null;
+		}
+		
+		String sUrl = s_sSTRIPE_BASE_URL;
+		if (!sUrl.endsWith("/")) sUrl += "/";
+		sUrl += "prices?";
+		
+		String sAllParams = String.join("&", asParameters);
+		sUrl += sAllParams;
+				
+		Map<String, String> asHeaders = getStripeAuthHeader();
+				
+		HttpCallResponse oHttpResponse = HttpUtils.httpPost(sUrl, "", asHeaders);
+		int iResponseCode = oHttpResponse.getResponseCode();
+		
+		if (iResponseCode >= 200 && iResponseCode <= 299) {
+			try {
+				JSONObject oJsonResponseBody = new JSONObject(oHttpResponse.getResponseBody());
+				String sPriceId = oJsonResponseBody.optString("id", null);
+				
+				if (Utils.isNullOrEmpty(sPriceId)) {
+					WasdiLog.warnLog("StripeService.createAppPrice: no price id found after creation on stripe");
+					//TODO: in this case I need probably to remove the price from Stripe
+					return null;
+				}
+				WasdiLog.debugLog("StripeService.createAppPrice: created price in Stripe with id: " + sPriceId);
+				
+				// one last check that the price is associated to the correct product (it should always be the case)
+				String sProductIdFromPrice = oJsonResponseBody.optString("product", null);
+				
+				if (!sProductIdFromPrice.equals(sProductId)) {
+					WasdiLog.warnLog("StripeService.createAppPrice: the product id of the price and the expected product id are not matching");
+					//TODO: in this case I need probably to remove the price from Stripe
+					return null;
+				}
+				
+				return sPriceId;
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("StripeService.createAppPrice: there was an error reading the json response ", oEx);
+				return null;
+			}
+		} else {
+			WasdiLog.errorLog("StripeService.createAppPrice: Can't create product on Stripe. Error while sending the request to Stripe.");
+			return null;
+		}
+	}
+	
 	
 	public Map<String, String> getStripeAuthHeader() {
 		Map<String, String> asHeaders = new HashMap<>();
 		
-		byte [] yAuthEncBytes = Base64.getEncoder().encode("sk_test_51Mg8UfKhhULxWbPP4GUh8PwQCkmmgWdBSZljuVceiHta1PVDsehJNCqN8Lfxv9iUsAkTF7wG11YNDmQClfvcU91Y00h0VUntGk".getBytes());
-		// byte [] yAuthEncBytes = Base64.getEncoder().encode(WasdiConfig.Current.stripe.apiKey.getBytes());
+		byte [] yAuthEncBytes = Base64.getEncoder().encode(WasdiConfig.Current.stripe.apiKey.getBytes());
         String sAuthStringEnc = new String(yAuthEncBytes);
         
         asHeaders.put("Authorization", "Basic " + sAuthStringEnc);
         
         return asHeaders;
+	}
+
+	
+	public static void main (String[]args) throws Exception {
+		StripeService stripeService = new StripeService();
+		WasdiConfig.readConfig("C:/temp/wasdi/wasdiLocalTESTConfig.json");
+		String isAppCreated = stripeService.createAppProduct("Test With Price", "This Is A Description", 10.00f);
+		System.out.println(isAppCreated);
+
+        
+        
 	}
 
 }
