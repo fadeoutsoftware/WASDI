@@ -1209,28 +1209,7 @@ public abstract class QueryTranslator {
 				// check for timeliness
 				try {
 					if (sQuery.contains(QueryTranslator.s_s_TIMELINESS)) {
-						/*
-						int iStart = sQuery.indexOf(s_s_TIMELINESS);
-						if (iStart < 0) {
-							throw new IllegalArgumentException("Could not find sensor mode");
-						}
-						iStart += s_s_TIMELINESS.length();
-						int iEnd = sQuery.indexOf(" AND ", iStart);
-						if (iEnd < 0) {
-							iEnd = sQuery.indexOf(')', iStart);
-						}
-						if (iEnd < 0) {
-							iEnd = sQuery.indexOf(' ', iStart);
-						}
-						if (iEnd < 0) {
-							iEnd = iStart + 12;
-						}
-						String sTimeliness = sQuery.substring(iStart, iEnd);
-						sTimeliness = sTimeliness.trim();
 						
-
-						oResult.timeliness = sTimeliness;
-						*/
 						String sSearchKey = QueryTranslator.s_s_TIMELINESS;
 						if (sSearchKey.endsWith(":")) {
 							sSearchKey = sSearchKey.substring(0, sSearchKey.length() - 1);
