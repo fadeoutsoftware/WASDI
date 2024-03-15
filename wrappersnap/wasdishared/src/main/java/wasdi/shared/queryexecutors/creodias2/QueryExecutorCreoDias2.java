@@ -79,8 +79,9 @@ public class QueryExecutorCreoDias2 extends QueryExecutorCREODIAS {
 			// Call standard http get API
 			HttpCallResponse oHttpResponse = HttpUtils.httpGet(sCreodiasQuery, null, null);  
 						
-			if (oHttpResponse.getResponseCode()< 200 && oHttpResponse.getResponseCode() > 299) {
+			if (oHttpResponse.getResponseCode()< 200 || oHttpResponse.getResponseCode() > 299) {
 				WasdiLog.debugLog("QueryExecutorCreoDias2.executeAndRetrieve. Error when trying to retrieve the results on CreoDias. Response code: " + oHttpResponse.getResponseCode());
+				return null;
 			}
 		
 			String sCreodiasResult = oHttpResponse.getResponseBody();
