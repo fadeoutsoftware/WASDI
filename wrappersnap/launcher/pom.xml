@@ -346,7 +346,14 @@
             <groupId>org.csa.rstb</groupId>
             <artifactId>rstb-op-soil-moisture</artifactId>
             <version>${sVersionS1tbx}</version>
-        </dependency>                                
+        </dependency>                          
+        
+        <!-- JLINDA -->
+        <dependency>
+  			<groupId>org.jlinda</groupId>
+  			<artifactId>jlinda-nest</artifactId>
+  			<version>${sVersionS1tbx}</version>
+		</dependency>
         
         <!-- S2 -->
         <dependency>

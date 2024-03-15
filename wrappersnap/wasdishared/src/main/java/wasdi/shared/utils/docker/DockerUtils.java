@@ -484,6 +484,8 @@ public class DockerUtils {
     public String start(String sMountWorkspaceFolder, int iProcessorPort) {
     	return start(sMountWorkspaceFolder, iProcessorPort, false);
     }
+    
+    
     /**
      * Run the docker at the specified port
      *
@@ -492,6 +494,17 @@ public class DockerUtils {
      * @param bAutoRemove true to autoremove the container once is done
      */
     public String start(String sMountWorkspaceFolder, int iProcessorPort, boolean bAutoRemove) {
+    	return start(sMountWorkspaceFolder, iProcessorPort, bAutoRemove, true);
+    }
+    
+    /**
+     * Run the docker at the specified port
+     *
+     * @param sMountWorkspaceFolder workspace folder to mount
+     * @param iProcessorPort Port to use
+     * @param bAutoRemove true to autoremove the container once is done
+     */
+    public String start(String sMountWorkspaceFolder, int iProcessorPort, boolean bAutoRemove, boolean bReuseExistingContainer) {
 
         try {
         	
@@ -541,7 +554,14 @@ public class DockerUtils {
             }
         	
             // Search first of all if the container is already here
-        	ContainerInfo oContainerInfo = getContainerInfoByImageName(m_oProcessor.getName(), m_oProcessor.getVersion());
+        	ContainerInfo oContainerInfo = null;
+        	
+        	if (bReuseExistingContainer) {
+        		oContainerInfo = getContainerInfoByImageName(m_oProcessor.getName(), m_oProcessor.getVersion());
+        	}
+        	else {
+        		WasdiLog.warnLog("DockerUtils.start: reuse existing container is false, force the creation of a new one");
+        	}
         	
         	boolean bNameIsDefined = true;
         	

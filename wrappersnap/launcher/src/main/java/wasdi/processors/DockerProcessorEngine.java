@@ -1563,7 +1563,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
     public String startContainerAndGetName(DockerUtils oDockerUtils, Processor oProcessor, ProcessorParameter oParameter, boolean bReconstructEnvironment) {
     	return startContainerAndGetName(oDockerUtils, oProcessor, oParameter, bReconstructEnvironment, false);
     }
-    
+
     /**
      * Check if a container is started. If not it starts it.
      * In both cases returns the name of the running container or empyt string in case of problems
@@ -1575,16 +1575,37 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
      * @return Name of the started container
      */
     public String startContainerAndGetName(DockerUtils oDockerUtils, Processor oProcessor, ProcessorParameter oParameter, boolean bReconstructEnvironment, boolean bAutoRemove) {
+    	return startContainerAndGetName(oDockerUtils, oProcessor, oParameter, bReconstructEnvironment, bReconstructEnvironment, true);
+    }
+    
+    /**
+     * Check if a container is started. If not it starts it.
+     * In both cases returns the name of the running container or empyt string in case of problems
+     * @param oDockerUtils Docker Utils
+     * @param oProcessor Processor 
+     * @param oParameter Processor Parameter
+     * @param bReconstructEnvironment True to reconstruct the environment after the start
+     * @param bAutoRemove True to autoremove the docker after is done
+     * @param bReuseExistingContainers True to try to reuse existing containers, false otherwise
+     *  
+     * @return Name of the started container
+     */
+    public String startContainerAndGetName(DockerUtils oDockerUtils, Processor oProcessor, ProcessorParameter oParameter, boolean bReconstructEnvironment, boolean bAutoRemove, boolean bReuseExistingContainers) {
     	try {
             // Check if the container is started
-            boolean bIsContainerStarted = oDockerUtils.isContainerStarted(oProcessor.getName(), oProcessor.getVersion());
+            boolean bIsContainerStarted = false;
+            
+            if (bReuseExistingContainers) {
+            	bIsContainerStarted = oDockerUtils.isContainerStarted(oProcessor.getName(), oProcessor.getVersion());
+            }
+            
             
             String sContainerName = "";
             
             if (!bIsContainerStarted) {
             	WasdiLog.debugLog("DockerProcessorEngine.startContainerAndGetName: the container must be started");
             	
-            	sContainerName = oDockerUtils.start("", oProcessor.getPort(), bAutoRemove);
+            	sContainerName = oDockerUtils.start("", oProcessor.getPort(), bAutoRemove, bReuseExistingContainers);
             	
                 // Try to start Again the docker
                 if (Utils.isNullOrEmpty(sContainerName)) {
