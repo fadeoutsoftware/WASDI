@@ -912,7 +912,14 @@ public class DockerUtils {
                         if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
                         	WasdiLog.infoLog("DockerUtils.delete: This is a registry stored docker: clean all our registers");
                         	for (DockerRegistryConfig oRegistryConfig : WasdiConfig.Current.dockers.registers) {
-                        		this.removeImageFromRegistry(sBaseDockerName, sVersion, oRegistryConfig);					
+                        		
+                        		if (!m_sDockerRegistry.equals(oRegistryConfig.address)) {
+                        			sDockerName = oRegistryConfig.address + "/" + sBaseDockerName;
+                        			WasdiLog.infoLog("DockerUtils.delete: this is a backup registry, clean also the image " + sDockerName);
+                        			this.removeImage(sDockerName);
+                        		}
+                        		
+                        		this.removeImageFromRegistry(sBaseDockerName, sVersion, oRegistryConfig);
             				}
                         }
                     }                
