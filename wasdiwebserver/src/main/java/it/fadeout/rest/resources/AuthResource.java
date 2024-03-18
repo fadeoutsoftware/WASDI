@@ -1,5 +1,7 @@
 package it.fadeout.rest.resources;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.json.JSONObject;
 
+import com.google.common.io.Files;
+
 import it.fadeout.Wasdi;
 import it.fadeout.services.AuthProviderService;
 import it.fadeout.services.KeycloakService;
@@ -29,6 +33,7 @@ import wasdi.shared.business.Subscription;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserSession;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.SessionRepository;
@@ -39,6 +44,7 @@ import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
@@ -1123,4 +1129,50 @@ public class AuthResource {
 		}
 		return true;
 	}
+	
+	@GET
+	@Path("/config")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response getClientConfig(@HeaderParam("x-session-token") String sSessionId) {
+
+		WasdiLog.debugLog("AuthResource.getClientConfig");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		// Domain Check
+		if (oUser == null) {
+			WasdiLog.warnLog("AuthResource.getClientConfig: invalid session");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		String sConfigFilePath = WasdiConfig.Current.paths.missionsConfigFilePath;
+		
+		File oAppConfigFile = new File(sConfigFilePath);
+		
+		if (!oAppConfigFile.exists()) {
+			WasdiLog.errorLog("AuthResource.getClientConfig: appconfig file not found!");
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();			
+		}
+
+		try {
+			
+			String sAppConfigContent = WasdiFileUtils.fileToText(sConfigFilePath);
+			
+			Map<String, Object> oAppConfigValues = JsonUtils.jsonToMapOfObjects(sAppConfigContent);
+			
+			if (oAppConfigValues.containsKey("missions")) {
+				ArrayList<Map<String, Object>> aoMissions = (ArrayList<Map<String, Object>>) oAppConfigValues.get("missions");
+				
+				for (Map<String, Object> oMission : aoMissions) {
+					String sName = (String) oMission.get("name");
+					WasdiLog.debugLog("Adding Mission: " + sName);
+				}
+			}
+
+			return Response.ok(oAppConfigValues).build();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("AuthResource.getClientConfig error: " + oEx);
+			return Response.serverError().build();
+		}
+	}	
 }

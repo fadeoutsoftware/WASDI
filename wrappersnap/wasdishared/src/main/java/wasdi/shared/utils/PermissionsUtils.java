@@ -42,8 +42,9 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**
+ * Wrap all the methods to check user rights and permissions
+ * 
  * @author c.nattero
- *
  */
 public class PermissionsUtils {
 	
@@ -808,6 +809,13 @@ public class PermissionsUtils {
 		return false;
 	}	
 	
+	/**
+	 * Check if a User can write a specific resource
+	 * @param sResourceType
+	 * @param sUserId
+	 * @param sWorkspaceId
+	 * @return
+	 */
 	public static boolean canUserWriteResource(String sResourceType, String sUserId, String sWorkspaceId) {
 		
 		try {
@@ -824,6 +832,26 @@ public class PermissionsUtils {
 			WasdiLog.errorLog("PermissionsUtils.canUserWriteResource error: " + oEx);
 			return false;
 		}
+	}
+	
+	/**
+	 * Check if a User can access a data provider or not
+	 * @param sUserId
+	 * @param sDataProviderId
+	 * @return
+	 */
+	public static boolean canUserAccessDataProvider(String sUserId, String sDataProviderId) {
+		try {
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			UserResourcePermission oPermission = oUserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId(ResourceTypes.DATAPROVIDER.name(), sUserId, sDataProviderId);
+			
+			if (oPermission == null) return false;
+			else return true;
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteResource error: " + oEx);
+			return false;
+		}		
 	}
 	
 	
