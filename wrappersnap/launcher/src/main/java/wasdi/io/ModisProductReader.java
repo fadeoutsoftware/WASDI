@@ -10,7 +10,6 @@ import org.esa.snap.core.datamodel.Product;
 import wasdi.shared.business.modis11a2.ModisItemForReading;
 import wasdi.shared.business.modis11a2.ModisLocation;
 import wasdi.shared.data.modis11a2.ModisRepository;
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;

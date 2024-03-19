@@ -1,12 +1,5 @@
 package wasdi.shared.utils;
 
-import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermission;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,14 +7,12 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 // email, IP addresses (v4 and v6), domains and URL validators:
 import org.apache.commons.validator.routines.DomainValidator;

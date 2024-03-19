@@ -39,10 +39,6 @@ public class PipOneShotPackageManager implements IPackageManager {
 	@Override
 	public Map<String, Object> getPackagesInfo() {
 		
-		DockerUtils oDockerUtils = new DockerUtils();
-		//oDockerUtils.run(sFlag, sFlag, null, false, null, false)
-				
-		
 		return null;
 	}
 

@@ -39,6 +39,7 @@ import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.ShareFileParameter;
 import wasdi.shared.rabbit.Send;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -342,7 +343,7 @@ public class FileBufferResource {
 				// Need a subscription valid to import data
 				WasdiLog.warnLog("FileBufferResource.imageImport: No valid Subscription");
 				oResult.setIntValue(401);
-				return oResult;				
+				return oResult;
 			}
 
 			String sUserId = oUser.getUserId();
@@ -374,6 +375,17 @@ public class FileBufferResource {
 				WasdiLog.warnLog("FileBufferResource.imageImport: user cannot write in the workspace");
 				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
 				return oResult;
+			}
+			
+			String sMission = MissionUtils.getPlatformFromSatelliteImageFileName(sFileName);
+			
+			WasdiLog.warnLog("FileBufferResource.imageImport: Detected Mission: " + sMission);
+			
+			if (!PermissionsUtils.canUserAccessMission(oUser.getUserId(), sMission)) {
+				// Invalid credentials
+				WasdiLog.warnLog("FileBufferResource.imageImport: user cannot access mission " + sMission);
+				oResult.setIntValue(401);
+				return oResult;				
 			}
 
 			// if the provider is not specified, we fallback on the node default provider

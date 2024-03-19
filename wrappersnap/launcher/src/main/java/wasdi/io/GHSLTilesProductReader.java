@@ -25,7 +25,6 @@ import org.opengis.filter.Filter;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.jrc.ResponseTranslatorJRC;
 import wasdi.shared.utils.JsonUtils;
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
