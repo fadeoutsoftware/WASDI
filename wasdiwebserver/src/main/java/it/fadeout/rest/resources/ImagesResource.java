@@ -29,6 +29,7 @@ import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.ImageResourceUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
@@ -133,14 +134,14 @@ public class ImagesResource {
 			
 			WasdiLog.debugLog("ImagesResource.uploadImage: sPath: " + sPath);
 			
-			String sExtensionOfSavedImage = ImageResourceUtils.getExtensionOfImageInFolder(Utils.getFileNameWithoutLastExtension(sPath));
+			String sExtensionOfSavedImage = ImageResourceUtils.getExtensionOfImageInFolder(WasdiFileUtils.getFileNameWithoutLastExtension(sPath));
 			
 			//if there is a saved logo with a different extension remove it 
 			if(!Utils.isNullOrEmpty(sExtensionOfSavedImage)) {
 				
 				WasdiLog.debugLog("ImagesResource.uploadImage: cleaning old image");
 				
-			    File oOldImage = new File(sPath.replace(Utils.getFileNameExtension(sPath), sExtensionOfSavedImage));
+			    File oOldImage = new File(sPath.replace(WasdiFileUtils.getFileNameExtension(sPath), sExtensionOfSavedImage));
 			    
 			    if (oOldImage.exists()) {
 			    	WasdiLog.debugLog("ImagesResource.uploadImage: delete old image with same name and different extension");

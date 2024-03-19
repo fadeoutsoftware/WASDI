@@ -36,8 +36,8 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.onda.ResponseTranslatorONDA;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
@@ -602,7 +602,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		if (sPlatformType.equals(Platforms.SENTINEL1) || sPlatformType.equals(Platforms.SENTINEL2) 
 				|| sPlatformType.equals(Platforms.SENTINEL3) || sPlatformType.equals(Platforms.SENTINEL5P) ||
 				sPlatformType.equals(Platforms.LANDSAT8)) {
-			Date oImageDate = WasdiFileUtils.getDateFromSatelliteImageFileName(sFileName);
+			Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName);
 			
 			Date oNow = new Date();
 			

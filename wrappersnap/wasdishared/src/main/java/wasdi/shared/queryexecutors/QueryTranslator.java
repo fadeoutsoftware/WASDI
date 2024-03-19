@@ -12,8 +12,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.google.common.base.Preconditions;
 
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -1520,7 +1520,7 @@ public abstract class QueryTranslator {
 				oQueryViewModel.platformName = Platforms.LANDSAT8;
 			}  else {
 				
-				String sPlatformName = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sProductName);
+				String sPlatformName = MissionUtils.getPlatformFromSatelliteImageFileName(sProductName);
 				
 				if (!Utils.isNullOrEmpty(sPlatformName)) {
 					oQueryViewModel.platformName = sPlatformName;

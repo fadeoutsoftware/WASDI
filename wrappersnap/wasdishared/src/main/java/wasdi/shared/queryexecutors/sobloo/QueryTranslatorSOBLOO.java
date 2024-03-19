@@ -13,9 +13,9 @@ import com.google.common.base.Preconditions;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryTranslationParser;
 import wasdi.shared.queryexecutors.QueryTranslator;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -36,8 +36,8 @@ public class QueryTranslatorSOBLOO extends QueryTranslator {
 
 		String sResult = null;
 		try {
-			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sAppConfigPath);
-			JSONObject oParseConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
+			JSONObject oAppConf = JsonUtils.loadJsonFromFile(m_sAppConfigPath);
+			JSONObject oParseConf = JsonUtils.loadJsonFromFile(m_sParserConfigPath);
 			String sQuery = this.prepareQuery(sQueryFromClient);
 			QueryViewModel oQueryViewModel = parseWasdiClientQuery(sQuery);
 

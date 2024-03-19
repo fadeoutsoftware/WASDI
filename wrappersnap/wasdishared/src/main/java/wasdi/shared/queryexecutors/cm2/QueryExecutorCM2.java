@@ -44,7 +44,7 @@ public class QueryExecutorCM2 extends QueryExecutor {
 		m_oQueryTranslator = new ConcreteQueryTranslator();
 		
 		try {
-			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
+			JSONObject oAppConf = JsonUtils.loadJsonFromFile(m_sParserConfigPath);
 			m_sPythonScript = oAppConf.getString("pythonScript");
 			WasdiLog.debugLog("QueryExecutorCM2: python script path " + m_sPythonScript);
 			
@@ -162,7 +162,7 @@ public class QueryExecutorCM2 extends QueryExecutor {
 			
 			WasdiLog.debugLog("QueryExecutorCM2.executeCount: got output file");
 			
-			JSONObject oOutput = WasdiFileUtils.loadJsonFromFile(sOutputFullPath);
+			JSONObject oOutput = JsonUtils.loadJsonFromFile(sOutputFullPath);
 			
 			int iCount = oOutput.getInt("count");
 			

@@ -284,11 +284,11 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 			if (null != oWSDocument) {
 				String sJSON = oWSDocument.toJson();
-				UserResourcePermission oStyleSharing;
+				UserResourcePermission oResourceSharing;
 
 				try {
-					oStyleSharing = s_oMapper.readValue(sJSON, UserResourcePermission.class);
-					return oStyleSharing;
+					oResourceSharing = s_oMapper.readValue(sJSON, UserResourcePermission.class);
+					return oResourceSharing;
 				} catch (IOException e) {
 					WasdiLog.errorLog("UserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId : exception ", e);
 				}

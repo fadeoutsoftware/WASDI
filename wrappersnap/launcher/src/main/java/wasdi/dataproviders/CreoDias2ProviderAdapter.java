@@ -20,8 +20,8 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.creodias2.ResponseTranslatorCreoDias2;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
@@ -458,14 +458,14 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		boolean bOnCloud = isWorkspaceOnSameCloud();
 		
 		if (sPlatformType.equals(Platforms.SENTINEL1)) {
-			String sType = WasdiFileUtils.getProductTypeSatelliteImageFileName(sFileName);
+			String sType = MissionUtils.getProductTypeSatelliteImageFileName(sFileName);
 			
 			if (sType.equals("SLC") || sType.equals("GRD") || sType.equals("GRD-COG") || sType.equals("RTC")) {
 				if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
 				else return DataProviderScores.DOWNLOAD.getValue();
 			}
 			else if (sType.equals("RAW")) {
-				Date oImageDate = WasdiFileUtils.getDateFromSatelliteImageFileName(sFileName);
+				Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName);
 				
 				Date oNow = new Date();
 				

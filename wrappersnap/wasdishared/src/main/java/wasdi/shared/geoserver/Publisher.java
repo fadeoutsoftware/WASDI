@@ -68,7 +68,7 @@ public class Publisher {
 
         try {
             //fix permission
-            Utils.fixUpPermissions(oTargetPath);
+            WasdiFileUtils.fixUpPermissions(oTargetPath);
             
             ArrayList<String> asCmds = new ArrayList<>();
             
@@ -206,13 +206,13 @@ public class Publisher {
         if (Utils.isNullOrEmpty(sStore)) return  "";
         if (asShapeFiles == null) return "";
         
-        String sBaseName = Utils.getFileNameWithoutLastExtension(sFileName);
+        String sBaseName = WasdiFileUtils.getFileNameWithoutLastExtension(sFileName);
         
         ArrayList<String> asRenamedShapeFiles = new ArrayList<>();
         
         for (String sShapeFile : asShapeFiles) {
         	
-        	String sExtension = Utils.getFileNameExtension(sShapeFile);
+        	String sExtension = WasdiFileUtils.getFileNameExtension(sShapeFile);
         	String sNewName = sShapeFile.replace(sBaseName+"."+sExtension, sStore+"."+sExtension);
         	File oNewFile = new File(sNewName);
         	
@@ -220,7 +220,7 @@ public class Publisher {
         	asRenamedShapeFiles.add(sNewName);
 		}
         
-        String sExtension = Utils.getFileNameExtension(sFileName);
+        String sExtension = WasdiFileUtils.getFileNameExtension(sFileName);
         sFileName = sFileName.replace(sBaseName+"."+sExtension, sStore+"."+sExtension);
         
         String sZipFile = sFileName.replace(".shp", ".zip");
