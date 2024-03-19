@@ -1,0 +1,147 @@
+package wasdi.shared.data.missions;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import wasdi.shared.business.missions.ClientConfig;
+import wasdi.shared.business.missions.Mission;
+import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.MongoRepository;
+import wasdi.shared.utils.PermissionsUtils;
+import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
+
+public class MissionsRepository {
+	
+	/**
+	 * Values of the app config file
+	 */
+	static ClientConfig s_oClientConfig = null;
+	
+	/**
+	 * Timestamp of the last update of the config file
+	 */
+	static long s_lLastAppConfigFileUpdate = 0;
+	
+	
+	/**
+	 * Create a Mission Repository.
+	 */
+	public MissionsRepository() {
+		
+		// Do we have the values from the json file?
+		if (s_oClientConfig == null) {
+			// No, read the app config file
+			readAppConfig();
+		}
+		else {
+			// Yes, but are up to date?
+			String sConfigFilePath = WasdiConfig.Current.paths.missionsConfigFilePath;
+			File oAppConfigFile = new File(sConfigFilePath);
+			
+			if (!oAppConfigFile.exists()) {
+				WasdiLog.errorLog("MissionsRepository.MissionsRepository: appconfig file not found!");
+			}
+			else {
+				// When was last modified?
+				if (oAppConfigFile.lastModified()>s_lLastAppConfigFileUpdate) {
+					// We need to refresh!
+					readAppConfig();
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Read the app config json file
+	 */
+	protected void readAppConfig() {
+		String sConfigFilePath = WasdiConfig.Current.paths.missionsConfigFilePath;
+		File oAppConfigFile = new File(sConfigFilePath);
+		
+		if (!oAppConfigFile.exists()) {
+			WasdiLog.errorLog("MissionsRepository.readAppConfig: appconfig file not found!");
+			s_oClientConfig = new ClientConfig();
+		}
+		else {
+			s_lLastAppConfigFileUpdate = oAppConfigFile.lastModified();
+			String sAppConfigContent = WasdiFileUtils.fileToText(sConfigFilePath);
+			
+			try {
+				s_oClientConfig = MongoRepository.s_oMapper.readValue(sAppConfigContent, new TypeReference<ClientConfig>(){});
+			} 
+			catch (Throwable oE) {
+				WasdiLog.debugLog("MissionsRepository.readAppConfig: could not parse the JSON payload due to " + oE + ".");
+			}
+		}
+	}
+	
+	/**
+	 * Get the client config for a specific user
+	 * @param sUserId
+	 * @return
+	 */
+	public ClientConfig getClientConfig(String sUserId) {
+		try {
+			
+			ClientConfig oClientConfig = new ClientConfig();
+			
+			oClientConfig.setOrbitsearch(s_oClientConfig.getOrbitsearch());
+			
+            for (Mission oMission: s_oClientConfig.getMissions()) {
+            	
+            	if (oMission.isIspublic()) {
+            		oClientConfig.getMissions().add(oMission);
+            		continue;
+            	}
+            	
+            	if (!Utils.isNullOrEmpty(oMission.getUserid())) {
+            		if (oMission.getUserid().equals(sUserId)) {
+                		oClientConfig.getMissions().add(oMission);
+                		continue;       			
+            		}
+            	}
+            	
+            	if (PermissionsUtils.canUserAccessDataProvider(sUserId, oMission.getName())) {
+            		oClientConfig.getMissions().add(oMission);
+            		continue;
+            	}
+			}
+            
+            return oClientConfig;
+			
+		}
+		catch (Throwable oE) {
+			WasdiLog.debugLog("MissionsRepository.readAppConfig: could not parse the JSON payload due to " + oE + ".");
+		}
+		return null;
+	}
+	
+	public List<Mission> getMissionsOwnedBy(String sUserId) {
+		
+		ArrayList<Mission> aoMissions = new ArrayList<>();
+		
+		try {
+			
+            for (Mission oMission: s_oClientConfig.getMissions()) {
+            	
+            	if (!Utils.isNullOrEmpty(oMission.getUserid())) {
+            		if (oMission.getUserid().equals(sUserId)) {
+            			aoMissions.add(oMission);
+                		continue;       			
+            		}
+            	}
+			}
+            
+			
+		}
+		catch (Throwable oE) {
+			WasdiLog.debugLog("MissionsRepository.readAppConfig: could not parse the JSON payload due to " + oE + ".");
+		}
+		return aoMissions;
+	}
+}

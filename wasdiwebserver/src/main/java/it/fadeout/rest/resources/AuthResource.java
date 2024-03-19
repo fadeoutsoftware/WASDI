@@ -21,8 +21,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.json.JSONObject;
 
-import com.google.common.io.Files;
-
 import it.fadeout.Wasdi;
 import it.fadeout.services.AuthProviderService;
 import it.fadeout.services.KeycloakService;
@@ -30,15 +28,16 @@ import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.Project;
 import wasdi.shared.business.Subscription;
+import wasdi.shared.business.missions.ClientConfig;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserSession;
-import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.missions.MissionsRepository;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.MailUtils;
@@ -1143,33 +1142,13 @@ public class AuthResource {
 		if (oUser == null) {
 			WasdiLog.warnLog("AuthResource.getClientConfig: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
-		}
-		
-		String sConfigFilePath = WasdiConfig.Current.paths.missionsConfigFilePath;
-		
-		File oAppConfigFile = new File(sConfigFilePath);
-		
-		if (!oAppConfigFile.exists()) {
-			WasdiLog.errorLog("AuthResource.getClientConfig: appconfig file not found!");
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();			
-		}
+		}		
 
 		try {
-			
-			String sAppConfigContent = WasdiFileUtils.fileToText(sConfigFilePath);
-			
-			Map<String, Object> oAppConfigValues = JsonUtils.jsonToMapOfObjects(sAppConfigContent);
-			
-			if (oAppConfigValues.containsKey("missions")) {
-				ArrayList<Map<String, Object>> aoMissions = (ArrayList<Map<String, Object>>) oAppConfigValues.get("missions");
-				
-				for (Map<String, Object> oMission : aoMissions) {
-					String sName = (String) oMission.get("name");
-					WasdiLog.debugLog("Adding Mission: " + sName);
-				}
-			}
+			MissionsRepository oMissionsRepository = new MissionsRepository();
+			ClientConfig oClientConfig = oMissionsRepository.getClientConfig(oUser.getUserId());
 
-			return Response.ok(oAppConfigValues).build();
+			return Response.ok(oClientConfig).build();
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("AuthResource.getClientConfig error: " + oEx);
 			return Response.serverError().build();
