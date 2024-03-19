@@ -309,12 +309,16 @@ public class SocketUtils {
 			oRequestBuilder.headers(asHeaders);
 		}
 		
+		InputStream oFileInputStream = null;
+		
 		try {
-			oRequestBuilder.body(FileUtils.openInputStream(oFile));
+			oFileInputStream = FileUtils.openInputStream(oFile);
 		} catch (IOException e) {
 			WasdiLog.errorLog("SocketUtils.httpPost. Error providing the input stream. Returning an empty response.");
 			return oHttpCallResponse;
 		}
+		
+		oRequestBuilder = oRequestBuilder.body(oFileInputStream);
 		
 		Request oRequest = oRequestBuilder.build();
 				
