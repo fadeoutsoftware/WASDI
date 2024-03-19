@@ -328,15 +328,18 @@ public class FileBufferResource {
 			
 			WasdiLog.debugLog("FileBufferResource.imageImport");
 			
+			// We get the user from session
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
+				// Invalid credentials
 				WasdiLog.warnLog("FileBufferResource.imageImport: session is not valid");
 				oResult.setIntValue(401);
 				return oResult;
 			}
 			
 			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+				// Need a subscription valid to import data
 				WasdiLog.warnLog("FileBufferResource.imageImport: No valid Subscription");
 				oResult.setIntValue(401);
 				return oResult;				
@@ -345,6 +348,7 @@ public class FileBufferResource {
 			String sUserId = oUser.getUserId();
 
 			if (oImageImportViewModel == null) {
+				// This is a bad request
 				WasdiLog.warnLog("FileBufferResource.imageImport: request is not valid");
 				oResult.setIntValue(401);
 				return oResult;
@@ -395,7 +399,6 @@ public class FileBufferResource {
 			if (sNode.equals(WasdiConfig.Current.nodeCode)) {
 				// Local Node: no need to make any API
 				CatalogResources oCatalogResources = new CatalogResources();
-				//Response oCallResponse = oCatalogResources.checkFileByNode(sSessionId, sFileName, sWorkspaceId);
 				Response oCallResponse = oCatalogResources.checkDownloadEntryAvailabilityByName(sSessionId, sFileName, sWorkspaceId, oImageImportViewModel.getParent(), oImageImportViewModel.getVolumePath());
 				if (oCallResponse.getStatus()>=200 && oCallResponse.getStatus()<299) {
 					oFileOnNode = (PrimitiveResult) oCallResponse.getEntity();
@@ -548,7 +551,7 @@ public class FileBufferResource {
 
 			if (oPublishBand != null)
 			{
-				String sProductName = Utils.getFileNameWithoutLastExtension(oPublishBand.getProductName());
+				String sProductName = WasdiFileUtils.getFileNameWithoutLastExtension(oPublishBand.getProductName());
 				WasdiLog.debugLog("FileBufferResource.publishBand: band already published: product Name : " + sProductName + " LayerId: " + oPublishBand.getLayerId());
 				PublishBandResultViewModel oPublishBandResultViewModel = new PublishBandResultViewModel();
 				oPublishBandResultViewModel.setBoundingBox(oPublishBand.getBoundingBox());

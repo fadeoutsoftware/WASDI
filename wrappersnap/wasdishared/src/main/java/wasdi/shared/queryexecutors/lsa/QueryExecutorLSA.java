@@ -15,8 +15,8 @@ import org.json.JSONObject;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
@@ -50,7 +50,7 @@ public class QueryExecutorLSA extends QueryExecutor {
 		super.init();
 		
 		try {
-			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
+			JSONObject oAppConf = JsonUtils.loadJsonFromFile(m_sParserConfigPath);
 			boolean bEnableFast24 = oAppConf.getBoolean("enableFast24");
 			
 			((QueryTranslatorLSA)m_oQueryTranslator).setEnableFast24(bEnableFast24);

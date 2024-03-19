@@ -1,7 +1,5 @@
 package it.fadeout.rest.resources;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +41,6 @@ import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;

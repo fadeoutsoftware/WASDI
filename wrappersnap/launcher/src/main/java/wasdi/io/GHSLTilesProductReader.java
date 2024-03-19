@@ -24,6 +24,7 @@ import org.opengis.filter.Filter;
 
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.jrc.ResponseTranslatorJRC;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -47,8 +48,8 @@ public class GHSLTilesProductReader extends WasdiProductReader {
         String sFileName = m_oProductFile != null ? m_oProductFile.getName() : "no_file_name";
         
     	oViewModel.setFileName(sFileName);
-    	oViewModel.setName(Utils.getFileNameWithoutLastExtension(sFileName));
-		oViewModel.setProductFriendlyName(Utils.getFileNameWithoutLastExtension(sFileName));
+    	oViewModel.setName(WasdiFileUtils.getFileNameWithoutLastExtension(sFileName));
+		oViewModel.setProductFriendlyName(WasdiFileUtils.getFileNameWithoutLastExtension(sFileName));
         
         NodeGroupViewModel oNodeGroupViewModel = new NodeGroupViewModel();
     	oNodeGroupViewModel.setNodeName("Bands");
@@ -89,7 +90,7 @@ public class GHSLTilesProductReader extends WasdiProductReader {
 		
 		String sParserConfigPath = WasdiConfig.Current.getDataProviderConfig("JRC").parserConfig;
 		
-		JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(sParserConfigPath);
+		JSONObject oAppConf = JsonUtils.loadJsonFromFile(sParserConfigPath);
 		String sShapeMaskPath = oAppConf.getString("shapeMaskPath");
 		
 		String sTileId = getTileId();

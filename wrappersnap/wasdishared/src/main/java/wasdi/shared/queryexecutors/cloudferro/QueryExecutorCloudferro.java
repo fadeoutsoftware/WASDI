@@ -13,8 +13,8 @@ import wasdi.shared.data.ecostress.EcoStressRepository;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.TimeEpochUtils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
@@ -145,7 +145,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
 		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
 		
-		JSONObject oParseConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
+		JSONObject oParseConf = JsonUtils.loadJsonFromFile(m_sParserConfigPath);
 		
 		if (oParseConf!=null) {
 			if(!oParseConf.has("volumeId")) {

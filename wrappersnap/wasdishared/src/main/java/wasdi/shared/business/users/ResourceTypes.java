@@ -10,7 +10,7 @@ public enum ResourceTypes {
 	PARAMETER("processorparameterstemplate"),
 	NODE("node"),
 	VOLUME("volume"),
-	DATAPROVIDER("dataprovider");
+	MISSION("mission");
 
 	private final String resourceType;
 

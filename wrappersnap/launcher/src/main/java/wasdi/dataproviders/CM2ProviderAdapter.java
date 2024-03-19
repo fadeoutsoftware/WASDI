@@ -38,7 +38,7 @@ public class CM2ProviderAdapter extends ProviderAdapter {
 		String sAdapterConfigPath = "";
 		try {
 			sAdapterConfigPath = m_oDataProviderConfig.adapterConfig;
-			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(sAdapterConfigPath);
+			JSONObject oAppConf = JsonUtils.loadJsonFromFile(sAdapterConfigPath);
 			m_sPythonScript = oAppConf.getString("pythonScript");
 			m_sExchangeFolder = WasdiConfig.Current.paths.wasdiTempFolder;
 		} catch(Exception oEx) {
@@ -171,7 +171,7 @@ public class CM2ProviderAdapter extends ProviderAdapter {
 			WasdiLog.debugLog("CM2ProviderAdapter.executeDownloadFile: got output file form the Python data provider");
 			
 			// the output (for now) it will simply be the path of the downloaded file
-			JSONObject oJsonOutput = WasdiFileUtils.loadJsonFromFile(sOutputFullPath);
+			JSONObject oJsonOutput = JsonUtils.loadJsonFromFile(sOutputFullPath);
 			String sDownloadedFilePath = oJsonOutput.optString("outputFile");
 			
 			if (!Utils.isNullOrEmpty(sDownloadedFilePath)) {

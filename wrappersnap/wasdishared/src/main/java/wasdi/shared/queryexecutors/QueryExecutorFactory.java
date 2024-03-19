@@ -17,7 +17,6 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.ads.QueryExecutorADS;
 import wasdi.shared.queryexecutors.cds.QueryExecutorCDS;
 import wasdi.shared.queryexecutors.cloudferro.QueryExecutorCloudferro;
-import wasdi.shared.queryexecutors.cm.QueryExecutorCM;
 import wasdi.shared.queryexecutors.cm2.QueryExecutorCM2;
 import wasdi.shared.queryexecutors.creodias.QueryExecutorCREODIAS;
 import wasdi.shared.queryexecutors.creodias2.QueryExecutorCreoDias2;

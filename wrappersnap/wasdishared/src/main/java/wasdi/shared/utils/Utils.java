@@ -127,74 +127,6 @@ public class Utils {
 		return new Date(oLong);
 	}
 
-	/**
-	 * This method removes the last extension from a filename 
-	 * @param sInputFile the name of the input file
-	 * @return
-	 */
-	public static String getFileNameWithoutLastExtension(String sInputFile) {
-		File oFile = new File(sInputFile);
-		String sInputFileNameOnly = oFile.getName();
-		String sReturn = sInputFileNameOnly;
-		
-		if(sInputFileNameOnly.contains(".")) {
-			sReturn = sInputFileNameOnly.substring(0, sInputFileNameOnly.lastIndexOf('.'));
-		}
-
-		return sReturn;
-	}
-
-	/**
-	 * Extracts the extension fro a file name
-	 * @param sInputFile Input File Name
-	 * @return Extension or empty string
-	 */
-	public static String getFileNameExtension(String sInputFile) {
-		String sReturn = "";
-		File oFile = new File(sInputFile);
-		String sInputFileNameOnly = oFile.getName();
-
-		if (sInputFileNameOnly.contains(".")) {
-			// Create a clean layer id: the file name without any extension
-			String[] asLayerIdSplit = sInputFileNameOnly.split("\\.");
-			if (asLayerIdSplit != null && asLayerIdSplit.length > 0) {
-				sReturn = asLayerIdSplit[asLayerIdSplit.length - 1];
-			}			
-		}
-
-		return sReturn;
-	}
-
-	public static void fixUpPermissions(Path destPath) throws IOException {
-		Stream<Path> files = Files.list(destPath);
-		files.forEach(path -> {
-			if (Files.isDirectory(path)) {
-				try {
-					fixUpPermissions(path);
-				} catch (IOException oEx) {
-					WasdiLog.errorLog("Utils.fixUpPermissions: error", oEx);
-
-				}
-			} else {
-				setExecutablePermissions(path);
-			}
-		});
-		files.close();
-	}
-
-	private static void setExecutablePermissions(Path executablePathName) {
-		if (IS_OS_UNIX) {
-			Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ,
-					PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ,
-					PosixFilePermission.GROUP_EXECUTE, PosixFilePermission.OTHERS_READ,
-					PosixFilePermission.OTHERS_EXECUTE));
-			try {
-				Files.setPosixFilePermissions(executablePathName, permissions);
-			} catch (IOException oEx) {
-				WasdiLog.errorLog("Utils.setExecutablePermissions: error", oEx);
-			}
-		}
-	}
 
 	/**
 	 * Format the date using the yyyyMMdd date format.
@@ -477,46 +409,6 @@ public class Utils {
 				sString.equalsIgnoreCase("y")
 		);
 	}
-	
-	/**
-	 * Confert a Polygon WKT String in a set of Lat Lon Points comma separated
-	 * 
-	 * @param sContent
-	 * @return
-	 */
-	public static String polygonToBounds(String sContent) {
-		sContent = sContent.replace("MULTIPOLYGON ", "");
-		sContent = sContent.replace("MULTIPOLYGON", "");
-		sContent = sContent.replace("POLYGON ", "");
-		sContent = sContent.replace("POLYGON", "");
-		sContent = sContent.replace("(((", "");
-		sContent = sContent.replace(")))", "");
-		sContent = sContent.replace("((", "");
-		sContent = sContent.replace("))", "");
-
-		String[] asContent = sContent.split(",");
-
-		String sOutput = "";
-
-		for (int iIndexBounds = 0; iIndexBounds < asContent.length; iIndexBounds++) {
-			String sBounds = asContent[iIndexBounds];
-			sBounds = sBounds.trim();
-			String[] asNewBounds = sBounds.split(" ");
-
-			if (iIndexBounds > 0)
-				sOutput += ", ";
-
-			try {
-				sOutput += asNewBounds[1] + "," + asNewBounds[0];
-			} catch (Exception oEx) {
-				WasdiLog.errorLog("Utils.polygonToBounds: error", oEx);
-			}
-
-		}
-		return sOutput;
-
-	}
-	
 	
 	
 	///////// units conversion

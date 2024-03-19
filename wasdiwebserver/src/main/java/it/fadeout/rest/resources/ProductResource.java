@@ -442,7 +442,7 @@ public class ProductResource {
                 oGeoPVM.setBbox(aoProductWorkspace.get(iProducts).getBbox());
 
                 File oFile = new File(aoProductWorkspace.get(iProducts).getProductName());
-                String sName = Utils.getFileNameWithoutLastExtension(oFile.getName());
+                String sName = WasdiFileUtils.getFileNameWithoutLastExtension(oFile.getName());
                 oGeoPVM.setProductFriendlyName(sName);
                 oGeoPVM.setName(sName);
 

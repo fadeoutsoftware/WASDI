@@ -60,18 +60,26 @@ public class MissionsRepository {
 	 * Read the app config json file
 	 */
 	protected void readAppConfig() {
+		
+		// Take the path
 		String sConfigFilePath = WasdiConfig.Current.paths.missionsConfigFilePath;
+		// Create the file
 		File oAppConfigFile = new File(sConfigFilePath);
 		
+		// We expect this to exists
 		if (!oAppConfigFile.exists()) {
+			// If not we create an empty one
 			WasdiLog.errorLog("MissionsRepository.readAppConfig: appconfig file not found!");
 			s_oClientConfig = new ClientConfig();
 		}
 		else {
+			// Keep trace of the last modified timestamp of the file
 			s_lLastAppConfigFileUpdate = oAppConfigFile.lastModified();
+			// Read the content
 			String sAppConfigContent = WasdiFileUtils.fileToText(sConfigFilePath);
 			
 			try {
+				// And convert it in our entity
 				s_oClientConfig = MongoRepository.s_oMapper.readValue(sAppConfigContent, new TypeReference<ClientConfig>(){});
 			} 
 			catch (Throwable oE) {
@@ -88,27 +96,19 @@ public class MissionsRepository {
 	public ClientConfig getClientConfig(String sUserId) {
 		try {
 			
+			// We create a new instance
 			ClientConfig oClientConfig = new ClientConfig();
 			
+			// We set orbit search
 			oClientConfig.setOrbitsearch(s_oClientConfig.getOrbitsearch());
 			
+			// For all the missions
             for (Mission oMission: s_oClientConfig.getMissions()) {
             	
-            	if (oMission.isIspublic()) {
+            	// If the user can access it
+            	if (PermissionsUtils.canUserAccessMission(sUserId, oMission)) {
+            		 // We add it
             		oClientConfig.getMissions().add(oMission);
-            		continue;
-            	}
-            	
-            	if (!Utils.isNullOrEmpty(oMission.getUserid())) {
-            		if (oMission.getUserid().equals(sUserId)) {
-                		oClientConfig.getMissions().add(oMission);
-                		continue;       			
-            		}
-            	}
-            	
-            	if (PermissionsUtils.canUserAccessDataProvider(sUserId, oMission.getName())) {
-            		oClientConfig.getMissions().add(oMission);
-            		continue;
             	}
 			}
             
@@ -118,9 +118,16 @@ public class MissionsRepository {
 		catch (Throwable oE) {
 			WasdiLog.debugLog("MissionsRepository.readAppConfig: could not parse the JSON payload due to " + oE + ".");
 		}
+		
+		// Here something did not work properly
 		return null;
 	}
 	
+	/**
+	 * Get a list of missions owned by the user
+	 * @param sUserId
+	 * @return
+	 */
 	public List<Mission> getMissionsOwnedBy(String sUserId) {
 		
 		ArrayList<Mission> aoMissions = new ArrayList<>();
@@ -144,4 +151,28 @@ public class MissionsRepository {
 		}
 		return aoMissions;
 	}
+	
+	/**
+	 * Get a Mission Entity by the Mission Index Value
+	 * @param sMissionIndexValue
+	 * @return
+	 */
+	public Mission getMissionsByIndexValue(String sMissionIndexValue) {
+		
+		try {
+			
+            for (Mission oMission: s_oClientConfig.getMissions()) {
+            	
+            	if (!Utils.isNullOrEmpty(oMission.getIndexvalue())) {
+            		if (oMission.getIndexvalue().equals(sMissionIndexValue)) {
+            			return oMission;			
+            		}
+            	}
+			}
+		}
+		catch (Throwable oE) {
+			WasdiLog.debugLog("MissionsRepository.readAppConfig: could not parse the JSON payload due to " + oE + ".");
+		}
+		return null;
+	}	
 }
