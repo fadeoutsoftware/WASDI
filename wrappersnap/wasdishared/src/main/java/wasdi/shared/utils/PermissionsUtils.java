@@ -862,7 +862,7 @@ public class PermissionsUtils {
 			if (oMission.getUserid().equals(sUserId)) return true;
 			
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-			UserResourcePermission oPermission = oUserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId(ResourceTypes.MISSION.name(), sUserId, oMission.getIndexvalue());
+			UserResourcePermission oPermission = oUserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId(ResourceTypes.MISSION.getResourceType(), sUserId, oMission.getIndexvalue());
 			
 			if (oPermission == null) return false;
 			else return true;
