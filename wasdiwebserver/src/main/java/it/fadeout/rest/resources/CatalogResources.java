@@ -35,6 +35,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.IngestFileParameter;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -226,7 +227,7 @@ public class CatalogResources {
 			if(oFile == null) {
 				
 				// Often we do not have the extension for S1 and S2 files. Try to help
-				String sExtension = Utils.getFileNameExtension(sFileName);
+				String sExtension = WasdiFileUtils.getFileNameExtension(sFileName);
 				
 				boolean bRetry = false;
 				
@@ -947,7 +948,7 @@ public class CatalogResources {
 	private Response zipShapeFile(File oInitialFile) {
 		
 		// Remove extension
-		final String sNameToFind = Utils.getFileNameWithoutLastExtension(oInitialFile.getName());
+		final String sNameToFind = WasdiFileUtils.getFileNameWithoutLastExtension(oInitialFile.getName());
 		
 		// Get parent folder
 		File oFolder = oInitialFile.getParentFile();
@@ -1057,7 +1058,7 @@ public class CatalogResources {
 				return zipBeanDimapFile(oInitialFile);
 			} else if (sBasePath.endsWith(".shp")) {
 				return zipShapeFile(oInitialFile);
-			} else if(WasdiFileUtils.isSentinel3Directory(oInitialFile)) {
+			} else if(MissionUtils.isSentinel3Directory(oInitialFile)) {
 				return zipSentinel3(oInitialFile);
 			} 
 		} 
@@ -1089,7 +1090,7 @@ public class CatalogResources {
 					//dim files are the output of SNAP operations
 					sName.endsWith(".dim") ||
 					WasdiFileUtils.isShapeFile(oFile) ||
-					WasdiFileUtils.isSentinel3Directory(oFile)
+					MissionUtils.isSentinel3Directory(oFile)
 					);
 		}
 		return bRet;

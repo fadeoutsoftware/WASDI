@@ -26,6 +26,7 @@ import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.Project;
 import wasdi.shared.business.Subscription;
+import wasdi.shared.business.missions.ClientConfig;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserSession;
@@ -34,6 +35,7 @@ import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.missions.MissionsRepository;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.MailUtils;
@@ -1123,4 +1125,30 @@ public class AuthResource {
 		}
 		return true;
 	}
+	
+	@GET
+	@Path("/config")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response getClientConfig(@HeaderParam("x-session-token") String sSessionId) {
+
+		WasdiLog.debugLog("AuthResource.getClientConfig");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		// Domain Check
+		if (oUser == null) {
+			WasdiLog.warnLog("AuthResource.getClientConfig: invalid session");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}		
+
+		try {
+			MissionsRepository oMissionsRepository = new MissionsRepository();
+			ClientConfig oClientConfig = oMissionsRepository.getClientConfig(oUser.getUserId());
+
+			return Response.ok(oClientConfig).build();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("AuthResource.getClientConfig error: " + oEx);
+			return Response.serverError().build();
+		}
+	}	
 }

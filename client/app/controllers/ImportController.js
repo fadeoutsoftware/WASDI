@@ -195,7 +195,7 @@ var ImportController = (function() {
                 oController.m_aoMissions = oController.m_oConfiguration.missions;
             }
 
-            oController.m_bShowsensingfilter = oController.m_oConfiguration.settings.showsensingfilter;
+            oController.m_bShowsensingfilter = true;
             oController.m_oScope.$apply();
             // selects the first mission (S1)
             oController.updateMissionSelection(0);

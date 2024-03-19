@@ -38,8 +38,8 @@ import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -185,7 +185,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     	
     	try {
     		
-    		String sPlatformType = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sFileName);
+    		String sPlatformType = MissionUtils.getPlatformFromSatelliteImageFileName(sFileName);
     		
     		if (Utils.isNullOrEmpty(sPlatformType)) {
     			WasdiLog.debugLog("ProviderAdapter.getScoreForFile: platform not recognized. DataProvider: " + m_sDataProviderCode + " File: " + sFileName);

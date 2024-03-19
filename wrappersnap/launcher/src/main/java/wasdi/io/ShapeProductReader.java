@@ -11,7 +11,6 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
@@ -47,7 +46,7 @@ public class ShapeProductReader extends WasdiProductReader{
             	
             	// Set name values
             	oRetViewModel.setFileName(m_oProductFile.getName());
-            	oRetViewModel.setName(Utils.getFileNameWithoutLastExtension(m_oProductFile.getName()));
+            	oRetViewModel.setName(WasdiFileUtils.getFileNameWithoutLastExtension(m_oProductFile.getName()));
             	oRetViewModel.setProductFriendlyName(oRetViewModel.getName());
             	
             	// Create the sub folder

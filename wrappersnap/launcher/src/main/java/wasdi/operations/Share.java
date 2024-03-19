@@ -239,8 +239,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 			m_oProcessWorkspaceLogger.log(new EndMessageProvider().getGood());
 
 			DownloadPayload oDownloadPayload = new DownloadPayload();
-			oDownloadPayload.setFileName(Utils.getFileNameWithoutLastExtension(sFileName));
-//			oDownloadPayload.setProvider(oParameter.getProvider());
+			oDownloadPayload.setFileName(WasdiFileUtils.getFileNameWithoutLastExtension(sFileName));
 
 			setPayload(oProcessWorkspace, oDownloadPayload);
 

@@ -19,8 +19,8 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class SOBLOOProviderAdapter extends ProviderAdapter{
@@ -365,7 +365,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		
 		if (sPlatformType.equals(Platforms.SENTINEL1) || sPlatformType.equals(Platforms.SENTINEL2) 
 				|| sPlatformType.equals(Platforms.SENTINEL3)) {
-			Date oImageDate = WasdiFileUtils.getDateFromSatelliteImageFileName(sFileName);
+			Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName);
 			
 			Date oNow = new Date();
 			

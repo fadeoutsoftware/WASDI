@@ -40,8 +40,8 @@ import wasdi.shared.payloads.DeleteProcessorPayload;
 import wasdi.shared.payloads.DeployProcessorPayload;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
 import wasdi.shared.utils.log.WasdiLog;
@@ -1310,7 +1310,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 				String sFileFullPath = sProcessorFolder + "packagesInfo.json";
 
-				bResult= WasdiFileUtils.writeMapAsJsonFile(aoPackagesInfo, sFileFullPath);
+				bResult= JsonUtils.writeMapAsJsonFile(aoPackagesInfo, sFileFullPath);
 
 				if (!bResult) {
 					WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: the packagesInfo.json file was not created.");

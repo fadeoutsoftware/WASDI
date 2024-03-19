@@ -18,6 +18,7 @@ import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.Style;
 import wasdi.shared.business.Subscription;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.missions.Mission;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
@@ -37,13 +38,15 @@ import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.data.missions.MissionsRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**
+ * Wrap all the methods to check user rights and permissions
+ * 
  * @author c.nattero
- *
  */
 public class PermissionsUtils {
 	
@@ -808,6 +811,13 @@ public class PermissionsUtils {
 		return false;
 	}	
 	
+	/**
+	 * Check if a User can write a specific resource
+	 * @param sResourceType
+	 * @param sUserId
+	 * @param sWorkspaceId
+	 * @return
+	 */
 	public static boolean canUserWriteResource(String sResourceType, String sUserId, String sWorkspaceId) {
 		
 		try {
@@ -824,6 +834,43 @@ public class PermissionsUtils {
 			WasdiLog.errorLog("PermissionsUtils.canUserWriteResource error: " + oEx);
 			return false;
 		}
+	}
+	
+	/**
+	 * Check if a User can access a Mission (Data Collection) or not
+	 * @param sUserId User 
+	 * @param sMissionIndexValue Code of the mission
+	 * @return
+	 */
+	public static boolean canUserAccessMission(String sUserId, String sMissionIndexValue) {
+		MissionsRepository oMissionsRepository = new MissionsRepository();
+		Mission oMission =  oMissionsRepository.getMissionsByIndexValue(sMissionIndexValue);
+		return canUserAccessMission(sUserId, oMission);
+	}
+	
+	/**
+	 * Check if a User can access a Mission (Data Collection) or not
+	 * @param sUserId
+	 * @param sMissionId
+	 * @return
+	 */
+	public static boolean canUserAccessMission(String sUserId, Mission oMission) {
+		try {
+			
+			if (oMission == null) return false;
+			if (oMission.isIspublic()) return true;
+			if (oMission.getUserid().equals(sUserId)) return true;
+			
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			UserResourcePermission oPermission = oUserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId(ResourceTypes.MISSION.getResourceType(), sUserId, oMission.getIndexvalue());
+			
+			if (oPermission == null) return false;
+			else return true;
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteResource error: " + oEx);
+			return false;
+		}		
 	}
 	
 	

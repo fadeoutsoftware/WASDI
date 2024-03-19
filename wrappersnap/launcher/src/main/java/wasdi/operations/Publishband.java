@@ -202,7 +202,7 @@ public class Publishband extends Operation {
 			
 			// We are searching for files with the same name but different extension
 			String sBaseFileNameFilter = oFileToCopy.getName();
-			sBaseFileNameFilter = Utils.getFileNameWithoutLastExtension(sBaseFileNameFilter);
+			sBaseFileNameFilter = WasdiFileUtils.getFileNameWithoutLastExtension(sBaseFileNameFilter);
 			sBaseFileNameFilter += ".";
 			
 			if (aoWorkspaceFiles != null) {
@@ -221,8 +221,8 @@ public class Publishband extends Operation {
             if (asFilesToCopy.size()>0) {
     			for (String sFileToCopy : asFilesToCopy) {
     				String sOtherOutputFile = oOutputFile.getPath();
-    				String sOtherOutputExtension = Utils.getFileNameExtension(sOtherOutputFile);
-    				String sNewExtension = Utils.getFileNameExtension(sFileToCopy);
+    				String sOtherOutputExtension = WasdiFileUtils.getFileNameExtension(sOtherOutputFile);
+    				String sNewExtension = WasdiFileUtils.getFileNameExtension(sFileToCopy);
     				
     				sOtherOutputFile = sOtherOutputFile.replace(sOtherOutputExtension, sNewExtension);
     				

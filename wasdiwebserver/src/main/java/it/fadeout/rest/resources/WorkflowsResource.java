@@ -58,6 +58,7 @@ import wasdi.shared.parameters.settings.GraphSetting;
 import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.workflows.SnapWorkflowViewModel;
@@ -904,7 +905,7 @@ public class WorkflowsResource {
 
                 if (oSnapWorkflowViewModel.getInputFileNames().size() > 0) {
                     sSourceProductName = oSnapWorkflowViewModel.getInputFileNames().get(0);
-                    sDestinationProdutName = Utils.getFileNameWithoutLastExtension(sSourceProductName) + "_" + sWorkFlowName + Utils.getFileNameExtension(sSourceProductName); 
+                    sDestinationProdutName = WasdiFileUtils.getFileNameWithoutLastExtension(sSourceProductName) + "_" + sWorkFlowName + WasdiFileUtils.getFileNameExtension(sSourceProductName); 
                 }
                 
                 if (oGraphSettings.getOutputFileNames().size()>0) {

@@ -2,10 +2,13 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 0.7.6
-; Last Update: 2023-11-20
+; IDL WASDI Lib Version 0.7.7
+; Last Update: 2024-03-19
 ;
 ; History
+;
+; 0.7.7 - 2024-03-19
+;	set AUTO as default data provider
 ;
 ; 0.7.6 - 2023-11-20
 ;	added catch in the POST operation
@@ -1733,7 +1736,7 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   END  
   
   IF (sProvider EQ !NULL) THEN BEGIN
-	 sProvider = 'LSA'
+	 sProvider = 'AUTO'
   END
 		
   ; TODO: CloudCoverage for S2
