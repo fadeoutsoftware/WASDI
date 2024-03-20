@@ -44,7 +44,7 @@ public class TarUtils {
 			// For all the files to add to the TAR
 			for (String sInputFile : asInputFilesFullPath) {
 				
-				if (sOutputTarFileFullPath.equals(sOutputTarFileFullPath)) continue;
+				if (sInputFile.equals(sOutputTarFileFullPath)) continue;
 				
 				// This is the input file
 				File oFile = new File(sInputFile);
