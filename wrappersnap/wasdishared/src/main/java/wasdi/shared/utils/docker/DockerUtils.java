@@ -399,7 +399,7 @@ public class DockerUtils {
     		WasdiLog.debugLog("DockerUtils.build: start build");
     		
         	// Finally make the call
-        	HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, FileUtils.readFileToByteArray(new File(sTarFileOuput)), asHeaders);
+        	HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, new File(sTarFileOuput), asHeaders);
         	
         	WasdiLog.debugLog("DockerUtils.build: build done");
         	
@@ -416,7 +416,7 @@ public class DockerUtils {
         	}
         	
         	// Delete the tar
-        	//WasdiFileUtils.deleteFile(sTarFileOuput);
+        	WasdiFileUtils.deleteFile(sTarFileOuput);
         	
         	if (oResponse.getResponseCode() != 200) {
         		WasdiLog.errorLog("There was an error in the post: message " + oResponse.getResponseBody());
