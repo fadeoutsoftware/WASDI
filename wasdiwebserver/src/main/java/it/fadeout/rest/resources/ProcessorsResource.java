@@ -39,6 +39,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
+import it.fadeout.services.StripeService;
 import it.fadeout.threads.DeleteProcessorWorker;
 import it.fadeout.threads.ForceLibraryUpdateWorker;
 import it.fadeout.threads.RedeployProcessorWorker;
@@ -1913,19 +1914,26 @@ public class ProcessorsResource  {
 			} 
 			else if (fOldOnDemandPrice != fNewOnDemandPrice) { // TODO: should we update those prices only if the showInStore == true? or in any case?
 				// the user updated the on-demand price of the app.
+				StripeService oStripeService = new StripeService();
 				
 				if (fOldOnDemandPrice > 0 && fNewOnDemandPrice == 0) {
-					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the app has been set for free. Removing the Stripe product");
+					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the app has been set for free. Archiving the Stripe product");
 
 				}
 				else if (fOldOnDemandPrice <= 0 && fNewOnDemandPrice > 0) {
-					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the app has been set for sale. Adding the Stripe product");
+					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: the app has been set for sale. Adding the Stripe product");
+					String sProductId = oStripeService.createProductAppWithOnDemandPrice(sSessionId, sProcessorId, fNewOnDemandPrice);
+					if (Utils.isNullOrEmpty(sProductId)) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id is null or emprt");
+					}
+					// TODO: we need to persist the product id
 
 				}
 				else if (fOldOnDemandPrice > 0 && fNewOnDemandPrice > 0 && fOldOnDemandPrice != fNewOnDemandPrice) {
 					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the price of the app changed. Updating the correspoding Stripe product");
+					// TODO: here we need to retrieve from the db the Stripe produc id of the processor.
+					String sProductId = ""; //TODO: add here the call to the db to retrieve the Stripe product id
 				}
-				
 				
 			}
 						

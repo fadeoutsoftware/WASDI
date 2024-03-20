@@ -393,6 +393,27 @@ public class StripeService {
 			return null;
 		}
 	}
+	
+	public String deactivateOnDemandPrice(String sProductId) {
+		if (Utils.isNullOrEmpty(sProductId)) {
+			WasdiLog.warnLog("StripeService.deactivateOnDemandPrice: product id is null or empty.");
+			return null;
+		}
+		
+		List<String> asOnDemandPrices = getActiveOnDemandPricesId(sProductId);
+		
+		if (asOnDemandPrices == null || asOnDemandPrices.size() == 0) {
+			WasdiLog.warnLog("StripeService.deactivateOnDemandPrice: no active prices found for product " + sProductId);
+			return null;
+		}
+		
+		if (asOnDemandPrices.size() > 1) {
+			WasdiLog.warnLog("StripeService.updateOnDemandPrice: more than one active prices found for product " + sProductId + ". Can not decide the one to deactivate");
+			return null;
+		}
+		
+		return deactivatePrice(asOnDemandPrices.get(0));
+	}
 
 	public String deactivatePrice(String sPriceId) {
 		if (Utils.isNullOrEmpty(sPriceId)) {
@@ -451,8 +472,32 @@ public class StripeService {
 		}
 
 	}
+	
+	public String updateOnDemandPrice(String sProductId, float fNewPrice) {
+		
+		if (Utils.isNullOrEmpty(sProductId)) {
+			WasdiLog.warnLog("StripeService.updateOnDemandPrice: product id is null or empty.");
+			return null;
+		}
+		
+		List<String> asOnDemandPrices = getActiveOnDemandPricesId(sProductId);
+		
+		if (asOnDemandPrices == null || asOnDemandPrices.size() == 0) {
+			WasdiLog.warnLog("StripeService.updateOnDemandPrice: no active prices found for product " + sProductId);
+			return null;
+		}
+		
+		if (asOnDemandPrices.size() > 1) {
+			WasdiLog.warnLog("StripeService.updateOnDemandPrice: more than one active prices found for product " + sProductId + ". Can not decide the one to update");
+			return null;
+		}
+		
+		return updateOnDemandPrice(sProductId, asOnDemandPrices.get(0), fNewPrice);
+		
+	}
 
 	public String updateOnDemandPrice(String sProductId, String sPriceId, float fNewPrice) {
+		// TODO: adjust this so that we retrieve directly here the priceId
 		if (Utils.isNullOrEmpty(sProductId)) {
 			WasdiLog.warnLog(
 					"StripeService.updateAppPrice: product id is null or empty. Impossible to update app price");
