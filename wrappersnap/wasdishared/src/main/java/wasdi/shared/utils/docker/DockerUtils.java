@@ -416,7 +416,7 @@ public class DockerUtils {
         	}
         	
         	// Delete the tar
-        	WasdiFileUtils.deleteFile(sTarFileOuput);
+        	//WasdiFileUtils.deleteFile(sTarFileOuput);
         	
         	if (oResponse.getResponseCode() != 200) {
         		WasdiLog.errorLog("There was an error in the post: message " + oResponse.getResponseBody());

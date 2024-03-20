@@ -277,7 +277,6 @@ public final class HttpUtils {
 			try (OutputStream oOutputStream = oConnection.getOutputStream()) {
 				InputStream oFileStream = FileUtils.openInputStream(oFile);
 				Util.copyStream(oFileStream, oOutputStream);
-				//oOutputStream.write(ayBytes);
 			}			
 
 			// Avoid log spam when we call local addresses

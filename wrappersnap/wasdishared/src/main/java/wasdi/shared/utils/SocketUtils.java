@@ -323,20 +323,21 @@ public class SocketUtils {
 		Request oRequest = oRequestBuilder.build();
 				
 		try (Response oResponse = oHttpClient.execute(oRequest)) {
+			
 			int iResponseCode = oResponse.getStatusCode();
 						
 			oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
 
 			// here we are not making a difference between a successful code or an error code. 
-			InputStream oInputStream = oResponse.getBody();
+			InputStream oResponseStream = oResponse.getBody();
 			
 			ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 						
-			if (oInputStream != null) {
-				Util.copyStream(oInputStream, oBytearrayOutputStream);
+			if (oResponseStream != null) {
+				Util.copyStream(oResponseStream, oBytearrayOutputStream);
 				sResult = oBytearrayOutputStream.toString();
 				oHttpCallResponse.setResponseBody(sResult);
-				oInputStream.close();
+				oResponseStream.close();
 			}
 						
 		} catch (Exception oEx) {
