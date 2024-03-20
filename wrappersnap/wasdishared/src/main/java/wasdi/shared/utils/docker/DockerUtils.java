@@ -399,7 +399,7 @@ public class DockerUtils {
     		WasdiLog.debugLog("DockerUtils.build: start build");
     		
         	// Finally make the call
-        	HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, FileUtils.readFileToByteArray(new File(sTarFileOuput)), asHeaders);
+        	HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, new File(sTarFileOuput), asHeaders);
         	
         	WasdiLog.debugLog("DockerUtils.build: build done");
         	

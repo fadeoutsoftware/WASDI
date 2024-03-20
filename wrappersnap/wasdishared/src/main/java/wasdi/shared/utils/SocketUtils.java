@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.io.Util;
 
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -276,6 +277,80 @@ public class SocketUtils {
 		return httpPost(sPath, sPayload.getBytes(), null, null);
 	}
 	
+	
+	public static HttpCallResponse httpPost(String sPath, File oFile, Map<String, String> asHeaders) {
+		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
+		
+		String sResult = null;
+		
+		if (Utils.isNullOrEmpty(sPath)) {
+			WasdiLog.errorLog("SocketUtils.httpPost: No Docker enpoint specified. Returning an empty result");
+			return oHttpCallResponse;
+		}
+		
+		DockerHttpClient oHttpClient = initializeDockerClient();
+		
+		if (oHttpClient == null) {
+			WasdiLog.errorLog("SocketUtils.httpPost. Docker HTTP client is null. Returning an empty response.");
+			return oHttpCallResponse;
+		}
+		
+		String sBaseAddress = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+		if (sBaseAddress.endsWith("/")) sBaseAddress = sBaseAddress.substring(0, sBaseAddress.length()-1);
+		sPath = sPath.substring(sBaseAddress.length());
+		
+		// WasdiLog.debugLog("SocketUtils.httpPost: computed path " + sPath);
+		
+		Request.Builder oRequestBuilder = Request.builder()
+			    .method(Request.Method.POST)
+			    .path(sPath);
+		
+		if (asHeaders != null && !asHeaders.isEmpty()) {
+			oRequestBuilder.headers(asHeaders);
+		}
+		
+		InputStream oFileInputStream = null;
+		
+		try {
+			oFileInputStream = FileUtils.openInputStream(oFile);
+		} catch (IOException e) {
+			WasdiLog.errorLog("SocketUtils.httpPost. Error providing the input stream. Returning an empty response.");
+			return oHttpCallResponse;
+		}
+		
+		oRequestBuilder = oRequestBuilder.body(oFileInputStream);
+		
+		Request oRequest = oRequestBuilder.build();
+				
+		try (Response oResponse = oHttpClient.execute(oRequest)) {
+			
+			int iResponseCode = oResponse.getStatusCode();
+						
+			oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
+
+			// here we are not making a difference between a successful code or an error code. 
+			InputStream oResponseStream = oResponse.getBody();
+			
+			ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+						
+			if (oResponseStream != null) {
+				Util.copyStream(oResponseStream, oBytearrayOutputStream);
+				sResult = oBytearrayOutputStream.toString();
+				oHttpCallResponse.setResponseBody(sResult);
+				oResponseStream.close();
+			}
+						
+		} catch (Exception oEx) {
+			WasdiLog.debugLog("SocketUtils.httpPost: Exception " + oEx.getMessage());
+		} finally {
+			try {
+				oHttpClient.close();
+			} catch (IOException oEx) {
+				WasdiLog.errorLog("SocketUtils.httpPost: Impossible to close the connection ", oEx);
+			}
+		}
+		return oHttpCallResponse;		
+	}
 	/**
 	 * @param sPath a path to an endpoint in the Docker Engine API (see: https://docs.docker.com/engine/api/v1.42/). Eg. "containers/json")
 	 * @param sDockerHostAddress unix socket address of the docker host

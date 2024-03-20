@@ -522,6 +522,10 @@ var WorkspaceController = (function () {
                         sDescription += "\n";
                         sDescription += oData.currentTime;
 
+                        if (utilsIsObjectNullOrUndefined(oData.currentPosition)) {
+                            return;
+                        }
+
                         var oActualPosition = oController.m_oGlobeService.drawPointWithImage(utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(oData.currentPosition), oActualSat.icon, sDescription, oActualSat.label, 32, 32);
                         oController.m_aoSatellitePositions.push(oActualPosition);
 
