@@ -29,7 +29,11 @@ services:
     depends_on:
 {% if bWasdiGeoserverEnabled == True %}
       {{ sWasdiGeoserverServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
       {{ sWasdiKeycloakServiceName }}:
@@ -41,7 +45,11 @@ services:
 {% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
       {{ sWasdiRabbitMqServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatOgcProcessesServerEnabled == True %}
       {{ sWasdiTomcatOgcProcessesServerServiceName }}:
@@ -108,7 +116,11 @@ services:
     depends_on:
 {% if bWasdiGeoserverEnabled == True %}
       {{ sWasdiGeoserverServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
       {{ sWasdiKeycloakServiceName }}:
@@ -120,7 +132,11 @@ services:
 {% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
       {{ sWasdiRabbitMqServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatOgcProcessesServerEnabled == True %}
       {{ sWasdiTomcatOgcProcessesServerServiceName }}:
@@ -196,6 +212,28 @@ services:
 {% for aoWasdiGeoserverCurrentEnvironmentVariable in aoWasdiGeoserverEnvironmentVariable %}
       - {{ aoWasdiGeoserverCurrentEnvironmentVariable['key'] }}={{ aoWasdiGeoserverCurrentEnvironmentVariable['value'] }}
 {% endfor %}
+{% endif %}
+{% if sEnvironmentName == "test" %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "curl"
+        - "--fail"
+        - "--head"
+        - "--max-time"
+        - "5"
+        - "--output"
+        - "/dev/null"
+        - "--silent"
+        - "--show-error"
+        - "--write-out"
+        - "HTTP CODE: %{http_code}\n"
+        - "http://127.0.0.1:{{ sWasdiGeoserverInternalPort }}/{{ sWasdiGeoserverDefaultContextPath.lstrip('/') }}/ows"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
 {% endif %}
     image: "{{ sWasdiGeoserverServiceName }}:latest"
     labels:
@@ -372,6 +410,7 @@ services:
       - {{ aoWasdiKeycloakCurrentEnvironmentVariable['key'] }}={{ aoWasdiKeycloakCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
+{% if sEnvironmentName == "test" %}
     healthcheck:
       test:
         - "CMD"
@@ -392,6 +431,7 @@ services:
       start_period: "2m"
       start_interval: "2s"
       timeout: "5s"
+{% endif %}
     image: "{{ sWasdiKeycloakServiceName }}:latest"
     labels:
       - "traefik.enable=true"
@@ -438,6 +478,21 @@ services:
 {% for aoWasdiMongoCurrentEnvironmentVariable in aoWasdiMongoEnvironmentVariable %}
       - {{ aoWasdiMongoCurrentEnvironmentVariable['key'] }}={{ aoWasdiMongoCurrentEnvironmentVariable['value'] }}
 {% endfor %}
+{% endif %}
+{% if sEnvironmentName == "test" %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "mongo"
+        - "--quiet"
+        - "127.0.0.1:{{ sWasdiMongoInternalPort }}/test"
+        - "--eval"
+        - "'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
 {% endif %}
     image: "{{ sWasdiMongoImageName }}:{{ sWasdiMongoVersion }}"
 {% if ( aWasdiMongoPorts | length ) > 0 %}
@@ -568,6 +623,7 @@ services:
       - {{ aoWasdiPostgresqlKeycloakCurrentEnvironmentVariable['key'] }}={{ aoWasdiPostgresqlKeycloakCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
+{% if sEnvironmentName == "test" %}
     healthcheck:
       test:
         - "CMD"
@@ -577,6 +633,7 @@ services:
       start_period: "2m"
       start_interval: "2s"
       timeout: "5s"
+{% endif %}
     image: "{{ sWasdiPostgresqlKeycloakImageName }}:{{ sWasdiPostgresqlKeycloakVersion }}"
 {% if ( aWasdiPostgresqlKeycloakPorts | length ) > 0 %}
     ports:
@@ -605,6 +662,7 @@ services:
       - {{ aoWasdiPostgresqlSonarqubeCurrentEnvironmentVariable['key'] }}={{ aoWasdiPostgresqlSonarqubeCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
+{% if sEnvironmentName == "test" %}
     healthcheck:
       test:
         - "CMD"
@@ -614,6 +672,7 @@ services:
       start_period: "2m"
       start_interval: "2s"
       timeout: "5s"
+{% endif %}
     image: "{{ sWasdiPostgresqlSonarqubeImageName }}:{{ sWasdiPostgresqlSonarqubeVersion }}"
 {% if ( aWasdiPostgresqlSonarqubePorts | length ) > 0 %}
     ports:
@@ -645,6 +704,19 @@ services:
 {% for aoWasdiRabbitMqCurrentEnvironmentVariable in aoWasdiRabbitMqEnvironmentVariable %}
       - {{ aoWasdiRabbitMqCurrentEnvironmentVariable['key'] }}={{ aoWasdiRabbitMqCurrentEnvironmentVariable['value'] }}
 {% endfor %}
+{% endif %}
+{% if sEnvironmentName == "test" %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "rabbitmq-diagnostics"
+        - "--quiet"
+        - "check_port_connectivity"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
 {% endif %}
     image: "{{ sWasdiRabbitMqServiceName }}:latest"
     labels:
@@ -700,7 +772,11 @@ services:
 {% if bWasdiMongoEnabled == True %}
     depends_on:
       {{ sWasdiMongoServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
 {% endif %}
     image: "{{ sWasdiSchedulerServiceName }}:latest"
     restart: "always"
@@ -771,11 +847,19 @@ services:
     depends_on:
 {% if bWasdiMongoEnabled == True %}
       {{ sWasdiMongoServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
       {{ sWasdiRabbitMqServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatOgcProcessesServerEnabled == True %}
       {{ sWasdiTomcatOgcProcessesServerServiceName }}:
@@ -832,7 +916,11 @@ services:
     depends_on:
 {% if bWasdiGeoserverEnabled == True %}
       {{ sWasdiGeoserverServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
       {{ sWasdiKeycloakServiceName }}:
@@ -842,11 +930,21 @@ services:
         condition: service_started
 {% endif %}
 {% endif %}
+{% if bWasdiMongoEnabled == True %}
       {{ sWasdiMongoServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
+{% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
       {{ sWasdiRabbitMqServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
 {% endif %}
       {{ sWasdiTraefikServiceName }}:
 {% if sEnvironmentName == "test" %}
@@ -860,6 +958,7 @@ services:
       - {{ aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable['key'] }}={{ aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
+{% if sEnvironmentName == "test" %}
     healthcheck:
       test:
         - "CMD"
@@ -880,6 +979,7 @@ services:
       start_period: "2m"
       start_interval: "2s"
       timeout: "5s"
+{% endif %}
     image: "{{ sWasdiTomcatOgcProcessesServerServiceName }}:latest"
     labels:
       - "traefik.enable=true"
@@ -915,7 +1015,11 @@ services:
     depends_on:
 {% if bWasdiGeoserverEnabled == True %}
       {{ sWasdiGeoserverServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
       {{ sWasdiKeycloakServiceName }}:
@@ -925,11 +1029,21 @@ services:
         condition: service_started
 {% endif %}
 {% endif %}
+{% if bWasdiMongoEnabled == True %}
       {{ sWasdiMongoServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
+{% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
       {{ sWasdiRabbitMqServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
 {% endif %}
       {{ sWasdiTraefikServiceName }}:
 {% if sEnvironmentName == "test" %}
@@ -943,6 +1057,7 @@ services:
       - {{ aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable['key'] }}={{ aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
+{% if sEnvironmentName == "test" %}
     healthcheck:
       test:
         - "CMD"
@@ -963,6 +1078,7 @@ services:
       start_period: "2m"
       start_interval: "2s"
       timeout: "5s"
+{% endif %}
     image: "{{ sWasdiTomcatWasdiOpenEoServerServiceName }}:latest"
     labels:
       - "traefik.enable=true"
@@ -998,7 +1114,11 @@ services:
     depends_on:
 {% if bWasdiGeoserverEnabled == True %}
       {{ sWasdiGeoserverServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
       {{ sWasdiKeycloakServiceName }}:
@@ -1008,11 +1128,21 @@ services:
         condition: service_started
 {% endif %}
 {% endif %}
+{% if bWasdiMongoEnabled == True %}
       {{ sWasdiMongoServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
+{% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
       {{ sWasdiRabbitMqServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
         condition: service_started
+{% endif %}
 {% endif %}
       {{ sWasdiTraefikServiceName }}:
 {% if sEnvironmentName == "test" %}
@@ -1026,6 +1156,7 @@ services:
       - {{ aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable['key'] }}={{ aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
+{% if sEnvironmentName == "test" %}
     healthcheck:
       test:
         - "CMD"
@@ -1046,6 +1177,7 @@ services:
       start_period: "2m"
       start_interval: "2s"
       timeout: "5s"
+{% endif %}
     image: "{{ sWasdiTomcatWasdiWebServerServiceName }}:latest"
     labels:
       - "traefik.enable=true"
