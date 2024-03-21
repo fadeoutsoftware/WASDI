@@ -28,24 +28,39 @@ services:
   {{ sWasdiClientServiceName }}:
     depends_on:
 {% if bWasdiGeoserverEnabled == True %}
-      - {{ sWasdiGeoserverServiceName }}
+      {{ sWasdiGeoserverServiceName }}:
+        condition: service_started
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
-      - {{ sWasdiKeycloakServiceName }}
+      {{ sWasdiKeycloakServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
-      - {{ sWasdiRabbitMqServiceName }}
+      {{ sWasdiRabbitMqServiceName }}:
+        condition: service_started
 {% endif %}
 {% if bWasdiTomcatOgcProcessesServerEnabled == True %}
-      - {{ sWasdiTomcatOgcProcessesServerServiceName }}
+      {{ sWasdiTomcatOgcProcessesServerServiceName }}:
+        condition: service_started
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
-      - {{ sWasdiTomcatWasdiOpenEoServerServiceName }}
+      {{ sWasdiTomcatWasdiOpenEoServerServiceName }}:
+        condition: service_started
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
-      - {{ sWasdiTomcatWasdiWebServerServiceName }}
+      {{ sWasdiTomcatWasdiWebServerServiceName }}:
+        condition: service_started
 {% endif %}
-      - {{ sWasdiTraefikServiceName }}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiClientEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiClientCurrentEnvironmentVariable in aoWasdiClientEnvironmentVariable %}
@@ -80,24 +95,39 @@ services:
   {{ sWasdiClientV2ServiceName }}:
     depends_on:
 {% if bWasdiGeoserverEnabled == True %}
-      - {{ sWasdiGeoserverServiceName }}
+      {{ sWasdiGeoserverServiceName }}:
+        condition: service_started
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
-      - {{ sWasdiKeycloakServiceName }}
+      {{ sWasdiKeycloakServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
-      - {{ sWasdiRabbitMqServiceName }}
+      {{ sWasdiRabbitMqServiceName }}:
+        condition: service_started
 {% endif %}
 {% if bWasdiTomcatOgcProcessesServerEnabled == True %}
-      - {{ sWasdiTomcatOgcProcessesServerServiceName }}
+      {{ sWasdiTomcatOgcProcessesServerServiceName }}:
+        condition: service_started
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
-      - {{ sWasdiTomcatWasdiOpenEoServerServiceName }}
+      {{ sWasdiTomcatWasdiOpenEoServerServiceName }}:
+        condition: service_started
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
-      - {{ sWasdiTomcatWasdiWebServerServiceName }}
+      {{ sWasdiTomcatWasdiWebServerServiceName }}:
+        condition: service_started
 {% endif %}
-      - {{ sWasdiTraefikServiceName }}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiClientV2EnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiClientV2CurrentEnvironmentVariable in aoWasdiClientV2EnvironmentVariable %}
@@ -131,7 +161,12 @@ services:
 {% if bWasdiGeoserverEnabled == True %}
   {{ sWasdiGeoserverServiceName }}:
     depends_on:
-      - {{ sWasdiTraefikServiceName }}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiGeoserverEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiGeoserverCurrentEnvironmentVariable in aoWasdiGeoserverEnvironmentVariable %}
@@ -168,7 +203,8 @@ services:
   {{ sWasdiGrafanaServiceName }}:
 {% if bWasdiInfluxDbGrafanaEnabled == True %}
     depends_on:
-      - {{ sWasdiInfluxDbGrafanaServiceName }}
+      {{ sWasdiInfluxDbGrafanaServiceName }}:
+        condition: service_started
 {% endif %}
 {% if ( aoWasdiGrafanaEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
@@ -297,7 +333,12 @@ services:
 {% endif %}
 {% if bWasdiPostgresqlKeycloakEnabled == True %}
     depends_on:
-      - {{ sWasdiPostgresqlKeycloakServiceName }}
+      {{ sWasdiPostgresqlKeycloakServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
     entrypoint:
       - {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/bin/kc.sh
@@ -307,6 +348,20 @@ services:
       - {{ aoWasdiKeycloakCurrentEnvironmentVariable['key'] }}={{ aoWasdiKeycloakCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "curl"
+        - "--head"
+        - "--fail"
+        - "--silent"
+        - "--show-error"
+        - "http://localhost:{{ sWasdiKeycloakInternalPort }}/{{ sWasdiKeycloakDefaultContextPath.lstrip('/') }}/health/ready"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
     image: "{{ sWasdiKeycloakServiceName }}:latest"
     labels:
       - "traefik.enable=true"
@@ -417,7 +472,12 @@ services:
 {% if bWasdiNexusEnabled == True %}
   {{ sWasdiNexusServiceName }}:
     depends_on:
-      - {{ sWasdiTraefikServiceName }}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiNexusEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiNexusCurrentEnvironmentVariable in aoWasdiNexusEnvironmentVariable %}
@@ -478,6 +538,15 @@ services:
       - {{ aoWasdiPostgresqlKeycloakCurrentEnvironmentVariable['key'] }}={{ aoWasdiPostgresqlKeycloakCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "pg_isready"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
     image: "{{ sWasdiPostgresqlKeycloakImageName }}:{{ sWasdiPostgresqlKeycloakVersion }}"
 {% if ( aWasdiPostgresqlKeycloakPorts | length ) > 0 %}
     ports:
@@ -506,6 +575,15 @@ services:
       - {{ aoWasdiPostgresqlSonarqubeCurrentEnvironmentVariable['key'] }}={{ aoWasdiPostgresqlSonarqubeCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "pg_isready"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
     image: "{{ sWasdiPostgresqlSonarqubeImageName }}:{{ sWasdiPostgresqlSonarqubeVersion }}"
 {% if ( aWasdiPostgresqlSonarqubePorts | length ) > 0 %}
     ports:
@@ -526,7 +604,12 @@ services:
 {% if bWasdiRabbitMqEnabled == True %}
   {{ sWasdiRabbitMqServiceName }}:
     depends_on:
-      - {{ sWasdiTraefikServiceName }}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiRabbitMqEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiRabbitMqCurrentEnvironmentVariable in aoWasdiRabbitMqEnvironmentVariable %}
@@ -586,7 +669,8 @@ services:
   {{ sWasdiSchedulerServiceName }}:
 {% if bWasdiMongoEnabled == True %}
     depends_on:
-      - {{ sWasdiMongoServiceName }}
+      {{ sWasdiMongoServiceName }}:
+        condition: service_started
 {% endif %}
     image: "{{ sWasdiSchedulerServiceName }}:latest"
     restart: "always"
@@ -603,9 +687,19 @@ services:
   {{ sWasdiSonarqubeServiceName }}:
     depends_on:
 {% if bWasdiPostgresqlSonarqubeEnabled == True %}
-      - {{ sWasdiPostgresqlSonarqubeServiceName }}
+      {{ sWasdiPostgresqlSonarqubeServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
 {% endif %}
-      - {{ sWasdiTraefikServiceName }}
+{% endif %}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiSonarqubeEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiSonarqubeCurrentEnvironmentVariable in aoWasdiSonarqubeEnvironmentVariable %}
@@ -646,19 +740,24 @@ services:
   {{ sWasdiTelegrafServiceName }}:
     depends_on:
 {% if bWasdiMongoEnabled == True %}
-      - {{ sWasdiMongoServiceName }}
+      {{ sWasdiMongoServiceName }}:
+        condition: service_started
 {% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
-      - {{ sWasdiRabbitMqServiceName }}
+      {{ sWasdiRabbitMqServiceName }}:
+        condition: service_started
 {% endif %}
 {% if bWasdiTomcatOgcProcessesServerEnabled == True %}
-      - {{ sWasdiTomcatOgcProcessesServerServiceName }}
+      {{ sWasdiTomcatOgcProcessesServerServiceName }}:
+        condition: service_started
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
-      - {{ sWasdiTomcatWasdiOpenEoServerServiceName }}
+      {{ sWasdiTomcatWasdiOpenEoServerServiceName }}:
+        condition: service_started
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
-      - {{ sWasdiTomcatWasdiWebServerServiceName }}
+      {{ sWasdiTomcatWasdiWebServerServiceName }}:
+        condition: service_started
 {% endif %}
 {% if ( aoWasdiTelegrafEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
@@ -690,16 +789,29 @@ services:
   {{ sWasdiTomcatOgcProcessesServerServiceName }}:
     depends_on:
 {% if bWasdiGeoserverEnabled == True %}
-      - {{ sWasdiGeoserverServiceName }}
+      {{ sWasdiGeoserverServiceName }}:
+        condition: service_started
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
-      - {{ sWasdiKeycloakServiceName }}
+      {{ sWasdiKeycloakServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
 {% endif %}
-      - {{ sWasdiMongoServiceName }}
+{% endif %}
+      {{ sWasdiMongoServiceName }}:
+        condition: service_started
 {% if bWasdiRabbitMqEnabled == True %}
-      - {{ sWasdiRabbitMqServiceName }}
+      {{ sWasdiRabbitMqServiceName }}:
+        condition: service_started
 {% endif %}
-      - {{ sWasdiTraefikServiceName }}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiTomcatOgcProcessesServerEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable in aoWasdiTomcatOgcProcessesServerEnvironmentVariable %}
@@ -740,16 +852,29 @@ services:
   {{ sWasdiTomcatWasdiOpenEoServerServiceName }}:
     depends_on:
 {% if bWasdiGeoserverEnabled == True %}
-      - {{ sWasdiGeoserverServiceName }}
+      {{ sWasdiGeoserverServiceName }}:
+        condition: service_started
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
-      - {{ sWasdiKeycloakServiceName }}
+      {{ sWasdiKeycloakServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
 {% endif %}
-      - {{ sWasdiMongoServiceName }}
+{% endif %}
+      {{ sWasdiMongoServiceName }}:
+        condition: service_started
 {% if bWasdiRabbitMqEnabled == True %}
-      - {{ sWasdiRabbitMqServiceName }}
+      {{ sWasdiRabbitMqServiceName }}:
+        condition: service_started
 {% endif %}
-      - {{ sWasdiTraefikServiceName }}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiTomcatWasdiOpenEoServerEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable in aoWasdiTomcatWasdiOpenEoServerEnvironmentVariable %}
@@ -790,16 +915,29 @@ services:
   {{ sWasdiTomcatWasdiWebServerServiceName }}:
     depends_on:
 {% if bWasdiGeoserverEnabled == True %}
-      - {{ sWasdiGeoserverServiceName }}
+      {{ sWasdiGeoserverServiceName }}:
+        condition: service_started
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
-      - {{ sWasdiKeycloakServiceName }}
+      {{ sWasdiKeycloakServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
 {% endif %}
-      - {{ sWasdiMongoServiceName }}
+{% endif %}
+      {{ sWasdiMongoServiceName }}:
+        condition: service_started
 {% if bWasdiRabbitMqEnabled == True %}
-      - {{ sWasdiRabbitMqServiceName }}
+      {{ sWasdiRabbitMqServiceName }}:
+        condition: service_started
 {% endif %}
-      - {{ sWasdiTraefikServiceName }}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiTomcatWasdiWebServerEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable in aoWasdiTomcatWasdiWebServerEnvironmentVariable %}
@@ -853,12 +991,28 @@ services:
       - "--log=true"
       - "--log.level=DEBUG"
       - "--log.format=common"
+{% if sEnvironmentName == "test" %}
+      - "--ping"
+{% endif %}
       - "--providers.docker=true"
       - "--providers.docker.endpoint={{ sWasdiTraefikDockerEndpoint }}"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.watch=true"
       - "--providers.file.directory=/etc/traefik/conf.d"
       - "--providers.file.watch=true"
+{% if sEnvironmentName == "test" %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "traefik"
+        - "healthcheck"
+        - "--ping"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
+{% endif %}
     image: "{{ sWasdiTraefikImageName }}:{{ sWasdiTraefikVersion }}"
     labels:
       - "traefik.enable=true"
@@ -899,10 +1053,16 @@ services:
   {{ sWasdiUpdateMetricServiceName }}:
     depends_on:
 {% if bWasdiKeycloakEnabled == True %}
-      - {{ sWasdiKeycloakServiceName }}
+      {{ sWasdiKeycloakServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
-      - {{ sWasdiTomcatWasdiWebServerServiceName }}
+      {{ sWasdiTomcatWasdiWebServerServiceName }}:
+        condition: service_started
 {% endif %}
 {% if ( aoWasdiUpdateMetricEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
