@@ -315,8 +315,7 @@ public class WasdiGraph {
 			
 			Product[] aoOutputs = oContext.getOutputProducts();
 			if (aoOutputs==null || aoOutputs.length==0)  {
-				m_oProcessWorkspaceLogger.log("No output created!!");
-				throw new Exception("No output created");
+				m_oProcessWorkspaceLogger.log("No output created by the Workflow");
 			}
 			
 			for (int iOutputs = 0; iOutputs<aoOutputs.length; iOutputs++) {
@@ -335,7 +334,17 @@ public class WasdiGraph {
 	            	sBbox = oDownloadedFile.getBoundingBox();
 	            }
 	            
-	            addProductToDb(oProduct, sBbox, aoOutputFiles.get(iOutputs));				
+	            if (iOutputs < aoOutputFiles.size()) {
+	            	addProductToDb(oProduct, sBbox, aoOutputFiles.get(iOutputs));
+	            }
+	            else {
+	            	File oFile = oProduct.getFileLocation();
+	            	if (oFile != null) {
+	            		WasdiLog.infoLog("WasdiGraph.execute: The output is not in the original list of outputs. Adding file " + oFile.getName());
+	            		addProductToDb(oProduct, sBbox, aoOutputFiles.get(iOutputs));
+	            	}
+	            	
+	            }
 			}
 			
 			try {
