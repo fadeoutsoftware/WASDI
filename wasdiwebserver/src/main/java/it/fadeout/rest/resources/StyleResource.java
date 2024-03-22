@@ -30,12 +30,15 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition.FormDataContentDispositionBuilder;
 
 import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.threads.styles.StyleDeleteFileWorker;
 import it.fadeout.threads.styles.StyleUpdateFileWorker;
+import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.Style;
 import wasdi.shared.business.users.ResourceTypes;
@@ -50,11 +53,14 @@ import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.styles.StyleSharingViewModel;
 import wasdi.shared.viewmodels.styles.StyleViewModel;
@@ -155,6 +161,8 @@ public class StyleResource {
 			//geoserver-side work
 			geoServerAddStyle(oStyleSldFile.getPath());
 			
+			updateStylePreview(sName, sSessionId);
+						
 			oResult.setBoolValue(true);
 			return Response.ok().entity(oResult).build();
 			
@@ -302,6 +310,8 @@ public class StyleResource {
 
 			//geoserver-side work
 			geoServerUpdateStyleIfExists(oStyle.getName(), oStyleSldFile.getPath());
+			
+			updateStylePreview(oStyle.getName(), sSessionId);
 		} catch (Exception oEx2) {
 			WasdiLog.errorLog("StyleResource.updateFile: " + oEx2);
 			return Response.serverError().build();
@@ -1150,5 +1160,21 @@ public class StyleResource {
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("StyleResource.computationalNodesDeleteStyle: error starting UpdateWorker " + oEx.getMessage());
 		}
-	}	
+	}
+	
+	protected void updateStylePreview(String sName, String sSessionId) {
+		
+		// Now try to get the preview			
+		HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(WasdiConfig.Current.geoserver.address + "/wms?request=GetLegendGraphic&STYLE=" + sName + "&format=image/png&WIDTH=12&HEIGHT=12&LAYER=" + WasdiConfig.Current.geoserver.defaultLayerToGetStyleImages + "&legend_options=fontAntiAliasing:true;fontSize:10&LEGEND_OPTIONS=forceRule:True");
+
+		if (oHttpCallResponse.getResponseCode()==200) {
+			ByteArrayInputStream oByteArrayInputStream = new ByteArrayInputStream(oHttpCallResponse.getResponseBytes());
+			ImagesResource oImagesResource = new ImagesResource();
+			
+			String sImageName = sName + ".png";
+			FormDataContentDispositionBuilder oFormDataContentDispositionBuilder = FormDataContentDisposition.name(sImageName);
+			
+			oImagesResource.uploadImage(oByteArrayInputStream, oFormDataContentDispositionBuilder.build(), sSessionId, ImagesCollections.STYLES.getFolder(), "", sImageName, true, true);
+		}	
+	}
 }

@@ -41,4 +41,6 @@ public class GeoServerConfig {
 	 * This allows to debug a publish band from a parameter taken from the server
 	 */
 	public boolean localDebugPublisBand = false;
+	
+	public String defaultLayerToGetStyleImages = "wasdi:ESA_CCI_LAND_COVER_2015";
 }

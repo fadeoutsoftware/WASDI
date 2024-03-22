@@ -226,7 +226,7 @@ public class Wasdi extends ResourceConfig {
 				
 				WasdiLog.debugLog("Workspace " + Wasdi.s_sLocalWorkspaceName + " created");
 			}
-			
+						
 		}
 		catch (Throwable oEx) {
 			WasdiLog.errorLog("Local Workspace Configuration Exception " + oEx.toString());
