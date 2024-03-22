@@ -31,8 +31,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition.FormDataContentDispositionBuilder;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
@@ -57,7 +57,6 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
@@ -1162,19 +1161,30 @@ public class StyleResource {
 		}
 	}
 	
+	/**
+	 * Create the style preview from geoserver and uploads it in the WASDI images collection
+	 * @param sName Style Name
+	 * @param sSessionId User Session Id
+	 */
 	protected void updateStylePreview(String sName, String sSessionId) {
 		
-		// Now try to get the preview			
-		HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(WasdiConfig.Current.geoserver.address + "/wms?request=GetLegendGraphic&STYLE=" + sName + "&format=image/png&WIDTH=12&HEIGHT=12&LAYER=" + WasdiConfig.Current.geoserver.defaultLayerToGetStyleImages + "&legend_options=fontAntiAliasing:true;fontSize:10&LEGEND_OPTIONS=forceRule:True");
-
-		if (oHttpCallResponse.getResponseCode()==200) {
-			ByteArrayInputStream oByteArrayInputStream = new ByteArrayInputStream(oHttpCallResponse.getResponseBytes());
-			ImagesResource oImagesResource = new ImagesResource();
-			
-			String sImageName = sName + ".png";
-			FormDataContentDispositionBuilder oFormDataContentDispositionBuilder = FormDataContentDisposition.name(sImageName);
-			
-			oImagesResource.uploadImage(oByteArrayInputStream, oFormDataContentDispositionBuilder.build(), sSessionId, ImagesCollections.STYLES.getFolder(), "", sImageName, true, true);
-		}	
+		try {		
+			// Now try to get the preview			
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(WasdiConfig.Current.geoserver.address + "/wms?request=GetLegendGraphic&STYLE=" + sName + "&format=image/png&WIDTH=12&HEIGHT=12&LAYER=" + WasdiConfig.Current.geoserver.defaultLayerToGetStyleImages + "&legend_options=fontAntiAliasing:true;fontSize:10&LEGEND_OPTIONS=forceRule:True");
+	
+			if (oHttpCallResponse.getResponseCode()==200) {
+				ByteArrayInputStream oByteArrayInputStream = new ByteArrayInputStream(oHttpCallResponse.getResponseBytes());
+				ImagesResource oImagesResource = new ImagesResource();
+				
+				String sImageName = sName + ".png";
+				FormDataContentDispositionBuilder oFormDataContentDispositionBuilder = FormDataContentDisposition.name(sImageName);
+				
+				
+				oImagesResource.uploadImage(oByteArrayInputStream, oFormDataContentDispositionBuilder.fileName(sImageName).build(), sSessionId, ImagesCollections.STYLES.getFolder(), "", sImageName, true, true);
+			}
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("StyleResource.computationalNodesDeleteStyle: error starting UpdateWorker " + oEx.getMessage());
+		}
+		
 	}
 }
