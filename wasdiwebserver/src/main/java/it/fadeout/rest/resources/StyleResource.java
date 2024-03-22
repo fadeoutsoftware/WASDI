@@ -451,7 +451,7 @@ public class StyleResource {
 	 */
 	protected String getStyleImageLink(String sImageName, String sSessionId) {
 		//https://test.wasdi.net/wasdiwebserver/rest/images/get?collection=processors&folder=hellowasdi&name=logo.jpg&token=32f32b02-7c34-41e8-9990-ef003031a4ed
-		String sImageLink = WasdiConfig.Current.baseUrl+"images/get?collection=" + ImagesCollections.STYLES.getFolder()+"&name=" + sImageName + "token="+sSessionId;
+		String sImageLink = WasdiConfig.Current.baseUrl+"images/get?collection=" + ImagesCollections.STYLES.getFolder()+"&name=" + sImageName + "&token="+sSessionId;
 		return sImageLink;
 	}
 
