@@ -442,6 +442,18 @@ public class StyleResource {
 
 		return Response.ok().build();
 	}
+	
+	/**
+	 * Get the link to access the style image
+	 * @param sImageName
+	 * @param sSessionId
+	 * @return
+	 */
+	protected String getStyleImageLink(String sImageName, String sSessionId) {
+		//https://test.wasdi.net/wasdiwebserver/rest/images/get?collection=processors&folder=hellowasdi&name=logo.jpg&token=32f32b02-7c34-41e8-9990-ef003031a4ed
+		String sImageLink = WasdiConfig.Current.baseUrl+"images/get?collection=" + ImagesCollections.STYLES.getFolder()+"&name=" + sImageName + "token="+sSessionId;
+		return sImageLink;
+	}
 
 	@GET
 	@Path("/getbyuser")
@@ -462,6 +474,9 @@ public class StyleResource {
 		List<StyleViewModel> aoRetStyles = new ArrayList<>();
 
 		try {
+			
+			ImagesResource oImageResource = new ImagesResource();
+			
 			// Here we take the list of all the users' styles + the public ones
 			List<Style> aoDbStyles = oStyleRepository.getStylePublicAndByUser(sUserId);
 			
@@ -478,6 +493,14 @@ public class StyleResource {
 				else {
 					// For now lets assume is read only
 					oStyleViewModel.setReadOnly(true);
+				}
+				
+				String sImageName = oStyleViewModel.getName() + ".png";
+				
+				Response oResponse = oImageResource.existsImage(sSessionId, sSessionId, ImagesCollections.STYLES.getFolder(), "", sImageName);
+				
+				if (oResponse.getStatus() == 200) {
+					oStyleViewModel.setImgLink(getStyleImageLink(sImageName, sSessionId));					
 				}
 				
 				aoRetStyles.add(oStyleViewModel);
@@ -499,7 +522,12 @@ public class StyleResource {
 					oStyleViewModel.setSharedWithMe(true);
 					// Keep if read only or not
 					oStyleViewModel.setReadOnly(!oSharing.canWrite());
+					
+					String sImageName = oStyleViewModel.getName() + ".png";
+					getStyleImageLink(sImageName, sSessionId);
+					
 					aoRetStyles.add(oStyleViewModel);
+					
 				} 
 				else {
 					// This is shared but public, so this must be already in our return list
