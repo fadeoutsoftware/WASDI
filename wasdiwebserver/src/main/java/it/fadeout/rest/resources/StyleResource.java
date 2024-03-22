@@ -524,7 +524,12 @@ public class StyleResource {
 					oStyleViewModel.setReadOnly(!oSharing.canWrite());
 					
 					String sImageName = oStyleViewModel.getName() + ".png";
-					getStyleImageLink(sImageName, sSessionId);
+					
+					Response oResponse = oImageResource.existsImage(sSessionId, sSessionId, ImagesCollections.STYLES.getFolder(), "", sImageName);
+					
+					if (oResponse.getStatus() == 200) {
+						oStyleViewModel.setImgLink(getStyleImageLink(sImageName, sSessionId));					
+					}
 					
 					aoRetStyles.add(oStyleViewModel);
 					
