@@ -119,15 +119,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: super class deploy returned false. So we stop here.");
 			return false;
 		}
-								
-		// Here we save the address of the image
-		String sPushedImageAddress = pushImageInRegisters(oProcessor);
-		
-		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
-			WasdiLog.infoLog("DockerBuildOnceEngine.redeploy: we got an empty address of the pushed image");
-			return false;
-		}
-		
+				
 		try {
 			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: try to clean old images. Last valid version is " + sNewVersion);
 			
@@ -142,6 +134,14 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		catch (Exception oEx) {
 			WasdiLog.errorLog("DockerBuildOnceEngine.run error searching old versions: ", oEx);
 		}
+		
+		// Here we save the address of the image
+		String sPushedImageAddress = pushImageInRegisters(oProcessor);
+		
+		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
+			WasdiLog.infoLog("DockerBuildOnceEngine.redeploy: we got an empty address of the pushed image");
+			return false;
+		}		
 		
         return true;
 	}
