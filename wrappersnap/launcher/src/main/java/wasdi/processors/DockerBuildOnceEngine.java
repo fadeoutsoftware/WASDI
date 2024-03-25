@@ -119,6 +119,9 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: super class deploy returned false. So we stop here.");
 			return false;
 		}
+		else {
+			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: super class deploy returned true lets proceed to clean and push");
+		}
 				
 		try {
 			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: try to clean old images. Last valid version is " + sNewVersion);
