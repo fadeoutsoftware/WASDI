@@ -515,4 +515,74 @@ public class ImagesResource {
 			return oResponse;
 		}
 	}
+	
+	/**
+	 * Gets an image as a Byte Stream
+	 * @param sSessionId User Session Id
+	 * @param sCollection Processor Id
+	 * @return Logo byte stream
+	 */
+	@GET
+	@Path("/exists")
+	public Response existsImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName) {
+		
+		try {
+			
+			// Check session
+			if( Utils.isNullOrEmpty(sSessionId) == false) {
+				sTokenSessionId = sSessionId;
+			}
+
+			WasdiLog.debugLog("ImagesResource.existsImage( collection: " + sCollection + " sImageName: " + sImageName +")");
+			
+			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
+
+			if (oUser==null) {
+				WasdiLog.warnLog("ImagesResource.existsImage: no valid user or session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			if (!ImageResourceUtils.isValidCollection(sCollection)) {
+				WasdiLog.warnLog("ImagesResource.existsImage: invalid collection");
+				return Response.status(Status.BAD_REQUEST).build();			
+			}
+			
+			if(Utils.isNullOrEmpty(sImageName)) {
+				WasdiLog.warnLog("ImagesResource.existsImage: Image name is null" );
+				return Response.status(Status.BAD_REQUEST).build();
+			}			
+			
+			if (!PermissionsUtils.canUserAccessImage(oUser.getUserId(), sCollection, sFolder, sImageName)) {
+				WasdiLog.warnLog("ImagesResource.existsImage: invalid user or session");
+				return Response.status(Status.FORBIDDEN).build();				
+			}			
+			
+			if (sFolder==null) sFolder="";
+			
+			//sanity check: are the inputs safe? It must be a file name, not a path
+			if(sImageName.contains("/") || sImageName.contains("\\") || sCollection.contains("/") || sCollection.contains("\\")|| sFolder.contains("/") || sFolder.contains("\\")) {
+				WasdiLog.warnLog("ImagesResource.existsImage: Image or Collection name looks like a path" );
+				return Response.status(Status.BAD_REQUEST).build();
+			}			
+					
+			String sPathLogoFolder = ImageResourceUtils.getImagesSubPath(sCollection, sFolder);
+			String sAbsolutePath = sPathLogoFolder + sImageName;
+			
+			WasdiLog.debugLog("ImagesResource.existsImage: sAbsolutePath " + sAbsolutePath);
+			
+			File oImage = new File(sAbsolutePath);
+			
+			//Check the logo and extension
+			if(oImage.exists() == false){
+				WasdiLog.warnLog("ImagesResource.existsImage: unable to find image in " + sAbsolutePath);
+				return Response.status(Status.NOT_FOUND).build();
+			}
+			
+		    return Response.ok().build();
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ImagesResource.existsImage: exception " + oEx.toString());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}		
 }
