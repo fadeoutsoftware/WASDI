@@ -23,7 +23,6 @@ import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
@@ -229,7 +228,7 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		}
 		
 		// add pagination
-		sSearchUrl += "&page_size=" + iLimit + "&page_num" + (iOffset + 1);
+		sSearchUrl += "&page_size=" + iLimit + "&page_num=" + (iOffset + 1);
 		
 		HttpCallResponse oHttpResponse = HttpUtils.httpGet(sSearchUrl);
 		
@@ -238,6 +237,8 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		if (iResponseCode >= 200 && iResponseCode <= 299) {
 			String sResponseBody = oHttpResponse.getResponseBody();
 			System.out.println(sResponseBody);
+			List<QueryResultViewModel> oResultList = this.m_oResponseTranslator.translateBatch(sResponseBody, bFullViewModel);
+			return oResultList;
 			
 		} else {
 			WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Error contacting the data privider " + iResponseCode);
@@ -290,7 +291,13 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		QueryExecutorLpDaac oQe = new QueryExecutorLpDaac();
 		String sWasdiQuery = "( footprint:\"intersects(POLYGON((-9.836481781581519 25.92643140728654,-9.836481781581519 34.56809749857311,0.8819874344851143 34.56809749857311,0.8819874344851143 25.92643140728654,-9.836481781581519 25.92643140728654)))\" ) AND ( beginPosition:[2020-02-01T00:00:00.000Z TO 2020-12-31T23:59:59.999Z] AND endPosition:[2020-02-01T00:00:00.000Z TO 2020-12-31T23:59:59.999Z] ) AND   (platformname:TERRA AND producttype:MOD11A2)";
 		PaginatedQuery oQuery = new PaginatedQuery(sWasdiQuery, "0", "10", null, null);
-		oQe.executeAndRetrieve(oQuery);
+		List<QueryResultViewModel> oList = oQe.executeAndRetrieve(oQuery);
+		System.out.println(oList.get(0).getTitle());
+		System.out.println(oList.get(0).getLink());
+		System.out.println(oList.get(0).getFootprint());
+		System.out.println(oList.get(0).getSummary());
+		System.out.println(oList.get(0).getId());
+		
 	}
 
 }

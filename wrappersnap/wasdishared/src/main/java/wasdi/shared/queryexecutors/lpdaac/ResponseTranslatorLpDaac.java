@@ -4,6 +4,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.business.modis11a2.ModisItemForReading;
@@ -34,7 +39,37 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 
 	@Override
 	public List<QueryResultViewModel> translateBatch(String sResponse, boolean bFullViewModel) {
-		return null;
+		List<QueryResultViewModel> oResultsList = new ArrayList<>();
+		JSONObject oJsonHttpResponse = new JSONObject(sResponse);
+		
+		JSONObject oJsonFeed = oJsonHttpResponse.optJSONObject("feed");
+		
+		if (oJsonFeed == null) {
+			WasdiLog.warnLog("ResponseTranslatorLpDaac.translateBatch: no 'feed' element found in the response");
+			return null;
+		}
+		
+		JSONArray oJsonEntries = oJsonFeed.optJSONArray("entry");
+		
+		if (oJsonEntries == null) {
+			WasdiLog.warnLog("ResponseTranslatorLpDaac.translateBatch: no 'entry' element found in the response");
+			return null;
+		}
+		
+		JSONObject oJsonModisEntry = null;
+		for (int i = 0; i < oJsonEntries.length(); i++) {
+			try {
+				oJsonModisEntry = oJsonEntries.getJSONObject(i);
+				QueryResultViewModel oResViewModel = translate(oJsonModisEntry);
+				if (oResViewModel != null) 
+					oResultsList.add(oResViewModel);
+				else 
+					WasdiLog.warnLog("ResponseTranslatorLpDaac.translateBatch: failed to translate one of the entries");
+			} catch(Exception oEx) {
+				WasdiLog.errorLog("ResponseTranslatorLpDaac.translateBatch: error reading the json entry ", oEx);
+			}
+		}
+		return oResultsList;
 	}
 
 	@Override
@@ -42,6 +77,84 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		return 0;
 	}
 	
+	
+	public QueryResultViewModel translate(JSONObject oJsonEntry) {
+		
+		if (oJsonEntry == null) {
+			WasdiLog.debugLog("ResponseTranslatorLpDaac.translate: json item is null");
+			return null;
+		}
+		
+		QueryResultViewModel oResult = new QueryResultViewModel();
+		oResult.setProvider("LPDAAC");		
+		
+		//id
+		String sId = oJsonEntry.optString("id");
+		if (Utils.isNullOrEmpty(sId)) {
+			WasdiLog.errorLog("ResponseTranslatorLpDaac.translate: no id found for the product. It will be impossible to download it");
+			return null;
+		} else {
+			oResult.setId(sId);
+		}
+		
+		// title
+		String sTitle = oJsonEntry.optString("title");
+		if (Utils.isNullOrEmpty(sTitle)) {
+			WasdiLog.errorLog("ResponseTranslatorLpDaac.translate: no title found for the product. It will be impossible to download it");
+			return null;
+		} else {
+			oResult.setTitle(sTitle);
+		}
+		
+		// footprint
+		JSONArray oPolygons = oJsonEntry.optJSONArray("polygons");
+		JSONArray oFirstPolygon =null;
+		
+		if (oPolygons.length() > 0) {
+			oFirstPolygon = oPolygons.optJSONArray(0);
+		}
+		
+		if (oFirstPolygon == null) {
+			WasdiLog.warnLog("ResponseTranslatorLpDaac.translate: impossible to read the bounding box");
+			return null;
+		}
+		
+		List<String> asPolygons = new ArrayList<>();
+		for (int i = 0; i < oFirstPolygon.length(); i++) {
+			String sPolygon = oFirstPolygon.getString(i);
+			// the polygon returned by earth data has the following form: ["lat1 long1 lat2 long2 lat3 long3 lat4 long4 lat1 long1"]
+			String[] asCoordinates = sPolygon.split(" ");
+			int iIndex = 0;
+			String sWKTCoordinates = "";
+			while (iIndex < asCoordinates.length-1) {
+				try {
+					String sLatitude = asCoordinates[iIndex];
+					String sLongitude = asCoordinates[iIndex + 1];
+					if (!Utils.isNullOrEmpty(sWKTCoordinates))
+						sWKTCoordinates += ", ";
+					sWKTCoordinates += sLongitude + " " + sLatitude;
+				} catch (IndexOutOfBoundsException oEx) {
+					WasdiLog.errorLog("ResponseTranslatorLpDaac.translate: index not valid when reading the footprint", oEx);
+					return null;
+				}
+				iIndex += 2;
+			}
+			asPolygons.add("(" + sWKTCoordinates + ")");
+		}
+		String sFootprint = "POLYGON(" + String.join(", ", asPolygons) + ")";
+		oResult.setFootprint(sFootprint);
+		
+		// properties
+		addProperties(oJsonEntry, sTitle, oResult);
+		
+		// link
+		addLink(oResult);
+		
+		// summary
+		addSummary(oResult);
+		
+		return oResult;
+	}
 	
 	public QueryResultViewModel translate(ModisItemForReading oItem) {
 		Preconditions.checkNotNull(oItem, "ResponseTranslatorModis.translate: null object");
@@ -109,6 +222,98 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 			String sFootPrint = oFootPrint.toString();
 			oResult.setFootprint(sFootPrint);
 		}
+	}
+	
+	private void addProperties(JSONObject oJsonItem, String sTitle, QueryResultViewModel oResult) {
+		
+		if (oJsonItem == null || oResult == null) {
+			WasdiLog.warnLog("ResponseTranslatorLpDaac.addProperties. Entry or result view model are null. Properties won't be added");
+			return;
+		}
+		
+		oResult.getProperties().put(STITLE, sTitle);
+		
+		
+		long lSizeByte = -1;
+		try {
+			String sSize = oJsonItem.optString("granule_size", null);
+			
+			if (!Utils.isNullOrEmpty(sSize)) {
+				lSizeByte = (long) Double.parseDouble(sSize) * 1000;
+				String sNormalizedSize = lSizeByte > 0 ? Utils.getNormalizedSize((double) lSizeByte) : "";
+				oResult.getProperties().put(SSIZE_IN_BYTES, "" + lSizeByte);
+				oResult.getProperties().put(SSIZE, sNormalizedSize);
+			} else {
+				WasdiLog.warnLog("ResponseTranslatorLpDaac.addProperties. No information about product size");
+			}
+		} catch (JSONException oEx) {
+			WasdiLog.warnLog("ResponseTranslatorLpDaac.addProperties. Could not retrieve granule size");
+		}
+
+
+		oResult.setPreview(null);
+
+		String sStartDate = oJsonItem.optString("time_start", null);
+		if (!Utils.isNullOrEmpty(sStartDate)) {
+			oResult.getProperties().put(SDATE, sStartDate);
+			oResult.getProperties().put("startDate", sStartDate);
+			oResult.getProperties().put("beginposition", sStartDate);
+		}
+		
+		JSONArray oLinks = oJsonItem.optJSONArray("links");
+		if (oLinks == null) {
+			WasdiLog.warnLog("ResponseTranslatorLpDaac.addProperties. Arrays of links not found. It won't be possible to download the prouct");
+			return;
+		}
+		
+		String sLink = null;
+		for (int i = 0; i < oLinks.length(); i++) {
+			JSONObject oLinkItem = oLinks.getJSONObject(i);
+			String sHref = oLinkItem.optString("href", null);
+			String sRel = oLinkItem.optString("rel", null);
+			if (!Utils.isNullOrEmpty(sHref) 
+					&& !Utils.isNullOrEmpty(sRel) 
+					&& sHref.startsWith("https://e4ftl01.cr.usgs.gov") 
+					&& sRel.equals("http://esipfed.org/ns/fedsearch/1.1/data#")) {
+				if (sTitle.startsWith("MOD11A2") && (sHref.endsWith("MOD11A2.061/") || sHref.endsWith("MOD11A2.061"))) {
+					// let's build back the url
+					// we first add the start date
+					if (!sHref.endsWith("/"))
+						sHref += "/";
+					
+					String sDateFolder = sStartDate.substring(0, 10).replace("-", ".");
+					sHref += sDateFolder + "/" + sTitle + ".hdf";
+					sLink = sHref;
+					break;
+				}
+			}
+		} 
+		
+		if (sLink == null) {
+			WasdiLog.warnLog("ResponseTranslatorLpDaac.addProperties. Link is null. It won't be possible to download the prouct");
+			return;
+		}
+		
+		oResult.getProperties().put(SHREF, sLink);
+		
+		
+		if (sTitle.startsWith("MOD11A2")) {
+			oResult.getProperties().put(SPLATFORM, "Terra");
+			oResult.getProperties().put("platformname", "Terra");
+
+			oResult.getProperties().put((SSENSOR_MODE), "MODIS");
+			oResult.getProperties().put("sensoroperationalmode", "MODIS");
+
+			oResult.getProperties().put(SINSTRUMENT, "MODIS");
+			oResult.getProperties().put("instrumentshortname", "MODIS");
+
+		}
+
+		String sDayNightFlag = oJsonItem.optString("day_night_flag", null);
+		if (!Utils.isNullOrEmpty(sDayNightFlag)) {
+			oResult.getProperties().put("polarisationmode", sDayNightFlag);
+		}
+
 	}
 	
 	/**
