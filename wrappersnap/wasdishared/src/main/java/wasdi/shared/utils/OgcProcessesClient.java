@@ -200,8 +200,6 @@ public class OgcProcessesClient {
 			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, m_asHeaders, null, aoOuputHeaders); 
 			String sResponse = oHttpCallResponse.getResponseBody();
 			
-			boolean bFoundJobId = false;
-			
 			if (Utils.isNullOrEmpty(sResponse)) {
 				
 				WasdiLog.debugLog("OgcProcessesClient.executProcess: empty response, search Job Id in headers");

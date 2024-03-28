@@ -1,0 +1,186 @@
+#!/bin/bash
+
+function trim() {
+    local sValue="${1}"
+
+    echo "${sValue}" | sed --expression 's/^[[:space:]]*//'
+    return 0
+}
+
+function addOrUpdateLine() {
+    local sFile="${1}"
+    local sLineReference="${2}"
+
+    # 'after' or 'before'
+    local sLineReferenceDirection="${3,,}"
+
+    local sLineToSearch="${4}"
+    local sLineToAddOrUpdate="${5}"
+    local iIndentation="${6}"
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '${sFile}' exists"
+
+    if [[ -f "${sFile}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the file does not exist"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '\${sLineReferenceDirection}' is properly filled"
+
+    if [[ -n "${sLineReferenceDirection}" ]] && [[ "${sLineReferenceDirection}" == "before" || "${sLineReferenceDirection}" == "after" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the variable is not filled"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '\${sLineToSearch}' is filled"
+
+    if [[ -n "${sLineToSearch}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the variable is not filled"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Check if '\${sLineToAddOrUpdate}' is filled"
+
+    if [[ -n "${sLineToAddOrUpdate}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] ERROR: the variable is not filled"
+        return 1
+    fi
+
+    echo "[ENTRYPOINT] [${FUNCNAME}] Search if the line '${sLineToSearch}' exists"
+    iPositionLineWeSearch=$(grep --line-number "${sLineToSearch}" ${sFile} | cut --delimiter ':' --fields '1')
+
+    if [[ -n "${iPositionLineWeSearch}" ]]
+    then
+        echo "[ENTRYPOINT] [${FUNCNAME}] The line exists: we will try to update it"
+        echo "[ENTRYPOINT] [${FUNCNAME}] Update the line"
+        sed --in-place "s/${sLineToSearch//\//\\/}/${sLineToAddOrUpdate//\//\\/}/g" ${sFile}
+
+        if [[ ${?} -eq 0 ]]
+        then
+            echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+        else
+            echo "[ENTRYPOINT] [${FUNCNAME}] ERROR"
+        fi
+    else
+        echo "[ENTRYPOINT] [${FUNCNAME}] The line does not exist: we will try to insert it"
+        echo "[ENTRYPOINT] [${FUNCNAME}] We requested an insertion ${sLineReferenceDirection} the line '${sLineReference}': search if the line exists"
+        iPositionLineReference=$(grep --line-number "${sLineReference}" ${sFile} | cut --delimiter ':' --fields '1')
+
+        if [[ -n "${iPositionLineReference}" ]]
+        then
+            echo "[ENTRYPOINT] [${FUNCNAME}] OK: the line exists"
+            sSpace="$(generateSpace ${iIndentation})"
+
+            if [[ "${sLineReferenceDirection}" == "after" ]]
+            then
+                iPositionInsertion=$(( ${iPositionLineReference} + 1 ))
+            else
+                iPositionInsertion=${iPositionLineReference}
+            fi
+
+            echo "[ENTRYPOINT] [${FUNCNAME}] Insert the line '${sLineToAddOrUpdate}'"
+            sed --in-place "${iPositionInsertion}i \ ${sSpace}${sLineToAddOrUpdate//\//\\/}" ${sFile}
+
+            if [[ ${?} -eq 0 ]]
+            then
+                echo "[ENTRYPOINT] [${FUNCNAME}] OK"
+            else
+                echo "[ENTRYPOINT] [${FUNCNAME}] ERROR"
+            fi
+        else
+            return 1
+        fi
+    fi
+
+    return 0
+}
+
+function generateSpace() {
+    local sNumber="${1}"
+    local sCounter=0
+    local sSpace=""
+
+    while [[ ${sCounter} -lt ${sNumber} ]]
+    do
+        sSpace="${sSpace} "
+        sCounter=$(( ${sCounter} + 1 ))
+    done
+
+    echo "${sSpace}"
+}
+
+
+
+
+# Initialize variables
+RABBITMQ_CONFIGURATION_DIRECTORY="$(trim "${RABBITMQ_CONFIGURATION_DIRECTORY}")"
+RABBITMQ_PLUGINS="$(trim "${RABBITMQ_PLUGINS}")"
+
+sRabbitMqConfigurationDirectory="${RABBITMQ_CONFIGURATION_DIRECTORY}"
+sRabbitMqMainConfigurationFile="${sRabbitMqConfigurationDirectory}/rabbitmq.conf"
+sRabbitMqEnabledPluginConfigurationFile="${sRabbitMqConfigurationDirectory}/enabled_plugins"
+
+
+# Dynamic configuration
+if [[ -z "${RABBITMQ_CONFIGURATION_DIRECTORY}" ]]
+then
+    echo "[ENTRYPOINT] \${RABBITMQ_CONFIGURATION_DIRECTORY} is empty: we do not configure RabbitMQ"
+else
+    # Update main port
+    if [[ -n "${RABBITMQ_NODE_PORT}" ]]
+    then
+        addOrUpdateLine \
+            "${sRabbitMqMainConfigurationFile}" \
+            "listeners.tcp.default.*=.*" \
+            "after" \
+            "listeners.tcp.default.*=.*" \
+            "listeners.tcp.default = ${RABBITMQ_NODE_PORT}" \
+            0
+    fi
+
+
+    # Update web stomp port
+    if [[ -n "${RABBITMQ_WEB_STOMP_PORT}" ]]
+    then
+        addOrUpdateLine \
+            "${sRabbitMqMainConfigurationFile}" \
+            "web_stomp.tcp.port.*=.*" \
+            "after" \
+            "web_stomp.tcp.port.*=.*" \
+            "web_stomp.tcp.port = ${RABBITMQ_WEB_STOMP_PORT}" \
+            0
+    fi
+
+
+    # Update plugins enabled
+    if [[ -n "${RABBITMQ_PLUGINS}" && -n "${sRabbitMqEnabledPluginConfigurationFile}" ]]
+    then
+        echo "[" > ${sRabbitMqEnabledPluginConfigurationFile}
+
+        echo "${RABBITMQ_PLUGINS}" | sed 's/,/,\n/g' | while read sCurrentPlugin
+        do
+            echo "  ${sCurrentPlugin}" >> ${sRabbitMqEnabledPluginConfigurationFile}
+        done
+
+        echo "]." >> ${sRabbitMqEnabledPluginConfigurationFile}
+    else
+        echo "[ENTRYPOINT] '\${RABBITMQ_PLUGINS}' is empty: we delete the file '${sRabbitMqEnabledPluginConfigurationFile}'"
+    fi
+fi
+
+
+# Start the container
+echo "[ENTRYPOINT] Start the container"
+exec "$@"

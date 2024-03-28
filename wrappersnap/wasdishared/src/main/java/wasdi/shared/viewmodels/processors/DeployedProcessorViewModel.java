@@ -15,6 +15,7 @@ public class DeployedProcessorViewModel {
 	private String processorVersion;
 	private String processorDescription;
 	private String imgLink;
+	private String logo;
 	private String publisher;
 	private String paramsSample = "";
 	private int isPublic = 0;
@@ -94,6 +95,12 @@ public class DeployedProcessorViewModel {
 	}
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
+	}
+	public String getLogo() {
+		return logo;
+	}
+	public void setLogo(String logo) {
+		this.logo = logo;
 	}
 
 }

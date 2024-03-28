@@ -77,6 +77,8 @@ public class RunTimeUtils {
 	 * 
 	 * @param asArgs List of arguments
 	 * @param bWait True to wait the process to finish, false to not wait
+	 * @param bReadOutput True to read the output of the process
+	 * @param bRedirectError True to redirect also the error stream
 	 * @param bLogCommandLine  True to log the command line false to jump
 	 * @return True if the process is executed
 	 */
@@ -139,6 +141,17 @@ public class RunTimeUtils {
 			// If we want to collect the logs, create the temp file
 			File oLogFile = null;
 			if (bReadOutput) oLogFile = createLogFile();
+			
+			// Get the shell exec item
+			ShellExecItemConfig oShellExecItem = WasdiConfig.Current.dockers.getShellExecItem(asArgs.get(0));
+			
+			if (oShellExecItem != null) {
+				// Check if we need to add a prefix to our command
+				if (!Utils.isNullOrEmpty(oShellExecItem.addPrefixToCommand)) {
+					WasdiLog.debugLog("RunTimeUtils.localShellExec: adding prefix to the command line - " + oShellExecItem.addPrefixToCommand);
+					asArgs.add(0, oShellExecItem.addPrefixToCommand);
+				}
+			}
 			
 			// Create the process builder
 			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
@@ -236,6 +249,12 @@ public class RunTimeUtils {
 			return localShellExec(asArgs, bWait, bReadOutput, bRedirectError, bLogCommandLine);			
 		}
 		
+		// Check if we need to add a prefix to our command
+		if (!Utils.isNullOrEmpty(oShellExecItem.addPrefixToCommand)) {
+			WasdiLog.debugLog("RunTimeUtils.dockerShellExec: adding prefix to the command line - " + oShellExecItem.addPrefixToCommand);
+			asArgs.add(0, oShellExecItem.addPrefixToCommand);
+		}		
+		
 		if (oShellExecItem.overrideDockerConfig) {
 			oDockerUtils.setWasdiSystemGroupId(oShellExecItem.systemGroupId);
 			oDockerUtils.setWasdiSystemGroupName(oShellExecItem.systemGroupName);
@@ -244,8 +263,15 @@ public class RunTimeUtils {
 			oDockerUtils.setDockerNetworkMode(oShellExecItem.dockerNetworkMode);
 		}
 		
+		boolean bAutoRemove = false;
+		
+		if (!bWait && WasdiConfig.Current.dockers.removeDockersAfterShellExec) {
+			WasdiLog.debugLog("RunTimeUtils.dockerShellExec: setting auto remove flag true");
+			bAutoRemove = true;
+		}
+		
 		// Create and run the docker
-		String sContainerId = oDockerUtils.run(oShellExecItem.dockerImage, oShellExecItem.containerVersion, asArgs, true, oShellExecItem.additionalMountPoints);
+		String sContainerId = oDockerUtils.run(oShellExecItem.dockerImage, oShellExecItem.containerVersion, asArgs, true, oShellExecItem.additionalMountPoints, bAutoRemove);
 		
 		// Did we got a Container Name?
 		if (Utils.isNullOrEmpty(sContainerId)) {

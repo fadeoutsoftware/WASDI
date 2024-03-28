@@ -5,7 +5,7 @@ EULA
 
 
 1. Introduction 
----------------------------
+----------------------------
 1.1. WASDI is a cloud service provided by WASDI Sarl (“WASDI”, “we”, or “us”). By using the WASDI platform services (“Services”), you agree to be bound by the following Terms of Service and any future modifications (collectively, the “Terms”). 
 
 1.2. **Please read these Terms carefully:** This end user agreement represents a legal between (a) you (either an individual or single entity) and (b) use (WASDI) that governs the use of our Services.  **If you use the Services, you agreed to these Terms.**

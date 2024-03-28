@@ -18,6 +18,7 @@ org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn
 org.esa.snap.dataio.rtp.RawTiledPyramidsProductCodecSpi
 
 #Sentinel-2
+org.esa.s2tbx.dataio.gdal.writer.plugins.COGDriverProductWriterPlugIn
 org.esa.s2tbx.dataio.gdal.writer.plugins.BMPDriverProductWriterPlugIn
 org.esa.s2tbx.dataio.gdal.writer.plugins.BTDriverProductWriterPlugIn
 org.esa.s2tbx.dataio.gdal.writer.plugins.GS7BGDriverProductWriterPlugIn
@@ -26,10 +27,8 @@ org.esa.s2tbx.dataio.gdal.writer.plugins.GTiffDriverProductWriterPlugIn
 org.esa.s2tbx.dataio.gdal.writer.plugins.GTXDriverProductWriterPlugIn
 org.esa.s2tbx.dataio.gdal.writer.plugins.HFADriverProductWriterPlugIn
 org.esa.s2tbx.dataio.gdal.writer.plugins.ILWISDriverProductWriterPlugIn
-org.esa.s2tbx.dataio.gdal.writer.plugins.KEADriverProductWriterPlugIn
 org.esa.s2tbx.dataio.gdal.writer.plugins.KRODriverProductWriterPlugIn
 org.esa.s2tbx.dataio.gdal.writer.plugins.MFFDriverProductWriterPlugIn
-org.esa.s2tbx.dataio.gdal.writer.plugins.NetCDFDriverProductWriterPlugIn
 org.esa.s2tbx.dataio.gdal.writer.plugins.NITFDriverProductWriterPlugIn
 org.esa.s2tbx.dataio.gdal.writer.plugins.PCIDSKDriverProductWriterPlugIn
 org.esa.s2tbx.dataio.gdal.writer.plugins.PNMDriverProductWriterPlugIn
@@ -37,3 +36,5 @@ org.esa.s2tbx.dataio.gdal.writer.plugins.RMFDriverProductWriterPlugIn
 org.esa.s2tbx.dataio.gdal.writer.plugins.RSTDriverProductWriterPlugIn
 org.esa.s2tbx.dataio.gdal.writer.plugins.SAGADriverProductWriterPlugIn
 org.esa.s2tbx.dataio.gdal.writer.plugins.SGIDriverProductWriterPlugIn
+
+org.esa.s2tbx.dataio.jp2.JP2ProductWriterPlugIn

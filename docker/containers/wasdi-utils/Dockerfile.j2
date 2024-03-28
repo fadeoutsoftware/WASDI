@@ -4,6 +4,10 @@ FROM ubuntu:22.04
 MAINTAINER "WASDI SARL"
 
 
+# Labels used to search our containers and/or images
+LABEL docker-image-name={{ sWasdiUtilsServiceName }}
+
+
 # From now, all commands executed are executed with the user 'root'
 USER root
 
@@ -99,12 +103,18 @@ RUN mkdir --parents \
         --output-document /tmp/{{ sWasdiJre8SourceUrl | basename }} \
         --progress=bar:force:noscroll \
         --show-progress \
-        {{ sWasdiJre8SourceUrl }} --output-document /tmp/{{ sWasdiJre8SourceUrl | basename }} && \
+        {{ sWasdiJre8SourceUrl }} && \
     tar \
         --directory {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} \
         --extract \
         --file /tmp/{{ sWasdiJre8SourceUrl | basename }} \
         --strip-components=1 && \
+    ln \
+        --symbolic \
+        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} \
+        {{ sWasdiJre8RootDirectoryPath }}/latest && \
+    chown --no-dereference {{ sWasdiJre8RootDirectoryOwner }}:{{ sWasdiJre8RootDirectoryGroup }} \
+        {{ sWasdiJre8RootDirectoryPath }}/latest && \
     rm --force \
         /tmp/{{ sWasdiJre8SourceUrl | basename }}
 

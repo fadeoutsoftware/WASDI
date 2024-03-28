@@ -196,5 +196,14 @@ public class Error   {
 		
 		return oError;
 	}	
+	
+	public static Error getForbideenError() {
+		Error oError = new Error();
+		oError.setId("Forbidden");
+		oError.setCode("403");
+		oError.setMessage("Forbidden");
+		
+		return oError;
+	}		
 }
 

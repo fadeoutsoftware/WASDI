@@ -4,6 +4,10 @@ FROM ubuntu:22.04
 MAINTAINER "WASDI SARL"
 
 
+# Labels used to search our containers and/or images
+LABEL docker-image-name={{ sWasdiJenkinsServiceName }}
+
+
 # From now, all commands executed are executed with the user 'root'
 USER root
 
@@ -108,13 +112,18 @@ RUN mkdir --parents \
         --output-document /tmp/{{ sWasdiJdk8SourceUrl | basename }} \
         --progress=bar:force:noscroll \
         --show-progress \
-        {{ sWasdiJdk8SourceUrl }} --output-document /tmp/{{ sWasdiJdk8SourceUrl | basename }} && \
+        {{ sWasdiJdk8SourceUrl }} && \
     tar \
         --directory {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} \
         --extract \
         --file /tmp/{{ sWasdiJdk8SourceUrl | basename }} \
         --strip-components=1 && \
-    ln --symbolic {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} {{ sWasdiJdk8RootDirectoryPath }}/latest && \
+    ln \
+        --symbolic \
+        {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} \
+        {{ sWasdiJdk8RootDirectoryPath }}/latest && \
+    chown --no-dereference {{ sWasdiJdk8RootDirectoryOwner }}:{{ sWasdiJdk8RootDirectoryGroup }} \
+        {{ sWasdiJdk8RootDirectoryPath }}/latest && \
     rm --force \
         /tmp/{{ sWasdiJdk8SourceUrl | basename }}
 
@@ -134,13 +143,18 @@ RUN mkdir --parents \
         --output-document /tmp/{{ sWasdiJdk17SourceUrl | basename }} \
         --progress=bar:force:noscroll \
         --show-progress \
-        {{ sWasdiJdk17SourceUrl }} --output-document /tmp/{{ sWasdiJdk17SourceUrl | basename }} && \
+        {{ sWasdiJdk17SourceUrl }} && \
     tar \
         --directory {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} \
         --extract \
         --file /tmp/{{ sWasdiJdk17SourceUrl | basename }} \
         --strip-components=1 && \
-    ln --symbolic {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} {{ sWasdiJdk17RootDirectoryPath }}/latest && \
+    ln \
+        --symbolic \
+        {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} \
+        {{ sWasdiJdk17RootDirectoryPath }}/latest && \
+    chown --no-dereference {{ sWasdiJdk17RootDirectoryOwner }}:{{ sWasdiJdk17RootDirectoryGroup }} \
+        {{ sWasdiJdk17RootDirectoryPath }}/latest && \
     rm --force \
         /tmp/{{ sWasdiJdk17SourceUrl | basename }}
 

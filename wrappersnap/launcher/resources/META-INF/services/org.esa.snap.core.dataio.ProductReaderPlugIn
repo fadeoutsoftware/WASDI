@@ -21,6 +21,10 @@ org.esa.s1tbx.io.TAXI.RATProductReaderPlugIn
 org.esa.s1tbx.io.generic.GenericComplexReaderPlugIn
 org.esa.s1tbx.io.generic.GenericReaderPlugIn
 
+org.csa.rstb.io.radarsat1.RadarsatProductReaderPlugIn
+org.csa.rstb.io.radarsat2.Radarsat2ProductReaderPlugIn
+org.csa.rstb.io.rcm.RCMProductReaderPlugIn
+org.csa.rstb.soilmoisture.io.matlab.MatlabReaderPlugIn
 
 org.esa.snap.dataio.bigtiff.BigGeoTiffProductReaderPlugIn
 org.esa.snap.core.dataio.dimap.DimapProductReaderPlugIn
@@ -37,10 +41,7 @@ org.esa.snap.dataio.netcdf.GenericNetCdfReaderPlugIn
 org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdfReaderPlugIn
 org.esa.snap.dataio.netcdf.metadata.profiles.hdfeos.HdfEosNetCdfReaderPlugIn
 org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamNetCdfReaderPlugIn
-
-org.esa.s2tbx.dataio.gdal.reader.plugins.ERMapperDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.GTiffDriverProductReaderPlugIn
-
+org.esa.snap.dataio.rtp.RawTiledPyramidsProductCodecSpi
 
 #Sentinel-2
 
@@ -181,24 +182,33 @@ org.esa.s2tbx.dataio.rapideye.RapidEyeL3ReaderPlugin
 
 #org.esa.s2tbx.dataio.jp2.JP2ProductReaderPlugin
 
+
 org.esa.s2tbx.dataio.gdal.reader.plugins.BTDriverProductReaderPlugIn
+org.esa.s2tbx.dataio.gdal.reader.plugins.ERMapperDriverProductReaderPlugIn
 org.esa.s2tbx.dataio.gdal.reader.plugins.GS7BGDriverProductReaderPlugIn
 org.esa.s2tbx.dataio.gdal.reader.plugins.GSBGDriverProductReaderPlugIn
 org.esa.s2tbx.dataio.gdal.reader.plugins.GTXDriverProductReaderPlugIn
 org.esa.s2tbx.dataio.gdal.reader.plugins.HFADriverProductReaderPlugIn
 org.esa.s2tbx.dataio.gdal.reader.plugins.ILWISDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.KEADriverProductReaderPlugIn
 org.esa.s2tbx.dataio.gdal.reader.plugins.KRODriverProductReaderPlugIn
 org.esa.s2tbx.dataio.gdal.reader.plugins.MFFDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.NetCDFDriverProductReaderPlugIn
 org.esa.s2tbx.dataio.gdal.reader.plugins.NITFDriverProductReaderPlugIn
 org.esa.s2tbx.dataio.gdal.reader.plugins.PCIDSKDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.PNGDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.PNMDriverProductReaderPlugIn
 org.esa.s2tbx.dataio.gdal.reader.plugins.RMFDriverProductReaderPlugIn
 org.esa.s2tbx.dataio.gdal.reader.plugins.RSTDriverProductReaderPlugIn
 org.esa.s2tbx.dataio.gdal.reader.plugins.SAGADriverProductReaderPlugIn
 org.esa.s2tbx.dataio.gdal.reader.plugins.SGIDriverProductReaderPlugIn
+org.esa.s2tbx.dataio.gdal.reader.plugins.GTiffDriverProductReaderPlugIn
+org.esa.s2tbx.dataio.gdal.reader.plugins.JP2OpenJPEGDriverProductReaderPlugIn
+
+
+org.esa.s2tbx.dataio.alos.av2.AlosAV2ProductReaderPlugin
+org.esa.s2tbx.dataio.deimos.DeimosProductReaderPlugin
+org.esa.s2tbx.dataio.ikonos.IkonosProductReaderPlugin
+
+org.esa.s2tbx.dataio.kompsat2.Kompsat2ProductReaderPlugin
+
+org.esa.s2tbx.dataio.pleiades.PleiadesProductReaderPlugin
 
 #VITO
 org.vito.probavbox.dataio.probav.ProbaVProductReaderPlugIn

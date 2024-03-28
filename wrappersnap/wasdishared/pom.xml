@@ -47,6 +47,8 @@
         <sVersionMockFtpServer>2.7.1</sVersionMockFtpServer>
         <sVersionMongoDb>4.3.4</sVersionMongoDb>
         <sVersionGeoTools>20.0</sVersionGeoTools>
+        <sVersionJersey2>2.38</sVersionJersey2>
+        <sVersionMercurius>1.0</sVersionMercurius>
     </properties>
 
     <build>
@@ -289,7 +291,25 @@
 		    <groupId>com.hubspot.jinjava</groupId>
 		    <artifactId>jinjava</artifactId>
 		    <version>2.7.1</version>
-		  </dependency>		
+		  </dependency>
+		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-client -->
+		<dependency>
+		    <groupId>org.glassfish.jersey.core</groupId>
+		    <artifactId>jersey-client</artifactId>
+		    <version>${sVersionJersey2}</version>
+		</dependency>		  
+        <!-- https://mvnrepository.com/artifact/org.glassfish.jersey.media/jersey-media-jaxb -->
+		<dependency>
+		    <groupId>org.glassfish.jersey.media</groupId>
+		    <artifactId>jersey-media-jaxb</artifactId>
+		    <version>${sVersionJersey2}</version>
+		</dependency>		  
+        <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
+        <dependency>
+            <groupId>it.fadeout</groupId>
+            <artifactId>mercurius</artifactId>
+            <version>${sVersionMercurius}</version>
+        </dependency>		  
     </dependencies>
 
     <repositories>

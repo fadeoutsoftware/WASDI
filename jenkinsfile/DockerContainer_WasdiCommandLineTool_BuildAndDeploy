@@ -67,25 +67,31 @@ pipeline {
 
     stage('DEPLOY THE CONTAINERS AND THEIR RUN ELEMENTS') {
       steps {
-        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-          script {
-            try {
-              sh script: """
-                cd ${env.sWasdiAnsiblePath}
-                ansible-playbook \
-                  playbooks/deployDockerContainerWasdiCommandLineTool.yml \
-                  --inventory inventories/${env.sAnsibleInventory}.yml \
-                  --limit ${env.sAnsibleLimit} \
-                  --diff \
-                  --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
-              """,
-              label: "Deploy the containers and their run elements"
-            } catch (oError) {
-              echo oError.getMessage()
-              throw oError
-            }
-          }
-        }
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deployDockerContainerWasdiCommandLineTool.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Deploy the container(s) and their run elements"
+      }
+    }
+
+    stage('CLEAN THE DOCKER IMAGE(S)') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deleteDockerImage.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiGdalContainer=true sDeployWasdiSen2corContainer=true sDeployWasdiSnaphuContainer=true'
+        """,
+        label: "Clean the Docker image(s)"
       }
     }
   }

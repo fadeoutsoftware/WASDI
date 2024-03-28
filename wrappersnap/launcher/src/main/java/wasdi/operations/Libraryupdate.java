@@ -30,7 +30,6 @@ public class Libraryupdate extends Operation {
 	        
 	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
 	        
-	        
 	        if (!oEngine.isProcessorOnNode(oParameter)) {
                 WasdiLog.errorLog("Libraryupdate.executeOperation: Processor [" + oParameter.getName() + "] not installed in this node, return");
                 return true;	        	
@@ -40,7 +39,11 @@ public class Libraryupdate extends Operation {
 	        oEngine.setSendToRabbit(m_oSendToRabbit);
 	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 	        oEngine.setProcessWorkspace(oProcessWorkspace);
-	        return oEngine.libraryUpdate(oParameter);
+	        boolean bRet = oEngine.libraryUpdate(oParameter);
+	        
+	        m_oSendToRabbit.sendRedeployDoneMessage(oParameter, bRet, oEngine.isLocalBuild());
+	        
+	        return bRet;
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("Libraryupdate.executeOperation: exception", oEx);

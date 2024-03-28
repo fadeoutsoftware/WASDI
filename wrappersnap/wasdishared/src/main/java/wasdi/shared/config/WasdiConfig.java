@@ -27,7 +27,7 @@ import wasdi.shared.utils.log.WasdiLog;
  *
  */
 public class WasdiConfig {
-	
+		
 	/**
 	 * Node Code
 	 */
@@ -101,12 +101,26 @@ public class WasdiConfig {
 	 */
 	public boolean logHttpCalls=true;
 	
+	/**
+	 * Set to true to add date time to log lines
+	 */
+	public boolean addDateTimeToLogs=false;
+	
 	
 	/**
 	 * Set true to NOT filter the internal http calls (keycloak, docker..).
 	 * If the general logHttpCalls is False, this does not change
 	 */
 	public boolean filterInternalHttpCalls=true;
+	
+	/**
+	 * Set true if the wasdi tomcat node web server must use the internal docker name instead
+	 * of the public http address of the Jupyter Notebook container.
+	 * Is due to the configuration of Adwaiseo that does not resolve the public ip of the server.
+	 */
+	public boolean useNotebooksDockerAddress = false;
+
+	
 	/**
 	 * Mongo db Configuration for the main node
 	 */
@@ -267,6 +281,7 @@ public class WasdiConfig {
         	oLinesStream = Files.lines(Paths.get(sConfigFilePath), StandardCharsets.UTF_8);
 			String sJson = oLinesStream.collect(Collectors.joining(System.lineSeparator()));
 			Current = MongoRepository.s_oMapper.readValue(sJson,WasdiConfig.class);
+			Current.paths.wasdiConfigFilePath = sConfigFilePath;
 			bRes = true;
 			
 		} catch (Exception oEx) {

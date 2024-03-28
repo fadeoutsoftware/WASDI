@@ -4,6 +4,10 @@ FROM ubuntu:22.04
 MAINTAINER "WASDI SARL"
 
 
+# Labels used to search our containers and/or images
+LABEL docker-image-name={{ sWasdiTomcatOgcProcessesServerServiceName }}
+
+
 # From now, all commands executed are executed with the user 'root'
 USER root
 
@@ -46,7 +50,7 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     apt-get update && \
     apt-get install \
         ca-certificates && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ jammy main restricted universe multiverse"          > /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy main restricted universe multiverse"           > /etc/apt/sources.list && \
     echo "deb https://mirror.ubuntu.ikoula.com/ jammy-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
     echo "deb https://mirror.ubuntu.ikoula.com/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list && \
     apt-get update && \
@@ -82,12 +86,18 @@ RUN mkdir --parents \
         --output-document /tmp/{{ sWasdiJre8SourceUrl | basename }} \
         --progress=bar:force:noscroll \
         --show-progress \
-        {{ sWasdiJre8SourceUrl }} --output-document /tmp/{{ sWasdiJre8SourceUrl | basename }} && \
+        {{ sWasdiJre8SourceUrl }} && \
     tar \
         --directory {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} \
         --extract \
         --file /tmp/{{ sWasdiJre8SourceUrl | basename }} \
         --strip-components=1 && \
+    ln \
+        --symbolic \
+        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} \
+        {{ sWasdiJre8RootDirectoryPath }}/latest && \
+    chown --no-dereference {{ sWasdiJre8RootDirectoryOwner }}:{{ sWasdiJre8RootDirectoryGroup }} \
+        {{ sWasdiJre8RootDirectoryPath }}/latest && \
     rm --force \
         /tmp/{{ sWasdiJre8SourceUrl | basename }}
 
@@ -139,7 +149,7 @@ RUN mkdir --parents \
       {{ sWasdiTomcatOgcProcessesServerRootDirectoryMode }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/webapps/docs \
       {{ sWasdiTomcatOgcProcessesServerRootDirectoryMode }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/webapps/examples && \
     sed --in-place 's/127\\.\\d+\\.\\d+\\.\\d+/127\\.\\d+\\.\\d+\\.\\d+|{{ sWasdiDockerNetworkRange.split('.')[0] }}\\.{{ sWasdiDockerNetworkRange.split('.')[1] }}\\.\\d+\\.\\d+/g' {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/webapps/manager/META-INF/context.xml
-
+ENV TOMCAT_HOME="{{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}"
 ENV PATH="{{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/bin:${PATH}"
 
 
@@ -149,11 +159,12 @@ WORKDIR {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgc
 
 # Copy data
 COPY --chown={{ sWasdiTomcatOgcProcessesServerBuildTargetFileOwner }}:{{ sWasdiTomcatOgcProcessesServerBuildTargetFileGroup }} ./dataToCopy/{{ sWasdiTomcatOgcProcessesServerBuildTargetFileName }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/webapps/{{ sWasdiTomcatOgcProcessesServerBuildTargetFileName }}
-COPY --chown={{ sWasdiTomcatOgcProcessesServerBuildTargetFileOwner }}:{{ sWasdiTomcatOgcProcessesServerBuildTargetFileGroup }} ./dataToCopy/conf_server.xml {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/conf/server.xml
-COPY --chown={{ sWasdiTomcatOgcProcessesServerBuildTargetFileOwner }}:{{ sWasdiTomcatOgcProcessesServerBuildTargetFileGroup }} ./dataToCopy/conf_tomcat-users.xml {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/conf/tomcat-users.xml
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/conf_server.xml {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/conf/server.xml
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/docker-entrypoint.sh /docker-entrypoint.sh
 
 
 # Start the container
+ENTRYPOINT ["/bin/bash", "/docker-entrypoint.sh"]
 CMD [ \
     "{{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/bin/catalina.sh", \
     "run" \

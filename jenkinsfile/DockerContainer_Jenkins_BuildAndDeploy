@@ -53,58 +53,55 @@ pipeline {
     stage('BUILD THE CONTAINER(S)') {
       steps {
         sh script: """
-            cd ${env.sWasdiAnsiblePath}
-            ansible-playbook \
-                playbooks/buildWasdiDockerContainer.yml \
-                --inventory inventories/${env.sAnsibleInventory}.yml \
-                --limit ${env.sEnvironmentLower} \
-                --diff \
-                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiJenkinsContainer=true'
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/buildWasdiDockerContainer.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sEnvironmentLower} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiJenkinsContainer=true'
         """,
         label: "Build the container(s)"
       }
     }
 
-    stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
+    stage('DEPLOY THE CONTAINER(S) AND THEIR RUN ELEMENTS') {
       steps {
-        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-          script {
-            try {
-              sh script: """
-                  cd ${env.sWasdiAnsiblePath}
-                  ansible-playbook \
-                    playbooks/deployDockerContainerWasdiJenkins.yml \
-                    --inventory inventories/${env.sAnsibleInventory}.yml \
-                    --limit ${env.sAnsibleLimit} \
-                    --diff \
-                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
-              """,
-              label: "Deploy the container and its run element"
-            } catch (oError) {
-              echo oError.getMessage()
-              throw oError
-            }
-          }
-        }
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deployDockerContainerWasdiJenkins.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Deploy the container(s) and their run elements"
       }
     }
 
     stage('PLEASE READ LOGS') {
       steps {
-        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-          script {
-            try {
-              sh script: """
-                echo "Please execute manually this command in the right directory:"
-                echo "docker compose up --detach --force-recreate wasdi-jenkins"
-              """,
-              label: "Command to start or restart the container"
-            } catch (oError) {
-              echo oError.getMessage()
-              throw oError
-            }
-          }
-        }
+        sh script: """
+          echo "Please execute manually this command in the right directory:"
+          echo "docker compose up --detach --force-recreate wasdi-jenkins"
+        """,
+        label: "Command to start or restart the container"
+      }
+    }
+
+    stage('CLEAN THE DOCKER IMAGE(S)') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deleteDockerImage.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiJenkinsContainer=true'
+        """,
+        label: "Clean the Docker image(s)"
       }
     }
   }

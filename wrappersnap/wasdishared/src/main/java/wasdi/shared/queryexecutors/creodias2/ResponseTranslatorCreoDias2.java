@@ -29,14 +29,10 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	private static final String SODATA_INSTRUMENT = "instrumentShortName";
 	private static final String SODATA_MODE = "operationalMode";
 	private static final String SODATA_NAME = "Name";
-	private static final String SODATA_ORBIT_NUMBER = "orbitNumber";
-	private static final String SODATA_ORBIT_DIRECTION  = "orbitDirection";
 	private static final String SODATA_PLATFORM_SERIAL_ID = "platformSerialIdentifier";
 	private static final String SODATA_PLATFORM_SHORT_NAME = "platformShortName";
-	private static final String SODATA_POLARISATION  = "polarisationChannels";
 	private static final String SODATA_POLYGON = "Polygon";
 	private static final String SODATA_PRODUCT_ID = "Id";
-	private static final String SODATA_PRODUCT_TYPE = "productType";
 	private static final String SODATA_RELATIVE_ORBIT = "relativeOrbitNumber";
 	private static final String SODATA_S3_PATH = "S3Path";
 	public static final String  SODATA_SIZE = "ContentLength";
@@ -49,7 +45,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	// WASDI  keywords
 	private static final String sDATE = "date";
 	private static final String SINSTRUMENT = "instrumentshortname";
-	private static final String SMULTI_POLYGON = "MULTYPOLYGON";
+	private static final String SMULTI_POLYGON = "MultiPolygon";
 	private static final String SRELATIVE_ORBIT = "relativeorbitnumber";
 	private static final String SPLATFORM_NAME = "platformname";
 	private static final String SPOLYGON = "POLYGON";
@@ -255,16 +251,27 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	
 	
 	private String parseFootPrint(JSONObject oJsonObject) {
-		JSONObject oJsonFootprint = new JSONObject(oJsonObject.optString(SODATA_FOOTPRINT));
-		
-		String sType = oJsonFootprint.optString(SODATA_TYPE);
-		
-		if (sType.equals(SODATA_POLYGON)) {
-			JSONArray aoCoordinates = (JSONArray) oJsonFootprint.optJSONArray(SODATA_COORDINATES);
-			String sCoordinates = parseCoordinates(aoCoordinates);
-			return SPOLYGON + " ((" + sCoordinates + "))";
+		try {
+			JSONObject oJsonFootprint = new JSONObject(oJsonObject.optString(SODATA_FOOTPRINT));
+			
+			String sType = oJsonFootprint.optString(SODATA_TYPE);
+			
+			if (sType.equals(SODATA_POLYGON)) {
+				JSONArray aoCoordinates = (JSONArray) oJsonFootprint.optJSONArray(SODATA_COORDINATES);
+				String sCoordinates = parseCoordinates(aoCoordinates);
+				return SPOLYGON + " ((" + sCoordinates + "))";
+			}
+			else if (sType.equals(SMULTI_POLYGON)) {
+				// NOTE: like this we are taking only the first polygon of the multi-polygon. May be to improved in future
+				JSONArray aoCoordinates = (JSONArray) oJsonFootprint.optJSONArray(SODATA_COORDINATES);
+				String sCoordinates = parseCoordinates(aoCoordinates.getJSONArray(0));
+				return SPOLYGON + " ((" + sCoordinates + "))";			
+			}			
 		}
-		// TODO: how to manage the multi-polygon? How I can simulate and example in Creodias?
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ResponseTranslatorCreoDias2.parseFootPrint: error " + oEx.toString());
+		}
+		
 		return "";	
 	}
 	

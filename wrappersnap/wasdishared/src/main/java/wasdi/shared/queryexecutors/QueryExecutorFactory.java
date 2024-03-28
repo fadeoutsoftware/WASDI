@@ -18,6 +18,7 @@ import wasdi.shared.queryexecutors.ads.QueryExecutorADS;
 import wasdi.shared.queryexecutors.cds.QueryExecutorCDS;
 import wasdi.shared.queryexecutors.cloudferro.QueryExecutorCloudferro;
 import wasdi.shared.queryexecutors.cm.QueryExecutorCM;
+import wasdi.shared.queryexecutors.cm2.QueryExecutorCM2;
 import wasdi.shared.queryexecutors.creodias.QueryExecutorCREODIAS;
 import wasdi.shared.queryexecutors.creodias2.QueryExecutorCreoDias2;
 import wasdi.shared.queryexecutors.eodc.QueryExecutorEODC;
@@ -34,6 +35,7 @@ import wasdi.shared.queryexecutors.sobloo.QueryExecutorSOBLOO;
 import wasdi.shared.queryexecutors.statics.QueryExecutorSTATICS;
 import wasdi.shared.queryexecutors.terrascope.QueryExecutorTerrascope;
 import wasdi.shared.queryexecutors.viirs.QueryExecutorVIIRS;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -64,16 +66,29 @@ public class QueryExecutorFactory {
 		aoMap.put("STATICS", QueryExecutorSTATICS::new);
 		aoMap.put("JRC", QueryExecutorJRC::new);
 		aoMap.put("GPM", QueryExecutorGPM::new);
-		aoMap.put("COPERNICUSMARINE", QueryExecutorCM::new);
+		aoMap.put("COPERNICUSMARINE", QueryExecutorCM2::new);
 		aoMap.put("CLOUDFERRO", QueryExecutorCloudferro::new);
 		aoMap.put("SKYWATCH", QueryExecutorSkywatch::new);
 		aoMap.put("LPDAAC", QueryExecutorLpDaac::new);
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
 		
-		WasdiLog.debugLog("QueryExecutorFactory.static constructor, s_aoExecutors content:");
-		for (String sKey : s_aoExecutors.keySet()) {
-			WasdiLog.debugLog("QueryExecutorFactory.s_aoExecutors key: " + sKey);
+		try {
+			WasdiLog.debugLog("QueryExecutorFactory.static constructor, s_aoExecutors content:");
+			String sExecutors = "";
+			
+			for (String sKey : s_aoExecutors.keySet()) {
+				sExecutors += sKey + " - ";
+			}
+			if (!Utils.isNullOrEmpty(sExecutors)) {
+				if (sExecutors.length()>3) {
+					sExecutors = sExecutors.substring(0, sExecutors.length()-3);
+				}
+			}
+			WasdiLog.debugLog("QueryExecutorFactory.s_aoExecutors key: " + sExecutors);			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("QueryExecutorFactory.static constructor exception " + oEx.toString());
 		}
 	}
 

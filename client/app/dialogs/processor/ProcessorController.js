@@ -467,7 +467,7 @@ var ProcessorController = (function () {
                             function () {
                                 var oDialog =
                                     utilsVexDialogAlertBottomRightCorner(
-                                        "PROCESSOR DATA UPDATED"
+                                        "PROCESSOR DATA UPDATED<br>REBUILD ONGOING"
                                     );
                                 utilsVexCloseDialogAfter(4000, oDialog);
                             },

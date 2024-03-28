@@ -152,6 +152,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    PythonCookbook/SavePayload.rst
    PythonCookbook/FindS2Tiles.rst
    PythonCookbook/UseLibAsClient.rst
+   PythonCookbook/ChangeHTTPRequestTimeouts.rst
 
 
 .. toctree::

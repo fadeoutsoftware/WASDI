@@ -8,17 +8,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-
-import wasdi.shared.data.MongoRepository;
 import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.packagemanagers.PipPackageManagerImpl;
-import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.shared.viewmodels.HttpCallResponse;
+import wasdi.shared.utils.packagemanagers.PackageManagerUtils;
 
 public class PipProcessorEngine extends DockerProcessorEngine {
 
@@ -93,7 +88,7 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 
 					String sPackage = asUserPackages.get(iPackages);
 
-					if (!checkPipPackage(sPackage)) {
+					if (!PackageManagerUtils.checkPipPackage(sPackage)) {
 						m_oProcessWorkspaceLogger.log("We did not find PIP package [" + sPackage + "], are you sure is correct?");
 						WasdiLog.infoLog("We did not find PIP package [" + sPackage + "], jump it");
 						continue;
@@ -123,53 +118,5 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 				WasdiLog.errorLog("PipProcessorEngine.onAfterUnzipProcessor: exception when closing the I/O resources", oEx);
 			}
 		}
-		
 	}
-	
-	/**
-	 * Checks if a pip package is valid or not. It does this searching for the package json file
-	 * @param sPackage
-	 * @return
-	 */
-	protected boolean checkPipPackage(String sPackage) {
-		try {
-			
-			if (Utils.isNullOrEmpty(sPackage)) {
-				return false;
-			}
-			
-			if (sPackage.startsWith("--")) {
-				WasdiLog.infoLog("PipProcessorEngine.checkPipPackage: line [" + sPackage + "] looks a pip option, try to keep it");
-				return true;
-			}
-			
-			if (sPackage.contains("==")) {
-				sPackage = sPackage.split("==")[0];
-			}
-
-			String sPipApi = "https://pypi.org/pypi/" + sPackage + "/json/";
-
-			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sPipApi, null); 
-			String sResult = oHttpCallResponse.getResponseBody();
-
-			if (Utils.isNullOrEmpty(sResult)==false) {
-				try {
-					TypeReference<HashMap<String,Object>> oMapType = new TypeReference<HashMap<String,Object>>() {};
-					HashMap<String,Object> oResults = MongoRepository.s_oMapper.readValue(sResult, oMapType);			
-
-					if (oResults.containsKey("info")) {
-						return true;
-					}
-				}
-				catch (Exception oEx) {
-				}
-			}
-		}
-		catch (Exception oExtEx) {
-			WasdiLog.infoLog("PipProcessorEngine.checkPipPackage: exception " + oExtEx.toString());
-		}
-
-		return false;
-	}
-
 }

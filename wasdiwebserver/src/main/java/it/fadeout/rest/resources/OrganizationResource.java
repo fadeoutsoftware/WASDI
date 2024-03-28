@@ -31,6 +31,7 @@ import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
+import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -457,7 +458,7 @@ public class OrganizationResource {
 				try {
 					String sTitle = "Organization " +  oOrganization.getName() + " Shared";
 					String sMessage = "The user " + oRequesterUser.getUserId() + " shared with you the organization: " + oOrganization.getName();
-					WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sDestinationUserId, sTitle, sMessage);
+					MailUtils.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sDestinationUserId, sTitle, sMessage);
 				}
 				catch (Exception oEx) {
 					WasdiLog.errorLog("OrganizationResource.shareOrganization: notification exception " + oEx.toString());
