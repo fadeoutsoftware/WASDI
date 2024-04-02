@@ -228,7 +228,7 @@ services:
         - "--show-error"
         - "--write-out"
         - "HTTP CODE: %{http_code}\n"
-        - "http://127.0.0.1:{{ sWasdiGeoserverInternalPort }}/{{ sWasdiGeoserverDefaultContextPath.lstrip('/') }}/ows"
+        - "http://127.0.0.1:{{ sWasdiGeoserverInternalPort }}/{{ sWasdiGeoserverDefaultContextPath.lstrip('/') }}/ows?service=WFS&acceptversions=2.0.0&request=GetCapabilities"
       interval: "5s"
       retries: "3"
       start_period: "2m"
