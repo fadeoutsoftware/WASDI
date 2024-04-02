@@ -107,7 +107,8 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 			WasdiLog.errorLog("ResponseTranslatorLpDaac.translate: no title found for the product. It will be impossible to download it");
 			return null;
 		} else {
-			oResult.setTitle(sTitle + ".hdf");
+			sTitle += ".hdf";
+			oResult.setTitle(sTitle);
 		}
 		
 		// footprint
@@ -268,7 +269,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 			String sSize = oJsonItem.optString("granule_size", null);
 			
 			if (!Utils.isNullOrEmpty(sSize)) {
-				lSizeByte = (long) Double.parseDouble(sSize) * 1000;
+				lSizeByte = (long) ( Double.parseDouble(sSize) * Math.pow(10, 6));		// size is provided in megabytes. So, we normalize to bytes
 				String sNormalizedSize = lSizeByte > 0 ? Utils.getNormalizedSize((double) lSizeByte) : "";
 				oResult.getProperties().put(SSIZE_IN_BYTES, "" + lSizeByte);
 				oResult.getProperties().put(SSIZE, sNormalizedSize);
@@ -287,6 +288,12 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 			oResult.getProperties().put(SDATE, sStartDate);
 			oResult.getProperties().put("startDate", sStartDate);
 			oResult.getProperties().put("beginposition", sStartDate);
+		}
+		
+		String sEndDate = oJsonItem.optString("time_end", null);
+		if (!Utils.isNullOrEmpty(sEndDate)) {
+			oResult.getProperties().put("endDate", sEndDate);
+			oResult.getProperties().put("endposition", sEndDate);
 		}
 		
 		JSONArray oLinks = oJsonItem.optJSONArray("links");
