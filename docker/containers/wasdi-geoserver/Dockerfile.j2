@@ -163,7 +163,6 @@ WORKDIR {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}
 
 # Copy data
 COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/docker-entrypoint.sh /docker-entrypoint.sh
-COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/web.xml {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/webapps/geoserver/WEB-INF/web.xml
 
 
 # Start the container

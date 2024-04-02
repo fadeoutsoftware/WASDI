@@ -90,6 +90,104 @@ function addOrUpdateLine() {
     return 0
 }
 
+function addContentFromLineNumber() {
+    local sLogPrefix="${1}"
+    local sFile="${2}"
+    local iLineNumber="${3}"
+    local sPrefixToAppend="${4}"
+    local sSuffixToAppend="${5}"
+
+    displayLog "${FUNCNAME}" "${sLogPrefix}" "Check if '${sFile}' exists"
+
+    if [[ -f "${sFile}" ]]
+    then
+        displayLog "${FUNCNAME}" "${sLogPrefix}" "OK"
+    else
+        displayLog "${FUNCNAME}" "${sLogPrefix}" "ERROR: the file does not exist"
+        return 1
+    fi
+
+    displayLog "${FUNCNAME}" "${sLogPrefix}" "Check if '\${iLineNumber}' is filled"
+
+    if [[ -n "${iLineNumber}" ]]
+    then
+        displayLog "${FUNCNAME}" "${sLogPrefix}" "OK"
+    else
+        displayLog "${FUNCNAME}" "${sLogPrefix}" "ERROR: the variable is not filled"
+        return 1
+    fi
+
+    displayLog "${FUNCNAME}" "${sLogPrefix}" "Check if we have a prefix to add on the line ${iLineNumber}"
+
+    if [[ -n "${sPrefixToAppend}" ]]
+    then
+        bUpdatePrefix="true"
+        displayLog "${FUNCNAME}" "${sLogPrefix}" "We have a prefix to add"
+        displayLog "${FUNCNAME}" "${sLogPrefix}" "Check if the prefix is already present or not on the line ${iLineNumber}"
+        local sPrefixToAppendEscaped="$(escapeForGrep "${sPrefixToAppend}")"
+        local sSearchResult="$(sed --quiet "${iLineNumber}p" ${sFile} | grep --extended-regexp "^${sPrefixToAppendEscaped}")"
+
+        if [[ -z "${sSearchResult}" ]]
+        then
+            displayLog "${FUNCNAME}" "${sLogPrefix}" "The prefix is missing: we will try to add it"
+        else
+            displayLog "${FUNCNAME}" "${sLogPrefix}" "The prefix is present: we stop now as there is nothing to do"
+            bUpdatePrefix="false"
+        fi
+
+        if [[ "${bUpdatePrefix}" == "true" ]]
+        then
+            displayLog "${FUNCNAME}" "${sLogPrefix}" "Update the line ${iLineNumber} to add the prefix"
+            sed --in-place "${iLineNumber}s/\(.*\)/${sPrefixToAppendEscaped} \1/" ${sFile}
+
+            if [[ ${?} -eq 0 ]]
+            then
+                displayLog "${FUNCNAME}" "${sLogPrefix}" "OK"
+            else
+                displayLog "${FUNCNAME}" "${sLogPrefix}" "ERROR"
+            fi
+        fi
+    else
+        displayLog "${FUNCNAME}" "${sLogPrefix}" "We have no prefix to add"
+    fi
+
+    displayLog "${FUNCNAME}" "${sLogPrefix}" "Check if we have a suffix to add on the line ${iLineNumber}"
+
+    if [[ -n "${sSuffixToAppend}" ]]
+    then
+        bUpdateSuffix="true"
+        displayLog "${FUNCNAME}" "${sLogPrefix}" "We have a suffix to add"
+        displayLog "${FUNCNAME}" "${sLogPrefix}" "Check if the suffix is already present or not on the line ${iLineNumber}"
+        local sSuffixToAppendEscaped="$(escapeForGrep "${sSuffixToAppend}")"
+        local sSearchResult="$(sed --quiet "${iLineNumber}p" ${sFile} | grep --extended-regexp "${sSuffixToAppendEscaped}$")"
+
+        if [[ -z "${sSearchResult}" ]]
+        then
+            displayLog "${FUNCNAME}" "${sLogPrefix}" "The suffix is missing: we will try to add it"
+        else
+            displayLog "${FUNCNAME}" "${sLogPrefix}" "The suffix is present: we stop now as there is nothing to do"
+            bUpdateSuffix="false"
+        fi
+
+        if [[ "${bUpdateSuffix}" == "true" ]]
+        then
+            displayLog "${FUNCNAME}" "${sLogPrefix}" "Update the line ${iLineNumber} to add the suffix"
+            sed --in-place "${iLineNumber}s/\(.*\)/\1 ${sSuffixToAppend}/" ${sFile}
+
+            if [[ ${?} -eq 0 ]]
+            then
+                displayLog "${FUNCNAME}" "${sLogPrefix}" "OK"
+            else
+                displayLog "${FUNCNAME}" "${sLogPrefix}" "ERROR"
+            fi
+        fi
+    else
+        displayLog "${FUNCNAME}" "${sLogPrefix}" "We have no suffix to add"
+    fi
+
+    return 0
+}
+
 function associateRoleToUser() {
     local sUserName=${1}
     local sRoleName=${2}
@@ -197,6 +295,32 @@ function deleteUser() {
     fi
 
     return ${iReturnCode}
+}
+
+function displayLog() {
+    local sFunctionName="${1}"
+    local sLogPrefix="${2}"
+    local sMessage="${3}"
+
+    local sMessageToDisplay="[ENTRYPOINT]"
+
+    if [[ -n "${sLogPrefix}" ]]
+    then
+        sMessageToDisplay="${sMessageToDisplay} [${sLogPrefix}]"
+    fi
+
+    if [[ -n "${sFunctionName}" ]]
+    then
+        sMessageToDisplay="${sMessageToDisplay} [${sFunctionName}]"
+    fi
+
+    sMessageToDisplay="${sMessageToDisplay} ${sMessage}"
+    echo -e "${sMessageToDisplay}"
+}
+
+function escapeForGrep() {
+    sInput="${1}"
+    echo "${sInput}" | sed 's/^-/\\-/g'
 }
 
 function generateHash() {
@@ -467,6 +591,53 @@ then
         else
             echo "[ENTRYPOINT] ERROR: unable to get the number of the line which contain 'useHeadersProxyURL'"
         fi
+    fi
+fi
+
+
+# Configure CORS for Jetty
+sGeoserverWebApplicationConfigurationFile="${GEOSERVER_HOME}/webapps/geoserver/WEB-INF/web.xml"
+
+if [[ -n "${GEOSERVER_ENABLE_CORS_JETTY}" && -f "${sGeoserverWebApplicationConfigurationFile}" ]]
+then
+    displayLog "" "CORS_JETTY" "Search the line at which the CORS for Jetty block is starting"
+    iCorsJettyBlockStartLineNumber="$(grep --extended-regexp --ignore-case --line-number ".*CORS.*Jetty.*" ${sGeoserverWebApplicationConfigurationFile} | cut --delimiter ':' --fields 1)"
+
+    if [[ -n "${iCorsJettyBlockStartLineNumber}" ]]
+    then
+        displayLog "" "CORS_JETTY" "OK: line ${iCorsJettyBlockStartLineNumber}"
+    else
+        displayLog "" "CORS_JETTY" "ERROR: unable to find the line"
+    fi
+
+    if [[ -n "${iCorsJettyBlockStartLineNumber}" ]]
+    then
+        displayLog "" "CORS_JETTY" "Search the line at which the CORS for Jetty block is finishing"
+        iCorsJettyBlockStopLineNumber="$(grep --line-number "\-->" ${sGeoserverWebApplicationConfigurationFile} | cut --delimiter ':' --fields 1 | awk -v iCorsJettyBlockStartLineNumber=${iCorsJettyBlockStartLineNumber} '{ if ( $1 > iCorsJettyBlockStartLineNumber ) print $0}' | head --lines 1)"
+
+        if [[ -n "${iCorsJettyBlockStopLineNumber}" ]]
+        then
+            displayLog "" "CORS_JETTY" "OK: line ${iCorsJettyBlockStopLineNumber}"
+        else
+            displayLog "" "CORS_JETTY" "ERROR: unable to find the line"
+        fi
+    fi
+
+    if [[ -n "${iCorsJettyBlockStartLineNumber}" && -n "${iCorsJettyBlockStopLineNumber}" ]]
+    then
+        addContentFromLineNumber \
+            "CORS_JETTY" \
+            "${sGeoserverWebApplicationConfigurationFile}" \
+            "${iCorsJettyBlockStartLineNumber}" \
+            "" \
+            "-->"
+
+        addContentFromLineNumber \
+            "CORS_JETTY" \
+            "${sGeoserverWebApplicationConfigurationFile}" \
+            "${iCorsJettyBlockStopLineNumber}" \
+            "    <--" \
+            ""
     fi
 fi
 
