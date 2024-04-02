@@ -77,7 +77,11 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		return 0;
 	}
 	
-	
+	/**
+	 * Given the json object representing a LpDaac result, creates the corresponding result view model
+	 * @param oJsonEntry the json object representing a LpDaac result
+	 * @return the result view model containing the relevant information retrieved from the json object
+	 */
 	public QueryResultViewModel translate(JSONObject oJsonEntry) {
 		
 		if (oJsonEntry == null) {
@@ -103,10 +107,36 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 			WasdiLog.errorLog("ResponseTranslatorLpDaac.translate: no title found for the product. It will be impossible to download it");
 			return null;
 		} else {
-			oResult.setTitle(sTitle);
+			oResult.setTitle(sTitle + ".hdf");
 		}
 		
 		// footprint
+		addFootprint(oJsonEntry, oResult);
+		
+		// properties
+		addProperties(oJsonEntry, sTitle, oResult);
+		
+		// link
+		addLink(oResult);
+		
+		// summary
+		addSummary(oResult);
+		
+		return oResult;
+	}
+	
+	/**
+	 * Read the footprint of the Json object representing a LpDaac product and translates it in the corresponding WKT coordinates
+	 * @param oJsonEntry the Json object representing a LpDaac product 
+	 * @param oResult the result view model to which the footprint has to be added
+	 */
+	private void addFootprint(JSONObject oJsonEntry, QueryResultViewModel oResult) {
+		
+		if (oJsonEntry == null || oResult == null) {
+			WasdiLog.warnLog("ResponseTranslatorLpDaac.addFootprint. Entry or result view model are null. Footprint won't be added");
+			return;
+		}
+		
 		JSONArray oPolygons = oJsonEntry.optJSONArray("polygons");
 		JSONArray oFirstPolygon =null;
 		
@@ -116,7 +146,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		
 		if (oFirstPolygon == null) {
 			WasdiLog.warnLog("ResponseTranslatorLpDaac.translate: impossible to read the bounding box");
-			return null;
+			return;
 		}
 		
 		List<String> asPolygons = new ArrayList<>();
@@ -135,7 +165,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 					sWKTCoordinates += sLongitude + " " + sLatitude;
 				} catch (IndexOutOfBoundsException oEx) {
 					WasdiLog.errorLog("ResponseTranslatorLpDaac.translate: index not valid when reading the footprint", oEx);
-					return null;
+					return;
 				}
 				iIndex += 2;
 			}
@@ -143,19 +173,10 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		}
 		String sFootprint = "POLYGON(" + String.join(", ", asPolygons) + ")";
 		oResult.setFootprint(sFootprint);
-		
-		// properties
-		addProperties(oJsonEntry, sTitle, oResult);
-		
-		// link
-		addLink(oResult);
-		
-		// summary
-		addSummary(oResult);
-		
-		return oResult;
 	}
 	
+	// This method will need to be deleted
+	@Deprecated
 	public QueryResultViewModel translate(ModisItemForReading oItem) {
 		Preconditions.checkNotNull(oItem, "ResponseTranslatorModis.translate: null object");
 		
@@ -176,6 +197,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 	 * @param oItem the object representing a MODIS product, read from the DB
 	 * @param oResult the result view model
 	 */
+	@Deprecated
 	private void addMainInfo(ModisItemForReading oItem, QueryResultViewModel oResult) {
 		oResult.setId(oItem.getFileName());
 		oResult.setTitle(oItem.getFileName());
@@ -186,6 +208,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 	 * @param sLocation the object representing the bounding box, as stored in the DB
 	 * @param oResult the result view model
 	 */
+	@Deprecated
 	private void addFootPrint(ModisLocation sLocation, QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(sLocation, "ResponseTranslatorModis.addFootPrint: input sLocation is null");
 		Preconditions.checkNotNull(oResult, "ResponseTranslatorModis.addFootPrint: QueryResultViewModel is null");
@@ -224,6 +247,12 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		}
 	}
 	
+	/**
+	 * Given the JSON object representing a LpDaac product, add to the result view models the map containing the product's property
+	 * @param oJsonItem the JSON object representing a LpDaac product
+	 * @param sTitle the name of the product
+	 * @param oResult the result view model 
+	 */
 	private void addProperties(JSONObject oJsonItem, String sTitle, QueryResultViewModel oResult) {
 		
 		if (oJsonItem == null || oResult == null) {
@@ -282,7 +311,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 						sHref += "/";
 					
 					String sDateFolder = sStartDate.substring(0, 10).replace("-", ".");
-					sHref += sDateFolder + "/" + sTitle + ".hdf";
+					sHref += sDateFolder + "/" + sTitle;
 					sLink = sHref;
 					break;
 				}
@@ -321,6 +350,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 	 * @param oItem  oItem the object representing a MODIS product, read from the DB
 	 * @param oResult the result view model
 	 */
+	@Deprecated
 	private void addProperties(ModisItemForReading oItem, QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(oItem, "ResponseTranslatorModis.addProperties: input oItem is null");
 		Preconditions.checkNotNull(oResult, "ResponseTranslatorModis.addProperties: QueryResultViewModel is null");
