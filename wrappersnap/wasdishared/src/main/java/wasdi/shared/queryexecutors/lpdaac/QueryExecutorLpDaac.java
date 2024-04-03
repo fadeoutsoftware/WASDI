@@ -228,7 +228,7 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		}
 		
 		// add pagination
-		sSearchUrl += "&page_size=" + iLimit + "&page_num=" + (iOffset + 1);
+		sSearchUrl += "&page_size=" + iLimit + "&offset=" + iOffset;
 		
 		HttpCallResponse oHttpResponse = HttpUtils.httpGet(sSearchUrl);
 		
