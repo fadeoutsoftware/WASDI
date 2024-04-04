@@ -21,6 +21,7 @@ public class ProcessorTypes {
 	public static String PYTHON_PIP_2 = "python_pip_2";
 	public static String PIP_ONESHOT = "pip_oneshot";
 	public static String PYTHON_PIP_2_UBUNTU_20 = "python_pip_2_ubuntu_20";
+	public static String PYTHON_PIP_MELUXINA = "python_pip_meluxina";
 	
 	/**
 	 * Obtains the name of the subfolder where the docker template is stored.
@@ -38,6 +39,7 @@ public class ProcessorTypes {
 		else if (sProcessorType.equals(PYTHON_PIP_2)) return "python_pip_2";
 		else if (sProcessorType.equals(PIP_ONESHOT)) return "pip_oneshot";
 		else if (sProcessorType.equals(PYTHON_PIP_2_UBUNTU_20)) return "wasdiUbuntuFocalPython";
+		else if (sProcessorType.equals(PYTHON_PIP_MELUXINA)) return "python_pip_meluxina";
 		return "";
 	}
 	

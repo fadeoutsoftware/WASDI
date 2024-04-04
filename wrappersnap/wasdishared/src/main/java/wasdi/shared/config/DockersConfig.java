@@ -126,6 +126,11 @@ public class DockersConfig {
 	public List<ProcessorTypeConfig> processorTypes = new ArrayList<>();
 	
 	/**
+	 * Meluxina Config
+	 */
+	public MeluxinaConfig meluxina;
+	
+	/**
 	 * Get the list of registers ordered by priority
 	 * @return Ordered list of registers
 	 */
