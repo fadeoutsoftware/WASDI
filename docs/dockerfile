@@ -24,7 +24,7 @@ WORKDIR /usr/src/app
 
 
 ## still need to fix domain.py for javasphinx :-( 
-COPY ./domain.py /usr/local/lib/python3.8/site-packages/javasphinx/domain.py
+COPY ./docs/domain.py /usr/local/lib/python3.8/site-packages/javasphinx/domain.py
 
 
 # Start the container
