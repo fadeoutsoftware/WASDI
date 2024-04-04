@@ -77,6 +77,7 @@ A good starting point to applications is the :doc:`App store overview </AppStore
 
    WasdiApplications/AppStoreTutorial.rst
    WasdiApplications/eDriftTutorial.rst
+   WasdiApplications/WheatLocator.rst
 
 
 Add your App to WASDI
