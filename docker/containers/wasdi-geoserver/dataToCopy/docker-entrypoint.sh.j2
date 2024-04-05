@@ -715,6 +715,49 @@ then
             "    <!--" \
             ""
     fi
+
+    iCorsJettyBlockStartLineNumber=""
+    iCorsJettyBlockStopLineNumber=""
+
+    displayLog "" "CORS_JETTY" "Search the line at which the CORS for Jetty block is starting"
+    iCorsJettyBlockStartLineNumber="$(grep --extended-regexp --ignore-case --line-number ".*Uncomment.*CORS$" ${sGeoserverWebApplicationConfigurationFile} | cut --delimiter ':' --fields 1)"
+
+    if [[ -n "${iCorsJettyBlockStartLineNumber}" ]]
+    then
+        displayLog "" "CORS_JETTY" "OK: line ${iCorsJettyBlockStartLineNumber}"
+    else
+        displayLog "" "CORS_JETTY" "ERROR: unable to find the line"
+    fi
+
+    if [[ -n "${iCorsJettyBlockStartLineNumber}" ]]
+    then
+        displayLog "" "CORS_JETTY" "Search the line at which the CORS for Jetty block is finishing"
+        iCorsJettyBlockStopLineNumber="$(grep --line-number "\-->" ${sGeoserverWebApplicationConfigurationFile} | cut --delimiter ':' --fields 1 | awk -v iCorsJettyBlockStartLineNumber=${iCorsJettyBlockStartLineNumber} '{ if ( $1 > iCorsJettyBlockStartLineNumber ) print $0}' | head --lines 1)"
+
+        if [[ -n "${iCorsJettyBlockStopLineNumber}" ]]
+        then
+            displayLog "" "CORS_JETTY" "OK: line ${iCorsJettyBlockStopLineNumber}"
+        else
+            displayLog "" "CORS_JETTY" "ERROR: unable to find the line"
+        fi
+    fi
+
+    if [[ -n "${iCorsJettyBlockStartLineNumber}" && -n "${iCorsJettyBlockStopLineNumber}" ]]
+    then
+        addContentFromLineNumber \
+            "CORS_JETTY" \
+            "${sGeoserverWebApplicationConfigurationFile}" \
+            "${iCorsJettyBlockStartLineNumber}" \
+            "" \
+            "-->"
+
+        addContentFromLineNumber \
+            "CORS_JETTY" \
+            "${sGeoserverWebApplicationConfigurationFile}" \
+            "${iCorsJettyBlockStopLineNumber}" \
+            "    <!--" \
+            ""
+    fi
 fi
 
 
