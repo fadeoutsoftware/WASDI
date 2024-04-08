@@ -167,6 +167,7 @@ public final class HttpUtils {
 						Util.copyStream(oInputStream, oBytearrayOutputStream);
 						sResult = oBytearrayOutputStream.toString();
 						oHttpCallResponse.setResponseBody(sResult);
+						oHttpCallResponse.setResponseBytes(oBytearrayOutputStream.toByteArray());
 					}
 				} 
 				else {

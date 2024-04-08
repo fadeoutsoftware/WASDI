@@ -695,6 +695,18 @@ public class PermissionsUtils {
 			else if (sCollection.equals(ImagesCollections.ORGANIZATIONS.getFolder())) {
 				return canUserAccessOrganization(sUserId, sFolder);
 			}
+			else if (sCollection.equals(ImagesCollections.STYLES.getFolder())) {
+				String sStyleName = WasdiFileUtils.getFileNameWithoutExtensionsAndTrailingDots(sImage);
+				
+				if (!Utils.isNullOrEmpty(sStyleName)) {
+					StyleRepository oStyleRepository = new StyleRepository();
+					Style oStyle = oStyleRepository.getStyleByName(sStyleName);
+					if (oStyle != null) {
+						return canUserAccessStyle(sUserId, oStyle.getStyleId());
+					}					
+				}				
+			}
+			
 			
 			return false;
 			
@@ -738,6 +750,17 @@ public class PermissionsUtils {
 			}
 			else if (sCollection.equals(ImagesCollections.ORGANIZATIONS.getFolder())) {
 				return canUserWriteOrganization(sUserId, sFolder);
+			}
+			else if (sCollection.equals(ImagesCollections.STYLES.getFolder())) {
+				String sStyleName = WasdiFileUtils.getFileNameWithoutExtensionsAndTrailingDots(sImage);
+				
+				if (!Utils.isNullOrEmpty(sStyleName)) {
+					StyleRepository oStyleRepository = new StyleRepository();
+					Style oStyle = oStyleRepository.getStyleByName(sStyleName);
+					if (oStyle != null) {
+						return canUserWriteStyle(sUserId, oStyle.getStyleId());
+					}					
+				}				
 			}
 			
 			return false;

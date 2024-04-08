@@ -235,17 +235,17 @@ public class WasdiFileUtils {
 
 	/**
 	 * Write input-stream to file
-	 * @param fileInputStream the input-stream to be written
+	 * @param oInputStream the input-stream to be written
 	 * @param oFile the file to be written
 	 * @throws FileNotFoundException in case of any issues with the file
 	 * @throws IOException if an I/O error occurs
 	 */
-	public static void writeFile(InputStream fileInputStream, File oFile) throws FileNotFoundException, IOException {
+	public static void writeFile(InputStream oInputStream, File oFile) throws FileNotFoundException, IOException {
 		int iRead = 0;
 		byte[] ayBytes = new byte[1024];
 
 		try (OutputStream oOutStream = new FileOutputStream(oFile)) {
-			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+			while ((iRead = oInputStream.read(ayBytes)) != -1) {
 				oOutStream.write(ayBytes, 0, iRead);
 			}
 			oOutStream.flush();

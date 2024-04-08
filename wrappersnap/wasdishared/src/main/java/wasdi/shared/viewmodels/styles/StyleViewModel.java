@@ -17,6 +17,7 @@ public class StyleViewModel {
 	private boolean isPublic;
 	private String userId;
 	private boolean readOnly;
+	private String imgLink;
 
 	// This field should be initialized before return the view model checking in the style sharing
 	// through the repositories 
@@ -102,6 +103,14 @@ public class StyleViewModel {
 
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
+	}
+
+	public String getImgLink() {
+		return imgLink;
+	}
+
+	public void setImgLink(String imgLink) {
+		this.imgLink = imgLink;
 	}
 
 }
