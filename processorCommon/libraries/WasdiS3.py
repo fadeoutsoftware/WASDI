@@ -62,6 +62,9 @@ class WasdiS3():
     :param bOnlyName:
         (optional) If True, we keep only the name
         of the file. Else, we keep all metadata.
+    :param sDirectory:
+        (optional) If setted, return only the content
+        of the directory specified.
 
     :return:
         if bOnlyName is True: a list which contain
@@ -71,16 +74,28 @@ class WasdiS3():
         contain all metadata for all objects present
         in the bucket (directories + files)
     '''
-    def getContent(self, bOnlyName = True):
+    def getContent(self, **kwargs):
+        aoConfiguration = {
+            'Bucket': self.sBucketName
+        }
+
+        if 'sDirectory' in kwargs and type(kwargs['sDirectory']) == str and kwargs['sDirectory'].strip() != '':
+            aoConfiguration['Prefix'] = kwargs['sDirectory'].strip()
+
+        bOnlyName = True
+
+        if 'bOnlyName' in kwargs and type(kwargs['bOnlyName']) == bool:
+            bOnlyName = kwargs['bOnlyName']
+
         if bOnlyName is True:
             aElements = []
 
-            for aoCurrentFile in self.oClient.list_objects(Bucket=self.sBucketName)['Contents']:
+            for aoCurrentFile in self.oClient.list_objects(**aoConfiguration)['Contents']:
                 aElements.append(aoCurrentFile['Key'])
 
             return aElements
 
-        return self.oClient.list_objects(Bucket=self.sBucketName)['Contents']
+        return self.oClient.list_objects(**aoConfiguration)['Contents']
 
 
     '''
@@ -90,10 +105,12 @@ class WasdiS3():
         a list which contain the list of files
         present in the bucket
     '''
-    def getFiles(self):
+    def getFiles(self, **kwargs):
+        kwargs['bOnlyName'] = True
+
         aFiles = []
 
-        for sCurrentElement in self.getContent(True):
+        for sCurrentElement in self.getContent(**kwargs):
             if not sCurrentElement.endswith('/'):
                 aFiles.append(sCurrentElement)
 
