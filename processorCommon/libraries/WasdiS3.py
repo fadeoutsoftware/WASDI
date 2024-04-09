@@ -2,7 +2,7 @@ import boto3
 import botocore
 import os
 
-from libs.WasdiLogging import WasdiLogging
+import WasdiLogging
 
 
 
