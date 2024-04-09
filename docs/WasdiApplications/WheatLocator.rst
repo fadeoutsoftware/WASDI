@@ -27,6 +27,8 @@ images, our model achieved an 84% F1-score. Our code is publicly
 available at this
 `Repo <https://github.com/geoaigroup/GEOAI-ECRS2023>`__.
 
+.. image:: ../_static/WheatLocator/2.png
+
 The App will automatically download the required Region of Interest
 (RoI) images or use available workspace images. Since we trained the
 transformer model on a Satellite Images Time Series (SITS) of Lebanon,
@@ -35,7 +37,8 @@ testing using new regions. This work is in the beta phase, and your
 feedback is highly appreciated via this
 `LINK <https://geogroup.ai/#contact>`__ or through info@geogroup.ai.
 
-`![1711545352449]<https://github.com/geoaigroup/crop-monitoring/assets/14883982/68f62e4e-e8e1-44ed-b936-2c0a668e6c60>`__
+.. image:: ../_static/WheatLocator/1.png
+   :scale: 70%
 
 Input Parameters:
 -----------------
