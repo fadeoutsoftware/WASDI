@@ -32,6 +32,9 @@ class WasdiLogging(metaclass = Singleton):
         # Define the default format of the message
         self.sFormatterDefault = '[%(process)s] %(asctime)s | %(levelname)-8s | %(message)s'
 
+        if 'sLogFormat' in kwargs:
+            self.sFormatterDefault = kwargs['sLogFormat']
+
         # Create the logging instance
         self.oLogging = logging.getLogger(kwargs['sLoggerName'])
 
