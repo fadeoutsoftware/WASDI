@@ -22,6 +22,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://www.wasdi.net",
     packages=setuptools.find_packages(),
+    license='CC-BY License',
     install_requires=[
         'requests',
     ],
@@ -30,7 +31,7 @@ setuptools.setup(
         "Environment :: Console",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: Creative Commons Attribution 4.0 International license",
+        "License :: Other/Proprietary License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
         "Topic :: Scientific/Engineering",
