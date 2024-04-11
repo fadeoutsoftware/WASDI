@@ -654,7 +654,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     print('sleep start')
-    time.sleep(200)
+    time.sleep(300)
     print('sleep end')
 
     if sOperation == "0":
