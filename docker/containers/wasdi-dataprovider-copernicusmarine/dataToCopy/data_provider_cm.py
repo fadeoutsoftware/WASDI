@@ -653,7 +653,9 @@ if __name__ == '__main__':
         logging.error('__main__: Exception ' + str(oE))
         sys.exit(1)
 
-    time.sleep(100)
+    print('sleep start')
+    time.sleep(120)
+    print('sleep end')
 
     if sOperation == "0":
         logging.debug('__main__: chosen operation is EXECUTE AND RETRIEVE')
