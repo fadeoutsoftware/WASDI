@@ -91,7 +91,7 @@ public class StripeService {
 		return oStripePaymentDetail;
 	}
 
-	public String createProductAppWithOnDemandPrice(String sName, String sDescription, Float fPrice) {
+	public Map<String, String> createProductAppWithOnDemandPrice(String sName, String sDescription, Float fPrice) {
 
 		if (Utils.isNullOrEmpty(sName)) {
 			WasdiLog.warnLog(
@@ -163,8 +163,9 @@ public class StripeService {
 
 				WasdiLog.debugLog("StripeService.createProductAppWithOnDemandPrice: created price " + sPriceId
 						+ " for product " + sProductId);
+				
 
-				return sProductId;
+				return Map.of("productId", sProductId, "priceId", sPriceId);
 			} catch (Exception oEx) {
 				WasdiLog.errorLog(
 						"StripeService.createProductAppWithOnDemandPrice: there was an error reading the json response ",
@@ -565,6 +566,122 @@ public class StripeService {
 		}
 
 	}
+	
+	public String createPaymentLink(String sPriceId, String sWasdiProcessorId) {
+		if (Utils.isNullOrEmpty(sPriceId)) {
+			WasdiLog.errorLog("StripeService.createPaymentLink: price id is null or empty. Impossible to create payment link");
+			return null;
+		}
+				
+		String sUrl = s_sSTRIPE_BASE_URL;
+		if (!sUrl.endsWith("/"))
+			sUrl += "/";
+		sUrl += "payment_links?";
+
+		// request parameters
+		List<String> asParameters = new ArrayList<>();
+		try {
+
+			asParameters.add("line_items[0][price]=" + URLEncoder.encode(sPriceId, StandardCharsets.UTF_8.toString()));
+			asParameters.add("line_items[0][quantity]=" + URLEncoder.encode("1", StandardCharsets.UTF_8.toString()));
+			
+			asParameters.add("metadata[wasdi_processor_id]=" + sWasdiProcessorId);
+						
+			asParameters.add("after_completion[type]=redirect");
+			// TODO: change the redirection link
+			asParameters.add("after_completion[redirect][url]=" + URLEncoder.encode("https://test.wasdi.net/wasdiwebserver/rest/subscriptions/stripe/confirmation/{CHECKOUT_SESSION_ID}", StandardCharsets.UTF_8.toString()));
+
+		} catch (UnsupportedEncodingException oEx) {
+			WasdiLog.errorLog(
+					"StripeService.createPaymentLink: can't create product on Stripe. Error in encoding the request parameters",
+					oEx);
+			return null;
+		}
+		
+		String sAllParams = String.join("&", asParameters);
+		sUrl += sAllParams;
+
+		// headers
+		Map<String, String> asHeaders = getStripeAuthHeader();
+		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+
+		HttpCallResponse oHttpResponse = HttpUtils.httpPost(sUrl, "", asHeaders);
+		int iResponseCode = oHttpResponse.getResponseCode();
+
+		if (iResponseCode >= 200 && iResponseCode <= 299) {
+			try {
+				JSONObject oJsonResponseBody = new JSONObject(oHttpResponse.getResponseBody());
+				String sPaymentLinkId = oJsonResponseBody.optString("id", null);
+
+				if (Utils.isNullOrEmpty(sPaymentLinkId)) {
+					WasdiLog.warnLog(
+							"StripeService.createPaymentLink: payment link id not found in the Stripe response.");
+					return null;
+				}
+
+				WasdiLog.debugLog("StripeService.createPaymentLink: payment link create on Stripe with id: " + sPaymentLinkId);
+				
+				return sPaymentLinkId;
+				
+			} catch (Exception oEx) {
+				WasdiLog.errorLog(
+						"StripeService.createProductAppWithOnDemandPrice: there was an error reading the json response ",
+						oEx);
+				return null;
+			}
+		} else {
+			WasdiLog.errorLog(
+					"StripeService.createProductAppWithOnDemandPrice: Can't create product on Stripe. Error while sending the request to Stripe.");
+			return null;
+		}
+		
+		
+	}
+	
+	
+	public String retrievePaymentLink(String sPaymentLinkId) {
+		
+		if (Utils.isNullOrEmpty(sPaymentLinkId)) {
+			WasdiLog.warnLog("StripeService.retrievePaymentLink: payment link id is null or empty");
+			return null;
+		}
+
+		WasdiLog.debugLog("StripeService.retrievePaymentLink: get payment link for payment link id " + sPaymentLinkId);
+
+		String sUrl = s_sSTRIPE_BASE_URL;
+		if (!sUrl.endsWith("/"))
+			sUrl += "/";
+		sUrl += "payment_links/" + sPaymentLinkId;
+
+		
+		Map<String, String> asStripeHeaders = getStripeAuthHeader();
+		HttpCallResponse oHttpResponse = HttpUtils.httpGet(sUrl, asStripeHeaders);
+
+		int iResponseCode = oHttpResponse.getResponseCode();
+
+		if (iResponseCode >= 200 && iResponseCode <= 299) {
+			try {
+
+				JSONObject oJsonResponseBody = new JSONObject(oHttpResponse.getResponseBody());
+				String sPaymentLink = oJsonResponseBody.optString("url");
+
+				if (sPaymentLink == null) {
+					WasdiLog.warnLog("StripeService.retrievePaymentLink: payment link is null for id "+ sPaymentLink);
+				}
+
+				return sPaymentLink;
+
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("StripeService.getActiveOnDemandPriceId: exception reading the Stripe response ",
+						oEx);
+				return null;
+			}
+		} else {
+			WasdiLog.errorLog("StripeService.getActiveOnDemandPriceId: error while sending the request to Stripe");
+			return null;
+		}
+		
+	}
 
 	public static void main(String[] args) throws Exception {
 
@@ -573,9 +690,10 @@ public class StripeService {
 //		String isAppCreated = stripeService.createProductAppWithOnDemandPrice("Test App with Metadata", "This is an app with metadata", 50.00f); // prod_PlWwdzKlNEtHSc
 //		System.out.println(isAppCreated);
 
-		String sProdId = stripeService.deactivateProduct("prod_PlUsE22AA6eMga");
-		System.out.println("Deleted product: " + sProdId);
-		stripeService.listProducts();
+//		String sProdId = stripeService.deactivateProduct("prod_PlUsE22AA6eMga");
+//		System.out.println("Deleted product: " + sProdId);
+//		stripeService.listProducts();
+		
 
 //        List<String> sPriceIds = stripeService.getActiveOnDemandPriceId("prod_PlWwdzKlNEtHSc"); 
 //        for (String sId : sPriceIds)
@@ -587,6 +705,11 @@ public class StripeService {
 //        sPriceIds = stripeService.getPriceIdFromProductId("prod_PlUsE22AA6eMga"); // price_1OvxsKKhhULxWbPP4MxyE6yB
 //        for (String sId : sPriceIds)
 //        	System.out.println(sId);
+		
+		
+		// PAYMENT LINK
+		// System.out.println(stripeService.createPaymentLink("price_1Ow07tKhhULxWbPPjF0seIp7", "wasdi-processor-id"));
+		System.out.println(stripeService.retrievePaymentLink("plink_1P43vlKhhULxWbPPNM5qFNFq"));
 
 	}
 

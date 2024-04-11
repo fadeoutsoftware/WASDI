@@ -1911,28 +1911,69 @@ public class ProcessorsResource  {
 			
 			if (fNewOnDemandPrice < 0) {
 				WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the ondemand price is a negative value. Information on Stripe won't be updated");
+				return Response.status(Status.BAD_REQUEST).build();
 			} 
-			else if (fOldOnDemandPrice != fNewOnDemandPrice) { // TODO: should we update those prices only if the showInStore == true? or in any case?
-				// the user updated the on-demand price of the app.
+			else if (fOldOnDemandPrice != fNewOnDemandPrice) {
 				StripeService oStripeService = new StripeService();
 				
 				if (fOldOnDemandPrice > 0 && fNewOnDemandPrice == 0) {
-					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the app has been set for free. Archiving the Stripe product");
-
+					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the app has been set for free. Archiving the Stripe price for the app");
+					String sStripeProductId = oProcessorToUpdate.getStripeProductId();
+					
+					if (Utils.isNullOrEmpty(sStripeProductId)) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id is null or empty.");
+						return Response.status(Status.NOT_FOUND).build(); // TODO: is the message appropriate?
+					}
+					
+					String sArchivedPriceId = oStripeService.deactivateOnDemandPrice(sStripeProductId);
+					if (Utils.isNullOrEmpty(sArchivedPriceId)) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the id of the archived product is null. Something might have gone wrong on Stripe");
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+					}
+					
+					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: archived price id: " + sArchivedPriceId);
 				}
 				else if (fOldOnDemandPrice <= 0 && fNewOnDemandPrice > 0) {
 					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: the app has been set for sale. Adding the Stripe product");
-					String sProductId = oStripeService.createProductAppWithOnDemandPrice(sSessionId, sProcessorId, fNewOnDemandPrice);
-					if (Utils.isNullOrEmpty(sProductId)) {
-						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id is null or emprt");
+					Map<String, String> oStripeProducInformationMap = oStripeService.createProductAppWithOnDemandPrice(oUpdatedProcessorVM.getProcessorName(), sProcessorId, fNewOnDemandPrice);
+				
+					if (oStripeProducInformationMap == null) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id is null or empty. No product will be created on Stripe");
+						return Response.status(Status.NOT_FOUND).build(); // TODO: is the message appropriate?
 					}
-					// TODO: we need to persist the product id
-
+					
+					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: product created on Stripe with id: " + sProcessorId);
+					
+					oProcessorToUpdate.setStripeProductId(oStripeProducInformationMap.get("productId"));
+					
+					String sPriceId = oStripeProducInformationMap.get("priceId");
+					String sStripePaymentLink = oStripeService.createPaymentLink(sPriceId, oProcessorToUpdate.getProcessorId());
+					
+					if (Utils.isNullOrEmpty(sStripePaymentLink)) {
+						WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: Stripe payment URL is null or empty.");
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+					}
+					
+					oProcessorToUpdate.setStripePaymentUrl(sStripePaymentLink);
+					
 				}
 				else if (fOldOnDemandPrice > 0 && fNewOnDemandPrice > 0 && fOldOnDemandPrice != fNewOnDemandPrice) {
 					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the price of the app changed. Updating the correspoding Stripe product");
-					// TODO: here we need to retrieve from the db the Stripe produc id of the processor.
-					String sProductId = ""; //TODO: add here the call to the db to retrieve the Stripe product id
+					String sStripeProductId = oProcessorToUpdate.getStripeProductId();
+					
+					if (Utils.isNullOrEmpty(sStripeProductId)) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id not found in the db. Price won't be updated");
+						return Response.status(Status.NOT_FOUND).build(); // TODO: is the message appropriate?
+					}
+					
+					String sStripeOnDemandPriceId = oStripeService.updateOnDemandPrice(sStripeProductId, fNewOnDemandPrice);
+					
+					if (Utils.isNullOrEmpty(sStripeOnDemandPriceId)) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: updated price id in Stripe is null or empty. Something might have gone wrong on Stripe");
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+					}
+					
+					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: price updated for Stripe product " + sStripeProductId + ". New price id: " + sStripeOnDemandPriceId);
 				}
 				
 			}
