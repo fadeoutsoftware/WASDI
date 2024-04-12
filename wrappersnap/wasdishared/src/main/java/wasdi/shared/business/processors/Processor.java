@@ -72,12 +72,12 @@ public class Processor {
 	/**
 	 * Product id on Stripe
 	 */
-	private String stripeProductId;
+	private String stripeProductId = "";
 	
 	/**
-	 * Stripe payment link
+	 * Stripe on demand payment link
 	 */
-	private String stripePaymentLinkId;
+	private String stripePaymentLinkId = "";
 	
 	/**
 	 * Application external link

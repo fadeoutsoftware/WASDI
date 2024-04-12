@@ -1,0 +1,77 @@
+package wasdi.shared.business;
+
+public class AppPayment {
+	
+	private String appPaymentId;
+	
+	private String name;
+		
+	private String userId;
+	
+	private String processorId;
+	
+	private boolean buySuccess;
+	
+	private Long buyDate;
+	
+	private Long runDate;
+	
+
+	public String getAppPaymentId() {
+		return appPaymentId;
+	}
+
+	public void setAppPaymentId(String appPaymentId) {
+		this.appPaymentId = appPaymentId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public String getProcessorId() {
+		return processorId;
+	}
+
+	public void setProcessorId(String processorId) {
+		this.processorId = processorId;
+	}
+
+	public boolean isBuySuccess() {
+		return buySuccess;
+	}
+
+	public void setBuySuccess(boolean buySuccess) {
+		this.buySuccess = buySuccess;
+	}
+
+	public Long getBuyDate() {
+		return buyDate;
+	}
+
+	public void setBuyDate(Long buyDate) {
+		this.buyDate = buyDate;
+	}
+
+	public Long getRunDate() {
+		return runDate;
+	}
+
+	public void setRunDate(Long runDate) {
+		this.runDate = runDate;
+	}
+
+	
+}

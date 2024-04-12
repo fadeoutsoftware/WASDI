@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.ws.rs.Consumes;
@@ -35,6 +36,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.joda.time.DateTime;
 
 import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
@@ -46,10 +48,12 @@ import it.fadeout.threads.RedeployProcessorWorker;
 import it.fadeout.threads.UpdateProcessorFilesWorker;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
+import wasdi.shared.business.AppPayment;
 import wasdi.shared.business.Counter;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.Review;
+import wasdi.shared.business.Subscription;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorLog;
@@ -62,7 +66,9 @@ import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.ProcessorTypeConfig;
+import wasdi.shared.config.StripeProductConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.AppPaymentRepository;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CounterRepository;
 import wasdi.shared.data.MongoRepository;
@@ -72,6 +78,7 @@ import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProcessorUIRepository;
 import wasdi.shared.data.ReviewRepository;
+import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
@@ -84,7 +91,13 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ClientMessageCodes;
+import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.SuccessResponse;
+import wasdi.shared.viewmodels.organizations.ProjectEditorViewModel;
+import wasdi.shared.viewmodels.organizations.SubscriptionType;
+import wasdi.shared.viewmodels.organizations.SubscriptionViewModel;
 import wasdi.shared.viewmodels.processors.AppDetailViewModel;
 import wasdi.shared.viewmodels.processors.AppFilterViewModel;
 import wasdi.shared.viewmodels.processors.AppListViewModel;
@@ -1925,36 +1938,44 @@ public class ProcessorsResource  {
 						return Response.status(Status.NOT_FOUND).build(); // TODO: is the message appropriate?
 					}
 					
-					String sArchivedPriceId = oStripeService.deactivateOnDemandPrice(sStripeProductId);
-					if (Utils.isNullOrEmpty(sArchivedPriceId)) {
+					String sDeactivatedOnDemandPrice = oStripeService.deactivateOnDemandPrice(sStripeProductId);
+					if (Utils.isNullOrEmpty(sDeactivatedOnDemandPrice)) {
 						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the id of the archived product is null. Something might have gone wrong on Stripe");
 						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 					}
 					
-					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: archived price id: " + sArchivedPriceId);
+					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: archived price id: " + sDeactivatedOnDemandPrice);
 				}
 				else if (fOldOnDemandPrice <= 0 && fNewOnDemandPrice > 0) {
 					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: the app has been set for sale. Adding the Stripe product");
+					
 					Map<String, String> oStripeProducInformationMap = oStripeService.createProductAppWithOnDemandPrice(oUpdatedProcessorVM.getProcessorName(), sProcessorId, fNewOnDemandPrice);
 				
-					if (oStripeProducInformationMap == null) {
-						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id is null or empty. No product will be created on Stripe");
+					if (oStripeProducInformationMap == null ) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: no information about the created Stripe product");
 						return Response.status(Status.NOT_FOUND).build(); // TODO: is the message appropriate?
 					}
 					
-					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: product created on Stripe with id: " + sProcessorId);
+					String sStripeProductId = oStripeProducInformationMap.getOrDefault("productId", null);
+					String sStripePriceId = oStripeProducInformationMap.getOrDefault("priceId", null);
 					
-					oProcessorToUpdate.setStripeProductId(oStripeProducInformationMap.get("productId"));
+					if (Utils.isNullOrEmpty(sStripeProductId) || Utils.isNullOrEmpty(sStripePriceId)) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id and price id are null or empty");
+						return Response.status(Status.NOT_FOUND).build(); // TODO: is the message appropriate?
+					}
 					
-					String sPriceId = oStripeProducInformationMap.get("priceId");
-					String sStripePaymentLink = oStripeService.createPaymentLink(sPriceId, oProcessorToUpdate.getProcessorId());
+					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: product created on Stripe with id: " + sStripeProductId);
 					
-					if (Utils.isNullOrEmpty(sStripePaymentLink)) {
-						WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: Stripe payment URL is null or empty.");
+					oProcessorToUpdate.setStripeProductId(sStripeProductId);
+					
+					String sStripePaymentLinkId = oStripeService.createPaymentLink(sStripePriceId, sProcessorId);
+					
+					if (Utils.isNullOrEmpty(sStripePaymentLinkId)) {
+						WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: Stripe payment link id is null or empty.");
 						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 					}
 					
-					oProcessorToUpdate.setStripePaymentUrl(sStripePaymentLink);
+					oProcessorToUpdate.setStripePaymentLinkId(sStripePaymentLinkId);
 					
 				}
 				else if (fOldOnDemandPrice > 0 && fNewOnDemandPrice > 0 && fOldOnDemandPrice != fNewOnDemandPrice) {
@@ -1966,14 +1987,42 @@ public class ProcessorsResource  {
 						return Response.status(Status.NOT_FOUND).build(); // TODO: is the message appropriate?
 					}
 					
-					String sStripeOnDemandPriceId = oStripeService.updateOnDemandPrice(sStripeProductId, fNewOnDemandPrice);
+					List<String> asStripeOnDemandPriceId = oStripeService.getActiveOnDemandPricesId(sStripeProductId);
 					
-					if (Utils.isNullOrEmpty(sStripeOnDemandPriceId)) {
+					if (asStripeOnDemandPriceId.size() != 1) {
+						// we support only one active price at time
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: none or more than one on demand prices found.");
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build(); // TODO: is the message appropriate?
+					}
+					
+					// deactivate the current on demand price and get the new price id
+					String sStripeNewOnDemandPriceId = oStripeService.updateOnDemandPrice(sStripeProductId, fNewOnDemandPrice);
+					
+					String sStripePaymentLinkId = oProcessorToUpdate.getStripePaymentLinkId();
+					String sResponsePaymentLinkId = oStripeService.deactivatePaymentLink(sStripePaymentLinkId);
+					
+					if (Utils.isNullOrEmpty(sResponsePaymentLinkId) || !sResponsePaymentLinkId.equals(sStripePaymentLinkId)) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: payment link on Stripe has not been deactivated");
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build(); // TODO: is the message appropriate?
+					}
+					
+					// generate a new on demand price
+					String sNewPaymentLinkId = oStripeService.createPaymentLink(sStripeNewOnDemandPriceId, sProcessorId);
+					
+					if (Utils.isNullOrEmpty(sNewPaymentLinkId)) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: payment link on Stripe has not been generated for price id " + sStripeNewOnDemandPriceId);
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build(); // TODO: is the message appropriate?
+					}
+					
+					oProcessorToUpdate.setStripePaymentLinkId(sNewPaymentLinkId);	
+					
+					if (Utils.isNullOrEmpty(sStripeNewOnDemandPriceId)) {
 						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: updated price id in Stripe is null or empty. Something might have gone wrong on Stripe");
 						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 					}
 					
-					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: price updated for Stripe product " + sStripeProductId + ". New price id: " + sStripeOnDemandPriceId);
+					WasdiLog.debugLog(
+							"ProcessorsResource.updateProcessorDetails: price updated for Stripe product " + sStripeProductId + ". New on demand price id: " + sStripeNewOnDemandPriceId);
 				}
 				
 			}
@@ -1997,7 +2046,119 @@ public class ProcessorsResource  {
 			WasdiLog.errorLog("ProcessorResource.updateProcessorDetails error: " + oEx.toString());
 			return Response.serverError().build();
 		}
-	}		
+	}
+	
+	@POST
+	@Path("/addAppPayment")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response createAppPayment(@HeaderParam("x-session-token") String sSessionId, @QueryParam("paymentName") String sPaymentName, @QueryParam("processorId") String sProcessorId) {
+		// TODO: I should do a real POST with a view model
+		WasdiLog.debugLog("ProcessorResource.createAppPayment( Payment name: " + sPaymentName + ")");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.warnLog("ProcessorResource.createAppPayment: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+		
+		try {
+			
+			// TODO: add validation of the processor id
+			
+			AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
+			
+			String sName = sPaymentName;
+			while (oAppPaymentRepository.getAppPaymentByNameAndUser(sPaymentName, oUser.getUserId()) != null) {
+				sName = Utils.cloneName(sName);
+				WasdiLog.debugLog("ProcessorResource.createAppPayment: an app payment with the same name already exists. Changing the name to " + sName);
+			}
+			
+			
+			AppPayment oAppPayment = new AppPayment();
+			oAppPayment.setAppPaymentId(UUID.randomUUID().toString());
+			oAppPayment.setName(sName);
+			oAppPayment.setUserId(oUser.getUserId());
+			oAppPayment.setProcessorId(sProcessorId);
+			oAppPayment.setBuySuccess(false); // TODO: how to manage pending payments
+			oAppPayment.setBuyDate(DateTime.now().getMillis()); 
+			
+			oAppPaymentRepository.insertAppPayment(oAppPayment);
+			
+			return Response.ok(new SuccessResponse(oAppPayment.getAppPaymentId())).build();
+					
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorResource.createAppPayment: error " ,  oEx);
+			return Response.serverError().build();
+		}
+	}
+	
+	
+	@GET
+	@Path("/stripe/onDemandPaymentUrl")
+	public Response getStripeOnDemandPaymentUrl(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("subscription") String sSubscriptionId, @QueryParam("processor") String sProcessorId, @QueryParam("appPayment") String sAppPaymentId) {
+		WasdiLog.debugLog("ProcessorsResource.getStripeOnDemandPaymentUrl( " + "Subscription id: " + sSubscriptionId + ", "
+				+ "Processor id: " + sProcessorId + "," + "In App Payment: " + sAppPaymentId + ")");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+
+		try {
+			// Domain Check
+			if (Utils.isNullOrEmpty(sSubscriptionId)) {
+				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: invalid subscription id");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid subscriptionId.")).build();
+			}
+
+			if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
+				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: user cannot access subscription info");
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("The user cannot access the subscription info.")).build();
+			}
+			
+			ProcessorRepository oProcessorRespository = new ProcessorRepository();
+			
+			Processor oProcessor = oProcessorRespository.getProcessor(sProcessorId);
+			
+			if (oProcessor == null) {
+				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: processor id not found " + sProcessorId);
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The processor cannot be found.")).build();
+			}
+			
+			String sStripePaymentLinkId = oProcessor.getStripePaymentLinkId();
+			
+			if (Utils.isNullOrEmpty(sStripePaymentLinkId)) {
+				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: no payment id found for processor id " + sProcessorId);
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No payment  information available to purchase a run of the app")).build();
+			}
+			
+			StripeService oStripeService = new StripeService();
+			String sPaymentLink = oStripeService.retrievePaymentLink(sStripePaymentLinkId);
+			
+			if (Utils.isNullOrEmpty(sPaymentLink)) {
+				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: no payment url found for processor " + sProcessorId + "ad payment link id " + sPaymentLink);
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No payment link available to purchase a run of the app")).build();
+			}
+			
+			
+			// TODO: finish here
+			String sUrl = sPaymentLink + "?client_reference_id=" + "";
+
+
+
+			return Response.ok(new SuccessResponse(sUrl)).build();
+		} 
+		catch (Exception oEx) {
+			WasdiLog.errorLog("SubscriptionResource.getStripePaymentUrl error " + oEx);
+			return Response.serverError().build();
+		}
+	}
+	
 	
 	/**
 	 * Downloads a zip with the processors files

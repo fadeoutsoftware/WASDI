@@ -395,6 +395,12 @@ public class StripeService {
 		}
 	}
 	
+	/**
+	 * Deactivates a given Stripe price id, setting its "active" field to false. 
+	 * Before de-activating the price, it checks that the product has only one active price at time. 
+	 * @param sPriceId the Stripe price id
+	 * @return the de-activated price id if the operation was successful, null otherwise
+	 */
 	public String deactivateOnDemandPrice(String sProductId) {
 		if (Utils.isNullOrEmpty(sProductId)) {
 			WasdiLog.warnLog("StripeService.deactivateOnDemandPrice: product id is null or empty.");
@@ -416,10 +422,14 @@ public class StripeService {
 		return deactivatePrice(asOnDemandPrices.get(0));
 	}
 
+	/**
+	 * Deactivates a given Stripe price id, setting its "active" field to false
+	 * @param sPriceId the Stripe price id
+	 * @return the de-activated price id if the operation was successfull, null otherwise
+	 */
 	public String deactivatePrice(String sPriceId) {
 		if (Utils.isNullOrEmpty(sPriceId)) {
-			WasdiLog.errorLog(
-					"StripeService.deactivateProductPrice: price id is null or empty. Impossible to deactivate the price");
+			WasdiLog.errorLog("StripeService.deactivateProductPrice: price id is null or empty. Impossible to deactivate the price");
 			return null;
 		}
 
@@ -439,25 +449,18 @@ public class StripeService {
 				String sStripePriceId = oJsonResponseBody.optString("id", null);
 
 				if (Utils.isNullOrEmpty(sStripePriceId)) {
-					WasdiLog.warnLog(
-							"StripeService.deactivateProductPrice: no price id found after creation on stripe");
+					WasdiLog.warnLog("StripeService.deactivateProductPrice: no price id found after creation on stripe");
 					// TODO: in this case I need probably to remove the price from Stripe
 					return null;
 				}
 
 				if (!sPriceId.equals(sStripePriceId)) {
 					// this case should never happen
-					WasdiLog.warnLog(
-							"StripeService.deactivateProductPrice: the required price id and the returned price id are different");
+					WasdiLog.warnLog("StripeService.deactivateProductPrice: the required price id and the returned price id are different");
 					return null;
 				}
 
-				// one last check that the price is associated to the correct product (it should
-				// always be the case)
-				String sProductIdFromPrice = oJsonResponseBody.optString("product", null);
-
-				WasdiLog.debugLog("StripeService.deactivateProductPrice: price in Stripe with id: " + sStripePriceId
-						+ " has been deactivated");
+				WasdiLog.debugLog("StripeService.deactivateProductPrice: price in Stripe with id: " + sStripePriceId + " has been deactivated");
 
 				return sStripePriceId;
 
@@ -467,13 +470,18 @@ public class StripeService {
 				return null;
 			}
 		} else {
-			WasdiLog.errorLog(
-					"StripeService.deactivateProductPrice: Can't deactivate price. Error while sending the request to Stripe");
+			WasdiLog.errorLog("StripeService.deactivateProductPrice: Can't deactivate price. Error while sending the request to Stripe");
 			return null;
 		}
 
 	}
 	
+	/**
+	 * Updates the active price of a Stripe product to a new value. The old one will be archived.
+	 * @param sProductId Stripe product id
+	 * @param fNewPrice new price of the product
+	 * @return the new price id
+	 */
 	public String updateOnDemandPrice(String sProductId, float fNewPrice) {
 		
 		if (Utils.isNullOrEmpty(sProductId)) {
@@ -497,11 +505,17 @@ public class StripeService {
 		
 	}
 
+	/**
+	 * 
+	 * @param sProductId
+	 * @param sPriceId
+	 * @param fNewPrice
+	 * @return
+	 */
 	public String updateOnDemandPrice(String sProductId, String sPriceId, float fNewPrice) {
 		// TODO: adjust this so that we retrieve directly here the priceId
 		if (Utils.isNullOrEmpty(sProductId)) {
-			WasdiLog.warnLog(
-					"StripeService.updateAppPrice: product id is null or empty. Impossible to update app price");
+			WasdiLog.warnLog("StripeService.updateAppPrice: product id is null or empty. Impossible to update app price");
 			return null;
 		}
 
@@ -515,18 +529,15 @@ public class StripeService {
 			return null;
 		}
 
-		// to update a price, we need first to deactivate the current price, then create
-		// a new one
+		// to update a price, we need first to deactivate the current price, then create a new one
 		String sOldPriceId = deactivatePrice(sPriceId);
 
 		if (Utils.isNullOrEmpty(sOldPriceId)) {
-			WasdiLog.warnLog(
-					"StripeService.updateAppPrice: no old price retrieved. The product won't be updated with the new price");
+			WasdiLog.warnLog("StripeService.updateAppPrice: no old price retrieved. The product won't be updated with the new price");
 			return null;
 		}
 
-		WasdiLog.debugLog("StripeService.updateAppPrice: old price with id " + sPriceId
-				+ " has been deactivated for the product " + sProductId);
+		WasdiLog.debugLog("StripeService.updateAppPrice: old price with id " + sPriceId + " has been deactivated for the product " + sProductId);
 
 		String sNewPriceId = createProductOnDemandPrice(sProductId, fNewPrice);
 
@@ -634,13 +645,10 @@ public class StripeService {
 					"StripeService.createProductAppWithOnDemandPrice: Can't create product on Stripe. Error while sending the request to Stripe.");
 			return null;
 		}
-		
-		
 	}
 	
-	
 	public String retrievePaymentLink(String sPaymentLinkId) {
-		
+
 		if (Utils.isNullOrEmpty(sPaymentLinkId)) {
 			WasdiLog.warnLog("StripeService.retrievePaymentLink: payment link id is null or empty");
 			return null;
@@ -653,7 +661,7 @@ public class StripeService {
 			sUrl += "/";
 		sUrl += "payment_links/" + sPaymentLinkId;
 
-		
+
 		Map<String, String> asStripeHeaders = getStripeAuthHeader();
 		HttpCallResponse oHttpResponse = HttpUtils.httpGet(sUrl, asStripeHeaders);
 
@@ -680,8 +688,63 @@ public class StripeService {
 			WasdiLog.errorLog("StripeService.getActiveOnDemandPriceId: error while sending the request to Stripe");
 			return null;
 		}
+
+	}
+
+	
+	public String deactivatePaymentLink(String sPaymentLinkId) {
+		
+		if (Utils.isNullOrEmpty(sPaymentLinkId)) {
+			WasdiLog.errorLog("StripeService.deactivatePaymentLink: payment link id is null or empty. Impossible to update");
+			return null;
+		}
+
+		WasdiLog.debugLog("StripeService.deactivatePaymentLink: deactivate payment link " + sPaymentLinkId);
+
+		String sUrl = s_sSTRIPE_BASE_URL;
+		if (!sUrl.endsWith("/"))
+			sUrl += "/";
+		sUrl += "payment_links/" + sPaymentLinkId + "?" + "active=false";
+
+		Map<String, String> asStripeHeaders = getStripeAuthHeader();
+		HttpCallResponse oHttpResponse = HttpUtils.httpPost(sUrl, "", asStripeHeaders);
+
+		int iResponseCode = oHttpResponse.getResponseCode();
+
+		if (iResponseCode >= 200 && iResponseCode <= 299) {
+			try {
+				JSONObject oJsonResponseBody = new JSONObject(oHttpResponse.getResponseBody());
+				String sResponsePaymentLinkId = oJsonResponseBody.optString("id", null);
+
+				if (Utils.isNullOrEmpty(sResponsePaymentLinkId)) {
+					WasdiLog.warnLog("StripeService.deactivatePaymentLink: payment link id not found in the Stripe response.");
+					return null;
+				}
+				
+				if (!oJsonResponseBody.optBoolean("active")) {
+					WasdiLog.debugLog("StripeService.deactivatePaymentLink: payment link deactivated on Stripe with id: " + sPaymentLinkId);
+					return sPaymentLinkId;
+				}
+				else {
+					WasdiLog.errorLog("StripeService.deactivatePaymentLink: payment link is still active on Stripe with id: " + sPaymentLinkId + " but it should not");
+					return null;
+				}
+				
+
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("StripeService.deactivatePaymentLink: exception reading the Stripe response ",oEx);
+				return null;
+			}
+		} 
+		else {
+			WasdiLog.errorLog("StripeService.deactivatePaymentLink: error while sending the request to Stripe");
+			return null;
+		}
 		
 	}
+	
+	
+	
 
 	public static void main(String[] args) throws Exception {
 
@@ -709,7 +772,10 @@ public class StripeService {
 		
 		// PAYMENT LINK
 		// System.out.println(stripeService.createPaymentLink("price_1Ow07tKhhULxWbPPjF0seIp7", "wasdi-processor-id"));
-		System.out.println(stripeService.retrievePaymentLink("plink_1P43vlKhhULxWbPPNM5qFNFq"));
+		System.out.println(stripeService.retrievePaymentLink("plink_1OwNBtKhhULxWbPPSxUd1JUD"));
+		
+		// payment link: plink_1OwNBtKhhULxWbPPSxUd1JUD (amount 1 euro, price: price_1OwNAAKhhULxWbPPMoRc9Kac)
+		// System.out.println(stripeService.deactivatePaymentLink("plink_1OwNBtKhhULxWbPPSxUd1JUD"));
 
 	}
 
