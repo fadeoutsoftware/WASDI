@@ -5,11 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.AppPayment;
+import wasdi.shared.business.Subscription;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class AppPaymentRepository extends MongoRepository {
@@ -89,5 +92,31 @@ public class AppPaymentRepository extends MongoRepository {
 
         return null;
     }
+    
+    
+	/**
+	 * Update the information about a payment.
+	 * 
+	 * @param oAppPayment the payment to be updated
+	 * @return true if the operation succeeded, false otherwise
+	 */
+	public boolean updateAppPayment(AppPayment oAppPayment) {
+
+		try {
+			String sJSON = s_oMapper.writeValueAsString(oAppPayment);
+
+			Bson oFilter = new Document("appPaymentId", oAppPayment.getAppPaymentId());
+			Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
+
+			UpdateResult oResult = getCollection(m_sThisCollection).updateOne(oFilter, oUpdateOperationDocument);
+
+			if (oResult.getModifiedCount() == 1)
+				return true;
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("AppPaymentRepository.updateAppPayment: error ", oEx);
+		}
+
+		return false;
+	}
     
 }

@@ -12,9 +12,9 @@ public class AppPayment {
 	
 	private boolean buySuccess;
 	
-	private Long buyDate;
+	private Double buyDate;
 	
-	private Long runDate;
+	private Double runDate;
 	
 
 	public String getAppPaymentId() {
@@ -57,19 +57,19 @@ public class AppPayment {
 		this.buySuccess = buySuccess;
 	}
 
-	public Long getBuyDate() {
+	public Double getBuyDate() {
 		return buyDate;
 	}
 
-	public void setBuyDate(Long buyDate) {
+	public void setBuyDate(Double buyDate) {
 		this.buyDate = buyDate;
 	}
 
-	public Long getRunDate() {
+	public Double getRunDate() {
 		return runDate;
 	}
 
-	public void setRunDate(Long runDate) {
+	public void setRunDate(Double runDate) {
 		this.runDate = runDate;
 	}
 
