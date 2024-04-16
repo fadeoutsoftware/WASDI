@@ -21,6 +21,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.json.JsonObject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -38,6 +39,9 @@ import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.joda.time.DateTime;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
@@ -111,6 +115,7 @@ import wasdi.shared.viewmodels.processors.AppPaymentViewModel;
 import wasdi.shared.viewmodels.processors.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.processors.ProcessorLogViewModel;
 import wasdi.shared.viewmodels.processors.ProcessorSharingViewModel;
+import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceSummaryViewModel;
 import wasdi.shared.viewmodels.processworkspace.RunningProcessorViewModel;
 
 /**
@@ -987,71 +992,7 @@ public class ProcessorsResource  {
 		return oRunningProcessorViewModel;
 	}
 	
-	@GET
-	@Path("/canAppRun")
-	public Response checkAppPurchase(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId")String sProcessorId) {
 		
-		try {
-			
-			if (Utils.isNullOrEmpty(sProcessorId)) {
-				WasdiLog.warnLog("ProcessorsResource.checkAppPurchase: processor id is null or empty");
-				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Processor id not specified")).build();
-			}
-		
-			
-			// Check User 
-			User oUser = Wasdi.getUserFromSession(sSessionId);
-
-			if (oUser == null) {
-				WasdiLog.warnLog("ProcessorsResource.checkAppPurchase: invalid session");
-				return Response.status(Status.UNAUTHORIZED).build();
-			}
-			
-			AppPaymentRepository oAppPurchaseRepository = new AppPaymentRepository();
-			List<AppPayment> aoAppPayments = oAppPurchaseRepository.getAppPaymentByProcessorAndUser(sProcessorId, "" + oUser.getId());
-			
-			if (aoAppPayments == null) {
-				WasdiLog.warnLog("ProcessorsResource.checkAppPurchase: list of payments is null");
-				return Response.status(Status.NOT_FOUND).entity(new ErrorResponse("Payments not found")).build();
-			}
-			
-			String sPaymentId = null;
-			for (AppPayment oAppPayment : aoAppPayments ) {
-				if (oAppPayment.isBuySuccess()) {
-					if (oAppPayment.getRunDate() == null) {
-						sPaymentId = oAppPayment.getAppPaymentId();
-						WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: found an app payment that has not been yet used " + sPaymentId);
-						break;
-					}
-				}
-			}
-			
-			
-			if (Utils.isNullOrEmpty(sPaymentId)) {
-				WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: no payments found for the processor " + sProcessorId);
-				return Response.ok(false).build();
-			}
-			
-			// check if there is not another run of the app ongoing
-			// or maybe I can directly put here the process obj id
-
-			
-			
-			oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessorId); // TODO: does this work only locally or on all nodes?
-			WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: the run of the processor has been purchased. Payment id: " + sPaymentId);
-			return Response.ok(true).build();
-			
-			
-			
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.checkAppPurchase error: ", oEx);
-			return Response.serverError().build();
-		}
-		
-			
-	}
-	
 	/**
 	 * Return the help of a processor. when the user uploads a processor it can upload also an help file
 	 * like help.md (supported different names ie readme.md...)
@@ -2129,60 +2070,71 @@ public class ProcessorsResource  {
 	@POST
 	@Path("/addAppPayment")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response createAppPayment(@HeaderParam("x-session-token") String sSessionId, AppPaymentViewModel oAppPaymentVM) {
+	public Response addAppPayment(@HeaderParam("x-session-token") String sSessionId, AppPaymentViewModel oAppPaymentVM) {
 
-		// TO DO: EXPAND THE VIEW MODEL, ALSO IN THE OTHER METHOD
 		// TODO: DO WE ALSO NEED TO CHECK THE SUBSCRIPTIONS IN THESE CASES 
-		
-		if (oAppPaymentVM == null || Utils.isNullOrEmpty(oAppPaymentVM.getPaymentName()) || Utils.isNullOrEmpty(oAppPaymentVM.getProcessorId())) {
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Not enough information to proceed with the purchase")).build();
-		}
-		
-		String sPaymentName = oAppPaymentVM.getPaymentName();
-		String sProcessorId = oAppPaymentVM.getProcessorId();
-		
-		WasdiLog.debugLog("ProcessorResource.createAppPayment. Payment name: " + sPaymentName);
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-
-		if (oUser == null) {
-			WasdiLog.warnLog("ProcessorResource.createAppPayment: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
-		}
-		
 		try {
+			// check request parameters
+			if (oAppPaymentVM == null 
+					|| Utils.isNullOrEmpty(oAppPaymentVM.getPaymentName()) 
+					|| Utils.isNullOrEmpty(oAppPaymentVM.getProcessorId()) 
+					|| Utils.isNullOrEmpty(oAppPaymentVM.getBuyDate())) {
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Not enough information to proceed with the purchase")).build();
+			}
+			String sPaymentName = oAppPaymentVM.getPaymentName();
+			String sProcessorId = oAppPaymentVM.getProcessorId();
+			Double dBuyDate = Utils.getDateAsDouble(Utils.getYyyyMMddTZDate(oAppPaymentVM.getBuyDate()));
+
+			// check existence of the user
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if (oUser == null) {
+				WasdiLog.warnLog("ProcessorResource.createAppPayment: invalid session");
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+			}
+			String sUserId = oUser.getUserId();
+			
+			// check existence of the processor
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
-			
 			if (oProcessor == null) {
 				WasdiLog.warnLog("ProcessorResource.createAppPayment: processor " + sProcessorId + " not found in the db");
 				return Response.status(Status.NOT_FOUND).entity(new ErrorResponse("The app required for purchase does not exist")).build();	
 			}
 			
+			// check uniqueness of the payment name 
 			AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
-			
-			String sName = sPaymentName;
-			while (oAppPaymentRepository.getAppPaymentByNameAndUser(sPaymentName, oUser.getUserId()) != null) {
-				sName = Utils.cloneName(sName);
-				WasdiLog.debugLog("ProcessorResource.createAppPayment: an app payment with the same name already exists. Changing the name to " + sName);
+			String sFinalPaymentName = sPaymentName;
+			List<AppPayment> aoPaymentsByName = oAppPaymentRepository.getAppPaymentByNameAndUser(sPaymentName, sUserId);
+			while (aoPaymentsByName != null && aoPaymentsByName.size() > 0) {
+				sFinalPaymentName = Utils.cloneName(sFinalPaymentName);
+				WasdiLog.debugLog("ProcessorResource.createAppPayment: an app payment with the same name already exists. Changing the name to " + sFinalPaymentName);
 			}
 			
+			// add payment information to the db
+			String sPaymentId = UUID.randomUUID().toString();
+			
 			AppPayment oAppPayment = new AppPayment();
-			oAppPayment.setAppPaymentId(UUID.randomUUID().toString());
-			oAppPayment.setName(sName);
-			oAppPayment.setUserId(oUser.getUserId());
+			oAppPayment.setAppPaymentId(sPaymentId);
+			oAppPayment.setName(sFinalPaymentName);
+			oAppPayment.setUserId(sUserId);
 			oAppPayment.setProcessorId(sProcessorId);
 			oAppPayment.setBuySuccess(false);
-			oAppPayment.setBuyDate(Utils.nowInMillis()); 
+			oAppPayment.setBuyDate(dBuyDate); 
 			oAppPayment.setRunDate(null);
 			
-			oAppPaymentRepository.insertAppPayment(oAppPayment);
+			WasdiLog.debugLog("ProcessorResource.createAppPayment. Payment: " + sPaymentId + ", name: " + sPaymentName + ", user id " + sUserId + ", processorId: " + sProcessorId);
 			
-			return Response.ok(new SuccessResponse(oAppPayment.getAppPaymentId())).build();
+			boolean bIsSuccess = oAppPaymentRepository.insertAppPayment(oAppPayment);
+			
+			if (bIsSuccess)
+				return Response.ok(new SuccessResponse(sPaymentId)).build();
+			else
+				return Response.serverError().build();
 					
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorResource.createAppPayment: error " ,  oEx);
+			WasdiLog.errorLog("ProcessorResource.createAppPayment: error ", oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -2198,26 +2150,30 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/stripe/onDemandPaymentUrl")
-	public Response getStripeOnDemandPaymentUrl(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("subscription") String sSubscriptionId, @QueryParam("processor") String sProcessorId, @QueryParam("appPayment") String sAppPaymentId) {
+	public Response getStripeOnDemandPaymentUrl(@HeaderParam("x-session-token") String sSessionId, 
+			@QueryParam("processor") String sProcessorId, @QueryParam("appPayment") String sAppPaymentId) {
 		
 		// TODO: DO WE ALSO NEED TO CHECK THE SUBSCRIPTIONS IN THESE CASES?
 		
-		if (Utils.isNullOrEmpty(sProcessorId) || Utils.isNullOrEmpty(sAppPaymentId)) {
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Empty request parameters")).build();
-		}
 
+		/*
 		WasdiLog.debugLog("ProcessorsResource.getStripeOnDemandPaymentUrl( " + "Subscription id: " + sSubscriptionId + ", "
 				+ "Processor id: " + sProcessorId + "," + "In App Payment: " + sAppPaymentId + ")");
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-
-		if (oUser == null) {
-			WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
-		}
+		*/
 
 		try {
+			if (Utils.isNullOrEmpty(sProcessorId) || Utils.isNullOrEmpty(sAppPaymentId)) {
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Empty request parameters")).build();
+			}
+			
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oUser == null) {
+				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: invalid session");
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+			}
+			
+			/*
 			if (Utils.isNullOrEmpty(sSubscriptionId)) {
 				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: invalid subscription id");
 				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid subscriptionId.")).build();
@@ -2227,7 +2183,7 @@ public class ProcessorsResource  {
 				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: user cannot access subscription info");
 				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("The user cannot access the subscription info.")).build();
 			}
-			
+			*/
 			AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
 			AppPayment oAppPayment = oAppPaymentRepository.getAppPaymentById(sAppPaymentId);
 			
@@ -2272,6 +2228,114 @@ public class ProcessorsResource  {
 		}
 	}
 	
+	@GET
+	@Path("/isAppPurchased")
+	public Response checkAppPurchase(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processor")String sProcessorId) {
+		
+		try {
+			
+			if (Utils.isNullOrEmpty(sProcessorId)) {
+				WasdiLog.warnLog("ProcessorsResource.checkAppPurchase: processor id is null or empty");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Processor id not specified")).build();
+			}
+		
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if (oUser == null) {
+				WasdiLog.warnLog("ProcessorsResource.checkAppPurchase: invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			AppPaymentRepository oAppPurchaseRepository = new AppPaymentRepository();
+			List<AppPayment> aoAppPayments = oAppPurchaseRepository.getAppPaymentByProcessorAndUser(sProcessorId, oUser.getUserId());
+			if (aoAppPayments == null) {
+				WasdiLog.warnLog("ProcessorsResource.checkAppPurchase: list of payments is null");
+				return Response.status(Status.NOT_FOUND).entity(new ErrorResponse("Payments not found")).build();
+			}
+			
+			// find a payment that: (i) is valid, (ii) has not yet been used 
+			String sPaymentId = null;
+			for (AppPayment oAppPayment : aoAppPayments) {
+				WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: app payment: " + oAppPayment.getName());
+				if (oAppPayment.isBuySuccess() && oAppPayment.getRunDate() == null) {
+					sPaymentId = oAppPayment.getAppPaymentId();
+					WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: found an app payment that has not been yet used " + sPaymentId);
+					break;
+				}
+			}
+			
+			
+			if (Utils.isNullOrEmpty(sPaymentId)) {
+				WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: no payments found for the processor " + sProcessorId);
+				return Response.ok(false).build();
+			}
+			
+			// at this point, we know the run of the app was payed. 
+			// we still need to check that the app is not currently being executed (thus "consuming" the payment that we found in the db)
+			
+			if (WasdiConfig.Current.isMainNode()) {
+				NodeRepository oNodeRepo = new NodeRepository();
+				List<Node> aoNodes = oNodeRepo.getNodesList();
+				
+				List<String> asRunningStatus = Arrays.asList(ProcessStatus.CREATED.name(), 
+												ProcessStatus.WAITING.name(),
+												ProcessStatus.RUNNING.name(),
+												ProcessStatus.READY.name());
+				
+				boolean bIsRunOngoing = false;
+				
+				for (Node oNode : aoNodes) {
+					if (oNode.getNodeCode().equals("wasdi")) continue;
+					if (oNode.getActive() == false) continue;
+					
+					try {
+						WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: send request to computing node " + oNode.getNodeCode());
+						HttpCallResponse oResponse = ProcessWorkspaceAPIClient.getByUser(oNode, sSessionId, false);
+						int iResCode = oResponse.getResponseCode();
+						
+						if (iResCode >= 200 && iResCode <= 299) {
+							if (Utils.isNullOrEmpty(oResponse.getResponseBody())) {
+								WasdiLog.warnLog("ProcessorsResource.checkAppPurchase: response body from node " + oNode.getNodeCode() + "is null");
+								return Response.status(Status.NOT_FOUND).build();
+							} 
+							
+							JSONArray aoJsonProcessWs = new JSONArray(oResponse.getResponseBody()); 
+							int i = 0;
+							
+							while (i < aoJsonProcessWs.length() && !bIsRunOngoing) {
+								JSONObject oJsonProcessWs = aoJsonProcessWs.getJSONObject(i);
+								String sStatus = oJsonProcessWs.optString("status");
+								String sOperationType = oJsonProcessWs.optString("operationType");
+								if (sOperationType.equals(LauncherOperations.RUNPROCESSOR.name()) && asRunningStatus.contains(sStatus)) {
+									WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: found a running processor lunached by the user. Process obj id " + oJsonProcessWs.optString("processObjId)"));
+									return Response.ok(false).build();
+								}
+								i++;
+							}
+									
+						} else {
+							WasdiLog.warnLog("ProcessorResource.checkAppPurchase: error code (" + iResCode + ") from computing node " + oNode.getNodeCode());
+							return Response.status(Status.NOT_FOUND).build();
+						}
+						
+					} catch(Exception oEx) {
+						WasdiLog.errorLog("ProcessorsResource.checkAppPurchase: error trying to send request to computing nodes");
+						return Response.serverError().build();
+					}
+				}
+			}
+			
+			WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: the run of the processor has been purchased. Payment id: " + sPaymentId);
+			return Response.ok(true).build();	
+			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorsResource.checkAppPurchase error: ", oEx);
+			return Response.serverError().build();
+		}
+		
+			
+	}
+
 	
 	/**
 	 * Get the information about a payment
@@ -2307,7 +2371,16 @@ public class ProcessorsResource  {
 				return Response.status(Status.NOT_FOUND).entity(new ErrorResponse("Payment id not found")).build();	
 			}
 			
-			return Response.ok(new AppPaymentViewModel(oAppPayment.getName(), oAppPayment.getProcessorId())).build();
+			AppPaymentViewModel oAppPaymentViewModel = new AppPaymentViewModel();
+			oAppPaymentViewModel.setAppPaymentId(oAppPayment.getAppPaymentId());
+			oAppPaymentViewModel.setPaymentName(oAppPayment.getName());
+			oAppPaymentViewModel.setUserId(oAppPayment.getUserId());
+			oAppPaymentViewModel.setProcessorId(oAppPayment.getProcessorId());
+			oAppPaymentViewModel.setBuySuccess(oAppPayment.isBuySuccess());
+			oAppPaymentViewModel.setBuyDate(Utils.getFormatDate(Utils.getDate(oAppPayment.getBuyDate())));
+			oAppPaymentViewModel.setRunDate(Utils.getFormatDate(Utils.getDate(oAppPayment.getRunDate())));
+			
+			return Response.ok(oAppPaymentViewModel).build();
 					
 		}
 		catch (Exception oEx) {
