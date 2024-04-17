@@ -18,10 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.json.JsonObject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -38,7 +36,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.joda.time.DateTime;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -57,9 +54,7 @@ import wasdi.shared.business.AppPayment;
 import wasdi.shared.business.Counter;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
-import wasdi.shared.business.Project;
 import wasdi.shared.business.Review;
-import wasdi.shared.business.Subscription;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorLog;
@@ -72,7 +67,6 @@ import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.ProcessorTypeConfig;
-import wasdi.shared.config.StripeProductConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppPaymentRepository;
 import wasdi.shared.data.AppsCategoriesRepository;
@@ -83,9 +77,7 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProcessorUIRepository;
-import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.ReviewRepository;
-import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
@@ -104,10 +96,7 @@ import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.SuccessResponse;
-import wasdi.shared.viewmodels.organizations.ProjectEditorViewModel;
 import wasdi.shared.viewmodels.organizations.StripePaymentDetail;
-import wasdi.shared.viewmodels.organizations.SubscriptionType;
-import wasdi.shared.viewmodels.organizations.SubscriptionViewModel;
 import wasdi.shared.viewmodels.processors.AppDetailViewModel;
 import wasdi.shared.viewmodels.processors.AppFilterViewModel;
 import wasdi.shared.viewmodels.processors.AppListViewModel;
@@ -115,7 +104,6 @@ import wasdi.shared.viewmodels.processors.AppPaymentViewModel;
 import wasdi.shared.viewmodels.processors.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.processors.ProcessorLogViewModel;
 import wasdi.shared.viewmodels.processors.ProcessorSharingViewModel;
-import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceSummaryViewModel;
 import wasdi.shared.viewmodels.processworkspace.RunningProcessorViewModel;
 
 /**
@@ -934,6 +922,41 @@ public class ProcessorsResource  {
 				oRunningProcessorViewModel.setStatus("ERROR");
 				return oRunningProcessorViewModel;				
 			}
+			
+			
+			// check if the app has an on-demand price: in that case, update the appspayments table to track the run date/time
+			Float fOnDemandPrice = oProcessorToRun.getOndemandPrice();
+			if (fOnDemandPrice != null && fOnDemandPrice > 0) {
+				WasdiLog.debugLog("ProcessorsResource.internalRun: the app has an ondemand price");
+				AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
+				List<AppPayment> oAppPayments = oAppPaymentRepository.getAppPaymentByProcessorAndUser(oProcessorToRun.getProcessorId(), sUserId);
+				
+				if (oAppPayments != null) {
+					boolean bHasRunBeenPayed = false;
+					for (AppPayment oPayment : oAppPayments) {
+						if (oPayment.isBuySuccess() && Utils.isNullOrEmpty(oPayment.getRunDate())) {
+							WasdiLog.debugLog("ProcessorsResource.internalRun: found a payment for the on-demand run. Payment id: " + oPayment.getAppPaymentId());
+							oPayment.setRunDate(Utils.nowInMillis());
+							if (oAppPaymentRepository.updateAppPayment(oPayment)) {
+								WasdiLog.debugLog("ProcessorsResource.internalRun: payment correctly updated with run timestamp");
+								bHasRunBeenPayed = true;
+								break;
+							} else {
+								WasdiLog.warnLog("ProcessorsResource.internalRun: error registering the payed run. Payment details not updated");
+								oRunningProcessorViewModel.setStatus("ERROR");
+								return oRunningProcessorViewModel;	
+							}
+						}
+					}
+					
+					if (!bHasRunBeenPayed) {
+						WasdiLog.warnLog("ProcessorsResource.internalRun: no valid payment found for the app");
+						oRunningProcessorViewModel.setStatus("ERROR");
+						return oRunningProcessorViewModel;	
+					}
+				}
+			}
+			
 			
 			if (Utils.isNullOrEmpty(sEncodedJson)) {
 				sEncodedJson = "%7B%7D";
