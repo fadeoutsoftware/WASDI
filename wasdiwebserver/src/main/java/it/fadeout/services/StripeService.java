@@ -15,7 +15,6 @@ import com.stripe.model.PaymentIntent;
 import com.stripe.model.checkout.Session;
 import com.stripe.model.checkout.Session.CustomerDetails;
 
-import wasdi.shared.config.StripeProductConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
@@ -599,8 +598,12 @@ public class StripeService {
 			asParameters.add("metadata[wasdi_processor_id]=" + sWasdiProcessorId);
 						
 			asParameters.add("after_completion[type]=redirect");
-			// TODO: change the redirection link
-			asParameters.add("after_completion[redirect][url]=" + URLEncoder.encode("https://test.wasdi.net/wasdiwebserver/rest/subscriptions/stripe/confirmation/{CHECKOUT_SESSION_ID}", StandardCharsets.UTF_8.toString()));
+			String sRedirectionUrl = WasdiConfig.Current.baseUrl;
+			if (!sRedirectionUrl.endsWith("/"))
+				sRedirectionUrl += "/";
+			sRedirectionUrl += "processors/stripe/confirmation/{CHECKOUT_SESSION_ID}";
+			
+			asParameters.add("after_completion[redirect][url]=" + URLEncoder.encode(sRedirectionUrl, StandardCharsets.UTF_8.toString()));
 
 		} catch (UnsupportedEncodingException oEx) {
 			WasdiLog.errorLog(
