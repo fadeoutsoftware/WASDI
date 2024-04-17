@@ -180,6 +180,11 @@ public class StripeService {
 		}
 	}
 
+	/**
+	 * Deactivate a product and the price associated with it in Stripe
+	 * @param sProductId the Stripe product id
+	 * @return the deactivated product id if the de-activation was successfull, null otherwise
+	 */
 	public String deactivateProduct(String sProductId) {
 
 		if (Utils.isNullOrEmpty(sProductId)) {
@@ -697,6 +702,11 @@ public class StripeService {
 	}
 
 	
+	/**
+	 * Deactivate a payment link id on Stripe
+	 * @param sPaymentLinkId the id of the payment link
+	 * @return the payment link id itself, if the link has been correctly de-activated on Stripe, null otherwise
+	 */
 	public String deactivatePaymentLink(String sPaymentLinkId) {
 		
 		if (Utils.isNullOrEmpty(sPaymentLinkId)) {

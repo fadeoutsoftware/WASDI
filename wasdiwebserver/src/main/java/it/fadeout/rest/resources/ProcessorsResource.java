@@ -926,7 +926,7 @@ public class ProcessorsResource  {
 			
 			// check if the app has an on-demand price: in that case, update the appspayments table to track the run date/time
 			Float fOnDemandPrice = oProcessorToRun.getOndemandPrice();
-			if (fOnDemandPrice != null && fOnDemandPrice > 0) {
+			if (oProcessorToRun.getShowInStore() && fOnDemandPrice != null && fOnDemandPrice > 0) {
 				WasdiLog.debugLog("ProcessorsResource.internalRun: the app has an ondemand price");
 				AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
 				List<AppPayment> oAppPayments = oAppPaymentRepository.getAppPaymentByProcessorAndUser(oProcessorToRun.getProcessorId(), sUserId);
@@ -1392,6 +1392,34 @@ public class ProcessorsResource  {
 				// No, so unauthorized
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
+			
+			// is the app available in the market place with an on-demand price?
+			Float fOnDemandPrice = oProcessorToDelete.getOndemandPrice();
+			if (oProcessorToDelete.getShowInStore() && fOnDemandPrice != null && fOnDemandPrice > 0) {
+				StripeService oStripeService = new StripeService();
+				String sProductId = oProcessorToDelete.getStripeProductId();
+				String sPaymentLinkId = oProcessorToDelete.getStripePaymentLinkId();
+				
+				if (!Utils.isNullOrEmpty(sProductId)) {
+					// archive the product and the price on Stripe
+					String sDeactivatedProductId = oStripeService.deactivateProduct(sProductId);
+					if (!sProductId.equals(sDeactivatedProductId)) {
+						WasdiLog.warnLog("ProcessorsResource.deleteProcessor: deactivated product id (" + sDeactivatedProductId + ") on Stripe does not match the stored product id (" + sProductId + ")");
+						return Response.status(Status.BAD_REQUEST).build();
+					}
+				}
+				
+				// archive the payment url
+				if (!Utils.isNullOrEmpty(sPaymentLinkId)) {
+					String sDeactivatedPaymentLinkId = oStripeService.deactivatePaymentLink(sPaymentLinkId);
+					if (!sPaymentLinkId.equals(sDeactivatedPaymentLinkId)) {
+						WasdiLog.warnLog(
+								"ProcessorsResource.deleteProcessor: deactivated payment link id (" + sDeactivatedPaymentLinkId + ") on Stripe does not match the stored payment link id (" + sPaymentLinkId + ")");
+						return Response.status(Status.BAD_REQUEST).build();
+					}
+				}
+				WasdiLog.debugLog("ProcessorsResource.deleteProcessor: Stripe information about processor on-demand purchase have been deactivated.");
+			}
 
 			// Schedule the process to delete the processor
 			String sProcessObjId = Utils.getRandomName();
@@ -1418,7 +1446,7 @@ public class ProcessorsResource  {
 			// Trigger the processor delete operation on this specific node
 			WasdiLog.debugLog("ProcessorsResource.deleteProcessor: Scheduling Processor Delete Operation");
 			
-			// Get the dedicated special workpsace
+			// Get the dedicated special workspace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);
 			
