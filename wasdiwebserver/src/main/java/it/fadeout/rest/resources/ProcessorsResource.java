@@ -2345,7 +2345,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/byAppPaymentId")
-	public Response getAppPaymentById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("appPaymentId") String sAppPaymentId) {
+	public Response getAppPaymentById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("appPayment") String sAppPaymentId) {
 		
 		if (Utils.isNullOrEmpty(sAppPaymentId)) {
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Payment id not specified")).build();
