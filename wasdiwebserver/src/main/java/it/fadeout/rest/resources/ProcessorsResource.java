@@ -2296,6 +2296,21 @@ public class ProcessorsResource  {
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			
+			if (oProcessor == null) {
+				WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: processor " + sProcessorId + " not found");
+				return Response.status(Status.NOT_FOUND).entity(new ErrorResponse("Processor not found")).build();
+			}
+			
+			Float fOnDemandPrice = oProcessor.getOndemandPrice();
+			
+			if (oProcessor.getShowInStore() && fOnDemandPrice != null && fOnDemandPrice == 0) {
+				WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: processor " + sProcessorId + " is free of charge");
+				return Response.ok(true).build();
+			}
+			
 			AppPaymentRepository oAppPurchaseRepository = new AppPaymentRepository();
 			List<AppPayment> aoAppPayments = oAppPurchaseRepository.getAppPaymentByProcessorAndUser(sProcessorId, oUser.getUserId());
 			if (aoAppPayments == null) {
@@ -2314,7 +2329,6 @@ public class ProcessorsResource  {
 				}
 			}
 			
-			
 			if (Utils.isNullOrEmpty(sPaymentId)) {
 				WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: no payments found for the processor " + sProcessorId);
 				return Response.ok(false).build();
@@ -2322,7 +2336,6 @@ public class ProcessorsResource  {
 			
 			// at this point, we know the run of the app was payed. 
 			// we still need to check that the app is not currently being executed (thus "consuming" the payment that we found in the db)
-			
 			if (WasdiConfig.Current.isMainNode()) {
 				NodeRepository oNodeRepo = new NodeRepository();
 				List<Node> aoNodes = oNodeRepo.getNodesList();
