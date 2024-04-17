@@ -163,8 +163,10 @@ public class StripeService {
 				WasdiLog.debugLog("StripeService.createProductAppWithOnDemandPrice: created price " + sPriceId
 						+ " for product " + sProductId);
 				
-
-				return Map.of("productId", sProductId, "priceId", sPriceId);
+				Map<String, String> oResult = new HashMap<>();
+				oResult.put("productId", sProductId);
+				oResult.put("priceId", sPriceId);
+				return oResult;
 			} catch (Exception oEx) {
 				WasdiLog.errorLog(
 						"StripeService.createProductAppWithOnDemandPrice: there was an error reading the json response ",
