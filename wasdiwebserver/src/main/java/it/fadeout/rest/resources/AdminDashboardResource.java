@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
+import org.omg.IOP.IOR;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.Workspace;
@@ -28,7 +29,9 @@ import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserAccessRights;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
+import wasdi.shared.business.users.UserType;
 import wasdi.shared.data.MetricsEntryRepository;
+import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
@@ -43,7 +46,10 @@ import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.monitoring.MetricsEntry;
 import wasdi.shared.viewmodels.permissions.UserResourcePermissionViewModel;
 import wasdi.shared.viewmodels.processors.DeployedProcessorViewModel;
+import wasdi.shared.viewmodels.users.FullUserViewModel;
+import wasdi.shared.viewmodels.users.UserListViewModel;
 import wasdi.shared.viewmodels.users.UserViewModel;
+import wasdi.shared.viewmodels.users.UsersSummaryViewModel;
 import wasdi.shared.viewmodels.workspaces.WorkspaceListInfoViewModel;
 
 /**
@@ -493,6 +499,305 @@ public class AdminDashboardResource {
 		}
 	}
 	
+
+	@GET
+	@Path("/users/list")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response getUsersList(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("partialName") String sPartialName,
+			@QueryParam("offset") Integer iOffset, @QueryParam("limit") Integer iLimit,
+			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder) {
+		
+		
+		WasdiLog.debugLog("AdminDashboardResource.getUsersList(" + " Partial name: " + sPartialName + " )");
+
+		// Validate Session
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		if (oRequesterUser == null) {
+			WasdiLog.infoLog("AdminDashboardResource.getUsersList: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+
+		// Can the user access this section?
+		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
+			WasdiLog.infoLog("AdminDashboardResource.getUsersList: requesting user is not an admin ");
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
+		}
+		
+		// Clean our inputs
+		if (Utils.isNullOrEmpty(sPartialName)) sPartialName = "";
+		if (Utils.isNullOrEmpty(sSortedBy)) sSortedBy = "userId";
+		
+		if (! (sSortedBy.equals("name") || sSortedBy.equals("surname") || sSortedBy.equals("") || sSortedBy.equals(""))) sSortedBy = "userId"; 
+		
+		if (Utils.isNullOrEmpty(sOrder)) sOrder = "asc";
+		if (iOffset == null) iOffset = 0;
+		if (iLimit == null) iLimit = 10;
+		
+		int iOrder = 1;
+		
+		if (sOrder.equals("desc") || sOrder.equals("des") || sOrder.equals("0") || sOrder.equals("-1")) {
+			WasdiLog.debugLog("AdminDashboardResource.getUsersList: setting iOrder to -1 due to order= " + sOrder);
+			iOrder = -1;
+		}
+		
+		try {
+			// Create the repo and get the list
+			UserRepository oUserRepository = new UserRepository();
+			
+			
+			List<User> aoUsers = oUserRepository.findUsersByPartialName(sPartialName, sSortedBy, iOrder);
+
+			List<UserListViewModel> aoUserVMs = new ArrayList<>();
+			
+			for (int iUsers = 0; iUsers < aoUsers.size(); iUsers++) {
+				if (iUsers<iOffset) continue;
+				if (iUsers>=iOffset+iLimit) break;
+				
+				User oActualUser = aoUsers.get(iUsers);
+				
+				UserListViewModel oUserListViewModel = new UserListViewModel();
+				oUserListViewModel.setUserId(oActualUser.getUserId());
+				oUserListViewModel.setActive(oActualUser.getValidAfterFirstAccess());
+				oUserListViewModel.setLastLogin(oActualUser.getLastLogin());
+				oUserListViewModel.setType(PermissionsUtils.getUserType(oActualUser.getUserId()));
+				oUserListViewModel.setName(oActualUser.getName());
+				oUserListViewModel.setSurname(oActualUser.getSurname());
+				
+				aoUserVMs.add(oUserListViewModel);
+			}
+
+			return Response.ok(aoUserVMs).build();			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("AdminDashboardResource.getUsersList: exeception ", oEx);
+			return Response.serverError().build();
+		}
+	}	
+	
+	
+	@GET
+	@Path("/users/summary")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response getUsersSummary(@HeaderParam("x-session-token") String sSessionId) {
+		
+		WasdiLog.debugLog("AdminDashboardResource.getUsersSummary");
+
+		// Validate Session
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		if (oRequesterUser == null) {
+			WasdiLog.infoLog("AdminDashboardResource.getUsersSummary: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+
+		// Can the user access this section?
+		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
+			WasdiLog.infoLog("AdminDashboardResource.getUsersSummary: requesting user is not an admin ");
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
+		}
+		
+		try {
+			// Create the repo and get the list
+			UserRepository oUserRepository = new UserRepository();
+			
+			UsersSummaryViewModel oUsersSummaryViewModel = new UsersSummaryViewModel();
+			
+			
+			// NOTE: This can become critical with a very long users list
+			List<User> aoUsers = oUserRepository.getAllUsers();
+			
+			oUsersSummaryViewModel.setTotalUsers(aoUsers.size());
+			
+			int iNone = 0;
+			int iFree = 0;
+			int iStd = 0;
+			int iPro = 0;
+			
+			for (User oUser : aoUsers) {
+				String sType = PermissionsUtils.getUserType(oUser.getUserId());
+				
+				if (sType.equals(UserType.NONE.name())) {
+					iNone ++;
+				}
+				else if (sType.equals(UserType.FREE.name())) {
+					iFree ++;
+				}
+				else if (sType.equals(UserType.STANDARD.name())) {
+					iStd ++;
+				}
+				else if (sType.equals(UserType.PROFESSIONAL.name())) {
+					iPro ++;
+				}
+			}
+			
+			oUsersSummaryViewModel.setNoneUsers(iNone);
+			oUsersSummaryViewModel.setFreeUsers(iFree);
+			oUsersSummaryViewModel.setProUsers(iPro);
+			oUsersSummaryViewModel.setStandardUsers(iStd);
+			
+			OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+			long lOrgs = oOrganizationRepository.getOrganizationsList().size();
+			
+			oUsersSummaryViewModel.setOrganizations((int)lOrgs);			
+
+			return Response.ok(oUsersSummaryViewModel).build();			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("AdminDashboardResource.getUsersSummary: exeception ", oEx);
+			return Response.serverError().build();
+		}
+	}		
+	
+	@GET
+	@Path("/users")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response getUsersDetails(@HeaderParam("x-session-token") String sSessionId, @QueryParam("userId") String sTargetUser) {
+		
+		WasdiLog.debugLog("AdminDashboardResource.getUsersDetails for " + sTargetUser);
+
+		// Validate Session
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		if (oRequesterUser == null) {
+			WasdiLog.infoLog("AdminDashboardResource.getUsersDetails: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+
+		// Can the user access this section?
+		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
+			WasdiLog.infoLog("AdminDashboardResource.getUsersDetails: requesting user is not an admin ");
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
+		}
+		
+		if (Utils.isNullOrEmpty(sTargetUser)) {
+			WasdiLog.infoLog("AdminDashboardResource.getUsersDetails: target user is empty");
+			return Response.status(Status.BAD_REQUEST).build();			
+		}
+		
+		UserRepository oUserRepository = new UserRepository();
+		User oTargetUser = oUserRepository.getUser(sTargetUser);
+		
+		if (oTargetUser == null){
+			WasdiLog.infoLog("AdminDashboardResource.getUsersDetails: target user not found");
+			return Response.status(Status.BAD_REQUEST).build();			
+		}
+		
+		try {
+			// Convert the Target User to the view model
+			FullUserViewModel oFullUserViewModel = FullUserViewModel.fromUser(oTargetUser);
+			return Response.ok(oFullUserViewModel).build();			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("AdminDashboardResource.getUsersDetails: exeception ", oEx);
+			return Response.serverError().build();
+		}
+	}			
+	
+	@POST
+	@Path("/users")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response updateUsersDetails(@HeaderParam("x-session-token") String sSessionId, FullUserViewModel oUserViewModel) {
+		
+		WasdiLog.debugLog("AdminDashboardResource.updateUsersDetails");
+
+		// Validate Session
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		if (oRequesterUser == null) {
+			WasdiLog.infoLog("AdminDashboardResource.updateUsersDetails: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+
+		// Can the user access this section?
+		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
+			WasdiLog.infoLog("AdminDashboardResource.updateUsersDetails: requesting user is not an admin ");
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
+		}
+		
+		if (oUserViewModel == null) {
+			WasdiLog.infoLog("AdminDashboardResource.updateUsersDetails: user view model is empty");
+			return Response.status(Status.BAD_REQUEST).build();			
+		}
+		
+		UserRepository oUserRepository = new UserRepository();
+		User oTargetUser = oUserRepository.getUser(oUserViewModel.getUserId());
+		
+		if (oTargetUser == null){
+			WasdiLog.infoLog("AdminDashboardResource.updateUsersDetails: target user not found");
+			return Response.status(Status.BAD_REQUEST).build();			
+		}
+		
+		try {
+			// Convert the view model to the entity
+			
+			oTargetUser.setConfirmationDate(oTargetUser.getConfirmationDate());
+			oTargetUser.setDefaultNode(oUserViewModel.getDefaultNode());
+			oTargetUser.setDescription(oUserViewModel.getDescription());
+			oTargetUser.setLink(oUserViewModel.getLink());
+			oTargetUser.setName(oUserViewModel.getName());
+			oTargetUser.setRegistrationDate(oUserViewModel.getRegistrationDate());
+			oTargetUser.setRole(oUserViewModel.getRole());
+			oTargetUser.setSurname(oUserViewModel.getSurname());
+			
+			if (!oUserRepository.updateUser(oTargetUser)) {
+				WasdiLog.errorLog("AdminDashboardResource.updateUsersDetails: the update user returned false!");
+				return Response.serverError().build();
+			}
+			
+			return Response.ok().build();			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("AdminDashboardResource.updateUsersDetails: exeception ", oEx);
+			return Response.serverError().build();
+		}
+	}
+	
+	@DELETE
+	@Path("/users")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response deleteUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("userId") String sTargetUser) {
+		
+		WasdiLog.debugLog("AdminDashboardResource.deleteUser for " + sTargetUser);
+
+		// Validate Session
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		if (oRequesterUser == null) {
+			WasdiLog.infoLog("AdminDashboardResource.deleteUser: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+
+		// Can the user access this section?
+		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
+			WasdiLog.infoLog("AdminDashboardResource.deleteUser: requesting user is not an admin ");
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
+		}
+		
+		if (Utils.isNullOrEmpty(sTargetUser)) {
+			WasdiLog.infoLog("AdminDashboardResource.deleteUser: target user is empty");
+			return Response.status(Status.BAD_REQUEST).build();			
+		}
+		
+		UserRepository oUserRepository = new UserRepository();
+		User oTargetUser = oUserRepository.getUser(sTargetUser);
+		
+		if (oTargetUser == null){
+			WasdiLog.infoLog("AdminDashboardResource.deleteUser: target user not found");
+			return Response.status(Status.BAD_REQUEST).build();			
+		}
+		
+		try {
+			if (PermissionsUtils.deleteUser(oTargetUser, sSessionId)) {
+				return Response.ok().build();				
+			}
+			else {
+				WasdiLog.errorLog("AdminDashboardResource.deleteUser: delete user returned false!!");
+				return Response.serverError().build();
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("AdminDashboardResource.deleteUser: exeception ", oEx);
+			return Response.serverError().build();
+		}
+	}	
+	
 	/**
 	 * Converts a User in a User View Model
 	 * @param oUser User Entity to convert
@@ -504,6 +809,7 @@ public class AdminDashboardResource {
 		oUserVM.setSurname(oUser.getSurname());
 		oUserVM.setUserId(oUser.getUserId());
 		oUserVM.setType(PermissionsUtils.getUserType(oUser));
+		
 
 		if (oUser.getRole() != null) {
 			oUserVM.setRole(StringUtils.capitalize(oUser.getRole().toLowerCase()));

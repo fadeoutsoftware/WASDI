@@ -730,6 +730,16 @@ public class WorkspaceResource {
 				// Delete also the sharings, it is deleted by the owner..
                 UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
                 oUserResourcePermissionRepository.deletePermissionsByWorkspaceId(sWorkspaceId);
+                
+                // Delete Process Workspaces
+                
+                // TODO: here is not correct... we should clean 
+                //  -All the processor logs
+                //	-All the parameters
+                // Then we can clean the process workspaces
+                
+                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+                oProcessWorkspaceRepository.deleteProcessWorkspaceByWorkspaceId(oWorkspace.getWorkspaceId());
 
 
 				return Response.ok().build();

@@ -58,6 +58,23 @@ import wasdi.shared.viewmodels.users.UserViewModel;
  *  .User sftp accounts
  *  .User registration
  *  
+ *  Exposes:
+ *  
+ *  /config
+ *  /lostPassword
+ *  /changePassword
+ *  /editUserDetails
+ *  /validateNewUser
+ *  /register
+ *  /upload/updatepassword
+ *  /upload/removeaccount
+ *  /upload/list
+ *  /upload/existsaccount
+ *  /upload/createaccount
+ *  /logout
+ *  /checksession
+ *  /login
+ *  
  * @author p.campanella
  *
  */

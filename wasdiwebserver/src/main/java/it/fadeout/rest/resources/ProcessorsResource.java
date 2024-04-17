@@ -1359,7 +1359,11 @@ public class ProcessorsResource  {
 				oDeleteWorker.init(aoNodes, sSessionId, sWorkspaceId, sProcessorId, oProcessorToDelete.getName(), oProcessorToDelete.getType(), oProcessorToDelete.getVersion());
 				oDeleteWorker.start();
 				
-				WasdiLog.debugLog("ProcessorsResource.deleteProcessor: Worker started");						
+				WasdiLog.debugLog("ProcessorsResource.deleteProcessor: Worker started");
+				
+				// Delete the user interface
+				ProcessorUIRepository oProcessorUIRepository = new ProcessorUIRepository();
+				oProcessorUIRepository.deleteProcessorUIByProcessorId(sProcessorId);
 			}
 			catch (Exception oEx) {
 				WasdiLog.errorLog("ProcessorsResource.deleteProcessor: error starting UpdateWorker " + oEx.toString());

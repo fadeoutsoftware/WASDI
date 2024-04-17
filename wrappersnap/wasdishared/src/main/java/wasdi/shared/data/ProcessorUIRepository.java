@@ -3,9 +3,11 @@ package wasdi.shared.data;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.processors.ProcessorUI;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class ProcessorUIRepository extends MongoRepository {
@@ -82,5 +84,19 @@ public class ProcessorUIRepository extends MongoRepository {
 
         return  false;
     }    
+    
+	/**
+	 * Delete all the comments of a specific user
+	 * @param sUserId
+	 * @return
+	 */
+    public int deleteProcessorUIByProcessorId(String sProcessorId) {
+    	if (Utils.isNullOrEmpty(sProcessorId)) return 0;
+
+		BasicDBObject oCriteria = new BasicDBObject();
+		oCriteria.append("processorId", sProcessorId);
+
+        return deleteMany(oCriteria, m_sThisCollection);
+    }
 
 }
