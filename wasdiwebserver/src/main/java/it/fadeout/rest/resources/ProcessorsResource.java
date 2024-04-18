@@ -2003,20 +2003,7 @@ public class ProcessorsResource  {
 						return Response.status(Status.NOT_FOUND).build();
 					}
 					
-					String sDeactivatedOnDemandPrice = oStripeService.deactivateOnDemandPrice(sStripeProductId);
-					if (Utils.isNullOrEmpty(sDeactivatedOnDemandPrice)) {
-						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the id of the archived product is null. Something might have gone wrong on Stripe");
-						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-					}
-					
-					// deactivate payment link
-					String sStripeDeactivatedPaymentLinkId = oStripeService.deactivatePaymentLink(sPaymentLinkId);
-					if (Utils.isNullOrEmpty(sStripeDeactivatedPaymentLinkId) ) {
-						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the id of the archived payment link is null. Something might have gone wrong on Stripe");
-						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-					}
-					
-					// deactivate the product, a new product will be created if the app will be set again for purchase
+					// deactivate the product and price, a new product will be created if the app will be set again for purchase
 					String sStripeDeactivatedProductId = oStripeService.deactivateProduct(sStripeProductId);
 					if (Utils.isNullOrEmpty(sStripeDeactivatedProductId) ) {
 						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the id of the archived product is null. Something might have gone wrong on Stripe");
@@ -2024,6 +2011,13 @@ public class ProcessorsResource  {
 					}
 					
 					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: deactivated product: " + sStripeDeactivatedProductId);
+					
+					// deactivate payment link
+					String sStripeDeactivatedPaymentLinkId = oStripeService.deactivatePaymentLink(sPaymentLinkId);
+					if (Utils.isNullOrEmpty(sStripeDeactivatedPaymentLinkId) ) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the id of the archived payment link is null. Something might have gone wrong on Stripe");
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+					}
 					
 					// we remove the reference to the product id and the payment link id in the db
 					oProcessorToUpdate.setStripePaymentLinkId(null);
