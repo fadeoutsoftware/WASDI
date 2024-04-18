@@ -1999,7 +1999,7 @@ public class ProcessorsResource  {
 					
 					if (Utils.isNullOrEmpty(sStripeProductId)) {
 						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id is null or empty.");
-						return Response.status(Status.NOT_FOUND).build(); // TODO: is the message appropriate?
+						return Response.status(Status.NOT_FOUND).build();
 					}
 					
 					String sDeactivatedOnDemandPrice = oStripeService.deactivateOnDemandPrice(sStripeProductId);
@@ -2017,7 +2017,7 @@ public class ProcessorsResource  {
 				
 					if (oStripeProducInformationMap == null ) {
 						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: no information about the created Stripe product");
-						return Response.status(Status.NOT_FOUND).build(); // TODO: is the message appropriate?
+						return Response.status(Status.NOT_FOUND).build();
 					}
 					
 					String sStripeProductId = oStripeProducInformationMap.getOrDefault("productId", null);
@@ -2025,7 +2025,7 @@ public class ProcessorsResource  {
 					
 					if (Utils.isNullOrEmpty(sStripeProductId) || Utils.isNullOrEmpty(sStripePriceId)) {
 						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id and price id are null or empty");
-						return Response.status(Status.NOT_FOUND).build(); // TODO: is the message appropriate?
+						return Response.status(Status.NOT_FOUND).build();
 					}
 					
 					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: product created on Stripe with id: " + sStripeProductId);
@@ -2048,7 +2048,7 @@ public class ProcessorsResource  {
 					
 					if (Utils.isNullOrEmpty(sStripeProductId)) {
 						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id not found in the db. Price won't be updated");
-						return Response.status(Status.NOT_FOUND).build(); // TODO: is the message appropriate?
+						return Response.status(Status.NOT_FOUND).build();
 					}
 					
 					List<String> asStripeOnDemandPriceId = oStripeService.getActiveOnDemandPricesId(sStripeProductId);
@@ -2056,7 +2056,7 @@ public class ProcessorsResource  {
 					if (asStripeOnDemandPriceId.size() != 1) {
 						// we support only one active price at time
 						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: none or more than one on demand prices found.");
-						return Response.status(Status.INTERNAL_SERVER_ERROR).build(); // TODO: is the message appropriate?
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 					}
 					
 					// deactivate the current on demand price and get the new price id
@@ -2067,7 +2067,7 @@ public class ProcessorsResource  {
 					
 					if (Utils.isNullOrEmpty(sResponsePaymentLinkId) || !sResponsePaymentLinkId.equals(sStripePaymentLinkId)) {
 						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: payment link on Stripe has not been deactivated");
-						return Response.status(Status.INTERNAL_SERVER_ERROR).build(); // TODO: is the message appropriate?
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 					}
 					
 					// generate a new on demand price
@@ -2075,7 +2075,7 @@ public class ProcessorsResource  {
 					
 					if (Utils.isNullOrEmpty(sNewPaymentLinkId)) {
 						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: payment link on Stripe has not been generated for price id " + sStripeNewOnDemandPriceId);
-						return Response.status(Status.INTERNAL_SERVER_ERROR).build(); // TODO: is the message appropriate?
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 					}
 					
 					oProcessorToUpdate.setStripePaymentLinkId(sNewPaymentLinkId);	
@@ -2123,8 +2123,6 @@ public class ProcessorsResource  {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response addAppPayment(@HeaderParam("x-session-token") String sSessionId, AppPaymentViewModel oAppPaymentVM) {
 
-		// TODO: DO WE ALSO NEED TO CHECK THE SUBSCRIPTIONS IN THESE CASES 
-
 		try {
 			// check request parameters
 			if (oAppPaymentVM == null 
@@ -2144,6 +2142,12 @@ public class ProcessorsResource  {
 				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 			}
 			String sUserId = oUser.getUserId();
+			
+			// user should have a valid subscription before paying for an app
+			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+				WasdiLog.warnLog("ProcessorsResource.createAppPayment: invalid subscription");
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("Invalid subscription")).build();
+			}
 			
 			// check existence of the processor
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
@@ -2203,14 +2207,6 @@ public class ProcessorsResource  {
 	@Path("/stripe/onDemandPaymentUrl")
 	public Response getStripeOnDemandPaymentUrl(@HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("processor") String sProcessorId, @QueryParam("appPayment") String sAppPaymentId) {
-		
-		// TODO: DO WE ALSO NEED TO CHECK THE SUBSCRIPTIONS IN THESE CASES?
-		
-
-		/*
-		WasdiLog.debugLog("ProcessorsResource.getStripeOnDemandPaymentUrl( " + "Subscription id: " + sSubscriptionId + ", "
-				+ "Processor id: " + sProcessorId + "," + "In App Payment: " + sAppPaymentId + ")");
-		*/
 
 		try {
 			if (Utils.isNullOrEmpty(sProcessorId) || Utils.isNullOrEmpty(sAppPaymentId)) {
@@ -2224,17 +2220,12 @@ public class ProcessorsResource  {
 				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 			}
 			
-			/*
-			if (Utils.isNullOrEmpty(sSubscriptionId)) {
-				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: invalid subscription id");
-				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid subscriptionId.")).build();
+			// user should have a valid subscription before paying for an app
+			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: invalid subscription");
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("Invalid subscription")).build();
 			}
-
-			if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
-				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: user cannot access subscription info");
-				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("The user cannot access the subscription info.")).build();
-			}
-			*/
+			
 			AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
 			AppPayment oAppPayment = oAppPaymentRepository.getAppPaymentById(sAppPaymentId);
 			

@@ -90,11 +90,16 @@ public class StripeService {
 		return oStripePaymentDetail;
 	}
 
-	public Map<String, String> createProductAppWithOnDemandPrice(String sName, String sDescription, Float fPrice) {
+	public Map<String, String> createProductAppWithOnDemandPrice(String sName, String sProcessorId, Float fPrice) {
 
 		if (Utils.isNullOrEmpty(sName)) {
 			WasdiLog.warnLog(
 					"StripeService.createProductAppWithOnDemandPrice: can't create product on Stripe. Produc name is null or empty");
+			return null;
+		}
+		
+		if (Utils.isNullOrEmpty(sProcessorId)) {
+			WasdiLog.warnLog("StripeService.createAppWithOnDemandPrice: processor id is null or empty");
 			return null;
 		}
 
@@ -112,12 +117,13 @@ public class StripeService {
 			// product name
 			asParameters.add("name=" + URLEncoder.encode(sName, StandardCharsets.UTF_8.toString()));
 
-			// description
-			if (!Utils.isNullOrEmpty(sDescription))
-				asParameters.add("description=" + URLEncoder.encode(sDescription, StandardCharsets.UTF_8.toString()));
-
 			// tax code - same of subscriptions (General - Electronically Supplied Services)
 			asParameters.add("tax_code=" + URLEncoder.encode("txcd_10000000", StandardCharsets.UTF_8.toString()));
+			
+			// metadata
+			asParameters.add("metadata[productType]=processor");
+			asParameters.add("metadata[priceType]=ondemand");
+			asParameters.add("metadata[processorId]=" + URLEncoder.encode(sProcessorId, StandardCharsets.UTF_8.toString()));
 		} catch (UnsupportedEncodingException oEx) {
 			WasdiLog.errorLog(
 					"StripeService.createProductAppWithOnDemandPrice: can't create product on Stripe. Error in encoding the request parameters",
@@ -132,9 +138,10 @@ public class StripeService {
 		Map<String, String> asHeaders = getStripeAuthHeader();
 
 		// metadata
-		String sMetadata = "metadata[productType]=processor";
+//		String sMetadata = "metadata[productType]=processor";
+		
 
-		HttpCallResponse oHttpResponse = HttpUtils.httpPost(sUrl, sMetadata, asHeaders);
+		HttpCallResponse oHttpResponse = HttpUtils.httpPost(sUrl, "", asHeaders);
 		int iResponseCode = oHttpResponse.getResponseCode();
 
 		if (iResponseCode >= 200 && iResponseCode <= 299) {
