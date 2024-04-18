@@ -90,6 +90,14 @@ public class StripeService {
 		return oStripePaymentDetail;
 	}
 
+	/**
+	 * Create a product on Stripe representing an app being sold in the Wasdi marketplace. 
+	 * Then, it creates on Stripe the price being set for the app and associates it with the corresponding product.
+	 * @param sName name for the product, it will be displayed when a user will purchase the product in Stripe
+	 * @param sProcessorId id of the processor
+	 * @param fPrice price of the app
+	 * @return a map with two fields "productId" and "priceId", representing the corresponding information on Stripe. It returns null in case of error.
+	 */
 	public Map<String, String> createProductAppWithOnDemandPrice(String sName, String sProcessorId, Float fPrice) {
 
 		if (Utils.isNullOrEmpty(sName)) {
@@ -137,8 +145,6 @@ public class StripeService {
 		// headers
 		Map<String, String> asHeaders = getStripeAuthHeader();
 
-		// metadata
-//		String sMetadata = "metadata[productType]=processor";
 		
 
 		HttpCallResponse oHttpResponse = HttpUtils.httpPost(sUrl, "", asHeaders);
@@ -256,9 +262,12 @@ public class StripeService {
 
 	}
 
+	/**
+	 * Get the list of active price ids associated to a product
+	 * @param sProductId the Stripe product id
+	 * @return a list of active price ids for the product. It returns null in case of error
+	 */
 	public List<String> getActiveOnDemandPricesId(String sProductId) {
-		// TODO: decide if I just return the list of price ids or some data structure
-		// more relevant
 
 		if (Utils.isNullOrEmpty(sProductId)) {
 			WasdiLog.warnLog("StripeService.getActiveOnDemandPriceId: product id is null or empty. ");
@@ -330,6 +339,12 @@ public class StripeService {
 		}
 	}
 
+	/**
+	 * Creates a Stripe price
+	 * @param sProductId the product id to which the price should be attached
+	 * @param fPrice the price value
+	 * @return the id of the created Stripe price
+	 */
 	public String createProductOnDemandPrice(String sProductId, Float fPrice) {
 
 		if (Utils.isNullOrEmpty(sProductId)) {
@@ -391,7 +406,6 @@ public class StripeService {
 				if (!sProductIdFromPrice.equals(sProductId)) {
 					WasdiLog.warnLog(
 							"StripeService.createProductPrice: the product id of the price and the expected product id are not matching");
-					// TODO: in this case I need probably to remove the price from Stripe
 					return null;
 				}
 
@@ -565,6 +579,10 @@ public class StripeService {
 		return sNewPriceId;
 	}
 
+	/**
+	 * Returns the standard authentication header for Stripe
+	 * @return the authentication header for Stripe, containing the authentication token
+	 */
 	public Map<String, String> getStripeAuthHeader() {
 		Map<String, String> asHeaders = new HashMap<>();
 
@@ -575,7 +593,10 @@ public class StripeService {
 
 		return asHeaders;
 	}
-
+	
+	/**
+	 * Utility method to print the list the products on Stripe
+	 */
 	public void listProducts() {
 		String sUrl = s_sSTRIPE_BASE_URL + "/products";
 
@@ -591,6 +612,13 @@ public class StripeService {
 
 	}
 	
+	/**
+	 * Creates the Stripe payment link for a given Stripe price and a given WASDI processor. The information about the processor id will be stored among the metadata
+	 * of the processor.
+	 * @param sPriceId the Stripe price id that should be associated with the payment link 
+	 * @param sWasdiProcessorId the WASDI processor id for which the payment link is being created
+	 * @return the id of the payment link on Stripe. Returns null in case of errors
+	 */
 	public String createPaymentLink(String sPriceId, String sWasdiProcessorId) {
 		if (Utils.isNullOrEmpty(sPriceId)) {
 			WasdiLog.errorLog("StripeService.createPaymentLink: price id is null or empty. Impossible to create payment link");
@@ -664,6 +692,11 @@ public class StripeService {
 		}
 	}
 	
+	/**
+	 * Given a Stripe payment link id, returns the associated URL
+	 * @param sPaymentLinkId the payment link id on Stripe
+	 * @return returns the Stripe payment URL
+	 */
 	public String retrievePaymentLink(String sPaymentLinkId) {
 
 		if (Utils.isNullOrEmpty(sPaymentLinkId)) {
@@ -765,6 +798,12 @@ public class StripeService {
 		
 	}
 	
+	/**
+	 * Given a Stripe payment intent id, it adds to its metadata the information about the app payment id stored in WASDI
+	 * @param sPaymentIntentId the Stripe payment intent id
+	 * @param sWasdiAppPaymentId the WASDI app payment id 
+	 * @return
+	 */
 	public String updatePaymentIntentWithAppPaymentId(String sPaymentIntentId, String sWasdiAppPaymentId) {
 		
 		if (Utils.isNullOrEmpty(sPaymentIntentId) || Utils.isNullOrEmpty(sWasdiAppPaymentId)) {
@@ -828,44 +867,5 @@ public class StripeService {
 		
 	}
 	
-	
-	
-
-	public static void main(String[] args) throws Exception {
-
-		StripeService stripeService = new StripeService();
-		WasdiConfig.readConfig("C:/temp/wasdi/wasdiLocalTESTConfig.json");
-//		Map<String, String> oAppCreatedInfoMap = stripeService.createProductAppWithOnDemandPrice("Test App with Metadata", "1234-2541-5684-985", 50.00f); 
-//		System.out.println(oAppCreatedInfoMap.get("priceId"));
-//		System.out.println(oAppCreatedInfoMap.get("productId"));
-		
-//		System.out.println(isAppCreated);
-
-//		String sProdId = stripeService.deactivateProduct("prod_PlUsE22AA6eMga");
-//		System.out.println("Deleted product: " + sProdId);
-//		stripeService.listProducts();
-		
-
-//        List<String> sPriceIds = stripeService.getActiveOnDemandPriceId("prod_PlWwdzKlNEtHSc"); 
-//        for (String sId : sPriceIds)
-//        	System.out.println(sId);
-		
-//        String sNewPriceId = stripeService.updateOnDemandPrice("prod_PlUsE22AA6eMga", "price_1OvxsKKhhULxWbPP4MxyE6yB", 100.00f);
-//        System.out.println("New price id: " + sNewPriceId);  // price_1Ovz08KhhULxWbPPlIxgVpWp
-
-//        sPriceIds = stripeService.getPriceIdFromProductId("prod_PlUsE22AA6eMga"); // price_1OvxsKKhhULxWbPP4MxyE6yB
-//        for (String sId : sPriceIds)
-//        	System.out.println(sId);
-		
-		
-		// PAYMENT LINK
-		// System.out.println(stripeService.createPaymentLink("price_1Ow07tKhhULxWbPPjF0seIp7", "wasdi-processor-id"));
-		// System.out.println(stripeService.retrievePaymentLink("plink_1OwNBtKhhULxWbPPSxUd1JUD"));
-		
-		// payment link: plink_1OwNBtKhhULxWbPPSxUd1JUD (amount 1 euro, price: price_1OwNAAKhhULxWbPPMoRc9Kac)
-		// System.out.println(stripeService.deactivatePaymentLink("plink_1OwNBtKhhULxWbPPSxUd1JUD"));
-
-		System.out.println(stripeService.updatePaymentIntentWithAppPaymentId("pi_3P6aIpKhhULxWbPP0QyV52qK", "1111-aaaa-2222-bbbb"));
-	}
 
 }

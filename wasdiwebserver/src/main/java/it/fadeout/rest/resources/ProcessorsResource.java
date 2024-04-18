@@ -2284,6 +2284,12 @@ public class ProcessorsResource  {
 		}
 	}
 	
+	/**
+	 * Check if an app has being set for purchase in the marketplace and if the run of the app has been purchased
+	 * @param sSessionId user session id
+	 * @param sProcessorId the id of the app
+	 * @return true if the run has been correctly purchased, false otherwise
+	 */
 	@GET
 	@Path("/isAppPurchased")
 	public Response checkAppPurchase(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processor")String sProcessorId) {
@@ -2407,7 +2413,7 @@ public class ProcessorsResource  {
 
 	
 	/**
-	 * Get the information about a payment
+	 * Get the information about the payment of an app
 	 * @param sSessionId
 	 * @param sAppPaymentId
 	 * @return
