@@ -2458,34 +2458,41 @@ public class ProcessorsResource  {
 	public String confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
 		WasdiLog.debugLog("ProcessorResource.confirmation. sCheckoutSessionId: " + sCheckoutSessionId);
 
-		if (Utils.isNullOrEmpty(sCheckoutSessionId)) {
-			WasdiLog.warnLog("ProcessorResource.confirmation: Stripe returned a null CHECKOUT_SESSION_ID, aborting");
-			return null;
-		}
-
 		try {
+			if (Utils.isNullOrEmpty(sCheckoutSessionId)) {
+				WasdiLog.warnLog("ProcessorResource.confirmation: Stripe returned a null CHECKOUT_SESSION_ID, aborting");
+				return null;
+			}
+			
 			StripeService oStripeService = new StripeService();
 			StripePaymentDetail oStripePaymentDetail = oStripeService.retrieveStripePaymentDetail(sCheckoutSessionId);
-
-			String sClientReferenceId = oStripePaymentDetail.getClientReferenceId();
-
-			if (oStripePaymentDetail == null || Utils.isNullOrEmpty(sClientReferenceId)) {
+			
+			if (oStripePaymentDetail == null) {
 				WasdiLog.warnLog("ProcessorResource.confirmation: Stripe returned an invalid result, aborting");
 				return null;
 			}
 
-			WasdiLog.debugLog("ProcessorResource.confirmation. App payment id " + sClientReferenceId);
+			String sAppPaymentId = oStripePaymentDetail.getClientReferenceId();
+			String sPaymentIntentId = oStripePaymentDetail.getPaymentIntentId();
+			
+			if (Utils.isNullOrEmpty(sAppPaymentId) || Utils.isNullOrEmpty(sPaymentIntentId)) {
+				WasdiLog.warnLog("ProcessorResource.confirmation: null or empty app payment id or payment intent id from Stripe");
+				return null;
+			}
+
+			WasdiLog.debugLog("ProcessorResource.confirmation. App payment id " + sAppPaymentId + ", payment intent id " + sPaymentIntentId);
 
 			if (oStripePaymentDetail != null) {
 				
 				AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
-				AppPayment oAppPayment = oAppPaymentRepository.getAppPaymentById(sClientReferenceId);
+				AppPayment oAppPayment = oAppPaymentRepository.getAppPaymentById(sAppPaymentId);
 				
 				if (oAppPayment == null) {
 					WasdiLog.warnLog("ProcessorResource.confirmation: reference id returned by Stripe does not correspond to any pamynet stored on the db");
 					return null;
 				}
 				
+				oAppPayment.setStripePaymentIntentId(sPaymentIntentId);
 				oAppPayment.setBuyDate(Utils.nowInMillis());
 				oAppPayment.setBuySuccess(true);
 				

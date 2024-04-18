@@ -765,6 +765,69 @@ public class StripeService {
 		
 	}
 	
+	public String updatePaymentIntentWithAppPaymentId(String sPaymentIntentId, String sWasdiAppPaymentId) {
+		
+		if (Utils.isNullOrEmpty(sPaymentIntentId) || Utils.isNullOrEmpty(sWasdiAppPaymentId)) {
+			WasdiLog.errorLog("StripeService.updatePaymentIntentWithAppPaymentId: payment intent id or WASDI app payment id is null or empty. Impossible to update");
+			return null;
+		}
+
+		WasdiLog.debugLog("StripeService.updatePaymentIntentWithAppPaymentId: updating payment intent id " + sPaymentIntentId);
+
+		String sUrl = s_sSTRIPE_BASE_URL;
+		if (!sUrl.endsWith("/"))
+			sUrl += "/";
+		sUrl += "payment_intents/" + sPaymentIntentId;
+		
+		
+		// request parameters
+		String sMetadata = "";
+		try {
+			sMetadata += "metadata[appPaymentId]=" + URLEncoder.encode(sWasdiAppPaymentId, StandardCharsets.UTF_8.toString());
+		} catch (UnsupportedEncodingException oEx) {
+			WasdiLog.errorLog(
+					"StripeService.updatePaymentIntentWithAppPaymentId: Error in encoding the request parameters",
+					oEx);
+			return null;
+		}
+		
+		sUrl += "?" + sMetadata;
+
+		Map<String, String> asStripeHeaders = getStripeAuthHeader();
+		HttpCallResponse oHttpResponse = HttpUtils.httpPost(sUrl, "", asStripeHeaders);
+
+		int iResponseCode = oHttpResponse.getResponseCode();
+
+		if (iResponseCode >= 200 && iResponseCode <= 299) {
+			try {
+				JSONObject oJsonResponseBody = new JSONObject(oHttpResponse.getResponseBody());
+				String sStripePaymentIntentId = oJsonResponseBody.optString("id", null);
+
+				if (Utils.isNullOrEmpty(sStripePaymentIntentId)) {
+					WasdiLog.warnLog("StripeService.updatePaymentIntentWithAppPaymentId: payment intent id not found in the Stripe response.");
+					return null;
+				}
+				
+				if (!sPaymentIntentId.equals(sStripePaymentIntentId)) {
+					WasdiLog.debugLog("StripeService.updatePaymentIntentWithAppPaymentId: mismatch in the Stripe payment ids");
+					return null;
+				}
+
+				return sStripePaymentIntentId;
+
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("StripeService.updatePaymentIntentWithAppPaymentId: exception reading the Stripe response ",oEx);
+				return null;
+			}
+		} 
+		else {
+			WasdiLog.errorLog("StripeService.updatePaymentIntentWithAppPaymentId: error while sending the request to Stripe");
+			return null;
+		}
+		
+		
+	}
+	
 	
 	
 
@@ -772,7 +835,10 @@ public class StripeService {
 
 		StripeService stripeService = new StripeService();
 		WasdiConfig.readConfig("C:/temp/wasdi/wasdiLocalTESTConfig.json");
-//		String isAppCreated = stripeService.createProductAppWithOnDemandPrice("Test App with Metadata", "This is an app with metadata", 50.00f); // prod_PlWwdzKlNEtHSc
+//		Map<String, String> oAppCreatedInfoMap = stripeService.createProductAppWithOnDemandPrice("Test App with Metadata", "1234-2541-5684-985", 50.00f); 
+//		System.out.println(oAppCreatedInfoMap.get("priceId"));
+//		System.out.println(oAppCreatedInfoMap.get("productId"));
+		
 //		System.out.println(isAppCreated);
 
 //		String sProdId = stripeService.deactivateProduct("prod_PlUsE22AA6eMga");
@@ -783,7 +849,7 @@ public class StripeService {
 //        List<String> sPriceIds = stripeService.getActiveOnDemandPriceId("prod_PlWwdzKlNEtHSc"); 
 //        for (String sId : sPriceIds)
 //        	System.out.println(sId);
-//		
+		
 //        String sNewPriceId = stripeService.updateOnDemandPrice("prod_PlUsE22AA6eMga", "price_1OvxsKKhhULxWbPP4MxyE6yB", 100.00f);
 //        System.out.println("New price id: " + sNewPriceId);  // price_1Ovz08KhhULxWbPPlIxgVpWp
 
@@ -794,11 +860,12 @@ public class StripeService {
 		
 		// PAYMENT LINK
 		// System.out.println(stripeService.createPaymentLink("price_1Ow07tKhhULxWbPPjF0seIp7", "wasdi-processor-id"));
-		System.out.println(stripeService.retrievePaymentLink("plink_1OwNBtKhhULxWbPPSxUd1JUD"));
+		// System.out.println(stripeService.retrievePaymentLink("plink_1OwNBtKhhULxWbPPSxUd1JUD"));
 		
 		// payment link: plink_1OwNBtKhhULxWbPPSxUd1JUD (amount 1 euro, price: price_1OwNAAKhhULxWbPPMoRc9Kac)
 		// System.out.println(stripeService.deactivatePaymentLink("plink_1OwNBtKhhULxWbPPSxUd1JUD"));
 
+		System.out.println(stripeService.updatePaymentIntentWithAppPaymentId("pi_3P6aIpKhhULxWbPP0QyV52qK", "1111-aaaa-2222-bbbb"));
 	}
 
 }
