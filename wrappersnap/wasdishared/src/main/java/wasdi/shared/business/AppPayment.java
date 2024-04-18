@@ -10,6 +10,8 @@ public class AppPayment {
 	
 	private String processorId;
 	
+	private String stripePaymentIntentId;
+	
 	private boolean buySuccess;
 	
 	private Double buyDate;
@@ -47,6 +49,14 @@ public class AppPayment {
 
 	public void setProcessorId(String processorId) {
 		this.processorId = processorId;
+	}
+
+	public String getStripePaymentIntentId() {
+		return stripePaymentIntentId;
+	}
+
+	public void setStripePaymentIntentId(String stripePaymentIntentId) {
+		this.stripePaymentIntentId = stripePaymentIntentId;
 	}
 
 	public boolean isBuySuccess() {

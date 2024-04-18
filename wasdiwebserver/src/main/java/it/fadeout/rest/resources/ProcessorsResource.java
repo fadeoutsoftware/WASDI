@@ -2484,6 +2484,7 @@ public class ProcessorsResource  {
 
 			if (oStripePaymentDetail != null) {
 				
+				// add the information about the payment intent in the db
 				AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
 				AppPayment oAppPayment = oAppPaymentRepository.getAppPaymentById(sAppPaymentId);
 				
@@ -2495,8 +2496,17 @@ public class ProcessorsResource  {
 				oAppPayment.setStripePaymentIntentId(sPaymentIntentId);
 				oAppPayment.setBuyDate(Utils.nowInMillis());
 				oAppPayment.setBuySuccess(true);
-				
 				oAppPaymentRepository.updateAppPayment(oAppPayment);
+				
+				// add the information about the WASDI payment id on Stripe
+				String sStripePaymentIntentId = oStripeService.updatePaymentIntentWithAppPaymentId(sPaymentIntentId, sAppPaymentId);
+				if (Utils.isNullOrEmpty(sStripePaymentIntentId)) {
+					WasdiLog.warnLog("ProcessorResource.confirmation: error updating the payment intent metadata on Stripe");
+					return null;
+				}
+				
+				WasdiLog.debugLog("ProcessorResource.confirmation: payment intent updated on stripe with information about payment id");
+				return sStripePaymentIntentId;
 			}		
 		}
 		catch (Exception oEx) {
