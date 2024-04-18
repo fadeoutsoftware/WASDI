@@ -2023,7 +2023,8 @@ public class ProcessorsResource  {
 			sRights = UserAccessRights.READ.getAccessRight();
 		}
 		
-		if (oRequesterUser.getUserId().equals(sUserId) && !oRequesterUser.getRole().equals(UserApplicationRole.ADMIN.name())) {
+		
+		if (oRequesterUser.getUserId().equals(sUserId) && !UserApplicationRole.isAdmin(oRequesterUser)) {
 			WasdiLog.warnLog("ProcessorsResource.shareProcessor: auto sharing not so smart");
 			oResult.setStringValue("Impossible to autoshare.");
 			return oResult;
@@ -2040,7 +2041,7 @@ public class ProcessorsResource  {
 			return oResult;		
 		}		
 		
-		if (!PermissionsUtils.canUserWriteProcessor(oRequesterUser.getUserId(), oValidateProcessor)) {
+		if (!PermissionsUtils.canUserWriteProcessor(oRequesterUser.getUserId(), oValidateProcessor)&& !UserApplicationRole.isAdmin(oRequesterUser)) {
 			WasdiLog.warnLog("ProcessorsResource.shareProcessor: user cannot write the processor");
 			oResult.setStringValue("Forbidden.");
 			return oResult;

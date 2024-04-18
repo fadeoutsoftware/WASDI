@@ -815,7 +815,7 @@ public class WorkspaceResource {
 		}
 
 		// Cannot Autoshare
-		if (oRequesterUser.getUserId().equals(sDestinationUserId)) {
+		if (oRequesterUser.getUserId().equals(sDestinationUserId) && !UserApplicationRole.isAdmin(oRequesterUser)) {
 			WasdiLog.warnLog("WorkspaceResource.shareWorkspace: auto sharing not so smart");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());

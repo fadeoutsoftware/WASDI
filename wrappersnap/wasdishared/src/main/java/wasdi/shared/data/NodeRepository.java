@@ -10,8 +10,10 @@ import org.bson.types.ObjectId;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.Node;
+import wasdi.shared.business.Organization;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -47,6 +49,30 @@ public class NodeRepository extends MongoRepository {
 			WasdiLog.errorLog("NodeRepository.InsertNode: ", oEx);
 		}
 		return "";
+	}
+	
+	/**
+	 * Updates a node
+	 * @param oNode
+	 * @return
+	 */
+	public boolean updateNode(Node oNode) {
+
+		try {
+			String sJSON = s_oMapper.writeValueAsString(oNode);
+
+			Bson oFilter = new Document("nodeCode", oNode.getNodeCode());
+			Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
+
+			UpdateResult oResult = getCollection(m_sThisCollection).updateOne(oFilter, oUpdateOperationDocument);
+
+			if (oResult.getModifiedCount() == 1)
+				return true;
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("NodeRepository.updateNode: error ", oEx);
+		}
+
+		return false;
 	}
 	
 	/**

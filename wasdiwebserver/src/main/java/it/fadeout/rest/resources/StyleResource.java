@@ -715,7 +715,7 @@ public class StyleResource {
 				return oResult;
 			}
 
-			if (oRequestingUser.getUserId().equals(sUserId)) {
+			if (oRequestingUser.getUserId().equals(sUserId) && !UserApplicationRole.isAdmin(oRequestingUser)) {
 				WasdiLog.warnLog("StyleResource.shareStyle: auto sharing not so smart");
 				oResult.setStringValue("Impossible to autoshare.");
 				return oResult;
@@ -732,7 +732,7 @@ public class StyleResource {
 				return oResult;
 			}
 			
-			if (!PermissionsUtils.canUserWriteStyle(oRequestingUser.getUserId(), sStyleId)) {
+			if (!PermissionsUtils.canUserWriteStyle(oRequestingUser.getUserId(), sStyleId) && !UserApplicationRole.isAdmin(oRequestingUser)) {
 				WasdiLog.warnLog("StyleResource.shareStyle: requesting user cannot write the style");
 				oResult.setStringValue("Can't write this style");
 				return oResult;				

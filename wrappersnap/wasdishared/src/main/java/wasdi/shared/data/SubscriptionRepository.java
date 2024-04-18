@@ -357,30 +357,29 @@ public class SubscriptionRepository extends MongoRepository {
 
 	/**
 	 * Find subscriptions by partial name or by partial id
-	 * @param sPartialName the partial name or partial id
+	 * @param sNameFilter the partial name or partial id
 	 * @return the list of subscriptions that partially match the name or id
 	 */
-	public List<Subscription> findSubscriptionsByPartialName(String sPartialName) {
+	public List<Subscription> findSubscriptionsByFilters(String sNameFilter, String sIdFilter, String sUserIdFilter) {
+		
 		List<Subscription> aoReturnList = new ArrayList<>();
 
-		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
-			return aoReturnList;
-		}
+		Pattern oNameRegEx = Pattern.compile(Pattern.quote(sNameFilter), Pattern.CASE_INSENSITIVE);
+		Pattern oIdRegEx = Pattern.compile(Pattern.quote(sIdFilter), Pattern.CASE_INSENSITIVE);
+		Pattern oUserIdRegEx = Pattern.compile(Pattern.quote(sUserIdFilter), Pattern.CASE_INSENSITIVE);
 
-		Pattern regex = Pattern.compile(Pattern.quote(sPartialName), Pattern.CASE_INSENSITIVE);
+		Bson oFilterLikeSubscriptionId = Filters.eq("subscriptionId", oIdRegEx);
+		Bson oFilterLikeName = Filters.eq("name", oNameRegEx);
+		Bson oFilterLikeUserId = Filters.eq("userId", oUserIdRegEx);
 
-		Bson oFilterLikeSubscriptionId = Filters.eq("subscriptionId", regex);
-		Bson oFilterLikeName = Filters.eq("name", regex);
-
-		Bson oFilter = Filters.or(oFilterLikeSubscriptionId, oFilterLikeName);
+		Bson oFilter = Filters.or(oFilterLikeSubscriptionId, oFilterLikeName, oFilterLikeUserId);
 
 		try {
-			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter)
-					.sort(new Document("name", 1));
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter).sort(new Document("name", 1));
 
 			fillList(aoReturnList, oWSDocuments, Subscription.class);
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("SubscriptionRepository.findSubscriptionsByPartialName : error " + oEx.toString());
+			WasdiLog.errorLog("SubscriptionRepository.findSubscriptionsByFilters : error " + oEx.toString());
 		}
 
 		return aoReturnList;

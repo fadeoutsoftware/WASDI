@@ -1,4 +1,4 @@
-package wasdi.shared.viewmodels;
+package wasdi.shared.viewmodels.nodes;
 
 /**
  * Represents a WASDI Node.

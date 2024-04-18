@@ -1,6 +1,7 @@
 package it.fadeout.rest.resources;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
-import org.omg.IOP.IOR;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.Workspace;
@@ -44,6 +44,7 @@ import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.monitoring.MetricsEntry;
+import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.permissions.UserResourcePermissionViewModel;
 import wasdi.shared.viewmodels.processors.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.users.FullUserViewModel;
@@ -430,6 +431,35 @@ public class AdminDashboardResource {
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_RESOURCE_TYPE.name())).build();
 		}
 	}
+	
+	/**
+	 * Get the list of available Resource Types
+	 * 
+	 * @param sSessionId Session Id
+	 * @return Array of strings with the names of the resource types
+	 */
+	@GET
+	@Path("resourcePermissions/types")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response getResourceTypes(@HeaderParam("x-session-token") String sSessionId) {
+		WasdiLog.debugLog("SubscriptionResource.getSubscriptionTypes");
+		try {
+			ArrayList<String> asResourceTypes = new ArrayList<>();
+			
+			List<ResourceTypes> aoOriginalList = Arrays.asList(ResourceTypes.values());
+			
+			for (ResourceTypes oResType : aoOriginalList) {
+				asResourceTypes.add(oResType.name());
+			}
+			
+			return Response.ok(asResourceTypes).build();
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("SubscriptionResource.getSubscriptionTypes: error ", oEx);
+			return Response.serverError().build();			
+		}		
+	}
+		
 
 	@PUT
 	@Path("/metrics")
@@ -692,7 +722,7 @@ public class AdminDashboardResource {
 		}
 	}			
 	
-	@POST
+	@PUT
 	@Path("/users")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response updateUsersDetails(@HeaderParam("x-session-token") String sSessionId, FullUserViewModel oUserViewModel) {
