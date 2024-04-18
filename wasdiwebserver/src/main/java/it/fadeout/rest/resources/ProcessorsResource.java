@@ -1996,9 +1996,10 @@ public class ProcessorsResource  {
 				if (fOldOnDemandPrice > 0 && fNewOnDemandPrice == 0) {
 					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the app has been set for free. Archiving the Stripe price for the app");
 					String sStripeProductId = oProcessorToUpdate.getStripeProductId();
+					String sPaymentLinkId = oProcessorToUpdate.getStripePaymentLinkId();
 					
-					if (Utils.isNullOrEmpty(sStripeProductId)) {
-						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id is null or empty.");
+					if (Utils.isNullOrEmpty(sStripeProductId) || Utils.isNullOrEmpty(sPaymentLinkId)) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id or payment link id are null or empty.");
 						return Response.status(Status.NOT_FOUND).build();
 					}
 					
@@ -2008,7 +2009,26 @@ public class ProcessorsResource  {
 						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 					}
 					
-					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: archived price id: " + sDeactivatedOnDemandPrice);
+					// deactivate payment link
+					String sStripeDeactivatedPaymentLinkId = oStripeService.deactivatePaymentLink(sPaymentLinkId);
+					if (Utils.isNullOrEmpty(sStripeDeactivatedPaymentLinkId) ) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the id of the archived payment link is null. Something might have gone wrong on Stripe");
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+					}
+					
+					// deactivate the product, a new product will be created if the app will be set again for purchase
+					String sStripeDeactivatedProductId = oStripeService.deactivateProduct(sStripeProductId);
+					if (Utils.isNullOrEmpty(sStripeDeactivatedProductId) ) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the id of the archived product is null. Something might have gone wrong on Stripe");
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+					}
+					
+					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: deactivated product: " + sStripeDeactivatedProductId);
+					
+					// we remove the reference to the product id and the payment link id in the db
+					oProcessorToUpdate.setStripePaymentLinkId(null);
+					oProcessorToUpdate.setStripeProductId(null);
+					
 				}
 				else if (fOldOnDemandPrice <= 0 && fNewOnDemandPrice > 0) {
 					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: the app has been set for sale. Adding the Stripe product");
@@ -2506,7 +2526,6 @@ public class ProcessorsResource  {
 				}
 				
 				WasdiLog.debugLog("ProcessorResource.confirmation: payment intent updated on stripe with information about payment id");
-				return sStripePaymentIntentId;
 			}		
 		}
 		catch (Exception oEx) {
