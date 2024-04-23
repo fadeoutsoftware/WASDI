@@ -926,7 +926,7 @@ public class ProcessorsResource  {
 			
 			// check if the app has an on-demand price: in that case, update the appspayments table to track the run date/time
 			Float fOnDemandPrice = oProcessorToRun.getOndemandPrice();
-			if (oProcessorToRun.getShowInStore() && fOnDemandPrice != null && fOnDemandPrice > 0) {
+			if (fOnDemandPrice != null && fOnDemandPrice > 0) {
 				WasdiLog.debugLog("ProcessorsResource.internalRun: the app has an ondemand price");
 				AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
 				List<AppPayment> oAppPayments = oAppPaymentRepository.getAppPaymentByProcessorAndUser(oProcessorToRun.getProcessorId(), sUserId);
@@ -1395,7 +1395,7 @@ public class ProcessorsResource  {
 			
 			// is the app available in the market place with an on-demand price?
 			Float fOnDemandPrice = oProcessorToDelete.getOndemandPrice();
-			if (oProcessorToDelete.getShowInStore() && fOnDemandPrice != null && fOnDemandPrice > 0) {
+			if (fOnDemandPrice != null && fOnDemandPrice > 0) {
 				StripeService oStripeService = new StripeService();
 				String sProductId = oProcessorToDelete.getStripeProductId();
 				String sPaymentLinkId = oProcessorToDelete.getStripePaymentLinkId();
@@ -2285,7 +2285,7 @@ public class ProcessorsResource  {
 	}
 	
 	/**
-	 * Check if an app has being set for purchase in the marketplace and if the run of the app has been purchased
+	 * Check if an app has being set for purchase and if the run of the app has been purchased
 	 * @param sSessionId user session id
 	 * @param sProcessorId the id of the app
 	 * @return true if the run has been correctly purchased, false otherwise
@@ -2317,7 +2317,7 @@ public class ProcessorsResource  {
 			
 			Float fOnDemandPrice = oProcessor.getOndemandPrice();
 			
-			if (oProcessor.getShowInStore() && fOnDemandPrice != null && fOnDemandPrice == 0) {
+			if (fOnDemandPrice != null && fOnDemandPrice == 0) {
 				WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: processor " + sProcessorId + " is free of charge");
 				return Response.ok(true).build();
 			}
