@@ -1,6 +1,8 @@
 package wasdi.shared.utils.wasdiAPI;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import wasdi.shared.business.Node;
 import wasdi.shared.config.WasdiConfig;
@@ -125,4 +127,5 @@ public class ProcessorAPIClient {
 		
 		return false;
 	}
+	
 }

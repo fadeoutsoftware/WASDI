@@ -27,6 +27,7 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -36,15 +37,20 @@ import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
+import it.fadeout.services.StripeService;
 import it.fadeout.threads.DeleteProcessorWorker;
 import it.fadeout.threads.ForceLibraryUpdateWorker;
 import it.fadeout.threads.RedeployProcessorWorker;
 import it.fadeout.threads.UpdateProcessorFilesWorker;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
+import wasdi.shared.business.AppPayment;
 import wasdi.shared.business.Counter;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
@@ -62,6 +68,7 @@ import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.ProcessorTypeConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.AppPaymentRepository;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CounterRepository;
 import wasdi.shared.data.MongoRepository;
@@ -83,10 +90,17 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.ProcessWorkspaceAPIClient;
+import wasdi.shared.viewmodels.ClientMessageCodes;
+import wasdi.shared.viewmodels.ErrorResponse;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.SuccessResponse;
+import wasdi.shared.viewmodels.organizations.StripePaymentDetail;
 import wasdi.shared.viewmodels.processors.AppDetailViewModel;
 import wasdi.shared.viewmodels.processors.AppFilterViewModel;
 import wasdi.shared.viewmodels.processors.AppListViewModel;
+import wasdi.shared.viewmodels.processors.AppPaymentViewModel;
 import wasdi.shared.viewmodels.processors.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.processors.ProcessorLogViewModel;
 import wasdi.shared.viewmodels.processors.ProcessorSharingViewModel;
@@ -909,6 +923,41 @@ public class ProcessorsResource  {
 				return oRunningProcessorViewModel;				
 			}
 			
+			
+			// check if the app has an on-demand price: in that case, update the appspayments table to track the run date/time
+			Float fOnDemandPrice = oProcessorToRun.getOndemandPrice();
+			if (fOnDemandPrice != null && fOnDemandPrice > 0) {
+				WasdiLog.debugLog("ProcessorsResource.internalRun: the app has an ondemand price");
+				AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
+				List<AppPayment> oAppPayments = oAppPaymentRepository.getAppPaymentByProcessorAndUser(oProcessorToRun.getProcessorId(), sUserId);
+				
+				if (oAppPayments != null) {
+					boolean bHasRunBeenPayed = false;
+					for (AppPayment oPayment : oAppPayments) {
+						if (oPayment.isBuySuccess() && Utils.isNullOrEmpty(oPayment.getRunDate())) {
+							WasdiLog.debugLog("ProcessorsResource.internalRun: found a payment for the on-demand run. Payment id: " + oPayment.getAppPaymentId());
+							oPayment.setRunDate(Utils.nowInMillis());
+							if (oAppPaymentRepository.updateAppPayment(oPayment)) {
+								WasdiLog.debugLog("ProcessorsResource.internalRun: payment correctly updated with run timestamp");
+								bHasRunBeenPayed = true;
+								break;
+							} else {
+								WasdiLog.warnLog("ProcessorsResource.internalRun: error registering the payed run. Payment details not updated");
+								oRunningProcessorViewModel.setStatus("ERROR");
+								return oRunningProcessorViewModel;	
+							}
+						}
+					}
+					
+					if (!bHasRunBeenPayed) {
+						WasdiLog.warnLog("ProcessorsResource.internalRun: no valid payment found for the app");
+						oRunningProcessorViewModel.setStatus("ERROR");
+						return oRunningProcessorViewModel;	
+					}
+				}
+			}
+			
+			
 			if (Utils.isNullOrEmpty(sEncodedJson)) {
 				sEncodedJson = "%7B%7D";
 			}
@@ -966,6 +1015,7 @@ public class ProcessorsResource  {
 		return oRunningProcessorViewModel;
 	}
 	
+		
 	/**
 	 * Return the help of a processor. when the user uploads a processor it can upload also an help file
 	 * like help.md (supported different names ie readme.md...)
@@ -1342,6 +1392,34 @@ public class ProcessorsResource  {
 				// No, so unauthorized
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
+			
+			// is the app available in the market place with an on-demand price?
+			Float fOnDemandPrice = oProcessorToDelete.getOndemandPrice();
+			if (fOnDemandPrice != null && fOnDemandPrice > 0) {
+				StripeService oStripeService = new StripeService();
+				String sProductId = oProcessorToDelete.getStripeProductId();
+				String sPaymentLinkId = oProcessorToDelete.getStripePaymentLinkId();
+				
+				if (!Utils.isNullOrEmpty(sProductId)) {
+					// archive the product and the price on Stripe
+					String sDeactivatedProductId = oStripeService.deactivateProduct(sProductId);
+					if (!sProductId.equals(sDeactivatedProductId)) {
+						WasdiLog.warnLog("ProcessorsResource.deleteProcessor: deactivated product id (" + sDeactivatedProductId + ") on Stripe does not match the stored product id (" + sProductId + ")");
+						return Response.status(Status.BAD_REQUEST).build();
+					}
+				}
+				
+				// archive the payment url
+				if (!Utils.isNullOrEmpty(sPaymentLinkId)) {
+					String sDeactivatedPaymentLinkId = oStripeService.deactivatePaymentLink(sPaymentLinkId);
+					if (!sPaymentLinkId.equals(sDeactivatedPaymentLinkId)) {
+						WasdiLog.warnLog(
+								"ProcessorsResource.deleteProcessor: deactivated payment link id (" + sDeactivatedPaymentLinkId + ") on Stripe does not match the stored payment link id (" + sPaymentLinkId + ")");
+						return Response.status(Status.BAD_REQUEST).build();
+					}
+				}
+				WasdiLog.debugLog("ProcessorsResource.deleteProcessor: Stripe information about processor on-demand purchase have been deactivated.");
+			}
 
 			// Schedule the process to delete the processor
 			String sProcessObjId = Utils.getRandomName();
@@ -1372,7 +1450,7 @@ public class ProcessorsResource  {
 			// Trigger the processor delete operation on this specific node
 			WasdiLog.debugLog("ProcessorsResource.deleteProcessor: Scheduling Processor Delete Operation");
 			
-			// Get the dedicated special workpsace
+			// Get the dedicated special workspace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);
 			
@@ -1907,6 +1985,129 @@ public class ProcessorsResource  {
 				WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: user cannot access the processor");
 				return Response.status(Status.FORBIDDEN).build();				
 			}
+			
+			// MANAGE STRIPE PRODUCT
+			Float fOldOnDemandPrice = oProcessorToUpdate.getOndemandPrice();
+			Float fNewOnDemandPrice = oUpdatedProcessorVM.getOndemandPrice();
+			
+			if (fNewOnDemandPrice < 0) {
+				WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the ondemand price is a negative value. Information on Stripe won't be updated");
+				return Response.status(Status.BAD_REQUEST).build();
+			} 
+			else if (fOldOnDemandPrice != fNewOnDemandPrice) {
+				StripeService oStripeService = new StripeService();
+				
+				if (fOldOnDemandPrice > 0 && fNewOnDemandPrice == 0) {
+					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the app has been set for free. Archiving the Stripe price for the app");
+					String sStripeProductId = oProcessorToUpdate.getStripeProductId();
+					String sPaymentLinkId = oProcessorToUpdate.getStripePaymentLinkId();
+					
+					if (Utils.isNullOrEmpty(sStripeProductId) || Utils.isNullOrEmpty(sPaymentLinkId)) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id or payment link id are null or empty.");
+						return Response.status(Status.NOT_FOUND).build();
+					}
+					
+					// deactivate the product and price, a new product will be created if the app will be set again for purchase
+					String sStripeDeactivatedProductId = oStripeService.deactivateProduct(sStripeProductId);
+					if (Utils.isNullOrEmpty(sStripeDeactivatedProductId) ) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the id of the archived product is null. Something might have gone wrong on Stripe");
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+					}
+					
+					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: deactivated product: " + sStripeDeactivatedProductId);
+					
+					// deactivate payment link
+					String sStripeDeactivatedPaymentLinkId = oStripeService.deactivatePaymentLink(sPaymentLinkId);
+					if (Utils.isNullOrEmpty(sStripeDeactivatedPaymentLinkId) ) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the id of the archived payment link is null. Something might have gone wrong on Stripe");
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+					}
+					
+					// we remove the reference to the product id and the payment link id in the db
+					oProcessorToUpdate.setStripePaymentLinkId(null);
+					oProcessorToUpdate.setStripeProductId(null);
+					
+				}
+				else if (fOldOnDemandPrice <= 0 && fNewOnDemandPrice > 0) {
+					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: the app has been set for sale. Adding the Stripe product");
+					
+					Map<String, String> oStripeProducInformationMap = oStripeService.createProductAppWithOnDemandPrice(oUpdatedProcessorVM.getProcessorName(), sProcessorId, fNewOnDemandPrice);
+				
+					if (oStripeProducInformationMap == null ) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: no information about the created Stripe product");
+						return Response.status(Status.NOT_FOUND).build();
+					}
+					
+					String sStripeProductId = oStripeProducInformationMap.getOrDefault("productId", null);
+					String sStripePriceId = oStripeProducInformationMap.getOrDefault("priceId", null);
+					
+					if (Utils.isNullOrEmpty(sStripeProductId) || Utils.isNullOrEmpty(sStripePriceId)) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id and price id are null or empty");
+						return Response.status(Status.NOT_FOUND).build();
+					}
+					
+					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: product created on Stripe with id: " + sStripeProductId);
+					
+					oProcessorToUpdate.setStripeProductId(sStripeProductId);
+					
+					String sStripePaymentLinkId = oStripeService.createPaymentLink(sStripePriceId, sProcessorId);
+					
+					if (Utils.isNullOrEmpty(sStripePaymentLinkId)) {
+						WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: Stripe payment link id is null or empty.");
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+					}
+					
+					oProcessorToUpdate.setStripePaymentLinkId(sStripePaymentLinkId);
+					
+				}
+				else if (fOldOnDemandPrice > 0 && fNewOnDemandPrice > 0 && fOldOnDemandPrice != fNewOnDemandPrice) {
+					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the price of the app changed. Updating the correspoding Stripe product");
+					String sStripeProductId = oProcessorToUpdate.getStripeProductId();
+					
+					if (Utils.isNullOrEmpty(sStripeProductId)) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id not found in the db. Price won't be updated");
+						return Response.status(Status.NOT_FOUND).build();
+					}
+					
+					List<String> asStripeOnDemandPriceId = oStripeService.getActiveOnDemandPricesId(sStripeProductId);
+					
+					if (asStripeOnDemandPriceId.size() != 1) {
+						// we support only one active price at time
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: none or more than one on demand prices found.");
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+					}
+					
+					// deactivate the current on demand price and get the new price id
+					String sStripeNewOnDemandPriceId = oStripeService.updateOnDemandPrice(sStripeProductId, fNewOnDemandPrice);
+					
+					String sStripePaymentLinkId = oProcessorToUpdate.getStripePaymentLinkId();
+					String sResponsePaymentLinkId = oStripeService.deactivatePaymentLink(sStripePaymentLinkId);
+					
+					if (Utils.isNullOrEmpty(sResponsePaymentLinkId) || !sResponsePaymentLinkId.equals(sStripePaymentLinkId)) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: payment link on Stripe has not been deactivated");
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+					}
+					
+					// generate a new on demand price
+					String sNewPaymentLinkId = oStripeService.createPaymentLink(sStripeNewOnDemandPriceId, sProcessorId);
+					
+					if (Utils.isNullOrEmpty(sNewPaymentLinkId)) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: payment link on Stripe has not been generated for price id " + sStripeNewOnDemandPriceId);
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+					}
+					
+					oProcessorToUpdate.setStripePaymentLinkId(sNewPaymentLinkId);	
+					
+					if (Utils.isNullOrEmpty(sStripeNewOnDemandPriceId)) {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: updated price id in Stripe is null or empty. Something might have gone wrong on Stripe");
+						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+					}
+					
+					WasdiLog.debugLog(
+							"ProcessorsResource.updateProcessorDetails: price updated for Stripe product " + sStripeProductId + ". New on demand price id: " + sStripeNewOnDemandPriceId);
+				}
+				
+			}
 						
 			oProcessorToUpdate.setCategories(oUpdatedProcessorVM.getCategories());
 			oProcessorToUpdate.setEmail(oUpdatedProcessorVM.getEmail());
@@ -1927,7 +2128,425 @@ public class ProcessorsResource  {
 			WasdiLog.errorLog("ProcessorResource.updateProcessorDetails error: " + oEx.toString());
 			return Response.serverError().build();
 		}
-	}		
+	}
+	
+	/**
+	 * Records the information about the payment of a processor's on-demand run
+	 * @param sSessionId user session id
+	 * @param oAppPaymentVM the information about the payment
+	 * @return the unique identifier of the payment
+	 */
+	@POST
+	@Path("/addAppPayment")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response addAppPayment(@HeaderParam("x-session-token") String sSessionId, AppPaymentViewModel oAppPaymentVM) {
+
+		try {
+			// check request parameters
+			if (oAppPaymentVM == null 
+					|| Utils.isNullOrEmpty(oAppPaymentVM.getPaymentName()) 
+					|| Utils.isNullOrEmpty(oAppPaymentVM.getProcessorId()) 
+					|| Utils.isNullOrEmpty(oAppPaymentVM.getBuyDate())) {
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Not enough information to proceed with the purchase")).build();
+			}
+			String sPaymentName = oAppPaymentVM.getPaymentName();
+			String sProcessorId = oAppPaymentVM.getProcessorId();
+			Double dBuyDate = Utils.getDateAsDouble(Utils.getYyyyMMddTZDate(oAppPaymentVM.getBuyDate()));
+
+			// check existence of the user
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if (oUser == null) {
+				WasdiLog.warnLog("ProcessorResource.createAppPayment: invalid session");
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+			}
+			String sUserId = oUser.getUserId();
+			
+			// user should have a valid subscription before paying for an app
+			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+				WasdiLog.warnLog("ProcessorsResource.createAppPayment: invalid subscription");
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("Invalid subscription")).build();
+			}
+			
+			// check existence of the processor
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			if (oProcessor == null) {
+				WasdiLog.warnLog("ProcessorResource.createAppPayment: processor " + sProcessorId + " not found in the db");
+				return Response.status(Status.NOT_FOUND).entity(new ErrorResponse("The app required for purchase does not exist")).build();	
+			}
+			
+			// check uniqueness of the payment name 
+			AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
+			String sFinalPaymentName = sPaymentName;
+			List<AppPayment> aoPaymentsByName = oAppPaymentRepository.getAppPaymentByNameAndUser(sPaymentName, sUserId);
+			while (aoPaymentsByName != null && aoPaymentsByName.size() > 0) {
+				sFinalPaymentName = Utils.cloneName(sFinalPaymentName);
+				WasdiLog.debugLog("ProcessorResource.createAppPayment: an app payment with the same name already exists. Changing the name to " + sFinalPaymentName);
+			}
+			
+			// add payment information to the db
+			String sPaymentId = UUID.randomUUID().toString();
+			
+			AppPayment oAppPayment = new AppPayment();
+			oAppPayment.setAppPaymentId(sPaymentId);
+			oAppPayment.setName(sFinalPaymentName);
+			oAppPayment.setUserId(sUserId);
+			oAppPayment.setProcessorId(sProcessorId);
+			oAppPayment.setBuySuccess(false);
+			oAppPayment.setBuyDate(dBuyDate); 
+			oAppPayment.setRunDate(null);
+			
+			WasdiLog.debugLog("ProcessorResource.createAppPayment. Payment: " + sPaymentId + ", name: " + sPaymentName + ", user id " + sUserId + ", processorId: " + sProcessorId);
+			
+			boolean bIsSuccess = oAppPaymentRepository.insertAppPayment(oAppPayment);
+			
+			if (bIsSuccess)
+				return Response.ok(new SuccessResponse(sPaymentId)).build();
+			else
+				return Response.serverError().build();
+					
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorResource.createAppPayment: error ", oEx);
+			return Response.serverError().build();
+		}
+	}
+	
+	
+	/**
+	 * Get the Stripe payment URL for the on-demand run of a processor
+	 * @param sSessionId user session id
+	 * @param sSubscriptionId the active subscription of the user
+	 * @param sProcessorId the id of the processor
+	 * @param sAppPaymentId the payment's unique identifier
+	 * @return
+	 */
+	@GET
+	@Path("/stripe/onDemandPaymentUrl")
+	public Response getStripeOnDemandPaymentUrl(@HeaderParam("x-session-token") String sSessionId, 
+			@QueryParam("processor") String sProcessorId, @QueryParam("appPayment") String sAppPaymentId) {
+
+		try {
+			if (Utils.isNullOrEmpty(sProcessorId) || Utils.isNullOrEmpty(sAppPaymentId)) {
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Empty request parameters")).build();
+			}
+			
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oUser == null) {
+				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: invalid session");
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+			}
+			
+			// user should have a valid subscription before paying for an app
+			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: invalid subscription");
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("Invalid subscription")).build();
+			}
+			
+			AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
+			AppPayment oAppPayment = oAppPaymentRepository.getAppPaymentById(sAppPaymentId);
+			
+			if (oAppPayment == null ) {
+				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: no payment information in the db for app payment id " + sAppPaymentId);
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Information to complete the purchase not available")).build();
+			}
+			
+			ProcessorRepository oProcessorRespository = new ProcessorRepository();
+			
+			
+			Processor oProcessor = oProcessorRespository.getProcessor(sProcessorId);
+			
+			if (oProcessor == null) {
+				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: processor id not found " + sProcessorId);
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The processor cannot be found.")).build();
+			}
+			
+			String sStripePaymentLinkId = oProcessor.getStripePaymentLinkId();
+			
+			if (Utils.isNullOrEmpty(sStripePaymentLinkId)) {
+				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: no payment id found for processor id " + sProcessorId);
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No payment  information available to purchase a run of the app")).build();
+			}
+			
+			StripeService oStripeService = new StripeService();
+			String sPaymentLink = oStripeService.retrievePaymentLink(sStripePaymentLinkId);
+			
+			if (Utils.isNullOrEmpty(sPaymentLink)) {
+				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: no payment url found for processor " + sProcessorId + " and payment link id " + sPaymentLink);
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No payment link available to purchase a run of the app")).build();
+			}
+			
+			String sUrl = sPaymentLink + "?client_reference_id=" + oAppPayment.getAppPaymentId();
+
+
+			return Response.ok(new SuccessResponse(sUrl)).build();
+		} 
+		catch (Exception oEx) {
+			WasdiLog.errorLog("SubscriptionResource.getStripePaymentUrl error " + oEx);
+			return Response.serverError().build();
+		}
+	}
+	
+	/**
+	 * Check if an app has being set for purchase and if the run of the app has been purchased
+	 * @param sSessionId user session id
+	 * @param sProcessorId the id of the app
+	 * @return true if the run has been correctly purchased, false otherwise
+	 */
+	@GET
+	@Path("/isAppPurchased")
+	public Response checkAppPurchase(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processor")String sProcessorId) {
+		
+		try {
+			
+			if (Utils.isNullOrEmpty(sProcessorId)) {
+				WasdiLog.warnLog("ProcessorsResource.checkAppPurchase: processor id is null or empty");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Processor id not specified")).build();
+			}
+		
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if (oUser == null) {
+				WasdiLog.warnLog("ProcessorsResource.checkAppPurchase: invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			
+			if (oProcessor == null) {
+				WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: processor " + sProcessorId + " not found");
+				return Response.status(Status.NOT_FOUND).entity(new ErrorResponse("Processor not found")).build();
+			}
+			
+			Float fOnDemandPrice = oProcessor.getOndemandPrice();
+			
+			if (fOnDemandPrice != null && fOnDemandPrice == 0) {
+				WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: processor " + sProcessorId + " is free of charge");
+				return Response.ok(true).build();
+			}
+			
+			AppPaymentRepository oAppPurchaseRepository = new AppPaymentRepository();
+			List<AppPayment> aoAppPayments = oAppPurchaseRepository.getAppPaymentByProcessorAndUser(sProcessorId, oUser.getUserId());
+			if (aoAppPayments == null) {
+				WasdiLog.warnLog("ProcessorsResource.checkAppPurchase: list of payments is null");
+				return Response.status(Status.NOT_FOUND).entity(new ErrorResponse("Payments not found")).build();
+			}
+			
+			// find a payment that: (i) is valid, (ii) has not yet been used 
+			String sPaymentId = null;
+			for (AppPayment oAppPayment : aoAppPayments) {
+				WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: app payment: " + oAppPayment.getName());
+				if (oAppPayment.isBuySuccess() && oAppPayment.getRunDate() == null) {
+					sPaymentId = oAppPayment.getAppPaymentId();
+					WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: found an app payment that has not been yet used " + sPaymentId);
+					break;
+				}
+			}
+			
+			if (Utils.isNullOrEmpty(sPaymentId)) {
+				WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: no payments found for the processor " + sProcessorId);
+				return Response.ok(false).build();
+			}
+			
+			// at this point, we know the run of the app was payed. 
+			// we still need to check that the app is not currently being executed (thus "consuming" the payment that we found in the db)
+			if (WasdiConfig.Current.isMainNode()) {
+				NodeRepository oNodeRepo = new NodeRepository();
+				List<Node> aoNodes = oNodeRepo.getNodesList();
+				
+				List<String> asRunningStatus = Arrays.asList(ProcessStatus.CREATED.name(), 
+												ProcessStatus.WAITING.name(),
+												ProcessStatus.RUNNING.name(),
+												ProcessStatus.READY.name());
+				
+				boolean bIsRunOngoing = false;
+				
+				for (Node oNode : aoNodes) {
+					if (oNode.getNodeCode().equals("wasdi")) continue;
+					if (oNode.getActive() == false) continue;
+					
+					try {
+						WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: send request to computing node " + oNode.getNodeCode());
+						HttpCallResponse oResponse = ProcessWorkspaceAPIClient.getByUser(oNode, sSessionId, false);
+						int iResCode = oResponse.getResponseCode();
+						
+						if (iResCode >= 200 && iResCode <= 299) {
+							if (Utils.isNullOrEmpty(oResponse.getResponseBody())) {
+								WasdiLog.warnLog("ProcessorsResource.checkAppPurchase: response body from node " + oNode.getNodeCode() + "is null");
+								return Response.status(Status.NOT_FOUND).build();
+							} 
+							
+							JSONArray aoJsonProcessWs = new JSONArray(oResponse.getResponseBody()); 
+							int i = 0;
+							
+							while (i < aoJsonProcessWs.length() && !bIsRunOngoing) {
+								JSONObject oJsonProcessWs = aoJsonProcessWs.getJSONObject(i);
+								String sStatus = oJsonProcessWs.optString("status");
+								String sOperationType = oJsonProcessWs.optString("operationType");
+								if (sOperationType.equals(LauncherOperations.RUNPROCESSOR.name()) && asRunningStatus.contains(sStatus)) {
+									WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: found a running processor lunached by the user. Process obj id " + oJsonProcessWs.optString("processObjId)"));
+									return Response.ok(false).build();
+								}
+								i++;
+							}
+									
+						} else {
+							WasdiLog.warnLog("ProcessorResource.checkAppPurchase: error code (" + iResCode + ") from computing node " + oNode.getNodeCode());
+							return Response.status(Status.NOT_FOUND).build();
+						}
+						
+					} catch(Exception oEx) {
+						WasdiLog.errorLog("ProcessorsResource.checkAppPurchase: error trying to send request to computing nodes");
+						return Response.serverError().build();
+					}
+				}
+			}
+			
+			WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: the run of the processor has been purchased. Payment id: " + sPaymentId);
+			return Response.ok(true).build();	
+			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorsResource.checkAppPurchase error: ", oEx);
+			return Response.serverError().build();
+		}
+		
+			
+	}
+
+	
+	/**
+	 * Get the information about the payment of an app
+	 * @param sSessionId
+	 * @param sAppPaymentId
+	 * @return
+	 */
+	@GET
+	@Path("/byAppPaymentId")
+	public Response getAppPaymentById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("appPayment") String sAppPaymentId) {
+		
+		if (Utils.isNullOrEmpty(sAppPaymentId)) {
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Payment id not specified")).build();
+		}
+		
+		WasdiLog.debugLog("ProcessorResource.getAppPaymentById. Payment id: " + sAppPaymentId);
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.warnLog("ProcessorResource.getAppPaymentById: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+		
+		try {
+			
+			AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
+			
+			AppPayment oAppPayment = oAppPaymentRepository.getAppPaymentById(sAppPaymentId);
+			
+			if (oAppPayment == null) {
+				WasdiLog.warnLog("ProcessorResource.getPaymentById: payment id not found");
+				return Response.status(Status.NOT_FOUND).entity(new ErrorResponse("Payment id not found")).build();	
+			}
+			
+			AppPaymentViewModel oAppPaymentViewModel = new AppPaymentViewModel();
+			oAppPaymentViewModel.setAppPaymentId(oAppPayment.getAppPaymentId());
+			oAppPaymentViewModel.setPaymentName(oAppPayment.getName());
+			oAppPaymentViewModel.setUserId(oAppPayment.getUserId());
+			oAppPaymentViewModel.setProcessorId(oAppPayment.getProcessorId());
+			oAppPaymentViewModel.setBuySuccess(oAppPayment.isBuySuccess());
+			oAppPaymentViewModel.setBuyDate(Utils.getFormatDate(Utils.getDate(oAppPayment.getBuyDate())));
+			oAppPaymentViewModel.setRunDate(Utils.getFormatDate(Utils.getDate(oAppPayment.getRunDate())));
+			
+			return Response.ok(oAppPaymentViewModel).build();
+					
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorResource.getAppPaymentById: error " ,  oEx);
+			return Response.serverError().build();
+		}
+	}
+	
+	
+	/**
+	 * Confirms the payment for an on-demand run of an app after the successful transaction from Stripe
+	 * The API should be called from Stripe. It connects again to Stripe to verify that the info is correct
+	 * If all is fine it activates the payment
+	 * 
+	 * @param sCheckoutSessionId Secret Checkout code used to link the stripe payment with the subscription
+	 * @return
+	 */
+	@GET
+	@Path("/stripe/confirmation/{CHECKOUT_SESSION_ID}")
+	public String confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
+		WasdiLog.debugLog("ProcessorResource.confirmation. sCheckoutSessionId: " + sCheckoutSessionId);
+
+		try {
+			if (Utils.isNullOrEmpty(sCheckoutSessionId)) {
+				WasdiLog.warnLog("ProcessorResource.confirmation: Stripe returned a null CHECKOUT_SESSION_ID, aborting");
+				return null;
+			}
+			
+			StripeService oStripeService = new StripeService();
+			StripePaymentDetail oStripePaymentDetail = oStripeService.retrieveStripePaymentDetail(sCheckoutSessionId);
+			
+			if (oStripePaymentDetail == null) {
+				WasdiLog.warnLog("ProcessorResource.confirmation: Stripe returned an invalid result, aborting");
+				return null;
+			}
+
+			String sAppPaymentId = oStripePaymentDetail.getClientReferenceId();
+			String sPaymentIntentId = oStripePaymentDetail.getPaymentIntentId();
+			
+			if (Utils.isNullOrEmpty(sAppPaymentId) || Utils.isNullOrEmpty(sPaymentIntentId)) {
+				WasdiLog.warnLog("ProcessorResource.confirmation: null or empty app payment id or payment intent id from Stripe");
+				return null;
+			}
+
+			WasdiLog.debugLog("ProcessorResource.confirmation. App payment id " + sAppPaymentId + ", payment intent id " + sPaymentIntentId);
+
+			if (oStripePaymentDetail != null) {
+				
+				// add the information about the payment intent in the db
+				AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
+				AppPayment oAppPayment = oAppPaymentRepository.getAppPaymentById(sAppPaymentId);
+				
+				if (oAppPayment == null) {
+					WasdiLog.warnLog("ProcessorResource.confirmation: reference id returned by Stripe does not correspond to any pamynet stored on the db");
+					return null;
+				}
+				
+				oAppPayment.setStripePaymentIntentId(sPaymentIntentId);
+				oAppPayment.setBuyDate(Utils.nowInMillis());
+				oAppPayment.setBuySuccess(true);
+				oAppPaymentRepository.updateAppPayment(oAppPayment);
+				
+				// add the information about the WASDI payment id on Stripe
+				String sStripePaymentIntentId = oStripeService.updatePaymentIntentWithAppPaymentId(sPaymentIntentId, sAppPaymentId);
+				if (Utils.isNullOrEmpty(sStripePaymentIntentId)) {
+					WasdiLog.warnLog("ProcessorResource.confirmation: error updating the payment intent metadata on Stripe");
+					return null;
+				}
+				
+				WasdiLog.debugLog("ProcessorResource.confirmation: payment intent updated on stripe with information about payment id");
+			}		
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorResource.confirmation error ", oEx);
+		}
+
+
+		String sHtmlContent = "<script type=\"text/javascript\">\r\n" + 
+				"setTimeout(\r\n" + 
+				"function ( )\r\n" + 
+				"{\r\n" + 
+				"  self.close();\r\n" + 
+				"}, 1000 );\r\n" + 
+				"</script>";
+		
+		return sHtmlContent;
+	}
 	
 	/**
 	 * Downloads a zip with the processors files
