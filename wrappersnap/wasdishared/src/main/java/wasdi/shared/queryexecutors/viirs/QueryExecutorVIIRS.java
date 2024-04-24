@@ -45,6 +45,7 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 	String m_sShapeMaskPath = "";
 	
 	private static final Object s_oShapeFileLock = new Object();
+	public static final String s_sLINK_PREFIX = "https://floodlight.ssec.wisc.edu/composite/";
 
 	
 	public QueryExecutorVIIRS() {
@@ -171,7 +172,7 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		    			
 		    			oResult.setId(sFileName);
 		    			oResult.setTitle(sFileName);
-		    			oResult.setLink("https://floodlight.ssec.wisc.edu/composite/" + sFileName);
+		    			oResult.setLink(s_sLINK_PREFIX + sFileName);
 		    			oResult.setSummary("Date: "  + TimeEpochUtils.fromEpochToDateString(oActualDay.getTime()) +  ", Mode: Earth Observation, Satellite: VIIRS");
 		    			oResult.setProvider("VIIRS");
 		    			oResult.setFootprint(sFootPrint);

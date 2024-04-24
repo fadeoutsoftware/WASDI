@@ -1,9 +1,24 @@
 package wasdi.dataproviders;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
+import org.apache.commons.io.FileUtils;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.queryexecutors.viirs.QueryExecutorVIIRS;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -29,12 +44,54 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 		WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: try to get " + sFileURL);
 				
 		String sResult = "";
+				
+		// this is the example of a link that we receive: 
+		// https://floodlight.ssec.wisc.edu/composite/RIVER-FLDglobal-composite1_20240416_000000.part003.tif
+			
+		String sFileName = "";
+		String sProductDate  = "";
+		String sTileNumber = "";
 		
+		try {
+	
+			String sURLPrefix = QueryExecutorVIIRS.s_sLINK_PREFIX;
+			if (!sURLPrefix.endsWith("/"))
+				sURLPrefix += "/";
+			
+			sFileName = sFileURL.replace(sURLPrefix, "");
+			
+			sProductDate = sFileName.split("_")[1];
+			sTileNumber = sFileName.split(".")[1].replace("part", "");	
+			
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("VIIRSProviderAdapter.executeDownloadFile: exception retrieving the product date and tile number from the url", oEx);
+		}
+		
+		if (Utils.isNullOrEmpty(sFileName) || Utils.isNullOrEmpty(sProductDate) || Utils.isNullOrEmpty(sTileNumber)) {
+			WasdiLog.warnLog("VIIRSProviderAdapter.executeDownloadFile: could not find product date and tile number from url " + sFileURL);
+			return sResult;
+		}
+		
+		if (!isDateMoreThan30DaysOld(sProductDate)) {
+			
+			sResult = executeDownloadFileFromFloodlight(sFileURL, sSaveDirOnServer, iMaxRetry);
+			
+		} else {
+			
+			sResult = executeDownloadFileFromS3(sFileURL, sSaveDirOnServer, sFileName, sProductDate, sTileNumber);
+			
+		}
+		
+		return sResult;
+	}
+	
+	private String executeDownloadFileFromFloodlight(String sFileURL, String sSaveDirOnServer, int iMaxRetry) {
+		String sResult = "";
 		int iAttemp = 0;
 		
-		while (Utils.isNullOrEmpty(sResult) && iAttemp<iMaxRetry) {
+		while (Utils.isNullOrEmpty(sResult) && iAttemp < iMaxRetry) {
 			
-			WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: attemp #" + iAttemp);
+			WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFileFromFloodlight: attemp #" + iAttemp);
 			
 			try {
 				sResult = downloadViaHttp(sFileURL.replace(s_sOldSubstring, s_sNewSubstring), "", "", sSaveDirOnServer);
@@ -44,19 +101,103 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 				boolean bIsFileRenamed = oOriginalFile.renameTo(oRenamedFile);
 				
 				if (!bIsFileRenamed)
-					WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile. File was not renamed.");
+					WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFileFromFloodlight. File was not renamed.");
 				
 				sResult = sResult.replace(s_sNewSubstring, s_sOldSubstring);
 				
 			}
 			catch (Exception oEx) {
-				WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
+				WasdiLog.errorLog("VIIRSProviderAdapter.executeDownloadFileFromFloodlight: exception in download via http call: ", oEx);
 			}
 			
 			iAttemp ++;
 		}
 		
 		return sResult;
+	}
+	
+	private String executeDownloadFileFromS3(String sFileURL, String sSaveDirOnServer, String sWasdiProductName, String sProductDate, String sTileNumber) {
+		
+		String sResult = "";
+				
+		if (sFileURL.contains("-composite_")) {
+			// folder for 5-day composite
+			
+			sResult = copyFileFromS3Bucket("VFM_5day_GLB/TIF/", sProductDate, sTileNumber, sSaveDirOnServer, sWasdiProductName);
+		
+		} else if (sFileURL.contains("-composite1_")) {
+			// folder for 1-day composite
+			sResult = copyFileFromS3Bucket("VFM_1day_GLB/TIF/", sProductDate, sTileNumber, sSaveDirOnServer, sWasdiProductName);
+		} else {
+			WasdiLog.warnLog("VIIRSProviderAdapter.executeDownloadFileFromS3: can not determine time span of pruduct (1 or 5 days composite) from file URL " + sFileURL);
+		}
+
+		return sResult;
+	}
+	
+	private String copyFileFromS3Bucket(String sS3FileNamePrefix, String sProductDate, String sTileNumber, String sSaveDirOnServer, String sTargetProductName) {
+		String sResult = "";
+		
+		String sS3VolumePath = "/mnt/wasdi/data-provider-volumes/noaa-jpss/"; // TODO: put this in the configuration file
+		
+		try {
+			String sYear = sProductDate.substring(0, 4);
+			String sMonth = sProductDate.substring(4, 6);
+			String sDay = sProductDate.substring(6, 8);
+			
+			WasdiLog.debugLog("");
+			
+			String sFilePrefix = sS3FileNamePrefix;
+			if (!sS3FileNamePrefix.endsWith("/"))
+				sFilePrefix += "/";
+			
+			sS3VolumePath += sFilePrefix + sYear + "/" + sMonth + "/" + sDay;
+			File sProductFolder = new File(sS3VolumePath);
+			final String sDateSubstring = "s" + sProductDate;
+			final String sTileSubstring = "-GLB" + sTileNumber;
+			
+			if (sProductFolder.exists() && sProductFolder.isDirectory()) {
+				// we can proceed to look for the product
+				List<String> asProducts = Arrays.asList(sProductFolder.listFiles()).stream()
+						.map(File::getName)
+						.filter(sFileName -> sFileName.contains(sDateSubstring) && sFileName.contains(sTileSubstring))
+						.collect(Collectors.toList());
+				if (asProducts.size() > 0) {
+					// what to do in this case?
+				} else {
+					String sFileNameOnS3 = asProducts.get(0);
+					File oSourceProduct = new File(sS3VolumePath + "/" + sFileNameOnS3);
+					File oDestinationProduct = new File(sSaveDirOnServer + "/" + sTargetProductName);
+					FileUtils.copyFile(oSourceProduct, oDestinationProduct);
+	
+					sResult =  oDestinationProduct.getAbsolutePath();
+				}
+			}
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("VIIRSProviderAdapter.copyFileFromS3Bucket: error copying the file for S3 ", oEx);
+		}
+		
+		return sResult;
+		
+	}
+	
+	
+	private boolean isDateMoreThan30DaysOld(String sDateString) {
+		SimpleDateFormat sSimpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+		try {
+			Date sFormattedDate = sSimpleDateFormat.parse(sDateString);
+			Calendar oCalendarGivenDate = Calendar.getInstance();
+			oCalendarGivenDate.setTime(sFormattedDate);
+			
+			Calendar oCalendarCurrentDate = Calendar.getInstance();
+			// subtracting 30 days from the current date
+			oCalendarCurrentDate.add(Calendar.DAY_OF_MONTH, -30);
+			return oCalendarGivenDate.before(oCalendarCurrentDate);
+		} catch (ParseException oEx) {
+			WasdiLog.errorLog("VIIRSProviderAdapter.isDateMoreThan30DaysOld: exception when parsing date: ", oEx);
+			return false;
+		}
+		
 	}
 
 	@Override
