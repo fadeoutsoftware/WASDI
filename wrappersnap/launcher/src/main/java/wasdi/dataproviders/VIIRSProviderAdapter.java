@@ -14,11 +14,12 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.json.JSONObject;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.viirs.QueryExecutorVIIRS;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -27,10 +28,13 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 	private static final String s_sNewSubstring = ".part";
 	private static final String s_sOldSubstring = "_part";
 	
+	private String m_sDataProviderVolumePath = "";
+	
 	public VIIRSProviderAdapter() {
 		super();
-		m_sDataProviderCode = "VIIRS";
+		m_sDataProviderCode = "VIIRS";	
 	}
+
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
@@ -203,7 +207,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 	private String getFilePathOnS3Volume(String sS3FileNamePrefix, String sProductDate, String sTileNumber) {
 		String sResult = "";
 		
-		String sS3VolumePath = "/mnt/wasdi/data-provider-volumes/noaa-jpss/JPSS_Blended_Products/";
+		String sS3VolumePath = m_sDataProviderVolumePath;
 		
 		if (!sS3VolumePath.endsWith("/"))
 			sS3VolumePath += "/";
@@ -221,8 +225,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 			
 			sS3VolumePath += sFilePrefix + "/TIF/" + sYear + "/" + sMonth + "/" + sDay;
 			File sProductFolder = new File(sS3VolumePath);
-			final String sDateSubstring = "s" + sProductDate;
-			final String sTileSubstring = "-GLB" + sTileNumber;
+			final String sTileSubstring = "-GLB" + sTileNumber + "_";
 			
 			WasdiLog.debugLog("VIIRSProviderAdapter.getFilePathOnS3Volume: looking for the product in the folder " + sProductFolder);
 			
@@ -230,12 +233,13 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 				// we can proceed to look for the product
 				List<String> asProducts = Arrays.asList(sProductFolder.listFiles()).stream()
 						.map(File::getName)
-						.filter(sFileName -> sFileName.contains(sDateSubstring) && sFileName.contains(sTileSubstring))
+						.filter(sFileName -> sFileName.contains(sTileSubstring))
 						.collect(Collectors.toList());
-				if (asProducts.size() > 1) {
+				if (asProducts.isEmpty()) {
+					WasdiLog.warnLog("VIIRSProviderAdapter.getFilePathOnS3Volume: no products found with substrings \"" + sTileSubstring + "\"");
+				} else if (asProducts.size() > 1) {
 					// what to do in this case?
-					WasdiLog.warnLog("VIIRSProviderAdapter.getFilePathOnS3Volume: more than one products "
-							+ "found with substrings \"" + sDateSubstring + "\" and \"" + sTileSubstring + "\"");
+					WasdiLog.warnLog("VIIRSProviderAdapter.getFilePathOnS3Volume: more than one products found with substrings \"" + sTileSubstring + "\"");
 				} else {
 					sResult = sS3VolumePath + "/" + asProducts.get(0);
 				}
@@ -293,6 +297,14 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 
 	@Override
 	protected void internalReadConfig() {
+		String sAdapterConfigPath = "";
+		try {
+			sAdapterConfigPath = m_oDataProviderConfig.adapterConfig;
+			JSONObject oAppConf = JsonUtils.loadJsonFromFile(sAdapterConfigPath);
+			m_sDataProviderVolumePath = oAppConf.getString("dataProviderVolumePath");
+		} catch(Exception oEx) {
+			WasdiLog.errorLog("VIIRSProviderAdapter.internalReadConfig: exception reading parser config file " + sAdapterConfigPath);
+		}
 		
 	}
 
@@ -304,25 +316,6 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 		}
 		
 		return 0;
-	}
-	
-	
-	public static void main(String[] args) throws Exception {
-		WasdiConfig.readConfig("C:/temp/wasdi/wasdiLocalTESTConfig.json");
-		VIIRSProviderAdapter oProvider = new VIIRSProviderAdapter();
-		System.out.println(oProvider.getFilePathOnS3Volume("VFM_1day_GLB", "20180418", "071"));
-		
-		/*
-		String sURL = "https://floodlight.ssec.wisc.edu/composite/RIVER-FLDglobal-composite1_20240201_000000.part006.tif";
-		String sDownloadUser = "user";
-		String sDownloadPassword = "password";
-		String sSaveDirOnServer = "C:/Users/valentina.leone/Desktop/WORK/VIIRS/test_copy_file";
-		ProcessWorkspace oProcessWorkspace = null;
-		int iMaxRetry = 4;
-		
-		oProvider.executeDownloadFile(sURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace, iMaxRetry);
-		*/
-		
 	}
 	
 }
