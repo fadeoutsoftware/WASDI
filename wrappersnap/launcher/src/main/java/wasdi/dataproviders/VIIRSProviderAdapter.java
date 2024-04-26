@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 
-import gov.nasa.gsfc.seadas.dataio.SeadasProductReader;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.viirs.QueryExecutorVIIRS;
 import wasdi.shared.utils.Utils;
@@ -48,7 +48,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 		String sFilePrefixOnS3 = asProductInfo.get(3);
 
 		if (!isDateMoreThan30DaysOld(sProductDate)) {
-			return getDownloadFileSizeViaHttp(sFileURL.replace(s_sOldSubstring, s_sNewSubstring));
+			lSize = getDownloadFileSizeViaHttp(sFileURL.replace(s_sOldSubstring, s_sNewSubstring));
 			
 		} else {
 			try {
@@ -137,9 +137,9 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 			sTileNumber = sWasdiFileName.split("\\.")[1].replace("part", "");	
 			
 			if (sFileURL.contains("-composite_"))
-				sFilePrefixOnS3 = "VFM_5day_GLB/TIF/";
+				sFilePrefixOnS3 = "VFM_5day_GLB";
 			else if (sFileURL.contains("-composite1_")) 
-				sFilePrefixOnS3 = "VFM_1day_GLB/TIF/";
+				sFilePrefixOnS3 = "VFM_1day_GLB";
 			else
 				WasdiLog.warnLog("VIIRSProviderAdapter.getProductInformation: can not determine time span of pruduct (1 or 5 days composite) from file URL " + sFileURL);
 			
@@ -154,6 +154,13 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 		return asResults;
 	}
 	
+	/**
+	 * Downloads the product from the data provider online
+	 * @param sFileURL URL of the data provider 
+	 * @param sSaveDirOnServer the directory where the downloaded file should be saved
+	 * @param iMaxRetry maximum number of times the download should be attempted
+	 * @return the path to the downloaded product
+	 */
 	private String executeDownloadFileFromFloodlight(String sFileURL, String sSaveDirOnServer, int iMaxRetry) {
 		String sResult = "";
 		int iAttemp = 0;
@@ -185,66 +192,18 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 		return sResult;
 	}
 	
-	private String copyFileFromS3Bucket(String sS3FileNamePrefix, String sProductDate, String sTileNumber, String sSaveDirOnServer, String sTargetProductName) {
-		
-		String sResult = "";
-		
-		String sS3VolumePath = "/mnt/wasdi/data-provider-volumes/noaa-jpss/";
-		
-		if (!sS3VolumePath.endsWith("/"))
-			sS3VolumePath += "/";
-		
-		try {
-			String sYear = sProductDate.substring(0, 4);
-			String sMonth = sProductDate.substring(4, 6);
-			String sDay = sProductDate.substring(6, 8);
-			
-			WasdiLog.debugLog("VIIRSProviderAdapter.copyFileFromS3Bucket: product refers to date " + sYear + "/" + sMonth + "/" + sDay + " and tile number " + sTileNumber);
-
-			String sFilePrefix = sS3FileNamePrefix;
-			if (!sS3FileNamePrefix.endsWith("/"))
-				sFilePrefix += "/";
-			
-			sS3VolumePath += sFilePrefix + sYear + "/" + sMonth + "/" + sDay;
-			File sProductFolder = new File(sS3VolumePath);
-			final String sDateSubstring = "s" + sProductDate;
-			final String sTileSubstring = "-GLB" + sTileNumber;
-			
-			WasdiLog.debugLog("VIIRSProviderAdapter.copyFileFromS3Bucket: looking for the product in the folder " + sProductFolder);
-			
-			if (sProductFolder.exists() && sProductFolder.isDirectory()) {
-				// we can proceed to look for the product
-				List<String> asProducts = Arrays.asList(sProductFolder.listFiles()).stream()
-						.map(File::getName)
-						.filter(sFileName -> sFileName.contains(sDateSubstring) && sFileName.contains(sTileSubstring))
-						.collect(Collectors.toList());
-				if (asProducts.size() > 1) {
-					// what to do in this case?
-					WasdiLog.warnLog("VIIRSProviderAdapter.copyFileFromS3Bucket: more than one products "
-							+ "found with substrings \"" + sDateSubstring + "\" and \"" + sTileSubstring + "\"");
-				} else {
-					String sFileNameOnS3 = asProducts.get(0);
-					File oSourceProduct = new File(sS3VolumePath + "/" + sFileNameOnS3);
-					File oDestinationProduct = new File(sSaveDirOnServer + "/" + sTargetProductName);
-					FileUtils.copyFile(oSourceProduct, oDestinationProduct);
 	
-					sResult =  oDestinationProduct.getAbsolutePath();
-					WasdiLog.debugLog("VIIRSProviderAdapter.copyFileFromS3Bucket: product copied from S3 to " + sResult);
-
-				}
-			}
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("VIIRSProviderAdapter.copyFileFromS3Bucket: error while trying to retrieve and copy the file from S3 ", oEx);
-		}
-		
-		return sResult;
-		
-	}
-	
+	/**
+	 * Get the path of a VIIRS product on the S3 volume
+	 * @param sS3FileNamePrefix prefix of the VIIRS product name on the S3 volume, it can be "VFM_5day_GLB" or "VFM_1day_GLB"
+	 * @param sProductDate the date the product refers to, in the format YYYYMMDD
+	 * @param sTileNumber  the tile number as a fixed-length string of three digits (e.g. 001)
+	 * @return the path of the VIIRS product on the S3 volume
+	 */
 	private String getFilePathOnS3Volume(String sS3FileNamePrefix, String sProductDate, String sTileNumber) {
 		String sResult = "";
 		
-		String sS3VolumePath = "/mnt/wasdi/data-provider-volumes/noaa-jpss/";
+		String sS3VolumePath = "/mnt/wasdi/data-provider-volumes/noaa-jpss/JPSS_Blended_Products/";
 		
 		if (!sS3VolumePath.endsWith("/"))
 			sS3VolumePath += "/";
@@ -260,7 +219,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 			if (!sS3FileNamePrefix.endsWith("/"))
 				sFilePrefix += "/";
 			
-			sS3VolumePath += sFilePrefix + sYear + "/" + sMonth + "/" + sDay;
+			sS3VolumePath += sFilePrefix + "/TIF/" + sYear + "/" + sMonth + "/" + sDay;
 			File sProductFolder = new File(sS3VolumePath);
 			final String sDateSubstring = "s" + sProductDate;
 			final String sTileSubstring = "-GLB" + sTileNumber;
@@ -292,7 +251,11 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 	}
 	
 	
-	
+	/**
+	 * Determines if a string in the format YYYYMMDD is earlier than 30 days from the current date
+	 * @param sDateString the date string in the format YYYYMMDD
+	 * @return return true if the given date is more than 30 days earlier before the current date
+	 */
 	private boolean isDateMoreThan30DaysOld(String sDateString) {
 		SimpleDateFormat sSimpleDateFormat = new SimpleDateFormat("yyyyMMdd");
 		try {
@@ -343,11 +306,13 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 		return 0;
 	}
 	
-	/*
+	
 	public static void main(String[] args) throws Exception {
 		WasdiConfig.readConfig("C:/temp/wasdi/wasdiLocalTESTConfig.json");
 		VIIRSProviderAdapter oProvider = new VIIRSProviderAdapter();
+		System.out.println(oProvider.getFilePathOnS3Volume("VFM_1day_GLB", "20180418", "071"));
 		
+		/*
 		String sURL = "https://floodlight.ssec.wisc.edu/composite/RIVER-FLDglobal-composite1_20240201_000000.part006.tif";
 		String sDownloadUser = "user";
 		String sDownloadPassword = "password";
@@ -356,7 +321,8 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 		int iMaxRetry = 4;
 		
 		oProvider.executeDownloadFile(sURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace, iMaxRetry);
+		*/
 		
 	}
-	*/
+	
 }
