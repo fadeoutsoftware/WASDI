@@ -15,7 +15,7 @@ networks:
       com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"
       com.docker.network.bridge.name: "br-{{ sWasdiDockerNetworkName }}"
       com.docker.network.driver.mtu: "1500"
-    external: {% if bWasdiDockerNetworkMustBeCreated %}false{% else %}true{% endif %}
+    external: {% if bWasdiDockerNetworkMustBeCreated %}true{% else %}false{% endif %}
 
     ipam:
       driver: "default"
