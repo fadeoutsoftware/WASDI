@@ -53,9 +53,11 @@ public class NodeResource {
 	@GET
 	@Path("/allnodes")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<NodeViewModel> getAllNodes(@HeaderParam("x-session-token") String sSessionId) {
+	public List<NodeViewModel> getAllNodes(@HeaderParam("x-session-token") String sSessionId, @QueryParam("all") Boolean bAlsoNotActive) {
 		
 		WasdiLog.debugLog("NodeResource.getAllNodes( Session: " + sSessionId + ")");
+		
+		if (bAlsoNotActive == null) bAlsoNotActive = false;
 		
 		// Check the user
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -82,7 +84,7 @@ public class NodeResource {
 			try {
 				
 				// checks whether the node is active
-				if (oNode.getActive()) {
+				if (oNode.getActive() || bAlsoNotActive) {
 					
 					// Create the view model and fill it
 					NodeViewModel oNodeViewModel = new NodeViewModel();
@@ -427,7 +429,7 @@ public class NodeResource {
 			oNode = NodeFullViewModel.toEntity(oNodeViewModel);
 			
 			// Insert it
-			if (Utils.isNullOrEmpty(oNodeRepository.insertNode(oNode))) {
+			if (!Utils.isNullOrEmpty(oNodeRepository.insertNode(oNode))) {
 				return Response.ok().build();	
 			}
 			else {
@@ -483,7 +485,7 @@ public class NodeResource {
 			Node oConvertedNode = NodeFullViewModel.toEntity(oNodeViewModel);
 				
 			// Insert it
-			if (oNodeRepository.updateNode(oConvertedNode)) {
+			if (!oNodeRepository.updateNode(oConvertedNode)) {
 				return Response.ok().build();	
 			}
 			else {
