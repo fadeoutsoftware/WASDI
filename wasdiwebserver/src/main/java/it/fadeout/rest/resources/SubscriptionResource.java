@@ -307,24 +307,29 @@ public class SubscriptionResource {
 		try {
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 			
-			String sName = oSubscriptionViewModel.getName();
-			
-			while (oSubscriptionRepository.getByNameAndUserId(sName, oUser.getUserId()) != null) {
-				sName = Utils.cloneName(sName);
-				WasdiLog.debugLog("SubscriptionResource.createSubscription: a subscription with the same name already exists. Changing the name to " + sName);
-			}
-			
+			String sName = oSubscriptionViewModel.getName();			
 			Subscription oSubscription = convertViewModelToSubscription(oSubscriptionViewModel);
-			oSubscription.setUserId(oUser.getUserId());
-			oSubscription.setSubscriptionId(Utils.getRandomName());
-			oSubscription.setName(sName);
+
+			String sUserId = oSubscriptionViewModel.getUserId();
 			
 			if (!UserApplicationRole.isAdmin(oUser)) {
+				sUserId = oUser.getUserId();
 				if (oSubscriptionViewModel.isBuySuccess()) {
 					WasdiLog.warnLog("SubscriptionResource.createSubscription: the user is not an admin so CANNOT set buy success true");
 					oSubscription.setBuySuccess(false);					
 				}
 			}
+			
+			if (Utils.isNullOrEmpty(sUserId)) sUserId = oUser.getUserId();
+			
+			while (oSubscriptionRepository.getByNameAndUserId(sName, sUserId) != null) {
+				sName = Utils.cloneName(sName);
+				WasdiLog.debugLog("SubscriptionResource.createSubscription: a subscription with the same name already exists. Changing the name to " + sName);
+			}
+			
+			oSubscription.setSubscriptionId(Utils.getRandomName());
+			oSubscription.setName(sName);			
+			oSubscription.setUserId(sUserId);
 
 			if (oSubscriptionRepository.insertSubscription(oSubscription)) {
 				ProjectEditorViewModel oProjectEditorViewModel = new ProjectEditorViewModel();

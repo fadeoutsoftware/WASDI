@@ -344,7 +344,6 @@ public class NodeResource {
 	 * @return NodeFullViewModel
 	 */
 	@GET
-	@Path("/node")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response getNode(@HeaderParam("x-session-token") String sSessionId, @QueryParam("node") String sNodeCode) {
 		
@@ -386,7 +385,6 @@ public class NodeResource {
 	
 	
 	@POST
-	@Path("/node")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response createNode(@HeaderParam("x-session-token") String sSessionId, NodeFullViewModel oNodeViewModel) {
 		
@@ -443,7 +441,6 @@ public class NodeResource {
 	}
 	
 	@PUT
-	@Path("/node")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response updateNode(@HeaderParam("x-session-token") String sSessionId, NodeFullViewModel oNodeViewModel) {
 		
