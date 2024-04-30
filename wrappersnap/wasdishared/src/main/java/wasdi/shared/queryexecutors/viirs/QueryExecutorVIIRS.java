@@ -6,6 +6,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 
 import org.geotools.data.FileDataStore;
 import org.geotools.data.FileDataStoreFinder;
@@ -44,6 +47,10 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 	
 	String m_sShapeMaskPath = "";
 	
+	private String m_sSearchIntervalStartDate = "";
+	private String m_sSearchGapStartDate = "";
+	private String m_sSearchGapEndDate = "";
+	
 	private static final Object s_oShapeFileLock = new Object();
 	public static final String s_sLINK_PREFIX = "https://floodlight.ssec.wisc.edu/composite/";
 
@@ -72,9 +79,11 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 			
 			ArrayList<String> asSections = getInvolvedSections(oVIIRSQuery);
 
-			int iDays = TimeEpochUtils.countDaysIncluding(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate);
+			int iDays = countDaysWithGap(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate); //TimeEpochUtils.countDaysIncluding(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate);
 
-		    iCount = asSections.size() * iDays;
+		    iCount = iDays >= 0 
+		    		?  asSections.size() * iDays
+		    		: -1;
 			
 			return iCount;			
 		}
@@ -142,8 +151,33 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		    DateFormat oDateFormat = new SimpleDateFormat("yyyyMMdd");
 
 			int iDays = TimeEpochUtils.countDaysIncluding(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate);
+			
+			long lStartSearchDate = -1L;
+			long lEndSearchDate = -1;
+			long lStartSearchGap = -1L;
+			long lEndSearchGap = -1L;
+			
+			if (!Utils.isNullOrEmpty(m_sSearchIntervalStartDate)) {
+				lStartSearchDate = TimeEpochUtils.fromDateStringToEpoch(m_sSearchIntervalStartDate);
+			}
+			
+			if (!Utils.isNullOrEmpty(m_sSearchGapStartDate)) {
+				lStartSearchGap = TimeEpochUtils.fromDateStringToEpoch(m_sSearchGapStartDate);
+			}
+			
+			if (!Utils.isNullOrEmpty(m_sSearchGapEndDate)) {
+				lEndSearchGap = TimeEpochUtils.fromDateStringToEpoch(m_sSearchGapEndDate);
+			}
+			
+			if (lStartSearchDate >= 0) 
+				lEndSearchDate = getEndOfCurrentDay();
+			
 			for (int i = 0; i < iDays; i++) {
 				Date oActualDay = TimeEpochUtils.getLaterDate(lStart, i);
+				
+				if (!isValidSearchDate(oActualDay, lStartSearchDate, lEndSearchDate, lStartSearchGap, lEndSearchGap)) {
+					continue;
+				}
 		    	
 		    	for (String sSection : asSections) {
 		    		
@@ -204,7 +238,9 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		try {
 			JSONObject oAppConf = JsonUtils.loadJsonFromFile(m_sParserConfigPath);
 			m_sShapeMaskPath = oAppConf.getString("shapeMaskPath");
-			
+			m_sSearchIntervalStartDate = oAppConf.optString("searchIntervalStartDate");
+			m_sSearchGapStartDate = oAppConf.optString("searchGapStartDate");
+			m_sSearchGapEndDate = oAppConf.optString("searchGapEndDate");
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("QueryExecutorVIIRS.init(): exception reading parser config file " + m_sParserConfigPath);
@@ -250,6 +286,28 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		return asSections;
 	}
 	
+	private boolean isValidSearchDate(Date oSearchDate, long lStartSearchInterval, long lEndSearchInterval, long lStartSearchGap, long lEndSearchGap) {
+		long lSearchDate = oSearchDate.getTime();
+		
+		boolean isInSearchRange = false;
+		boolean isInGapRange = false;
+		
+		if (lStartSearchInterval >= 0 && lEndSearchInterval >= 0) {
+			if (lSearchDate >= lStartSearchInterval  && lSearchDate <= lEndSearchInterval ) 
+				isInSearchRange = true;
+		} else {
+			isInSearchRange = true;
+		}
+		
+		if (lStartSearchGap >= 0 && lEndSearchGap >= 0) {
+			if (lSearchDate >= lStartSearchGap && lSearchDate <= lEndSearchGap) {
+				isInGapRange = true;
+			}
+		} 
+		
+		return isInSearchRange && !isInGapRange;
+	}
+	
 	private SimpleFeatureCollection grabFeaturesInBoundingBox(double x1, double y1, double x2, double y2, SimpleFeatureSource oFeatureSource) {
 		
 		try {
@@ -264,4 +322,162 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		
 		return null;
     }
+	
+	/**
+	 * Get the time corresponding to 23:59 of the current day, in milliseconds
+	 * @return the milliseconds representing 23:59 of the current day
+	 */
+	private static long getEndOfCurrentDay() {
+		java.time.LocalDate oCurrentDate = java.time.LocalDate.now();
+
+        // Get the time 23:59:59 of the current date
+        Instant oInstant = oCurrentDate
+                .atTime(LocalTime.MAX)
+                .atZone(ZoneOffset.UTC)
+                .toInstant();
+
+        // Get the epoch time in milliseconds
+        long lEpochMilliseconds = oInstant.toEpochMilli();
+        
+        return lEpochMilliseconds;
+	}
+	
+	/**
+	 * The VIIRS data provider could have some gap in the data. The method uses the information stored in the configuration to
+	 * compute the actual days covered by the data providers, keeping into account eventual gaps.
+	 * @param sStartDate the start date of the WASDI query, in the format YYYY-MM-dd'T'HH:MM:SS.mmm'Z'
+	 * @param sEndDate the end date of the WASDI query, in the format YYYY-MM-dd'T'HH:MM:SS.mmm'Z'
+	 * @return the actual number of days covered by the data provider, given a certain time range
+	 */
+	private int countDaysWithGap(String sStartDate, String sEndDate) {
+		try {
+			long lStartInputEpoch = TimeEpochUtils.fromDateStringToEpoch(sStartDate);
+			long lEndInputEpoch = TimeEpochUtils.fromDateStringToEpoch(sEndDate);
+			
+			if (lEndInputEpoch <= lStartInputEpoch) {
+				WasdiLog.warnLog("QueryExecutorVIIRS.countDaysWithGap: invalid time range");
+				return -1;
+			}
+			
+			String sStartSearchDate = "1970-01-01T00:00:00.000Z";
+			if (!Utils.isNullOrEmpty(m_sSearchIntervalStartDate)) { 
+				sStartSearchDate = m_sSearchIntervalStartDate;
+			}
+			long lStartSearchEpoch = TimeEpochUtils.fromDateStringToEpoch(sStartSearchDate);	
+			
+			long lEndSearchEpoch = getEndOfCurrentDay();
+			String sEndSeachDate = TimeEpochUtils.fromEpochToDateString(lEndSearchEpoch);
+			
+			String sStartGap = m_sSearchGapStartDate;
+			String sEndGap = m_sSearchGapEndDate;
+			long lStartGapEpoch = !Utils.isNullOrEmpty(sStartGap) 
+							? TimeEpochUtils.fromDateStringToEpoch(sStartGap) 
+							: -1L;
+			long lEndGapEpoch = !Utils.isNullOrEmpty(sEndGap) 
+							? TimeEpochUtils.fromDateStringToEpoch(sEndGap)
+							: -1L;
+			
+			// input dates before the beginning of the search interval
+			if (lStartInputEpoch < lStartSearchEpoch && lEndInputEpoch < lStartSearchEpoch) {
+				WasdiLog.debugLog("QueryExecutorVIIRS.countDaysWithGap: WASDI query time range is before the time range covered by the data provider");
+				return 0;
+			}
+			
+			// input dates after the end of the search interval
+			if (lStartInputEpoch > lEndSearchEpoch && lEndInputEpoch > lEndSearchEpoch) {
+				WasdiLog.debugLog("QueryExecutorVIIRS.countDaysWithGap: WASDI query time range is after the time range covered by the data provider");
+				return 0;
+			}
+			
+			String sModifiedStartDate = sStartDate;
+			if (lStartInputEpoch < lStartSearchEpoch)  {
+				sModifiedStartDate = sStartSearchDate;
+				lStartInputEpoch = lStartSearchEpoch;
+			}
+				
+			String sModifiedEndDate = sEndDate;
+			if (lEndInputEpoch > lEndSearchEpoch) {
+				sModifiedEndDate = sEndSeachDate;
+				lEndInputEpoch = lEndSearchEpoch;
+			}
+					
+			if (lStartGapEpoch < 0 || lEndGapEpoch < 0) {
+				WasdiLog.debugLog("QueryExecutorVIIRS.countDaysWithGap: no time gap in data provider");
+				return TimeEpochUtils.countDaysIncluding(sModifiedStartDate, sModifiedEndDate);	
+			}
+			
+				
+			if (isIntervalIncludedInRange(lStartInputEpoch, lEndInputEpoch, lStartGapEpoch, lEndGapEpoch)) {
+				WasdiLog.debugLog("QueryExecutorVIIRS.countDaysWithGap: WASDI query time range included in the time gap of missing products");
+				return 0;	
+			}
+				
+			// at this point, we know we have two time intervals:
+			// INTERVAL1: from the date of the older product in the data provider to the start date of the "gap" of results (exclusive)
+			// INTERVAL2: from the end date of the "gap" of results, until now
+			
+			// check if both intervals are in the same time interval
+			if (isIntervalIncludedInRange(lStartInputEpoch, lEndInputEpoch, lStartSearchEpoch, lStartGapEpoch - 1000)
+				|| isIntervalIncludedInRange(lStartInputEpoch, lEndInputEpoch, lEndGapEpoch + 1000, lEndSearchEpoch)) {
+				WasdiLog.debugLog("QueryExecutorVIIRS.countDaysWithGap: start and end date of the query are in the same search interval");
+				return TimeEpochUtils.countDaysIncluding(sModifiedStartDate, sModifiedEndDate);	
+			} 
+				
+			// at this point, we know that the query start date and end date belong to different intervals
+			int iDaysInterval1 = 0;
+			
+			if (lStartInputEpoch >= lStartSearchEpoch && lStartInputEpoch < lStartGapEpoch) {		
+				String sEndInterval1 =  TimeEpochUtils.fromEpochToDateString(lStartGapEpoch - 1000);
+				iDaysInterval1 = TimeEpochUtils.countDaysIncluding(sModifiedStartDate, sEndInterval1);
+			}
+			
+			int iDaysInterval2 = 0;
+			if (lEndInputEpoch > lEndGapEpoch && lEndInputEpoch <= lEndSearchEpoch) {
+				String sStartInterval2 =  TimeEpochUtils.fromEpochToDateString(lEndGapEpoch + 1000);
+				iDaysInterval2  = TimeEpochUtils.countDaysIncluding(sStartInterval2, sModifiedEndDate);
+			}
+			return iDaysInterval1 + iDaysInterval2;
+		} catch(Exception oEx) {
+			WasdiLog.errorLog("QueryExecutorVIIRS.countDaysWithGap: exception while counting the effective number of search days", oEx);
+			return -1;
+		}
+		
+	}
+	
+	/**
+	 * Given the start and the end (in milliseconds) of two intervals, checks it the first interval is included in the second interval
+	 * @param sStartInterval start date of the first interval
+	 * @param sEndInterval end date of the first interval
+	 * @param sStartRange start date of the second interval
+	 * @param sEndRange end date of the second interval
+	 * @return true if the first time interval is included in the second one, false otherwise
+	 */
+	private boolean isIntervalIncludedInRange(long lStartInterval, long lEndInterval, long lStartRange, long lEndRange) {
+		return lStartInterval >= lStartRange 
+				&& lStartInterval <= lEndRange 
+				&& lEndInterval >= lStartRange 
+				&& lEndInterval <= lEndRange;
+	}
+	
+	public static void main(String[]args) throws Exception {
+		QueryExecutorVIIRS q = new QueryExecutorVIIRS();
+		q.init();
+		System.out.println(q.countDaysWithGap("2011-01-01T00:00:00.000Z", "2012-01-19T23:59:59.999Z") == 0); // prima dell'intervallo
+		System.out.println(q.countDaysWithGap("2012-01-20T00:00:00.000Z", "2012-01-20T23:59:59.999Z") == 1); // nel primo giorno di risultati
+		System.out.println(q.countDaysWithGap("2012-01-24T00:00:00.000Z", "2012-01-26T23:59:59.999Z") == 3); // nel pieno del primo intervallo
+		System.out.println(q.countDaysWithGap("2020-12-01T00:00:00.000Z", "2020-12-31T23:59:59.999Z") == 31); // prima del gap
+		System.out.println(q.countDaysWithGap("2020-12-01T00:00:00.000Z", "2021-12-31T23:59:59.999Z") == 31); // a cavallo del gap
+		System.out.println(q.countDaysWithGap("2020-12-01T00:00:00.000Z", "2023-08-10T23:59:59.999Z") == 32); // a cavallo el gap
+		System.out.println(q.countDaysWithGap("2021-12-01T00:00:00.000Z", "2023-08-10T23:59:59.999Z") == 1); // a cavallo del gap
+		System.out.println(q.countDaysWithGap("2024-04-30T00:00:00.000Z", "2024-05-10T23:59:59.999Z") == 1); // nel secondo intervallo e oltre
+		System.out.println(q.countDaysWithGap("2020-12-31T00:00:00.000Z", "2023-08-10T23:59:59.999Z") == 2); // a cavallo del gap
+		System.out.println(q.countDaysWithGap("2022-12-31T00:00:00.000Z", "2023-07-10T23:59:59.999Z") == 0);
+
+
+		
+	}
+	
+
+
 }
+ 

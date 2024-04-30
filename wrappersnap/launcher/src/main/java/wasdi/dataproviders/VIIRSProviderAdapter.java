@@ -237,10 +237,8 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 						.collect(Collectors.toList());
 				if (asProducts.isEmpty()) {
 					WasdiLog.warnLog("VIIRSProviderAdapter.getFilePathOnS3Volume: no products found with substrings \"" + sTileSubstring + "\"");
-				} else if (asProducts.size() > 1) {
-					// what to do in this case?
-					WasdiLog.warnLog("VIIRSProviderAdapter.getFilePathOnS3Volume: more than one products found with substrings \"" + sTileSubstring + "\"");
 				} else {
+					// in case of more than one result, it will return the first one
 					sResult = sS3VolumePath + "/" + asProducts.get(0);
 				}
 			}  else {
