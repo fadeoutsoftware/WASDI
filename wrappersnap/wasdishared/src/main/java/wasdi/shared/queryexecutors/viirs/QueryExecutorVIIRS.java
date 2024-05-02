@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
@@ -79,7 +80,9 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 			
 			ArrayList<String> asSections = getInvolvedSections(oVIIRSQuery);
 
-			int iDays = countDaysWithGap(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate); //TimeEpochUtils.countDaysIncluding(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate);
+			int iDays = Utils.isNullOrEmpty(m_sSearchIntervalStartDate) 
+						? TimeEpochUtils.countDaysIncluding(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate)
+						: countDaysWithGap(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate); 
 
 		    iCount = iDays >= 0 
 		    		?  asSections.size() * iDays
@@ -152,28 +155,30 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 
 			int iDays = TimeEpochUtils.countDaysIncluding(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate);
 			
-			long lStartSearchDate = -1L;
-			long lEndSearchDate = -1;
-			long lStartSearchGap = -1L;
-			long lEndSearchGap = -1L;
+			// first day with available VIIRS results
+			long lStartSearchDate = !Utils.isNullOrEmpty(m_sSearchIntervalStartDate) 
+							? TimeEpochUtils.fromDateStringToEpoch(m_sSearchIntervalStartDate)
+							:-1L;
 			
-			if (!Utils.isNullOrEmpty(m_sSearchIntervalStartDate)) {
-				lStartSearchDate = TimeEpochUtils.fromDateStringToEpoch(m_sSearchIntervalStartDate);
-			}
+			// last day with available VIIRS results (i.e. the current date)
+			long lEndSearchDate = lStartSearchDate >= 0L
+							? getEndOfCurrentDay()
+							: -1L ;
 			
-			if (!Utils.isNullOrEmpty(m_sSearchGapStartDate)) {
-				lStartSearchGap = TimeEpochUtils.fromDateStringToEpoch(m_sSearchGapStartDate);
-			}
+			// first days of "gap" in VIIRS results
+			long lStartSearchGap = !Utils.isNullOrEmpty(m_sSearchGapStartDate) 
+							? TimeEpochUtils.fromDateStringToEpoch(m_sSearchGapStartDate) 
+							: -1L;
 			
-			if (!Utils.isNullOrEmpty(m_sSearchGapEndDate)) {
-				lEndSearchGap = TimeEpochUtils.fromDateStringToEpoch(m_sSearchGapEndDate);
-			}
+			// last days of "gap" in VIIRS results
+			long lEndSearchGap = !Utils.isNullOrEmpty(m_sSearchGapEndDate) 
+							? TimeEpochUtils.fromDateStringToEpoch(m_sSearchGapEndDate) 
+							: -1L;
 			
-			if (lStartSearchDate >= 0) 
-				lEndSearchDate = getEndOfCurrentDay();
 			
 			for (int i = 0; i < iDays; i++) {
-				Date oActualDay = TimeEpochUtils.getLaterDate(lStart, i);
+				Date oActualDay = TimeEpochUtils.getLaterDate(lStart, i, "GMT");
+				
 				
 				if (!isValidSearchDate(oActualDay, lStartSearchDate, lEndSearchDate, lStartSearchGap, lEndSearchGap)) {
 					continue;
@@ -292,17 +297,16 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		boolean isInSearchRange = false;
 		boolean isInGapRange = false;
 		
-		if (lStartSearchInterval >= 0 && lEndSearchInterval >= 0) {
-			if (lSearchDate >= lStartSearchInterval  && lSearchDate <= lEndSearchInterval ) 
-				isInSearchRange = true;
-		} else {
-			isInSearchRange = true;
+		if (lStartSearchInterval < 0L || lEndSearchInterval < 0L || lStartSearchGap < 0L || lEndSearchGap < 0L) {
+			return true;
 		}
 		
-		if (lStartSearchGap >= 0 && lEndSearchGap >= 0) {
-			if (lSearchDate >= lStartSearchGap && lSearchDate <= lEndSearchGap) {
-				isInGapRange = true;
-			}
+		if (lSearchDate >= lStartSearchInterval  && lSearchDate <= lEndSearchInterval ) 
+			isInSearchRange = true;
+		
+		
+		if (lSearchDate >= lStartSearchGap && lSearchDate <= lEndSearchGap) {
+			isInGapRange = true;
 		} 
 		
 		return isInSearchRange && !isInGapRange;
@@ -327,7 +331,7 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 	 * Get the time corresponding to 23:59 of the current day, in milliseconds
 	 * @return the milliseconds representing 23:59 of the current day
 	 */
-	private static long getEndOfCurrentDay() {
+	private long getEndOfCurrentDay() {
 		java.time.LocalDate oCurrentDate = java.time.LocalDate.now();
 
         // Get the time 23:59:59 of the current date
@@ -462,19 +466,18 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 	public static void main(String[]args) throws Exception {
 		QueryExecutorVIIRS q = new QueryExecutorVIIRS();
 		q.init();
-		System.out.println(q.countDaysWithGap("2011-01-01T00:00:00.000Z", "2012-01-19T23:59:59.999Z") == 0); // prima dell'intervallo
-		System.out.println(q.countDaysWithGap("2012-01-20T00:00:00.000Z", "2012-01-20T23:59:59.999Z") == 1); // nel primo giorno di risultati
-		System.out.println(q.countDaysWithGap("2012-01-24T00:00:00.000Z", "2012-01-26T23:59:59.999Z") == 3); // nel pieno del primo intervallo
-		System.out.println(q.countDaysWithGap("2020-12-01T00:00:00.000Z", "2020-12-31T23:59:59.999Z") == 31); // prima del gap
-		System.out.println(q.countDaysWithGap("2020-12-01T00:00:00.000Z", "2021-12-31T23:59:59.999Z") == 31); // a cavallo del gap
-		System.out.println(q.countDaysWithGap("2020-12-01T00:00:00.000Z", "2023-08-10T23:59:59.999Z") == 32); // a cavallo el gap
-		System.out.println(q.countDaysWithGap("2021-12-01T00:00:00.000Z", "2023-08-10T23:59:59.999Z") == 1); // a cavallo del gap
-		System.out.println(q.countDaysWithGap("2024-04-30T00:00:00.000Z", "2024-05-10T23:59:59.999Z") == 1); // nel secondo intervallo e oltre
-		System.out.println(q.countDaysWithGap("2020-12-31T00:00:00.000Z", "2023-08-10T23:59:59.999Z") == 2); // a cavallo del gap
-		System.out.println(q.countDaysWithGap("2022-12-31T00:00:00.000Z", "2023-07-10T23:59:59.999Z") == 0);
-
-
 		
+		System.out.println(q.countDaysWithGap("2011-01-01T00:00:00.000Z", "2012-01-19T23:59:59.999Z") == 0); // prima dell'intervallo	
+		System.out.println(q.countDaysWithGap("2012-01-20T00:00:00.000Z", "2012-01-20T23:59:59.999Z") == 1); // nel primo giorno di risultati	
+		System.out.println(q.countDaysWithGap("2012-01-24T00:00:00.000Z", "2012-01-26T23:59:59.999Z") == 3); // nel pieno del primo intervallo	OK
+		System.out.println(q.countDaysWithGap("2020-12-01T00:00:00.000Z", "2020-12-31T23:59:59.999Z") == 31); // prima del gap					OK
+		System.out.println(q.countDaysWithGap("2020-12-01T00:00:00.000Z", "2021-12-31T23:59:59.999Z") == 31); // a cavallo del gap				OK
+		System.out.println(q.countDaysWithGap("2020-12-01T00:00:00.000Z", "2023-08-10T23:59:59.999Z") == 32); // a cavallo del gap				OK
+		System.out.println(q.countDaysWithGap("2021-12-01T00:00:00.000Z", "2023-08-10T23:59:59.999Z") == 1); // a cavallo del gap 				OK
+		System.out.println(q.countDaysWithGap("2024-04-30T00:00:00.000Z", "2024-05-10T23:59:59.999Z") == 1); // nel secondo intervallo e oltre OK
+		System.out.println(q.countDaysWithGap("2020-12-31T00:00:00.000Z", "2023-08-10T23:59:59.999Z") == 2); // a cavallo del gap		OK
+		System.out.println(q.countDaysWithGap("2022-12-31T00:00:00.000Z", "2023-07-10T23:59:59.999Z") == 0); 							// OK
+
 	}
 	
 
