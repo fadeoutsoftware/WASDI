@@ -80,13 +80,19 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ResponseTranslatorCREODIAS.translateBatch: " + oE);
+			WasdiLog.errorLog("ResponseTranslatorCREODIAS.translateBatch. Exception when translating the Creodias results in the Wasdi view model ", oE);
 			return Collections.emptyList();
 		}
 		
 		return aoResults;
 	}
 	
+	/**
+	 * Method for extracting the information related to a single product returned by Creodias in Json format and saving it in a view model.
+	 * @param oJsonItem the Json representation of a product, as returned by the Creodias API.
+	 * @param bFullViewModel determines the amount of information to be stored in the view model. When true, the view model is populated with complete information about the product. When false only the essential information is added.
+	 * @return the WASDI result view model for a product
+	 */
 	private QueryResultViewModel processProduct(JSONObject oJsonItem, boolean bFullViewModel) {
 		// BASIC INFO: title, summary, product id, link, footprint, provider id
 		String sProductTitle =  removeExtensionFromProductTitle(oJsonItem.optString(SODATA_NAME));
@@ -118,6 +124,11 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	}
 	
 	
+	/**
+	 * Remove the file extension from the title of the product
+	 * @param sProductTitle the title of the product
+	 * @return the sama title, without the file extension at the end
+	 */
 	public static String removeExtensionFromProductTitle(String sProductTitle) {
 		return sProductTitle.replace(".SAFE", "")	// extension for Sentinel-1 and Sentinel-2
 				.replace(".SEN3", "") 	// extension for Sentinel-3
@@ -125,6 +136,14 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	}
 	
 	
+	/**
+	 * Set the minimum set of information of a product in the view model
+	 * @param oViewModel the view model to be sent to the client
+	 * @param sProductId the id of the product on Creodias
+	 * @param sProductTitle the title of the product
+	 * @param sSummary the string representing the summary of the the main properties of the product
+	 * @param sFootprint the string representing the footprint of the product
+	 */
 	private void setBasicInfo(QueryResultViewModel oViewModel, String sProductId, String sProductTitle, String sLink, String sSummary, String sFootprint) {
 		oViewModel.setProvider("CREODIAS2");
 		
@@ -144,6 +163,17 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 			oViewModel.setFootprint(sFootprint);
 	}
 	
+	/**
+	 * Set the minimum set of properties in the map of the view model
+	 * @param oViewModel the view model to be sent to the client
+	 * @param sDate the reference date for the product
+	 * @param sPlatform the product's platform
+	 * @param sPlatformSerialId the platform's serial id (e.g. A or Be, for Sentinel-1)
+	 * @param sInstrument the instrument
+	 * @param sMode the sensor mode
+	 * @param sSize the size of the file
+	 * @param sRelativeOrbit the relative orbit 
+	 */
 	private void setBasicProperties(QueryResultViewModel oViewModel, String sDate, String sPlatform, String sPlatformSerialId, String sInstrument, String sMode, String sSize, String sRelativeOrbit) {
 		Map<String, String> oMapProperties = oViewModel.getProperties();
 		
@@ -168,7 +198,16 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		
 	}
 	
-	
+	/**
+	 * Creates and stores in the view model the link that the provider adapter will use to download a product from Creodias.
+	 * The link is actually a string made by a concatenation of four values, separated by comma: the URL to download the file from Creodias,
+	 * the name that will be used to save the downloaded copy of the file (with the zip extension), the size of the file and its S3Path on creodias. 
+	 * @param oResult the view model where the link string will be stored
+	 * @param sDownloadLink the URL to be used for downloading a product from Creodias
+	 * @param sProductTitle the name of the product to download (without any extension)
+	 * @param dSizeInBytes the size of the product 
+	 * @param sS3Path the S3 path on Creodias
+	 */
 	private void setLink(QueryResultViewModel oResult, double dSizeInBytes, String sS3Path) {
 		Preconditions.checkNotNull(oResult, "result view model is null");
 		try {
@@ -177,7 +216,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 			
 			String sLink = oResult.getLink(); 
 			if(Utils.isNullOrEmpty(sLink)) {
-				WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: the download URL is null or empty. Product title: " + oResult.getTitle() );
+				WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: the download URL is null or empty. ");
 				sLink = "http://";
 			} 
 			oLink.append(sLink).append(SLINK_SEPARATOR_CREODIAS2); //0: on-line download link
@@ -212,7 +251,11 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	}
 	
 	
-	
+	/**
+	 * Takes all the product's attributes sent by Creodias and stores them in the view model's attribute 
+	 * @param oViewModel the view model 
+	 * @param aoAttributes the json array of attributes, as sent by Creodias
+	 */
 	private void setAllProviderProperties(QueryResultViewModel oViewModel, JSONArray aoAttributes) {
 		Map<String, String> oMapProperties = oViewModel.getProperties();
 		for (Object oAtt : aoAttributes) {
@@ -222,7 +265,12 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	}
 	
 	
-
+	/**
+	 * Returns the value of a given attribute from the array of attributes sent by Creodias
+	 * @param aoAttributes the array of attributes
+	 * @param sAttributeName the name of the attribute to look for
+	 * @return the value of the attribute
+	 */
 	private String getAttribute(JSONArray aoAttributes, String sAttributeName) {
 		for (Object oAtt : aoAttributes) {
 			JSONObject oJsonAtt = (JSONObject) oAtt;
@@ -232,7 +280,15 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		return "";
 	}
 	
-	
+	/**
+	 * @param sDate date of reference
+	 * @param sSize size of the file
+	 * @param sInstrument instrument
+	 * @param sMode sensor mode
+	 * @param sPlatform platform name (e.g. Sentinel-1)
+	 * @param sPlatformSerialId the id of the platform (e.g. A or B for Sentinel-1)
+	 * @return the string representing the summary of the main info about the product
+	 */
 	private String getSummary(String sDate, String sSize, String sInstrument, String sMode, String sPlatform, String sPlatformSerialId) {
 		List<String> asRes = new ArrayList<>();
 		if (!Utils.isNullOrEmpty(sDate))
@@ -249,7 +305,10 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		
 	}
 	
-	
+	/**
+	 * @param oJsonObject the whole Json object describing the product, as sent by Creosias
+	 * @return the string representing the footprint in the WASDI format
+	 */
 	private String parseFootPrint(JSONObject oJsonObject) {
 		try {
 			JSONObject oJsonFootprint = new JSONObject(oJsonObject.optString(SODATA_FOOTPRINT));
@@ -275,6 +334,10 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		return "";	
 	}
 	
+	/**
+	 * @param aoCoordinates the json array of coordinates sent by Creodias
+	 * @return the string representing the concatenation of coordinates, in the format: "X1 Y1, X2 Y2, X3 Y3"
+	 */
 	private String parseCoordinates(JSONArray aoCoordinates) {
 		List<String> asCoordinates = new ArrayList<>();
 		for (Object oItem: aoCoordinates) {
