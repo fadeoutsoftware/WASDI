@@ -462,25 +462,6 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 				&& lEndInterval >= lStartRange 
 				&& lEndInterval <= lEndRange;
 	}
-	
-	public static void main(String[]args) throws Exception {
-		QueryExecutorVIIRS q = new QueryExecutorVIIRS();
-		q.init();
-		
-		System.out.println(q.countDaysWithGap("2011-01-01T00:00:00.000Z", "2012-01-19T23:59:59.999Z") == 0); // prima dell'intervallo	
-		System.out.println(q.countDaysWithGap("2012-01-20T00:00:00.000Z", "2012-01-20T23:59:59.999Z") == 1); // nel primo giorno di risultati	
-		System.out.println(q.countDaysWithGap("2012-01-24T00:00:00.000Z", "2012-01-26T23:59:59.999Z") == 3); // nel pieno del primo intervallo	OK
-		System.out.println(q.countDaysWithGap("2020-12-01T00:00:00.000Z", "2020-12-31T23:59:59.999Z") == 31); // prima del gap					OK
-		System.out.println(q.countDaysWithGap("2020-12-01T00:00:00.000Z", "2021-12-31T23:59:59.999Z") == 31); // a cavallo del gap				OK
-		System.out.println(q.countDaysWithGap("2020-12-01T00:00:00.000Z", "2023-08-10T23:59:59.999Z") == 32); // a cavallo del gap				OK
-		System.out.println(q.countDaysWithGap("2021-12-01T00:00:00.000Z", "2023-08-10T23:59:59.999Z") == 1); // a cavallo del gap 				OK
-		System.out.println(q.countDaysWithGap("2024-04-30T00:00:00.000Z", "2024-05-10T23:59:59.999Z") == 1); // nel secondo intervallo e oltre OK
-		System.out.println(q.countDaysWithGap("2020-12-31T00:00:00.000Z", "2023-08-10T23:59:59.999Z") == 2); // a cavallo del gap		OK
-		System.out.println(q.countDaysWithGap("2022-12-31T00:00:00.000Z", "2023-07-10T23:59:59.999Z") == 0); 							// OK
-
-	}
-	
-
 
 }
  
