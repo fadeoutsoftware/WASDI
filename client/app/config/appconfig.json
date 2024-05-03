@@ -161,6 +161,52 @@
 				}
 			]
 		},
+				{
+			"name": "S6",
+			"indexname": "platformname",
+			"indexvalue": "Sentinel-6",
+			"filters": [
+				{
+					"indexname": "Instrument",
+					"indexlabel": "Instrument",
+					"indexvalues": "AMR-C|P4",
+					"regex": ".*"
+				},
+				{
+					"indexname": "productlevel",
+					"indexlabel": "Product Level",
+					"indexvalues": "L1|L2",
+					"regex": ".*",
+					"indexvalue": ""
+				},
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "P4_1B_LR_____",
+					"regex": ".*",
+					"visibilityConditions": "productlevel:L1"
+				},
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "MW_2__AMR____|P4_2__LR_____",
+					"regex": ".*",
+					"visibilityConditions": "productlevel:L2"
+				},
+				{
+					"indexname": "timeliness",
+					"indexlabel": "Timeliness",
+					"indexvalues": "Near real time|Short time critical|Non time critical",
+					"regex": ".*"
+				},
+				{
+					"indexname": "absoluteorbit",
+					"indexlabel": "Relative Orbit",
+					"indexvalues": "",
+					"regex": ".*"
+				}
+			]
+		},
 		{
 			"name": "PROBAV",
 			"indexname": "platformname",

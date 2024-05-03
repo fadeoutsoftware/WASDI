@@ -143,6 +143,8 @@ public class MissionUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("S5P_")) {
 				return Platforms.SENTINEL5P;
+			} else if (sFileName.toUpperCase().startsWith("S6A_")) {
+				return Platforms.SENTINEL6;
 			}
 			else if (sFileName.toUpperCase().startsWith("LC08_")) {
 				return Platforms.LANDSAT8;

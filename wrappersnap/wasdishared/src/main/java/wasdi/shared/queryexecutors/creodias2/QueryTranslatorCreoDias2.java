@@ -1,5 +1,6 @@
 package wasdi.shared.queryexecutors.creodias2;
 
+import java.nio.file.attribute.PosixFileAttributeView;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -49,6 +50,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		asODATA_TIMELINESS_MAP.put(Platforms.SENTINEL1, "swathIdentifier");
 		asODATA_TIMELINESS_MAP.put(Platforms.SENTINEL3, "timeliness");
 		asODATA_TIMELINESS_MAP.put(Platforms.SENTINEL5P, "processingMode");
+		asODATA_TIMELINESS_MAP.put(Platforms.SENTINEL6, "timeliness");
 	}
  
 	@Override
@@ -99,7 +101,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		// relative orbit number
 		// TODO: in creodias, the interval for the relative orbit is higher
 		int iRelativeOrbit = oQueryViewModel.relativeOrbit; 
-		if ( iRelativeOrbit > 0 && ((sPlatform.equals(Platforms.SENTINEL1) && iRelativeOrbit <= 175) || (sPlatform.equals(Platforms.SENTINEL3) && iRelativeOrbit <= 442)))
+		if ( isValidRelativeOrbit(sPlatform, iRelativeOrbit))
 			asQueryElements.add(createIntegerAttribute("relativeOrbitNumber", sODataEQ, iRelativeOrbit));
 		
 		// cloud coverage - from
@@ -153,7 +155,8 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 			asQueryElements.add(createStringAttribute(sODataSwathId, sSwathId));
 		}
 
-			
+		asQueryElements.add("Online eq true");
+		
 		String sFilterValue = String.join(" " + sODataAND + " ", asQueryElements);	
 		
 		return sODataFilterOption + sFilterValue;
@@ -252,6 +255,28 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	}
 	
 	/**
+	 * Checks if te relative orbit number is valid for a given platform
+	 * @param sPlatformCode the platform code
+	 * @param iRelativeOrbit the relative orbit number
+	 * @return true if the relative orbit number is valid, false otherwise
+	 */
+	private boolean isValidRelativeOrbit(String sPlatform, int iRelativeOrbit) {
+		if (Utils.isNullOrEmpty(sPlatform) || iRelativeOrbit <= 0) 
+			return false;
+		
+		if (sPlatform.equals(Platforms.SENTINEL1) && iRelativeOrbit <= 175)
+			return true;
+		
+		if (sPlatform.equals(Platforms.SENTINEL3) && iRelativeOrbit <= 442)
+			return true;
+		
+		if (sPlatform.equals(Platforms.SENTINEL6) && iRelativeOrbit <= 127)
+			return true;
+		
+		return false;
+	}
+	
+	/**
 	 * Converts the string representing the timeliness from the WASDI format to the OData code
 	 * @param sPlatform the platform's name
 	 * @param sTimeliness the string representing the timeliness in WASDI format
@@ -260,7 +285,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	private String getTimelinessCode(String sPlatform, String sTimeliness) {
 		if (Utils.isNullOrEmpty(sTimeliness))
 			return null;
-		if (sPlatform.equalsIgnoreCase(Platforms.SENTINEL3)) {
+		if (sPlatform.equalsIgnoreCase(Platforms.SENTINEL3) || sPlatform.equalsIgnoreCase(Platforms.SENTINEL6)) {
 			if (sTimeliness.equalsIgnoreCase("Near Real Time")) 
 				return  "NR";
 			if (sTimeliness.equalsIgnoreCase("Short Time Critical"))
@@ -297,7 +322,11 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 				return "L1b";
 			if (sProductLevel.equalsIgnoreCase("LEVEL2"))
 				return "L2";
-		} else if (sPlatform.equals(Platforms.ENVISAT)) {
+		} else if (sPlatform.equals(Platforms.SENTINEL6)) {
+			if (sProductLevel.equals("L1") || sProductLevel.equals("L2"))
+				return sProductLevel;
+		}
+		else if (sPlatform.equals(Platforms.ENVISAT)) {
 			return sProductLevel;
 		}
 		return "";
@@ -325,9 +354,12 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	 */
 	private void refineQueryViewModel(String sQuery, QueryViewModel oViewModel) {
 		WasdiLog.debugLog("QueryTranslatorCreoDias2.refineQueryViewModel. Try to fill view model with missing information");
-		oViewModel.polarisation = extractValue(sQuery, "polarisationmode");
-		oViewModel.platformSerialIdentifier = extractValue(sQuery, "filename");
-		oViewModel.instrument = extractValue(sQuery, "Instrument");
+		if (Utils.isNullOrEmpty(oViewModel.polarisation))
+			oViewModel.polarisation = extractValue(sQuery, "polarisationmode");
+		if (Utils.isNullOrEmpty(oViewModel.platformSerialIdentifier))
+			oViewModel.platformSerialIdentifier = extractValue(sQuery, "filename");
+		if (Utils.isNullOrEmpty(oViewModel.instrument))
+			oViewModel.instrument = extractValue(sQuery, "Instrument");
 		if (oViewModel.relativeOrbit < 0) {
 			String sRelativeOrbit = extractValue(sQuery, "relativeorbitstart");
 			if (!Utils.isNullOrEmpty(sRelativeOrbit)) {
