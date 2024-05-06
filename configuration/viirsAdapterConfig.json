@@ -1,0 +1,3 @@
+{
+	"dataProviderVolumePath": "{{ sWasdiMountedDataProviderVolumeRootDirectoryPath }}/noaa-jpss/JPSS_Blended_Products/"
+}
