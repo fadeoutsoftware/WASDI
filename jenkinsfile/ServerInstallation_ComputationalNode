@@ -1,0 +1,191 @@
+pipeline {
+  agent any
+
+  environment {
+    sEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '365'))
+    disableConcurrentBuilds()
+  }
+
+  tools {
+    jdk "WASDI_JDK_8"
+    maven "WASDI_MAVEN"
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        echo "env.GIT_BRANCH                       = " + env.GIT_BRANCH
+        echo "env.sEnvironmentLower                = " + env.sEnvironmentLower
+        echo "env.sAnsibleInventory                = " + env.sAnsibleInventory
+        echo "env.sAnsibleLimit                    = " + env.sAnsibleLimit
+        echo "env.sSourceBranch                    = " + env.sSourceBranch
+        echo "env.sWasdiAnsiblePath                = " + env.sWasdiAnsiblePath
+        echo "env.WORKSPACE                        = " + env.WORKSPACE
+        echo "env.sCommandLineToolVersion          = " + env.sCommandLineToolVersion
+        echo "env.sGeoserverVersion                = " + env.sGeoserverVersion
+        echo "env.sTelegrafVersion                 = " + env.sTelegrafVersion
+        echo "env.sToolboxVersion                  = " + env.sToolboxVersion
+        echo "env.sUpdateMetricVersion             = " + env.sUpdateMetricVersion
+
+        sh script: "pwd", label: "Current location"
+      }
+    }
+
+    stage('DockerContainer_Geoserver_Deploy') {
+      steps {
+        build job: 'DockerContainer_Geoserver_Deploy',
+        parameters: [
+          string(name: 'sAnsibleInventory', value: env.sAnsibleInventory),
+          string(name: 'sAnsibleLimit', value: env.sAnsibleLimit),
+          string(name: 'sSourceBranch', value: env.sSourceBranch),
+          string(name: 'sCurrentRevision', value: env.sGeoserverVersion)
+        ]
+      }
+    }
+
+    stage('DockerContainer_Mongo_Deploy') {
+      steps {
+        build job: 'DockerContainer_Mongo_Deploy',
+        parameters: [
+          string(name: 'sAnsibleInventory', value: env.sAnsibleInventory),
+          string(name: 'sAnsibleLimit', value: env.sAnsibleLimit),
+          string(name: 'sSourceBranch', value: env.sSourceBranch)
+        ]
+      }
+    }
+
+    stage('WasdiConfigurationFile_Deploy') {
+      steps {
+        build job: 'WasdiConfigurationFile_Deploy',
+        parameters: [
+          string(name: 'sAnsibleInventory', value: env.sAnsibleInventory),
+          string(name: 'sAnsibleLimit', value: env.sAnsibleLimit),
+          string(name: 'sSourceBranch', value: env.sSourceBranch)
+        ]
+      }
+    }
+
+    stage('DockerContainer_Toolbox_Deploy') {
+      steps {
+        build job: 'DockerContainer_Toolbox_Deploy',
+        parameters: [
+          string(name: 'sAnsibleInventory', value: env.sAnsibleInventory),
+          string(name: 'sAnsibleLimit', value: env.sAnsibleLimit),
+          string(name: 'sSourceBranch', value: env.sSourceBranch),
+          string(name: 'sCurrentRevision', value: env.sToolboxVersion)
+        ]
+      }
+    }
+
+    stage('WasdiProcessor_DockerTemplate_Deploy') {
+      steps {
+        build job: 'WasdiProcessor_DockerTemplate_Deploy',
+        parameters: [
+          string(name: 'sAnsibleInventory', value: env.sAnsibleInventory),
+          string(name: 'sAnsibleLimit', value: env.sAnsibleLimit),
+          string(name: 'sSourceBranch', value: env.sSourceBranch)
+        ]
+      }
+    }
+
+    stage('WasdiTool_Deploy') {
+      steps {
+        build job: 'WasdiTool_Deploy',
+        parameters: [
+          string(name: 'sAnsibleInventory', value: env.sAnsibleInventory),
+          string(name: 'sAnsibleLimit', value: env.sAnsibleLimit),
+          string(name: 'sSourceBranch', value: env.sSourceBranch)
+        ]
+      }
+    }
+
+    stage('DockerContainer_WasdiCommandLineTool_Deploy') {
+      steps {
+        build job: 'DockerContainer_WasdiCommandLineTool_Deploy',
+        parameters: [
+          string(name: 'sAnsibleInventory', value: env.sAnsibleInventory),
+          string(name: 'sAnsibleLimit', value: env.sAnsibleLimit),
+          string(name: 'sSourceBranch', value: env.sSourceBranch),
+          string(name: 'sCurrentRevision', value: env.sCommandLineToolVersion)
+        ]
+      }
+    }
+
+    stage('DockerContainer_WasdiDataProvider_BuildAndDeploy') {
+      steps {
+        build job: 'DockerContainer_WasdiDataProvider_BuildAndDeploy',
+        parameters: [
+          string(name: 'sAnsibleInventory', value: env.sAnsibleInventory),
+          string(name: 'sAnsibleLimit', value: env.sEnvironmentLower),
+          string(name: 'sSourceBranch', value: env.sSourceBranch),
+          string(name: 'sCurrentRevision', value: env.sCommandLineToolVersion)
+        ]
+      }
+    }
+
+    stage('DockerContainer_WasdiJavaArtifact_BuildAndDeploy') {
+      steps {
+        build job: 'DockerContainer_WasdiJavaArtifact_BuildAndDeploy',
+        parameters: [
+          string(name: 'sAnsibleInventory', value: env.sAnsibleInventory),
+          string(name: 'sAnsibleLimit', value: env.sEnvironmentLower),
+          string(name: 'sSourceBranch', value: env.sSourceBranch),
+          string(name: 'sCurrentRevision', value: env.sJavaArtifactVersion),
+          string(name: 'bDeployConfigurationFile', value: 'false'),
+          string(name: 'sWasdiLauncher', value: 'true'),
+          string(name: 'sWasdiScheduler', value: 'true'),
+          string(name: 'sWasdiTomcatOgcProcessesServer', value: 'true'),
+          string(name: 'sWasdiTomcatOpenEoServer', value: 'true'),
+          string(name: 'sWasdiTomcatWasdiWebServer', value: 'true'),
+          string(name: 'sWasdiTrigger', value: 'true'),
+          string(name: 'sWasdiUtils', value: 'true'),
+        ]
+      }
+    }
+
+    stage('DockerContainer_WasdiUpdateMetric_Deploy') {
+      steps {
+        build job: 'DockerContainer_WasdiUpdateMetric_Deploy',
+        parameters: [
+          string(name: 'sAnsibleInventory', value: env.sAnsibleInventory),
+          string(name: 'sAnsibleLimit', value: env.sAnsibleLimit),
+          string(name: 'sSourceBranch', value: env.sSourceBranch),
+          string(name: 'sCurrentRevision', value: env.sUpdateMetricVersion)
+        ]
+      }
+    }
+
+    stage('DockerContainer_Telegraf_Deploy') {
+      steps {
+        build job: 'DockerContainer_Telegraf_Deploy',
+        parameters: [
+          string(name: 'sAnsibleInventory', value: env.sAnsibleInventory),
+          string(name: 'sAnsibleLimit', value: env.sAnsibleLimit),
+          string(name: 'sSourceBranch', value: env.sSourceBranch),
+          string(name: 'sCurrentRevision', value: env.sTelegrafVersion)
+        ]
+      }
+    }
+
+    stage('WasdiCrontab_Deploy') {
+      steps {
+        build job: 'WasdiCrontab_Deploy',
+        parameters: [
+          string(name: 'sAnsibleInventory', value: env.sAnsibleInventory),
+          string(name: 'sAnsibleLimit', value: env.sAnsibleLimit),
+          string(name: 'sSourceBranch', value: env.sSourceBranch)
+        ]
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
