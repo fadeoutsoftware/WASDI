@@ -133,12 +133,12 @@ public class TimeEpochUtils {
 				? "GMT"
 				: sTimeZone;
 		
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeZone(TimeZone.getTimeZone(sFinalTimeZone));
-		cal.setTimeInMillis(lTimeInMillis);
-		cal.add(Calendar.DATE, iDaysLater);
+		Calendar oCal = Calendar.getInstance();
+		oCal.setTimeZone(TimeZone.getTimeZone(sFinalTimeZone));
+		oCal.setTimeInMillis(lTimeInMillis);
+		oCal.add(Calendar.DATE, iDaysLater);
 
-		return cal.getTime();
+		return oCal.getTime();
 	}
 
 	/**
