@@ -62,6 +62,10 @@ public class STATICSProviderAdapter extends ProviderAdapter {
 	    	
 	    	WasdiLog.debugLog("STATICSProviderAdapter.executeDownloadFile: Generated URL: " + sUrl);
 	    	
+	    	m_iHttpDownloadReadTimeoutMultiplier = 10;
+	    	
+	    	WasdiLog.debugLog("STATICSProviderAdapter.executeDownloadFile: setting read timeout multiplier to " + m_iHttpDownloadReadTimeoutMultiplier);
+	    	
 	    	return downloadViaHttp(sUrl, sDownloadUser, sDownloadPassword, sSaveDirOnServer, sOutputFileName);			
 		}
 		catch (Exception oEx) {
