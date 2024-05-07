@@ -24,6 +24,18 @@ public class MissionUtils {
 		}
 		return false;
 	}
+	
+	public static boolean isSentinel6File(File oFile) {
+		if (oFile == null) {
+			return false;
+		}
+		
+		if (oFile.getName().toUpperCase().startsWith("S6A") || oFile.getName().toUpperCase().startsWith("S6B") ) {
+			return true;
+		}
+		
+		return false;
+	}
 
 	public static boolean isGpmZipFile(File oFile) {
 		try {
@@ -143,7 +155,7 @@ public class MissionUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("S5P_")) {
 				return Platforms.SENTINEL5P;
-			} else if (sFileName.toUpperCase().startsWith("S6A_")) {
+			} else if (sFileName.toUpperCase().startsWith("S6A_") || sFileName.toUpperCase().startsWith("S6B_")) {
 				return Platforms.SENTINEL6;
 			}
 			else if (sFileName.toUpperCase().startsWith("LC08_")) {
