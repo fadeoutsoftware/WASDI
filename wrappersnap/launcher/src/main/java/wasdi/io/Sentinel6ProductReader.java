@@ -1,6 +1,7 @@
 package wasdi.io;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.nio.file.Files;
@@ -8,15 +9,19 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 
+import ucar.ma2.Array;
 import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFiles;
+import ucar.nc2.Variable;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
@@ -52,50 +57,157 @@ public class Sentinel6ProductReader extends SnapProductReader {
 		oProductVM.setName(sFileNameNoExtension);
 		oProductVM.setProductFriendlyName(sFileNameNoExtension);
 		
-		
 		// prepare bands 
 		NodeGroupViewModel oNodeGroupVM = new NodeGroupViewModel();
 		oNodeGroupVM.setNodeName("Bands");
 		
     	List<BandViewModel> oBands = new ArrayList<>();
-
-		
-		try {
-			NetcdfFile oNetcdfFile = NetcdfFiles.open(m_oProductFile.getAbsolutePath());
-			Group oRootGroup = oNetcdfFile.getRootGroup();
-			
-			Optional<Group> oMaybeData20Group = oRootGroup.getGroups().stream().filter(oGroup -> oGroup.getShortName().equals("data_20")).findFirst();
-			if (!oMaybeData20Group.isEmpty()) {
-				Group oData20Group = oMaybeData20Group.get();
-				List<Group> aoGroups = oData20Group.getGroups();
+    	
+    	String sRelevantNetCdfFile = getRelevantNetCDFFile();
+    	
+    	if (!Utils.isNullOrEmpty(sRelevantNetCdfFile)) {
+  		
+			try {
+				NetcdfFile oNetcdfFile = NetcdfFiles.open(sRelevantNetCdfFile);
+				Group oRootGroup = oNetcdfFile.getRootGroup();
 				
-				
-				for (Group oGroup : aoGroups) {
-					BandViewModel oBandViewModel = new BandViewModel();
-					oBandViewModel.setName(oGroup.getShortName());
-					oBands.add(oBandViewModel);
+				Optional<Group> oMaybeData20Group = oRootGroup.getGroups().stream().filter(oGroup -> oGroup.getShortName().equals("data_20")).findFirst();
+				if (!oMaybeData20Group.isEmpty()) {
+					Group oData20Group = oMaybeData20Group.get();
+					List<Group> aoGroups = oData20Group.getGroups();
+					
+					for (Group oGroup : aoGroups) {
+						BandViewModel oBandViewModel = new BandViewModel();
+						oBandViewModel.setName(oGroup.getShortName());
+						oBands.add(oBandViewModel);
+					}
+					
+				} else {
+					WasdiLog.warnLog("Sentinel6ProductReader.getProductViewModel: no 'data_20' group found");
 				}
 				
-			} else {
-				WasdiLog.warnLog("Sentinel6ProductReader.getProductViewModel: no 'data_20' group found");
+	
+	        	
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("Sentinel6ProductReader.getProductViewModel: error reading the bands", oEx);
 			}
-			
-			oNodeGroupVM.setBands(oBands);
-        	oProductVM.setBandsGroups(oNodeGroupVM);
-        	
-			
-		} catch (Exception oEx) {
-			
-		}
+    	}
 		
+		oNodeGroupVM.setBands(oBands);
+    	oProductVM.setBandsGroups(oNodeGroupVM);
+    	
 		return oProductVM;
-		
 	}
 	
-
+	private String getRelevantNetCDFFile() {
+		// Sentinel-6 products are always directories
+		String sNetCdfFilePath = "";
+		
+		if (!m_oProductFile.isDirectory()) {
+			WasdiLog.warnLog("Sentinel6ProductReader.getBandsVMList: product should be a folder, but it is not");
+			return sNetCdfFilePath;
+		}
+		
+		String sProductFolderName = m_oProductFile.getName();
+		String sProductFolderPath = m_oProductFile.getAbsolutePath();
+				
+		if (sProductFolderName.contains("P4_1B_LR_____")) {
+			// data are in the file measurements.nc
+			if (Arrays.stream(m_oProductFile.listFiles()).anyMatch(oFile -> oFile.getName().equals("measurement.nc"))) {
+				sNetCdfFilePath = sProductFolderPath + File.separator + "measurement.nc";
+			}
+			
+		} else if (sProductFolderName.contains("MW_2__AMR____")) {
+			// data are in a ".nc" file, with the name starting in the same way
+			
+			for (File oFile : m_oProductFile.listFiles()) {
+				String sFileName = oFile.getName();
+				if ( (sFileName.startsWith("S6A_MW_2__AMR____") 
+						|| sFileName.startsWith("S6B_MW_2__AMR____") 
+						|| sFileName.startsWith("S6_MW_2__AMR____"))
+						&& sFileName.endsWith(".nc")) {
+					sNetCdfFilePath = oFile.getAbsolutePath();					
+					break;
+				}
+			}
+		} else if (sProductFolderName.contains("P4_2__LR_____")) {
+			// the reference file is the one with Standard (STD) data
+			
+			for (File oFile : m_oProductFile.listFiles()) {
+				String sFileName = oFile.getName();
+				if ( (sFileName.contains("P4_2__LR_STD") 
+						|| sFileName.contains("P4_2__LR_STD") 
+						|| sFileName.contains("P4_2__LR_STD"))
+						&& sFileName.endsWith(".nc")) {
+					sNetCdfFilePath = oFile.getAbsolutePath();
+					break;
+				}	
+			}
+		}
+		
+		return sNetCdfFilePath;
+	}
 	
 	@Override
 	public String getProductBoundingBox() {
+		String sRelevantNetCdfFile = "C:/Users/valentina.leone/Desktop/WORK/SENTINEL-6/S6A_P4_2__LR______20240501T152036_20240501T165910_20240501T171410_5914_128_043_022_EUM__OPE_NR_F09.SEN6/S6A_P4_2__LR_STD__NR_128_043_20240501T152036_20240501T165910_F09.nc"; // getRelevantNetCDFFile();
+		
+		if (!Utils.isNullOrEmpty(sRelevantNetCdfFile)) {
+	  		
+			try {
+				NetcdfFile oNetcdfFile = NetcdfFiles.open(sRelevantNetCdfFile);
+				Group oRootGroup = oNetcdfFile.getRootGroup();
+				
+				Optional<Group> oMaybeData20Group = oRootGroup.getGroups().stream().filter(oGroup -> oGroup.getShortName().equals("data_20")).findFirst();
+				if (!oMaybeData20Group.isEmpty()) {
+					Group oData20Group = oMaybeData20Group.get();
+					List<Group> aoGroups = oData20Group.getGroups();
+					
+					for (Group oGroup : aoGroups) {			// here we are at group level (c, ku)
+						System.out.println(oGroup.getName().toUpperCase());
+						Variable oLatitude = oGroup.findVariable("latitude");
+						Variable oLongitude = oGroup.findVariable("longitude");
+						
+						if (oLatitude != null && oLongitude != null) {
+							Array oArrayLatitude = oLatitude.read();
+							Array oArrayLongitude = oLongitude.read();
+							
+							if (oArrayLatitude != null && oArrayLongitude != null) {
+								
+								Object oStorageLatitude = oArrayLatitude.getStorage();
+								Object oStorageLongitude = oArrayLongitude.getStorage();
+								
+								if (oStorageLatitude != null && oStorageLongitude != null
+										&& oStorageLatitude instanceof int[] && oStorageLongitude instanceof int[]) {
+									List<Integer> aiLatitudeValues = Arrays.asList(Arrays.stream((int[]) oStorageLatitude)
+                                            .boxed()
+                                            .toArray(Integer[]::new));
+									List<Integer> aiLongitudeValues = Arrays.asList(Arrays.stream((int[]) oStorageLongitude)
+                                            .boxed()
+                                            .toArray(Integer[]::new));
+									Integer iMaxLatitude = Collections.max(aiLatitudeValues);
+									Integer iMinLatitude = Collections.min(aiLatitudeValues);;
+									Integer iMaxLongitude = Collections.max(aiLongitudeValues);
+									Integer iMinLongitude = Collections.min(aiLongitudeValues);
+									System.out.println("Lat (" + iMinLatitude + "," + iMaxLatitude + ") Long (" + iMinLongitude + ", " + iMaxLongitude + ")");
+								}
+							}
+							
+						}
+						
+					}
+					
+				} else {
+					WasdiLog.warnLog("Sentinel6ProductReader.getProductViewModel: no 'data_20' group found");
+				}
+				
+	
+	        	
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("Sentinel6ProductReader.getProductViewModel: error reading the bands", oEx);
+			}
+    	}
+		
 		return "";
 	}
 	
@@ -139,11 +251,17 @@ public class Sentinel6ProductReader extends SnapProductReader {
 				return null;
 			}
 			
-			// find the measurement file
 			File oSentinelDirectory = new File(oUnzippedFolderPath.toString());
 			
+			m_oProductFile = oSentinelDirectory;
+			
+			return oSentinelDirectory.getAbsolutePath();
+			
+			/*
 			if (sUnzippedFolderName.contains("P4_1B_LR_____") 
 					&& Arrays.stream(oSentinelDirectory.listFiles()).anyMatch(oFile -> oFile.getName().equals("measurement.nc"))) {
+				// level 1 products have a single 'measurement.nc' file
+
 				
 				// we need to rename the file and move it in the parent folder
 				String sNewMeasurementFileName = sUnzippedFolderName.replace(".SEN6", "") + ".nc";
@@ -173,8 +291,9 @@ public class Sentinel6ProductReader extends SnapProductReader {
 				}
 				
 			} 
+			else if (sUnzippedFolderName.contains("")) 
 			return null;	
-			
+			*/
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("Sentinel6ProductReader.adjustFileAfterDownload: error unzipping Sentinel-6 product", oEx);
 		}
@@ -218,17 +337,19 @@ public class Sentinel6ProductReader extends SnapProductReader {
 		/*
 		File oSentinelFile = new File(sFolderPath);
 		Product oSnapProd = ProductIO.readProduct(oSentinelFile);
-		for (Band oBand : oSnapProd.getBands()) {
+		for (Band oBand : oSnapProd.getBands()) {s
 			System.out.println("Band: " + oBand.getName());
 		}
 		*/
 		
 		Sentinel6ProductReader oProductReader = new Sentinel6ProductReader(new File(sZipFilePath));
+		/*
 		System.out.println(oProductReader.adjustFileAfterDownload(sZipFilePath, "S6A_P4_1B_LR______20240430T063350_20240430T073003_20240501T074454_3373_128_009_004_EUM__OPE_ST_F09.SEN6"));
-		oProductReader.getProductViewModel();
-		
-		
-		
+		ProductViewModel oVM = oProductReader.getProductViewModel();
+		List<BandViewModel> aoBands = oVM.getBandsGroups().getBands();
+		aoBands.forEach(oB -> System.out.println(oB.getName()));
+		*/
+		oProductReader.getProductBoundingBox();
 		
 	}
 	
