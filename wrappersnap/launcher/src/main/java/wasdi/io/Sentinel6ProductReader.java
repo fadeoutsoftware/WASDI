@@ -75,10 +75,18 @@ public class Sentinel6ProductReader extends SnapProductReader {
 			try {
 				NetcdfFile oNetcdfFile = NetcdfFiles.open(sRelevantNetCdfFile);
 				Group oRootGroup = oNetcdfFile.getRootGroup();
+				List<Group> aoRootGroups = oRootGroup.getGroups();
 				
-				Optional<Group> oMaybeData20Group = oRootGroup.getGroups().stream().filter(oGroup -> oGroup.getShortName().equals("data_20")).findFirst();
-				if (!oMaybeData20Group.isEmpty()) {
-					Group oData20Group = oMaybeData20Group.get();
+				Group oData20Group = null;
+				
+				for (Group oGroup : aoRootGroups) {
+					if (oGroup.getShortName().equals("data_20")) {
+						oData20Group = oGroup;
+						break;
+					}
+				}
+				
+				if (oData20Group != null) {
 					List<Group> aoGroups = oData20Group.getGroups();
 					
 					for (Group oGroup : aoGroups) {

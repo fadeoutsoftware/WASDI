@@ -48,6 +48,10 @@ public class WasdiProductReaderFactory {
 		if(MissionUtils.isSentinel3Name(oFile)) {
 			return new Sentinel3ProductReader(oFile);
 		}
+		
+		if (MissionUtils.isSentinel6File(oFile)) {
+			return new Sentinel6ProductReader(oFile);
+		}
 
 		if (oFile.getName().toLowerCase().endsWith(".nc")) {
 			return new CmNcProductReader(oFile);
