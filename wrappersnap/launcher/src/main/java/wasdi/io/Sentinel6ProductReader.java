@@ -2,6 +2,12 @@ package wasdi.io;
 
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.nio.file.Files;
@@ -13,20 +19,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
-import ucar.ma2.Array;
 import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFiles;
-import ucar.nc2.Variable;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
+import wasdi.shared.viewmodels.products.MetadataViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.BandViewModel;
@@ -150,65 +155,104 @@ public class Sentinel6ProductReader extends SnapProductReader {
 	
 	@Override
 	public String getProductBoundingBox() {
-		String sRelevantNetCdfFile = "C:/Users/valentina.leone/Desktop/WORK/SENTINEL-6/S6A_P4_2__LR______20240501T152036_20240501T165910_20240501T171410_5914_128_043_022_EUM__OPE_NR_F09.SEN6/S6A_P4_2__LR_STD__NR_128_043_20240501T152036_20240501T165910_F09.nc"; // getRelevantNetCDFFile();
+		String sResBBox = "";
+		// we read the bounding box from the manifest.xml file. There, the tag <gml:posList> contains the coordinates of the polygon
 		
-		if (!Utils.isNullOrEmpty(sRelevantNetCdfFile)) {
-	  		
-			try {
-				NetcdfFile oNetcdfFile = NetcdfFiles.open(sRelevantNetCdfFile);
-				Group oRootGroup = oNetcdfFile.getRootGroup();
-				
-				Optional<Group> oMaybeData20Group = oRootGroup.getGroups().stream().filter(oGroup -> oGroup.getShortName().equals("data_20")).findFirst();
-				if (!oMaybeData20Group.isEmpty()) {
-					Group oData20Group = oMaybeData20Group.get();
-					List<Group> aoGroups = oData20Group.getGroups();
-					
-					for (Group oGroup : aoGroups) {			// here we are at group level (c, ku)
-						System.out.println(oGroup.getName().toUpperCase());
-						Variable oLatitude = oGroup.findVariable("latitude");
-						Variable oLongitude = oGroup.findVariable("longitude");
-						
-						if (oLatitude != null && oLongitude != null) {
-							Array oArrayLatitude = oLatitude.read();
-							Array oArrayLongitude = oLongitude.read();
-							
-							if (oArrayLatitude != null && oArrayLongitude != null) {
-								
-								Object oStorageLatitude = oArrayLatitude.getStorage();
-								Object oStorageLongitude = oArrayLongitude.getStorage();
-								
-								if (oStorageLatitude != null && oStorageLongitude != null
-										&& oStorageLatitude instanceof int[] && oStorageLongitude instanceof int[]) {
-									List<Integer> aiLatitudeValues = Arrays.asList(Arrays.stream((int[]) oStorageLatitude)
-                                            .boxed()
-                                            .toArray(Integer[]::new));
-									List<Integer> aiLongitudeValues = Arrays.asList(Arrays.stream((int[]) oStorageLongitude)
-                                            .boxed()
-                                            .toArray(Integer[]::new));
-									Integer iMaxLatitude = Collections.max(aiLatitudeValues);
-									Integer iMinLatitude = Collections.min(aiLatitudeValues);;
-									Integer iMaxLongitude = Collections.max(aiLongitudeValues);
-									Integer iMinLongitude = Collections.min(aiLongitudeValues);
-									System.out.println("Lat (" + iMinLatitude + "," + iMaxLatitude + ") Long (" + iMinLongitude + ", " + iMaxLongitude + ")");
-								}
-							}
-							
-						}
-						
-					}
-					
-				} else {
-					WasdiLog.warnLog("Sentinel6ProductReader.getProductViewModel: no 'data_20' group found");
-				}
-				
-	
-	        	
-			} catch (Exception oEx) {
-				WasdiLog.errorLog("Sentinel6ProductReader.getProductViewModel: error reading the bands", oEx);
+		// first get the manifest file
+		Pattern oManifestNamePattern = Pattern.compile("^xfd.*\\.xml$");
+		Matcher oMatcher = null;
+		File oManifestFile = null;
+
+		
+		try {
+			if (!m_oProductFile.isDirectory()) {
+				WasdiLog.warnLog("Sentinel6ProductReader.getProductBoundingBox: the pointer to the product file is not a folder " + m_oProductFile.getAbsolutePath());
 			}
-    	}
+			
+			File[] aoSAFEFolderContent = m_oProductFile.listFiles();
+			
+			
+			for (File oFile : aoSAFEFolderContent) {
+				oMatcher = oManifestNamePattern.matcher(oFile.getName());
+				if (oMatcher.matches()) {
+					oManifestFile = oFile;
+					break;
+				}
+			}
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("Sentinel6ProductReader.getProductBoundingBox:  error retrieving the manifest file", oEx);
+		}
 		
-		return "";
+		if (oManifestFile == null) {
+			WasdiLog.warnLog("Sentinel6ProductReader.getProductBoundingBox: no manifest file found in the product folder "  + m_oProductFile.getAbsolutePath());
+			return sResBBox;
+		}
+		
+        double dMinY = Double.MAX_VALUE;  	// min latitude
+        double dMaxY = Double.MIN_VALUE;	// max latitude
+        double dMinX = Double.MAX_VALUE;	// min longitude
+        double dMaxX = Double.MIN_VALUE; // max longitude
+        
+		try {
+			// Parse the XML file
+			DocumentBuilderFactory oFactory = DocumentBuilderFactory.newInstance();
+	        DocumentBuilder oBuilder = oFactory.newDocumentBuilder();
+	        Document oDocument = oBuilder.parse(oManifestFile);
+	        Element oRoot = oDocument.getDocumentElement();
+	        
+	        // Find all elements with the tag <gml:posList>, describing the polygons of the product
+	        NodeList oNodeList = oRoot.getElementsByTagName("gml:posList");
+	        
+	        // If there are no such elements, return null
+	        if (oNodeList.getLength() == 0) {
+	            WasdiLog.warnLog("Sentinel6ProductReader.getProductBoundingBox: no element 'gml:posList' in xml file " + oManifestFile.getAbsolutePath());
+	            return sResBBox;
+	        }
+   
+	        int iItem = 0;
+	        while (iItem < oNodeList.getLength()) {
+	        	String sCoordinates = oNodeList.item(iItem).getTextContent();
+	        	String[] asCoordinates = sCoordinates.split(" ");
+	        	List<Double> asLatitude = new ArrayList<>();
+	        	List<Double> asLongitude = new ArrayList<>();
+	        	
+	        	int i = 0;
+	        	while (i < asCoordinates.length) {
+	        		if (i % 2 == 0) 
+	        			asLatitude.add(Double.parseDouble(asCoordinates[i]));
+		        	else 
+		        		asLongitude.add(Double.parseDouble(asCoordinates[i]));
+		        	i ++;
+	        	}
+	        	
+	        	Double dMaxLat = Collections.max(asLatitude);
+		        Double dMinLat = Collections.min(asLatitude);
+		        Double dMaxLong = Collections.max(asLongitude);
+		        Double dMinLong = Collections.min(asLongitude);
+		        
+		        if (dMaxLat > dMaxY) dMaxY = dMaxLat;
+		        if (dMinLat < dMinY) dMinY = dMinLat;
+		        if (dMaxLong > dMaxX) dMaxX = dMaxLong;
+		        if (dMinLong < dMinX) dMinX = dMinLong;   
+		        
+		        iItem ++;
+	        }
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("Sentinel6ProductReader.getProductBoundingBox:  error reading manifest xml file", oEx);
+		}
+	        
+        if (dMinY >= - 90 && dMinY <= 90
+        		&& dMaxY >= -90 && dMaxY <= 90
+        		&& dMinX >= -180 && dMinX <= 180
+        		&& dMaxX >= -180 && dMaxX <= 180) {
+        	sResBBox = String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", 
+							(float) dMinY, (float) dMinX, (float) dMinY, (float) dMaxX, (float) dMaxY, (float) dMaxX, (float) dMaxY, (float) dMinX, (float) dMinY, (float) dMinX);
+        } else {
+        	WasdiLog.warnLog(String.format("Sentinel6ProductReader.getProductBoundingBox: some coordinates out of expected range lat (%f, %f) long (%f, %f)", dMinY, dMaxY, dMinX, dMaxX));
+        }
+        
+        return sResBBox;
+	        
 	}
 	
 	@Override
@@ -257,43 +301,6 @@ public class Sentinel6ProductReader extends SnapProductReader {
 			
 			return oSentinelDirectory.getAbsolutePath();
 			
-			/*
-			if (sUnzippedFolderName.contains("P4_1B_LR_____") 
-					&& Arrays.stream(oSentinelDirectory.listFiles()).anyMatch(oFile -> oFile.getName().equals("measurement.nc"))) {
-				// level 1 products have a single 'measurement.nc' file
-
-				
-				// we need to rename the file and move it in the parent folder
-				String sNewMeasurementFileName = sUnzippedFolderName.replace(".SEN6", "") + ".nc";
-				String sNewDestinationPath = sParentFolderPath + File.separator + sNewMeasurementFileName;
-				Path oSourcePath = Paths.get(oUnzippedFolderPath.toString() + File.separator +  "measurement.nc");
-				Path oDestinationPath = Paths.get(sNewDestinationPath);
-				Files.move(oSourcePath, oDestinationPath);
-				
-				File oMovedFile = oDestinationPath.toFile();
-				if (oMovedFile.exists()) {
-					
-					m_oProductFile = oMovedFile;
-					
-					// we remove the folder and all its contents
-					Arrays.asList(oSentinelDirectory.listFiles()).forEach(File::delete);
-					
-					if (oSentinelDirectory.delete()) 
-						WasdiLog.debugLog("Sentinel6ProductReader.adjustFileAfterDownload: folder deleted " + oUnzippedFolderPath.toString());
-					else 
-						WasdiLog.warnLog("Sentinel6ProductReader.adjustFileAfterDownload: folder not deleted " + oUnzippedFolderPath.toString() );
-					
-					return oMovedFile.getAbsolutePath();
-					
-				} else {
-					WasdiLog.warnLog("Sentinel6ProductReader.adjustFileAfterDownload: file not moved in the expected location " + oDestinationPath.toString());
-					return null;
-				}
-				
-			} 
-			else if (sUnzippedFolderName.contains("")) 
-			return null;	
-			*/
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("Sentinel6ProductReader.adjustFileAfterDownload: error unzipping Sentinel-6 product", oEx);
 		}
@@ -319,42 +326,22 @@ public class Sentinel6ProductReader extends SnapProductReader {
 		}
 	}
 	
-	
-	public static void main(String[]args) throws Exception {
-		
-		// TEST PER UNZIP OK - verificato che una cartella zippata viene estratta in una cartella con lo stesso nome
-		// come secondo parametro posso passare 
-		//ZipFileUtils oZipUtils = new ZipFileUtils();
-		String sZipFilePath = "C:/Users/valentina.leone/Desktop/WORK/SENTINEL-6/test_code/S6A_P4_1B_LR______20240430T063350_20240430T073003_20240501T074454_3373_128_009_004_EUM__OPE_ST_F09.SEN6.zip";
-		String sDestinationPath = "C:/Users/valentina.leone/Downloads";
-		//System.out.println(oZipUtils.unzip(sZipFilePath, sDestinationPath));
-		
-		// posso passare a SNAP l'intera cartella?No, c'e' bisogno del measurement
-		String sFolderPath = "C:/Users/valentina.leone/Desktop/WORK/SENTINEL-6/test_code/S6A_P4_1B_LR/S6A_P4_1B_LR______20240430T063350_20240430T073003_20240501T074454_3373_128_009_004_EUM__OPE_ST_F09.SEN6.zip";
-//		Path oPath = Paths.get(sFolderPath);
-//		System.out.println(oPath.toString());
-		
-		/*
-		File oSentinelFile = new File(sFolderPath);
-		Product oSnapProd = ProductIO.readProduct(oSentinelFile);
-		for (Band oBand : oSnapProd.getBands()) {s
-			System.out.println("Band: " + oBand.getName());
-		}
-		*/
-		
-		Sentinel6ProductReader oProductReader = new Sentinel6ProductReader(new File(sZipFilePath));
-		/*
-		System.out.println(oProductReader.adjustFileAfterDownload(sZipFilePath, "S6A_P4_1B_LR______20240430T063350_20240430T073003_20240501T074454_3373_128_009_004_EUM__OPE_ST_F09.SEN6"));
-		ProductViewModel oVM = oProductReader.getProductViewModel();
-		List<BandViewModel> aoBands = oVM.getBandsGroups().getBands();
-		aoBands.forEach(oB -> System.out.println(oB.getName()));
-		*/
-		oProductReader.getProductBoundingBox();
-		
+	@Override
+	public File getFileForPublishBand(String sBand, String sLayerId) {
+		return null;
 	}
 	
 	
+	@Override
+	public MetadataViewModel getProductMetadataViewModel() {
+		return null;
+	}
 	
-	
-
+	public static void main(String[]args) throws Exception {
+		String sPath = "C:/Users/valentina.leone/Desktop/WORK/SENTINEL-6/test_code/S6A_MW_2__AMR_____20240503T054610_20240503T064222_20240504T073349_3373_128_085_042_EUM__OPE_ST_F09.SEN6.zip";
+		File oSentinel = new File(sPath);
+		Sentinel6ProductReader oReader = new Sentinel6ProductReader(oSentinel);
+		oReader.adjustFileAfterDownload(sPath, "S6A_MW_2__AMR_____20240503T054610_20240503T064222_20240504T073349_3373_128_085_042_EUM__OPE_ST_F09.SEN6");
+		System.out.println(oReader.getProductBoundingBox());
+	}
 }

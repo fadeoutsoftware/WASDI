@@ -30,7 +30,8 @@ public class MissionUtils {
 			return false;
 		}
 		
-		if (oFile.getName().toUpperCase().startsWith("S6A") || oFile.getName().toUpperCase().startsWith("S6B") ) {
+		String sFileName = oFile.getName();
+		if (sFileName.toUpperCase().startsWith("S6A_") || sFileName.toUpperCase().startsWith("S6B_") || sFileName.toUpperCase().startsWith("S6_")) {
 			return true;
 		}
 		
