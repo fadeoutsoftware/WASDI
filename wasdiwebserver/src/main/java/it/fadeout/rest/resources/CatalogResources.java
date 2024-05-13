@@ -1011,31 +1011,40 @@ public class CatalogResources {
 	}
 	
 	private Response zipSentinel3(File oInitialFile) {
-		if(null==oInitialFile) {
-			WasdiLog.debugLog("CatalogResource.zipSentinel3: passed a null file, aborting");
+		return zipSentinelProduct(oInitialFile, ".SEN3", ".zip");
+	}
+	
+	
+	private Response zipSentinel6(File oInitialFile) {
+		return zipSentinelProduct(oInitialFile, ".SEN6", ".zip");
+	}
+	
+	private Response zipSentinelProduct(File oFile, String sDirectoryExtension, String sZipExtension) {
+		if(oFile == null) {
+			WasdiLog.debugLog("CatalogResource.zipSentinelProduct: passed a null file, aborting");
 			return Response.serverError().build();
 		}
-		if(!oInitialFile.isDirectory()) {
-			WasdiLog.debugLog("CatalogResource.zipSentinel3: file " + oInitialFile.getAbsolutePath() + " is not a directory, aborting");
+		if(!oFile.isDirectory()) {
+			WasdiLog.debugLog("CatalogResource.zipSentinelProduct: file " + oFile.getAbsolutePath() + " is not a directory, aborting");
 			return Response.serverError().build();
 		}
 		Map<String, File> aoFileEntries = new HashMap<>();
 		
 		//collect all files in the directory
-		try( Stream<java.nio.file.Path> paths = Files.walk(oInitialFile.toPath())){
+		try( Stream<java.nio.file.Path> paths = Files.walk(oFile.toPath())){
 			paths
 			.filter(oPath -> !Files.isDirectory(oPath))
 			.forEach(oPath -> {
-				String sPath = oInitialFile.getName() + File.separator + oPath.toFile().getName();
-				WasdiLog.debugLog("CatalogResource.zipSentinel3: adding file: " + sPath);
+				String sPath = oFile.getName() + File.separator + oPath.toFile().getName();
+				WasdiLog.debugLog("CatalogResource.zipSentinelProduct: adding file: " + sPath);
 				aoFileEntries.put(sPath, oPath.toFile());
 			});
 		} catch (Exception oE) {
-			WasdiLog.errorLog("CatalogResource.zipSentinel3: " + oE + " while adding files");
+			WasdiLog.errorLog("CatalogResource.zipSentinelProduct: exception while adding files to zip", oE);
 		}
 
 		
-		return zipOnTheFly(aoFileEntries, oInitialFile.getName().toUpperCase().replace(".SEN3", ".zip"));
+		return zipOnTheFly(aoFileEntries, oFile.getName().toUpperCase().replace(sDirectoryExtension, sZipExtension));
 	}
 	
 	/**
@@ -1060,7 +1069,9 @@ public class CatalogResources {
 				return zipShapeFile(oInitialFile);
 			} else if(MissionUtils.isSentinel3Directory(oInitialFile)) {
 				return zipSentinel3(oInitialFile);
-			} 
+			} else if (MissionUtils.isSentinel6Directory(oInitialFile)) {
+				return zipSentinel6(oInitialFile);
+			}
 		} 
 		catch (Exception oEx) {
 			WasdiLog.errorLog("CatalogResources.prepareAndReturnZip: " + oEx);
@@ -1090,7 +1101,8 @@ public class CatalogResources {
 					//dim files are the output of SNAP operations
 					sName.endsWith(".dim") ||
 					WasdiFileUtils.isShapeFile(oFile) ||
-					MissionUtils.isSentinel3Directory(oFile)
+					MissionUtils.isSentinel3Directory(oFile) ||
+					MissionUtils.isSentinel6Directory(oFile)
 					);
 		}
 		return bRet;

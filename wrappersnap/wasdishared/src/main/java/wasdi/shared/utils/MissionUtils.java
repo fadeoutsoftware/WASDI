@@ -136,6 +136,33 @@ public class MissionUtils {
 		return false;
 	}
 	
+	private static boolean isSentinel6Directory(String sName) {
+		try {
+			if(Utils.isNullOrEmpty(sName)) {
+				return false;
+			}
+			if(sName.toLowerCase().startsWith("s6") && sName.toLowerCase().endsWith(".sen6")){
+				return true;
+			}
+		} catch (Exception oE) {
+			WasdiLog.debugLog("WasdiFileUtils.isSentinel6Directory( String): " + oE);
+		}
+		return false;
+	}
+	
+	public static boolean isSentinel6Directory(File oFile) {
+		try {
+			if(oFile == null) {
+				return false;
+			}
+			return isSentinel6Directory(oFile.getName());
+		} catch (Exception oE) {
+			WasdiLog.errorLog("WasdiFileUtils.isSentinel6Directory( File ): ", oE);
+		}
+		return false;
+	}
+	
+	
 	/**
 	 * Get the Platform code of the mission starting from the file Name
 	 * @param sFileName File Name to investigate
