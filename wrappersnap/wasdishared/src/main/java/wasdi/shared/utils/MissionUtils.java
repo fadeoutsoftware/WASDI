@@ -258,6 +258,11 @@ public class MissionUtils {
 				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
 				return new Date(lTime);
 			}
+			else if(sPlatform.equals(Platforms.SENTINEL6)) {
+				String sDate = sFileName.substring(18, 18+15);
+				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
+				return new Date(lTime);
+			}
 			else if (sPlatform.equals(Platforms.ENVISAT)) {
 				String sDate = sFileName.substring(14, 14+8);
 				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd");
