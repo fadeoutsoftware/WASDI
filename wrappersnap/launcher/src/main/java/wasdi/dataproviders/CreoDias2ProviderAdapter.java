@@ -161,8 +161,11 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			boolean bIsUserEnabledForTest = false;
 			
 			for(int i = 0; i < asTestUsers.length(); i++) {
+				
 				String sTestUser = asTestUsers.getString(i);
-				if (!Utils.isNullOrEmpty(sTestUser) && sTestUser.equals(sUserId)) {
+				if (Utils.isNullOrEmpty(sTestUser)) continue;
+				
+				if (sTestUser.equals(sUserId)|| sTestUser.equals("*")) {
 					bIsUserEnabledForTest = true;
 					break;
 				}
@@ -515,7 +518,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
         ZipOutputStream oZipOut = new ZipOutputStream(oFos);
         File oFileToZip = new File(sSourceFile);
 
-        ZipFileUtils.zipFile(oFileToZip, oFileToZip.getName(), oZipOut);
+        ZipFileUtils.zipFile(oFileToZip, oFileToZip.getName(), oZipOut, 32*1024);
         oZipOut.close();
         oFos.close();
 	}
