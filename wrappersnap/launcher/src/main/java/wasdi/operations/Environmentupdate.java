@@ -3,11 +3,15 @@ package wasdi.operations;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.util.ArrayList;
 
 import org.json.JSONObject;
 
+import wasdi.LauncherMain;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.PathsConfig;
@@ -34,12 +38,12 @@ public class Environmentupdate extends Operation {
 		WasdiLog.debugLog("Environmentupdate.executeOperation");
 
 		if (oParam == null) {
-			WasdiLog.errorLog("Parameter is null");
+			WasdiLog.errorLog("Environmentupdate.executeOperation: Parameter is null");
 			return false;
 		}
 
 		if (oProcessWorkspace == null) {
-			WasdiLog.errorLog("Process Workspace is null");
+			WasdiLog.errorLog("Environmentupdate.executeOperation: Process Workspace is null");
 			return false;
 		}
 
@@ -99,8 +103,9 @@ public class Environmentupdate extends Operation {
 					
 					if (!oActionsLogFile.exists()) {
 						boolean bIsFileCreated = oActionsLogFile.createNewFile();
-						if (!bIsFileCreated)
+						if (!bIsFileCreated) {
 							WasdiLog.errorLog("Environmentupdate.executeOperation: the action file was not created");
+						}
 					}
 					
 					// Extract the command we just executed
@@ -115,13 +120,33 @@ public class Environmentupdate extends Operation {
 						
 						WasdiLog.debugLog("Environmentupdate.executeOperation: adding " + sUpdateCommand + " to the envActionsList");
 					
-						// Add carriage return
-						sUpdateCommand += "\n";
+						// we re-read all the actions line per line
+						ArrayList<String> asActionLines = new ArrayList<>(); 
+
+				        try (java.util.stream.Stream<String> oLinesStream = Files.lines(oActionsLogFile.toPath())) {
+				        	oLinesStream.forEach(sLine -> {
+				        		asActionLines.add(sLine);
+				            });
+				        }
+				        
+				        asActionLines.add(sUpdateCommand);
+				        
+				        String sLastLine = "";
 					
-						// Add this action to the list
-						try (OutputStream oOutStream = new FileOutputStream(oActionsLogFile, true)) {
-							byte[] ayBytes = sUpdateCommand.getBytes();
-							oOutStream.write(ayBytes);
+						// Add this action to the list and re-write avoiding duplicates
+						try (OutputStream oOutStream = new FileOutputStream(oActionsLogFile, false)) {
+							for (String sActualLine : asActionLines) {
+								if (sActualLine.equals(sLastLine)) {
+									WasdiLog.debugLog("Environmentupdate.executeOperation: jump duplicate " + sActualLine + " in to envActionsList");
+									continue;
+								}
+								
+								String sWriteLine = sActualLine + "\n";
+								byte[] ayBytes = sWriteLine.getBytes();
+								oOutStream.write(ayBytes);
+								
+								sLastLine = sActualLine;
+							}
 						}
 					}
 				}
@@ -131,10 +156,9 @@ public class Environmentupdate extends Operation {
 			}
 
 			try {
-				
 				// We need to refresh the package list if we are in the main node
 				if (WasdiConfig.Current.isMainNode()) {
-					Thread.sleep(2000);
+					
 					oEngine.refreshPackagesInfo(oParameter);
 					
 					// Notify the user
@@ -146,15 +170,17 @@ public class Environmentupdate extends Operation {
 
 					m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.ENVIRONMENTUPDATE.name(), oParam.getExchange(), sInfo, oParam.getExchange());
 					
-				}							
-
+				}
 			} 
-			catch (InterruptedException oEx) {
-				Thread.currentThread().interrupt();
-				WasdiLog.errorLog("Environmentupdate.executeOperation: current thread was interrupted", oEx);
-			}
 			catch (Exception oRabbitException) {
 				WasdiLog.errorLog("Environmentupdate.executeOperation: exception sending Rabbit Message", oRabbitException);
+			}
+			
+			if (bRet) {
+				LauncherMain.updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+			}
+			else {
+				LauncherMain.updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 			}
 
 			return bRet;

@@ -3,7 +3,7 @@ package wasdi.io;
 import java.io.File;
 import java.util.ArrayList;
 
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
@@ -32,7 +32,7 @@ public class VrtProductReader extends WasdiProductReader {
         	
         	// Set name values
         	oRetViewModel.setFileName(m_oProductFile.getName());
-        	oRetViewModel.setName(Utils.getFileNameWithoutLastExtension(m_oProductFile.getName()));
+        	oRetViewModel.setName(WasdiFileUtils.getFileNameWithoutLastExtension(m_oProductFile.getName()));
         	oRetViewModel.setProductFriendlyName(oRetViewModel.getName());
         	
         	// Create the sub folder

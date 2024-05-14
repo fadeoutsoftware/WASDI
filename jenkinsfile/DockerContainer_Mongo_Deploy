@@ -49,7 +49,7 @@ pipeline {
       }
     }
 
-    stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
+    stage('DEPLOY THE CONTAINER(S) AND THEIR RUN ELEMENTS') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
@@ -60,7 +60,7 @@ pipeline {
             --diff \
             --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
-        label: "Deploy the container and its run element"
+        label: "Deploy the container(s) and their run elements"
       }
     }
 
@@ -69,13 +69,28 @@ pipeline {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
-            playbooks/runDockerContainerWasdiMongo.yml \
+            playbooks/startOrRestartDockerContainer.yml \
             --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiMongoContainer=true'
         """,
         label: "Start or restart the container(s)"
+      }
+    }
+
+    stage('CLEAN THE DOCKER IMAGE(S)') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deleteDockerImage.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiMongoContainer=true'
+        """,
+        label: "Clean the Docker image(s)"
       }
     }
   }

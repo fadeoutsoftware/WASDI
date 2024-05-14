@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
@@ -77,7 +77,7 @@ public class GpmZipProductReader extends WasdiProductReader {
     	oBandViewModel.setHeight(0);
     	oBandViewModel.setWidth(0);
     	oBandViewModel.setPublished(false);
-    	oBandViewModel.setName(Utils.getFileNameWithoutLastExtension(oRetViewModel.getName()));
+    	oBandViewModel.setName(WasdiFileUtils.getFileNameWithoutLastExtension(oRetViewModel.getName()));
 		
 		aoBands.add(oBandViewModel);
 

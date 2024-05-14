@@ -1,12 +1,10 @@
 package it.fadeout.threads.styles;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import wasdi.shared.business.Node;
-import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.StyleAPIClient;
 
 /**
  * Thread that calls all the computing nodes to ask to delete the file of a style
@@ -46,21 +44,7 @@ public class StyleDeleteFileWorker extends Thread {
 			}
 
 			try {
-				String sUrl = oNode.getNodeBaseAddress();
-
-				if (!sUrl.endsWith("/")) {
-					sUrl += "/";
-				}
-
-				sUrl += "styles/nodedelete?styleId=" + m_sStyleId + "&styleName=" + m_sStyleName;
-
-				Map<String, String> asHeaders = new HashMap<>();
-				asHeaders.put("x-session-token", m_sSessionId);
-
-				WasdiLog.debugLog("StyleDeleteFileWorker.run: calling url: " + sUrl);
-
-				HttpUtils.httpDelete(sUrl, asHeaders);
-
+				StyleAPIClient.nodeDelete(oNode, m_sSessionId, m_sStyleId, m_sStyleName);				
 				WasdiLog.debugLog("StyleDeleteFileWorker.run: node deleted " + oNode.getNodeCode());
 			} catch (Exception oEx) {
 				WasdiLog.debugLog("StyleDeleteFileWorker.run: Exception " + oEx.getMessage());

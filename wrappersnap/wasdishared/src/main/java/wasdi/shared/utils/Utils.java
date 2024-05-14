@@ -1,25 +1,18 @@
 package wasdi.shared.utils;
 
-import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermission;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 // email, IP addresses (v4 and v6), domains and URL validators:
 import org.apache.commons.validator.routines.DomainValidator;
@@ -125,67 +118,6 @@ public class Utils {
 		return new Date(oLong);
 	}
 
-	/**
-	 * This method removes the last extension from a filename 
-	 * @param sInputFile the name of the input file
-	 * @return
-	 */
-	public static String getFileNameWithoutLastExtension(String sInputFile) {
-		File oFile = new File(sInputFile);
-		String sInputFileNameOnly = oFile.getName();
-		String sReturn = sInputFileNameOnly;
-		
-		if(sInputFileNameOnly.contains(".")) {
-			sReturn = sInputFileNameOnly.substring(0, sInputFileNameOnly.lastIndexOf('.'));
-		}
-
-		return sReturn;
-	}
-
-	public static String GetFileNameExtension(String sInputFile) {
-		String sReturn = "";
-		File oFile = new File(sInputFile);
-		String sInputFileNameOnly = oFile.getName();
-
-		// Create a clean layer id: the file name without any extension
-		String[] asLayerIdSplit = sInputFileNameOnly.split("\\.");
-		if (asLayerIdSplit != null && asLayerIdSplit.length > 0) {
-			sReturn = asLayerIdSplit[asLayerIdSplit.length - 1];
-		}
-
-		return sReturn;
-	}
-
-	public static void fixUpPermissions(Path destPath) throws IOException {
-		Stream<Path> files = Files.list(destPath);
-		files.forEach(path -> {
-			if (Files.isDirectory(path)) {
-				try {
-					fixUpPermissions(path);
-				} catch (IOException oEx) {
-					WasdiLog.errorLog("Utils.fixUpPermissions: error", oEx);
-
-				}
-			} else {
-				setExecutablePermissions(path);
-			}
-		});
-		files.close();
-	}
-
-	private static void setExecutablePermissions(Path executablePathName) {
-		if (IS_OS_UNIX) {
-			Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ,
-					PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ,
-					PosixFilePermission.GROUP_EXECUTE, PosixFilePermission.OTHERS_READ,
-					PosixFilePermission.OTHERS_EXECUTE));
-			try {
-				Files.setPosixFilePermissions(executablePathName, permissions);
-			} catch (IOException oEx) {
-				WasdiLog.errorLog("Utils.setExecutablePermissions: error", oEx);
-			}
-		}
-	}
 
 	/**
 	 * Format the date using the yyyyMMdd date format.
@@ -469,46 +401,6 @@ public class Utils {
 		);
 	}
 	
-	/**
-	 * Confert a Polygon WKT String in a set of Lat Lon Points comma separated
-	 * 
-	 * @param sContent
-	 * @return
-	 */
-	public static String polygonToBounds(String sContent) {
-		sContent = sContent.replace("MULTIPOLYGON ", "");
-		sContent = sContent.replace("MULTIPOLYGON", "");
-		sContent = sContent.replace("POLYGON ", "");
-		sContent = sContent.replace("POLYGON", "");
-		sContent = sContent.replace("(((", "");
-		sContent = sContent.replace(")))", "");
-		sContent = sContent.replace("((", "");
-		sContent = sContent.replace("))", "");
-
-		String[] asContent = sContent.split(",");
-
-		String sOutput = "";
-
-		for (int iIndexBounds = 0; iIndexBounds < asContent.length; iIndexBounds++) {
-			String sBounds = asContent[iIndexBounds];
-			sBounds = sBounds.trim();
-			String[] asNewBounds = sBounds.split(" ");
-
-			if (iIndexBounds > 0)
-				sOutput += ", ";
-
-			try {
-				sOutput += asNewBounds[1] + "," + asNewBounds[0];
-			} catch (Exception oEx) {
-				WasdiLog.errorLog("Utils.polygonToBounds: error", oEx);
-			}
-
-		}
-		return sOutput;
-
-	}
-	
-	
 	
 	///////// units conversion
 	private static String[] sUnits = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB"}; //...yeah, ready for the decades to come :-O
@@ -603,5 +495,31 @@ public class Utils {
 	public static Double nowInMillis() {
 		return (double) new Date().getTime();
 	}
+	
+    /**
+     * Function to remove duplicates from an ArrayList 
+     * @param <T> Type
+     * @param aoOriginalList
+     * @return
+     */
+    public static <T> ArrayList<T> removeDuplicates(ArrayList<T> aoOriginalList) 
+    { 
+  
+        // Create a new LinkedHashSet 
+        Set<T> oUniqueSet = new LinkedHashSet<>(); 
+  
+        // Add the elements to set 
+        oUniqueSet.addAll(aoOriginalList); 
+  
+        // Clear the list 
+        aoOriginalList.clear(); 
+  
+        // add the elements of set 
+        // with no duplicates to the list 
+        aoOriginalList.addAll(oUniqueSet); 
+  
+        // return the list 
+        return aoOriginalList; 
+    }	
 
 }

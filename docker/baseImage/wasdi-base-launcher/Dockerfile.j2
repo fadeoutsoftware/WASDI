@@ -1,0 +1,175 @@
+FROM ubuntu:22.04
+
+
+MAINTAINER "WASDI SARL"
+
+
+# From now, all commands executed are executed with the user 'root'
+USER root
+
+
+# This environment variable is setted to avoid packages to ask a confirmation
+ENV DEBIAN_FRONTEND="noninteractive"
+
+# This variable is setted to make Python stop creating files '.pyc'
+ENV PYTHONDONTWRITEBYTECODE="False"
+
+# This variable is setted to force the 'print' method of Python to flush message directly
+ENV PYTHONUNBUFFERED="True"
+
+# This variable is setted to set the default editor
+ENV EDITOR="nano"
+
+
+# RUN generic to create user, group, directories, etc
+RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
+    useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
+    mkdir --parents \
+        {{ sWasdiSystemUserHome }}/.ssh \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} \
+        {{ sWasdiSystemUserHome }}/.ssh && \
+    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chmod 700 \
+        {{ sWasdiSystemUserHome }}/.ssh && \
+    chmod {{ sWasdiSoftwareRootDirectoryMode }} \
+        {{ sWasdiSoftwareRootDirectoryPath }}
+
+
+# RUN generic to update the system and install common packages
+RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
+    echo "APT::Install-Recommends \"0\";" >> /etc/apt/apt.conf.d/99local && \
+    echo "APT::Get::Assume-Yes \"true\";" >> /etc/apt/apt.conf.d/99local && \
+    echo "APT::Keep-Downloaded-Packages \"false\";" >> /etc/apt/apt.conf.d/99local && \
+    echo "Dpkg::Options::--force-confold;" >> /etc/apt/apt.conf.d/99local && \
+    apt-get update && \
+    apt-get install \
+        ca-certificates && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy main restricted universe multiverse"           > /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get dist-upgrade && \
+    apt-get install \
+        curl \
+        nano \
+        tar \
+        unzip \
+        wget && \
+    sed --in-place "s/# set tabsize.*/set tabsize 4/g" /etc/nanorc && \
+    sed --in-place "s/# set tabstospaces/set tabstospaces/g" /etc/nanorc && \
+    rm --recursive --force /var/lib/apt/lists/* && \
+    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
+
+
+# RUN specific to install the launcher
+RUN apt-get update && \
+    apt-get install \
+        g++ \
+        libgfortran5 \
+        libjhdf4-jni \
+        libjhdf5-jni \
+        libopenjp2-7-dev \
+        libproj-dev \
+        make \
+        pkg-config && \
+    mkdir --parents \
+        {{ sWasdiDataPartitionRootDirectoryPath }} \
+        {{ sWasdiDataRootDirectoryPath }} \
+        {{ sWasdiConfigurationRootDirectoryPath }} \
+        {{ sWasdiLauncherRootDirectoryPath }} \
+        /tmp/gdal && \
+    chown {{ sWasdiDataPartitionRootDirectoryOwner }}:{{ sWasdiDataPartitionRootDirectoryGroup }} \
+        {{ sWasdiDataPartitionRootDirectoryPath }} && \
+    chmod {{ sWasdiDataPartitionRootDirectoryMode }} \
+        {{ sWasdiDataPartitionRootDirectoryPath }} && \
+    chown {{ sWasdiDataRootDirectoryOwner }}:{{ sWasdiDataRootDirectoryGroup }} \
+        {{ sWasdiDataRootDirectoryPath }} && \
+    chmod {{ sWasdiDataRootDirectoryMode }} \
+        {{ sWasdiDataRootDirectoryPath }} && \
+    chown {{ sWasdiConfigurationRootDirectoryOwner }}:{{ sWasdiConfigurationRootDirectoryGroup }} \
+        {{ sWasdiConfigurationRootDirectoryPath }} && \
+    chmod {{ sWasdiConfigurationRootDirectoryMode }} \
+        {{ sWasdiConfigurationRootDirectoryPath }} && \
+    chown {{ sWasdiLauncherRootDirectoryOwner }}:{{ sWasdiLauncherRootDirectoryGroup }} \
+        {{ sWasdiLauncherRootDirectoryPath }} && \
+    chmod {{ sWasdiLauncherRootDirectoryMode }} \
+        {{ sWasdiLauncherRootDirectoryPath }} && \
+    wget \
+        --no-verbose \
+        --output-document /tmp/{{ sWasdiGdalCompiledSourceUrl | basename }} \
+        --progress=bar:force:noscroll \
+        --show-progress \
+        {{ sWasdiGdalCompiledSourceUrl }} && \
+    tar \
+        --directory /tmp/gdal \
+        --extract \
+        --file /tmp/{{ sWasdiGdalCompiledSourceUrl | basename }} \
+        --strip-components=1 && \
+    cd /tmp/gdal && \
+    ./configure \
+        --prefix=/usr \
+        --with-jp2mrsid=yes \
+        --with-openjpeg=yes && \
+    make -j16 && \
+    make install && \
+    cd / && \
+    apt-get --purge remove \
+        gcc \
+        g++ \
+        make \
+        pkg-config && \
+    apt autoremove && \
+    rm --recursive --force \
+        /tmp/{{ sWasdiGdalCompiledSourceUrl | basename }} \
+        /tmp/gdal \
+        /usr/lib/libgdal.a \
+        /var/lib/apt/lists/* && \
+    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
+
+
+# From now, all commands executed are executed with the user '{{ sWasdiSystemUserName }}'
+USER {{ sWasdiSystemUserName }}
+
+
+# RUN specific to install JDK 8
+RUN mkdir --parents \
+        {{ sWasdiJdk8RootDirectoryPath }} \
+        {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} && \
+    chown {{ sWasdiJdk8RootDirectoryOwner }}:{{ sWasdiJdk8RootDirectoryGroup }} \
+        {{ sWasdiJdk8RootDirectoryPath }} \
+        {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} && \
+    chmod {{ sWasdiJdk8RootDirectoryMode }} \
+        {{ sWasdiJdk8RootDirectoryPath }} \
+        {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} && \
+    wget \
+        --no-verbose \
+        --output-document /tmp/{{ sWasdiJdk8SourceUrl | basename }} \
+        --progress=bar:force:noscroll \
+        --show-progress \
+        {{ sWasdiJdk8SourceUrl }} && \
+    tar \
+        --directory {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} \
+        --extract \
+        --file /tmp/{{ sWasdiJdk8SourceUrl | basename }} \
+        --strip-components=1 && \
+    ln \
+        --symbolic \
+        {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} \
+        {{ sWasdiJdk8RootDirectoryPath }}/latest && \
+    chown --no-dereference {{ sWasdiJdk8RootDirectoryOwner }}:{{ sWasdiJdk8RootDirectoryGroup }} \
+        {{ sWasdiJdk8RootDirectoryPath }}/latest && \
+    rm --force \
+        /tmp/{{ sWasdiJdk8SourceUrl | basename }}
+
+ENV JAVA_HOME="{{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }}"
+ENV PATH="{{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }}/bin:${PATH}"
+
+
+# Set the workdir
+WORKDIR {{ sWasdiLauncherRootDirectoryPath }}
+
+
+# Add a marker
+RUN echo "{{ sCurrentRevision }}" > {{ sWasdiSystemUserHome }}/dockerImageVersion.txt

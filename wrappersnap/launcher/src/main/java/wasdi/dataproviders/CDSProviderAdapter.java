@@ -16,7 +16,6 @@ import java.util.stream.IntStream;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.cds.CDSUtils;
-import wasdi.shared.queryexecutors.cds.QueryExecutorCDS;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;

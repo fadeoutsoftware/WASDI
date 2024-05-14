@@ -3,6 +3,7 @@ package wasdi.io;
 import java.io.File;
 
 import wasdi.shared.queryexecutors.jrc.ResponseTranslatorJRC;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.WasdiFileUtils;
 
 public class WasdiProductReaderFactory {
@@ -24,11 +25,11 @@ public class WasdiProductReaderFactory {
 			return new VrtProductReader(oFile);
 		}
 		
-		if (WasdiFileUtils.isSentinel5PFile(oFile)) { 
+		if (MissionUtils.isSentinel5PFile(oFile)) { 
 			return new Sentinel5ProductReader(oFile);
 		}
 
-		if (WasdiFileUtils.isGpmZipFile(oFile)) { 
+		if (MissionUtils.isGpmZipFile(oFile)) { 
 			return new GpmZipProductReader(oFile);
 		}
 
@@ -44,7 +45,7 @@ public class WasdiProductReaderFactory {
 			}
 		}
 		
-		if(WasdiFileUtils.isSentinel3Name(oFile)) {
+		if(MissionUtils.isSentinel3Name(oFile)) {
 			return new Sentinel3ProductReader(oFile);
 		}
 
@@ -52,16 +53,12 @@ public class WasdiProductReaderFactory {
 			return new CmNcProductReader(oFile);
 		}
 		
-		if (oFile.getName().toLowerCase().endsWith(".pdf")) { 
-			return new PdfProductReader(oFile);
+		if (WasdiFileUtils.isDocumentFormatFile(oFile)) { 
+			return new DocumentFormatsProductReader(oFile);
 		}
 		
 		if (WasdiFileUtils.isImageFile(oFile)) {
 			return new ImagesProductReader(oFile);
-		}
-
-		if (oFile.getName().toLowerCase().endsWith(".hdf")) {
-			return new ModisProductReader(oFile);
 		}
 
 		if (oFile.getName().toLowerCase().endsWith(".hdf")) {

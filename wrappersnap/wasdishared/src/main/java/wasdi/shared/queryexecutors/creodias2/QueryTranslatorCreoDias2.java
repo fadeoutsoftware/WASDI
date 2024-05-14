@@ -185,11 +185,11 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	
 
 	private String createIntegerAttribute(String sName, String sOperator, int sValue) {
-		return "Attributes/OData.CSC.IntegerAttribute/any(i0:i0/Name eq '" + sName+ "' and i0/Value " + sOperator +  " '" + sValue + "')";
+		return "Attributes/OData.CSC.IntegerAttribute/any(i0:i0/Name eq '" + sName+ "' and i0/Value " + sOperator +  " " + sValue + ")";
 	}
 	
 	private String createDoubleAttribute(String sName, String sOperator, double sValue) {
-		return "Attributes/OData.CSC.DoubleAttribute/any(i0:i0/Name eq '" + sName+ "' and i0/Value " + sOperator +  " '" + sValue + "')";
+		return "Attributes/OData.CSC.DoubleAttribute/any(i0:i0/Name eq '" + sName+ "' and i0/Value " + sOperator +  " " + sValue + ")";
 	}
 	
 	
@@ -373,81 +373,4 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		return sUrl;
 	}
 
-	public static void main(String[]args) throws Exception {
-		String clientString = "( beginPosition:[2023-06-29T00:00:00.000Z TO 2023-07-06T23:59:59.999Z] AND endPosition:[2023-06-29T00:00:00.000Z TO 2023-07-06T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:SLC AND polarisationmode:VV AND sensoroperationalmode:EW AND relativeorbitnumber:123)";
-		QueryTranslatorCreoDias2 tr = new QueryTranslatorCreoDias2();
-		tr.setAppconfigPath("C:/WASDI/GIT/WASDI/client/app/config/appconfig.json");
-		tr.setParserConfigPath("C:/WASDI/GIT/WASDI/configuration/creodias2ParserConfig.json");
-	
-		// try the bounding box
-		String sQuery = "( footprint:\"intersects(POLYGON((5.843719647673683 43.22105226995176,5.843719647673683 46.61479620873007,10.763258396058559 46.61479620873007,10.763258396058559 43.22105226995176,5.843719647673683 43.22105226995176)))\" ) AND ( beginPosition:[2023-06-30T00:00:00.000Z TO 2023-06-30T23:59:59.999Z] AND endPosition:[2023-06-30T00:00:00.000Z TO 2023-06-30T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_*)";
-		String sRes = tr.getCountUrl(sQuery);
-		System.out.println(sRes + ""); //OK
-		
-		// try the search by name
-		sQuery = "S1A_IW_SLC__1SDV_20230630T001327_20230630T001357_049208_05EACA_F030 AND ( beginPosition:[2023-06-30T00:00:00.000Z TO 2023-06-30T23:59:59.999Z] AND endPosition:[2023-06-30T00:00:00.000Z TO 2023-06-30T23:59:59.999Z] ) AND   (platformname:Sentinel-1)";
-		sRes = tr.getCountUrl(sQuery);
-		System.out.println(sRes); // OK
-		
-		
-		String sQuery2 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:SLC AND polarisationmode:HH AND sensoroperationalmode:IW AND relativeorbitnumber:5)";
-		String sRes2 = tr.getCountUrl(sQuery2);
-		System.out.println("\nQuery for Sentinel-1. Parameters: [time frame, product type, Polarisation, Sensor mode, Relative orbit number]. Must return 5 results");
-		System.out.println(sRes2);
-		
-		String sQuery3 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-2 AND producttype:S2MSI1C AND cloudcoverpercentage:[3 TO 30])";
-		String sRes3 = tr.getCountUrl(sQuery3);
-		System.out.println("\nQuery for Sentinel-2. Parameters: [time frame, product type, cloud coverage]. Must return 20057 results");
-		System.out.println(sRes3);
-		
-		String sQuery4 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-3 AND productlevel:L1 AND Instrument:SRAL AND producttype:SR_1_SRA___ AND timeliness:Near Real Time AND relativeorbitstart:38)"; 
-		String sRes4 = tr.getCountUrl(sQuery4);
-		System.out.println("\nQuery for Sentinel-3. Parameters: [time frame, product type, product level, timeliness ]. Must return  2711 results");
-		System.out.println(sRes4);
-		
-		String sQuery7 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-5P AND productlevel:LEVEL1B AND producttype:L1B_IR_SIR AND timeliness:Offline AND absoluteorbit:29698)";  
-		String sRes7 = tr.getCountUrl(sQuery7);
-		System.out.println("\nQuery for Sentinel-5P. Parameters: [time frame, product type, product level, timeliness, absoluteorbit ]. Must return  0 results");
-		System.out.println(sRes7);
-		
-		// TODO - IMPORTANT! envisat filters in wasdi do not have a match with creodias
-//		String sQuery5 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Envisat AND name:ASA_IM__0P AND orbitDirection:ASCENDING)";  
-//		String sRes5 = tr.getCountUrl(sQuery5);
-//		System.out.println("\nQuery for ENVISAT. Parameters: [time frame, product type, product level, timeliness, absoluteorbit ]. Must return  0 results");
-//		System.out.println(sRes5);
-		
-		String sQuery6 = "( footprint:\"intersects(POLYGON((4.983398169279099 43.4413942785878,4.983398169279099 45.789344262312,10.124999731779099 45.789344262312,10.124999731779099 43.4413942785878,4.983398169279099 43.4413942785878)))\" ) AND ( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Landsat-* AND name:L1TP AND cloudcoverpercentage:[0 TO 30])";   
-		String sRes6 = tr.getCountUrl(sQuery6);
-		System.out.println("\nQuery for LANDSTAT-8. Parameters: [time frame, bounding box, name]. Must return  3 results");
-		System.out.println(sRes6);
-		
-		
-		QueryViewModel oQVM = new QueryViewModel();
-		oQVM.platformName = Platforms.SENTINEL1;
-		System.out.println("\nTryRegex for polarisation");
-		String sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:S2MSI1C AND polarisationmode:HH+VV)";;
-		tr.findPolarisation(sQ, oQVM);
-		System.out.println(oQVM.polarisation);
-		
-		System.out.println("\nTryRegex for platform identifier");
-		sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:SLC AND polarisationmode:HH AND sensoroperationalmode:IW AND relativeorbitnumber:5 AND swathidentifier:1)";
-		tr.findPlatformSerialIdentifier(sQ, oQVM);
-		System.out.println(oQVM.platformSerialIdentifier);
-		
-		System.out.println("\nTry regex for instrument");
-		sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-3 AND productlevel:L1 AND Instrument:SRAL AND producttype:SR_1_SRA___ AND timeliness:Non Time Critical AND relativeorbitstart:[1-385])";
-		oQVM.platformName = Platforms.SENTINEL3;
-		tr.findInstrument(sQ, oQVM);
-		System.out.println(oQVM.instrument);
-		
-		System.out.println("\nTry regex for relative orbit start");
-		sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-3 AND productlevel:L1 AND Instrument:SRAL AND producttype:SR_1_SRA___ AND timeliness:Non Time Critical AND relativeorbitstart:385)";
-		tr.findRelativeOrbit(sQ, oQVM);
-		System.out.println(oQVM.relativeOrbit);
-		
-		PaginatedQuery oPQ = new PaginatedQuery(sQuery6, "0", "10", null, null);
-		String sSearchUrl1 = tr.getSearchUrl(oPQ);
-		System.out.println(sSearchUrl1);
-		
-	}
 }

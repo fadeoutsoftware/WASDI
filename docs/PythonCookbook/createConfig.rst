@@ -2,7 +2,7 @@
    sphinx-quickstart on Mon Apr 19 16:00:28 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
-.. _SearchS1Images
+.. _config_quickstart
 
 
 Create a config.json file
@@ -19,7 +19,7 @@ To run this code you need:
  - A running Python 3.x Environment
  - A valid WASDI Account
 
-If this is not clear, you probably need to take a look to the `Python Tutorial <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/PythonTutorial.html>`_ before.
+If this is not clear, you probably need to take a look to the :doc:`Python Tutorial <../ProgrammingTutorials/PythonTutorial>` before.
 
 
 Recipe

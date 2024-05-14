@@ -30,6 +30,7 @@ import wasdi.shared.queryexecutors.QueryExecutorFactory;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.gis.BoundingBoxUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
@@ -237,7 +238,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
                 if (!Utils.isNullOrEmpty(sBoundingBox)) {
                     if (sBoundingBox.startsWith("POLY") || sBoundingBox.startsWith("MULTI")) {
-                        sBoundingBox = Utils.polygonToBounds(sBoundingBox);
+                        sBoundingBox = BoundingBoxUtils.polygonToBounds(sBoundingBox);
                     }
 
                     oAlreadyDownloaded.setBoundingBox(sBoundingBox);
@@ -301,7 +302,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             m_oProcessWorkspaceLogger.log(new EndMessageProvider().getGood());
 
             DownloadPayload oDownloadPayload = new DownloadPayload();
-            oDownloadPayload.setFileName(Utils.getFileNameWithoutLastExtension(sFileName));
+            oDownloadPayload.setFileName(WasdiFileUtils.getFileNameWithoutLastExtension(sFileName));
             oDownloadPayload.setProvider(oParameter.getProvider());
             if (oProviderAdapter != null) {
             	oDownloadPayload.setSelectedProvider(oProviderAdapter.getCode());

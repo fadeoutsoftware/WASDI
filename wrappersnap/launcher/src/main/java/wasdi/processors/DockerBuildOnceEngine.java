@@ -91,7 +91,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
 		// Create utils
-        DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry);
+        DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry);
         
         if (oDockerUtils.isContainerStarted(oProcessor.getName(), oProcessor.getVersion())) {
         	WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: There is the previous version running, stop it");
@@ -101,7 +101,6 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
         		WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: stop returned false, we try to proceed anyhow");
         	}
         }
-        
         
 		// Increment the version of the processor
 		String sNewVersion = oProcessor.getVersion();
@@ -120,13 +119,32 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: super class deploy returned false. So we stop here.");
 			return false;
 		}
-						
+		else {
+			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: super class deploy returned true lets proceed to clean and push");
+		}
+				
+		try {
+			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: try to clean old images. Last valid version is " + sNewVersion);
+			
+			String sVersion = oProcessor.getVersion();
+			Integer iVersion = Integer.parseInt(sVersion);
+			
+			if (iVersion>1) {
+				iVersion = iVersion - 1;				
+				oDockerUtils.delete(oProcessor.getName(), "" + iVersion);
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("DockerBuildOnceEngine.run error searching old versions: ", oEx);
+		}
+		
 		// Here we save the address of the image
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
 		
 		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
 			WasdiLog.infoLog("DockerBuildOnceEngine.redeploy: we got an empty address of the pushed image");
-		}
+			return false;
+		}		
 		
         return true;
 	}
@@ -153,7 +171,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 		
-		DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_sDockerTemplatePath);
+		DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, m_sDockerTemplatePath, m_sDockerRegistry);
 		
 		if (!oDockerUtils.isContainerStarted(oProcessor)) {
 			
@@ -163,14 +181,9 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 				String sVersion = oProcessor.getVersion();
 				Integer iVersion = Integer.parseInt(sVersion);
 				
-				while (iVersion>1) {
+				if (iVersion>1) {
 					iVersion = iVersion - 1;
-					
-					if (oDockerUtils.isContainerStarted(oProcessor.getName(), "" + iVersion)) {
-						WasdiLog.debugLog("DockerBuildOnceEngine.run: found version " + iVersion + " running, stop it");
-						oDockerUtils.stop(oProcessor.getName(), "" + iVersion);
-						break;
-					}
+					oDockerUtils.delete(oProcessor.getName(), ""+iVersion);
 				}
 			}
 			catch (Exception oEx) {
@@ -188,7 +201,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 			
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry);
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry);
 			
 	        WasdiLog.debugLog("DockerBuildOnceEngine.waitForApplicationToStart: wait to let docker start");
 

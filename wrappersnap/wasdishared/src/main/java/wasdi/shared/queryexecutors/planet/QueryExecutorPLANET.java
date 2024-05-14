@@ -49,6 +49,7 @@ public class QueryExecutorPLANET extends QueryExecutor {
 		return 0;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		

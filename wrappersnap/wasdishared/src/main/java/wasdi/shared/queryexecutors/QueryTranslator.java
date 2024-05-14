@@ -12,8 +12,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.google.common.base.Preconditions;
 
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -1203,34 +1203,45 @@ public abstract class QueryTranslator {
 						oResult.productType = sType;
 					}
 				} catch (Exception oE) {
-					WasdiLog.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): error while parsing product type: " + oE);
+					WasdiLog.warnLog("QueryTranslator.parseSentinel3( " + sQuery + " ): error while parsing product type: " + oE);
 				}
 
-				// check for product type
+				// check for timeliness
 				try {
 					if (sQuery.contains(QueryTranslator.s_s_TIMELINESS)) {
-						int iStart = sQuery.indexOf(s_s_TIMELINESS);
-						if (iStart < 0) {
-							throw new IllegalArgumentException("Could not find sensor mode");
+						
+						String sSearchKey = QueryTranslator.s_s_TIMELINESS;
+						if (sSearchKey.endsWith(":")) {
+							sSearchKey = sSearchKey.substring(0, sSearchKey.length() - 1);
 						}
-						iStart += s_s_TIMELINESS.length();
-						int iEnd = sQuery.indexOf(" AND ", iStart);
-						if (iEnd < 0) {
-							iEnd = sQuery.indexOf(')', iStart);
+						String sTimeliness = extractValue(sQuery, sSearchKey);
+						
+						if (!Utils.isNullOrEmpty(sTimeliness)) {
+							oResult.timeliness = sTimeliness;
 						}
-						if (iEnd < 0) {
-							iEnd = sQuery.indexOf(' ', iStart);
-						}
-						if (iEnd < 0) {
-							iEnd = iStart + 12;
-						}
-						String sTimeliness = sQuery.substring(iStart, iEnd);
-						sTimeliness = sTimeliness.trim();
-
-						oResult.timeliness = sTimeliness;
 					}
 				} catch (Exception oE) {
-					WasdiLog.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): error while parsing product type: " + oE);
+					WasdiLog.warnLog("QueryTranslator.parseSentinel3( " + sQuery + " ): error while parsing timeliness: " + oE);
+				}
+				
+				// check for processing level
+				try {
+					if (sQuery.contains(QueryTranslator.s_sPRODUCTLEVEL)) {
+						
+						String sSearchKey = QueryTranslator.s_sPRODUCTLEVEL;
+						if (sSearchKey.endsWith(":")) {
+							sSearchKey =  sSearchKey.substring(0, sSearchKey.length() - 1);
+						}
+						
+						String sProcessingLevel = extractValue(sQuery, sSearchKey);
+						
+						if (!Utils.isNullOrEmpty(sProcessingLevel)) {
+							oResult.productLevel = sProcessingLevel;
+						}
+					}
+					
+				} catch (Exception oE) {
+					WasdiLog.warnLog("QueryTranslator.parseSentinel3( " + sQuery + "): error while parsing processing level: " + oE);
 				}
 			}
 		} catch (Exception oE) {
@@ -1509,7 +1520,7 @@ public abstract class QueryTranslator {
 				oQueryViewModel.platformName = Platforms.LANDSAT8;
 			}  else {
 				
-				String sPlatformName = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sProductName);
+				String sPlatformName = MissionUtils.getPlatformFromSatelliteImageFileName(sProductName);
 				
 				if (!Utils.isNullOrEmpty(sPlatformName)) {
 					oQueryViewModel.platformName = sPlatformName;

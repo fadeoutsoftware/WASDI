@@ -12,7 +12,12 @@ import com.rabbitmq.client.Connection;
 
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.Workspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
 
@@ -27,6 +32,10 @@ public class Send {
 	Channel m_oChannel= null;
 	String m_sExchangeName = "amq.topic";
 	
+	/**
+	 * Default Constructor
+	 * @param sExchange code of the exchange queue to use
+	 */
 	public Send(String sExchange) {
 		
 		if (sExchange == null) return;
@@ -41,6 +50,9 @@ public class Send {
         }
 	}
 	
+	/**
+	 * Free the resources
+	 */
 	public void Free() {
 		try {
 			
@@ -143,6 +155,71 @@ public class Send {
         	WasdiLog.debugLog("Send.SendRabbitMessage: ERROR " + oEx.toString());
             return  false;
         }
-
     }
+    
+    /**
+     * Send the redeploy done message for the processor
+     * 
+     * @param oParameter Processor Parameter
+     * @param bSendToLocalNode True to send the message when the operation is done in the computing node. False to send it when is done on the main node
+     * @return true if all ok false otherwise
+     */
+    public boolean sendRedeployDoneMessage(ProcessorParameter oParameter, boolean bSuccess, boolean bSendToLocalNode) {
+    	
+    	boolean bSendRet = false;
+    	
+        try {
+        	// In the exchange we should have the workspace from there the user requested the Redeploy
+        	String sOriginalWorkspaceId = oParameter.getExchange();
+        	
+        	// Check if it is valid
+        	if (Utils.isNullOrEmpty(sOriginalWorkspaceId)==false) {
+        		
+        		// Read the workspace
+        		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+        		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sOriginalWorkspaceId);
+        		
+        		if (oWorkspace != null) {
+        			
+    				// Prepare the message
+		        	String sName = oParameter.getName();
+		        	
+		        	if (Utils.isNullOrEmpty(sName)) sName = "Your Processor";
+		        	
+		            String sInfo = "Re Deploy Done<br>" + sName + " is now available";
+		            
+		            if (!bSuccess) {
+		            	sInfo = "GURU MEDITATION<br>There was an error re-deploying " + sName + " :(";
+		            }
+        			
+        			String sNodeCode = "wasdi";
+        			
+        			if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
+        				sNodeCode = oWorkspace.getNodeCode();
+        			}	        			
+        			
+        			if (bSendToLocalNode) {
+	        			// This is the computing node where the request came from?
+	        			if (sNodeCode.equals(WasdiConfig.Current.nodeCode)) {
+				            this.SendRabbitMessage(bSuccess, LauncherOperations.INFO.name(), oParameter.getExchange(), sInfo, oParameter.getExchange());
+				            bSendRet = true;
+	        			}	        				
+        			}
+        			else {
+        				// This is the main node?
+        				if (WasdiConfig.Current.isMainNode()) {
+        					this.SendRabbitMessage(bSuccess, LauncherOperations.INFO.name(), oParameter.getExchange(), sInfo, oParameter.getExchange());
+        					bSendRet = true;
+        				}
+        			}
+        		}	        		
+        	}
+        	
+        }
+        catch (Exception oRabbitException) {
+			WasdiLog.errorLog("Send.sendRedeployDoneMessage: exception sending Rabbit Message", oRabbitException);
+		}
+        
+        return bSendRet;
+    }    
 }

@@ -17,6 +17,7 @@ import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.payloads.IngestPayload;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.ShapeFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -191,7 +192,7 @@ public class Ingest extends Operation {
                 	if (asFiles!=null) {
                 		if (asFiles.size() == 1) {
                 			String sFile = asFiles.get(0);
-                			String sExt = Utils.GetFileNameExtension(sFile);
+                			String sExt = WasdiFileUtils.getFileNameExtension(sFile);
                 			if (sExt.toLowerCase().equals("nc")) {
                 				WasdiLog.infoLog("Ingest.executeOperation: this looks a zip file with only on netcdf inside. We set the name with the .zip extension");
                 				oImportProductViewModel.setName(oImportProductViewModel.getFileName());

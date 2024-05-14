@@ -38,8 +38,8 @@ import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -107,6 +107,8 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      * Data Provider Config
      */
     protected DataProviderConfig m_oDataProviderConfig;
+    
+    protected int m_iHttpDownloadReadTimeoutMultiplier = 1;
 
     /**
      * Constructor: uses LauncerMain logger
@@ -185,7 +187,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     	
     	try {
     		
-    		String sPlatformType = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sFileName);
+    		String sPlatformType = MissionUtils.getPlatformFromSatelliteImageFileName(sFileName);
     		
     		if (Utils.isNullOrEmpty(sPlatformType)) {
     			WasdiLog.debugLog("ProviderAdapter.getScoreForFile: platform not recognized. DataProvider: " + m_sDataProviderCode + " File: " + sFileName);
@@ -582,7 +584,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
 		
 		// Set Read Timeout
-		oHttpConn.setReadTimeout(WasdiConfig.Current.readTimeout);
+		oHttpConn.setReadTimeout(WasdiConfig.Current.readTimeout*m_iHttpDownloadReadTimeoutMultiplier);
 		// Set Connection Timeout
 		oHttpConn.setConnectTimeout(WasdiConfig.Current.connectionTimeout);			
 		

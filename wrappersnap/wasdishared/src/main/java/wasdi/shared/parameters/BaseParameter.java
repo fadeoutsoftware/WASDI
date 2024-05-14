@@ -47,6 +47,11 @@ public class BaseParameter {
 	 * sessionID of the user that launched the operation that needs this parameter
 	 */
 	private String sessionID;
+	
+	/**
+	 * Flag to define if we want to notify the user by mail or not
+	 */
+	private boolean notifyOwnerByMail = false;
 
     public String getProcessObjId() {
         return processObjId;
@@ -176,5 +181,13 @@ public class BaseParameter {
 	}
 	public void setSessionID(String sessionID) {
 		this.sessionID = sessionID;
+	}
+
+	public boolean isNotifyOwnerByMail() {
+		return notifyOwnerByMail;
+	}
+
+	public void setNotifyOwnerByMail(boolean notifyOwnerByMail) {
+		this.notifyOwnerByMail = notifyOwnerByMail;
 	}
 }

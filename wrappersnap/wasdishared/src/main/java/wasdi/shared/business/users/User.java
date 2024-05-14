@@ -2,6 +2,8 @@ package wasdi.shared.business.users;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import wasdi.shared.utils.Utils;
+
 /**
  * WASDI User
  * Created by p.campanella on 21/10/2016.
@@ -286,5 +288,28 @@ public class User {
 	@JsonIgnore
 	public boolean isProfessionalUser() {
 		return type.equals(UserType.PROFESSIONAL.name());
+	}
+	
+	/**
+	 * Get a safe full user name string.
+	 * 
+	 * @return
+	 */
+	@JsonIgnore
+	public String getSafeUserName() {
+		
+		String sUserName = "";
+		
+		if (!Utils.isNullOrEmpty(this.getName())) sUserName += this.getName();
+		
+		if (!Utils.isNullOrEmpty(this.getSurname()))  {
+			if (!Utils.isNullOrEmpty(sUserName)) sUserName = sUserName + " ";
+			sUserName += this.getSurname();
+		}
+		
+		if (Utils.isNullOrEmpty(sUserName)) sUserName = this.getUserId();
+		
+		return sUserName;
+		
 	}
 }

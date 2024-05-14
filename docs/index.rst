@@ -46,7 +46,7 @@ If you're acquired the basic concepts of WASDI and you're interested in how proc
 
 WASDI User Manual
 -------------------------------
-WASDI has created a comprehensive user manual to explain and simplify all operations in WASDI. If you require explaination for any concepts in WASDI, please see the corresponding section in the manual. 
+WASDI has created a comprehensive user manual to explain and simplify all operations in WASDI. If you require explanation for any concepts in WASDI, please see the corresponding section in the manual. 
 A good starting point to search for and executing applications is the tutorial on the Space Marketplace 
 
 .. toctree::
@@ -60,9 +60,6 @@ A good starting point to search for and executing applications is the tutorial o
    UserManual/SubscriptionsAndOrganizations.rst
    UserManual/Other.rst
 
-   .. UserManual/AppStoreTutorial.rst 
-   .. UserManual/AddAppUIControl.rst
-   .. UserManual/Worksapces.rst
 
   
   
@@ -102,8 +99,10 @@ If you already know WASDI features and you are a Python developer check out the 
    :caption: Programming tutorials
 
    ProgrammingTutorials/PythonTutorial.rst
+   ProgrammingTutorials/JupyterNotebookTutorial.rst
    ProgrammingTutorials/PythonLandsatTutorial.rst
    ProgrammingTutorials/SearchImport.rst
+   ProgrammingTutorials/ConfigTutorial.rst
    ProgrammingTutorials/LibWorkspaces.rst
    ProgrammingTutorials/SynchAsynch.rst
    ProgrammingTutorials/C#Tutorial.rst
@@ -126,6 +125,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
 
    Libraries/c#/WasdiLib.rst
    Libraries/java/WasdiLib.rst
+   Libraries/matlab/matlab.rst
    Libraries/octave/octave.rst
    Libraries/python/waspy.rst
    Libraries/typescript/wasdi.rst
@@ -143,6 +143,8 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    PythonCookbook/SearchS3Images.rst
    PythonCookbook/SearchS5pImages.rst
    PythonCookbook/SearchCMImages.rst
+   PythonCookbook/SearchEcostressProducts.rst
+   PythonCookbook/SearchERA5Images.rst
    PythonCookbook/ImportSearchedImages.rst
    PythonCookbook/ImportAndPreprocess.rst
    PythonCookbook/RunSnapWorkflow.rst
@@ -150,6 +152,8 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    PythonCookbook/SavePayload.rst
    PythonCookbook/FindS2Tiles.rst
    PythonCookbook/UseLibAsClient.rst
+   PythonCookbook/ChangeHTTPRequestTimeouts.rst
+
 
 .. toctree::
    :maxdepth: 2

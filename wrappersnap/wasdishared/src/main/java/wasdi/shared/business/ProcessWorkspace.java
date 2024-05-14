@@ -115,6 +115,11 @@ public class ProcessWorkspace {
 	 * identified not by the pid but by this container name
 	 */
 	private String containerId;
+	
+	/**
+	 * Flag to know if we need to notify the user by mail when the operation is finished
+	 */
+	private boolean notifyOwnerByMail = false;
 
 
 	public String getProductName() {
@@ -315,6 +320,14 @@ public class ProcessWorkspace {
 
 	public void setContainerId(String containerId) {
 		this.containerId = containerId;
+	}
+
+	public boolean isNotifyOwnerByMail() {
+		return notifyOwnerByMail;
+	}
+
+	public void setNotifyOwnerByMail(boolean notifyOwnerByMail) {
+		this.notifyOwnerByMail = notifyOwnerByMail;
 	}
 	
 }

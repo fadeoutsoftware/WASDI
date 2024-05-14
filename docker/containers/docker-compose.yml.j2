@@ -15,7 +15,7 @@ networks:
       com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"
       com.docker.network.bridge.name: "br-{{ sWasdiDockerNetworkName }}"
       com.docker.network.driver.mtu: "1500"
-    external: {% if bWasdiDockerNetworkMustBeCreated %}false{% else %}true{% endif %}
+    external: {% if bWasdiDockerNetworkMustBeCreated %}true{% else %}false{% endif %}
 
     ipam:
       driver: "default"
@@ -70,7 +70,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "never"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiClientUlimitNofile }}
@@ -108,7 +108,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.rule=Host(`testnew.wasdi.net`) && PathPrefix(`/`)"
+      - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.rule=Host(`{{ sWasdiClientV2BaseUrl }}`) && PathPrefix(`/`)"
       - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.service=s_{{ sWasdiClientV2ServiceName }}"
 {% if bWasdiSslEnabled == True %}
@@ -122,7 +122,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "never"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiClientV2UlimitNofile }}
@@ -156,7 +156,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "never"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiGeoserverUlimitNofile }}
@@ -196,7 +196,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiGrafanaUlimitNofile }}
@@ -234,7 +234,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiInfluxDbGrafanaUlimitNofile }}
@@ -276,7 +276,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "never"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiJenkinsUlimitNofile }}
@@ -295,8 +295,10 @@ services:
 {% if bWasdiKeycloakNewInstance | default(False) == True %}
       - "--import-realm"
 {% endif %}
+{% if bWasdiPostgresqlKeycloakEnabled == True %}
     depends_on:
       - {{ sWasdiPostgresqlKeycloakServiceName }}
+{% endif %}
     entrypoint:
       - {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/bin/kc.sh
 {% if ( aoWasdiKeycloakEnvironmentVariable | default([]) | length ) > 0 %}
@@ -323,7 +325,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "never"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiKeycloakUlimitNofile }}
@@ -352,7 +354,7 @@ services:
       - {{ aoWasdiMongoCurrentEnvironmentVariable['key'] }}={{ aoWasdiMongoCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
-    image: "mongo:{{ sWasdiMongoVersion }}"
+    image: "{{ sWasdiMongoImageName }}:{{ sWasdiMongoVersion }}"
 {% if ( aWasdiMongoPorts | length ) > 0 %}
     ports:
 {% for sWasdiMongoCurrentPort in aWasdiMongoPorts %}
@@ -360,7 +362,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiMongoUlimitNofile }}
@@ -369,6 +371,46 @@ services:
     volumes:
 {% for sWasdiMongoCurrentVolume in aWasdiMongoVolume %}
       - "{{ sWasdiMongoCurrentVolume }}"
+{% endfor %}
+{% endif %}
+{% endif %}
+{% if bWasdiMongoNv5LicenseServerEnabled == True %}
+  {{ sWasdiMongoNv5LicenseServerServiceName }}:
+{% if ( aWasdiMongoNv5LicenseServerCommand | length ) > 0 %}
+    command:
+{% for sWasdiMongoNv5LicenseServerCurrentCommand in aWasdiMongoNv5LicenseServerCommand %}
+      - "{{ sWasdiMongoNv5LicenseServerCurrentCommand }}"
+{% endfor %}
+{% endif %}
+{% if ( sWasdiMongoNv5LicenseServerInternalPort | default('') ) not in ['', '27017'] %}
+      - "--port"
+      - "{{ sWasdiMongoNv5LicenseServerInternalPort }}"
+    expose:
+      - "{{ sWasdiMongoNv5LicenseServerInternalPort }}"
+{% endif %}
+{% if ( aoWasdiMongoNv5LicenseServerEnvironmentVariable | default([]) | length ) > 0 %}
+    environment:
+{% for aoWasdiMongoNv5LicenseServerCurrentEnvironmentVariable in aoWasdiMongoNv5LicenseServerEnvironmentVariable %}
+      - {{ aoWasdiMongoNv5LicenseServerCurrentEnvironmentVariable['key'] }}={{ aoWasdiMongoNv5LicenseServerCurrentEnvironmentVariable['value'] }}
+{% endfor %}
+{% endif %}
+    image: "{{ sWasdiMongoNv5LicenseServerImageName }}:{{ sWasdiMongoNv5LicenseServerVersion }}"
+{% if ( aWasdiMongoNv5LicenseServerPorts | length ) > 0 %}
+    ports:
+{% for sWasdiMongoNv5LicenseServerCurrentPort in aWasdiMongoNv5LicenseServerPorts %}
+      - "{{ sWasdiMongoNv5LicenseServerCurrentPort | regex_replace('^:', '') }}"
+{% endfor %}
+{% endif %}
+    pull_policy: "missing"
+    restart: "always"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiMongoNv5LicenseServerUlimitNofile }}
+        hard: {{ sWasdiMongoNv5LicenseServerUlimitNofile }}
+{% if ( aWasdiMongoNv5LicenseServerVolume | length ) > 0 %}
+    volumes:
+{% for sWasdiMongoNv5LicenseServerCurrentVolume in aWasdiMongoNv5LicenseServerVolume %}
+      - "{{ sWasdiMongoNv5LicenseServerCurrentVolume }}"
 {% endfor %}
 {% endif %}
 {% endif %}
@@ -410,7 +452,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiNexusUlimitNofile }}
@@ -422,7 +464,7 @@ services:
 {% endfor %}
 {% endif %}
 {% endif %}
-{% if bWasdiKeycloakEnabled == True %}
+{% if bWasdiPostgresqlKeycloakEnabled == True %}
   {{ sWasdiPostgresqlKeycloakServiceName }}:
 {% if ( aWasdiPostgresqlKeycloakCommand | length ) > 0 %}
     command:
@@ -444,7 +486,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiPostgresqlKeycloakUlimitNofile }}
@@ -456,7 +498,7 @@ services:
 {% endfor %}
 {% endif %}
 {% endif %}
-{% if bWasdiSonarqubeEnabled == True %}
+{% if bWasdiPostgresqlSonarqubeEnabled == True %}
   {{ sWasdiPostgresqlSonarqubeServiceName }}:
 {% if ( aoWasdiPostgresqlSonarqubeEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
@@ -472,7 +514,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiPostgresqlSonarqubeUlimitNofile }}
@@ -528,7 +570,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "never"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiRabbitMqUlimitNofile }}
@@ -547,7 +589,7 @@ services:
       - {{ sWasdiMongoServiceName }}
 {% endif %}
     image: "{{ sWasdiSchedulerServiceName }}:latest"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiSchedulerUlimitNofile }}
@@ -560,7 +602,9 @@ services:
 {% if bWasdiSonarqubeEnabled == True %}
   {{ sWasdiSonarqubeServiceName }}:
     depends_on:
+{% if bWasdiPostgresqlSonarqubeEnabled == True %}
       - {{ sWasdiPostgresqlSonarqubeServiceName }}
+{% endif %}
       - {{ sWasdiTraefikServiceName }}
 {% if ( aoWasdiSonarqubeEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
@@ -586,7 +630,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiSonarqubeUlimitNofile }}
@@ -630,7 +674,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "never"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiTelegrafUlimitNofile }}
@@ -680,14 +724,17 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "never"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiTomcatOgcProcessesServerUlimitNofile }}
         hard: {{ sWasdiTomcatOgcProcessesServerUlimitNofile }}
+{% if ( aoWasdiTomcatOgcProcessesServerVolume | length ) > 0 %}
     volumes:
-      - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
-      - {{ sWasdiConfigurationRootDirectoryPath }}:{{ sWasdiConfigurationRootDirectoryPath }}:ro
+{% for aoWasdiTomcatOgcProcessesServerCurrentVolume in aoWasdiTomcatOgcProcessesServerVolume %}
+      - {{ aoWasdiTomcatOgcProcessesServerCurrentVolume }}
+{% endfor %}
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
   {{ sWasdiTomcatWasdiOpenEoServerServiceName }}:
@@ -727,14 +774,17 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "never"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiTomcatWasdiOpenEoServerUlimitNofile }}
         hard: {{ sWasdiTomcatWasdiOpenEoServerUlimitNofile }}
+{% if ( aoWasdiTomcatWasdiOpenEoServerVolume | length ) > 0 %}
     volumes:
-      - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
-      - {{ sWasdiConfigurationRootDirectoryPath }}:{{ sWasdiConfigurationRootDirectoryPath }}:ro
+{% for aoWasdiTomcatWasdiOpenEoServerCurrentVolume in aoWasdiTomcatWasdiOpenEoServerVolume %}
+      - {{ aoWasdiTomcatWasdiOpenEoServerCurrentVolume }}
+{% endfor %}
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
   {{ sWasdiTomcatWasdiWebServerServiceName }}:
@@ -774,7 +824,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "never"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiTomcatWasdiWebServerUlimitNofile }}
@@ -826,7 +876,7 @@ services:
 {% endfor %}
 {% endif %}
     pull_policy: "missing"
-    restart: "unless-stopped"
+    restart: "always"
     stdin_open: true
     tty: true
     user: "{{ sWasdiTraefikUserName }}:{{ sWasdiTraefikGroupName }}"
@@ -861,7 +911,7 @@ services:
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiUpdateMetricServiceName }}:latest"
-    restart: "unless-stopped"
+    restart: "always"
     ulimits:
       nofile:
         soft: {{ sWasdiUpdateMetricUlimitNofile }}

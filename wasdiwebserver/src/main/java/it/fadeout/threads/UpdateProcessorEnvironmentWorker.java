@@ -1,12 +1,10 @@
 package it.fadeout.threads;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import wasdi.shared.business.Node;
-import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.PackageManagerAPIClient;
 
 /**
  * Thread that calls all the computing nodes to ask to update the processor's environment
@@ -76,30 +74,8 @@ public class UpdateProcessorEnvironmentWorker extends Thread {
 
 			try {
 
-				// Get the url
-				String sUrl = oNode.getNodeBaseAddress();
-
-				// Safe programming
-				if (!sUrl.endsWith("/")) sUrl += "/";
-
-				// Compose the API string
-				sUrl += "packageManager/environmentupdate?processorId=" + m_sProcessorId + "&workspace=" + m_sWorkspaceId;
-
-				if (m_sUpdateCommand != null) {
-					sUrl += "&updateCommand=" + m_sUpdateCommand;
-				}
-
-				// Add the auth header
-				Map<String, String> asHeaders = new HashMap<>();
-				asHeaders.put("x-session-token", m_sSessionId);
-
-				WasdiLog.debugLog("UpdateProcessorEnvironmentWorker.run: calling url: " + sUrl);
-
-				// It is a get call
-				HttpUtils.httpGet(sUrl, asHeaders);
-
+				PackageManagerAPIClient.environmentUpdate(oNode, m_sSessionId, m_sProcessorId, m_sWorkspaceId, m_sUpdateCommand);
 				WasdiLog.debugLog("UpdateProcessorEnvironmentWorker.run: environment update on node " + oNode.getNodeCode());
-
 			}
 			catch (Exception oEx) {
 				WasdiLog.debugLog("UpdateProcessorEnvironmentWorker.run: Exception " + oEx.toString());

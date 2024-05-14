@@ -31,13 +31,12 @@ extensions = ['javasphinx',
 'sphinxemoji.sphinxemoji',
 'sphinx.ext.autodoc',
 'sphinxcontrib.matlab',
-'myst_parser',
 'sphinx_js',
 'sphinxcontrib.youtube']
 
-js_language = 'typescript'
-js_source_path = '../libraries/jswasdilib/src/index.ts'
-jsdoc_config_path = '../libraries/jswasdilib/src/tsconfig.json'
+#js_language = 'javascript'
+js_source_path = '../libraries/jswasdilib/src/index.js'
+#jsdoc_config_path = '../libraries/jswasdilib/src/tsconfig.json'
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -64,10 +63,7 @@ html_favicon = 'favicon.ico'
 
 html_logo = '_static/logowasdi.svg'
 
-## test to fix the file replacing "_l" with "_"
-##search for "l_,"" and replace it with ""
-##search for "l_("" and replace it with "_("
-##/home/docs/checkouts/readthedocs.org/user_builds/testreadthedocsbymena/envs/latest/lib/python3.7/site-packages/javasphinx/domain.py
+
 import os
 import sys
 #print(sys.path)
@@ -82,12 +78,15 @@ print("Matlab/Octave source folder " + matlab_src_dir +"\n")
 
 os.system("echo --- HOT FIX for Javasphinx library ---")
 os.system("echo --- overwriting domain.py with the fixed version ---")
-os.system("mv domain.py /home/docs/checkouts/readthedocs.org/user_builds/wasdi/envs/latest/lib/python3.8/site-packages/javasphinx/domain.py")
+os.system("mv domain.py /home/docs/checkouts/readthedocs.org/user_builds/wasdi/envs/latest/lib/python3.12/site-packages/javasphinx/domain.py")
 
 os.system("npm list -g;")
 
-os.system("echo --- FIX for npm version ---")
-os.system("cd ~ ;npm install -g typedoc@0.22.18;")
+os.system("echo --- Installation of JsDoc---")
+os.system("cd ~ ;npm install -g jsdoc@3.6.10;")
+
+#os.system("echo --- FIX for npm version ---")
+#os.system("cd ~ ;npm install -g typedoc@0.22.18;")
 
 os.system("echo --- Python version ---")
 os.system("python --version")

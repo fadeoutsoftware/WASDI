@@ -320,7 +320,7 @@ public class GeoServerManager {
     	File oFile = new File(sStyleFile);
     	
     	if (oFile.exists()) {
-    		String sStyleName = Utils.getFileNameWithoutLastExtension(oFile.getName());
+    		String sStyleName = WasdiFileUtils.getFileNameWithoutLastExtension(oFile.getName());
     		return m_oGsPublisher.publishStyle(oFile, sStyleName);
     	}
     	else {

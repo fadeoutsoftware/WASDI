@@ -26,6 +26,7 @@ import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.Project;
 import wasdi.shared.business.Subscription;
+import wasdi.shared.business.missions.ClientConfig;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserSession;
@@ -34,8 +35,10 @@ import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.missions.MissionsRepository;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.JsonUtils;
+import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -108,14 +111,16 @@ public class AuthResource {
 			
 			// Check if the user exists
 			UserRepository oUserRepository = new UserRepository();
-			User oUser = oUserRepository.getUser(oLoginInfo.getUserId());
+			String sLowerCaseUserId = oLoginInfo.getUserId().toLowerCase();
+			WasdiLog.debugLog("AuthResource.login: user id forced to be lower case: " + sLowerCaseUserId);
+			User oUser = oUserRepository.getUser(sLowerCaseUserId);
 			
 			if( oUser == null ) {
-				// User not in the db wasdi db
-				WasdiLog.debugLog("AuthResource.login: user not found: " + oLoginInfo.getUserId() + ", check if this is the first access");
+				// User not in the wasdi db
+				WasdiLog.debugLog("AuthResource.login: user not found: " + sLowerCaseUserId + ", check if this is the first access");
 				
-				// Try to retrive info about this user 
-				String sUserInfo = m_oKeycloakService.getUserData(m_oKeycloakService.getToken(), oLoginInfo.getUserId());
+				// Try to retrieve info about this user 
+				String sUserInfo = m_oKeycloakService.getUserData(m_oKeycloakService.getToken(), sLowerCaseUserId); // TODO - not sure if this will still work: for the user with multiple accounts yes, but what about the other two?
 				
 				if (Utils.isNullOrEmpty(sUserInfo)) {
 					// No, something did not work well
@@ -154,7 +159,7 @@ public class AuthResource {
 				else {
 					WasdiLog.debugLog("AuthResource.login: user found in keycloak and mail verified: we can register the new user!!");
 					RegistrationInfoViewModel oRegistrationInfoViewModel = new RegistrationInfoViewModel();
-					oRegistrationInfoViewModel.setUserId(oLoginInfo.getUserId());
+					oRegistrationInfoViewModel.setUserId(sLowerCaseUserId);
 					PrimitiveResult oRegistrationResult = this.userRegistration(oRegistrationInfoViewModel);
 
 					if (oRegistrationResult==null) {
@@ -174,7 +179,7 @@ public class AuthResource {
 				}
 				
 				// Read again the user to proceed
-				oUser = oUserRepository.getUser(oLoginInfo.getUserId());
+				oUser = oUserRepository.getUser(sLowerCaseUserId);
 				
 				if (oUser==null) {
 					WasdiLog.warnLog("AuthResource.login: we had a problem reading again the user in the db after registration, return invalid");
@@ -189,7 +194,7 @@ public class AuthResource {
 			}
 
 			// First try to Authenticate using keycloak
-			String sAuthResult = m_oKeycloakService.login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
+			String sAuthResult = m_oKeycloakService.login(sLowerCaseUserId, oLoginInfo.getUserPassword());  // not sure
 			
 			boolean bLoginSuccess = false;
 			
@@ -595,7 +600,9 @@ public class AuthResource {
 
 			WasdiLog.debugLog("AuthResource.userRegistration: checking if " + oRegistrationInfoViewModel.getUserId() + " is already in wasdi ");
 			UserRepository oUserRepository = new UserRepository();
-			User oWasdiUser = oUserRepository.getUser(oRegistrationInfoViewModel.getUserId());
+			// user id should be unique, independently from the upper and lower case letters they use
+			String sLowerCasedUserId = oRegistrationInfoViewModel.getUserId().toLowerCase();
+			User oWasdiUser = oUserRepository.getUser(sLowerCasedUserId);
 
 			//do we already have this user in our DB?
 			if(oWasdiUser != null){
@@ -610,15 +617,13 @@ public class AuthResource {
 				//no, it's a new user! :)
 				//let's check it's a legit one (against kc)  
 				//otherwise someone might call this api even if the user is not registered on KC
-
-				String sUserId = oRegistrationInfoViewModel.getUserId();
 				
 				if (m_oKeycloakService==null) {
 					WasdiLog.debugLog("AuthResource.userRegistration: m_oKeycloakService is NULL!! Creating it...");
 					m_oKeycloakService = new KeycloakService();
 				}
 				
-				User oNewUser = m_oKeycloakService.getUser(sUserId);
+				User oNewUser = m_oKeycloakService.getUser(sLowerCasedUserId);
 				if(null==oNewUser) {
 					PrimitiveResult oResult = new PrimitiveResult();
 					//not found
@@ -695,8 +700,9 @@ public class AuthResource {
 	public PrimitiveResult validateNewUser(@QueryParam("email") String sUserId, @QueryParam("validationCode") String sToken  ) {
 		WasdiLog.debugLog("AuthResource.validateNewUser UserId: " + sUserId + " Token: " + sToken);
 
-
-		if(! (m_oCredentialPolicy.validUserId(sUserId) && m_oCredentialPolicy.validEmail(sUserId)) ) {
+		String sLowerCaseUser = sUserId.toLowerCase();
+		
+		if(! (m_oCredentialPolicy.validUserId(sUserId) && m_oCredentialPolicy.validEmail(sLowerCaseUser)) ) {
 			WasdiLog.debugLog("AuthResources.validateNewUser: invalid userId");
 			return PrimitiveResult.getInvalid();
 		}
@@ -707,7 +713,7 @@ public class AuthResource {
 		}
 
 		UserRepository oUserRepo = new UserRepository();
-		User oUser = oUserRepo.getUser(sUserId);
+		User oUser = oUserRepo.getUser(sLowerCaseUser);
 		if( null == oUser.getValidAfterFirstAccess()) {
 			WasdiLog.debugLog("AuthResources.validateNewUser: unexpected null first access validation flag");
 			return PrimitiveResult.getInvalid();
@@ -1046,7 +1052,7 @@ public class AuthResource {
 
 		sMessage += "\n\nUSER: " + sAccount + " - PASSWORD: " + sPassword;
 
-		return WasdiResource.sendEmail(WasdiConfig.Current.notifications.pwRecoveryMailSender, sRecipientEmail, sTitle, sMessage);
+		return MailUtils.sendEmail(WasdiConfig.Current.notifications.pwRecoveryMailSender, sRecipientEmail, sTitle, sMessage);
 	}
 	
 	/**
@@ -1077,7 +1083,7 @@ public class AuthResource {
 
 		sMessage += "\n\nUSER: " + sAccount + " - PASSWORD: " + sPassword;
 
-		return WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sRecipientEmail, sTitle, sMessage);
+		return MailUtils.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sRecipientEmail, sTitle, sMessage);
 	}
 
 	/**
@@ -1112,11 +1118,37 @@ public class AuthResource {
 				sWasdiAdminMail = "team@wasdi.cloud";
 			}
 			
-			WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sWasdiAdminMail, sTitle, sMessage);
+			MailUtils.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sWasdiAdminMail, sTitle, sMessage);
 		} catch(Exception oEx) {
 			WasdiLog.errorLog("AuthResource.notifyNewUserInWasdi error "+oEx.getMessage());
 			return false;
 		}
 		return true;
 	}
+	
+	@GET
+	@Path("/config")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response getClientConfig(@HeaderParam("x-session-token") String sSessionId) {
+
+		WasdiLog.debugLog("AuthResource.getClientConfig");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		// Domain Check
+		if (oUser == null) {
+			WasdiLog.warnLog("AuthResource.getClientConfig: invalid session");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}		
+
+		try {
+			MissionsRepository oMissionsRepository = new MissionsRepository();
+			ClientConfig oClientConfig = oMissionsRepository.getClientConfig(oUser.getUserId());
+
+			return Response.ok(oClientConfig).build();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("AuthResource.getClientConfig error: " + oEx);
+			return Response.serverError().build();
+		}
+	}	
 }

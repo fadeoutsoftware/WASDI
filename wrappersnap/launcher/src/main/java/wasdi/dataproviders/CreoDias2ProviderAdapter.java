@@ -26,6 +26,8 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.creodias2.ResponseTranslatorCreoDias2;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.JsonUtils;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
@@ -34,15 +36,13 @@ import wasdi.shared.viewmodels.HttpCallResponse;
 
 public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	
-	private static final String SODATA_ATTRIBUTES = "Attributes";
 	private static final String SODATA_NAME = "Name";
 	private static final String SODATA_VALUE = "Value";
 	
 	private static final String SAUTHENTICATION_URL = "https://identity.cloudferro.com/auth/realms/wekeo-elasticity/protocol/openid-connect/token";
-	private static final String SDOWNLOAD_URL_START = "https://zipper.dataspace.copernicus.eu/odata/v1/Products(";
 	private static final String SDOWNLOAD_URL_END = "?token=";
 	
-	private static final String SODATA_FILE_URL_START = "https://datahub.creodias.eu/odata/v1/Products(";
+	private static final String SODATA_FILE_URL_START = "https://zipper.creodias.eu/odata/v1/Products(";
 	private static final String SODATA_FILE_URL_END = ")/$value";
 	
 	private static final String SCREODIAS_BASE_URL = "https://datahub.creodias.eu/odata/v1/Products?";
@@ -142,7 +142,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			}
 			
 			// at this point, we know that the file with the configuration file for the adapter is present
-			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(sAdapterConfigFile);
+			JSONObject oAppConf = JsonUtils.loadJsonFromFile(sAdapterConfigFile);
 			
 			if (oAppConf == null) {
 				WasdiLog.debugLog("CreoDias2.isFileAccessTestEnabled - could not load JSON object from the adapter config file");
@@ -277,8 +277,8 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			}
 			
 			WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Answer well received from the provider");
-						
-							
+				
+			
 			JSONObject oJsonBody = new JSONObject(sResponse.getResponseBody());
 			JSONArray aoValues = oJsonBody.optJSONArray("value");
 			if (aoValues == null || aoValues.length() != 1) {
@@ -635,14 +635,14 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		boolean bOnCloud = isWorkspaceOnSameCloud();
 		
 		if (sPlatformType.equals(Platforms.SENTINEL1)) {
-			String sType = WasdiFileUtils.getProductTypeSatelliteImageFileName(sFileName);
+			String sType = MissionUtils.getProductTypeSatelliteImageFileName(sFileName);
 			
 			if (sType.equals("SLC") || sType.equals("GRD") || sType.equals("GRD-COG") || sType.equals("RTC")) {
 				if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
 				else return DataProviderScores.DOWNLOAD.getValue();
 			}
 			else if (sType.equals("RAW")) {
-				Date oImageDate = WasdiFileUtils.getDateFromSatelliteImageFileName(sFileName);
+				Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName);
 				
 				Date oNow = new Date();
 				
@@ -660,9 +660,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			return DataProviderScores.LTA.getValue();
 		}
 		else if (sPlatformType.equals(Platforms.SENTINEL2)) {
-			String sType = WasdiFileUtils.getProductTypeSatelliteImageFileName(sFileName);
-			
-			
+			//String sType = WasdiFileUtils.getProductTypeSatelliteImageFileName(sFileName);
 			if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
 			else return DataProviderScores.DOWNLOAD.getValue();				
 		}

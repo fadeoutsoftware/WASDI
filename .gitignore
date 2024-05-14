@@ -1011,3 +1011,4 @@ wrappersnap/wasdishared/.flattened-pom.xml
 processorTypes/pipOneShotDocker/.pydevproject
 keycloak-events/target/
 docs/.vscode/
+docs/venv/

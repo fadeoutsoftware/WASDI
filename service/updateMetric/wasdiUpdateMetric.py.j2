@@ -623,7 +623,7 @@ class WasdiSystemResourceMain(object):
                 }
             )
 
-        return None
+        return 503, None
 
 
 
@@ -874,105 +874,115 @@ if __name__ == '__main__':
     INFINITE LOOP
     '''
     while oWasdiSystemResourceMain.bReleased == False:
-        '''
-        CHANGE LOGGING MODE
-        '''
-        if 'debug' in oWasdiSystemResourceMain.aoConfiguration['metrics'] and oWasdiSystemResourceMain.aoConfiguration['metrics']['debug'] == True:
-            oLogging.setLevel(logging.DEBUG)
-            oLogging.debug('The debug mode is enabled')
-        else:
-            oLogging.setLevel(logging.INFO)
-            oLogging.debug('The debug mode is disabled')
+        try:
+            '''
+            CHANGE LOGGING MODE
+            '''
+            if 'debug' in oWasdiSystemResourceMain.aoConfiguration['metrics'] and oWasdiSystemResourceMain.aoConfiguration['metrics']['debug'] == True:
+                oLogging.setLevel(logging.DEBUG)
+                oLogging.debug('The debug mode is enabled')
+            else:
+                oLogging.setLevel(logging.INFO)
+                oLogging.debug('The debug mode is disabled')
 
-        '''
-        /CHANGE LOGGING MODE
-        '''
+            '''
+            /CHANGE LOGGING MODE
+            '''
 
-        oSystemResourceMetric = SystemResourceMetric(
-            oLogging = oLogging,
-            aoData = {
-                "node": oWasdiSystemResourceMain.aoConfiguration['nodeCode'],
-                "timestamp": datetime.datetime.now(datetime.timezone.utc).timestamp()
-            },
-            aPartition = oWasdiSystemResourceMain.aoConfiguration['metrics']['metric']['partition'],
-            aLicense = oWasdiSystemResourceMain.aoConfiguration['metrics']['metric']['license']
-        )
-
-
-        '''
-        CREATE THE DATA TO SEND TO WASDI
-        '''
-        aoData = oSystemResourceMetric.get()
-        '''
-        /CREATE THE DATA TO SEND TO WASDI
-        '''
+            oSystemResourceMetric = SystemResourceMetric(
+                oLogging = oLogging,
+                aoData = {
+                    "node": oWasdiSystemResourceMain.aoConfiguration['nodeCode'],
+                    "timestamp": datetime.datetime.now(datetime.timezone.utc).timestamp()
+                },
+                aPartition = oWasdiSystemResourceMain.aoConfiguration['metrics']['metric']['partition'],
+                aLicense = oWasdiSystemResourceMain.aoConfiguration['metrics']['metric']['license']
+            )
 
 
-        '''
-        DELETE THE OBJECT TO SAVE MEMORY
-        '''
-        del(oSystemResourceMetric)
-        '''
-        /DELETE THE OBJECT TO SAVE MEMORY
-        '''
+            '''
+            CREATE THE DATA TO SEND TO WASDI
+            '''
+            aoData = oSystemResourceMetric.get()
+            '''
+            /CREATE THE DATA TO SEND TO WASDI
+            '''
 
 
-        '''
-        AUTHENTICATE TO WASDI
-        '''
-        sSessionId = oWasdiSystemResourceMain.wasdiConnect()
-
-        if sSessionId is None:
-            time.sleep(oWasdiSystemResourceMain.aoConfiguration['metrics']['waitingTime'])
-            continue
-        '''
-        /AUTHENTICATE TO WASDI
-        '''
+            '''
+            DELETE THE OBJECT TO SAVE MEMORY
+            '''
+            del(oSystemResourceMetric)
+            '''
+            /DELETE THE OBJECT TO SAVE MEMORY
+            '''
 
 
-        '''
-        SEND DATA TO WASDI
-        '''
-        iReturnStatusCode, aoReturnValue = oWasdiSystemResourceMain.wasdiApiExecute(
-            sAction = oWasdiSystemResourceMain.aoConfiguration['metrics']['api']['endpoint']['path'],
-            sMethod = oWasdiSystemResourceMain.aoConfiguration['metrics']['api']['endpoint']['method'].lower(),
-            sSessionId = sSessionId,
-            aoData = aoData
-        )
+            '''
+            AUTHENTICATE TO WASDI
+            '''
+            sSessionId = oWasdiSystemResourceMain.wasdiConnect()
 
-        oLogging.info('Response:')
-        oLogging.info(
-            '- return code: %(returnCode)s'
-            %{
-                'returnCode': str(iReturnStatusCode)
-            }
-        )
-
-        if aoReturnValue != None:
-            for sKey, sValue in aoReturnValue.items():
-                oLogging.info(
-                    '- key \'%(key)s\' = \'%(value)s\''
-                    %{
-                        'key': sKey,
-                        'value': sValue
-                    }
-                )
-
-        oLogging.debug('DATA:')
-        oLogging.debug(json.dumps(aoData, indent=4, default=str))
-        '''
-        /SEND DATA TO WASDI
-        '''
+            if sSessionId is None:
+                time.sleep(oWasdiSystemResourceMain.aoConfiguration['metrics']['waitingTime'])
+                continue
+            '''
+            /AUTHENTICATE TO WASDI
+            '''
 
 
-        '''
-        DISCONNECT THE SESSON
-        '''
-        oWasdiSystemResourceMain.wasdiDisconnect()
-        '''
-        /DISCONNECT THE SESSON
-        '''
+            '''
+            SEND DATA TO WASDI
+            '''
+            iReturnStatusCode, aoReturnValue = oWasdiSystemResourceMain.wasdiApiExecute(
+                sAction = oWasdiSystemResourceMain.aoConfiguration['metrics']['api']['endpoint']['path'],
+                sMethod = oWasdiSystemResourceMain.aoConfiguration['metrics']['api']['endpoint']['method'].lower(),
+                sSessionId = sSessionId,
+                aoData = aoData
+            )
 
+            oLogging.info('Response:')
+            oLogging.info(
+                '- return code: %(returnCode)s'
+                %{
+                    'returnCode': str(iReturnStatusCode)
+                }
+            )
+
+            if aoReturnValue != None:
+                for sKey, sValue in aoReturnValue.items():
+                    oLogging.info(
+                        '- key \'%(key)s\' = \'%(value)s\''
+                        %{
+                            'key': sKey,
+                            'value': sValue
+                        }
+                    )
+
+            oLogging.debug('DATA:')
+            oLogging.debug(json.dumps(aoData, indent=4, default=str))
+            '''
+            /SEND DATA TO WASDI
+            '''
+
+
+            '''
+            DISCONNECT THE SESSON
+            '''
+            oWasdiSystemResourceMain.wasdiDisconnect()
+            '''
+            /DISCONNECT THE SESSON
+            '''
+        except:
+            oLogging.error('Error in the loop: we continue')
+
+            EngineException(
+                oLogging = oLogging,
+                aoError = {
+                    'inspectError': inspect.stack(),
+                    'sysError': sys.exc_info()
+                }
+            )
 
         '''
         The 'if' condition is a little tip to avoid to enter
@@ -982,6 +992,7 @@ if __name__ == '__main__':
         '''
         if oWasdiSystemResourceMain.bReleased == False:
             time.sleep(oWasdiSystemResourceMain.aoConfiguration['metrics']['waitingTime'])
+
     '''
     /INFINITE LOOP
     '''

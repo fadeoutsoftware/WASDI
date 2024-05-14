@@ -22,6 +22,7 @@ import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.geotools.referencing.CRS;
 
 import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
@@ -224,7 +225,7 @@ public class SnapProductReader extends WasdiProductReader {
 		String sBaseDir = m_oProductFile.getParentFile().getPath();
 		if (!sBaseDir.endsWith("/")) sBaseDir += "/";
 		
-		String sPlatform = WasdiFileUtils.getPlatformFromSatelliteImageFileName(m_oProductFile.getName());
+		String sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(m_oProductFile.getName());
 		
 		if (m_oProductFile.getName().toLowerCase().endsWith(".tif") || m_oProductFile.getName().toLowerCase().endsWith(".tiff")) {
 			
@@ -336,7 +337,7 @@ public class SnapProductReader extends WasdiProductReader {
 				if (oGdalInfoResult.coordinateSystemWKT.contains("Mollweide")) {
 					WasdiLog.debugLog("SnapProductReader.addPrjToMollweidTiffFiles: this is a Mollweide file, try to convert");
 					
-					String sExtension = Utils.GetFileNameExtension(m_oProductFile.getName());
+					String sExtension = WasdiFileUtils.getFileNameExtension(m_oProductFile.getName());
 					String sOutputFile = m_oProductFile.getAbsolutePath().replace("." +sExtension, ".prj");
 					
 		            File oPrjFile = new File(sOutputFile);

@@ -1,12 +1,10 @@
 package it.fadeout.threads;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import wasdi.shared.business.Node;
-import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.ProcessorAPIClient;
 
 public class ForceLibraryUpdateWorker extends Thread  {
 	/**
@@ -62,26 +60,8 @@ public class ForceLibraryUpdateWorker extends Thread  {
 			if (oNode.getActive() == false) continue;
 			
 			try {
-				// Get the url
-				String sUrl = oNode.getNodeBaseAddress();
-				
-				// Safe programming				
-				if (!sUrl.endsWith("/")) sUrl += "/";
-				
-				// Compose the API string				
-				sUrl += "processors/libupdate?processorId="+m_sProcessorId+"&workspace="+m_sWorkspaceId;
-				
-				// Add the auth header				
-				Map<String, String> asHeaders = new HashMap<String, String>();
-				asHeaders.put("x-session-token", m_sSessionId);
-				
-				WasdiLog.debugLog("ForceLibraryUpdateWorker.run: calling url: " + sUrl);
-				
-				// It is a get call				
-				HttpUtils.httpGet(sUrl, asHeaders);
-				
+				ProcessorAPIClient.forceLibraryUpdate(oNode, m_sSessionId, m_sProcessorId, m_sWorkspaceId);				
 				WasdiLog.debugLog("ForceLibraryUpdateWorker.run: lib updated on node " + oNode.getNodeCode());
-				
 			}
 			catch (Exception oEx) {
 				WasdiLog.debugLog("ForceLibraryUpdateWorker.run: Exception " + oEx.toString());

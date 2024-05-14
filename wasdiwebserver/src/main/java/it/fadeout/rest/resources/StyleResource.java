@@ -50,6 +50,7 @@ import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
@@ -727,7 +728,7 @@ public class StyleResource {
 			try {
 				String sTitle = "Style " + oStyle.getName() + " Shared";
 				String sMessage = "The user " + oRequestingUser.getUserId() + " shared with you the Style: " + oStyle.getName();
-				WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sUserId, sTitle, sMessage);
+				MailUtils.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sUserId, sTitle, sMessage);
 				
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("StyleResource.shareStyle: notification exception " + oEx.toString());

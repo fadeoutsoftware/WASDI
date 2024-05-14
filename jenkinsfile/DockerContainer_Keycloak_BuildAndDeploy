@@ -53,63 +53,60 @@ pipeline {
     stage('BUILD THE CONTAINER(S)') {
       steps {
         sh script: """
-            cd ${env.sWasdiAnsiblePath}
-            ansible-playbook \
-                playbooks/buildWasdiDockerContainer.yml \
-                --inventory inventories/${env.sAnsibleInventory}.yml \
-                --limit ${env.sEnvironmentLower} \
-                --diff \
-                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiKeycloakContainer=true'
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/buildWasdiDockerContainer.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sEnvironmentLower} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiKeycloakContainer=true sDeployWasdiPostgresqlKeycloakContainer=true'
         """,
         label: "Build the container(s)"
       }
     }
 
-    stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
+    stage('DEPLOY THE CONTAINER(S) AND THEIR RUN ELEMENTS') {
       steps {
-        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-          script {
-            try {
-              sh script: """
-                  cd ${env.sWasdiAnsiblePath}
-                  ansible-playbook \
-                    playbooks/deployDockerContainerWasdiKeycloak.yml \
-                    --inventory inventories/${env.sAnsibleInventory}.yml \
-                    --limit ${env.sAnsibleLimit} \
-                    --diff \
-                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sWasdiKeycloakThemeVersion=${env.sWasdiKeycloakThemeVersion}'
-              """,
-              label: "Deploy the container and its run elements"
-            } catch (oError) {
-              echo oError.getMessage()
-              throw oError
-            }
-          }
-        }
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deployDockerContainerWasdiKeycloak.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+              --diff \
+              --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sWasdiKeycloakThemeVersion=${env.sWasdiKeycloakThemeVersion}'
+        """,
+        label: "Deploy the container(s) and their run elementss"
       }
     }
 
     stage('START OR RESTART THE CONTAINER(S)') {
       steps {
-        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-          script {
-            try {
-              sh script: """
-                cd ${env.sWasdiAnsiblePath}
-                ansible-playbook \
-                    playbooks/runDockerContainerWasdiKeycloak.yml \
-                    --inventory inventories/${env.sAnsibleInventory}.yml \
-                    --limit ${env.sAnsibleLimit} \
-                    --diff \
-                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
-              """,
-              label: "Start or restart the container(s)"
-            } catch (oError) {
-              echo oError.getMessage()
-              throw oError
-            }
-          }
-        }
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/startOrRestartDockerContainer.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiKeycloakContainer=true sDeployWasdiPostgresqlKeycloakContainer=true'
+        """,
+        label: "Start or restart the container(s)"
+      }
+    }
+
+    stage('CLEAN THE DOCKER IMAGE(S)') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deleteDockerImage.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiKeycloakContainer=true sDeployWasdiPostgresqlKeycloakContainer=true'
+        """,
+        label: "Clean the Docker image(s)"
       }
     }
   }

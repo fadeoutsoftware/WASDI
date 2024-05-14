@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.5.4
+Version 0.8.6.3
 
-Last Update: 20/12/2023
+Last Update: 19/03/2024
 
 Tested with: Python 3.7, Python 3.8, Python 3.9, Python 3.10
 
@@ -116,6 +116,8 @@ m_iUploadTimeout = 10 * 60
 m_sPayload = ""
 # True to enable the test of the checksum when determining when a file should be downloaded locally or not
 m_bEnableChecksumTest = False
+# Time spent in sleep while polling for API like wait Process
+m_iPollingSleepSeconds = 3
 
 def printStatus():
     """Prints status
@@ -562,6 +564,21 @@ def getEnableChecksum():
     global m_bEnableChecksumTest
     return m_bEnableChecksumTest
 
+
+def setOnlyWorkspaceFolderMounted(bOnlyWorkspaceFolderMounted):
+    """
+    :param bOnlyWorkspaceFolderMounted: true if only the workspace folder is mounted
+    """
+    global m_bOnlyWorkspaceFolderMounted
+    m_bOnlyWorkspaceFolderMounted = bOnlyWorkspaceFolderMounted
+
+def getOnlyWorkspaceFolderMounted():
+    """
+    Get the value of the Only Workspace Folder Mounted Flag
+    """
+    global m_bOnlyWorkspaceFolderMounted
+    return m_bOnlyWorkspaceFolderMounted
+
 def refreshParameters():
     """
     Refresh parameters, reading the file again
@@ -575,6 +592,21 @@ def _getEnvironmentVariable(sVariable):
         return sValue
     except KeyError:
         return None
+
+def getPollingSleepSeconds():
+    """
+    :return: the number of seconds to sleep between polling http calls
+    """
+    global m_iPollingSleepSeconds
+    return m_iPollingSleepSeconds
+
+
+def setPollingSleepSeconds(iPollingSleepSeconds):
+    """
+    :param iPollingSleepSeconds: the number of seconds to sleep between polling http calls
+    """
+    global m_iPollingSleepSeconds
+    m_iPollingSleepSeconds = iPollingSleepSeconds
 
 def init(sConfigFilePath=None):
     """
@@ -657,6 +689,13 @@ def init(sConfigFilePath=None):
                 m_sBasePath = sEnvBasePath
                 print('[INFO] Base Path read by WASDI_BASE_PATH: ' + m_sBasePath)
 
+    sOnlyWsFolderMounted = _getEnvironmentVariable('WASDI_ONLY_WS_FOLDER')
+
+    if sOnlyWsFolderMounted is not None:
+        if sOnlyWsFolderMounted == "1":
+            print('[INFO] Only Workspace Folder detect from  WASDI_ONLY_WS_FOLDER')
+            setOnlyWorkspaceFolderMounted(True)
+
     # Check if we have the session id in env
     if not m_sSessionId or m_sSessionId=='':
         m_sSessionId = _getEnvironmentVariable("WASDI_SESSION_ID")
@@ -669,7 +708,7 @@ def init(sConfigFilePath=None):
     if not m_sMyProcId or m_sMyProcId == '':
         m_sMyProcId = _getEnvironmentVariable("WASDI_PROCESS_WORKSPACE_ID")
         if m_sMyProcId is not None:
-            print('[INFO] waspy.init: session id read in the env WASDI_SESSION_ID variable')
+            print('[INFO] waspy.init: process workspace id read in the env WASDI_SESSION_ID variable')
         if m_sMyProcId is None:
             m_sMyProcId = ""
 
@@ -1203,15 +1242,18 @@ def _internalGetPath(sProductName):
     """
     Iternal get path. Resolve the path of a Product
     """
-    global m_bIsOnServer
-    global m_bIsOnExternalServer
-    global m_bOnlyWorkspaceFolderMounted
     global m_sActiveWorkspace
     global m_sWorkspaceOwner
-    if m_bOnlyWorkspaceFolderMounted and (m_bIsOnServer or m_bIsOnExternalServer):
+    if getOnlyWorkspaceFolderMounted() and (getIsOnServer() or getIsOnExternalServer()):
         return os.path.join(getBasePath(), sProductName)
     else:
-        return os.path.join(getBasePath(), m_sWorkspaceOwner, m_sActiveWorkspace, sProductName)
+        sWorkspaceOwner = m_sWorkspaceOwner
+        if sWorkspaceOwner is None:
+            sWorkspaceOwner = ""
+        if sWorkspaceOwner == "":
+            sWorkspaceOwner = m_sUser
+
+        return os.path.join(getBasePath(), sWorkspaceOwner, m_sActiveWorkspace, sProductName)
 
 
 def getFullProductPath(sProductName):
@@ -1222,14 +1264,14 @@ def getFullProductPath(sProductName):
     :param sProductName: name of the product to get the path open (WITH the final extension)
     :return: local path of the Product File
     """
-    global m_sBasePath
     global m_sActiveWorkspace
-    global m_sUser
     global m_bDownloadActive
     global m_sWorkspaceOwner
 
     # Normalize the path and extract the name
-    sProductName = os.path.basename(os.path.normpath(sProductName))
+    if sProductName.startswith(getSavePath()):
+        sProductName = sProductName.replace(getSavePath(),"")
+    #sProductName = os.path.basename(os.path.normpath(sProductName))
 
     # Get the full path
     sFullPath = _internalGetPath(sProductName)
@@ -1283,9 +1325,6 @@ def getSavePath():
 
     :return: local path to use to save files (with '/' as last char)
     """
-    global m_sBasePath
-    global m_sActiveWorkspace
-    global m_sUser
 
     sFullPath = _internalGetPath("")
 
@@ -1452,6 +1491,11 @@ def waitProcess(sProcessId, sDestinationWorkspaceUrl=None):
              '  ******************************************************************************')
         return "ERROR"
 
+    if sProcessId in {"DONE", "STOPPED", "ERROR"}:
+        _log('[INFO] waspy.waitProcess: process ID is indeed alrady a status, returning it' +
+             '  ******************************************************************************')
+        return sProcessId
+
     # Put this processor in WAITING
     updateStatus("WAITING")
 
@@ -1464,7 +1508,7 @@ def waitProcess(sProcessId, sDestinationWorkspaceUrl=None):
             if sStatus in {"DONE", "STOPPED", "ERROR"}:
                 break
 
-            time.sleep(5)
+            time.sleep(getPollingSleepSeconds())
     except:
         _log("[ERROR] Exception in the waitProcess")
 
@@ -1484,9 +1528,6 @@ def waitProcesses(asProcIdList):
     
     :return: list of strings with the same number of elements in input, with the exit status of the processes
     """
-
-    global m_sBaseUrl
-    global m_sSessionId
 
     asHeaders = _getStandardHeaders()
 
@@ -1509,6 +1550,30 @@ def waitProcesses(asProcIdList):
 
     iTotalTime = 0
 
+    # Pre-filter the list: skip None, empty or "status" processes Id
+    asFilteredProcs = []
+    asFilteredIndexes = []
+
+    iIndex = 0
+
+    for sProcId in asProcIdList:
+        iIndex = iIndex + 1
+        if sProcId is None:
+            # Not valid
+            continue
+        if sProcId == "":
+            # Empty
+            continue
+        if sProcId in  {"DONE", "STOPPED", "ERROR"}:
+            # This is already a resutl
+            continue
+        asFilteredProcs.append(str(sProcId))
+        asFilteredIndexes.append(iIndex-1)
+
+    if len(asFilteredProcs) == 0:
+        wasdiLog("[INFO] waitProcesses asProcIdList are all empty, None or already status. Return immediatly")
+        return  asProcIdList
+
     # Put this process in WAITING
     updateStatus("WAITING")
 
@@ -1518,7 +1583,7 @@ def waitProcesses(asProcIdList):
 
         oResult = None
         try:
-            oResult = requests.post(sUrl, data=json.dumps(asProcIdList), headers=asHeaders, timeout=m_iRequestsTimeout)
+            oResult = requests.post(sUrl, data=json.dumps(asFilteredProcs), headers=asHeaders, timeout=m_iRequestsTimeout)
 
         except Exception as oEx:
             wasdiLog("[ERROR] waitProcesses: there was an error contacting the API " + str(oEx))
@@ -1549,15 +1614,23 @@ def waitProcesses(asProcIdList):
 
         if not bAllDone:
             # Sleep a little bit
-            sleep(5)
+            sleep(getPollingSleepSeconds())
             # Trace the time needed
-            iTotalTime = iTotalTime + 5
+            iTotalTime = iTotalTime + getPollingSleepSeconds()
 
     # Wait to be resumed
     _waitForResume()
 
+    asFullReturnStatus = []
+
+    for iIndex in range(len(asProcIdList)):
+        if iIndex in asFilteredIndexes:
+            asFullReturnStatus.append(str(asReturnStatus[asFilteredIndexes.index(iIndex)]))
+        else:
+            asFullReturnStatus.append(str(asProcIdList[iIndex]))
+
     # Return the list of status
-    return asReturnStatus
+    return asFullReturnStatus
 
 
 def updateProgressPerc(iPerc):
@@ -1896,6 +1969,8 @@ def _downloadFile(sFileName):
     sUrl += sFileName
     sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
+    sUrl += "&procws="
+    sUrl += getProcId()
 
     _log('[INFO] waspy.downloadfile: send request to configured url ' + sUrl)
 
@@ -1940,6 +2015,17 @@ def _downloadFile(sFileName):
                     else:
                         bLoop = False
         sSavePath = getSavePath()
+
+        asParts = sFileName.split("/")
+        sFolders = ""
+        if asParts is not  None:
+            if len(asParts) > 1:
+                for sPart in asParts[:-1]:
+                    sFolders +=  sPart + "/"
+
+        if sFolders != "":
+            sAttachmentName = sFolders + sAttachmentName
+
         sSavePath = os.path.join(sSavePath, sAttachmentName)
 
         if os.path.exists(os.path.dirname(sSavePath)) == False:
@@ -2127,9 +2213,9 @@ def searchEOImages(sPlatform, sDateFrom=None, sDateTo=None,
                     '  ******************************************************************************')
 
     if sDateFrom is None:
-        wasdiLog("[WARNING] waspy.searchEOImages: sDateFrom is None, assume very old one 01/01/1900" +
+        wasdiLog("[WARNING] waspy.searchEOImages: sDateFrom is None, assume very old one 04/10/1957" +
                  '  ******************************************************************************')
-        sDateFrom = "1900-01-01"
+        sDateFrom = "1957-10-04"
 
     # if (len(sDateFrom) < 10) or (sDateFrom[4] != '-') or (sDateFrom[7] != '-'):
     if not bool(re.match(r"\d\d\d\d\-\d\d\-\d\d", sDateFrom)):
@@ -2381,6 +2467,8 @@ def fileExistsOnWasdi(sFileName):
     sUrl += sFileName
     sUrl += "&workspace="
     sUrl += sActiveWorkspace
+    sUrl += "&procws="
+    sUrl += getProcId()
 
     asHeaders = _getStandardHeaders()
 
@@ -2441,7 +2529,7 @@ def getProductBBOX(sFileName):
     return ""
 
 
-def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None):
+def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None):
     """
     Imports a product from a Provider in WASDI, starting from the File URL.
 
@@ -2452,58 +2540,26 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
     :param sBoundingBox: declared bounding box of the file to import
 
     :param sProvider: WASDI Data Provider to use. Use None for Default
+
+    :param sVolumeName: if the file is in a Volume, the name of the volume
+
+    :param sVolumePath: if the file is in a Volume, the path of the file in the volume
     
     :return: execution status as a STRING. Can be DONE, ERROR, STOPPED.
     """
 
     sReturn = "ERROR"
 
-    if sProvider is None:
-        sProvider = "AUTO"
-
-    sUrl = getBaseUrl()
-    sUrl += "/filebuffer/download?fileUrl="
-    sUrl += urllib.parse.quote(sFileUrl)
-    sUrl += "&provider=" + sProvider
-    sUrl += "&workspace="
-    sUrl += getActiveWorkspaceId()
-
-    if sBoundingBox is not None:
-        sUrl += "&bbox="
-        sUrl += urllib.parse.quote(sBoundingBox)
-
-    if sName is not None:
-        sUrl += "&name=" + urllib.parse.quote(sName)
-
-    if getIsOnServer() is True or getIsOnExternalServer() is True:
-        sUrl += "&parent="
-        sUrl += getProcId()
-
-    asHeaders = _getStandardHeaders()
-
     try:
-        oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+        sProcessId = asynchImportProductByFileUrl(sFileUrl, sName, sBoundingBox, sProvider, sVolumeName, sVolumePath)
+        sReturn = waitProcess(sProcessId)
     except Exception as oEx:
-        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
-
-    if oResponse is None:
-        wasdiLog('[ERROR] waspy.importProductByFileUrl: cannot import product' +
-                 '  ******************************************************************************')
-    elif oResponse.ok is not True:
-        wasdiLog('[ERROR] waspy.importProductByFileUrl: cannot import product, server returned: ' + str(
-            oResponse.status_code) +
-                 '  ******************************************************************************')
-    else:
-        oJsonResponse = oResponse.json()
-        if ("boolValue" in oJsonResponse) and (oJsonResponse["boolValue"] is True):
-            if "stringValue" in oJsonResponse:
-                sProcessId = str(oJsonResponse["stringValue"])
-                sReturn = waitProcess(sProcessId)
+        wasdiLog("[ERROR] there was an error importing a product " + str(oEx))
 
     return sReturn
 
 
-def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None):
+def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None):
     """
     Asynch Import of a product from a Provider in WASDI, starting from file URL
 
@@ -2514,8 +2570,12 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
     :param sBoundingBox: declared bounding box of the file to import
 
     :param sProvider: WASDI Data Provider. Use None for default
+
+    :param sVolumeName: if the file is in a Volume, the name of the volume
+
+    :param sVolumePath: if the file is in a Volume, the path of the file in the volume
     
-    :return: ProcessId of the Download Operation or "ERROR" if there is any problem
+    :return: ProcessId of the Download Operation, "DONE" if the file is imported or "ERROR" if there is any problem
     """
 
     sReturn = "ERROR"
@@ -2524,28 +2584,25 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
         sProvider = "AUTO"
 
     sUrl = getBaseUrl()
-    sUrl += "/filebuffer/download?fileUrl="
-    sUrl += urllib.parse.quote(sFileUrl)
-    sUrl += "&provider="
-    sUrl += sProvider
-    sUrl += "&workspace="
-    sUrl += getActiveWorkspaceId()
-
-    if sBoundingBox is not None:
-        sUrl += "&bbox="
-        sUrl += urllib.parse.quote(sBoundingBox)
-
-    if sName is not None:
-        sUrl += "&name=" + urllib.parse.quote(sName)
-
-    if getIsOnServer() is True or getIsOnExternalServer() is True:
-        sUrl += "&parent="
-        sUrl += getProcId()
+    sUrl += "/filebuffer/download"
 
     asHeaders = _getStandardHeaders()
 
+    oImageImportViewModel = {}
+    oImageImportViewModel["fileUrl"] = sFileUrl
+    oImageImportViewModel["name"] = sName
+    oImageImportViewModel["provider"] = sProvider
+    oImageImportViewModel["workspace"] = getActiveWorkspaceId()
+    oImageImportViewModel["bbox"] = sBoundingBox
+    oImageImportViewModel["volumeName"] = sVolumeName
+    oImageImportViewModel["volumePath"] = sVolumePath
+
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
+        oImageImportViewModel["parent"] = getProcId()
+
     try:
-        oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+        sEncodedBody = json.dumps(oImageImportViewModel)
+        oResponse = requests.post(sUrl,data=sEncodedBody, headers=asHeaders, timeout=m_iRequestsTimeout)
     except Exception as oEx:
         wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
 
@@ -2597,7 +2654,7 @@ def importProduct(oProduct, sProvider=None):
         if "title" in oProduct:
             sName = oProduct['title']
 
-        return importProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider)
+        return importProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
     except Exception as e:
         wasdiLog("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
@@ -2636,7 +2693,7 @@ def asynchImportProduct(oProduct, sProvider=None):
             sName = oProduct["title"]
 
         return asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
-                                            sProvider=sProvider)
+                                            sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
     except Exception as e:
         wasdiLog("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
@@ -2681,7 +2738,7 @@ def importProductList(aoProducts, sProvider=None):
 
             # Start the download propagating the Asynch Flag
             sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
-                                                   sProvider=sActualProvider)
+                                                   sProvider=sActualProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
 
             # Append the process id to the list
             asReturnList.append(sReturn)
@@ -2732,7 +2789,7 @@ def asynchImportProductList(aoProducts, sProvider=None):
 
             # Start the download propagating the Asynch Flag
             sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
-                                                   sProvider=sProvider)
+                                                   sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
             # Append the process id to the list
             asReturnList.append(sReturn)
         except Exception as e:
@@ -2778,7 +2835,7 @@ def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvid
             asOriginalFiles.append(sFile)
 
     # Flag to know if we are waiting for a donwload
-    bWaitingDonwload = True;
+    bWaitingDonwload = True
 
     # While there are download to wait for
     while bWaitingDonwload:
@@ -2820,7 +2877,7 @@ def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvid
                 bWaitingDonwload = True
 
         if bWaitingDonwload:
-            time.sleep(5)
+            time.sleep(getPollingSleepSeconds())
 
             # Checkpoint: wait for all asynch workflows to finish
     _log("[INFO] All image imported, waiting for all workflows to finish")
@@ -2900,7 +2957,7 @@ def executeProcessor(sProcessorName, aoProcessParams):
             wasdiLog('[ERROR] waspy.executeProcessor: server returned status ' + str(oResult.status_code))
 
         wasdiLog("[ERROR]: Error triggering the new process.")
-        time.sleep(5)
+        time.sleep(getPollingSleepSeconds())
 
     wasdiLog("[ERROR]: process not triggered, too many errors")
 
@@ -3243,7 +3300,7 @@ def _internalExecuteSen2Cor(sProductName, sWorkspaceId, bAsynch):
         return ''
 
 
-def executeWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
+def executeWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, aoTemplateParams = None):
     """
     Execute a SNAP Workflow available in WASDI (you can use WASDI to upload your SNAP Graph XML and use from remote)
 
@@ -3252,12 +3309,16 @@ def executeWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
     :param asOutputFileNames: array of the  outputs of the workflow. Must correspond to the number of inputs of the workflow.
 
     :param sWorkflowName: Name of the workflow to run
+
+    :param aoTemplateParams: Dictionary with strings KEY-VALUE that will be used to fill potential parameters in the Workflow XML.
+     Wasdi will search the XML for the strings in the keys and replace with the value here provided
+
     :return: final status of the executed Workflow
     """
-    return _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, False)
+    return _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, False, aoTemplateParams)
 
 
-def asynchExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
+def asynchExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, aoTemplateParams = None):
     """
     Trigger the asynch execution of a SNAP Workflow available in WASDI (you can use WASDI to upload your SNAP Graph XML and use from remote)
 
@@ -3266,9 +3327,13 @@ def asynchExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
     :param asOutputFileNames: array of the  outputs of the workflow. Must correspond to the number of inputs of the workflow.
 
     :param sWorkflowName: Name of the workflow to run
+
+    :param aoTemplateParams: Dictionary with strings KEY-VALUE that will be used to fill potential parameters in the Workflow XML.
+     Wasdi will search the XML for the strings in the keys and replace with the value here provided
+
     :return: Process Id of the started workflow
     """
-    return _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, True)
+    return _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, True, aoTemplateParams)
 
 
 def asynchMosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None, fPixelSizeX=None,
@@ -3695,6 +3760,8 @@ def _loadConfig(sConfigFilePath):
                 setProcId(oJson['MYPROCID'])
             if 'ENABLECHECKSUM' in oJson:
                 setEnableChecksum(bool(oJson["ENABLECHECKSUM"]))
+            if 'POLLINGSLEEPSECONDS' in oJson:
+                setPollingSleepSeconds(int(oJson['POLLINGSLEEPSECONDS']))
 
         return True, sTempWorkspaceName, sTempWorkspaceID
 
@@ -3771,7 +3838,7 @@ def _waitForResume():
 
             while sStatus not in {"RUNNING", "DONE", "STOPPED", "ERROR"}:
                 sStatus = getProcessStatus(getProcId())
-                time.sleep(5)
+                time.sleep(getPollingSleepSeconds())
 
             _log("[INFO] Process Resumed, let's go!")
         except:
@@ -3910,7 +3977,7 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None, sStyle=""):
     return sResult
 
 
-def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, bAsynch=False):
+def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, bAsynch=False, aoTemplateParams = None):
     """
     Internal call to execute workflow
 
@@ -3922,6 +3989,10 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
     :param sWorkflowName: name of the SNAP workflow uploaded in WASDI
 
     :param bAsynch: true to run asynch, false to run synch
+
+    :param aoTemplateParams: Dictionary with strings KEY-VALUE that will be used to fill potential parameters in the Workflow XML.
+     Wasdi will search the XML for the strings in the keys and replace with the value here provided
+
     :return: processID if asynch, status of the executed process if synch, empty string in case of failure
     """
 
@@ -4001,6 +4072,9 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
     try:
         aoDictPayload["inputFileNames"] = asInputFileNames
         aoDictPayload["outputFileNames"] = asOutputFileNames
+
+        if aoTemplateParams is not None:
+            aoDictPayload["templateParams"] = aoTemplateParams
     except:
         wasdiLog('[ERROR] waspy._internalExecuteWorkflow: payload could not be generated, aborting' +
                  '  ******************************************************************************')
@@ -4220,7 +4294,7 @@ def getlayerWMS(sProduct, sBand):
             wasdiLog('[ERROR] getlayerWMS: reached the maximum number of attempt ( ' + str(type(iCountRetries)) + ') Aborting operation')
             return
         oPublishedBandResponse = asynchPublishBand(sProduct, sBand)
-        time.sleep(3)
+        time.sleep(getPollingSleepSeconds())
         iCountRetries -= 1
         wasdiLog('[INFO] getlayerWMS: waiting for the band to be available... (' + str(type(iCountRetries)) + ' attempts left before aborting)')
     oPayload = oPublishedBandResponse["payload"]

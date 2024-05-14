@@ -75,6 +75,7 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.OgcProcessesClient;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.StringUtils;
@@ -251,6 +252,7 @@ public class dbUtils {
 
             System.out.println("\t1 - Clean by not existing Workspace");
             System.out.println("\t2 - Clean by not existing Product Name");
+            System.out.println("\t3 - Change Workspace Owner");
             System.out.println("\tx - Back");
             System.out.println("");
 
@@ -323,7 +325,55 @@ public class dbUtils {
                     System.out.println("productWorkspace: Deleted " + iDeleted + " Product Workspace");
                 }
             }
+            else if (sInputString.equals("3")) {
+                System.out.println("Workspace Id?");
+                String sWorkspaceId = s_oScanner.nextLine();
 
+                System.out.println("Old User Id?");
+                String sOldUser = s_oScanner.nextLine();
+
+                System.out.println("New User Id?");
+                String sNewUser = s_oScanner.nextLine();
+                
+                ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+                
+                System.out.println("Reading Product Workspaces");
+
+                List<ProductWorkspace> aoAllProductWorkspace = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
+                
+                System.out.println("Update Product Workspaces");
+                
+                for (ProductWorkspace oProductWorkspace : aoAllProductWorkspace) {
+                	
+                	if (oProductWorkspace.getProductName().contains(sOldUser)) {
+                		String sOldProductName = oProductWorkspace.getProductName();
+                		oProductWorkspace.setProductName(oProductWorkspace.getProductName().replace(sOldUser, sNewUser));
+                		oProductWorkspaceRepository.updateProductWorkspace(oProductWorkspace, sOldProductName);
+                	}
+                	else {
+                		System.out.println("WARNING Product Workspace " + oProductWorkspace.getProductName() + " DOES NOT includes the old user!!");
+                	}
+				}
+                
+                System.out.println("Reading Downloaded Files");
+                
+                DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+                
+                List<DownloadedFile> aoFiles = oDownloadedFilesRepository.getByWorkspace(sWorkspaceId);
+                
+                System.out.println("Updating Downloaded Files");
+                
+                for (DownloadedFile oFile : aoFiles) {
+                	if (oFile.getFilePath().contains(sOldUser)) {
+                		String sOldPath = oFile.getFilePath();
+                		oFile.setFilePath(oFile.getFilePath().replace(sOldUser, sNewUser));
+                		oDownloadedFilesRepository.updateDownloadedFile(oFile, sOldPath);
+                	}
+                	else {
+                		System.out.println("WARNING Downloaded File " + oFile.getFilePath() + " DOES NOT includes the old user!!");
+                	}
+				}                            	
+            }
 
         } catch (Exception oEx) {
             System.out.println("productWorkspace: exception " + oEx);
@@ -2200,7 +2250,8 @@ public class dbUtils {
 		ProcessList oProcList = oOgcProcessesClient.getProcesses();
 		
 		// Call the deploy function: is a post of the App Deploy Body
-		boolean bApiAnswer = oOgcProcessesClient.deployProcess(sDeployBody);    	
+		boolean bApiAnswer = oOgcProcessesClient.deployProcess(sDeployBody);
+		WasdiLog.infoLog("Deploy Process answer " + bApiAnswer);
     }
     
 

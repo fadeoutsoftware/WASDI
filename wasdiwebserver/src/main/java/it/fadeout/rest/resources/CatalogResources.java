@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.stream.Stream;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
@@ -34,6 +35,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.IngestFileParameter;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -71,7 +73,9 @@ public class CatalogResources {
 	public Response downloadEntryByName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("token") String sTokenSessionId,
 			@QueryParam("filename") String sFileName,
-			@QueryParam("workspace") String sWorkspaceId)
+			@QueryParam("workspace") String sWorkspaceId,
+			@QueryParam("procws") String sProcessObjId
+			)
 	{			
 
 		WasdiLog.debugLog("CatalogResources.downloadEntryByName( FileName: " + sFileName + ", Ws: " + sWorkspaceId);
@@ -90,6 +94,7 @@ public class CatalogResources {
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
+			// Check if the user can access the workspace
 			if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
 				WasdiLog.warnLog("CatalogResources.downloadEntryByName: user cannot access workspace");
 				return Response.status(Status.FORBIDDEN).build();				
@@ -100,7 +105,11 @@ public class CatalogResources {
 			
 			ResponseBuilder oResponseBuilder = null;
 			
-			if(oFile == null) {
+			if (oFile == null) {
+				oFile = PermissionsUtils.getFileFromS3Volume(oUser.getUserId(), sFileName, sWorkspaceId, sProcessObjId);
+			}
+			
+			if(oFile == null) {				
 				// File invalid
 				WasdiLog.debugLog("CatalogResources.downloadEntryByName: file not readable");
 				oResponseBuilder = Response.serverError();	
@@ -146,6 +155,7 @@ public class CatalogResources {
 	@GET
 	@Path("fileOnNode")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Consumes({"application/xml", "application/json", "text/xml"})
 	public Response checkFileByNode(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId)
 	{	
 		WasdiLog.debugLog("CatalogResources.checkFileByNode");
@@ -194,10 +204,10 @@ public class CatalogResources {
 	@GET
 	@Path("checkdownloadavaialibitybyname")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId)
+ 	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId, @QueryParam("procws") String sProcessObjId, @QueryParam("volumepath") String sVolumePath)
 	{
 		try {
-			WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName");
+			WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName " + sFileName);
 
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -210,13 +220,69 @@ public class CatalogResources {
 				WasdiLog.warnLog("CatalogResources.checkDownloadEntryAvailabilityByName: user cannot access workspace");
 				return Response.status(Status.FORBIDDEN).build();			
 			}
-
+						
+			// Try to see if the file is in the wasdi db and present
 			File oFile = this.getEntryFile(sFileName,sWorkspaceId);
 			
 			if(oFile == null) {
-				return Response.serverError().build();	
+				
+				// Often we do not have the extension for S1 and S2 files. Try to help
+				String sExtension = WasdiFileUtils.getFileNameExtension(sFileName);
+				
+				boolean bRetry = false;
+				
+				if (Utils.isNullOrEmpty(sExtension)) {
+					// We are without extension, is it a S1 or S2 ?
+					if (sFileName.startsWith("S1") || sFileName.startsWith("S2")) {
+						WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file starts with S1 or S2, try to add .zip" );
+						// Yes! Retry with extension
+						sFileName += ".zip";
+						bRetry = true;
+					}
+				}
+				
+				if (bRetry) {
+					WasdiLog.warnLog("CatalogResources.checkDownloadEntryAvailabilityByName: retry adding extension new file name = " + sFileName);
+					oFile = this.getEntryFile(sFileName,sWorkspaceId);
+				}
+				
+				// Here we check again maybe something changed due to the retry
+				if (oFile == null) {
+					WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found, check if it is in a Volume");
+					
+					if (!Utils.isNullOrEmpty(sVolumePath)) {
+						
+						WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: adding volume path " + sVolumePath);
+						
+						if (!sVolumePath.endsWith("/")) {
+							sVolumePath += "/";
+						}
+						
+						sFileName = sVolumePath+sFileName;
+					}
+					
+					// The file is not in the WASDI db. Can be a file on an S3 Volume?
+					File oFileInVolume = PermissionsUtils.getFileFromS3Volume(oUser.getUserId(), sFileName, sWorkspaceId, sProcessObjId);
+					
+					if (oFileInVolume!=null) {
+						if (oFileInVolume.exists()) {
+							PrimitiveResult oResult = new PrimitiveResult();
+							oResult.setBoolValue(true);
+							return Response.ok(oResult).build();									
+						}
+						else {
+							WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: no, we cannot read it");
+						}					
+					}
+					else {
+						WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found in any volume");
+					}				
+
+					return Response.serverError().build();					
+				}
 			}
 
+			WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file found!");
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(oFile != null);
 			return Response.ok(oResult).build();			
@@ -698,6 +764,11 @@ public class CatalogResources {
 		}
 	}
 	
+	/**
+	 * Generate MD5 of a File
+	 * @param oFile File
+	 * @return MD5 checksum
+	 */
 	protected String generateMD5(File oFile){
 		
 	    if(oFile==null){
@@ -743,31 +814,37 @@ public class CatalogResources {
 	private File getEntryFile(String sFileName, String sWorkspace)
 	{
 		WasdiLog.debugLog("CatalogResources.getEntryFile( fileName : " + sFileName + " )");
-				
-		String sTargetFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
+		try {
+			String sTargetFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
 
-		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
-		DownloadedFile oDownloadedFile = oRepo.getDownloadedFileByPath(sTargetFilePath);
+			DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
+			DownloadedFile oDownloadedFile = oRepo.getDownloadedFileByPath(sTargetFilePath);
 
-		if (oDownloadedFile == null) {
-			oDownloadedFile = oRepo.getDownloadedFileByPath(WasdiFileUtils.fixPathSeparator(sTargetFilePath));
+			if (oDownloadedFile == null) {
+				oDownloadedFile = oRepo.getDownloadedFileByPath(WasdiFileUtils.fixPathSeparator(sTargetFilePath));
+			}
+
+			if (oDownloadedFile == null) 
+			{
+				WasdiLog.debugLog("CatalogResources.getEntryFile: file " + sFileName + " not found in path " + sTargetFilePath);
+				return null;
+			}
+			
+			File oFile = new File(sTargetFilePath);
+
+			if( oFile.canRead() == true) {
+				return oFile;
+			}
+			else {
+				WasdiLog.debugLog("CatalogResources.getEntryFile: cannot read file " + sFileName + " from " + sTargetFilePath + ", returning null");
+				return null; 
+			}			
 		}
-
-		if (oDownloadedFile == null) 
-		{
-			WasdiLog.debugLog("CatalogResources.getEntryFile: file " + sFileName + " not found in path " + sTargetFilePath);
-			return null;
+		catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogResources.getEntryFile: exception: ", oEx);
 		}
 		
-		File oFile = new File(sTargetFilePath);
-
-		if( oFile.canRead() == true) {
-			return oFile;
-		}
-		else {
-			WasdiLog.debugLog("CatalogResources.getEntryFile: cannot read file " + sFileName + " from " + sTargetFilePath + ", returning null");
-			return null; 
-		}
+		return null;
 	}
 	
 	/**
@@ -871,7 +948,7 @@ public class CatalogResources {
 	private Response zipShapeFile(File oInitialFile) {
 		
 		// Remove extension
-		final String sNameToFind = Utils.getFileNameWithoutLastExtension(oInitialFile.getName());
+		final String sNameToFind = WasdiFileUtils.getFileNameWithoutLastExtension(oInitialFile.getName());
 		
 		// Get parent folder
 		File oFolder = oInitialFile.getParentFile();
@@ -981,7 +1058,7 @@ public class CatalogResources {
 				return zipBeanDimapFile(oInitialFile);
 			} else if (sBasePath.endsWith(".shp")) {
 				return zipShapeFile(oInitialFile);
-			} else if(WasdiFileUtils.isSentinel3Directory(oInitialFile)) {
+			} else if(MissionUtils.isSentinel3Directory(oInitialFile)) {
 				return zipSentinel3(oInitialFile);
 			} 
 		} 
@@ -1012,9 +1089,8 @@ public class CatalogResources {
 			return (
 					//dim files are the output of SNAP operations
 					sName.endsWith(".dim") ||
-					//sName.endsWith(".shp") ||
 					WasdiFileUtils.isShapeFile(oFile) ||
-					WasdiFileUtils.isSentinel3Directory(oFile)
+					MissionUtils.isSentinel3Directory(oFile)
 					);
 		}
 		return bRet;

@@ -42,6 +42,7 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     apt-get dist-upgrade && \
     apt-get install \
         curl \
+        dos2unix \
         gdal-bin \
         git \
         gunicorn \
@@ -63,7 +64,6 @@ USER {{ sWasdiSystemUserName }}
 
 
 # Create the application directory
-# Create the virtual environment
 RUN mkdir --parents \
         {{ sWasdiSystemUserHome }}/application
 
@@ -81,8 +81,10 @@ COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirecto
 # Install the common PIP libraries
 RUN python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
     pip3 install --no-cache-dir --no-compile \
-        numpy \
-        wasdi
+        numpy && \
+    pip3 install --no-cache-dir --no-compile {{ sPythonPipLibraryWasdiRepository }} \
+        wasdi && \
+    find {{ sWasdiSystemUserHome }} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
 # From now, all commands executed are executed with the user 'root'
@@ -100,7 +102,7 @@ RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
 USER {{ sWasdiSystemUserName }}
 
 
-# Install packages only if {{ sWasdiSystemUserHome }}/application/packages.txt exists
+# Install packages only if {{ sWasdiSystemUserHome }}/application/pip.txt exists
 RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
         --application-directory {{ sWasdiSystemUserHome }}/application \
         --home-directory {{ sWasdiSystemUserHome }} \

@@ -21,16 +21,6 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 	 */
 	boolean m_bAuthenticated = false;
 
-	/**
-	 * Base path of the folder mounted with EO Data
-	 */
-	private String m_sProviderBasePath = "";    
-
-	/**
-	 * URL domain (i.e. https://services.terrascope.be/catalogue/products).
-	 */
-	private String m_sProviderUrlDomain = "";
-
 	private static final String TERRASCOPE_URL_ZIPPER = "https://services.terrascope.be/package/zip";
 	private static final String s_sSizeParam = "&size=";
 	private static final String s_sCompressedPayload = "?compressed_payload=";
@@ -280,8 +270,6 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 
 		try {
 			m_sDefaultProtocol = m_oDataProviderConfig.defaultProtocol; 
-			m_sProviderBasePath = m_oDataProviderConfig.localFilesBasePath;
-			m_sProviderUrlDomain = m_oDataProviderConfig.urlDomain;
 		} catch (Exception e) {
 			WasdiLog.errorLog("TerrascopeProviderAdapter: Config reader is null");
 		}
@@ -291,7 +279,6 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
 
 		if (sPlatformType.equals(Platforms.SENTINEL1) 
-//				|| sPlatformType.equals(Platforms.SENTINEL2)
 				|| sPlatformType.equals(Platforms.DEM)
 				|| sPlatformType.equals(Platforms.WORLD_COVER)) {
 			if (isWorkspaceOnSameCloud()) {
