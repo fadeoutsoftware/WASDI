@@ -154,7 +154,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			JSONArray asTestUsers = oAppConf.optJSONArray("testingUsers");
 			
 			if (asTestUsers == null || asTestUsers.length() == 0) {
-				WasdiLog.debugLog("CreoDias2.isFileAccessTestEnabled - no user(s) specified for enabling the test");
+				WasdiLog.debugLog("CreoDias2.isFileAccessEnabled - no user(s) specified for enabling the test");
 				return false;
 			}
 			
@@ -169,16 +169,16 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			}
 			
 			if (!bIsUserEnabledForTest) {
-				WasdiLog.debugLog("CreoDias2.isFileAccessTestEnabled - the user is not enabled for the test");
+				WasdiLog.debugLog("CreoDias2.isFileAccessEnabled - the user is not enabled for the test");
 				return false;
 			}
 
-			WasdiLog.debugLog("CreoDias2.isFileProtocolNew - file access test is ideally possible");
+			WasdiLog.debugLog("CreoDias2.isFileAccessEnabled - file access test is ideally possible");
 			
 			return true;
 			
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("CreoDias2.isFileAccessTestEnabled - exception", oEx);
+			WasdiLog.errorLog("CreoDias2.isFileAccessEnabled - exception", oEx);
 			return false;
 		}	
 	}
