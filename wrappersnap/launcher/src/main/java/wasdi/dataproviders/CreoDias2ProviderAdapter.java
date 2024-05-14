@@ -1,8 +1,6 @@
 
 package wasdi.dataproviders;
 
-import wasdi.shared.config.DataProviderConfig;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.net.IDN;
@@ -22,6 +20,7 @@ import org.json.JSONObject;
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.creodias2.ResponseTranslatorCreoDias2;
@@ -29,7 +28,6 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
@@ -79,6 +77,12 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 				return false;
 			}
 			
+			if (!sCloud.equals("CREODIAS")) {
+				WasdiLog.debugLog("CreoDias2.isFileProtocolNew - the workspace is not on CREODIAS. File access not possible.");
+				return false;
+			} 
+			
+			WasdiLog.debugLog("CreoDias2.isFileProtocolNew - the workspace is on CREODIAS.");			
 			
 			String sS3Path =extractProductIdentifierFromURL(sUrl);
 			
@@ -88,15 +92,6 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			}
 			
 			WasdiLog.debugLog("CreoDias2.isFileProtocolNew - identified file access path: " + sS3Path);
-			
-			
-			// TODO: once in prod, this part should be moved as a first check. If the workspace is not on CREO, there is no point of doing other checks
-			if (!sCloud.equals("CREODIAS")) {
-				WasdiLog.debugLog("CreoDias2.isFileProtocolNew - the workspace is not on CREODIAS. File access not possible.");
-				return false;
-			} 
-			
-			WasdiLog.debugLog("CreoDias2.isFileProtocolNew - the workspace is on CREODIAS.");
 			
 			if (!Files.exists(Paths.get(sS3Path))){
 				WasdiLog.debugLog("CreoDias2.isFileProtocolNew - the path of the file is not on the server. ");
@@ -114,30 +109,30 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	}
 	
 	/* Ideally, this method can be deleted once the test has been done. */
-	protected boolean isFileAccessTestEnabled() {
+	protected boolean isFileAccessEnabled() {
 		
 		try {
 			
 			String sUserId = m_oProcessWorkspace.getUserId();
 			
-			WasdiLog.debugLog("CreoDias2.isFileAccessTestEnabled - user id: " + sUserId);		
+			WasdiLog.debugLog("CreoDias2.isFileAccessEnabled - user id: " + sUserId);		
 			
 			DataProviderConfig oProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);
 			
 			if (oProviderConfig == null) {
-				WasdiLog.debugLog("CreoDias2.isFileAccessTestEnabled - didn't find a configuration for the provider");
+				WasdiLog.debugLog("CreoDias2.isFileAccessEnabled - didn't find a configuration for the provider");
 				return false;
 			}
 			
 			String sAdapterConfigFile = oProviderConfig.adapterConfig;		// let's read the adapter config file, which should contain the info to perform the test
 			
 			if (Utils.isNullOrEmpty(sAdapterConfigFile)) {
-				WasdiLog.debugLog("CreoDias2.isFileAccessTestEnabled - the path of the adapter config file is null. Test cannot start");
+				WasdiLog.debugLog("CreoDias2.isFileAccessEnabled - the path of the adapter config file is null. Test cannot start");
 				return false;
 			}
 			
 			if (!Files.isRegularFile(Paths.get(sAdapterConfigFile))) {
-				WasdiLog.debugLog("CreoDias2.isFileAccessTestEnabled - the path of the adapter config does not existing on the server");
+				WasdiLog.debugLog("CreoDias2.isFileAccessEnabled - the path of the adapter config does not existing on the server");
 				return false;
 			}
 			
@@ -145,14 +140,14 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			JSONObject oAppConf = JsonUtils.loadJsonFromFile(sAdapterConfigFile);
 			
 			if (oAppConf == null) {
-				WasdiLog.debugLog("CreoDias2.isFileAccessTestEnabled - could not load JSON object from the adapter config file");
+				WasdiLog.debugLog("CreoDias2.isFileAccessEnabled - could not load JSON object from the adapter config file");
 				return false;
 			}
 			
 			boolean bIsFileAccessTestEnabled = oAppConf.optBoolean("fileAccessTestEnabled");
 			
 			if (!bIsFileAccessTestEnabled) {
-				WasdiLog.debugLog("CreoDias2.isFileAccessTestEnabled - the flag for the test is not enabled");
+				WasdiLog.debugLog("CreoDias2.isFileAccessEnabled - the flag for the test is not enabled");
 				return false;
 			}
 			
@@ -200,7 +195,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		long lSizeInBytes = 0L;
 		
 		// TEST: FILE ACCESS
-		if (isFileAccessTestEnabled()) { 
+		if (isFileAccessEnabled()) { 
 			WasdiLog.debugLog("CreoDias2ProviderAdapter.getDownloadFileSize - test for file access enabled");
 			
 			if (isFileProtocolNew(sFileURL)) {
@@ -371,9 +366,10 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		
 		String sResult = null;
 		
-		// TEST: file access
-		if (isFileAccessTestEnabled()) {
-			WasdiLog.debugLog("Creodias2ProviderAdapter.executeDownloadFile. Test for file access is possible.");
+		// Is this a file access?
+		if (isFileAccessEnabled()) {
+			
+			WasdiLog.debugLog("Creodias2ProviderAdapter.executeDownloadFile. Test if file access is possible.");
 			
 			if (isFileProtocolNew(sFileURL)) {
 				try {
@@ -409,35 +405,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 				}
 
 			}
-		} else if (isFileProtocol(m_sDefaultProtocol)) {
-			WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile: detected file protocol with old method");
-
-			String sFilesystemPath = null;
-			
-			if (isFileProtocol(sFileURL)) {
-				sFilesystemPath = removePrefixFile(sFileURL);
-				WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile:  file system path from file protocol " + sFilesystemPath);
-			} else if (isHttpsProtocol(sFileURL)) {
-				sFilesystemPath = extractFilePathFromHttpsUrl(sFileURL);
-				WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile:  file system path from http protocol " + sFilesystemPath);
-			} else {
-				WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile: unknown protocol " + sFileURL);
-			}
-
-			if (sFilesystemPath != null) {
-				File oSourceFile = new File(sFilesystemPath);
-
-				if (oSourceFile != null && oSourceFile.exists()) {
-					sResult = copyFile("file:" + sFilesystemPath, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace, iMaxRetry);
-					WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile: destination file path " + sResult);
-
-					return sResult;
-				}
-			}
-			WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile: no operation was effective for file protocol");
-
-		}
-				
+		} 	
 
 		if(isHttpsProtocol(sFileURL)) { 
 			int iAttemptCount = 0;
@@ -461,7 +429,6 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 				String sDownloadUrl = sODataDownloadUrl + SDOWNLOAD_URL_END + sAccessToken;
 				
 				WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile. Access token correctly received. Download url (withouth accesso token): " + sODataDownloadUrl + SDOWNLOAD_URL_END);
-	
 				
 				// TODO: understand if I should also pass the name of the file - I think no. The method already parses the "File-disposition" attribute in the header. Should also work for Creodias2
 				long lStartTime = System.currentTimeMillis();
@@ -501,10 +468,6 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		return "";
 	}
 	
-	
-	
-	
-	
 	private String copyFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 
@@ -526,19 +489,20 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		if (isFileProtocol(sFileURL)) {
 			if (isZipFile(sFileURL)) {
 				sResult = localFileCopy(sFileURL, sSaveDirOnServer, iMaxRetry);
-			} else if (isSafeDirectory(sFileURL)) {
-				String sourceFile = removePrefixFile(sFileURL);
-				String destinationFile = getFileName(sFileURL);
+			} 
+			else if (isSafeDirectory(sFileURL.toUpperCase())) {
+				String sSourceFile = removePrefixFile(sFileURL);
+				String sDestinationFile = getFileName(sFileURL);
 
 				// set the destination folder
 				if (sSaveDirOnServer.endsWith("/") == false) sSaveDirOnServer += "/";
-				destinationFile = sSaveDirOnServer + destinationFile;
+				sDestinationFile = sSaveDirOnServer + sDestinationFile;
 
-				destinationFile = addZipExtension(removeSafeTermination(destinationFile));
+				sDestinationFile = addZipExtension(removeSafeTermination(sDestinationFile));
 
-				downloadZipFile(sourceFile, destinationFile);
+				downloadZipFile(sSourceFile, sDestinationFile);
 				
-				sResult = destinationFile;
+				sResult = sDestinationFile;
 			}
 		} 
 
@@ -546,14 +510,14 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	}
 	
 	
-	private void downloadZipFile(String sourceFile, String destinationFile) throws Exception {
-        FileOutputStream fos = new FileOutputStream(destinationFile);
-        ZipOutputStream zipOut = new ZipOutputStream(fos);
-        File fileToZip = new File(sourceFile);
+	private void downloadZipFile(String sSourceFile, String sDestinationFile) throws Exception {
+        FileOutputStream oFos = new FileOutputStream(sDestinationFile);
+        ZipOutputStream oZipOut = new ZipOutputStream(oFos);
+        File oFileToZip = new File(sSourceFile);
 
-        ZipFileUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
-        zipOut.close();
-        fos.close();
+        ZipFileUtils.zipFile(oFileToZip, oFileToZip.getName(), oZipOut);
+        oZipOut.close();
+        oFos.close();
 	}
 	
 	
