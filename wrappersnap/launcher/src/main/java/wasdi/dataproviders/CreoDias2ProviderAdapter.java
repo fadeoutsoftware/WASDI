@@ -34,7 +34,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	private static final String SAUTHENTICATION_URL = "https://identity.cloudferro.com/auth/realms/wekeo-elasticity/protocol/openid-connect/token";
 	private static final String SDOWNLOAD_URL_END = "?token=";
 	
-	private static final String SODATA_FILE_URL_START = "https://datahub.creodias.eu/odata/v1/Products(";
+	private static final String SODATA_FILE_URL_START = "https://zipper.creodias.eu/odata/v1/Products(";
 	private static final String SODATA_FILE_URL_END = ")/$value";
 	
 	private static final String SCREODIAS_BASE_URL = "https://datahub.creodias.eu/odata/v1/Products?";
