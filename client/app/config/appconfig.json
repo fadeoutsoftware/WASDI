@@ -161,7 +161,7 @@
 				}
 			]
 		},
-				{
+		{
 			"name": "S6",
 			"indexname": "platformname",
 			"indexvalue": "Sentinel-6",
@@ -202,6 +202,7 @@
 				{
 					"indexname": "absoluteorbit",
 					"indexlabel": "Relative Orbit",
+					"indexhint": "(from 1 to 127)",
 					"indexvalues": "",
 					"regex": ".*"
 				}
