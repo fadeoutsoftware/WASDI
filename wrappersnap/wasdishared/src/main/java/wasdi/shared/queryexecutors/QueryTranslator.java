@@ -67,6 +67,10 @@ public abstract class QueryTranslator {
 	 */
 	private static final String s_sPLATFORMNAME_SENTINEL_5P = "platformname:Sentinel-5P";	
 	/**
+	 * Token of S5P platform
+	 */
+	private static final String s_sPLATFORMNAME_SENTINEL_6 = "platformname:Sentinel-6";	
+	/**
 	 * Token of Landsat platform
 	 */
 	private static final String s_sPLATFORMNAME_LANDSAT = "platformname:Landsat-*";
@@ -529,6 +533,8 @@ public abstract class QueryTranslator {
 			
 			// Try to get Info about Sentinel 5P
 			parseSentinel5P(sQuery, oResult);
+			
+			parseSentinel6(sQuery, oResult);
 			
 			parsePlanet(sQuery, oResult);
 
@@ -1353,6 +1359,36 @@ public abstract class QueryTranslator {
 			}
 		} catch (Exception oE) {
 			WasdiLog.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): " + oE);
+		}
+	}
+	
+	/**
+	 * Parse Sentinel-6 Info
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parseSentinel6(String sQuery, QueryViewModel oResult) {
+		try {
+			
+			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_SENTINEL_6)) {
+				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_SENTINEL_6);
+
+				oResult.platformName = Platforms.SENTINEL6;
+				
+				oResult.productLevel = extractValue(sQuery, "productlevel");
+				oResult.instrument = extractValue(sQuery, "Instrument");
+				oResult.timeliness = extractValue(sQuery, "timeliness");
+				
+				try {
+					String sOrbit = extractValue(sQuery, "absoluteorbit");
+					if (!Utils.isNullOrEmpty(sOrbit))
+						oResult.relativeOrbit = Integer.parseInt(sOrbit);
+				} catch (NumberFormatException oEx) {
+					WasdiLog.errorLog("QueryTranslator.parseSentinel6: error parsing absolute orbit in query " + sQuery, oEx);
+				}			
+			}
+		} catch (Exception oE) {
+			WasdiLog.errorLog("QueryTranslator.parseSentinel6. Error parsing query: " + sQuery, oE);
 		}
 	}
 	
