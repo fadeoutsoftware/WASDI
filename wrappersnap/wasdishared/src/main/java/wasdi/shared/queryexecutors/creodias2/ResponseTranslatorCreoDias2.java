@@ -39,7 +39,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	private static final String SODATA_TYPE = "type";
 	private static final String SODATA_VALUE = "Value";
 	
-	private static final String SODATA_BASE_DOWNLOAD_URL = "https://datahub.creodias.eu/odata/v1/Products(";
+	private static final String SODATA_BASE_DOWNLOAD_URL = "https://zipper.creodias.eu/odata/v1/Products(";
 	private static final String SODATA_END_DOWNLOAD_URL = ")/$value";
 	
 	// WASDI  keywords
