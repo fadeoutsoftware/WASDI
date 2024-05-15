@@ -520,9 +520,13 @@ public class ZipFileUtils {
 			}
 		}
 	}
+	
+	public static void zipFile(File oFileToZip, String sFileName, ZipOutputStream oZipOut) {
+		zipFile(oFileToZip, sFileName, oZipOut, 1024);
+	}
 
 	//courtesy of https://www.baeldung.com/java-compress-and-uncompress
-	public static void zipFile(File oFileToZip, String sFileName, ZipOutputStream oZipOut) {
+	public static void zipFile(File oFileToZip, String sFileName, ZipOutputStream oZipOut, int iBufferSize) {
 		try {
 			if(oFileToZip.getName().equals(".") || oFileToZip.getName().equals("..")) {
 				return;
@@ -544,7 +548,7 @@ public class ZipFileUtils {
 			try (FileInputStream oFis = new FileInputStream(oFileToZip)) {
 				ZipEntry oZipEntry = new ZipEntry(sFileName);
 				oZipOut.putNextEntry(oZipEntry);
-				byte[] bytes = new byte[1024];
+				byte[] bytes = new byte[iBufferSize];
 				int iLength;
 				while ((iLength = oFis.read(bytes)) >= 0) {
 					oZipOut.write(bytes, 0, iLength);
