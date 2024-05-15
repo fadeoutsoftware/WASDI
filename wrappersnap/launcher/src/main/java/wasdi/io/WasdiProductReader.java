@@ -162,6 +162,11 @@ public abstract class WasdiProductReader {
         	return null;        	
         }
         
+        if (MissionUtils.isSentinel6File(m_oProductFile)) {
+           	WasdiLog.debugLog("WasdiProductReader.readSnapProduct: we do not want SNAP to read S6, return null ");
+        	return null;        	
+        }
+        
         if (m_oProductFile.getName().toUpperCase().endsWith(".ZIP")) {
         	if (!ZipFileUtils.isValidZipFile(m_oProductFile)) {
             	WasdiLog.debugLog("WasdiProductReader.readSnapProduct: not valid zip file, return null");

@@ -1,10 +1,12 @@
 package wasdi.shared.queryexecutors.creodias2;
 
+import java.nio.file.attribute.PosixFileAttributeView;
 import java.util.Arrays;
 import java.util.List;
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.HashMap;
+
 import java.util.LinkedList;
 
 import com.google.common.base.Preconditions;
@@ -29,9 +31,14 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	private static final String sODataTopOption = "$top=";
 	private static final String sODataOrderBy = "$orderby=";
 	
+	// map the polarisation field in the QueryViewModel to the corresponding OData attribute, depending on the platform
 	private static final HashMap<String, String> asODATA_POLARISATION_MODE_MAP =  new HashMap<>();
 	
+	// map the absoluteOrbit field in the QueryViewModel to the corresponding OData attribute, depending on the platform
 	private static final HashMap<String, String> asODATA_ABSOLUTE_ORBIT_MAP = new HashMap<>();
+	
+	// map the timeliness field in the QueryViewModel to the corresponding OData attribute, depending on the platform
+	private static final HashMap<String, String> asODATA_TIMELINESS_MAP = new HashMap<String, String>();
 	
 	static {
 		asODATA_POLARISATION_MODE_MAP.put(Platforms.ENVISAT, "phaseNumber");
@@ -39,6 +46,11 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		
 		asODATA_ABSOLUTE_ORBIT_MAP.put(Platforms.SENTINEL5P, "orbitNumber");
 		asODATA_ABSOLUTE_ORBIT_MAP.put(Platforms.ENVISAT, "cycleNumber");
+		
+		asODATA_TIMELINESS_MAP.put(Platforms.SENTINEL1, "swathIdentifier");
+		asODATA_TIMELINESS_MAP.put(Platforms.SENTINEL3, "timeliness");
+		asODATA_TIMELINESS_MAP.put(Platforms.SENTINEL5P, "processingMode");
+		asODATA_TIMELINESS_MAP.put(Platforms.SENTINEL6, "timeliness");
 	}
  
 	@Override
@@ -89,7 +101,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		// relative orbit number
 		// TODO: in creodias, the interval for the relative orbit is higher
 		int iRelativeOrbit = oQueryViewModel.relativeOrbit; 
-		if ( iRelativeOrbit > 0 && ((sPlatform.equals(Platforms.SENTINEL1) && iRelativeOrbit <= 175) || (sPlatform.equals(Platforms.SENTINEL3) && iRelativeOrbit <= 385)))
+		if ( isValidRelativeOrbit(sPlatform, iRelativeOrbit))
 			asQueryElements.add(createIntegerAttribute("relativeOrbitNumber", sODataEQ, iRelativeOrbit));
 		
 		// cloud coverage - from
@@ -108,9 +120,10 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 			asQueryElements.add(createStringAttribute("processingLevel", sProductLevelCode));
 		
 		// timeliness
-		String[] asTimeliness = getTimelinessAttributeAndCode(sPlatform, oQueryViewModel.timeliness);
-		if (asTimeliness != null && asTimeliness.length > 0)
-			asQueryElements.add(createStringAttribute(asTimeliness[0], asTimeliness[1]));
+		String sTimelinessODataAttribute = asODATA_TIMELINESS_MAP.get(sPlatform);
+		String sTimelinessCode = getTimelinessCode(sPlatform, oQueryViewModel.timeliness);
+		if (!Utils.isNullOrEmpty(sTimelinessCode) && !Utils.isNullOrEmpty(sTimelinessODataAttribute))
+			asQueryElements.add(createStringAttribute(sTimelinessODataAttribute, sTimelinessCode));
 					
 		// absolute orbit
 		int iAbsoluteOrbit = oQueryViewModel.absoluteOrbit;
@@ -135,33 +148,45 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		if (!Utils.isNullOrEmpty(sPlatformId))
 			asQueryElements.add(createStringAttribute("platformSerialIdentifier", sPlatformId));
 		
-		
+		// swath identifier
+		String sSwathId = oQueryViewModel.timeliness;
+		String sODataSwathId = sTimelinessODataAttribute; // if the odata attribute is present, we already found it when checking the timeliness
+		if (sPlatform.equals(Platforms.SENTINEL1) && !Utils.isNullOrEmpty(sSwathId) && !Utils.isNullOrEmpty(sODataSwathId)) {
+			asQueryElements.add(createStringAttribute(sODataSwathId, sSwathId));
+		}
 
-		// TODO: swath (for Sentinel-1), not supported by the queryViewModel? To be confirmed. What values can it take? (Laura)
-		// TODO - IMPORTANT!!! Envisat filters and the corresponding values have no match with what we currently have in WASDI
-		// TODO: cosa facciamo con tutti i valori che sono nuovi in creodias e non sono i Wasdi? - non metterli x il momento
+		asQueryElements.add("Online eq true");
 		
-		// TODO - DONE: polarisation (sentinel 1)
-		// TODO - DONE: satellite platform (e.g. Sentinel-2 A or B), not supported by the queryViewModel? To be confirmed.
-		// TODO - DONE: instrument (for Sentinel-3)
-		// TODO - DONE: relativeorbitstart (for Sentinel-3)
-
-			
 		String sFilterValue = String.join(" " + sODataAND + " ", asQueryElements);	
 		
 		return sODataFilterOption + sFilterValue;
 	}
 	
+	/**
+	 * Create the filter in OData format to filter results by platform
+	 * @param sCollectionName the name of a platform
+	 * @return the string that represents the OData filter by platform 
+	 */
 	private String createCollectionNameEqFilter(String sCollectionName) {
 		List<String> asFilterElements = Arrays.asList("Collection/Name", sODataEQ, "'" + sCollectionName.toUpperCase() + "'");
 		return String.join(" ", asFilterElements); 
 	}
 	
+	/**
+	 * Creates the option in OData format to filter results by name
+	 * @param sCollectionName the name of a product
+	 * @return the string that represents the OData filter by product name 
+	 */
 	private String createProductNameEqFilter(String sProductName) {
 		return "contains(Name, '" + sProductName.toUpperCase() + "')"; 
 	}
 	
-
+	/**
+	 * Creates the option in OData format to filter results by sensing date
+	 * @param sDate the sensing date, in the format yyyy-mm-ddThh:mm:ss.000Z
+	 * @param bStartDate if true, the sDate refers to the beginning of the sensing time. If false, the sDate refers to the end of the sensing time.
+	 * @return the string that represents the OData filter by sensing date
+	 */
 	private String createSensingDateFilter(String sDate, boolean bStartDate) {
 		String sInclusion = bStartDate ? sODataGE : sODataLE;		// TODO: so far, I consider both intervals as included. 
 		String sContentFilterOption = "ContentDate/Start";
@@ -169,6 +194,14 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		return String.join(" ", asFilterElements);
 	}
 	
+	/**
+	 * Given the four cardinal points, it returns the option in OData format to filter results by footprint
+	 * @param sN north
+	 * @param sS south
+	 * @param sE east
+	 * @param sW west
+	 * @return the string that represents the OData filter by footprint
+	 */
 	private String createGeographicalFillter(Double sN, Double sS, Double sE, Double sW) {
 		List<String> asCoordinates = new LinkedList<>();
 		asCoordinates.add(sW + " " + sS);
@@ -179,20 +212,41 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		return "OData.CSC.Intersects(Footprint=geography'SRID=4326;POLYGON ((" + String.join(", ", asCoordinates) + "))')";
 	}
 	
+	/**
+	 * Creates an option in OData format to filter results by some attribute with string value
+	 * @param sName the name of the attribute
+	 * @param sValue the value of the attribute
+	 * @return the string that represent the OData filter by string attribute
+	 */
 	private String createStringAttribute(String sName, String sValue) {
 		return "Attributes/OData.CSC.StringAttribute/any(i0:i0/Name eq '" + sName+ "' and i0/Value eq '" + sValue + "')";
 	}
 	
 
+	/**
+	 * Creates an option in OData format to filter results by some attribute with integer value
+	 * @param sName the name of the attribute
+	 * @param sValue the value of the attribute
+	 * @return the string that represent the OData filter by integer attribute
+	 */
 	private String createIntegerAttribute(String sName, String sOperator, int sValue) {
 		return "Attributes/OData.CSC.IntegerAttribute/any(i0:i0/Name eq '" + sName+ "' and i0/Value " + sOperator +  " " + sValue + ")";
 	}
 	
+	/**
+	 * Creates an option in OData format to filter results by some attribute with double value
+	 * @param sName the name of the attribute
+	 * @param sValue the value of the attribute
+	 * @return the string that represent the OData filter by double attribute
+	 */
 	private String createDoubleAttribute(String sName, String sOperator, double sValue) {
 		return "Attributes/OData.CSC.DoubleAttribute/any(i0:i0/Name eq '" + sName+ "' and i0/Value " + sOperator +  " " + sValue + ")";
 	}
 	
-	
+	/**
+	 * @param oQueryViewModel the view model representing the WASDI query 
+	 * @return true if the view models has valid information for all the four cardinal points, false otherwise 
+	 */
 	private boolean isBoundingBoxValid(QueryViewModel oQueryViewModel) {
 		return oQueryViewModel.north != null 
 				&& oQueryViewModel.south != null
@@ -200,29 +254,61 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 				&& oQueryViewModel.east != null;
 	}
 	
-	private String[] getTimelinessAttributeAndCode(String sPlatform, String sTimeliness) {
+	/**
+	 * Checks if te relative orbit number is valid for a given platform
+	 * @param sPlatformCode the platform code
+	 * @param iRelativeOrbit the relative orbit number
+	 * @return true if the relative orbit number is valid, false otherwise
+	 */
+	private boolean isValidRelativeOrbit(String sPlatform, int iRelativeOrbit) {
+		if (Utils.isNullOrEmpty(sPlatform) || iRelativeOrbit <= 0) 
+			return false;
+		
+		if (sPlatform.equals(Platforms.SENTINEL1) && iRelativeOrbit <= 175)
+			return true;
+		
+		if (sPlatform.equals(Platforms.SENTINEL3) && iRelativeOrbit <= 442)
+			return true;
+		
+		if (sPlatform.equals(Platforms.SENTINEL6) && iRelativeOrbit <= 127)
+			return true;
+		
+		return false;
+	}
+	
+	/**
+	 * Converts the string representing the timeliness from the WASDI format to the OData code
+	 * @param sPlatform the platform's name
+	 * @param sTimeliness the string representing the timeliness in WASDI format
+	 * @return the OData code for timeliness if the platform supports that attribute, null otherwise
+	 */
+	private String getTimelinessCode(String sPlatform, String sTimeliness) {
 		if (Utils.isNullOrEmpty(sTimeliness))
 			return null;
-		if (sPlatform.equalsIgnoreCase(Platforms.SENTINEL3)) {
-			String sAttribute = "timeliness";
+		if (sPlatform.equalsIgnoreCase(Platforms.SENTINEL3) || sPlatform.equalsIgnoreCase(Platforms.SENTINEL6)) {
 			if (sTimeliness.equalsIgnoreCase("Near Real Time")) 
-				return  new String[]{sAttribute, "NR"};
+				return  "NR";
 			if (sTimeliness.equalsIgnoreCase("Short Time Critical"))
-				return new String[]{sAttribute, "ST"};
+				return "ST";
 			if (sTimeliness.equalsIgnoreCase("Non Time Critical"))
-				return new String[]{sAttribute, "NT"};
+				return "NT";
 		} else if (sPlatform.equalsIgnoreCase(Platforms.SENTINEL5P)) {
-			String sAttribute = "processingMode";
 			if (sTimeliness.equalsIgnoreCase("Offline"))
-				return new String[]{sAttribute, "OFFL"};
+				return "OFFL";
 			if (sTimeliness.equalsIgnoreCase("Near Real Time")) 
-				return new String[]{sAttribute, "NRTI"};
+				return "NRTI";
 			if (sTimeliness.equalsIgnoreCase("Reprocessing")) 
-				return new String[]{sAttribute, "RPRO"};
+				return "RPRO";
 		}
 		return null;
 	}
 	
+	/**
+	 * Converts the string representing the product level from the WASDI format to the OData code
+	 * @param sProductLevel the string representing the level in WASDI format
+	 * @param sPlatform the platform's name
+	 * @return the OData code for the product level if the platform supports that attribute, an empty string otherwise
+	 */
 	private String getProductLevelCode(String sProductLevel, String sPlatform) {
 		if (Utils.isNullOrEmpty(sProductLevel) || Utils.isNullOrEmpty(sPlatform))
 			return "";
@@ -236,12 +322,21 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 				return "L1b";
 			if (sProductLevel.equalsIgnoreCase("LEVEL2"))
 				return "L2";
-		} else if (sPlatform.equals(Platforms.ENVISAT)) {
+		} else if (sPlatform.equals(Platforms.SENTINEL6)) {
+			if (sProductLevel.equals("L1") || sProductLevel.equals("L2"))
+				return sProductLevel;
+		}
+		else if (sPlatform.equals(Platforms.ENVISAT)) {
 			return sProductLevel;
 		}
 		return "";
 	}
 	
+	/**
+	 * Converts the string representing the platform serial identifier (e.g. A or B for Sentinel-1) to the corresponding OData code
+	 * @param sId the string representing the platform serial id in WASDI format
+	 * @return the OData code for the platform serial id if the platform has that id, an empty string otherwise
+	 */
 	private String getPlatformSerialIdentifierCode(String sId) {
 		if (Utils.isNullOrEmpty(sId))
 			return "";
@@ -252,12 +347,19 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		return "";
 	}
 	
-	
+	/**
+	 * Method meant to complete the parseWasdiQuery in the superclass. It fills the query view model with the information that is not parsed by the superclass
+	 * @param sQuery the string representing the WASDI query
+	 * @param oViewModel the view model
+	 */
 	private void refineQueryViewModel(String sQuery, QueryViewModel oViewModel) {
 		WasdiLog.debugLog("QueryTranslatorCreoDias2.refineQueryViewModel. Try to fill view model with missing information");
-		oViewModel.polarisation = extractValue(sQuery, "polarisationmode");
-		oViewModel.platformSerialIdentifier = extractValue(sQuery, "filename");
-		oViewModel.instrument = extractValue(sQuery, "Instrument");
+		if (Utils.isNullOrEmpty(oViewModel.polarisation))
+			oViewModel.polarisation = extractValue(sQuery, "polarisationmode");
+		if (Utils.isNullOrEmpty(oViewModel.platformSerialIdentifier))
+			oViewModel.platformSerialIdentifier = extractValue(sQuery, "filename");
+		if (Utils.isNullOrEmpty(oViewModel.instrument))
+			oViewModel.instrument = extractValue(sQuery, "Instrument");
 		if (oViewModel.relativeOrbit < 0) {
 			String sRelativeOrbit = extractValue(sQuery, "relativeorbitstart");
 			if (!Utils.isNullOrEmpty(sRelativeOrbit)) {
@@ -268,69 +370,30 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 				}
 			}
 		}
-		
-		/*
-		findPolarisation(sQuery, oViewModel);
-		findPlatformSerialIdentifier(sQuery, oViewModel);
-		findInstrument(sQuery, oViewModel);
-		findRelativeOrbit(sQuery, oViewModel);
-		*/
+		findSwathIdentifier(sQuery, oViewModel);
 	}
 	
-	
-	private void findPolarisation(String sQuery, QueryViewModel oViewModel) {
-		if (oViewModel == null || Utils.isNullOrEmpty(oViewModel.platformName) || !oViewModel.platformName.equalsIgnoreCase(Platforms.SENTINEL1))
-			return;
+	/**
+	 * Given the WASDI query, looks for the value of the swath identifier filter. If that value is present, then it is set in the query vuiew model.
+	 * @param sQuery the WASDI query
+	 * @param oViewModel the view model
+	 */
+	public void findSwathIdentifier(String sQuery, QueryViewModel oViewModel) {
+		if (oViewModel == null || Utils.isNullOrEmpty(sQuery) || Utils.isNullOrEmpty(oViewModel.platformName) 
+				|| !oViewModel.platformName.equalsIgnoreCase(Platforms.SENTINEL1) || !Utils.isNullOrEmpty(oViewModel.timeliness) )
+			return ;
+		String sRegex = "swathidentifier:([A-Z][A-Z\\d,]*)";
+		try {
+			Pattern oPattern = Pattern.compile(sRegex);
+			Matcher oMatcher = oPattern.matcher(sQuery);
 
-		String sRegex = "polarisationmode:([HV\\+]{2,5})[\\s\\)]";
-		Pattern oPattern = Pattern.compile(sRegex);
-		Matcher oMatcher = oPattern.matcher(sQuery);
-		
-		if (oMatcher.find() && oMatcher.groupCount() >= 1) 
-			oViewModel.polarisation = oMatcher.group(1);
+			if (oMatcher.find() && oMatcher.groupCount() >= 1) {
+				oViewModel.timeliness = oMatcher.group(1);
+			}
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("QueryTranslatorCreoDias2.findSwathIdentifier: error while retrieving the swath idenfier from regex.", oEx);
+		}
 	}
-	
-	private void findPlatformSerialIdentifier(String sQuery, QueryViewModel oViewModel) {
-		if (oViewModel == null || Utils.isNullOrEmpty(oViewModel.platformName) 
-				|| (!oViewModel.platformName.equalsIgnoreCase(Platforms.SENTINEL1) && !oViewModel.platformName.equalsIgnoreCase(Platforms.SENTINEL2)))
-			return;
-		
-		String sPlatformName = oViewModel.platformName;
-
-		String sPlatformCode = sPlatformName.equalsIgnoreCase(Platforms.SENTINEL1) ? "S1" : "S2";
-		String sRegex = "filename:(" + sPlatformCode + "[AB]" + "\\_\\*)";
-		Pattern oPattern = Pattern.compile(sRegex);
-		Matcher oMatcher = oPattern.matcher(sQuery);
-		
-		if (oMatcher.find() && oMatcher.groupCount() >= 1)
-			oViewModel.platformSerialIdentifier = oMatcher.group(1);
-	}
-	
-	private void findInstrument(String sQuery, QueryViewModel oViewModel) {
-		if (oViewModel == null || Utils.isNullOrEmpty(oViewModel.platformName) || !oViewModel.platformName.equalsIgnoreCase(Platforms.SENTINEL3))
-			return;
-		
-		String sRegex = "[iI]nstrument:([A-Z]+)[\\s\\)]";
-		Pattern oPattern = Pattern.compile(sRegex);
-		Matcher oMatcher = oPattern.matcher(sQuery);
-		
-		if (oMatcher.find() && oMatcher.groupCount() >= 1)
-			oViewModel.instrument = oMatcher.group(1);
-	}
-	
-	private void findRelativeOrbit(String sQuery, QueryViewModel oViewModel) {
-		if (oViewModel == null || Utils.isNullOrEmpty(oViewModel.platformName) 
-				|| !oViewModel.platformName.equalsIgnoreCase(Platforms.SENTINEL3) || oViewModel.relativeOrbit >= 0)
-			return;
-		
-		String sRegex = "relativeorbitstart:(\\d\\d?\\d?)[\\s\\)]";
-		Pattern oPattern = Pattern.compile(sRegex);
-		Matcher oMatcher = oPattern.matcher(sQuery);
-		
-		if (oMatcher.find() && oMatcher.groupCount() >= 1) 
-			oViewModel.relativeOrbit = Integer.parseInt(oMatcher.group(1));
-	}
-	
 	
 
 	@Override

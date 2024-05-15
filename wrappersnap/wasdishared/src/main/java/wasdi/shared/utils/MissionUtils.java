@@ -24,6 +24,19 @@ public class MissionUtils {
 		}
 		return false;
 	}
+	
+	public static boolean isSentinel6File(File oFile) {
+		if (oFile == null) {
+			return false;
+		}
+		
+		String sFileName = oFile.getName();
+		if (sFileName.toUpperCase().startsWith("S6A_") || sFileName.toUpperCase().startsWith("S6B_") || sFileName.toUpperCase().startsWith("S6_")) {
+			return true;
+		}
+		
+		return false;
+	}
 
 	public static boolean isGpmZipFile(File oFile) {
 		try {
@@ -123,6 +136,33 @@ public class MissionUtils {
 		return false;
 	}
 	
+	private static boolean isSentinel6Directory(String sName) {
+		try {
+			if(Utils.isNullOrEmpty(sName)) {
+				return false;
+			}
+			if(sName.toLowerCase().startsWith("s6") && sName.toLowerCase().endsWith(".sen6")){
+				return true;
+			}
+		} catch (Exception oE) {
+			WasdiLog.debugLog("WasdiFileUtils.isSentinel6Directory( String): " + oE);
+		}
+		return false;
+	}
+	
+	public static boolean isSentinel6Directory(File oFile) {
+		try {
+			if(oFile == null) {
+				return false;
+			}
+			return isSentinel6Directory(oFile.getName());
+		} catch (Exception oE) {
+			WasdiLog.errorLog("WasdiFileUtils.isSentinel6Directory( File ): ", oE);
+		}
+		return false;
+	}
+	
+	
 	/**
 	 * Get the Platform code of the mission starting from the file Name
 	 * @param sFileName File Name to investigate
@@ -143,6 +183,8 @@ public class MissionUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("S5P_")) {
 				return Platforms.SENTINEL5P;
+			} else if (sFileName.toUpperCase().startsWith("S6_") || sFileName.toUpperCase().startsWith("S6A_") || sFileName.toUpperCase().startsWith("S6B_")) {
+				return Platforms.SENTINEL6;
 			}
 			else if (sFileName.toUpperCase().startsWith("LC08_")) {
 				return Platforms.LANDSAT8;
@@ -240,6 +282,11 @@ public class MissionUtils {
 			}
 			else if (sPlatform.equals(Platforms.SENTINEL5P)) {
 				String sDate = sFileName.substring(20, 20+15);
+				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
+				return new Date(lTime);
+			}
+			else if(sPlatform.equals(Platforms.SENTINEL6)) {
+				String sDate = sFileName.substring(18, 18+15);
 				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
 				return new Date(lTime);
 			}
