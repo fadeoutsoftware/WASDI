@@ -75,7 +75,13 @@ pipeline {
     }
 
     stage('CHECKOUT THE SPECIFIED BRANCH') {
+      when {
+        expression {
+            return ${sClientV2SourceBranch} != 'main';
+        }
+      }
       steps {
+     
         sh script: """
           pwd
           cd client_v2
