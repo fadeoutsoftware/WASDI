@@ -81,7 +81,7 @@ pipeline {
           cd client_v2
           git fetch
           git branch -v -a
-          git switch ${sClientV2SourceBranch}
+          git checkout -b ${sClientV2SourceBranch} origin/${sClientV2SourceBranch}
         """,
         label: "Checkout the branch specified"
       }
