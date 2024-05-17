@@ -77,7 +77,7 @@ pipeline {
     stage('CHECKOUT THE SPECIFIED BRANCH') {
       when {
         expression {
-            return ${sClientV2SourceBranch} == 'main';
+            return false;
         }
       }
       steps {
