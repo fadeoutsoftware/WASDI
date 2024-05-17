@@ -22,5 +22,7 @@ For the sake of simplicity few operations will be included keeping the actual op
 Next a brief introduction to the Octave package management in WASDI is presented.
 The last phase will be to adapt the code to be deployed in a new WASDI application, to be executed in the cloud.
 
-
+Local Setup
+---------------------------
+The following 
 
