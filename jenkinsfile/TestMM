@@ -79,8 +79,9 @@ pipeline {
         sh script: """
           pwd
           cd client_v2
-          git status
-          git checkout ${sClientV2SourceBranch}
+          git fetch
+          git branch -v -a
+          git switch ${sClientV2SourceBranch}
         """,
         label: "Checkout the branch specified"
       }
