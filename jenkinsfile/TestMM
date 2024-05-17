@@ -74,10 +74,10 @@ pipeline {
       }
     }
 
-    stage('CHECKOUT THE SPECIFIED BRANCH') {
+    stage('CHECKOUT THE CLIENT V2 BRANCH') {
       when {
         expression {
-            return false;
+            return sClientV2SourceBranch != 'main';
         }
       }
       steps {
