@@ -369,7 +369,7 @@ public class SnapProductReader extends WasdiProductReader {
 			return sEPSG;
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("SnapProductReader.getEPSG(): exception " + oEx.toString());
+			WasdiLog.errorLog("SnapProductReader.getEPSG(): exception ", oEx);
 		}
 		return null;    	
     }
@@ -408,7 +408,7 @@ public class SnapProductReader extends WasdiProductReader {
 			}			
 		}
 		catch (Exception oEx) {
-			
+        	WasdiLog.errorLog("SnapProductReader.addPrjToMollweidTiffFiles: error ", oEx);
 		}
 	
 	}
