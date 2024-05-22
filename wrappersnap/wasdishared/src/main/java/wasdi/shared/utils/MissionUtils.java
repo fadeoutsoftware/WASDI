@@ -299,6 +299,7 @@ public class MissionUtils {
 			}
 			else if (sPlatform.equals(Platforms.LANDSAT5)) {
 				String sDate = sFileName.substring(21, 21+15);
+				WasdiLog.debugLog("MissionUtils.getDateFromSatelliteImageFileName: date found for Landsat-5: " + sDate);
 				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd");
 				return new Date(lTime);
 			}
