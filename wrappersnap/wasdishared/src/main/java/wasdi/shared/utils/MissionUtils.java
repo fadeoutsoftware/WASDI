@@ -37,6 +37,19 @@ public class MissionUtils {
 		
 		return false;
 	}
+	
+	public static boolean isLandsat5File(File oFile) {
+		if (oFile == null) {
+			return false;
+		}
+		
+		String sFileName = oFile.getName();
+		if (sFileName.toUpperCase().startsWith("LS05_")) {
+			return true;
+		}
+		
+		return false;
+	}
 
 	public static boolean isGpmZipFile(File oFile) {
 		try {

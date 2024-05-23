@@ -54,7 +54,7 @@ public class WasdiProductReaderFactory {
 			return new Sentinel6ProductReader(oFile);
 		}
 		
-		if (MissionUtils.getPlatformFromSatelliteImageFileName(oFile.getName()).equals(Platforms.LANDSAT5)) {
+		if (MissionUtils.isLandsat5File(oFile)) {
 			return new Landsat5ProductReader(oFile);
 		}
 
