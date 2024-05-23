@@ -39,6 +39,7 @@ import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.products.FtpTransferViewModel;
@@ -1011,21 +1012,40 @@ public class CatalogResources {
 	}
 	
 	private Response zipSentinel3(File oInitialFile) {
-		return zipSentinelProduct(oInitialFile, ".SEN3", ".zip");
+		if(oInitialFile == null) {
+			WasdiLog.debugLog("CatalogResource.zipSentinel3: passed a null file, aborting");
+			return Response.serverError().build();
+		}
+		String sZippedOutputFileName = oInitialFile.getName().toUpperCase().replace(".SEN3", ".zip");
+		return zipProductFolder(oInitialFile, sZippedOutputFileName);
 	}
 	
 	
 	private Response zipSentinel6(File oInitialFile) {
-		return zipSentinelProduct(oInitialFile, ".SEN6", ".zip");
+		if(oInitialFile == null) {
+			WasdiLog.debugLog("CatalogResource.zipSentinel6: passed a null file, aborting");
+			return Response.serverError().build();
+		}
+		String sZippedOutputFileName = oInitialFile.getName().toUpperCase().replace(".SEN6", ".zip");
+		return zipProductFolder(oInitialFile, sZippedOutputFileName);
 	}
 	
-	private Response zipSentinelProduct(File oFile, String sDirectoryExtension, String sZipExtension) {
+	private Response zipLandsat5(File oInitialFile) {
+		if(oInitialFile == null) {
+			WasdiLog.debugLog("CatalogResource.zipLandsat5: passed a null file, aborting");
+			return Response.serverError().build();
+		}
+		String sZippedOutputFileName = oInitialFile.getName() + ".zip";
+		return zipProductFolder(oInitialFile, sZippedOutputFileName);
+	}
+	
+	private Response zipProductFolder(File oFile, String sZippedOutputFileName) {
 		if(oFile == null) {
-			WasdiLog.debugLog("CatalogResource.zipSentinelProduct: passed a null file, aborting");
+			WasdiLog.debugLog("CatalogResource.zipProductFolder: passed a null file, aborting");
 			return Response.serverError().build();
 		}
 		if(!oFile.isDirectory()) {
-			WasdiLog.debugLog("CatalogResource.zipSentinelProduct: file " + oFile.getAbsolutePath() + " is not a directory, aborting");
+			WasdiLog.debugLog("CatalogResource.zipProductFolder: file " + oFile.getAbsolutePath() + " is not a directory, aborting");
 			return Response.serverError().build();
 		}
 		Map<String, File> aoFileEntries = new HashMap<>();
@@ -1036,15 +1056,14 @@ public class CatalogResources {
 			.filter(oPath -> !Files.isDirectory(oPath))
 			.forEach(oPath -> {
 				String sPath = oFile.getName() + File.separator + oPath.toFile().getName();
-				WasdiLog.debugLog("CatalogResource.zipSentinelProduct: adding file: " + sPath);
+				WasdiLog.debugLog("CatalogResource.zipProductFolder: adding file: " + sPath);
 				aoFileEntries.put(sPath, oPath.toFile());
 			});
 		} catch (Exception oE) {
-			WasdiLog.errorLog("CatalogResource.zipSentinelProduct: exception while adding files to zip", oE);
+			WasdiLog.errorLog("CatalogResource.zipProductFolder: exception while adding files to zip", oE);
 		}
 
-		
-		return zipOnTheFly(aoFileEntries, oFile.getName().toUpperCase().replace(sDirectoryExtension, sZipExtension));
+		return zipOnTheFly(aoFileEntries, sZippedOutputFileName);
 	}
 	
 	/**
@@ -1071,6 +1090,8 @@ public class CatalogResources {
 				return zipSentinel3(oInitialFile);
 			} else if (MissionUtils.isSentinel6Directory(oInitialFile)) {
 				return zipSentinel6(oInitialFile);
+			} else if (MissionUtils.isLandsat5File(oInitialFile)) {
+				return zipLandsat5(oInitialFile);
 			}
 		} 
 		catch (Exception oEx) {
@@ -1102,7 +1123,8 @@ public class CatalogResources {
 					sName.endsWith(".dim") ||
 					WasdiFileUtils.isShapeFile(oFile) ||
 					MissionUtils.isSentinel3Directory(oFile) ||
-					MissionUtils.isSentinel6Directory(oFile)
+					MissionUtils.isSentinel6Directory(oFile) ||
+					MissionUtils.isLandsat5File(oFile)
 					);
 		}
 		return bRet;
