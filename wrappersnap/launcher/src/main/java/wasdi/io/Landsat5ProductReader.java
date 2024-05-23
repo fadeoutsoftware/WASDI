@@ -1,28 +1,36 @@
 package wasdi.io;
 
-import java.awt.Dimension;
-import java.awt.image.ColorModel;
-import java.awt.image.RenderedImage;
 import java.io.File;
-import java.io.IOException;
 
 import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.core.util.geotiff.GeoTIFF;
-import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 
-import wasdi.shared.queryexecutors.Platforms;
-import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.snapopearations.BandImageManager;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class Landsat5ProductReader extends SnapProductReader {
 
 	public Landsat5ProductReader(File oProductFile) {
-		super(oProductFile);
+		super(oProductFile);	
+	}
+	
+	@Override
+	public ProductViewModel getProductViewModel() {
+		WasdiLog.debugLog("Landsat5ProductReader.getProductViewModel. Product file path " + m_oProductFile.getAbsolutePath());
+		
+		ProductViewModel oViewModel = new ProductViewModel();
+
+        // Get Bands
+        this.getSnapProductBandsViewModel(oViewModel, getSnapProduct());
+        
+        if (m_oProductFile!=null) {
+        	oViewModel.setFileName(m_oProductFile.getName());
+        	oViewModel.setName(m_oProductFile.getName());
+        }
+
+        WasdiLog.debugLog("Landsat5ProductReader.getProductViewModel: done");
+		return oViewModel;
 	}
 	
 	@Override
@@ -92,13 +100,6 @@ public class Landsat5ProductReader extends SnapProductReader {
 		return oSNAPProduct;
 	}
 
-	// PRODUCT VIEW MODEL -> OK. Usa il metodo getSnapProduct()
-	
-	// GET PRODUCT BOUNDING BOX -> Dovrebbe funzionare, ma c'e' una conversione a Mollweid coordinates coordinates che non sono sicura sia giusta 
-	
-	// GET PRODUCT METADATA VIEW MODEL -> ok, se faccio funzionale il metodo getSnapProduct()
-	
-	// ADJUST PRODUCT AFTER DOWNLOAD -> QUESTO DOVREBBE FUNZIONARE se copio e incollo quello che ho fatto in snap product reader
 	@Override
 	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
 		String sFileName = sDownloadedFileFullPath;
@@ -136,19 +137,18 @@ public class Landsat5ProductReader extends SnapProductReader {
 		return sFileName;
 	}
 	
-	// GET FILE FOR PUBLISH BAND -> devo vedere. Non sono sicura se riesco a farlo
-
 	
 	public static void main(String [] args) throws Exception {
 		String sFilePath = "C:/Users/valentina.leone/Desktop/WORK/Landsat-5/test_code/LS05_RMTI_TM__GTC_1P_20050511T093014_20050511T093042_112727_0190_0021_DC6B.zip";
 		Landsat5ProductReader oPR = new Landsat5ProductReader(new File(sFilePath));
 		oPR.adjustFileAfterDownload(sFilePath, "LS05_RMTI_TM__GTC_1P_20050511T093014_20050511T093042_112727_0190_0021_DC6B.zip");
-		File oFile = oPR.getFileForPublishBand("radiance_6", "1111-1111-1111");
+		/* File oFile = oPR.getFileForPublishBand("radiance_6", "1111-1111-1111");
 		if (oFile == null)
 			System.out.println("ERROR: file is null");
 		else {
 			System.out.println("File path: " + oFile.getAbsolutePath());
-		}
+		}*/
+		System.out.println(oPR.getProductBoundingBox());
 	}
 	
 }
