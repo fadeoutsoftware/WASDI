@@ -6,11 +6,6 @@ import java.net.CookieManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.abdera.Abdera;
-import org.apache.abdera.model.Element;
-import org.apache.abdera.model.Feed;
-import org.apache.abdera.parser.Parser;
-import org.apache.abdera.parser.ParserOptions;
 import org.json.JSONObject;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
@@ -91,46 +86,46 @@ public class QueryExecutorLSA extends QueryExecutor {
 		
 		try {
 			
-			// Parse results with abdera
-			Abdera oAbdera = new Abdera();
-			
-			Parser oParser = oAbdera.getParser();
-			ParserOptions oParserOptions = oParser.getDefaultParserOptions();
-			
-			oParserOptions.setCharset("UTF-8");
-			oParserOptions.setFilterRestrictedCharacterReplacement('_');
-			oParserOptions.setFilterRestrictedCharacters(true);
-			oParserOptions.setMustPreserveWhitespace(false);
-			oParserOptions.setParseFilter(null);
-
-			org.apache.abdera.model.Document<Feed> oDocument = null;
-			
-			oDocument = oParser.parse(new StringReader(sRLSAResults), oParserOptions);
-			
-			if (oDocument == null) {
-				WasdiLog.debugLog("QueryExecutorLSA.executeCount: Document response null, aborting");
-				return -1;
-			}
-			
-			// Extract the count
-			Feed oFeed = (Feed) oDocument.getRoot();
-			String sText = null;
-			for (Element oElement : oFeed.getElements()) {
-				if (oElement.getQName().getLocalPart().equals("totalResults")) {
-					sText = oElement.getText();
-					break;
-				}
-			} 
-			
-			WasdiLog.debugLog("QueryExecutorLSA.executeCount: " + sText);
-			
-			try {
-				// Cast the result
-				iCount = Integer.parseInt(sText);
-			}
-			catch (Exception oEx) {
-				WasdiLog.debugLog("QueryExecutorLSA.executeCount: Exception = " + oEx.toString());
-			}
+//			// Parse results with abdera
+//			Abdera oAbdera = new Abdera();
+//			
+//			Parser oParser = oAbdera.getParser();
+//			ParserOptions oParserOptions = oParser.getDefaultParserOptions();
+//			
+//			oParserOptions.setCharset("UTF-8");
+//			oParserOptions.setFilterRestrictedCharacterReplacement('_');
+//			oParserOptions.setFilterRestrictedCharacters(true);
+//			oParserOptions.setMustPreserveWhitespace(false);
+//			oParserOptions.setParseFilter(null);
+//
+//			org.apache.abdera.model.Document<Feed> oDocument = null;
+//			
+//			oDocument = oParser.parse(new StringReader(sRLSAResults), oParserOptions);
+//			
+//			if (oDocument == null) {
+//				WasdiLog.debugLog("QueryExecutorLSA.executeCount: Document response null, aborting");
+//				return -1;
+//			}
+//			
+//			// Extract the count
+//			Feed oFeed = (Feed) oDocument.getRoot();
+//			String sText = null;
+//			for (Element oElement : oFeed.getElements()) {
+//				if (oElement.getQName().getLocalPart().equals("totalResults")) {
+//					sText = oElement.getText();
+//					break;
+//				}
+//			} 
+//			
+//			WasdiLog.debugLog("QueryExecutorLSA.executeCount: " + sText);
+//			
+//			try {
+//				// Cast the result
+//				iCount = Integer.parseInt(sText);
+//			}
+//			catch (Exception oEx) {
+//				WasdiLog.debugLog("QueryExecutorLSA.executeCount: Exception = " + oEx.toString());
+//			}
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("QueryExecutorLSA.executeCount: Exception = " + oEx.toString());

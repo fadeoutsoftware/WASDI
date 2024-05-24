@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -392,13 +390,13 @@ public class AuthResource {
 			WasdiLog.debugLog("AuthResource.createSftpAccount: email null or empty, aborting");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
-		try {
-			InternetAddress oEmailAddr = new InternetAddress(sEmail);
-			oEmailAddr.validate();
-		} catch (AddressException oEx) {
-			WasdiLog.errorLog("AuthResource.createSftpAccount: email is invalid, aborting");
-			return Response.status(Status.BAD_REQUEST).build();
-		}
+//		try {
+//			InternetAddress oEmailAddr = new InternetAddress(sEmail);
+//			oEmailAddr.validate();
+//		} catch (AddressException oEx) {
+//			WasdiLog.errorLog("AuthResource.createSftpAccount: email is invalid, aborting");
+//			return Response.status(Status.BAD_REQUEST).build();
+//		}
 		
 		try {	
 			

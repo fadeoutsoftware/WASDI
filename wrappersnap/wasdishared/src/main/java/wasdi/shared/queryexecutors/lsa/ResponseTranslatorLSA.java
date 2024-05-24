@@ -1,6 +1,7 @@
 package wasdi.shared.queryexecutors.lsa;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -9,22 +10,19 @@ import java.util.Base64;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.abdera.Abdera;
-import org.apache.abdera.model.Element;
-import org.apache.abdera.model.Entry;
-import org.apache.abdera.model.Feed;
-import org.apache.abdera.model.Link;
-import org.apache.abdera.parser.Parser;
-import org.apache.abdera.parser.ParserOptions;
-import org.apache.abdera.protocol.Response.ResponseType;
-import org.apache.abdera.protocol.client.AbderaClient;
-import org.apache.abdera.protocol.client.ClientResponse;
-import org.apache.abdera.protocol.client.RequestOptions;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import wasdi.shared.queryexecutors.ResponseTranslator;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 public class ResponseTranslatorLSA extends ResponseTranslator {
@@ -34,52 +32,51 @@ public class ResponseTranslatorLSA extends ResponseTranslator {
 		
 		List<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
 		
+		DocumentBuilderFactory oDocBuildFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder oDocBuilder;		
+		
 		try {
 			
-			// Parse results with abdera
-			Abdera oAbdera = new Abdera();
+			oDocBuilder = oDocBuildFactory.newDocumentBuilder();
+			Document oResultsXml = oDocBuilder.parse(new InputSource(new StringReader(sJson)));
+			oResultsXml.getDocumentElement().normalize();
+			WasdiLog.debugLog("ResponseTranslatorLSA.translateBatch root element: " + oResultsXml.getDocumentElement().getNodeName());
 			
-			AbderaClient oClient = new AbderaClient(oAbdera);
-			oClient.setConnectionTimeout(15000);
-			oClient.setSocketTimeout(40000);
-			oClient.setConnectionManagerTimeout(20000);
-			oClient.setMaxConnectionsTotal(200);
-			oClient.setMaxConnectionsPerHost(50);
-	
-			// get default request option
-			RequestOptions oOptions = oClient.getDefaultRequestOptions();			
+			// loop through each Entry item
+			NodeList aoItems = oResultsXml.getElementsByTagName("entry");
 			
-			Parser oParser = oAbdera.getParser();
-			ParserOptions oParserOptions = oParser.getDefaultParserOptions();
-			
-			oParserOptions.setCharset("UTF-8");
-			oParserOptions.setFilterRestrictedCharacterReplacement('_');
-			oParserOptions.setFilterRestrictedCharacters(true);
-			oParserOptions.setMustPreserveWhitespace(false);
-			oParserOptions.setParseFilter(null);
-
-			org.apache.abdera.model.Document<Feed> oDocument = null;
-			
-			oDocument = oParser.parse(new StringReader(sJson), oParserOptions);
-			
-			if (oDocument == null) {
-				WasdiLog.debugLog("ResponseTranslatorLSA.executeAndRetrieve: Document response null, aborting");
-				return aoResults;
-			}
-			
-			// Extract the count
-			Feed oFeed = (Feed) oDocument.getRoot();
-
-			for (Entry oEntry : oFeed.getEntries()) {
-
+			for (int iItem = 0; iItem < aoItems.getLength(); iItem++)
+			{
+				// We need an Element Node
+				org.w3c.dom.Node oNode = aoItems.item(iItem);
+				if (oNode.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE)  continue;
+				
+				Element oEntry = (Element) oNode;
+				
 				QueryResultViewModel oResult = new QueryResultViewModel();
 				
+				// Summary for later
 				String sSummary = "";
-				
+
+				// Fixed Data Provider
 				oResult.setProvider("LSA");
-				//retrive the title
-				String sTitle = oEntry.getTitle();
-				oResult.setTitle(sTitle);
+				
+				// Get the Title
+				String sTitle = "";
+				
+				// Search the position (we assume we will receive only one)
+				NodeList aoTitleList = oEntry.getElementsByTagName("title");
+				
+				for (int iTitle = 0; iTitle < aoTitleList.getLength(); iTitle++) {
+					org.w3c.dom.Node oTitleNode = aoTitleList.item(iTitle);
+					
+					if (oTitleNode.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) continue;
+					
+					Element oTitleEntry = (Element) oTitleNode;
+					
+					sTitle = oTitleEntry.getTextContent();
+					oResult.setTitle(sTitle);					
+				}				
 				
 				// Relative Orbit				
 				if (sTitle.startsWith("S1")) {
@@ -136,8 +133,6 @@ public class ResponseTranslatorLSA extends ResponseTranslator {
 					}
 					
 					sSummary = "Satellite: Sentinel-1, " + sMode;
-					
-					
 				}
 				else if (sTitle.startsWith("S2")) {
 					// Split the title
@@ -172,70 +167,88 @@ public class ResponseTranslatorLSA extends ResponseTranslator {
 					sSummary = "Satellite: Sentinel-2, Mode: MSI, Instrument: INS-NOBS";
 				}
 				
-				// Set platform
-				oResult.getProperties().put("platform", sTitle.substring(0, 3));
-				oResult.getProperties().put("platformname", sTitle.substring(0, 3));
+				if (!Utils.isNullOrEmpty(sTitle)) {
+					// Set platform
+					oResult.getProperties().put("platform", sTitle.substring(0, 3));
+					oResult.getProperties().put("platformname", sTitle.substring(0, 3));					
+				}
 				
+								
+				// Get the id
+				NodeList aoIdList = oEntry.getElementsByTagName("id");
 				
-				//retrieve the id
-				oResult.setId(oEntry.getId().toString());
-
-				//retrieve the link
-				List<Link> aoLinks = oEntry.getLinks();
-				
-				for (Link oLink : aoLinks) {
+				for (int iId = 0; iId < aoIdList.getLength(); iId++) {
+					org.w3c.dom.Node oIdNode = aoIdList.item(iId);
 					
-					if (oLink.getTitle().contains("Source package download")) {
-						String sLink = "https://collgs.lu/" + oLink.getHref().toString();
+					if (oIdNode.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) continue;
+					
+					Element oIdEntry = (Element) oIdNode;
+					
+					String sId = oIdEntry.getTextContent();
+					oResult.setId(sId);					
+				}
+				
+				// Get the links
+				NodeList aoLinks = oEntry.getElementsByTagName("link");
+				
+				for (int iLink = 0; iLink < aoLinks.getLength(); iLink++) {
+					
+					org.w3c.dom.Node oLinkNode = aoLinks.item(iLink);
+					
+					if (oLinkNode.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) continue;
+					
+					Element oLinkEntry = (Element) oLinkNode;
+					
+					if (!oLinkEntry.hasAttribute("title")) continue;
+						
+					// Extract Download link
+					if (oLinkEntry.getAttribute("title").equals("Source package download")) {
+						String sLink = "https://collgs.lu/" + oLinkEntry.getAttribute("href");
 						oResult.setLink(sLink);
 					}
 					
+					// And foot print if needed
 					if (bFullViewModel) {
-						if (oLink.getTitle().contains("Quicklook")) {
-							
-							if (oLink != null) {
+						if (oLinkEntry.getAttribute("title").equals("Quicklook")) {
+							try {
+								
+								HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(oLinkEntry.getAttribute("href"));
+								
+								if (oHttpCallResponse.getResponseCode()>=200 && oHttpCallResponse.getResponseCode()<=299) {
 
-								try {
-									ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
-		
-									if (oImageResponse.getType() == ResponseType.SUCCESS) {
-		
-										InputStream oInputStreamImage = oImageResponse.getInputStream();
-										BufferedImage  oImage = ImageIO.read(oInputStreamImage);
-										ByteArrayOutputStream bas = new ByteArrayOutputStream();
-										ImageIO.write(oImage, "png", bas);
-										oResult.setPreview("data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
-									}				
-								}
-								catch (Exception e) {
-									WasdiLog.debugLog("ResponseTranslatorLSA.translateBatch: Image Preview Cycle Exception " + e.toString());
-								}					
-							} 
-						}						
+									InputStream oInputStreamImage = new ByteArrayInputStream(oHttpCallResponse.getResponseBytes());
+									BufferedImage  oImage = ImageIO.read(oInputStreamImage);
+									ByteArrayOutputStream bas = new ByteArrayOutputStream();
+									ImageIO.write(oImage, "png", bas);
+									oResult.setPreview("data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
+								}				
+							}
+							catch (Exception e) {
+								WasdiLog.debugLog("ResponseTranslatorLSA.translateBatch: Image Preview Cycle Exception " + e.toString());
+							}												
+						}
 					}
-				}
-
-				//retrieve the footprint and all others properties
-				List<Element> aoElements = oEntry.getElements();
+				} // End Cycle on links
 				
-				for (Element oElement : aoElements) {
+				// Search the position (we assume we will receive only one)
+				NodeList aoFootprint = oEntry.getElementsByTagName("georss:where");
+				
+				for (int iFootprint = 0; iFootprint < aoFootprint.getLength(); iFootprint++) {
+					org.w3c.dom.Node oFootPrintNode = aoFootprint.item(iFootprint);
 					
-					String sName = oElement.getQName().toString();
+					if (oFootPrintNode.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) continue;
 					
-					if (sName != null) {
-						if (sName.equals("{http://www.georss.org/georss}where")) {
+					Element oFootPrintEntry = (Element) oFootPrintNode;
+					
+					NodeList aoPositionListNodeList = oFootPrintEntry.getElementsByTagName("gml:posList");
+					
+					if (aoPositionListNodeList.getLength()>0) {
+						org.w3c.dom.Node oPositionListNode = aoPositionListNodeList.item(iFootprint);
+						if (oFootPrintNode.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+							Element oPositionListEntry = (Element) oPositionListNode;
 							
 							try {
-								// Get Polygon
-								Element oChild = oElement.getFirstChild();
-								// Get exterior
-								oChild = oChild.getFirstChild();
-								// Get Linear Ring
-								oChild = oChild.getFirstChild();
-								// Get PosList
-								oChild = oChild.getFirstChild();
-							
-								String sPoints = oChild.getText();
+								String sPoints = oPositionListEntry.getTextContent();
 								String sCommaPoints = "";
 								
 								String [] asPoints = sPoints.split(" ");
@@ -248,35 +261,41 @@ public class ResponseTranslatorLSA extends ResponseTranslator {
 								}
 								
 								String sFootPrint = "POLYGON ((" + sCommaPoints + "))";								
-								oResult.setFootprint(sFootPrint);
-								
+								oResult.setFootprint(sFootPrint);									
 							}
 							catch (Exception oEx) {
 								WasdiLog.debugLog("Exception " + oEx.toString());
-							}
-						}
-						else if (sName.equals("{http://purl.org/dc/elements/1.1/}date")) {
-							
-							String sDate = oElement.getText();
-							
-							
-							if (!Utils.isNullOrEmpty(sDate)) {
-								String asParts[] = sDate.split("/");
-								if (asParts != null) {
-									if (asParts.length>0) {
-										sSummary += ", Date: " + asParts[0];
-									}
-								}
-							}
-							
+							}								
 						}
 					}
 				}
 				
-				oResult.setSummary(sSummary);
+				// Search the position (we assume we will receive only one)
+				NodeList aoDateList = oEntry.getElementsByTagName("dc:date");
 				
-				aoResults.add(oResult);
-			} 
+				for (int iDate = 0; iDate < aoDateList.getLength(); iDate++) {
+					org.w3c.dom.Node oDateNode = aoDateList.item(iDate);
+					
+					if (oDateNode.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) continue;
+					
+					Element oDateEntry = (Element) oDateNode;
+					
+					try {
+						String sDate = oDateEntry.getTextContent();
+						
+						String [] asDates = sDate.split("/");
+						
+						if (asDates.length>0) sSummary += ", Date: " + asDates[0];				
+					}
+					catch (Exception oEx) {
+						WasdiLog.debugLog("Exception " + oEx.toString());
+					}						
+				}
+				
+				oResult.setSummary(sSummary);				
+				aoResults.add(oResult);		
+			}
+			
 			
 			WasdiLog.debugLog("ResponseTranslatorLSA.translateBatch: Search Done: found " + aoResults.size() + " results");		
 		}

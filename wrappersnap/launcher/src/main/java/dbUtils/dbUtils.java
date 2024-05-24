@@ -1,4 +1,5 @@
 package dbUtils;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -2579,8 +2580,7 @@ public class dbUtils {
     			
             } catch (Exception exp) {
                 // no log4j configuration
-                System.err.println("DbUtils - Error loading log configuration.  Reason: "
-                        + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
+                System.err.println("DbUtils - Error loading log configuration.  Reason: " + exp.toString());
             }
 
             // If this is not the main node

@@ -24,10 +24,7 @@ public class ProviderAdapterFactory {
 	static {
 		final Map<String, Supplier<ProviderAdapter>> aoDownloaders = new HashMap<>();
 		aoDownloaders.put("ONDA", ONDAProviderAdapter::new);
-		aoDownloaders.put("SENTINEL", DhUSProviderAdapter::new);
-		aoDownloaders.put("MATERA", DhUSProviderAdapter::new);
 		aoDownloaders.put("PROBAV", PROBAVProviderAdapter::new);
-		aoDownloaders.put("FEDEO", DhUSProviderAdapter::new);
 		aoDownloaders.put("CREODIAS", CREODIASProviderAdapter::new);
 		aoDownloaders.put("CREODIAS2", CreoDias2ProviderAdapter::new);
 		aoDownloaders.put("SOBLOO", SOBLOOProviderAdapter::new);

@@ -1034,9 +1034,10 @@ public class WorkflowsResource {
      * @return true if ok, false in case of problems
      */
     protected boolean fillWorkflowIONodes(File oFile, SnapWorkflow oSnapWorflow) {
+    	
 		DocumentBuilderFactory oDocBuildFactory = DocumentBuilderFactory.newInstance();
-		
 		DocumentBuilder oDocBuilder;
+		
 		try {
 			
 			oDocBuilder = oDocBuildFactory.newDocumentBuilder();

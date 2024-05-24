@@ -18,13 +18,10 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionAbderaClient>1.1.3</sVersionAbderaClient>
-        <sVersionAbderaCore>1.1.3</sVersionAbderaCore>
-        <sVersionAbderaExtensionsJson>1.1.3</sVersionAbderaExtensionsJson>
         <sVersionAmqpClient>5.18.0</sVersionAmqpClient>
         <sVersionAssertjCore>3.18.1</sVersionAssertjCore>
         <sVersionAwsJavaSdkS3>1.12.392</sVersionAwsJavaSdkS3>
@@ -44,7 +41,7 @@
         <sVersionJunitJupiter>5.7.0</sVersionJunitJupiter>
         <sVersionLog4j>2.20.0</sVersionLog4j>
         <sVersionLombok>1.18.22</sVersionLombok>
-        <sVersionMockFtpServer>2.7.1</sVersionMockFtpServer>
+        <!--sVersionMockFtpServer>2.7.1</sVersionMockFtpServer-->
         <sVersionMongoDb>4.3.4</sVersionMongoDb>
         <sVersionGeoTools>20.0</sVersionGeoTools>
         <sVersionJersey2>2.38</sVersionJersey2>
@@ -97,7 +94,7 @@
         </plugins>
     </build>
 
-    <dependencies>
+    <dependencies>	
 		<!-- https://mvnrepository.com/artifact/com.github.docker-java/docker-java -->
 		<dependency>
 		    <groupId>com.github.docker-java</groupId>
@@ -121,24 +118,6 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${sVersionJackson}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-core -->
-        <dependency>
-            <groupId>org.apache.abdera</groupId>
-            <artifactId>abdera-core</artifactId>
-            <version>${sVersionAbderaCore}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-client -->
-        <dependency>
-            <groupId>org.apache.abdera</groupId>
-            <artifactId>abdera-client</artifactId>
-            <version>${sVersionAbderaClient}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-extensions-json -->
-        <dependency>
-            <groupId>org.apache.abdera</groupId>
-            <artifactId>abdera-extensions-json</artifactId>
-            <version>${sVersionAbderaExtensionsJson}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
         <dependency>
@@ -228,12 +207,12 @@
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.mockftpserver/MockFtpServer -->
-        <dependency>
+        <!--dependency>
             <groupId>org.mockftpserver</groupId>
             <artifactId>MockFtpServer</artifactId>
             <version>${sVersionMockFtpServer}</version>
             <scope>test</scope>
-        </dependency>
+        </dependency-->
         <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
         <dependency>
             <groupId>org.assertj</groupId>
@@ -242,11 +221,11 @@
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
-        <dependency>
+        <!--dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <version>${sVersionJaxbApi}</version>
-        </dependency>
+        </dependency-->
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
