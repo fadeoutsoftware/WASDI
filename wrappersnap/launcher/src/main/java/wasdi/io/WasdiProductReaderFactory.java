@@ -54,8 +54,9 @@ public class WasdiProductReaderFactory {
 			return new Sentinel6ProductReader(oFile);
 		}
 		
-		if (MissionUtils.isLandsat5File(oFile)) {
-			return new Landsat5ProductReader(oFile);
+		if (MissionUtils.isLandsat5File(oFile) 
+				|| MissionUtils.isLandsat7File(oFile)) {
+			return new LandsatProductReader(oFile);
 		}
 
 		if (oFile.getName().toLowerCase().endsWith(".nc")) {

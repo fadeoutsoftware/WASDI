@@ -1,6 +1,5 @@
 package wasdi.shared.queryexecutors.creodias2;
 
-import java.nio.file.attribute.PosixFileAttributeView;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -50,13 +49,14 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		asODATA_ABSOLUTE_ORBIT_MAP.put(Platforms.SENTINEL5P, "orbitNumber");
 		asODATA_ABSOLUTE_ORBIT_MAP.put(Platforms.ENVISAT, "cycleNumber");
 		asODATA_ABSOLUTE_ORBIT_MAP.put(Platforms.LANDSAT5, "rowNumber");
-		
+		asODATA_ABSOLUTE_ORBIT_MAP.put(Platforms.LANDSAT7, "rowNumber");
+	
 		asODATA_RELATIVE_ORBIT_MAP.put(Platforms.SENTINEL1, "relativeOrbitNumber");
 		asODATA_RELATIVE_ORBIT_MAP.put(Platforms.SENTINEL3, "relativeOrbitNumber");
 		asODATA_RELATIVE_ORBIT_MAP.put(Platforms.SENTINEL6, "relativeOrbitNumber");
-		asODATA_RELATIVE_ORBIT_MAP.put(Platforms.LANDSAT5, "rowNumber");
-		
-		
+		asODATA_RELATIVE_ORBIT_MAP.put(Platforms.LANDSAT5, "pathNumber");
+		asODATA_RELATIVE_ORBIT_MAP.put(Platforms.LANDSAT7, "pathNumber");
+
 		asODATA_TIMELINESS_MAP.put(Platforms.SENTINEL1, "swathIdentifier");
 		asODATA_TIMELINESS_MAP.put(Platforms.SENTINEL3, "timeliness");
 		asODATA_TIMELINESS_MAP.put(Platforms.SENTINEL5P, "processingMode");
@@ -71,7 +71,6 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		String sQuery = this.prepareQuery(sQueryFromClient);
 		QueryViewModel oQueryViewModel = parseWasdiClientQuery(sQuery);
 		refineQueryViewModel(sQuery, oQueryViewModel);
-		
 		
 		List<String> asQueryElements = new LinkedList<>();
 		
