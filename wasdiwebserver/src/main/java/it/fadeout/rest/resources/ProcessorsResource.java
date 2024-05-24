@@ -2289,7 +2289,9 @@ public class ProcessorsResource  {
 	}
 	
 	/**
-	 * Check if an app has being set for purchase and if the run of the app has been purchased
+	 * Check if an app has being set for purchase and if the run of the app has been purchased.
+	 * If the app has being set for being sold, it checks if the user needs actually to pay the app or exceptions apply.
+	 * An exception appies when the user is the owner of the app or the app has been shared with that user.
 	 * @param sSessionId user session id
 	 * @param sProcessorId the id of the app
 	 * @return true if the run has been correctly purchased, false otherwise
@@ -2324,6 +2326,21 @@ public class ProcessorsResource  {
 			if (fOnDemandPrice != null && fOnDemandPrice == 0) {
 				WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: processor " + sProcessorId + " is free of charge");
 				return Response.ok(true).build();
+			}
+			
+			// the owner of the app can always run the app for free
+			if (oProcessor.getUserId().equals(oUser.getUserId())) {
+				WasdiLog.debugLog(
+						"ProcessorsResource.checkAppPurchase: processor " + sProcessorId + " is set for purchase but the user " + oProcessor.getUserId() + " is the app's owner");
+				return Response.ok(true).build();
+			}
+			
+			// if there user has a "write" permission on the processor, then the user can run the app for free 
+			UserResourcePermissionRepository oPermissionRepo = new UserResourcePermissionRepository();
+			List<UserResourcePermission> aoPermissions = oPermissionRepo.getPermissionsByTypeAndUserId(ResourceTypes.PROCESSOR.getResourceType(), oUser.getUserId());
+			for (UserResourcePermission oPermission : aoPermissions) {
+				if (oPermission.getPermissions().equals("write"))
+					return Response.ok(true).build();
 			}
 			
 			AppPaymentRepository oAppPurchaseRepository = new AppPaymentRepository();
