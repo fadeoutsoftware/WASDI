@@ -1030,7 +1030,7 @@ public class CatalogResources {
 		return zipProductFolder(oInitialFile, sZippedOutputFileName);
 	}
 	
-	private Response zipLandsat5(File oInitialFile) {
+	private Response zipLandsat(File oInitialFile) {
 		if(oInitialFile == null) {
 			WasdiLog.debugLog("CatalogResource.zipLandsat5: passed a null file, aborting");
 			return Response.serverError().build();
@@ -1090,8 +1090,9 @@ public class CatalogResources {
 				return zipSentinel3(oInitialFile);
 			} else if (MissionUtils.isSentinel6Directory(oInitialFile)) {
 				return zipSentinel6(oInitialFile);
-			} else if (MissionUtils.isLandsat5File(oInitialFile)) {
-				return zipLandsat5(oInitialFile);
+			} else if (MissionUtils.isLandsat5File(oInitialFile) 
+					|| MissionUtils.isLandsat7File(oInitialFile) ) {
+				return zipLandsat(oInitialFile);
 			}
 		} 
 		catch (Exception oEx) {
@@ -1124,7 +1125,8 @@ public class CatalogResources {
 					WasdiFileUtils.isShapeFile(oFile) ||
 					MissionUtils.isSentinel3Directory(oFile) ||
 					MissionUtils.isSentinel6Directory(oFile) ||
-					MissionUtils.isLandsat5File(oFile)
+					MissionUtils.isLandsat5File(oFile) ||
+					MissionUtils.isLandsat7File(oFile)
 					);
 		}
 		return bRet;
