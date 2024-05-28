@@ -2,6 +2,9 @@ package wasdi.shared.queryexecutors.sina;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.time.YearMonth;
 
@@ -10,6 +13,7 @@ import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
@@ -18,12 +22,36 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 
 public class QueryExecutorSina extends QueryExecutor {
 
+	private String m_sFileListUrl = null;
+	
 	public QueryExecutorSina() {
 		this.m_sProvider = "SINA";
 		
 		this.m_oQueryTranslator = new QueryTranslatorSina();
 		this.m_oResponseTranslator = new ResponseTranslatorSina();
 		this.m_asSupportedPlatforms.add(Platforms.BIGBANG);
+	}
+	
+	@Override
+	public void init() {
+		super.init();
+		
+		try {
+			JSONObject oAppConf = JsonUtils.loadJsonFromFile(m_sParserConfigPath);
+			m_sFileListUrl = oAppConf.getString("fileListUrl");
+		}
+		catch (Exception oEx) {
+			WasdiLog.debugLog("QueryExecutorSina.init: exception reading parser config file " + m_sParserConfigPath);
+		}		
+	}
+	
+	
+	@Override
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+		if (sProduct.toUpperCase().startsWith("SPEI")) {
+			return sOriginalUrl;
+		}
+		return null;
 	}
 
 	@Override
@@ -152,7 +180,7 @@ public class QueryExecutorSina extends QueryExecutor {
 				.map(oRange -> sDatasetPrefix + "_" + oRange.getYear() + "_" + String.format("%02d", oRange.getMonthValue()))
 				.collect(Collectors.toList());
 		
-		List<String> aoZipFiles = getZipContent();
+		List<String> aoZipFiles = getZipContent(sDatasetPrefix);
 		
 		if (aoZipFiles == null) {
 			WasdiLog.warnLog("QueryExecutorSina.getRelevantFiles: list of files from data provider is null");
@@ -186,11 +214,25 @@ public class QueryExecutorSina extends QueryExecutor {
 	}
 	
 	
-	private List<String> getZipContent() {
+	private List<String> getZipContent(String sDatasetPrefix) {
 		List<String> aoFileList = null;
 		
-		// TODO: put this in the config
-		String sUrl = "https://groupware.sinanet.isprambiente.it/bigbang-data/library/bigbang_70/ascii_grid/spei/spei01_1952-2022_ascii-1/download/en/1/SPEI01_1952-2022_ASCII.zip?action=view";
+		if (Utils.isNullOrEmpty(m_sFileListUrl)) {
+			WasdiLog.warnLog("QueryExecutorSina.getZipContent. Path to parser config is null");
+			return aoFileList;
+		}
+		
+		String sUrl = m_sFileListUrl; // "https://groupware.sinanet.isprambiente.it/bigbang-data/library/bigbang_70/ascii_grid/spei/spei01_1952-2022_ascii-1/download/en/1/SPEI01_1952-2022_ASCII.zip?action=view";
+		if (!sUrl.endsWith("/"))
+			sUrl += "/";
+		
+		if (sDatasetPrefix.equals("SPEI01")) {
+			sUrl += "spei01_1952-2022_ascii-1/download/en/1/SPEI01_1952-2022_ASCII.zip?action=view";
+		} else {
+			WasdiLog.warnLog("QueryExecutorSina.getZipContent. Unknown url for dataset " + sDatasetPrefix);
+			return aoFileList;
+		}
+		
 		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
 		
 		if (oResponse.getResponseCode() >= 200 || oResponse.getResponseCode() <= 299) {
@@ -221,17 +263,6 @@ public class QueryExecutorSina extends QueryExecutor {
 		}
 		return asSanitizedLines;
 	}
-	
-	
-	public static void main(String[]args) throws Exception {
-		WasdiConfig.readConfig("C:/temp/wasdi/wasdiLocalTESTConfig.json");
-		QueryExecutorSina oQE = new QueryExecutorSina();
-//		List<YearMonth> aoList = oQE.generateYearMonthRange(2000, 2, 2001, 3);
-//		aoList.forEach(oYM -> System.out.println(oYM.getMonthValue() + " " + oYM.getYear()));
-		oQE.getZipContent();
 
-
-		
-	}
 
 }
