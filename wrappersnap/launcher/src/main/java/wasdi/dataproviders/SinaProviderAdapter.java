@@ -3,7 +3,6 @@ package wasdi.dataproviders;
 import org.json.JSONObject;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
