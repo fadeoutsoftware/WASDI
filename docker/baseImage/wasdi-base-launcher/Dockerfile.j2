@@ -142,39 +142,38 @@ RUN apt-get update && \
 # From now, all commands executed are executed with the user '{{ sWasdiSystemUserName }}'
 USER {{ sWasdiSystemUserName }}
 
-
-# RUN specific to install JDK 8
+# RUN specific to install JDK 17
 RUN mkdir --parents \
-        {{ sWasdiJdk8RootDirectoryPath }} \
-        {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} && \
-    chown {{ sWasdiJdk8RootDirectoryOwner }}:{{ sWasdiJdk8RootDirectoryGroup }} \
-        {{ sWasdiJdk8RootDirectoryPath }} \
-        {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} && \
-    chmod {{ sWasdiJdk8RootDirectoryMode }} \
-        {{ sWasdiJdk8RootDirectoryPath }} \
-        {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} && \
+        {{ sWasdiJdk17RootDirectoryPath }} \
+        {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} && \
+    chown {{ sWasdiJdk17RootDirectoryOwner }}:{{ sWasdiJdk17RootDirectoryGroup }} \
+        {{ sWasdiJdk17RootDirectoryPath }} \
+        {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} && \
+    chmod {{ sWasdiJdk17RootDirectoryMode }} \
+        {{ sWasdiJdk17RootDirectoryPath }} \
+        {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} && \
     wget \
         --no-verbose \
-        --output-document /tmp/{{ sWasdiJdk8SourceUrl | basename }} \
+        --output-document /tmp/{{ sWasdiJdk17SourceUrl | basename }} \
         --progress=bar:force:noscroll \
         --show-progress \
-        {{ sWasdiJdk8SourceUrl }} && \
+        {{ sWasdiJdk17SourceUrl }} && \
     tar \
-        --directory {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} \
+        --directory {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} \
         --extract \
-        --file /tmp/{{ sWasdiJdk8SourceUrl | basename }} \
+        --file /tmp/{{ sWasdiJdk17SourceUrl | basename }} \
         --strip-components=1 && \
     ln \
         --symbolic \
-        {{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }} \
-        {{ sWasdiJdk8RootDirectoryPath }}/latest && \
-    chown --no-dereference {{ sWasdiJdk8RootDirectoryOwner }}:{{ sWasdiJdk8RootDirectoryGroup }} \
-        {{ sWasdiJdk8RootDirectoryPath }}/latest && \
+        {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} \
+        {{ sWasdiJdk17RootDirectoryPath }}/latest && \
+    chown --no-dereference {{ sWasdiJdk17RootDirectoryOwner }}:{{ sWasdiJdk17RootDirectoryGroup }} \
+        {{ sWasdiJdk17RootDirectoryPath }}/latest && \
     rm --force \
-        /tmp/{{ sWasdiJdk8SourceUrl | basename }}
+        /tmp/{{ sWasdiJdk17SourceUrl | basename }}
 
-ENV JAVA_HOME="{{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }}"
-ENV PATH="{{ sWasdiJdk8RootDirectoryPath }}/{{ sWasdiJdk8Version }}/bin:${PATH}"
+ENV JAVA_HOME="{{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }}"
+ENV PATH="{{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }}/bin:${PATH}"
 
 
 # Set the workdir

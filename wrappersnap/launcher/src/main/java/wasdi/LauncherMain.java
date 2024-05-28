@@ -3,8 +3,6 @@ package wasdi;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Security;
@@ -27,7 +25,6 @@ import org.esa.snap.runtime.EngineConfig;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import sun.management.VMManagement;
 import wasdi.operations.Operation;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
@@ -663,17 +660,10 @@ public class LauncherMain  {
         Integer iPid = 0;
         try {
             RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-            Field jvmField = runtimeMXBean.getClass().getDeclaredField("jvm");
-            jvmField.setAccessible(true);
-            VMManagement vmManagement = (VMManagement) jvmField.get(runtimeMXBean);
-            Method getProcessIdMethod = vmManagement.getClass().getDeclaredMethod("getProcessId");
-            getProcessIdMethod.setAccessible(true);
-            iPid = (Integer) getProcessIdMethod.invoke(vmManagement);
-
+            iPid = (Integer) runtimeMXBean.getPid();
         } catch (Throwable oEx) {
             try {
-                WasdiLog.errorLog("LauncherMain.GetProcessId: Error getting processId: "
-                        + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                WasdiLog.errorLog("LauncherMain.GetProcessId: Error getting processId: ", oEx);
             } finally {
                 WasdiLog.errorLog("LauncherMain.GetProcessId: finally here");
             }
