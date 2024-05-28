@@ -142,18 +142,4 @@ public class LandsatProductReader extends SnapProductReader {
 		return sFileName;
 	}
 	
-	
-	public static void main(String [] args) throws Exception {
-		String sFilePath = "C:/Users/valentina.leone/Desktop/WORK/Landsat-5/test_code/LS05_RMTI_TM__GTC_1P_20050511T093014_20050511T093042_112727_0190_0021_DC6B.zip";
-		LandsatProductReader oPR = new LandsatProductReader(new File(sFilePath));
-		oPR.adjustFileAfterDownload(sFilePath, "LS05_RMTI_TM__GTC_1P_20050511T093014_20050511T093042_112727_0190_0021_DC6B.zip");
-		/* File oFile = oPR.getFileForPublishBand("radiance_6", "1111-1111-1111");
-		if (oFile == null)
-			System.out.println("ERROR: file is null");
-		else {
-			System.out.println("File path: " + oFile.getAbsolutePath());
-		}*/
-		System.out.println(oPR.getProductBoundingBox());
-	}
-	
 }
