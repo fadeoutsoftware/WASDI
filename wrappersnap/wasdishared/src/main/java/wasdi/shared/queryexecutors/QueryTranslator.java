@@ -149,6 +149,11 @@ public abstract class QueryTranslator {
 	 * Token of TERRA platform
 	 */
 	private static final String S_SPLATFORMNAME_TERRA = "platformname:TERRA";
+	
+	/**
+	 * Token of TERRA platform
+	 */
+	private static final String s_sPLATFORMNAME_BIGBANG = "platformname:BIGBANG";
 
 	/**
 	 * Token of product type
@@ -563,6 +568,8 @@ public abstract class QueryTranslator {
 			parseTerra(sQuery, oResult);
 			
 			parseStaticTiles(sQuery, oResult);
+			
+			parseBIGBANG(sQuery, oResult);
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
@@ -1010,7 +1017,6 @@ public abstract class QueryTranslator {
 	 * @param oResult the resulting Query View Model
 	 */
 	private void parseCM(String sQuery, QueryViewModel oResult) {
-		//WasdiLog.debugLog("QueryTranslator.parseCM | sQuery: " + sQuery);
 
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_CM)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_CM);
@@ -1039,6 +1045,15 @@ public abstract class QueryTranslator {
 					WasdiLog.debugLog("QueryTranslator.parseCM( " + sQuery  + " ): error while parsing endDepth: " + sEndDepth);
 				}
 			}
+		}
+	}
+	
+	private void parseBIGBANG(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_BIGBANG)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_BIGBANG);
+			
+			oResult.platformName = Platforms.BIGBANG;
+			oResult.sensorMode = extractValue(sQuery, "dataset");
 		}
 	}
 
