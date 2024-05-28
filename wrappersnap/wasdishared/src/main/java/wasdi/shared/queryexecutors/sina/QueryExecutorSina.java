@@ -8,7 +8,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.time.YearMonth;
 
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;

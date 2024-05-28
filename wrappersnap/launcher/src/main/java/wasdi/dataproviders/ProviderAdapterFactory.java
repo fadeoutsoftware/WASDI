@@ -45,6 +45,7 @@ public class ProviderAdapterFactory {
 		aoDownloaders.put("SKYWATCH", SkywatchProviderAdapter::new);
 		aoDownloaders.put("LPDAAC", LpDaacProviderAdapter::new);
 		aoDownloaders.put("JRC", JRCProviderAdapter::new);
+		aoDownloaders.put("SINA", SinaProviderAdapter::new);
 		s_aoDownloaderSuppliers = Collections.unmodifiableMap(aoDownloaders);
 	}
 
