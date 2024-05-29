@@ -118,6 +118,8 @@ public class LandsatProductReader extends SnapProductReader {
 	        	String sDownloadFolderPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
 	        	ZipFileUtils oZipExtractor = new ZipFileUtils();
 	        	oZipExtractor.unzip(sDownloadFolderPath + File.separator + sFileNameFromProvider, sDownloadFolderPath);
+	        	deleteDownloadedZipFile(sDownloadedFileFullPath);
+	        	
 	        	
 	        	String sLandsat5UnzippedFolderPath = sDownloadFolderPath + File.separator + sFileNameFromProvider.replace(".zip", "");
 	        	File oLandsat5UnzippedFolder = new File(sLandsat5UnzippedFolderPath);
@@ -141,5 +143,23 @@ public class LandsatProductReader extends SnapProductReader {
 		
 		return sFileName;
 	}
+	
+	/**
+	 * @param sFileNameFromProvider
+	 * @param sDownloadPath
+	 */
+	private void deleteDownloadedZipFile(String sDownloadedFileFullPath) {
+		try {
+			File oZipFile = new File(sDownloadedFileFullPath);
+			if(!oZipFile.delete()) {
+				WasdiLog.errorLog("LandsatProductReader.deleteZipFile: cannot delete zip file");
+			} else {
+				WasdiLog.debugLog("LandsatProductReader.deleteZipFile: file zip successfully deleted");
+			}
+		} catch (Exception oE) {
+			WasdiLog.errorLog("LandsatProductReader.deleteZipFile: exception while trying to delete zip file: " + oE ); 
+		}
+	}
+	
 	
 }
