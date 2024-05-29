@@ -40,7 +40,7 @@
         <sVersionLog4j>2.20.0</sVersionLog4j>
         <sVersionMongoDb>4.3.4</sVersionMongoDb>
         <sVersionGeoTools>29.5</sVersionGeoTools>
-        <sVersionJersey2>3.1.7</sVersionJersey2>
+        <sVersionJersey2>2.43</sVersionJersey2>
         <sVersionMercurius>1.0</sVersionMercurius>
     </properties>
 
