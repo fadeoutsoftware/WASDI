@@ -1,5 +1,11 @@
-eu.esa.opt.biophysical.BiophysicalActivatoreu.esa.opt.fu.ModuleActivatoreu.esa.opt.fub.wew.ModuleActivatoreu.esa.opt.meris.ModuleActivatororg.esa.snap.worldwind.WWActivatoreu.esa.snap.hdf.HdfActivatororg.esa.snap.lib.openjpeg.activator.OpenJPEGActivatororg.esa.snap.core.util.EngineVersionCheckActivator
-org.esa.snap.dataio.netcdf.NetCdfActivatororg.esa.snap.runtime.ActivatorsTest$A1
-org.esa.snap.runtime.ActivatorsTest$A2
-org.esa.snap.runtime.ActivatorsTest$A3
-org.esa.snap.core.gpf.operators.tooladapter.ToolAdapterActivatororg.esa.snap.vfs.activator.VFSPlugInActivatororg.csa.rstb.soilmoisture.SoilMoistureActivator
+eu.esa.opt.biophysical.BiophysicalActivator
+eu.esa.opt.fu.ModuleActivator
+eu.esa.opt.fub.wew.ModuleActivator
+eu.esa.opt.meris.ModuleActivator
+org.esa.snap.worldwind.WWActivator
+eu.esa.snap.hdf.HdfActivator
+org.esa.snap.lib.openjpeg.activator.OpenJPEGActivator
+org.esa.snap.core.util.EngineVersionCheckActivator
+org.esa.snap.dataio.netcdf.NetCdfActivator
+org.esa.snap.vfs.activator.VFSPlugInActivator
+org.csa.rstb.soilmoisture.SoilMoistureActivator
