@@ -22,7 +22,6 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionAbderaCore>1.1.3</sVersionAbderaCore>
         <sVersionAssertjCore>2.1.0</sVersionAssertjCore>
         <sVersionBcpkixJdk15on>1.78.1</sVersionBcpkixJdk15on>
         <sVersionCommonsCli>1.7.0</sVersionCommonsCli>
@@ -162,22 +161,6 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>${sVersionJson}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-core -->
-        <dependency>
-            <groupId>org.apache.abdera</groupId>
-            <artifactId>abdera-core</artifactId>
-            <version>${sVersionAbderaCore}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>xerces</groupId>
-                    <artifactId>xml-apis</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>xerces</groupId>
-                    <artifactId>xercesImpl</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- https://mvnrepository.com/artifact/xerces/xercesImpl -->
         <dependency>
