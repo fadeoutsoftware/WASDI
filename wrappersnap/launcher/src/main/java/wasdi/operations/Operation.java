@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
@@ -393,7 +394,7 @@ public abstract class Operation {
                 return true;
             }
         } catch (Exception e) {
-            WasdiLog.errorLog("LauncherMain.AddProductToWorkspace: Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
+            WasdiLog.errorLog("LauncherMain.AddProductToWorkspace: Exception " + ExceptionUtils.getStackTrace(e));
         }
 
         return false;

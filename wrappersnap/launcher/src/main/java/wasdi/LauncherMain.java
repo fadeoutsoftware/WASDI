@@ -16,6 +16,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.lib.openjpeg.utils.OpenJpegExecRetriever;
@@ -117,7 +118,7 @@ public class LauncherMain  {
             WasdiFileUtils.loadLogConfigFile(sThisFilePath);
             
         } catch (Exception exp) {
-            System.err.println("Launcher Main - Error setting the crypto policy.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
+            System.err.println("Launcher Main - Error setting the crypto policy.  Reason: " + ExceptionUtils.getStackTrace(exp));
         }
 
         WasdiLog.debugLog("WASDI Launcher Main Start");
@@ -243,7 +244,7 @@ public class LauncherMain  {
         catch (Throwable oException) {
 
         	// ERROR: we need to put the ProcessWorkspace in a end-state, error in this case
-            WasdiLog.errorLog("Launcher Main Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oException));
+            WasdiLog.errorLog("Launcher Main Exception " + ExceptionUtils.getStackTrace(oException));
 
             try {
                 System.err.println("LauncherMain: try to put process [" + sParameter + "] in Safe ERROR state");
@@ -261,7 +262,7 @@ public class LauncherMain  {
                     }
                 }
             } catch (Exception oInnerEx) {
-                WasdiLog.errorLog("Launcher Main FINAL-catch Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oInnerEx));
+                WasdiLog.errorLog("Launcher Main FINAL-catch Exception " + ExceptionUtils.getStackTrace(oInnerEx));
             }
 
             // Exit with error
@@ -342,7 +343,7 @@ public class LauncherMain  {
             configureSNAP();
 
         } catch (Throwable oEx) {
-            WasdiLog.errorLog("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Launcher Main Constructor Exception " + ExceptionUtils.getStackTrace(oEx));
         }
     }
 
@@ -444,11 +445,11 @@ public class LauncherMain  {
             	}
             }
             catch (Throwable oEx) {
-            	WasdiLog.errorLog("LauncherMain.configureSNAP Exception OpenJpegExecRetriever.getOpenJPEGAuxDataPath(): " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            	WasdiLog.errorLog("LauncherMain.configureSNAP Exception OpenJpegExecRetriever.getOpenJPEGAuxDataPath(): " + ExceptionUtils.getStackTrace(oEx));
 			}
     	}
     	catch (Throwable oEx) {
-            WasdiLog.errorLog("LauncherMain.configureSNAP Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("LauncherMain.configureSNAP Exception " + ExceptionUtils.getStackTrace(oEx));
         }
     }
 
@@ -534,7 +535,7 @@ public class LauncherMain  {
         }
         catch (Exception oEx) {
 
-            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+            String sError = ExceptionUtils.getMessage(oEx);
 
             WasdiLog.errorLog("LauncherMain.executeOperation Exception ", oEx);
 
@@ -646,8 +647,7 @@ public class LauncherMain  {
                 s_oSendToRabbit.SendUpdateProcessMessage(s_oProcessWorkspace);
             }
         } catch (Exception oEx) {
-            WasdiLog.debugLog("LauncherMain.CloseProcessWorkspace: Exception closing process workspace "
-                    + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.debugLog("LauncherMain.CloseProcessWorkspace: Exception closing process workspace " + ExceptionUtils.getStackTrace(oEx));
         }
     }
 

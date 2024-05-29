@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.esa.snap.core.datamodel.Product;
 
 import com.google.common.base.Charsets;
@@ -373,8 +374,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 					try {
 						return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
 					} catch (Exception oEx) {
-						WasdiLog.errorLog("ProviderAdapter.getFileNameViaHttp: exception setting auth "
-								+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+						WasdiLog.errorLog("ProviderAdapter.getFileNameViaHttp: exception setting auth " + ExceptionUtils.getStackTrace(oEx));
 					}
 					return null;
 				}
@@ -500,7 +500,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 						try {
 							return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
 						} catch (Exception oEx) {
-							WasdiLog.errorLog("ProviderAdapter.downloadViaHttp: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+							WasdiLog.errorLog("ProviderAdapter.downloadViaHttp: exception setting auth " + ExceptionUtils.getStackTrace(oEx));
 						}
 						return null;
 					}
@@ -836,7 +836,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
                     return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
                 }
                 catch (Exception oEx){
-                    WasdiLog.errorLog("ProviderAdapter.getDownloadFileSizeViaHttp: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                    WasdiLog.errorLog("ProviderAdapter.getDownloadFileSizeViaHttp: exception setting auth " + ExceptionUtils.getStackTrace(oEx));
                 }
                 return null;
             }

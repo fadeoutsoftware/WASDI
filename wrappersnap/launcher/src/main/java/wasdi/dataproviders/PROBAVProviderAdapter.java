@@ -10,6 +10,7 @@ import java.util.Base64;
 import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.WasdiConfig;
@@ -409,7 +410,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 			return sReturnFilePath;
 			
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("PROBAVProviderAdapter.getFileName: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			WasdiLog.errorLog("PROBAVProviderAdapter.getFileName: " + ExceptionUtils.getStackTrace(oEx));
 		}
 
 		return "";

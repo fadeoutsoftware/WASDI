@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import wasdi.LauncherMain;
 import wasdi.io.WasdiProductReader;
@@ -351,9 +352,9 @@ public class Publishband extends Operation {
 
             m_oProcessWorkspaceLogger.log("Exception " + oEx.toString());
 
-            WasdiLog.errorLog("Publishband.executeOperation: Exception " + oEx.toString() + " " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Publishband.executeOperation: Exception " + oEx.toString() + " " + ExceptionUtils.getStackTrace(oEx));
 
-            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+            String sError = ExceptionUtils.getMessage(oEx);
 
             m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(), oParam.getWorkspace(), sError, oParam.getExchange());            
         } 

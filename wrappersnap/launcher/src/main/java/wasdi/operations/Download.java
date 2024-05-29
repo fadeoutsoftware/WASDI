@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.esa.snap.core.datamodel.Product;
 
 import wasdi.ProcessWorkspaceUpdateSubscriber;
@@ -317,10 +318,9 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             
         } catch (Exception oEx) {
         	
-            WasdiLog.errorLog("Download.executeOperation: Exception "
-                    + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Download.executeOperation: Exception ", oEx);
 
-            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+            String sError = oEx.toString();
             oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
             m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.DOWNLOAD.name(), oParam.getWorkspace(),
                         sError, oParam.getExchange());
@@ -352,7 +352,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             }
         } catch (Exception oEx) {
         	WasdiLog.errorLog("Download.executeOperationFile: Exception: " + oEx);
-        	WasdiLog.debugLog("Download.executeOperationFile: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+        	WasdiLog.debugLog("Download.executeOperationFile: " + ExceptionUtils.getStackTrace(oEx));
         }
     }
     
@@ -498,7 +498,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 		catch (Exception oEx) {
         	
             WasdiLog.errorLog("Download.getBestProviderAdapater: Exception "
-                    + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                    + ExceptionUtils.getStackTrace(oEx));
         }
 		
 		return null;
@@ -583,9 +583,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
 		}
 		catch (Exception oEx) {
-        	
-            WasdiLog.errorLog("Download.getProviderAdapater: Exception "
-                    + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Download.getProviderAdapater: Exception " + ExceptionUtils.getStackTrace(oEx));
         }
 		
 		return null;

@@ -22,12 +22,11 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionAssertjCore>2.1.0</sVersionAssertjCore>
+        <sVersionAssertjCore>3.26.0</sVersionAssertjCore>
         <sVersionBcpkixJdk15on>1.78.1</sVersionBcpkixJdk15on>
-        <sVersionCommonsCli>1.7.0</sVersionCommonsCli>
+        <sVersionCommonsCli>1.8.0</sVersionCommonsCli>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionJson>20240303</sVersionJson>
-        <sVersionJts>1.13</sVersionJts>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionJUniversalChardet>2.4.0</sVersionJUniversalChardet>
         <sVersionLog4j>2.23.1</sVersionLog4j>
@@ -39,7 +38,6 @@
         <sVersionOpticaltbx>10.0.1</sVersionOpticaltbx>
         <sVersionSnap>10.0.0</sVersionSnap>
         <sVersionSshj>0.38.0</sVersionSshj>
-        <sVersionXercesImpl>2.12.2</sVersionXercesImpl>
     </properties>
 
     <build>
@@ -161,12 +159,6 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>${sVersionJson}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/xerces/xercesImpl -->
-        <dependency>
-            <groupId>xerces</groupId>
-            <artifactId>xercesImpl</artifactId>
-            <version>${sVersionXercesImpl}</version>
         </dependency>
         <!-- https://search.maven.org/artifact/com.hierynomus/sshj -->
         <dependency>
@@ -365,6 +357,12 @@
             <groupId>eu.esa.opt</groupId>
             <artifactId>opttbx-s2msi-reader</artifactId>
             <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>            
         </dependency>
         <dependency>
             <groupId>eu.esa.opt</groupId>
@@ -385,11 +383,23 @@
             <groupId>eu.esa.opt</groupId>
             <artifactId>opttbx-spot-reader</artifactId>
             <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
         </dependency>
         <dependency>
             <groupId>eu.esa.opt</groupId>
             <artifactId>opttbx-spot6-reader</artifactId>
             <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
         </dependency>
         <dependency>
             <groupId>eu.esa.opt</groupId>
@@ -415,6 +425,12 @@
             <groupId>eu.esa.opt</groupId>
             <artifactId>opttbx-rapideye-reader</artifactId>
             <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
         </dependency>
         <dependency>
             <groupId>eu.esa.opt</groupId>
@@ -465,11 +481,23 @@
             <groupId>eu.esa.opt</groupId>
             <artifactId>opttbx-muscate-reader</artifactId>
             <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
         </dependency>
         <dependency>
             <groupId>eu.esa.opt</groupId>
             <artifactId>opttbx-pleiades-reader</artifactId>
             <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
         </dependency>		
         <dependency>
             <groupId>eu.esa.opt</groupId>
@@ -651,12 +679,6 @@
             <artifactId>assertj-core</artifactId>
             <version>${sVersionAssertjCore}</version>
             <scope>test</scope>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.vividsolutions/jts -->
-        <dependency>
-            <groupId>com.vividsolutions</groupId>
-            <artifactId>jts</artifactId>
-            <version>${sVersionJts}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/edu.ucar/netcdfAll -->
         <dependency>

@@ -22,29 +22,25 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionAmqpClient>5.18.0</sVersionAmqpClient>
-        <sVersionAssertjCore>3.18.1</sVersionAssertjCore>
-        <sVersionAwsJavaSdkS3>1.12.392</sVersionAwsJavaSdkS3>
-        <sVersionCommonsCompress>1.21</sVersionCommonsCompress>
-        <sVersionCommonsLang>2.6</sVersionCommonsLang>
-        <sVersionCommonsLang3>3.12.0</sVersionCommonsLang3>
-        <sVersionCommonsNet>3.9.0</sVersionCommonsNet>
-        <sVersionCommonsValidator>1.4.1</sVersionCommonsValidator>
+        <sVersionAmqpClient>5.21.0</sVersionAmqpClient>
+        <sVersionAssertjCore>3.26.0</sVersionAssertjCore>
+        <sVersionAwsJavaSdkS3>1.12.731</sVersionAwsJavaSdkS3>
+        <sVersionCommonsCompress>1.26.2</sVersionCommonsCompress>
+        <sVersionCommonsLang3>3.14.0</sVersionCommonsLang3>
+        <sVersionCommonsNet>3.10.0</sVersionCommonsNet>
+        <sVersionCommonsValidator>1.9.0</sVersionCommonsValidator>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionGeoserverManager>1.7.0</sVersionGeoserverManager>
-        <sVersionGson>2.10.1</sVersionGson>
-        <sVersionGuava>33.0.0-jre</sVersionGuava>
-        <sVersionJackson>2.14.1</sVersionJackson>
-        <sVersionJaxbApi>2.3.1</sVersionJaxbApi>
-        <sVersionJson>20230227</sVersionJson>
+        <sVersionGson>2.11.0</sVersionGson>
+        <sVersionGuava>33.2.0-jre</sVersionGuava>
+        <sVersionJackson>2.17.1</sVersionJackson>
+        <sVersionJson>20240303</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionJunitJupiter>5.7.0</sVersionJunitJupiter>
         <sVersionLog4j>2.20.0</sVersionLog4j>
-        <sVersionLombok>1.18.22</sVersionLombok>
-        <!--sVersionMockFtpServer>2.7.1</sVersionMockFtpServer-->
         <sVersionMongoDb>4.3.4</sVersionMongoDb>
-        <sVersionGeoTools>20.0</sVersionGeoTools>
-        <sVersionJersey2>2.38</sVersionJersey2>
+        <sVersionGeoTools>29.5</sVersionGeoTools>
+        <sVersionJersey2>3.1.7</sVersionJersey2>
         <sVersionMercurius>1.0</sVersionMercurius>
     </properties>
 
@@ -99,13 +95,13 @@
 		<dependency>
 		    <groupId>com.github.docker-java</groupId>
 		    <artifactId>docker-java</artifactId>
-		    <version>3.3.3</version>
+		    <version>3.3.6</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.github.docker-java/docker-java-transport-httpclient5 -->
 		<dependency>
 		    <groupId>com.github.docker-java</groupId>
 		    <artifactId>docker-java-transport-httpclient5</artifactId>
-		    <version>3.3.3</version>
+		    <version>3.3.6</version>
 		</dependency>
         <!-- https://mvnrepository.com/artifact/org.mongodb/mongodb-driver-sync -->
         <dependency>
@@ -136,12 +132,6 @@
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
             <version>${sVersionAmqpClient}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang -->
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>${sVersionCommonsLang}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>
@@ -206,13 +196,6 @@
             <version>${sVersionJunitJupiter}</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.mockftpserver/MockFtpServer -->
-        <!--dependency>
-            <groupId>org.mockftpserver</groupId>
-            <artifactId>MockFtpServer</artifactId>
-            <version>${sVersionMockFtpServer}</version>
-            <scope>test</scope>
-        </dependency-->
         <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
         <dependency>
             <groupId>org.assertj</groupId>
@@ -220,12 +203,6 @@
             <version>${sVersionAssertjCore}</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
-        <!--dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>${sVersionJaxbApi}</version>
-        </dependency-->
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -259,18 +236,14 @@
 		<dependency>
 		    <groupId>org.jsoup</groupId>
 		    <artifactId>jsoup</artifactId>
-		    <version>1.14.2</version>
+		    <version>1.17.2</version>
 		</dependency>        
-        <dependency>
-		    <groupId>org.osgeo</groupId>
-		    <artifactId>proj4j</artifactId>
-		    <version>0.1.0</version> 
-		</dependency>		
-		 <dependency>
+		<!-- https://mvnrepository.com/artifact/com.hubspot.jinjava/jinjava -->
+		<dependency>
 		    <groupId>com.hubspot.jinjava</groupId>
 		    <artifactId>jinjava</artifactId>
-		    <version>2.7.1</version>
-		  </dependency>
+		    <version>2.7.2</version>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-client -->
 		<dependency>
 		    <groupId>org.glassfish.jersey.core</groupId>
