@@ -1048,6 +1048,52 @@ public class CatalogResources {
 	}
 	
 	/**
+	 * Zip a shape file
+	 * @param oInitialFile file .
+	 * @return stream with the zipped shape file
+	 */
+	private Response zipAsciiFile(File oInitialFile) {
+		
+		if (!oInitialFile.getName().endsWith(".asc")) {
+			WasdiLog.warnLog("CatalogResources.zipAsciiFile: the file is not a .asc file");
+			return null;
+		}
+		
+		WasdiLog.warnLog("CatalogResources.zipAsciiFile: looking for.prj file associated to " + oInitialFile.getAbsolutePath());
+		
+		// Remove extension
+		final String sNameToFind = WasdiFileUtils.getFileNameWithoutLastExtension(oInitialFile.getName());
+		
+		// Get parent folder
+		File oFolder = oInitialFile.getParentFile();
+		
+		File oPrjFile = null;
+		for (File oFile : oFolder.listFiles()) {
+			if (oFile.getName().equals(oFile.getName().replace(".asc", ".prj"))) {
+				oPrjFile = oFile;
+				break;
+			}
+		}
+		
+		if (oPrjFile == null) {
+			WasdiLog.warnLog("CatalogResources.zipAsciiFile: .prj file not found");
+			return null;
+		}
+		
+		try {
+			Map<String, File> aoFileEntries = new HashMap<>();
+			aoFileEntries.put(oInitialFile.getName(), oInitialFile);
+			aoFileEntries.put(oPrjFile.getName(), oPrjFile);
+			
+			return zipOnTheFly(aoFileEntries, oInitialFile.getName().replace(".asc", ".zip"));
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogResource.zipAsciiFile: error while zipping file ", oEx);
+		}
+		
+		return null;
+	}
+	
+	/**
 	 * Zip a file and return the stream 
 	 * @param oInitialFile File to zip
 	 * @return stream
@@ -1071,6 +1117,8 @@ public class CatalogResources {
 				return zipSentinel3(oInitialFile);
 			} else if (MissionUtils.isSentinel6Directory(oInitialFile)) {
 				return zipSentinel6(oInitialFile);
+			} else if (MissionUtils.isAsciiFile(oInitialFile)) {
+				return zipAsciiFile(oInitialFile);
 			}
 		} 
 		catch (Exception oEx) {
@@ -1102,7 +1150,8 @@ public class CatalogResources {
 					sName.endsWith(".dim") ||
 					WasdiFileUtils.isShapeFile(oFile) ||
 					MissionUtils.isSentinel3Directory(oFile) ||
-					MissionUtils.isSentinel6Directory(oFile)
+					MissionUtils.isSentinel6Directory(oFile) ||
+					MissionUtils.isAsciiFile(oFile)
 					);
 		}
 		return bRet;

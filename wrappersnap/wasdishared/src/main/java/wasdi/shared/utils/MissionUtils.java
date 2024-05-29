@@ -37,6 +37,23 @@ public class MissionUtils {
 		
 		return false;
 	}
+	
+	public static boolean isAsciiFile(File oFile) {
+		try {
+			if (oFile == null) {
+				return false;
+			}
+			
+			String sFileName = oFile.getName();
+			
+			return sFileName.endsWith(".asc");
+			
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("WasdiFileUtils.isAsciiFile: exception ", oEx);
+		}
+		return false;
+	}
+	
 
 	public static boolean isGpmZipFile(File oFile) {
 		try {
