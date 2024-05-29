@@ -44,7 +44,6 @@ import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.monitoring.MetricsEntry;
-import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.permissions.UserResourcePermissionViewModel;
 import wasdi.shared.viewmodels.processors.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.users.FullUserViewModel;

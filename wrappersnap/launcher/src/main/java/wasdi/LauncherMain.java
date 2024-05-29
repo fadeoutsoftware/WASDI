@@ -660,10 +660,10 @@ public class LauncherMain  {
         Integer iPid = 0;
         try {
             RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-            iPid = (Integer) runtimeMXBean.getPid();
+            iPid = (int) runtimeMXBean.getPid();
         } catch (Throwable oEx) {
             try {
-                WasdiLog.errorLog("LauncherMain.GetProcessId: Error getting processId: ", oEx);
+                WasdiLog.errorLog("LauncherMain.GetProcessId: Error getting processId: " + oEx.toString());
             } finally {
                 WasdiLog.errorLog("LauncherMain.GetProcessId: finally here");
             }

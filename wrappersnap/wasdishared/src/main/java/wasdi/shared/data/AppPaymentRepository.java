@@ -12,7 +12,6 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.AppPayment;
-import wasdi.shared.business.Subscription;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class AppPaymentRepository extends MongoRepository {

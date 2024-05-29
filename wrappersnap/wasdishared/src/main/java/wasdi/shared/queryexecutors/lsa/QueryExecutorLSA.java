@@ -1,17 +1,11 @@
 package wasdi.shared.queryexecutors.lsa;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -23,11 +17,9 @@ import org.xml.sax.InputSource;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
-import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
