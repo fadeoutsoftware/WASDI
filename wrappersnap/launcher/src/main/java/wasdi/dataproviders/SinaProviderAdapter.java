@@ -131,19 +131,27 @@ public class SinaProviderAdapter extends ProviderAdapter {
 					WasdiLog.debugLog("SinaProviderAdapter.executeDownloadFile: try to copy entry to " + sTargetFilePath);
 					
 					try (InputStream oIn = oZipFile.getInputStream(oEntry)) {
-						OutputStream oOut = new FileOutputStream(oTargetFile);
+						OutputStream oOut = null;
 						
-						byte[] ayBuffer = new byte[1024];
-						int iLen;
-						while ((iLen = oIn.read(ayBuffer)) > 0) {
-							oOut.write(ayBuffer, 0, iLen);
-						}
-						
-						
-						if (oTargetFile.getName().endsWith(".asc")) {
-							sAscFilePath = oTargetFile.getAbsolutePath();
-						}
-						WasdiLog.debugLog("SinaProviderAdapter.executeDownloadFile: file extracted at " + oTargetFile.getAbsolutePath());
+						try {
+							oOut = new FileOutputStream(oTargetFile);
+							
+							byte[] ayBuffer = new byte[1024];
+							int iLen;
+							while ((iLen = oIn.read(ayBuffer)) > 0) {
+								oOut.write(ayBuffer, 0, iLen);
+							}
+							
+							
+							if (oTargetFile.getName().endsWith(".asc")) {
+								sAscFilePath = oTargetFile.getAbsolutePath();
+							}
+							WasdiLog.debugLog("SinaProviderAdapter.executeDownloadFile: file extracted at " + oTargetFile.getAbsolutePath());
+						} catch (Exception oEx) {
+							WasdiLog.errorLog("SinaProviderAdapter.executeDownloadFile: error copying the file ", oEx);
+						} finally {
+							if (oOut != null) oOut.close();
+						} 
 					}
 					
 				} else {
