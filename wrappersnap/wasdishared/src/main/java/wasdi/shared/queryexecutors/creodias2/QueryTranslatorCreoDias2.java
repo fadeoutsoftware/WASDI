@@ -280,9 +280,10 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		if (sPlatform.equals(Platforms.SENTINEL6) && iRelativeOrbit <= 127)
 			return true;
 		
-		if (sPlatform.equals(Platforms.LANDSAT5) && iRelativeOrbit <= 233)
+		if ((sPlatform.equals(Platforms.LANDSAT5) || sPlatform.equals(Platforms.LANDSAT7)) 
+				&& iRelativeOrbit <= 233)
 			return true;
-		
+				
 		return false;
 	}
 	
@@ -302,7 +303,8 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		if (sPlatform.equals(Platforms.ENVISAT) && iAbsoluteOrbit >= 6 && iAbsoluteOrbit <= 113) 
 			return true;
 		
-		if (sPlatform.equals(Platforms.LANDSAT5) && iAbsoluteOrbit >= 1 && iAbsoluteOrbit <= 248) 
+		if ( (sPlatform.equals(Platforms.LANDSAT5) || sPlatform.equals(Platforms.LANDSAT7))
+				&& iAbsoluteOrbit >= 1 && iAbsoluteOrbit <= 248) 
 			return true;
 		
 		return false;
