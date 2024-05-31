@@ -40,7 +40,12 @@ public class SinaProviderAdapter extends ProviderAdapter {
 	public long getDownloadFileSize(String sFileURL) throws Exception {
 		long lFileSize = 0L;
 		
-		String sDataFilePath = getPathToZip(sFileURL);
+		String sFileName = sFileURL;
+		if (sFileName.startsWith("http://")) {
+			sFileName = sFileName.replace("http://", "");
+		}
+		
+		String sDataFilePath = getPathToZip(sFileName);
 		
 		if (Utils.isNullOrEmpty(sDataFilePath)) {
 			WasdiLog.debugLog("SinaProviderAdapter.getDownloadFileSize: path to zip file not found " + sDataFilePath);
@@ -58,11 +63,11 @@ public class SinaProviderAdapter extends ProviderAdapter {
             
             while (aoEntries.hasMoreElements()) {
                 ZipEntry oEntry = aoEntries.nextElement();
-                if (oEntry.getName().equals(sFileURL)) {
+                if (oEntry.getName().equals(sFileName)) {
                 	lAscSize = oEntry.getSize();
                 	bAscRetrieved = true;
                 }
-                if (oEntry.getName().equals(sFileURL.replace(".asc", ".prj"))) {
+                if (oEntry.getName().equals(sFileName.replace(".asc", ".prj"))) {
                 	lPrjSize = oEntry.getSize();
                 	bPrjRetrieved = true;
                 }
@@ -88,6 +93,11 @@ public class SinaProviderAdapter extends ProviderAdapter {
 		
 		WasdiLog.debugLog("SinaProviderAdapter.executeDownloadFile. Url: " + sFileURL);
 		
+		String sFileNameUrl = sFileURL;
+		if (sFileNameUrl.startsWith("http://")) {
+			sFileNameUrl = sFileNameUrl.replace("http://", "");
+		}
+		
 		String sZipFilePath = getPathToZip(sFileURL);
 		
 		if (Utils.isNullOrEmpty(sZipFilePath)) {
@@ -95,7 +105,7 @@ public class SinaProviderAdapter extends ProviderAdapter {
 			return null;
 		}
 		
-		String[] asFileNames = new String[]{sFileURL, sFileURL.replace(".asc", ".prj")};
+		String[] asFileNames = new String[]{sFileNameUrl, sFileNameUrl.replace(".asc", ".prj")};
 		
 //		boolean bAscFileCopies = false;
 //		boolean bPrjFileCopied = false;
