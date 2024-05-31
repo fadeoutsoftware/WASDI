@@ -69,6 +69,7 @@ public class ResponseTranslatorSina extends ResponseTranslator {
 		oProperties.put("platformname", "BIGBANG");
 		
 		oResult.setProperties(oProperties);
+		oResult.setProvider("SINA");
 		
 		return oResult;
 	}
