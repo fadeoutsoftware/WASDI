@@ -3,6 +3,7 @@ package wasdi.shared.queryexecutors.sina;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import com.google.common.base.Preconditions;
 
@@ -11,6 +12,8 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
+
+
 
 public class ResponseTranslatorSina extends ResponseTranslator {
 
@@ -58,6 +61,14 @@ public class ResponseTranslatorSina extends ResponseTranslator {
 		asSummaryElements.add("Size: 0GB");
 		String sSummary = String.join(", ", asSummaryElements);
 		oResult.setSummary(sSummary);
+		
+		Map<String, String> oProperties = new HashMap<String, String>();
+		oProperties.put("fileName", sFileId);
+		oProperties.put("sizeInBytes", "0");
+		oProperties.put("size", "0 B");
+		oProperties.put("platformname", "BIGBANG");
+		
+		oResult.setProperties(oProperties);
 		
 		return oResult;
 	}
