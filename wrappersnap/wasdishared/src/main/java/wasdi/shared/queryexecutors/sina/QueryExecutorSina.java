@@ -47,10 +47,7 @@ public class QueryExecutorSina extends QueryExecutor {
 	
 	@Override
 	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
-		if (sProduct.toUpperCase().startsWith("SPEI")) {
-			return sOriginalUrl;
-		}
-		return null;
+		return sOriginalUrl;
 	}
 
 	@Override

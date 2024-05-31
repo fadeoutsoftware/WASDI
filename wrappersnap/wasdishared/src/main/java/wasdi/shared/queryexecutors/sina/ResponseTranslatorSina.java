@@ -43,7 +43,7 @@ public class ResponseTranslatorSina extends ResponseTranslator {
 		String sFileId = WasdiFileUtils.getFileNameWithoutLastExtension(sFileName);
 		oResult.setId(sFileId);
 		oResult.setTitle(sFileId);
-		oResult.setLink("http://" + sFileName);
+		oResult.setLink("https://" + sFileName);
 		
 		String sFootPrint = "POLYGON ((6.6267 35.4922, 6.6267 47.0920, 18.5205 47.0920, 18.5205 35.4922, 6.6267 35.4922))";
 		oResult.setFootprint(sFootPrint);

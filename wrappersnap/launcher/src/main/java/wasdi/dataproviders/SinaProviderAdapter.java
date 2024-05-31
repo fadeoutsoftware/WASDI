@@ -41,8 +41,8 @@ public class SinaProviderAdapter extends ProviderAdapter {
 		long lFileSize = 0L;
 		
 		String sFileName = sFileURL;
-		if (sFileName.startsWith("http://")) {
-			sFileName = sFileName.replace("http://", "");
+		if (sFileName.startsWith("https://")) {
+			sFileName = sFileName.replace("https://", "");
 		}
 		
 		String sDataFilePath = getPathToZip(sFileName);
@@ -94,11 +94,11 @@ public class SinaProviderAdapter extends ProviderAdapter {
 		WasdiLog.debugLog("SinaProviderAdapter.executeDownloadFile. Url: " + sFileURL);
 		
 		String sFileNameUrl = sFileURL;
-		if (sFileNameUrl.startsWith("http://")) {
-			sFileNameUrl = sFileNameUrl.replace("http://", "");
+		if (sFileNameUrl.startsWith("https://")) {
+			sFileNameUrl = sFileNameUrl.replace("https://", "");
 		}
 		
-		String sZipFilePath = getPathToZip(sFileURL);
+		String sZipFilePath = getPathToZip(sFileNameUrl);
 		
 		if (Utils.isNullOrEmpty(sZipFilePath)) {
 			WasdiLog.warnLog("SinaProviderAdapter.executeDownloadFile. Path to zip file not found " + sZipFilePath);
