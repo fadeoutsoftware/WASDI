@@ -146,7 +146,7 @@ COPY --chown={{ sWasdiSchedulerRootDirectoryOwner }}:{{ sWasdiSchedulerRootDirec
 
 # Start the container
 CMD [ \
-    "{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin/java", \
+    "{{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }}/bin/java", \
     "-jar", \
     "{{ sWasdiSchedulerBuildTargetFileName }}", \
     "--config", \

@@ -145,7 +145,7 @@ COPY --chown={{ sWasdiTriggerRootDirectoryOwner }}:{{ sWasdiTriggerRootDirectory
 
 # Start the container
 ENTRYPOINT [ \
-    "{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin/java", \
+    "{{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }}/bin/java", \
     "-Xmx24g", \
     "-Xms1024m", \
     "-XX:+AggressiveOpts", \
