@@ -30,6 +30,7 @@ import wasdi.shared.queryexecutors.onda.QueryExecutorONDA;
 import wasdi.shared.queryexecutors.planet.QueryExecutorPLANET;
 import wasdi.shared.queryexecutors.probav.QueryExecutorPROBAV;
 import wasdi.shared.queryexecutors.sentinelhub.QueryExecutorSENTINEL;
+import wasdi.shared.queryexecutors.sina.QueryExecutorSina;
 import wasdi.shared.queryexecutors.skywatch.QueryExecutorSkywatch;
 import wasdi.shared.queryexecutors.sobloo.QueryExecutorSOBLOO;
 import wasdi.shared.queryexecutors.statics.QueryExecutorSTATICS;
@@ -71,6 +72,7 @@ public class QueryExecutorFactory {
 		aoMap.put("SKYWATCH", QueryExecutorSkywatch::new);
 		aoMap.put("LPDAAC", QueryExecutorLpDaac::new);
 		aoMap.put("EXT_WEB", ExtWebQueryExecutor::new);
+		aoMap.put("SINA", QueryExecutorSina::new);		
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
 		
