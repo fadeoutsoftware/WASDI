@@ -560,9 +560,31 @@ public abstract class QueryTranslator {
 			// Try get Info about Earthcache
 			parseEarthcache(sQuery, oResult);
 			
+			// Try to get info about Terra
 			parseTerra(sQuery, oResult);
 			
+			// Try to get the info for semi-static provided files
 			parseStaticTiles(sQuery, oResult);
+			
+			// Check if we got at least the platfrom
+			
+			if (Utils.isNullOrEmpty(oResult.platformName)) {
+				WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: platformName not found: try to read the generic one");
+				
+				int iStartIndex = sQuery.indexOf("platformname");
+				
+				if (iStartIndex>=0) {
+					int iEndIndex = sQuery.substring(iStartIndex).indexOf("AND");
+					if (iEndIndex>=0) {
+						int iStartIndex2 = iStartIndex + "platformname".length() + 1;
+						String sPlatform = sQuery.substring(iStartIndex2, iStartIndex+iEndIndex);
+						sPlatform = sPlatform.trim();
+						oResult.platformName = sPlatform;
+						WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: found platformName: " + sPlatform);
+					}
+				}
+			}
+			
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);

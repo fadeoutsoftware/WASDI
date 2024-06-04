@@ -929,9 +929,9 @@ public final class HttpUtils {
 				oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
 			}
 
-			int responseCode =  oConnection.getResponseCode();
+			int iResponseCode =  oConnection.getResponseCode();
 
-			if (responseCode == HttpURLConnection.HTTP_OK) {
+			if (iResponseCode == HttpURLConnection.HTTP_OK) {
 
 				Map<String, List<String>> aoHeaders = oConnection.getHeaderFields();
 				List<String> asContents = null;
@@ -950,8 +950,6 @@ public final class HttpUtils {
 					}
 					WasdiLog.debugLog("HttpUtils.downloadFile: attachment name: " + sAttachmentName);
 				}
-				
-
 				
 				File oTargetFile = new File(sOutputFilePath);
 				File oTargetDir = oTargetFile.getParentFile();
@@ -979,7 +977,7 @@ public final class HttpUtils {
 				return sOutputFilePath;
 			} else {
 				String sMessage = "HttpUtils.downloadFile: response message: " + oConnection.getResponseMessage();
-				WasdiLog.debugLog(sMessage);
+				WasdiLog.warnLog(sMessage);
 				return "";
 			}
 

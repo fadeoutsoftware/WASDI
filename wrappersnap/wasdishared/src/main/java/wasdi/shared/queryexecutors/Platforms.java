@@ -53,5 +53,8 @@ public class Platforms {
 	public static String COP_DEM = "COP_DEM";
 	public static String S2GLC = "S2GLC";
 	
+	
+	// Return Plaforms
+	public static String RETURN_RASTER = "ReturnRaster";
 
 }

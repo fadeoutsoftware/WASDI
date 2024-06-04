@@ -240,6 +240,9 @@ public class MissionUtils {
 			else if (sFileName.toUpperCase().startsWith("GHS_BUILT_S_E2018_GLOBE_R2023A_54009_10_V1_0_")) {
 				return Platforms.JRC_GHSL;
 			}
+			else if (sFileName.toUpperCase().startsWith("RETRAS_") && sFileName.toUpperCase().endsWith(".TIF")) {
+				return Platforms.RETURN_RASTER;
+			}
 			
 			return null;
 		}
