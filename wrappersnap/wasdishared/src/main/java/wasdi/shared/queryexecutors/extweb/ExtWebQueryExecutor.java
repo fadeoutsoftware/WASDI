@@ -133,7 +133,7 @@ public class ExtWebQueryExecutor extends QueryExecutor {
 			return null;			
 		}
 		
-		List<QueryResultViewModel> oResults = new ArrayList<>();
+		List<QueryResultViewModel> aoResults = new ArrayList<>();
 		
 		try {
 			oQueryVM.offset = Integer.parseInt(oQuery.getOffset());
@@ -170,9 +170,14 @@ public class ExtWebQueryExecutor extends QueryExecutor {
 			
 			if (oResponse.getResponseCode()>=200 && oResponse.getResponseCode()<=299) {
 				
-				oResults = MongoRepository.s_oMapper.readValue(oResponse.getResponseBody(), new TypeReference<List<QueryResultViewModel>>(){});
+				aoResults = MongoRepository.s_oMapper.readValue(oResponse.getResponseBody(), new TypeReference<List<QueryResultViewModel>>(){});
 				
-				return oResults;
+				// "Sign" the results if it is my provider
+				for (QueryResultViewModel oResultVM : aoResults) {
+					oResultVM.setProvider(m_sProvider);
+				}
+				
+				return aoResults;
 			}
 			
 		}
@@ -180,7 +185,7 @@ public class ExtWebQueryExecutor extends QueryExecutor {
 			WasdiLog.errorLog("ExtWebQueryExecutor.executeAndRetrieve: exception reading config files ", oEx);
 		}
 		
-		return oResults;
+		return aoResults;
 	}
 	
 	@Override
