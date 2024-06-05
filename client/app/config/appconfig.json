@@ -1001,6 +1001,20 @@
 					"indexvalue": "MOD11A2"
 				}
 			]
+		},
+		{
+			"name": "WSF",
+			"indexname": "platformname",
+			"indexvalue": "WSF",
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "WSF_2019",
+					"regex": ".*",
+					"indexvalue": "WSF_2019"
+				}
+			]
 		}
 	],
 	"orbitsearch": {

@@ -239,6 +239,8 @@ public class MissionUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("GHS_BUILT_S_E2018_GLOBE_R2023A_54009_10_V1_0_")) {
 				return Platforms.JRC_GHSL;
+			} else if (sFileName.toUpperCase().startsWith("WSF2019_v1_")) {
+				return Platforms.WSF;
 			}
 			
 			return null;

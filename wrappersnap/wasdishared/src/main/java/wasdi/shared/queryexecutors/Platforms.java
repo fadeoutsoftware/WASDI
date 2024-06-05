@@ -47,6 +47,8 @@ public class Platforms {
 	
 	public static String TERRA = "TERRA";
 	
+	public static String WSF = "WSF"; // World Settlement Footprint
+	
 	// Creodias 2 new platforms
 	public static String SMOS = "SMOS";
 	public static String TERRAAQUA = "Terraaqua";
