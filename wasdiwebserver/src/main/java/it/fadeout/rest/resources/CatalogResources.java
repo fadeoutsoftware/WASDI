@@ -1043,67 +1043,80 @@ public class CatalogResources {
 			WasdiLog.errorLog("CatalogResource.zipSentinelProduct: exception while adding files to zip", oE);
 		}
 
-		
 		return zipOnTheFly(aoFileEntries, oFile.getName().toUpperCase().replace(sDirectoryExtension, sZipExtension));
 	}
-	
+
 	/**
 	 * Zip a shape file
 	 * @param oInitialFile file .
 	 * @return stream with the zipped shape file
 	 */
 	private Response zipAsciiFile(File oInitialFile) {
-		
+
 		if (!oInitialFile.getName().endsWith(".asc")) {
 			WasdiLog.warnLog("CatalogResources.zipAsciiFile: the file is not a .asc file");
 			return null;
 		}
-		
-		WasdiLog.warnLog("CatalogResources.zipAsciiFile: looking for.prj file associated to " + oInitialFile.getAbsolutePath());
-		
+
+		WasdiLog.debugLog("CatalogResources.zipAsciiFile: looking for.prj file associated to " + oInitialFile.getAbsolutePath());
+
 		// Remove extension
-		final String sNameToFind = WasdiFileUtils.getFileNameWithoutLastExtension(oInitialFile.getName());
-		
+		final String sNameToFind = WasdiFileUtils.getFileNameWithoutLastExtension(oInitialFile.getName()) + ".prj";
+
+		WasdiLog.debugLog("CatalogResources.zipAsciiFile: file to look for: " + sNameToFind);
+
 		// Get parent folder
 		File oFolder = oInitialFile.getParentFile();
-		
+
 		File oPrjFile = null;
 		for (File oFile : oFolder.listFiles()) {
-			if (oFile.getName().equals(oFile.getName().replace(".asc", ".prj"))) {
+			if (oFile.getName().equals(sNameToFind)) {
 				oPrjFile = oFile;
 				break;
 			}
 		}
-		
+
 		if (oPrjFile == null) {
 			WasdiLog.warnLog("CatalogResources.zipAsciiFile: .prj file not found");
 			return null;
 		}
-		
+
+		WasdiLog.debugLog("CatalogResources.zipAsciiFile: found .prj file " + oPrjFile.getAbsolutePath());
+
 		try {
 			Map<String, File> aoFileEntries = new HashMap<>();
 			aoFileEntries.put(oInitialFile.getName(), oInitialFile);
 			aoFileEntries.put(oPrjFile.getName(), oPrjFile);
 			
-			return zipOnTheFly(aoFileEntries, oInitialFile.getName().replace(".asc", ".zip"));
+			String sZipFileName = oInitialFile.getName().replace(".asc", ".zip");
+			
+			ZipStreamingOutput oStream = new ZipStreamingOutput(aoFileEntries);
+			ResponseBuilder oResponseBuilder = Response.ok(oStream);
+			
+			oResponseBuilder.header("Content-Disposition", "attachment; filename=\"" + sZipFileName + "\"");
+			oResponseBuilder.header("Access-Control-Expose-Headers", "Content-Disposition");
+
+			WasdiLog.debugLog("CatalogResources.zipAsciiFile: zip file ready");
+			
+			return oResponseBuilder.build();
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("CatalogResource.zipAsciiFile: error while zipping file ", oEx);
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
-	 * Zip a file and return the stream 
+	 * Zip a file and return the stream
 	 * @param oInitialFile File to zip
 	 * @return stream
 	 */
 	private Response prepareAndReturnZip(File oInitialFile) {
 		WasdiLog.debugLog("CatalogResources.prepareAndReturnZip");
-		if(null==oInitialFile) {
+		if (null == oInitialFile) {
 			WasdiLog.debugLog("CatalogResources.prepareAndReturnZip: oFile is null");
 			return null;
-		}		
+		}
 		try {
 			WasdiLog.debugLog("CatalogResources.prepareAndReturnZip: init");
 			String sBasePath = oInitialFile.getAbsolutePath();
