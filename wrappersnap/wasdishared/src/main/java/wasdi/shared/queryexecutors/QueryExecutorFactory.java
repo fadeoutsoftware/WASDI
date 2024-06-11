@@ -70,7 +70,7 @@ public class QueryExecutorFactory {
 		aoMap.put("CLOUDFERRO", QueryExecutorCloudferro::new);
 		aoMap.put("SKYWATCH", QueryExecutorSkywatch::new);
 		aoMap.put("LPDAAC", QueryExecutorLpDaac::new);
-		aoMap.put("WSF", QueryExecutorDLR::new);
+		aoMap.put("DLR", QueryExecutorDLR::new);
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
 		

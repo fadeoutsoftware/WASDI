@@ -149,6 +149,11 @@ public abstract class QueryTranslator {
 	 * Token of TERRA platform
 	 */
 	private static final String S_SPLATFORMNAME_TERRA = "platformname:TERRA";
+	
+	/**
+	 * Token of WSF platform
+	 */
+	private static final String S_SPLATFORMNAME_WSF = "platformname:WSF";
 
 	/**
 	 * Token of product type
@@ -563,6 +568,9 @@ public abstract class QueryTranslator {
 			parseTerra(sQuery, oResult);
 			
 			parseStaticTiles(sQuery, oResult);
+			
+			parseWFS(sQuery, oResult);
+			
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
@@ -936,6 +944,20 @@ public abstract class QueryTranslator {
 			sQuery = removePlatformToken(sQuery, QueryTranslator.S_SPLATFORMNAME_TERRA);
 
 			oResult.platformName = Platforms.TERRA;
+		}
+	}
+	
+	/**
+	 * Fills the Query View Model with WSF (World Settlement Footprint) info
+	 * 
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 */
+	private void parseWFS(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.S_SPLATFORMNAME_WSF)) {
+			sQuery = removePlatformToken(sQuery, QueryTranslator.S_SPLATFORMNAME_WSF);
+
+			oResult.platformName = Platforms.WSF;
 		}
 	}
 	
