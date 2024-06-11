@@ -1,15 +1,14 @@
 package wasdi.shared.queryexecutors.dlr;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.fasterxml.jackson.databind.node.POJONode;
-
-import wasdi.shared.config.WasdiConfig;
 
 /**
  * Data provider for the German Space Agency - Deutsches Zentrum für Luft- und Raumfahrt (DLR)
@@ -20,6 +19,7 @@ import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.search.QueryViewModel;
@@ -52,7 +52,22 @@ public class QueryExecutorDLR extends QueryExecutor {
 				return -1;
 			}
 			
-			// TODO: implement search by name
+			if (Utils.isNullOrEmpty(oQueryViewModel.productName)) {
+				WasdiLog.debugLog("QueryExecutorDLR.executeCount. Searching product name: " + oQueryViewModel.productName);
+				JSONObject oMatchingTile = getTileMatchingName(oQueryViewModel.productName);
+				if (oMatchingTile == null) {
+					WasdiLog.warnLog("QueryExecutorDLR.executeCount. Matching tile is null");
+					return -1;
+				}
+				else if (Utils.isNullOrEmpty(oMatchingTile.optString("filename"))) {
+					WasdiLog.debugLog("QueryExecutorDLR.executeCount. No tile matching the name " + oQueryViewModel.productName);;
+					return 0;
+				}
+					
+				WasdiLog.debugLog("QueryExecutorDLR.executeCount. Found tile matching the name " + oQueryViewModel.productName);;
+				return 1;
+			}
+			
 			Double dQueryNorth = oQueryViewModel.north;
 			Double dQuerySouth = oQueryViewModel.south;
 			Double dQueryEast = oQueryViewModel.east;
@@ -117,7 +132,22 @@ public class QueryExecutorDLR extends QueryExecutor {
 				return null;
 			}
 			
-			// TODO: implement search by name
+			if (Utils.isNullOrEmpty(oQueryViewModel.productName)) {
+				WasdiLog.debugLog("QueryExecutorDLR.executeCount. Searching product name: " + oQueryViewModel.productName);
+				JSONObject oMatchingTile = getTileMatchingName(oQueryViewModel.productName);
+				if (oMatchingTile == null) {
+					WasdiLog.warnLog("QueryExecutorDLR.executeAndRetrieve. Matching tile is null");
+					return null;
+				}
+				else if (Utils.isNullOrEmpty(oMatchingTile.optString("filename"))) {
+					WasdiLog.debugLog("QueryExecutorDLR.executeAndRetrieve. No tile matching the name " + oQueryViewModel.productName);;
+					return null;
+				}
+					
+				WasdiLog.debugLog("QueryExecutorDLR.executeAndRetrieve. Found tile matching the name " + oQueryViewModel.productName);;
+				return Arrays.asList(getResultViewModel(oMatchingTile));
+			}
+			
 			Double dQueryNorth = oQueryViewModel.north;
 			Double dQuerySouth = oQueryViewModel.south;
 			Double dQueryEast = oQueryViewModel.east;
@@ -151,7 +181,9 @@ public class QueryExecutorDLR extends QueryExecutor {
 				List<QueryResultViewModel> aoResults = new ArrayList<>();
 				
 				for (JSONObject oTile : aoOverlappingTiles) {
-					aoResults.add(getResultViewModel(oTile));
+					QueryResultViewModel oVM = getResultViewModel(oTile);
+					if (oVM != null)
+					aoResults.add(oVM);
 				}
 				
 				WasdiLog.debugLog("QueryExecutorDLR.executeAndRetrieve. Number of returned result " + aoResults.size());
@@ -266,7 +298,7 @@ public class QueryExecutorDLR extends QueryExecutor {
 			JSONObject oTileJson = oTilesList.optJSONObject(iTile);
 			
 			if (oTileJson == null) {
-				WasdiLog.debugLog("QueryExecutorDLR.listOverlappingTiles. ");
+				WasdiLog.debugLog("QueryExecutorDLR.listOverlappingTiles. Got null tile");
 				return null;
 			}
 			
@@ -306,12 +338,9 @@ public class QueryExecutorDLR extends QueryExecutor {
 					
 					double dTileWest = aoTopLeftCorner.optDouble(0);
 					double dTileNorth = aoTopLeftCorner.optDouble(1);
-					
 					double dTileEast = aoBottomRightCorner.optDouble(0);
 					double dTileSouth = aoBottomRightCorner.optDouble(1);
-					
-					// boundingBoxOverlap(float fN1, float fE1, float fS1, float fW1, float fN2, float fE2, float fS2, float fW2)
-					
+										
 					boolean bIsOverlap = boundingBoxOverlap(dQueryNorth, dQueryEast, dQuerySouth, dQueryWest, dTileNorth, dTileEast, dTileSouth, dTileWest);
 					
 					if (bIsOverlap) 
@@ -328,17 +357,85 @@ public class QueryExecutorDLR extends QueryExecutor {
 		return oOverlappingTiles;
 	}
 	
+	public JSONObject getTileMatchingName(String sProductName) {
+				
+		JSONArray oTilesList = getWSFTiles();
+		
+		if (oTilesList == null) {
+			WasdiLog.warnLog("QueryExecutorDLR.getTileMatchingName. No tiles retireved from the HTTP provider");
+			return null;
+		}
+		
+		int iTile = 0;
+		
+		
+		while (iTile < oTilesList.length()) {
+			JSONObject oTileJson = oTilesList.optJSONObject(iTile);
+			
+			if (oTileJson == null) {
+				WasdiLog.debugLog("QueryExecutorDLR.getTileMatchingName. Got null tile");
+				return null;
+			}
+					
+			JSONObject oProperties = oTileJson.optJSONObject("properties");
+			
+			if (oProperties == null)
+				continue;
+			
+			String sFileName = oProperties.optString("filename");
+			
+			if (sFileName.endsWith(".tif"))
+				sFileName = sFileName.replace(".tif", "");
+			
+			if (sProductName.endsWith(".tif"))
+				sProductName = sProductName.replace(".tif", "");
+			
+			if (sFileName.equals(sProductName))
+				return oTileJson;
+				 
+			iTile ++;
+		}
+		
+		return new JSONObject();
+	}
+	
 	public QueryResultViewModel getResultViewModel(JSONObject oJsonResult) {
 		
-		JSONObject oProperties = oJsonResult.getJSONObject("properties");
-		String sFileName = oProperties.getString("filename");
-		String sId = oProperties.getString("id");
-		String sSize = oProperties.getString("filesize");
-		String sLink = oProperties.getString("Download");
+		JSONObject oProperties = oJsonResult.optJSONObject("properties");
 		
-		JSONObject oGeometry = oJsonResult.getJSONObject("geometry");
-		JSONArray aoCoordinates = oGeometry.getJSONArray("coordinates");
-		JSONArray aoOnePolygon = aoCoordinates.getJSONArray(0);
+		if (oProperties == null) {
+			WasdiLog.warnLog("QueryExecutorDLR.getResultViewMolel. 'properties' field missing from json object");
+			return null;
+		}
+		
+		String sFileName = oProperties.optString("filename");
+		String sId = oProperties.optString("id");
+		String sSizeInBytes = oProperties.optString("filesize");
+		double dSize = Double.parseDouble(sSizeInBytes);
+		String sSize = Utils.isNullOrEmpty(sSizeInBytes) ? "0" : Utils.getNormalizedSize(dSize);
+		
+		String sLink = oProperties.optString("Download");
+		
+		JSONObject oGeometry = oJsonResult.optJSONObject("geometry");
+		
+		if (oGeometry == null) {
+			WasdiLog.warnLog("QueryExecutorDLR.getResultViewModel. 'geometry' field missiong from json object");
+			return null;
+		}
+		
+		JSONArray aoCoordinates = oGeometry.optJSONArray("coordinates");
+		
+		if (aoCoordinates == null) {
+			WasdiLog.warnLog("QueryExecutorDLR.getResultViewModel. 'coordinates' field missiong from json object");
+			return null;
+		}
+		
+		JSONArray aoOnePolygon = aoCoordinates.optJSONArray(0);
+		
+		if (aoOnePolygon == null) {
+			WasdiLog.warnLog("QueryExecutorDLR.getResultViewModel. No poligons to describe the bounding box");
+			return null;
+		}
 		
 		JSONArray aoTopLeftCorner = aoOnePolygon.optJSONArray(0);
 		
@@ -365,7 +462,15 @@ public class QueryExecutorDLR extends QueryExecutor {
 		
 		String sFootprint = "POLYGON" + " ((" + sCoordinates + "))";
 		
-		String sSummary = "Date: 2019-01-01T00:00:00.000Z, Instrument: BOH, Mode: Boh, Satellite: Boh, Size: 100B";
+		String sSummary = "Date: 2019-01-01T00:00:00.000Z, Instrument: WSF, Mode: WSF, Satellite: WSF, Size: " + sSize;
+		
+		String sFileNameNoExtension = WasdiFileUtils.getFileNameWithoutLastExtension(sFileName);
+		
+		Map<String, String> oWasdiProperties = new HashMap<>();
+		oWasdiProperties.put("fileName",sFileNameNoExtension);
+		oWasdiProperties.put("id", sId);
+		oWasdiProperties.put("filesize", sSizeInBytes);
+		oWasdiProperties.put("download", sFileNameNoExtension);
 		
 		
 		QueryResultViewModel oVM = new QueryResultViewModel();
@@ -373,8 +478,9 @@ public class QueryExecutorDLR extends QueryExecutor {
 		oVM.setId(sId);
 		oVM.setLink(sLink);
 		oVM.setProvider("WSF");
-		oVM.setTitle(sFileName);
+		oVM.setTitle(WasdiFileUtils.getFileNameWithoutLastExtension(sFileNameNoExtension));
 		oVM.setSummary(sSummary);
+		oVM.setProperties(oWasdiProperties);
 		
 		return oVM;
 		
