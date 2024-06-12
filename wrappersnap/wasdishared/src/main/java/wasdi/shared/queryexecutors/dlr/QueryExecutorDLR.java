@@ -476,7 +476,7 @@ public class QueryExecutorDLR extends QueryExecutor {
 		QueryResultViewModel oVM = new QueryResultViewModel();
 		oVM.setFootprint(sFootprint);
 		oVM.setId(sId);
-		oVM.setLink(sLink);
+		oVM.setLink(sLink + ";" + sSizeInBytes);
 		oVM.setProvider("WSF");
 		oVM.setTitle(WasdiFileUtils.getFileNameWithoutLastExtension(sFileNameNoExtension));
 		oVM.setSummary(sSummary);
