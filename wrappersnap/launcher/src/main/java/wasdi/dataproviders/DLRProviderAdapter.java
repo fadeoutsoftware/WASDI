@@ -5,12 +5,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.HashMap;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
-import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.shared.viewmodels.HttpCallResponse;
 
 public class DLRProviderAdapter extends ProviderAdapter {
 
@@ -64,8 +61,6 @@ public class DLRProviderAdapter extends ProviderAdapter {
 		}
 		
 		try {
-			
-			
 			String[] asLinkInfos = sFileURL.split(";");
 			String sHttpUrl = asLinkInfos[0];
 			
@@ -98,13 +93,32 @@ public class DLRProviderAdapter extends ProviderAdapter {
 			WasdiLog.errorLog("DLRProviderAdapter.executeDownloadFile. Error downloading the file" + sFileURL);
 			return sResult;
 		}
-		
 	}
 
 	@Override
 	public String getFileName(String sFileURL) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		String sResult = null;
+		
+		if (Utils.isNullOrEmpty(sFileURL)) {
+			WasdiLog.warnLog("DLRProviderAdapter.getFileName. The file URL is null or empty");
+			return sResult;
+		}
+		
+		try {
+			String[] asLinkInfos = sFileURL.split(";");
+			String sHttpUrl = asLinkInfos[0];
+			
+			String[] asUrlTokens = sHttpUrl.split("/");
+			
+			sResult = asUrlTokens[asUrlTokens.length - 1];
+			WasdiLog.debugLog("DLRProviderAdapter.getFileName. File name extracted from URL: " + sResult);
+			return sResult;
+			
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("DLRProviderAdapter.getFileName. Error extracting file name from URL " + sFileURL);
+			return sResult;
+		}
+			
 	}
 
 	@Override
@@ -113,14 +127,6 @@ public class DLRProviderAdapter extends ProviderAdapter {
 			return DataProviderScores.DOWNLOAD.getValue();
 		}
 		return 0;
-	}
-	
-	public static void main(String[]args) throws Exception {
-		WasdiConfig.readConfig("C:/temp/wasdi/wasdiLocalTESTConfig.json");
-		DLRProviderAdapter oAdapter = new DLRProviderAdapter();
-		oAdapter.executeDownloadFile("https://download.geoservice.dlr.de/WSF2019/files//WSF2019_v1_-100_16.tif;1000", 
-				null, null, "C:/Users/valentina.leone/Downloads", null, 2);
-		
 	}
 
 }
