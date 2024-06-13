@@ -37,6 +37,32 @@ public class MissionUtils {
 		
 		return false;
 	}
+	
+	public static boolean isLandsat5File(File oFile) {
+		if (oFile == null) {
+			return false;
+		}
+		
+		String sFileName = oFile.getName();
+		if (sFileName.toUpperCase().startsWith("LS05_")) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public static boolean isLandsat7File(File oFile) {
+		if (oFile == null) {
+			return false;
+		}
+		
+		String sFileName = oFile.getName();
+		if (sFileName.toUpperCase().startsWith("LS07_")) {
+			return true;
+		}
+		
+		return false;
+	}
 
 	public static boolean isGpmZipFile(File oFile) {
 		try {
@@ -183,8 +209,15 @@ public class MissionUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("S5P_")) {
 				return Platforms.SENTINEL5P;
-			} else if (sFileName.toUpperCase().startsWith("S6_") || sFileName.toUpperCase().startsWith("S6A_") || sFileName.toUpperCase().startsWith("S6B_")) {
+			} 
+			else if (sFileName.toUpperCase().startsWith("S6_") || sFileName.toUpperCase().startsWith("S6A_") || sFileName.toUpperCase().startsWith("S6B_")) {
 				return Platforms.SENTINEL6;
+			}
+			else if (sFileName.toUpperCase().startsWith("LS05_")) {
+				return Platforms.LANDSAT5;
+			}
+			else if (sFileName.toUpperCase().startsWith("LS07_")) {
+				return Platforms.LANDSAT7;
 			}
 			else if (sFileName.toUpperCase().startsWith("LC08_")) {
 				return Platforms.LANDSAT8;
@@ -294,6 +327,12 @@ public class MissionUtils {
 			}
 			else if (sPlatform.equals(Platforms.ENVISAT)) {
 				String sDate = sFileName.substring(14, 14+8);
+				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd");
+				return new Date(lTime);
+			}
+			else if (sPlatform.equals(Platforms.LANDSAT5)
+					|| sPlatform.equals(Platforms.LANDSAT7)) {
+				String sDate = sFileName.substring(21, 21+15);
 				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd");
 				return new Date(lTime);
 			}

@@ -2,6 +2,7 @@ package wasdi.io;
 
 import java.io.File;
 
+import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.jrc.ResponseTranslatorJRC;
 import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -51,6 +52,11 @@ public class WasdiProductReaderFactory {
 		
 		if (MissionUtils.isSentinel6File(oFile)) {
 			return new Sentinel6ProductReader(oFile);
+		}
+		
+		if (MissionUtils.isLandsat5File(oFile) 
+				|| MissionUtils.isLandsat7File(oFile)) {
+			return new LandsatProductReader(oFile);
 		}
 
 		if (oFile.getName().toLowerCase().endsWith(".nc")) {

@@ -71,11 +71,19 @@ public abstract class QueryTranslator {
 	 */
 	private static final String s_sPLATFORMNAME_SENTINEL_6 = "platformname:Sentinel-6";	
 	/**
+	 * Token of Landsat-5 platform
+	 */
+	private static final String s_sPLATFORMNAME_LANDSAT_5 = "platformname:Landsat-5";
+	/**
+	 * Token of Landsat-7 platform
+	 */
+	private static final String s_sPLATFORMNAME_LANDSAT_7 = "platformname:Landsat-7";
+	/**
 	 * Token of Landsat platform
 	 */
 	private static final String s_sPLATFORMNAME_LANDSAT = "platformname:Landsat-*";
 	/**
-	 * Token of Landsat platform
+	 * Token of Prova-V platform
 	 */
 	private static final String s_sPLATFORMNAME_PROBAV = "platformname:Proba-V";
 	/**
@@ -520,8 +528,11 @@ public abstract class QueryTranslator {
 
 			// Try get Info about CAMS
 			parseCAMS(sQuery, oResult);
+			
+			// Try to get info about Landsat-5 or Landsat-7
+			parseLandsat5And7(sQuery, oResult);
 
-			// Try to get info about Landsat
+			// Try to get info about Landsat-8
 			parseLandsat(sQuery, oResult);
 			
 			// Try to get Info about ProbaV
@@ -1098,7 +1109,48 @@ public abstract class QueryTranslator {
 	}
 	
 	/**
-	 * Parse Landsat filters
+	 * Parse Landsat-5 and Landsat-7 filters
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parseLandsat5And7(String sQuery, QueryViewModel oResult) {
+		try {
+			boolean bIsLandsatProduct = false;
+			
+			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_LANDSAT_5)) {
+				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_LANDSAT_5);
+				oResult.platformName = Platforms.LANDSAT5;
+				bIsLandsatProduct = true;
+			} else if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_LANDSAT_7)) {
+				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_LANDSAT_7);
+				oResult.platformName = Platforms.LANDSAT7;
+				bIsLandsatProduct = true;
+			}
+			
+			if (bIsLandsatProduct) {
+				oResult.productType = extractValue(sQuery, "producttype");
+				oResult.sensorMode = extractValue(sQuery, "sensoroperationalmode");
+				
+				try {
+					String sPathNumber = extractValue(sQuery, "relativeorbitnumber");
+					if (!Utils.isNullOrEmpty(sPathNumber))
+						oResult.relativeOrbit = Integer.parseInt(sPathNumber);
+					
+					String sRowNumber = extractValue(sQuery, "absoluteorbit");
+					if (!Utils.isNullOrEmpty(sRowNumber)) {
+						oResult.absoluteOrbit = Integer.parseInt(sRowNumber);
+					}
+				} catch (NumberFormatException oEx) {
+					WasdiLog.errorLog("QueryTranslator.parseLandsat5And7: error parsing filters with integer value " + sQuery, oEx);
+				}		
+			}
+		} catch (Exception oE) {
+			WasdiLog.errorLog("QueryTranslator.parseLandsat5And7 ( " + sQuery + " ): ", oE);
+		}
+	}
+	
+	/**
+	 * Parse Landsat-8 filters
 	 * @param sQuery
 	 * @param oResult
 	 */
