@@ -52,7 +52,7 @@ public class QueryExecutorDLR extends QueryExecutor {
 				return -1;
 			}
 			
-			if (Utils.isNullOrEmpty(oQueryViewModel.productName)) {
+			if (!Utils.isNullOrEmpty(oQueryViewModel.productName)) {
 				WasdiLog.debugLog("QueryExecutorDLR.executeCount. Searching product name: " + oQueryViewModel.productName);
 				JSONObject oMatchingTile = getTileMatchingName(oQueryViewModel.productName);
 				if (oMatchingTile == null) {
@@ -117,8 +117,17 @@ public class QueryExecutorDLR extends QueryExecutor {
 		
 		try {
 			String sQuery = oQuery.getQuery();
-			// int iLimit = Integer.getInteger(oQuery.getLimit());
-			// int iOffset = Integer.getInteger(oQuery.getOffset());
+			
+			int iLimit = 0;
+			int iOffset = 0;
+			
+			try {
+				iLimit = Integer.getInteger(oQuery.getLimit());
+				iOffset = Integer.getInteger(oQuery.getOffset());
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("QueryExecutorDLR.executeAndRetrieve. Error in parsing limit or offset");
+				return null;
+			}
 			
 			if (Utils.isNullOrEmpty(sQuery)) {
 				WasdiLog.warnLog("QueryExecutorDLR.executeAndRetrieve. Query from client is null or empty");
@@ -132,7 +141,7 @@ public class QueryExecutorDLR extends QueryExecutor {
 				return null;
 			}
 			
-			if (Utils.isNullOrEmpty(oQueryViewModel.productName)) {
+			if (!Utils.isNullOrEmpty(oQueryViewModel.productName)) {
 				WasdiLog.debugLog("QueryExecutorDLR.executeCount. Searching product name: " + oQueryViewModel.productName);
 				JSONObject oMatchingTile = getTileMatchingName(oQueryViewModel.productName);
 				if (oMatchingTile == null) {
@@ -187,10 +196,13 @@ public class QueryExecutorDLR extends QueryExecutor {
 				}
 				
 				WasdiLog.debugLog("QueryExecutorDLR.executeAndRetrieve. Number of returned result " + aoResults.size());
-				return aoResults;
+				
+				int iEnd = iOffset + iLimit > aoResults.size() ? aoResults.size() : iOffset + iLimit;
+				return aoResults.subList(iOffset, iEnd);
 				
 			} else {
 				WasdiLog.warnLog("QueryExecutorDLR.executeAndRetrieve. Product type not recognized " + sProductType);
+				return null;
 			}
 			
 		} catch (Exception oEx) {
@@ -198,7 +210,6 @@ public class QueryExecutorDLR extends QueryExecutor {
 			return null;
 		}
 		
-		return null;
 	}
 	
 	
