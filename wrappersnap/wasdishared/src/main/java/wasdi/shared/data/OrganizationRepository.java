@@ -253,6 +253,15 @@ public class OrganizationRepository extends MongoRepository {
 
 		return aoReturnList;
 	}
+	
+	/**
+	 * Get the list of organizations.
+	 * @return the list of organizations
+	 */
+	public long getOrganizationsCount() {
+		return getCollection(m_sThisCollection).countDocuments();
+	}
+
 
 	/**
 	 * Find organizations by partial name or by partial id

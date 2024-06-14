@@ -1078,6 +1078,20 @@
 				}
 			]
 		}
+		{
+			"name": "BIGBANG",
+			"indexname": "platformname",
+			"indexvalue": "BIGBANG",
+			"filters": [
+				{
+					"indexname": "dataset",
+					"indexlabel": "Dataset",
+					"indexvalues": "SPEI01",
+					"regex": ".*",
+					"indexvalue": "SPEI01"
+				}
+			]
+		}
 	],
 	"orbitsearch": {
 		"sensortypes": [

@@ -79,6 +79,8 @@ RUN apt-get update && \
         {{ sWasdiDataRootDirectoryPath }} \
         {{ sWasdiConfigurationRootDirectoryPath }} \
         {{ sWasdiLauncherRootDirectoryPath }} \
+        {{ sWasdiMountedVolumeRootDirectoryPath }} \
+        {{ sWasdiMountedDataProviderVolumeRootDirectoryPath }} \
         /tmp/gdal && \
     chown {{ sWasdiDataPartitionRootDirectoryOwner }}:{{ sWasdiDataPartitionRootDirectoryGroup }} \
         {{ sWasdiDataPartitionRootDirectoryPath }} && \
@@ -96,6 +98,14 @@ RUN apt-get update && \
         {{ sWasdiLauncherRootDirectoryPath }} && \
     chmod {{ sWasdiLauncherRootDirectoryMode }} \
         {{ sWasdiLauncherRootDirectoryPath }} && \
+    chown {{ sWasdiMountedVolumeRootDirectoryOwner }}:{{ sWasdiMountedVolumeRootDirectoryGroup }} \
+        {{ sWasdiMountedVolumeRootDirectoryPath }} && \
+    chmod {{ sWasdiMountedVolumeRootDirectoryMode }} \
+        {{ sWasdiMountedVolumeRootDirectoryPath }} && \
+    chown {{ sWasdiMountedDataProviderVolumeRootDirectoryOwner }}:{{ sWasdiMountedDataProviderVolumeRootDirectoryGroup }} \
+        {{ sWasdiMountedDataProviderVolumeRootDirectoryPath }} && \
+    chmod {{ sWasdiMountedDataProviderVolumeRootDirectoryMode }} \
+        {{ sWasdiMountedDataProviderVolumeRootDirectoryPath }} && \
     wget \
         --no-verbose \
         --output-document /tmp/{{ sWasdiGdalCompiledSourceUrl | basename }} \

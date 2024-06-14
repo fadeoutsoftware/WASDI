@@ -39,7 +39,6 @@ import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
-import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.products.FtpTransferViewModel;
@@ -1065,18 +1064,78 @@ public class CatalogResources {
 
 		return zipOnTheFly(aoFileEntries, sZippedOutputFileName);
 	}
-	
+
 	/**
-	 * Zip a file and return the stream 
+	 * Zip a shape file
+	 * @param oInitialFile file .
+	 * @return stream with the zipped shape file
+	 */
+	private Response zipAsciiFile(File oInitialFile) {
+
+		if (!oInitialFile.getName().endsWith(".asc")) {
+			WasdiLog.warnLog("CatalogResources.zipAsciiFile: the file is not a .asc file");
+			return null;
+		}
+
+		WasdiLog.debugLog("CatalogResources.zipAsciiFile: looking for.prj file associated to " + oInitialFile.getAbsolutePath());
+
+		// Remove extension
+		final String sNameToFind = WasdiFileUtils.getFileNameWithoutLastExtension(oInitialFile.getName()) + ".prj";
+
+		WasdiLog.debugLog("CatalogResources.zipAsciiFile: file to look for: " + sNameToFind);
+
+		// Get parent folder
+		File oFolder = oInitialFile.getParentFile();
+
+		File oPrjFile = null;
+		for (File oFile : oFolder.listFiles()) {
+			if (oFile.getName().equals(sNameToFind)) {
+				oPrjFile = oFile;
+				break;
+			}
+		}
+
+		if (oPrjFile == null) {
+			WasdiLog.warnLog("CatalogResources.zipAsciiFile: .prj file not found");
+			return null;
+		}
+
+		WasdiLog.debugLog("CatalogResources.zipAsciiFile: found .prj file " + oPrjFile.getAbsolutePath());
+
+		try {
+			Map<String, File> aoFileEntries = new HashMap<>();
+			aoFileEntries.put(oInitialFile.getName(), oInitialFile);
+			aoFileEntries.put(oPrjFile.getName(), oPrjFile);
+			
+			String sZipFileName = oInitialFile.getName().replace(".asc", ".zip");
+			
+			ZipStreamingOutput oStream = new ZipStreamingOutput(aoFileEntries);
+			ResponseBuilder oResponseBuilder = Response.ok(oStream);
+			
+			oResponseBuilder.header("Content-Disposition", "attachment; filename=\"" + sZipFileName + "\"");
+			oResponseBuilder.header("Access-Control-Expose-Headers", "Content-Disposition");
+
+			WasdiLog.debugLog("CatalogResources.zipAsciiFile: zip file ready");
+			
+			return oResponseBuilder.build();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogResource.zipAsciiFile: error while zipping file ", oEx);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Zip a file and return the stream
 	 * @param oInitialFile File to zip
 	 * @return stream
 	 */
 	private Response prepareAndReturnZip(File oInitialFile) {
 		WasdiLog.debugLog("CatalogResources.prepareAndReturnZip");
-		if(null==oInitialFile) {
+		if (null == oInitialFile) {
 			WasdiLog.debugLog("CatalogResources.prepareAndReturnZip: oFile is null");
 			return null;
-		}		
+		}
 		try {
 			WasdiLog.debugLog("CatalogResources.prepareAndReturnZip: init");
 			String sBasePath = oInitialFile.getAbsolutePath();
@@ -1093,6 +1152,9 @@ public class CatalogResources {
 			} else if (MissionUtils.isLandsat5File(oInitialFile) 
 					|| MissionUtils.isLandsat7File(oInitialFile) ) {
 				return zipLandsat(oInitialFile);
+			}
+			else if (MissionUtils.isAsciiFile(oInitialFile)) {
+				return zipAsciiFile(oInitialFile);
 			}
 		} 
 		catch (Exception oEx) {
@@ -1126,7 +1188,8 @@ public class CatalogResources {
 					MissionUtils.isSentinel3Directory(oFile) ||
 					MissionUtils.isSentinel6Directory(oFile) ||
 					MissionUtils.isLandsat5File(oFile) ||
-					MissionUtils.isLandsat7File(oFile)
+					MissionUtils.isLandsat7File(oFile) || 
+					MissionUtils.isAsciiFile(oFile)					
 					);
 		}
 		return bRet;

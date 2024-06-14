@@ -609,7 +609,7 @@ public class WorkflowsResource {
                 return oResult;
             }
             
-            if (oRequesterUser.getUserId().equals(sUserId)) {
+            if (oRequesterUser.getUserId().equals(sUserId) && !UserApplicationRole.isAdmin(oRequesterUser)) {
                 WasdiLog.warnLog("WorkflowsResource.ShareWorkflow: auto sharing not so smart");
                 oResult.setStringValue("Impossible to autoshare.");
                 return oResult;

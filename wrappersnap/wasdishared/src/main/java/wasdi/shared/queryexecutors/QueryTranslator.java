@@ -164,6 +164,11 @@ public abstract class QueryTranslator {
 	private static final String S_SPLATFORMNAME_WSF = "platformname:WSF";
 
 	/**
+	 * Token of TERRA platform
+	 */
+	private static final String s_sPLATFORMNAME_BIGBANG = "platformname:BIGBANG";
+
+	/**
 	 * Token of product type
 	 */
 	private static final String s_sPRODUCTTYPE = "producttype:";
@@ -576,11 +581,32 @@ public abstract class QueryTranslator {
 			// Try get Info about Earthcache
 			parseEarthcache(sQuery, oResult);
 			
+			// Try to get info about Terra
 			parseTerra(sQuery, oResult);
 			
+			// Try to get the info for semi-static provided files
 			parseStaticTiles(sQuery, oResult);
 			
 			parseWFS(sQuery, oResult);
+						
+			parseBIGBANG(sQuery, oResult);
+						
+			if (Utils.isNullOrEmpty(oResult.platformName)) {
+				WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: platformName not found: try to read the generic one");
+				
+				int iStartIndex = sQuery.indexOf("platformname");
+				
+				if (iStartIndex>=0) {
+					int iEndIndex = sQuery.substring(iStartIndex).indexOf("AND");
+					if (iEndIndex>=0) {
+						int iStartIndex2 = iStartIndex + "platformname".length() + 1;
+						String sPlatform = sQuery.substring(iStartIndex2, iStartIndex+iEndIndex);
+						sPlatform = sPlatform.trim();
+						oResult.platformName = sPlatform;
+						WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: found platformName: " + sPlatform);
+					}
+				}
+			}
 			
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
@@ -1043,7 +1069,6 @@ public abstract class QueryTranslator {
 	 * @param oResult the resulting Query View Model
 	 */
 	private void parseCM(String sQuery, QueryViewModel oResult) {
-		//WasdiLog.debugLog("QueryTranslator.parseCM | sQuery: " + sQuery);
 
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_CM)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_CM);
@@ -1072,6 +1097,15 @@ public abstract class QueryTranslator {
 					WasdiLog.debugLog("QueryTranslator.parseCM( " + sQuery  + " ): error while parsing endDepth: " + sEndDepth);
 				}
 			}
+		}
+	}
+	
+	private void parseBIGBANG(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_BIGBANG)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_BIGBANG);
+			
+			oResult.platformName = Platforms.BIGBANG;
+			oResult.sensorMode = extractValue(sQuery, "dataset");
 		}
 	}
 

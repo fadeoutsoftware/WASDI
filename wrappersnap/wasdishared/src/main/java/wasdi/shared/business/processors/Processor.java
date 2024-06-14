@@ -70,6 +70,16 @@ public class Processor {
 	private Float subscriptionPrice = 0.0f; 
 	
 	/**
+	 * Product id on Stripe
+	 */
+	private String stripeProductId = "";
+	
+	/**
+	 * Stripe on demand payment link
+	 */
+	private String stripePaymentLinkId = "";
+	
+	/**
 	 * Application external link
 	 */
 	private String link = "";
@@ -253,6 +263,18 @@ public class Processor {
 	}
 	public void setSubscriptionPrice(Float subscriptionPrice) {
 		this.subscriptionPrice = subscriptionPrice;
+	}
+	public String getStripeProductId() {
+		return stripeProductId;
+	}
+	public void setStripeProductId(String stripeProductId) {
+		this.stripeProductId = stripeProductId;
+	}
+	public String getStripePaymentLinkId() {
+		return stripePaymentLinkId;
+	}
+	public void setStripePaymentLinkId(String stripePaymentLinkId) {
+		this.stripePaymentLinkId = stripePaymentLinkId;
 	}
 	public boolean getShowInStore() {
 		return showInStore;

@@ -1,0 +1,9 @@
+{
+	"providers": [
+		{
+			"baseUrl": "https://wasdi-box.fadeout.cloud/return/",
+			"mission":"ReturnRaster",
+			"apiKey": "super-secret-WASDI-key"
+		}		
+	]
+}

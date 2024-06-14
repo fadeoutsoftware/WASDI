@@ -2,10 +2,10 @@ package wasdi.io;
 
 import java.io.File;
 
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.jrc.ResponseTranslatorJRC;
 import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class WasdiProductReaderFactory {
 	
@@ -77,6 +77,11 @@ public class WasdiProductReaderFactory {
 		
 		if (oFile.getName().toUpperCase().startsWith(ResponseTranslatorJRC.s_sFileNamePrefix) && oFile.getName().endsWith(".zip")) {
 			return new GHSLTilesProductReader(oFile);
+		}
+		
+		if (oFile.getName().startsWith("SPEI") || oFile.getName().startsWith("https://SPEI")) {
+			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader " + oFile.getName());
+			return new BigBangProductReader(oFile);
 		}
 
 		return new SnapProductReader(oFile);

@@ -239,5 +239,29 @@ public class ProcessorParametersTemplateRepository extends MongoRepository {
 
 		return bIsTheOwner;
 	}
+	
+	/**
+	 * Delete the ProcessorParametersTemplates by UserId.
+	 * 
+	 * @param sUSerId the id of the user
+	 * @return number of elements deleted
+	 */
+	public int deleteByUserId(String sUserId) {
+		if (Utils.isNullOrEmpty(sUserId)) {
+			return 0;
+		}
+
+		try {
+			
+			BasicDBObject oCriteria = new BasicDBObject();
+			oCriteria.append("userId", sUserId);
+
+			return deleteMany(oCriteria, m_sThisCollection);			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorParametersTemplateRepository.deleteByUserId: error ", oEx);
+			return -1;
+		}
+	}	
 
 }
