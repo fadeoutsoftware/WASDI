@@ -1,11 +1,9 @@
 package wasdi.shared.queryexecutors.sina;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-
-import com.google.common.base.Preconditions;
 
 import wasdi.shared.queryexecutors.ResponseTranslator;
 import wasdi.shared.utils.Utils;
@@ -19,7 +17,7 @@ public class ResponseTranslatorSina extends ResponseTranslator {
 
 	public ResponseTranslatorSina() {
 		// TODO Auto-generated constructor stub
-	}O
+	}
 
 	@Override
 	public List<QueryResultViewModel> translateBatch(String sResponse, boolean bFullViewModel) {
