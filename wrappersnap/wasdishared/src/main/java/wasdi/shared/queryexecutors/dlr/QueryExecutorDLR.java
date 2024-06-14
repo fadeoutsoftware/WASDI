@@ -35,6 +35,11 @@ public class QueryExecutorDLR extends QueryExecutor {
 		this.m_oResponseTranslator = new ResponseTranslatorDLR();
 		this.m_asSupportedPlatforms.add(Platforms.WSF);
 	}
+	
+	@Override
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+		return sOriginalUrl;
+	}
 
 	@Override
 	public int executeCount(String sQuery) {
