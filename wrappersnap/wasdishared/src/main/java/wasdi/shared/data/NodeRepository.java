@@ -13,7 +13,6 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.Node;
-import wasdi.shared.business.Organization;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 

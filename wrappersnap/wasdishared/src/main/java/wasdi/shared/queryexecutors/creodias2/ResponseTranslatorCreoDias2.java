@@ -38,6 +38,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	public static final String  SODATA_SIZE = "ContentLength";
 	private static final String SODATA_TYPE = "type";
 	private static final String SODATA_VALUE = "Value";
+	private static final String SODATA_BEGINNING_DATE_TIME = "beginningDateTime";
 	
 	private static final String SODATA_BASE_DOWNLOAD_URL = "https://zipper.creodias.eu/odata/v1/Products(";
 	private static final String SODATA_END_DOWNLOAD_URL = ")/$value";
@@ -99,7 +100,6 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		String sProductId = oJsonItem.optString(SODATA_PRODUCT_ID);
 		String sLink = SODATA_BASE_DOWNLOAD_URL + sProductId + SODATA_END_DOWNLOAD_URL;
 		String sFootprint = parseFootPrint(oJsonItem);
-		String sDate = oJsonItem.optString(SODATA_DATE);
 		double dByteSize = (double) oJsonItem.optLong(SODATA_SIZE, -1L);
 		String sSize = dByteSize > 0 ? Utils.getNormalizedSize(dByteSize) : "";
 		String sS3Path = oJsonItem.optString(SODATA_S3_PATH);
@@ -111,6 +111,12 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		String sPlatform = getAttribute(aoAttributes, SODATA_PLATFORM_SHORT_NAME);
 		String sPlatformSerialId = getAttribute(aoAttributes, SODATA_PLATFORM_SERIAL_ID);
 		String sRelativeOrbit = getAttribute(aoAttributes, SODATA_RELATIVE_ORBIT);
+		String sBeginningDateTime = getAttribute(aoAttributes, SODATA_BEGINNING_DATE_TIME);
+		
+		// retrieve product date
+		String sDate = !Utils.isNullOrEmpty(sBeginningDateTime) 
+				? sBeginningDateTime 
+				: oJsonItem.optString(SODATA_DATE);
 				
 		String sSummary = getSummary(sDate, sSize, sInstrument, sMode, sPlatform, sPlatformSerialId);
 		

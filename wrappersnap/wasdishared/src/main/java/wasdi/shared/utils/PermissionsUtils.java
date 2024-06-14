@@ -37,7 +37,6 @@ import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.OpenEOJobRepository;
 import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
-import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProjectRepository;

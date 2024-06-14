@@ -77,7 +77,8 @@ public class WasdiFileUtils {
 						"dot",
 						"dotx",
 						"rtf",
-						"odt"
+						"odt",
+						"csv"
 				)
 		);
 		

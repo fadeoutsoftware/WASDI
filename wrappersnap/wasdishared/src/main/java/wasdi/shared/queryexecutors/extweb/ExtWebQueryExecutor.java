@@ -22,7 +22,6 @@ import wasdi.shared.queryexecutors.extweb.config.ExtWebConfig;
 import wasdi.shared.queryexecutors.extweb.config.ExtWebDataProviderConfig;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;

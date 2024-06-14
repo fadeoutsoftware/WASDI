@@ -53,6 +53,11 @@ public class WasdiProductReaderFactory {
 		if (MissionUtils.isSentinel6File(oFile)) {
 			return new Sentinel6ProductReader(oFile);
 		}
+		
+		if (MissionUtils.isLandsat5File(oFile) 
+				|| MissionUtils.isLandsat7File(oFile)) {
+			return new LandsatProductReader(oFile);
+		}
 
 		if (oFile.getName().toLowerCase().endsWith(".nc")) {
 			return new CmNcProductReader(oFile);

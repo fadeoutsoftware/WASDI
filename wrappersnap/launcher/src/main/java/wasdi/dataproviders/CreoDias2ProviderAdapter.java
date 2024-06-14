@@ -641,7 +641,9 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		else if (sPlatformType.equals(Platforms.SENTINEL3) 
 				|| sPlatformType.equals(Platforms.SENTINEL5P)
 				|| sPlatformType.equals(Platforms.SENTINEL6)
-				|| sPlatformType.equals(Platforms.LANDSAT8)) {
+				|| sPlatformType.equals(Platforms.LANDSAT8)
+				|| sPlatformType.equals(Platforms.LANDSAT5)
+				|| sPlatformType.equals(Platforms.LANDSAT7)) {
 			if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
 			else return DataProviderScores.DOWNLOAD.getValue();
 		}

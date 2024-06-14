@@ -313,6 +313,68 @@
 			]
 		},
 		{
+			"name": "L5",
+			"indexname": "platformname",
+			"indexvalue": "Landsat-5",
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "L1G|L1T",
+					"regex": ".*"
+				},
+				{
+					"indexname": "sensoroperationalmode",
+					"indexlabel": "Operational Mode",
+					"indexvalues": "SAM|BUMPER",
+					"regex": ".*"
+				},
+				{
+					"indexname": "relativeorbitnumber",
+					"indexlabel": "Path Number",
+					"indexhint": "(from 1 to 233)",
+					"regex": ".*"
+				},
+				{
+					"indexname": "absoluteorbit",
+					"indexlabel": "Row Number",
+					"indexhint": "(from 1 to 248)",
+					"regex": ".*"
+				}
+			]
+		},
+		{
+			"name": "L7",
+			"indexname": "platformname",
+			"indexvalue": "Landsat-7",
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "L1G|L1T|L1GT|GTC_1P",
+					"regex": ".*"
+				},
+				{
+					"indexname": "sensoroperationalmode",
+					"indexlabel": "Operational Mode",
+					"indexvalues": "SAM|BUMPER",
+					"regex": ".*"
+				},
+				{
+					"indexname": "relativeorbitnumber",
+					"indexlabel": "Path Number",
+					"indexhint": "(from 1 to 233)",
+					"regex": ".*"
+				},
+				{
+					"indexname": "absoluteorbit",
+					"indexlabel": "Row Number",
+					"indexhint": "(from 1 to 248)",
+					"regex": ".*"
+				}
+			]
+		},
+		{
 			"name": "L8",
 			"indexname": "platformname",
 			"indexvalue": "Landsat-*",
@@ -1003,6 +1065,20 @@
 			]
 		},
 		{
+			"name": "WSF",
+			"indexname": "platformname",
+			"indexvalue": "WSF",
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "WSF_2019",
+					"regex": ".*",
+					"indexvalue": "WSF_2019"
+				}
+			]
+		},
+		{
 			"name": "BIGBANG",
 			"indexname": "platformname",
 			"indexvalue": "BIGBANG",
@@ -1015,7 +1091,22 @@
 					"indexvalue": "SPEI01"
 				}
 			]
-		}
+		},
+        {
+            "name": "Return Rasters",
+            "indexname": "platformname",
+            "indexvalue": "ReturnRaster",
+            "selected": false,
+            "ispublic": true,
+            "filters": [
+                {
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues": "CIMA_AIR_TEMP_AVG|CIMA_AIR_TEMP_MIN|CIMA_AIR_TEMP_MAX|CIMA_FAPAR|CIMA_PREC|CIMA_SPEI|CIMA_SSMI",
+                    "indexvalue": "CIMA_AIR_TEMP_AVG"
+                }
+            ]
+        }		
 	],
 	"orbitsearch": {
 		"sensortypes": [

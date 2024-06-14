@@ -3,7 +3,6 @@ package wasdi.shared.packagemanagers;
 import java.util.List;
 import java.util.Map;
 
-import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.packagemanagers.PackageManagerUtils;
 import wasdi.shared.viewmodels.processors.PackageManagerViewModel;
 import wasdi.shared.viewmodels.processors.PackageViewModel;
