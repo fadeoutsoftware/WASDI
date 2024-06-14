@@ -122,8 +122,8 @@ public class QueryExecutorDLR extends QueryExecutor {
 			int iOffset = 0;
 			
 			try {
-				iLimit = Integer.getInteger(oQuery.getLimit());
-				iOffset = Integer.getInteger(oQuery.getOffset());
+				iLimit = Integer.parseInt(oQuery.getLimit());
+				iOffset = Integer.parseInt(oQuery.getOffset());
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("QueryExecutorDLR.executeAndRetrieve. Error in parsing limit or offset");
 				return null;
