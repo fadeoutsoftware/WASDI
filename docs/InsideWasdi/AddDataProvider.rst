@@ -35,7 +35,7 @@ In case of a new platform, add also the support to:
 
 .. code-block:: java
 
-	wasdi.shared.utils.WasdiFileUtils.getPlatformFromSatelliteImageFileName
+	wasdi.shared.utils.MissionUtils.getPlatformFromSatelliteImageFileName
 
 This method must be able to infer to platform type from the file name.
 

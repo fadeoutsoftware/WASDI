@@ -238,6 +238,7 @@ wRefreshParameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  .. mat:autofunction:: matlabwasdilib::wRefreshParameters
 
+.. _mat_SearchEOImages:
 wSearchEOImages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  .. mat:autofunction:: matlabwasdilib::wSearchEOImages

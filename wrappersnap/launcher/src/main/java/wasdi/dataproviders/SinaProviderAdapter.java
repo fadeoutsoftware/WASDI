@@ -187,9 +187,8 @@ public class SinaProviderAdapter extends ProviderAdapter {
 
 	@Override
 	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
-		boolean bOnCloud = isWorkspaceOnSameCloud();
 		
-		if (sPlatformType.equals(Platforms.BIGBANG) && bOnCloud) {
+		if (sPlatformType.equals(Platforms.BIGBANG)) {
 			return DataProviderScores.FILE_ACCESS.getValue();
 		}
 		

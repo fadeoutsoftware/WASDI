@@ -150,9 +150,9 @@ public class AdminDashboardResource {
 					.collect(Collectors.toList());
 		}
 
-		GenericEntity<List<WorkspaceListInfoViewModel>> entity = new GenericEntity<List<WorkspaceListInfoViewModel>>(aoWorkspaceVMs, List.class);
+		GenericEntity<List<WorkspaceListInfoViewModel>> aoWorkspaceViewModels = new GenericEntity<List<WorkspaceListInfoViewModel>>(aoWorkspaceVMs, List.class);
 
-		return Response.ok(entity).build();
+		return Response.ok(aoWorkspaceViewModels).build();
 	}
 
 	@GET
@@ -583,23 +583,31 @@ public class AdminDashboardResource {
 				if (iUsers<iOffset) continue;
 				if (iUsers>=iOffset+iLimit) break;
 				
-				User oActualUser = aoUsers.get(iUsers);
-				
-				UserListViewModel oUserListViewModel = new UserListViewModel();
-				oUserListViewModel.setUserId(oActualUser.getUserId());
-				oUserListViewModel.setActive(oActualUser.getValidAfterFirstAccess());
-				oUserListViewModel.setLastLogin(oActualUser.getLastLogin());
-				oUserListViewModel.setType(PermissionsUtils.getUserType(oActualUser.getUserId()));
-				oUserListViewModel.setName(oActualUser.getName());
-				oUserListViewModel.setSurname(oActualUser.getSurname());
-				
-				aoUserVMs.add(oUserListViewModel);
+				try {
+					User oActualUser = aoUsers.get(iUsers);
+					
+					UserListViewModel oUserListViewModel = new UserListViewModel();
+					oUserListViewModel.setUserId(oActualUser.getUserId());
+					
+					Boolean bValid = oActualUser.getValidAfterFirstAccess();
+					if (bValid == null) bValid = false;
+					oUserListViewModel.setActive(bValid);
+					oUserListViewModel.setLastLogin(oActualUser.getLastLogin());
+					oUserListViewModel.setType(PermissionsUtils.getUserType(oActualUser.getUserId()));
+					oUserListViewModel.setName(oActualUser.getName());
+					oUserListViewModel.setSurname(oActualUser.getSurname());
+					
+					aoUserVMs.add(oUserListViewModel);					
+				}
+				catch (Exception oEx) {
+					WasdiLog.errorLog("AdminDashboardResource.getUsersList: exception reading a user ", oEx);
+				}				
 			}
 
 			return Response.ok(aoUserVMs).build();			
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("AdminDashboardResource.getUsersList: exeception ", oEx);
+			WasdiLog.errorLog("AdminDashboardResource.getUsersList: exception ", oEx);
 			return Response.serverError().build();
 		}
 	}	

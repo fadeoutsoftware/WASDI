@@ -476,8 +476,8 @@ public class NodeResource {
 			NodeRepository oNodeRepository = new NodeRepository();
 			Node oNode = oNodeRepository.getNodeByCode(oNodeViewModel.getNodeCode());
 		
-			if (oNode != null) {
-				WasdiLog.warnLog("NodeResource.getNode: there is already a node named " + oNodeViewModel.getNodeCode());
+			if (oNode == null) {
+				WasdiLog.warnLog("NodeResource.getNode: impossible to find a node named " + oNodeViewModel.getNodeCode());
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
