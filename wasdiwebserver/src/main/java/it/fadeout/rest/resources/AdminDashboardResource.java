@@ -150,9 +150,9 @@ public class AdminDashboardResource {
 					.collect(Collectors.toList());
 		}
 
-		GenericEntity<List<WorkspaceListInfoViewModel>> entity = new GenericEntity<List<WorkspaceListInfoViewModel>>(aoWorkspaceVMs, List.class);
+		GenericEntity<List<WorkspaceListInfoViewModel>> aoWorkspaceViewModels = new GenericEntity<List<WorkspaceListInfoViewModel>>(aoWorkspaceVMs, List.class);
 
-		return Response.ok(entity).build();
+		return Response.ok(aoWorkspaceViewModels).build();
 	}
 
 	@GET
