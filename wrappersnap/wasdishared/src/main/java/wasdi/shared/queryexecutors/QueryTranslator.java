@@ -1130,7 +1130,12 @@ public abstract class QueryTranslator {
 			iEnd = sQuery.indexOf(" AND ", iStart);
 
 			if (iEnd < 0) {
-				iEnd = sQuery.length();
+				
+				iEnd = sQuery.indexOf(" )", iStart);
+				
+				if (iEnd < 0) {
+					iEnd = sQuery.length();
+				}
 			}
 
 			String sType = sQuery.substring(iStart, iEnd);

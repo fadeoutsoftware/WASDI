@@ -87,20 +87,20 @@
 				{
 					"indexname": "Instrument",
 					"indexlabel": "Instrument",
-					"indexvalues": "SRAL|SLSTR",
+					"indexvalues": "SRAL|SLSTR|OLCI",
 					"regex": ".*"
 				},
 				{
 					"indexname": "producttype",
 					"indexlabel": "Product Type",
-					"indexvalues": "SR_1_SRA___|SR_1_SRA_A_|SR_1_SRA_BS|SL_1_RBT___",
+					"indexvalues": "SR_1_SRA___|SR_1_SRA_A_|SR_1_SRA_BS|SL_1_RBT___|OL_1_EFR___|OL_1_ERR___",
 					"regex": ".*",
 					"visibilityConditions": "productlevel:L1"
 				},
 				{
 					"indexname": "producttype",
 					"indexlabel": "Product Type",
-					"indexvalues": "SR_2_LAN___|SL_2_AOD___|SL_2_FRP___|SL_2_LST___|SL_2_WST___",
+					"indexvalues": "SR_2_LAN___|SL_2_AOD___|SL_2_FRP___|SL_2_LST___|SL_2_WST___|OL_2_LFR___|OL_2_LRR___|OL_2_WFR___|OL_2_WRR___",
 					"regex": ".*",
 					"visibilityConditions": "productlevel:L2"
 				},
