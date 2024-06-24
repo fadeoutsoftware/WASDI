@@ -4,8 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.HashMap;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.DELETE;
@@ -112,7 +111,13 @@ public class WorkspaceResource {
 			List<Node> aoNodeList = oNodeRepository.getNodesList();
 			
 			// And create a map based on the node code
-			Map<String, Node> aoNodeMap = aoNodeList.stream().collect(Collectors.toMap(Node::getNodeCode, Function.identity()));
+			Map<String, Node> aoNodeMap = new HashMap<>();
+			for (Node oNode : aoNodeList) {
+				if (aoNodeMap.putIfAbsent(oNode.getNodeCode(), oNode) != null) {
+					WasdiLog.warnLog("WorkspaceResource.getListByUser: duplicated key for node " + oNode.getNodeCode());
+				}
+			}
+			
 
 			// Create repo
 			WorkspaceRepository oWSRepository = new WorkspaceRepository();

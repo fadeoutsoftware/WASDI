@@ -277,7 +277,19 @@ public class QueryTranslatorONDA extends QueryTranslator {
 				sResult += "SL_2_WST___*";
 			} else if(sQuery.substring(iStart).contains("SL_2_LST___")) {
 				sResult += "SL_2_LST___*";
-			}  
+			} else if (sQuery.substring(iStart).contains("OL_1_EFR___")) {
+				sResult += "OL_1_EFR___*";
+			} else if (sQuery.substring(iStart).contains("OL_1_ERR___")) {
+				sResult += "OL_1_ERR___*";
+			} else if (sQuery.substring(iStart).contains("OL_2_LFR___")) {
+				sResult += "OL_2_LFR___*";
+			} else if (sQuery.substring(iStart).contains("OL_2_LRR___")) {
+				sResult += "OL_2_LRR___*";
+			} else if (sQuery.substring(iStart).contains("OL_2_WFR___")) {
+				sResult += "OL_2_WFR___*";
+			} else if (sQuery.substring(iStart).contains("OL_2_WRR___")) {
+				sResult += "OL_2_WRR___*";
+			}
 
 			if(sQuery.substring(iStart).contains("timeliness")) {
 				sResult += " AND timeliness:";
