@@ -111,7 +111,6 @@ public class WorkspaceResource {
 			List<Node> aoNodeList = oNodeRepository.getNodesList();
 			
 			// And create a map based on the node code
-			// Map<String, Node> aoNodeMap = aoNodeList.stream().collect(Collectors.toMap(Node::getNodeCode, Function.identity()));
 			Map<String, Node> aoNodeMap = new HashMap<>();
 			for (Node oNode : aoNodeList) {
 				if (aoNodeMap.putIfAbsent(oNode.getNodeCode(), oNode) != null) {
