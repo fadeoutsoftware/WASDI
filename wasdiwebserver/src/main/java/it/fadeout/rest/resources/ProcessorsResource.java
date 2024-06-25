@@ -926,8 +926,13 @@ public class ProcessorsResource  {
 			
 			// check if the app has an on-demand price and if the person is not the owner of tje app: 
 			// in that case, update the apps payments table to track the run date/time
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			Float fOnDemandPrice = oProcessorToRun.getOndemandPrice();
-			if (fOnDemandPrice != null && fOnDemandPrice > 0 && !oUser.getUserId().equals(oProcessorToRun.getUserId())) {
+			if (fOnDemandPrice != null 
+					&& fOnDemandPrice > 0 
+					&& !oUser.getUserId().equals(oProcessorToRun.getUserId())
+					&& !oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, oProcessorToRun.getProcessorId())) {
+				
 				WasdiLog.debugLog("ProcessorsResource.internalRun: the app has an ondemand price");
 				AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
 				List<AppPayment> oAppPayments = oAppPaymentRepository.getAppPaymentByProcessorAndUser(oProcessorToRun.getProcessorId(), sUserId);
