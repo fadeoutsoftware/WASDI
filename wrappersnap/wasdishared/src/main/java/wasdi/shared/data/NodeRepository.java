@@ -65,9 +65,11 @@ public class NodeRepository extends MongoRepository {
 
 			UpdateResult oResult = getCollection(m_sThisCollection).updateOne(oFilter, oUpdateOperationDocument);
 
-			// Indeed we experienced some unexpected results from this count that led the API return false while instead the change was done in the db.
-			//if (oResult.getModifiedCount() == 1)
-			return true;
+			if (oResult.getModifiedCount() == 1) return true;
+			else {
+				WasdiLog.errorLog("NodeRepository.updateNode: indeed there was no change! ");
+				return true;
+			}
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("NodeRepository.updateNode: error ", oEx);
 		}
