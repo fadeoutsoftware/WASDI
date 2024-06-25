@@ -489,6 +489,7 @@ public class NodeResource {
 				return Response.ok().build();	
 			}
 			else {
+				WasdiLog.warnLog("NodeResource.getNode: the update of the repo for the node returned false");
 				return Response.serverError().build();
 			}
 		}
