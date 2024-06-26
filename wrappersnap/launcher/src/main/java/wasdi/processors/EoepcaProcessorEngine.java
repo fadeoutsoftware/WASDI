@@ -418,7 +418,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				oOgcProcessesClient.getHeaders().put("Prefer", "respond-async");				
 			}
 			
-			StatusInfo oStatusInfo = oOgcProcessesClient.executeProcess(oParameter.getName()+"-1_0", oExecute);
+			StatusInfo oStatusInfo = oOgcProcessesClient.executeProcess(oParameter.getName(), oExecute);
 			String sJobId = oStatusInfo.getJobID();
 			
 			if (Utils.isNullOrEmpty(sJobId)) {
