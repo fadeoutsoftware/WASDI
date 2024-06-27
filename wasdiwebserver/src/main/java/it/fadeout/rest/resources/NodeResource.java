@@ -476,8 +476,8 @@ public class NodeResource {
 			NodeRepository oNodeRepository = new NodeRepository();
 			Node oNode = oNodeRepository.getNodeByCode(oNodeViewModel.getNodeCode());
 		
-			if (oNode != null) {
-				WasdiLog.warnLog("NodeResource.getNode: there is already a node named " + oNodeViewModel.getNodeCode());
+			if (oNode == null) {
+				WasdiLog.warnLog("NodeResource.getNode: impossible to find a node named " + oNodeViewModel.getNodeCode());
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
@@ -485,10 +485,11 @@ public class NodeResource {
 			Node oConvertedNode = NodeFullViewModel.toEntity(oNodeViewModel);
 				
 			// Insert it
-			if (!oNodeRepository.updateNode(oConvertedNode)) {
+			if (oNodeRepository.updateNode(oConvertedNode)) {
 				return Response.ok().build();	
 			}
 			else {
+				WasdiLog.warnLog("NodeResource.getNode: the update of the repo for the node returned false");
 				return Response.serverError().build();
 			}
 		}

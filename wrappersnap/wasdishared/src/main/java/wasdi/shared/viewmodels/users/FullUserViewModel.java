@@ -1,6 +1,7 @@
 package wasdi.shared.viewmodels.users;
 
 import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserType;
 import wasdi.shared.utils.PermissionsUtils;
 
 public class FullUserViewModel {
@@ -90,20 +91,43 @@ public class FullUserViewModel {
 		if (oUser == null) return oFullUserViewModel;
 		
 		oFullUserViewModel.setActive(oUser.getValidAfterFirstAccess());
+		
 		oFullUserViewModel.setConfirmationDate(oUser.getConfirmationDate());
+		if (oFullUserViewModel.getConfirmationDate() == null) oFullUserViewModel.setConfirmationDate("");
+		
 		oFullUserViewModel.setDefaultNode(oUser.getDefaultNode());
+		if (oFullUserViewModel.getDefaultNode() == null) oFullUserViewModel.setDefaultNode("");
+		
 		oFullUserViewModel.setDescription(oUser.getDescription());
+		if (oFullUserViewModel.getDescription() == null) oFullUserViewModel.setDescription("");
+		
 		oFullUserViewModel.setLink(oUser.getLink());
+		if (oFullUserViewModel.getLink() == null) oFullUserViewModel.setLink("");
+		
 		oFullUserViewModel.setName(oUser.getName());
+		if (oFullUserViewModel.getName() == null) oFullUserViewModel.setName("");
+		
 		oFullUserViewModel.setSurname(oUser.getSurname());
+		if (oFullUserViewModel.getSurname() == null) oFullUserViewModel.setSurname("");
+		
 		oFullUserViewModel.setRegistrationDate(oUser.getRegistrationDate());
+		if (oFullUserViewModel.getRegistrationDate() == null) oFullUserViewModel.setRegistrationDate("");
+		
 		oFullUserViewModel.setRole(oUser.getRole());
+		if (oFullUserViewModel.getRole() == null) oFullUserViewModel.setRole("");
+		
 		oFullUserViewModel.setType(PermissionsUtils.getUserType(oUser.getUserId()));
+		if (oFullUserViewModel.getType() == null) oFullUserViewModel.setType(UserType.NONE.name());
+		
 		oFullUserViewModel.setUserId(oUser.getUserId());
+		if (oFullUserViewModel.getUserId() == null) oFullUserViewModel.setUserId("");
+		
 		oFullUserViewModel.setLastLogin(oUser.getLastLogin());
+		if (oFullUserViewModel.getLastLogin() == null) oFullUserViewModel.setLastLogin("");
 		
 		return oFullUserViewModel;
 	}
+	
 	public String getLastLogin() {
 		return lastLogin;
 	}

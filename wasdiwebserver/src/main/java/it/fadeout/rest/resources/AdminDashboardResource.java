@@ -150,9 +150,9 @@ public class AdminDashboardResource {
 					.collect(Collectors.toList());
 		}
 
-		GenericEntity<List<WorkspaceListInfoViewModel>> entity = new GenericEntity<List<WorkspaceListInfoViewModel>>(aoWorkspaceVMs, List.class);
+		GenericEntity<List<WorkspaceListInfoViewModel>> aoWorkspaceViewModels = new GenericEntity<List<WorkspaceListInfoViewModel>>(aoWorkspaceVMs, List.class);
 
-		return Response.ok(entity).build();
+		return Response.ok(aoWorkspaceViewModels).build();
 	}
 
 	@GET
@@ -557,7 +557,7 @@ public class AdminDashboardResource {
 		if (Utils.isNullOrEmpty(sPartialName)) sPartialName = "";
 		if (Utils.isNullOrEmpty(sSortedBy)) sSortedBy = "userId";
 		
-		if (! (sSortedBy.equals("name") || sSortedBy.equals("surname") || sSortedBy.equals("") || sSortedBy.equals(""))) sSortedBy = "userId"; 
+		if (! (sSortedBy.equals("name") || sSortedBy.equals("surname") || sSortedBy.equals("userId") || sSortedBy.equals(""))) sSortedBy = "userId"; 
 		
 		if (Utils.isNullOrEmpty(sOrder)) sOrder = "asc";
 		if (iOffset == null) iOffset = 0;
