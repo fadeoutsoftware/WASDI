@@ -218,7 +218,7 @@ public class QueryExecutorSina extends QueryExecutor {
 			return aoFileList;
 		}
 		
-		String sUrl = m_sFileListUrl; // "https://groupware.sinanet.isprambiente.it/bigbang-data/library/bigbang_70/ascii_grid/spei/spei01_1952-2022_ascii-1/download/en/1/SPEI01_1952-2022_ASCII.zip?action=view";
+		String sUrl = m_sFileListUrl;
 		if (!sUrl.endsWith("/"))
 			sUrl += "/";
 		

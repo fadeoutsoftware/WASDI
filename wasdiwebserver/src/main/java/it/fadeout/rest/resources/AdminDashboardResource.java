@@ -557,7 +557,7 @@ public class AdminDashboardResource {
 		if (Utils.isNullOrEmpty(sPartialName)) sPartialName = "";
 		if (Utils.isNullOrEmpty(sSortedBy)) sSortedBy = "userId";
 		
-		if (! (sSortedBy.equals("name") || sSortedBy.equals("surname") || sSortedBy.equals("") || sSortedBy.equals(""))) sSortedBy = "userId"; 
+		if (! (sSortedBy.equals("name") || sSortedBy.equals("surname") || sSortedBy.equals("userId") || sSortedBy.equals(""))) sSortedBy = "userId"; 
 		
 		if (Utils.isNullOrEmpty(sOrder)) sOrder = "asc";
 		if (iOffset == null) iOffset = 0;
