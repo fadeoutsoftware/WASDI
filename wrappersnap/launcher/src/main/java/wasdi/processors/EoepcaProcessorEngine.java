@@ -379,7 +379,8 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			
 			// Login
 			if (!loginInEOEpca(oOgcProcessesClient)) {
-				WasdiLog.debugLog("EoepcaProcessorEngine.run: error logging in Eoepca Server"); 
+				WasdiLog.debugLog("EoepcaProcessorEngine.run: error logging in Eoepca Server");
+				processWorkspaceLog("Error logging in Eoepca Server");
 				return false;
 			}
 			
@@ -422,6 +423,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			String sJobId = oStatusInfo.getJobID();
 			
 			if (Utils.isNullOrEmpty(sJobId)) {
+				processWorkspaceLog("Error getting a valid Job Id from EOEPCA Server");
 				WasdiLog.errorLog("EoepcaProcessorEngine.run: unable to get a valid Job Id");
 				return false;
 			}
@@ -483,6 +485,8 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				
 				if (oStatusInfo.getStatus() == StatusCode.FAILED) oStatus = ProcessStatus.ERROR;
 				if (oStatusInfo.getStatus() == StatusCode.DISMISSED) oStatus = ProcessStatus.STOPPED;
+				
+				processWorkspaceLog("Process finished with status " + oStatus.toString());
 				
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, oStatus, 100);
 			}
