@@ -896,7 +896,9 @@ public class PermissionsUtils {
 			
 			if (oMission == null) return false;
 			if (oMission.isIspublic()) return true;
-			if (oMission.getUserid().equals(sUserId)) return true;
+			if (Utils.isNullOrEmpty(oMission.getUserid()) == false) {
+				if (oMission.getUserid().equals(sUserId)) return true;
+			}
 			
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			UserResourcePermission oPermission = oUserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId(ResourceTypes.MISSION.getResourceType(), sUserId, oMission.getIndexvalue());
