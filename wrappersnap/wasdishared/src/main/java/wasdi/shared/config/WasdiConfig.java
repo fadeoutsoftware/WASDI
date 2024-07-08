@@ -119,7 +119,11 @@ public class WasdiConfig {
 	 * Is due to the configuration of Adwaiseo that does not resolve the public ip of the server.
 	 */
 	public boolean useNotebooksDockerAddress = false;
-
+	
+	/**
+	 * Set true if the node has an NVIDIA GPU that we want to make available to our Apps dockers
+	 */
+	public boolean nvidiaGPUAvailable = false;
 	
 	/**
 	 * Mongo db Configuration for the main node

@@ -148,7 +148,7 @@ h. Engaging in any other activity deemed by WASDI to be in conflict with the spi
 ----------------------------------------
 12.1. Your WASDI account may be terminated by you at any time. However, we do not give pro-rated refunds for unused time if you cancel during a billing cycle.
 
-20.2. The limited license granted by this agreement terminates automatically, without notice to you, if you breach any of these Terms.
+12.2. The limited license granted by this agreement terminates automatically, without notice to you, if you breach any of these Terms.
 
 12.3. Additionally, WASDI may cancel or suspend your account for any reason by providing you with thirty days’ advance notice. Upon cancellation or suspension, your right to use the Services will cease immediately. You may not have access to data that you had stored on the site after we cancel or suspend your account. You are responsible for backing up data that you use with the Services. If we cancel your account in its entirety without cause, we will refund you on a pro-rata basis the amount of your payment corresponding to the portion of your Service remaining right before we cancelled your account.
 

@@ -493,7 +493,7 @@ Make sure you have the latest version of Microsoft Visual C++ Build Tools instal
  
 If you get some error, try to install GDAL following these steps:
 
-1. Download the wheel from (https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal) the website has many libraries that are very useful.
+1. Download the wheel from (https://github.com/cgohlke/geospatial-wheels/releases) the website has many libraries that are very useful.
 
 	1.1	Pay attention to the last part of the wheel to choose the correct one suitable 			for your PC, for example check if it is 64 or 32 bit.(For more information 			check: https://realpython.com/python-wheels/#what-is-a-python-wheel).
 

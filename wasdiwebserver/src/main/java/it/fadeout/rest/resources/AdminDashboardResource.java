@@ -23,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.missions.Mission;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
@@ -36,6 +37,7 @@ import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.data.missions.MissionsRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -329,6 +331,23 @@ public class AdminDashboardResource {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
 		} 
+		else if (sResourceType.equalsIgnoreCase(ResourceTypes.MISSION.getResourceType())) {
+			MissionsRepository oMissionsRepository = new MissionsRepository();
+			Mission oMission = oMissionsRepository.getMissionsByIndexValue(sResourceId);
+			
+			if (oMission == null) {
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid Resource Id")).build();
+			}
+			
+			UserResourcePermission oUserResourcePermission = new UserResourcePermission(sResourceType,sResourceId, sDestinationUserId,oMission.getUserid(),oRequesterUser.getUserId(), sRights);
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			if (oUserResourcePermissionRepository.insertPermission(oUserResourcePermission)) {
+				return Response.ok().build();
+			}
+			else {
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Error inserting the sharing")).build();
+			}
+		}
 		else {
 			WasdiLog.debugLog("AdminDashboardResource.addResourcePermission: invalid resource type");
 
@@ -426,6 +445,15 @@ public class AdminDashboardResource {
 			}
 		} 
 		else {
+			
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			UserResourcePermission oUserResourcePermission = oUserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId(sResourceType, sUserId, sResourceId);
+			
+			if (oUserResourcePermission != null) {
+				oUserResourcePermissionRepository.deletePermissionsByTypeAndUserIdAndResourceId(sResourceType, sUserId, sResourceId);
+				return Response.ok().build();
+			}
+			
 			WasdiLog.debugLog("AdminDashboardResource.removeResourcePermission: invalid resource type");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_RESOURCE_TYPE.name())).build();
 		}
