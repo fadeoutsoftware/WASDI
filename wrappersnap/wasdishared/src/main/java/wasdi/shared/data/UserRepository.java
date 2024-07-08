@@ -194,6 +194,29 @@ public class UserRepository extends  MongoRepository{
     }
     
     /**
+     * Get a sorted list of users
+     * @param sOrderBy db field on which to perform the sorting operation
+     * @param iOrder decreasing or increasing order
+     * @return
+     */
+    public ArrayList<User> getAllUsersSorted(String sOrderBy, int iOrder) {
+    	
+    	ArrayList<User> aoReturnList = new ArrayList<User>();
+    	
+    	try {
+	    	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+	    			.find()
+	    			.sort(new Document(sOrderBy, iOrder));
+	        
+	        fillList(aoReturnList, oWSDocuments, User.class);
+    	} catch(Exception oEx) {
+    		WasdiLog.errorLog("UserRepository.getAllUsersSorted. Error retrieving users", oEx);
+    	}
+    	
+    	return aoReturnList;  	
+    }
+    
+    /**
      * Get a list of users matching a partial name
      * @param sPartialName
      * @return
@@ -205,7 +228,9 @@ public class UserRepository extends  MongoRepository{
     public List<User> findUsersByPartialName(String sPartialName, String sOrderBy, int iOrder) {
 		List<User> aoReturnList = new ArrayList<>();
 
-		if (Utils.isNullOrEmpty(sPartialName)) {
+		if (Utils.isNullOrEmpty(sPartialName) && !Utils.isNullOrEmpty(sOrderBy)) {
+			return getAllUsersSorted(sOrderBy, iOrder);
+		} else if (Utils.isNullOrEmpty(sPartialName) && Utils.isNullOrEmpty(sOrderBy)) {
 			return getAllUsers();
 		}
 
@@ -230,7 +255,6 @@ public class UserRepository extends  MongoRepository{
 		}
 
 		return aoReturnList;
-    	
     }    
 
 	public long getUsersCount() {
