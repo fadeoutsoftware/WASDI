@@ -20,7 +20,7 @@ public class Platforms {
 	public static String PROBAV = "Proba-V";
 	public static String LANDSAT5 = "Landsat-5"; 
 	public static String LANDSAT7 = "Landsat-7";
-	public static String LANDSAT8 = "Landsat-8";
+	public static String LANDSAT8 = "Landsat-*";
 	public static String ENVISAT = "Envisat";
 	
 	public static String COPERNICUS_MARINE = "Copernicus-Marine";
