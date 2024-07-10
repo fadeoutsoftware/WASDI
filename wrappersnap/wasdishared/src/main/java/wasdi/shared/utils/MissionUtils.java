@@ -420,7 +420,7 @@ public class MissionUtils {
 			// For Others are Not relevant 
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
+			WasdiLog.debugLog("WasdiFileUtils.getProductTypeSatelliteImageFileName: exception " + oEx.toString());
 		}
 		
 		return "";

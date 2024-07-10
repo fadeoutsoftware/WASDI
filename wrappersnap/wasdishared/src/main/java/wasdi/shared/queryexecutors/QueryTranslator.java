@@ -1123,25 +1123,30 @@ public abstract class QueryTranslator {
 		int iStart = -1;
 		int iEnd = -1;
 
-		if (sQuery.contains(sKey)) {
-			iStart = sQuery.indexOf(sKey);
+		try {
+			if (sQuery.contains(sKey)) {
+				iStart = sQuery.indexOf(sKey);
 
-			iStart += (sKey.length() + 1);
-			iEnd = sQuery.indexOf(" AND ", iStart);
+				iStart += (sKey.length() + 1);
+				iEnd = sQuery.indexOf(" AND ", iStart);
 
-			if (iEnd < 0) {
-				
-				iEnd = sQuery.indexOf(" )", iStart);
-				
 				if (iEnd < 0) {
-					iEnd = sQuery.length();
+					
+					iEnd = sQuery.indexOf(" )", iStart);
+					
+					if (iEnd < 0) {
+						iEnd = sQuery.length();
+					}
 				}
-			}
 
-			String sType = sQuery.substring(iStart, iEnd);
-			sType = sType.trim();
+				String sType = sQuery.substring(iStart, iEnd);
+				sType = sType.trim();
 
-			return sType;
+				return sType;
+			}			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("QueryTranslator.extractValue: error ", oEx);
 		}
 
 		return null;

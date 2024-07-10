@@ -392,24 +392,29 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	 * @param oViewModel the view model
 	 */
 	private void refineQueryViewModel(String sQuery, QueryViewModel oViewModel) {
-		WasdiLog.debugLog("QueryTranslatorCreoDias2.refineQueryViewModel. Try to fill view model with missing information");
-		if (Utils.isNullOrEmpty(oViewModel.polarisation))
-			oViewModel.polarisation = extractValue(sQuery, "polarisationmode");
-		if (Utils.isNullOrEmpty(oViewModel.platformSerialIdentifier))
-			oViewModel.platformSerialIdentifier = extractValue(sQuery, "filename");
-		if (Utils.isNullOrEmpty(oViewModel.instrument))
-			oViewModel.instrument = extractValue(sQuery, "Instrument");
-		if (oViewModel.relativeOrbit < 0) {
-			String sRelativeOrbit = extractValue(sQuery, "relativeorbitstart");
-			if (!Utils.isNullOrEmpty(sRelativeOrbit)) {
-				try {
-					oViewModel.relativeOrbit = Integer.parseInt(sRelativeOrbit); 
-				} catch (NumberFormatException oEx) {
-					WasdiLog.debugLog("QueryTranslatorCreoDias2.refineQueryViewModel. Impossible to parse relative orbit. " + oEx.getMessage());
+		try {
+			WasdiLog.debugLog("QueryTranslatorCreoDias2.refineQueryViewModel. Try to fill view model with missing information");
+			if (Utils.isNullOrEmpty(oViewModel.polarisation))
+				oViewModel.polarisation = extractValue(sQuery, "polarisationmode");
+			if (Utils.isNullOrEmpty(oViewModel.platformSerialIdentifier))
+				oViewModel.platformSerialIdentifier = extractValue(sQuery, "filename");
+			if (Utils.isNullOrEmpty(oViewModel.instrument))
+				oViewModel.instrument = extractValue(sQuery, "Instrument");
+			if (oViewModel.relativeOrbit < 0) {
+				String sRelativeOrbit = extractValue(sQuery, "relativeorbitstart");
+				if (!Utils.isNullOrEmpty(sRelativeOrbit)) {
+					try {
+						oViewModel.relativeOrbit = Integer.parseInt(sRelativeOrbit); 
+					} catch (NumberFormatException oEx) {
+						WasdiLog.debugLog("QueryTranslatorCreoDias2.refineQueryViewModel. Impossible to parse relative orbit. " + oEx.getMessage());
+					}
 				}
 			}
+			findSwathIdentifier(sQuery, oViewModel);			
 		}
-		findSwathIdentifier(sQuery, oViewModel);
+		catch (Exception oEx) {
+			WasdiLog.errorLog("QueryTranslatorCreoDias2.refineQueryViewModel: error ", oEx);
+		}
 	}
 	
 	/**
