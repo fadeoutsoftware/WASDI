@@ -485,10 +485,11 @@ public class NodeResource {
 			Node oConvertedNode = NodeFullViewModel.toEntity(oNodeViewModel);
 				
 			// Insert it
-			if (!oNodeRepository.updateNode(oConvertedNode)) {
+			if (oNodeRepository.updateNode(oConvertedNode)) {
 				return Response.ok().build();	
 			}
 			else {
+				WasdiLog.warnLog("NodeResource.getNode: the update of the repo for the node returned false");
 				return Response.serverError().build();
 			}
 		}

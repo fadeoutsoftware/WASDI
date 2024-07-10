@@ -738,6 +738,14 @@ public class DockerUtils {
                     	}
                     }
                     
+                    if (WasdiConfig.Current.nvidiaGPUAvailable) {
+                    	WasdiLog.warnLog("DockerUtils.start: Node has a GPU, enabling NVIDIA in the Container");
+                    	oContainerCreateParams.HostConfig.EnableGpu = true;
+                    }
+                    else {
+                    	oContainerCreateParams.HostConfig.EnableGpu = false;
+                    }
+                    
                     // Convert the payload in JSON (NOTE: is hand-made !!)
             		String sContainerCreateParams = oContainerCreateParams.toJson();
             		

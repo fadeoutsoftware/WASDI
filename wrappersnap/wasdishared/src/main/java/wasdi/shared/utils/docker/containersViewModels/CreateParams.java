@@ -10,7 +10,7 @@ import wasdi.shared.utils.log.WasdiLog;
  * Object Representation of the payload to send to the Docker API 
  * to create a new container.
  * 
- * Given some "strange" features it is serialized in JSON by a custom object.
+ * Given some "strange" features it is serialized in JSON by a custom method.
  * 
  * Refer to this documentation:
  * https://docs.docker.com/engine/api/v1.43/#tag/Container/operation/ContainerCreate
