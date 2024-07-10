@@ -84,6 +84,11 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		
 		// platform (e.g. Sentinel-1). This should always be sent by the client
 		if (!Utils.isNullOrEmpty(sPlatform)) {
+			
+			if (sPlatform.equals(Platforms.LANDSAT8)) {
+				sPlatform = "LANDSAT-8";
+			}
+			
 			asQueryElements.add(createCollectionNameEqFilter(sPlatform));
 		}
 		
