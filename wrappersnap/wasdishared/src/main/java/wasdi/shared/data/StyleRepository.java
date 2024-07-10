@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -253,5 +254,41 @@ public class StyleRepository extends MongoRepository {
 
 		return false;
 	}
+	
+	
+    /**
+     * Find a style by partial name, by partial description or by partial id
+     * @return the list of styles that partially match the name, the description or the id
+     */
+    public List<Style> findStylesByPartialName(String sPartialName) {
+
+        final ArrayList<Style> aoReturnList = new ArrayList<Style>();
+        
+        if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
+        	return null;
+        }
+        
+		Pattern regex = Pattern.compile(Pattern.quote(sPartialName), Pattern.CASE_INSENSITIVE);
+		
+		Bson oFilterLikeStyleId= Filters.eq("styleId", regex);
+		Bson oFilterLikeName = Filters.eq("name", regex);
+		Bson oFilterLikeDescription = Filters.eq("description", regex);
+		
+		Bson oFilter = Filters.or(oFilterLikeStyleId, oFilterLikeName, oFilterLikeDescription);
+
+        try {
+
+            FindIterable<Document> oRetrievedDocuments = getCollection(m_sThisCollection)
+            		.find(oFilter)
+            		.sort(new Document("name", 1));
+            
+            fillList(aoReturnList, oRetrievedDocuments, Style.class);
+            
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("SnapWorkflowRepository.findStyleByPartialName : error ", oEx);
+        }
+
+        return aoReturnList;
+    }
 
 }
