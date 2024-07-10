@@ -379,6 +379,7 @@ public class MissionUtils {
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
+			return null;
 		}
 		
 		return new Date();
