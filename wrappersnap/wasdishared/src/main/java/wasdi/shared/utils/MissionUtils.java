@@ -236,7 +236,7 @@ public class MissionUtils {
 			else if (sFileName.toUpperCase().startsWith("LS07_")) {
 				return Platforms.LANDSAT7;
 			}
-			else if (sFileName.toUpperCase().startsWith("LC08")) {
+			else if (sFileName.toUpperCase().startsWith("LC08") || sFileName.toUpperCase().startsWith("LC8")) {
 				return Platforms.LANDSAT8;
 			}
 			else if (sFileName.toUpperCase().startsWith("MER_") || sFileName.toUpperCase().startsWith("ASA_")) {
