@@ -924,9 +924,15 @@ public class ProcessorsResource  {
 			}
 			
 			
-			// check if the app has an on-demand price: in that case, update the appspayments table to track the run date/time
+			// check if the app has an on-demand price and if the person is not the owner of tje app: 
+			// in that case, update the apps payments table to track the run date/time
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			Float fOnDemandPrice = oProcessorToRun.getOndemandPrice();
-			if (fOnDemandPrice != null && fOnDemandPrice > 0) {
+			if (fOnDemandPrice != null 
+					&& fOnDemandPrice > 0 
+					&& !oUser.getUserId().equals(oProcessorToRun.getUserId())
+					&& !oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, oProcessorToRun.getProcessorId())) {
+				
 				WasdiLog.debugLog("ProcessorsResource.internalRun: the app has an ondemand price");
 				AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
 				List<AppPayment> oAppPayments = oAppPaymentRepository.getAppPaymentByProcessorAndUser(oProcessorToRun.getProcessorId(), sUserId);
@@ -2335,12 +2341,12 @@ public class ProcessorsResource  {
 				return Response.ok(true).build();
 			}
 			
+			
 			// if there user has a "write" permission on the processor, then the user can run the app for free 
 			UserResourcePermissionRepository oPermissionRepo = new UserResourcePermissionRepository();
-			List<UserResourcePermission> aoPermissions = oPermissionRepo.getPermissionsByTypeAndUserId(ResourceTypes.PROCESSOR.getResourceType(), oUser.getUserId());
-			for (UserResourcePermission oPermission : aoPermissions) {
-				if (oPermission.getPermissions().equals("write"))
-					return Response.ok(true).build();
+			if (oPermissionRepo.isProcessorSharedWithUser(oUser.getUserId(), oProcessor.getProcessorId())) {
+				WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: processor " + sProcessorId + " is set for purchase but the app is shared with the user");
+				return Response.ok(true).build();
 			}
 			
 			AppPaymentRepository oAppPurchaseRepository = new AppPaymentRepository();
