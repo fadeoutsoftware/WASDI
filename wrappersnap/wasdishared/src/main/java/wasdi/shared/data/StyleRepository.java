@@ -249,12 +249,11 @@ public class StyleRepository extends MongoRepository {
 				return true;
 			}
 		} catch (Exception oE) {
-			WasdiLog.errorLog("StyleWorkspaceRepository.isStyleOwnedByUser( " + sUserId + ", " + sStyleId + " ): ", oE);
+			WasdiLog.errorLog("StyleRepository.isStyleOwnedByUser( " + sUserId + ", " + sStyleId + " ): ", oE);
 		}
 
 		return false;
 	}
-	
 	
     /**
      * Find a style by partial name, by partial description or by partial id
@@ -285,7 +284,7 @@ public class StyleRepository extends MongoRepository {
             fillList(aoReturnList, oRetrievedDocuments, Style.class);
             
         } catch (Exception oEx) {
-        	WasdiLog.errorLog("SnapWorkflowRepository.findStyleByPartialName : error ", oEx);
+        	WasdiLog.errorLog("StyleWorkspaceRepository.findStylesByPartialName : error ", oEx);
         }
 
         return aoReturnList;

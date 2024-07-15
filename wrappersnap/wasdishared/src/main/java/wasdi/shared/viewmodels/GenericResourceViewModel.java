@@ -14,11 +14,13 @@ public class GenericResourceViewModel {
 	
 	private String resourceType;
 	private String resourceId;
+	private String resourceName;
 	private String userId;
 
-	public GenericResourceViewModel(String resourceType, String resourceId, String userId) {
+	public GenericResourceViewModel(String resourceType, String resourceId, String resourceName, String userId) {
 		this.resourceType = resourceType;
 		this.resourceId = resourceId;
+		this.resourceName = resourceName;
 		this.userId = userId;
 	}
 
@@ -36,6 +38,14 @@ public class GenericResourceViewModel {
 
 	public void setResourceId(String resourceId) {
 		this.resourceId = resourceId;
+	}
+	
+	public String getResourceName() {
+		return resourceName;
+	}
+
+	public void setResourceName(String resourceName) {
+		this.resourceName = resourceName;
 	}
 
 	public String getUserId() {
