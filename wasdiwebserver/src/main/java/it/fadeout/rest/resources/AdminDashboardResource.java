@@ -22,6 +22,9 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang.StringUtils;
 
 import it.fadeout.Wasdi;
+import wasdi.shared.business.Organization;
+import wasdi.shared.business.SnapWorkflow;
+import wasdi.shared.business.Style;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.missions.Mission;
 import wasdi.shared.business.processors.Processor;
@@ -34,15 +37,18 @@ import wasdi.shared.business.users.UserType;
 import wasdi.shared.data.MetricsEntryRepository;
 import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.missions.MissionsRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ClientMessageCodes;
 import wasdi.shared.viewmodels.ErrorResponse;
+import wasdi.shared.viewmodels.GenericResourceViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.monitoring.MetricsEntry;
@@ -156,7 +162,232 @@ public class AdminDashboardResource {
 
 		return Response.ok(aoWorkspaceViewModels).build();
 	}
+	
+	@GET
+	@Path("/resourceByPartialName")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response findResourceByPartialName(@HeaderParam("x-session-token") String sSessionId, 
+			@QueryParam("resourceType") String sResourceType,
+			@QueryParam("partialName") String sPartialName,
+			@QueryParam("offset") Integer iOffset, 
+			@QueryParam("limit") Integer iLimit) {
+		
+		WasdiLog.debugLog("AdminDashboardResource.findResourceByPartialName( Resource type: " + sResourceType + ", Partial name: " + sPartialName + " )");
+		
+		try {
 
+			// Validate Session
+			User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+			if (oRequesterUser == null) {
+				WasdiLog.debugLog("AdminDashboardResource.findResourceByPartialName: invalid session");
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+			}
+	
+			// Can the user access this section?
+			if (!UserApplicationRole.isAdmin(oRequesterUser)) {
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
+			}
+	
+			if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
+				WasdiLog.debugLog("AdminDashboardResource.findResourceByPartialName: invalid partialName");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_PARTIAL_NAME.name())).build();
+			}
+			
+			if (Utils.isNullOrEmpty(sResourceType)) {
+				WasdiLog.debugLog("AdminDashboardResource.findResourceByPartialName: no resource type specified");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INSUFFICIENT_SEARCH_CRITERIA.name())).build();
+			}
+			
+			if (iOffset == null) iOffset = 0;
+			
+			if (iLimit == null) iLimit = 10;
+			
+			List<GenericResourceViewModel> aoResultsVM = null;
+			
+			for (ResourceTypes oType : ResourceTypes.values()) {
+				
+				if (!sResourceType.equalsIgnoreCase(oType.name())) {
+					continue;
+				}
+				
+				if (oType.equals(ResourceTypes.WORKSPACE)) {
+					aoResultsVM = retrieveWorkspacesByPartialName(sPartialName);
+				} 
+				else if (oType.equals(ResourceTypes.PROCESSOR)) {
+					aoResultsVM = retrieveProcessorsByPartialName(sPartialName);
+				} 
+				else if (oType.equals(ResourceTypes.ORGANIZATION)) {
+					aoResultsVM = retrieveOrganizationsByPartialName(sPartialName);
+				} 
+				else if (oType.equals(ResourceTypes.WORKFLOW)) {
+					aoResultsVM = retrieveWorkflowsByPartialName(sPartialName);
+				} 
+				else if (oType.equals(ResourceTypes.STYLE)) {
+					aoResultsVM = retrieveStylesByPartialName(sPartialName);
+				} 
+			}
+			
+			if (aoResultsVM == null) {
+				WasdiLog.warnLog("AdminDashboard.findResourceByPartialName: looks like there was an error while retrieving the resource type " + sResourceType + " with partial name " + sPartialName);
+				return Response.serverError().build();
+			}
+			
+			
+			List<GenericResourceViewModel> aoPaginatedResultsViewModel = new ArrayList<>();
+			
+			for (int i = 0; i < aoResultsVM.size(); i++) {
+				
+				if (i < iOffset) continue;
+				if (i >= iOffset+iLimit) break;
+				
+				aoPaginatedResultsViewModel.add(aoResultsVM.get(i));
+			}
+			
+			GenericEntity<List<GenericResourceViewModel>> aoGenericResourcesViewModels = new GenericEntity<List<GenericResourceViewModel>>(aoPaginatedResultsViewModel, List.class);
+			return Response.ok(aoGenericResourcesViewModels).build();
+			
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("AdminDashboard.findResourceByPartialName: exception while trying to retrieve the resource ", oEx);
+			return Response.serverError().build();
+		}
+
+		
+	}
+	
+	/**
+	 * Retrieve the list of workspaces matching a partial name
+	 * @param sPartialName the partial name that the workspace's name should match
+	 * @return the list of view model representing the resource
+	 */
+	private List<GenericResourceViewModel> retrieveWorkspacesByPartialName(String sPartialName) {
+		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+		
+		List<Workspace> aoWorkspaces = oWorkspaceRepository.findWorkspacesByPartialName(sPartialName);
+		
+		if (aoWorkspaces == null) {
+			WasdiLog.warnLog("AdminDashboard.retrieveWorkspacesByPartialName. List of retrieved workspaces is null");
+			return null;
+		}
+
+		List<GenericResourceViewModel> aoResultsVM = new ArrayList<>();
+		
+		for (Workspace oWorkspace : aoWorkspaces) {
+			aoResultsVM.add(new GenericResourceViewModel(ResourceTypes.WORKSPACE.name(), oWorkspace.getWorkspaceId(), oWorkspace.getName(), oWorkspace.getUserId()));
+		}
+		
+		WasdiLog.debugLog("AdminDashboard.retrieveWorkspacesByPartialName. Retrieved " + aoResultsVM.size() + " workspaces matching the partial name " + sPartialName);
+		
+		return aoResultsVM;
+	}
+	
+	
+	/**
+	 * Retrieve the list of processors matching a partial name
+	 * @param sPartialName the partial name that the pocessor's name should match
+	 * @return the list of view model representing the resource
+	 */
+	private List<GenericResourceViewModel> retrieveProcessorsByPartialName(String sPartialName) {
+		
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		
+		List<Processor> aoProcessors = oProcessorRepository.findProcessorsByPartialName(sPartialName);
+		
+		if (aoProcessors == null) {
+			WasdiLog.warnLog("AdminDashboard.retrieveProcessorsByPartialName. List of retrieved processors is null");
+			return null;
+		}
+
+		List<GenericResourceViewModel> aoResultsVM = new ArrayList<>();
+		
+		for (Processor oProcessor : aoProcessors) {
+			aoResultsVM.add(new GenericResourceViewModel(ResourceTypes.PROCESSOR.name(), oProcessor.getProcessorId(), oProcessor.getName(), oProcessor.getUserId()));
+		}
+		
+		WasdiLog.debugLog("AdminDashboard.retrieveProcessorsByPartialName. Retrieved " + aoResultsVM.size() + " processors matching the partial name " + sPartialName);
+	
+		return aoResultsVM;
+	}
+	
+	
+	/**
+	 * Retrieve the list of organisations matching a partial name
+	 * @param sPartialName the partial name that the organisation's name should match
+	 * @return the list of view model representing the resource
+	 */
+	private List<GenericResourceViewModel> retrieveOrganizationsByPartialName(String sPartialName) {
+		
+		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+		
+		List<Organization> aoOrganization = oOrganizationRepository.findOrganizationsByPartialName(sPartialName);
+		
+		if (aoOrganization == null) {
+			WasdiLog.warnLog("AdminDashboard.retrieveOrganizationsByPartialName. List of retrieved organizations is null");
+			return null;
+		}
+		
+		List<GenericResourceViewModel> aoResultsVM = new ArrayList<>();
+		
+		for (Organization oOrganization : aoOrganization) {
+			aoResultsVM.add(new GenericResourceViewModel(ResourceTypes.ORGANIZATION.name(), oOrganization.getOrganizationId(), oOrganization.getName(), oOrganization.getUserId()));
+		}
+		
+		WasdiLog.debugLog("AdminDashboard.retrieveOrganizationsByPartialName. Retrieved " + aoResultsVM.size() + " organizations matching the partial name " + sPartialName);
+	
+		return aoResultsVM;
+	}
+
+	/**
+	 * Retrieve the list of SNAP workflows matching a partial name
+	 * @param sPartialName the partial name that the organisation's name should match
+	 * @return the list of view model representing the resource
+	 */
+	private List<GenericResourceViewModel> retrieveWorkflowsByPartialName(String sPartialName) {
+		
+		SnapWorkflowRepository oWorkflowRepository = new SnapWorkflowRepository();
+		
+		List<SnapWorkflow> aoWorkflows = oWorkflowRepository.findWorkflowByPartialName(sPartialName);
+		
+		if (aoWorkflows == null) {
+			WasdiLog.warnLog("AdminDashboard.retrieveWorkflowsByPartialName. List of retrieved workflows is null");
+			return null;
+		}
+
+		List<GenericResourceViewModel> aoResultsVM = new ArrayList<>();
+		
+		for (SnapWorkflow oWorkflow : aoWorkflows) {
+			aoResultsVM.add(new GenericResourceViewModel(ResourceTypes.WORKFLOW.name(), oWorkflow.getWorkflowId(), oWorkflow.getName(), oWorkflow.getUserId()));
+		}
+		
+		WasdiLog.debugLog("AdminDashboard.retrieveWorkflowsByPartialName. Retrieved " + aoResultsVM.size() + " workflows matching the partial name " + sPartialName);
+
+		return aoResultsVM;
+	}
+	
+	/**
+	 * Retrieve the list of styles matching a partial name
+	 * @param sPartialName the partial name that the style's name should match
+	 * @return the list of view model representing the resource
+	 */
+	private List<GenericResourceViewModel> retrieveStylesByPartialName(String sPartialName) {
+		
+		StyleRepository oStyleRepository = new StyleRepository();
+		
+		List<Style> aoStyles = oStyleRepository.findStylesByPartialName(sPartialName);
+		
+		List<GenericResourceViewModel> aoResultsVM = new ArrayList<>();
+		
+		if (aoStyles == null) {
+			return null;
+		}
+		
+		for (Style oStyle : aoStyles) {
+			aoResultsVM.add(new GenericResourceViewModel(ResourceTypes.STYLE.name(), oStyle.getStyleId(), oStyle.getName(), oStyle.getUserId()));
+		}
+	
+		return aoResultsVM;
+	}
+ 
+	
 	@GET
 	@Path("/processorsByPartialName")
 	@Produces({ "application/xml", "application/json", "text/xml" })
