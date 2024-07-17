@@ -55,7 +55,8 @@ public class WasdiProductReaderFactory {
 		}
 		
 		if (MissionUtils.isLandsat5File(oFile) 
-				|| MissionUtils.isLandsat7File(oFile)) {
+				|| MissionUtils.isLandsat7File(oFile)
+				|| oFile.getName().toUpperCase().startsWith("LC08_L2SP_")) {
 			return new LandsatProductReader(oFile);
 		}
 

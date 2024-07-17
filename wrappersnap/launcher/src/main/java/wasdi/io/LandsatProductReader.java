@@ -10,7 +10,7 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
 /**
- * Product reader class for Landsat-5 and Landsat-7 products
+ * Product reader class for Landsat-5, Landsat-7 products and Landsat-8 L2 products
  * @author valentina.leone
  *
  */
@@ -64,8 +64,9 @@ public class LandsatProductReader extends SnapProductReader {
     	}
     	
     	if (oTIFFolder == null) {
-    		WasdiLog.warnLog("LandsatProductReader.readSnapProduct: TIFF folder with Landsat-5 files not found");
-    		return oSNAPProduct;
+    		WasdiLog.warnLog("LandsatProductReader.readSnapProduct: TIFF folder with Landsat files not found. Will try to look for MTL file in the main product folder.");
+    		oTIFFolder = m_oProductFile;
+    		// return oSNAPProduct;
     	}
     	
     	// if we found the TIF folder, then we can access the "MTL" file
@@ -114,7 +115,7 @@ public class LandsatProductReader extends SnapProductReader {
 		try {
 			if(sFileNameFromProvider.endsWith(".zip")) {
 				
-	        	WasdiLog.debugLog("LandsatProductReader.adjustFileAfterDownload: File is a Landsat-5 product, start unzip");
+	        	WasdiLog.debugLog("LandsatProductReader.adjustFileAfterDownload: File is a Landsat product, start unzip");
 	        	String sDownloadFolderPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
 	        	ZipFileUtils oZipExtractor = new ZipFileUtils();
 	        	oZipExtractor.unzip(sDownloadFolderPath + File.separator + sFileNameFromProvider, sDownloadFolderPath);
@@ -122,16 +123,16 @@ public class LandsatProductReader extends SnapProductReader {
 	        	
 	        	
 	        	String sLandsat5UnzippedFolderPath = sDownloadFolderPath + File.separator + sFileNameFromProvider.replace(".zip", "");
-	        	File oLandsat5UnzippedFolder = new File(sLandsat5UnzippedFolderPath);
+	        	File oLandsatUnzippedFolder = new File(sLandsat5UnzippedFolderPath);
 	        	
-	        	if (!oLandsat5UnzippedFolder.exists() || oLandsat5UnzippedFolder.isFile()) {
+	        	if (!oLandsatUnzippedFolder.exists() || oLandsatUnzippedFolder.isFile()) {
 	        		WasdiLog.warnLog("LandsatProductReader.adjustFileAfterDownload: file does not exists or it is not a folder " + sLandsat5UnzippedFolderPath);
 	        		return sFileName;
 	        	}
 	        	
-	        	sFileName = oLandsat5UnzippedFolder.getAbsolutePath();
-	        	m_oProductFile = oLandsat5UnzippedFolder;
-	        	WasdiLog.debugLog("LandsatProductReader.adjustFileAfterDownload: unzipped Landsat-5 folder path" + sFileName);        	
+	        	sFileName = oLandsatUnzippedFolder.getAbsolutePath();
+	        	m_oProductFile = oLandsatUnzippedFolder;
+	        	WasdiLog.debugLog("LandsatProductReader.adjustFileAfterDownload: unzipped Landsat folder path" + sFileName);        	
 	        	
 	        } else {
 	        	WasdiLog.warnLog("LandsatProductReader.adjustFileAfterDownload: the product is not in zipped format");
