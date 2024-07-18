@@ -80,8 +80,11 @@ public class WasdiProductReaderFactory {
 		}
 		
 		if (oFile.getName().startsWith("SPEI") || oFile.getName().startsWith("https://SPEI")) {
-			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader " + oFile.getName());
 			return new BigBangProductReader(oFile);
+		}
+		
+		if (oFile.getName().endsWith(".pth") || oFile.getName().endsWith(".pt")) {
+			return new PyTorchModelReader(oFile);
 		}
 
 		return new SnapProductReader(oFile);
