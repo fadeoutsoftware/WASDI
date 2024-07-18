@@ -75,12 +75,15 @@ public class Redeployprocessor extends Operation {
 		} 
 		finally {
 			if (oProcessorRepository != null && oProcessor != null) {
-				oProcessor.setDeploymentOngoing(false);
-				if (oProcessorRepository.updateProcessor(oProcessor)) {
-		        	WasdiLog.debugLog("Redeployprocessor.executeOperation: flag for tracking the in-progress deployment set back to false after after exception handling");
-		        } else {
-		        	WasdiLog.warnLog("Redeployprocessor.executeOperation: could not set back to false the flag for tracking the in-progress deployment after exception handling");
-		        }
+				if (oProcessor.isDeploymentOngoing())  {
+					oProcessor.setDeploymentOngoing(false);
+					if (oProcessorRepository.updateProcessor(oProcessor)) {
+			        	WasdiLog.debugLog("Redeployprocessor.executeOperation: flag for tracking the in-progress deployment set back to false after after exception handling");
+			        } else {
+			        	WasdiLog.warnLog("Redeployprocessor.executeOperation: could not set back to false the flag for tracking the in-progress deployment after exception handling");
+			        }
+				}
+				
 			}
 		}
 		
