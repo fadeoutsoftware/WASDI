@@ -394,6 +394,7 @@ public class ProcessorsResource  {
 				oDeployedProcessorViewModel.setMinuteTimeout((int) (oProcessor.getTimeoutMs()/60000l));
 				oDeployedProcessorViewModel.setImgLink(ImageResourceUtils.getProcessorLogoPlaceholderPath(oProcessor));
 				oDeployedProcessorViewModel.setLogo(oProcessor.getLogo());
+				oDeployedProcessorViewModel.setDeploymentOngoing(oProcessor.isDeploymentOngoing());
 				
 				aoRet.add(oDeployedProcessorViewModel);
 			}
@@ -1577,6 +1578,16 @@ public class ProcessorsResource  {
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.REDEPLOYPROCESSOR.name(),oProcessorToReDeploy.getName(),oProcessorParameter);			
 			
 			if (oRes.getBoolValue()) {
+				
+				// if the launch of the redeployment was successful, then we set the flag to track the ongoing deployment
+				// set flag for ongoing deployment
+				oProcessorToReDeploy.setDeploymentOngoing(true);
+				if (oProcessorRepository.updateProcessor(oProcessorToReDeploy)) {
+					WasdiLog.debugLog("ProcessorResource.redeployProcessor. Flag set to true for ongoing deployment");
+				} else {
+					WasdiLog.warnLog("ProcessorResource.redeployProcessor. Could not set back to false the flag for ongoing deployment");
+				}
+				
 				return Response.ok().build();
 			}
 			else {
@@ -1588,6 +1599,7 @@ public class ProcessorsResource  {
 			return Response.serverError().build();
 		}
 	}
+	
 	
 	/**
 	 * Force the update of the lib of a processor
