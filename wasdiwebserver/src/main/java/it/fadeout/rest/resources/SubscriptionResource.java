@@ -992,7 +992,7 @@ public class SubscriptionResource {
 
 			// Get the list of Subscriptions owned by the user
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-			List<Subscription> aoSubscriptions = oSubscriptionRepository.findSubscriptionsByFilters(sNameFilter,sIdFilter,sUserFilter);
+			List<Subscription> aoSubscriptions = oSubscriptionRepository.findSubscriptionsByFilters(sNameFilter, sIdFilter, sUserFilter);
 			
 			Set<String> asOrganizationIds = aoSubscriptions.stream().map(Subscription::getOrganizationId).filter(Objects::nonNull).collect(Collectors.toSet());
 			Map<String, String> aoOrganizationNames = getOrganizationNamesById(asOrganizationIds);

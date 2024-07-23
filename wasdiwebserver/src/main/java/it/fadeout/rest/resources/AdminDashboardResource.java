@@ -28,6 +28,7 @@ import wasdi.shared.business.Style;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.missions.Mission;
 import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.Subscription;
 import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserAccessRights;
@@ -42,6 +43,7 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
+import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.missions.MissionsRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
@@ -216,6 +218,9 @@ public class AdminDashboardResource {
 				else if (oType.equals(ResourceTypes.PROCESSOR)) {
 					aoResultsVM = retrieveProcessorsByPartialName(sPartialName);
 				} 
+				else if (oType.equals(ResourceTypes.SUBSCRIPTION)) {
+					aoResultsVM = retrieveSubscriptionsByPartialName(sPartialName);
+				}
 				else if (oType.equals(ResourceTypes.ORGANIZATION)) {
 					aoResultsVM = retrieveOrganizationsByPartialName(sPartialName);
 				} 
@@ -305,6 +310,32 @@ public class AdminDashboardResource {
 		
 		WasdiLog.debugLog("AdminDashboard.retrieveProcessorsByPartialName. Retrieved " + aoResultsVM.size() + " processors matching the partial name " + sPartialName);
 	
+		return aoResultsVM;
+	}
+	
+	/**
+	 * Retrieve the list of subscriptions matching a partial name
+	 * @param sPartialName the partial name that the subscription name should match
+	 * @return the list of view model representing the resource
+	 */
+	private List<GenericResourceViewModel> retrieveSubscriptionsByPartialName(String sPartialName) {
+		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+		
+		List<Subscription> aoSubscriptions = oSubscriptionRepository.findSubscriptionByPartialName(sPartialName);
+		
+		if (aoSubscriptions == null) {
+			WasdiLog.warnLog("AdminDashboard.retrieveSubscriptionsByPartialName. List of retrieved subscriptions is null");
+			return null;
+		}
+
+		List<GenericResourceViewModel> aoResultsVM = new ArrayList<>();
+		
+		for (Subscription oSubscription : aoSubscriptions) {
+			aoResultsVM.add(new GenericResourceViewModel(ResourceTypes.SUBSCRIPTION.name(), oSubscription.getSubscriptionId(), oSubscription.getName(), oSubscription.getUserId()));
+		}
+		
+		WasdiLog.debugLog("AdminDashboard.retrieveSubscriptionsByPartialName. Retrieved " + aoResultsVM.size() + " subscriptions matching the partial name " + sPartialName);
+		
 		return aoResultsVM;
 	}
 	
