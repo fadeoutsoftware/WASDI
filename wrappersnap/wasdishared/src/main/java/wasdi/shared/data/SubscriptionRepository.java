@@ -424,7 +424,7 @@ public class SubscriptionRepository extends MongoRepository {
 		
 		Bson oQueryFilter = null;
 		if (aoFilters.isEmpty()) {
-			getSubscriptionsSortedList(sOrderBy, iOrder);
+			return getSubscriptionsSortedList(sOrderBy, iOrder);
 		} else if (aoFilters.size() == 1) {
 			oQueryFilter = aoFilters.get(0);
 		} else {
