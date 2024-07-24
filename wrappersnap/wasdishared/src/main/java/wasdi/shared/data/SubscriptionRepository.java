@@ -354,6 +354,34 @@ public class SubscriptionRepository extends MongoRepository {
 
 		return aoReturnList;
 	}
+	
+	/**
+	 * Get the sorted list of subscriptions.
+	 * @return the sorted list of subscriptions
+	 */
+	public List<Subscription> getSubscriptionsSortedList(String sOrderBy, int iOrder) {
+		final List<Subscription> aoReturnList = new ArrayList<>();
+		
+		if (Utils.isNullOrEmpty(sOrderBy)) {
+			sOrderBy = "name";
+		}
+		
+		if (iOrder != -1 && iOrder != 1) {
+			iOrder = 1;
+		}
+
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find()
+					.sort(new Document(sOrderBy, iOrder));
+
+			fillList(aoReturnList, oWSDocuments, Subscription.class);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("SubscriptionRepository.getSubscriptionsSortedList : error ", oEx);
+		}
+
+		return aoReturnList;
+	}
 
 	/**
 	 * Find subscriptions by partial name, by partial id or partial user id
@@ -362,7 +390,7 @@ public class SubscriptionRepository extends MongoRepository {
 	 * @param sUserIdFilter the partial user id of the subscription
 	 * @return the list of subscriptions that partially match the name or id
 	 */
-	public List<Subscription> findSubscriptionsByFilters(String sNameFilter, String sIdFilter, String sUserIdFilter) {
+	public List<Subscription> findSubscriptionsByFilters(String sNameFilter, String sIdFilter, String sUserIdFilter, String sOrderBy, int iOrder) {
 		
 		List<Subscription> aoReturnList = new ArrayList<>();
 		
@@ -386,9 +414,17 @@ public class SubscriptionRepository extends MongoRepository {
 			aoFilters.add(oFilterLikeUserId);
 		}
 		
+		if (Utils.isNullOrEmpty(sOrderBy)) {
+			sOrderBy = "name";
+		}
+		
+		if (iOrder != -1 && iOrder != 1) {
+			iOrder = 1;
+		}
+		
 		Bson oQueryFilter = null;
 		if (aoFilters.isEmpty()) {
-			return getSubscriptionsList();
+			getSubscriptionsSortedList(sOrderBy, iOrder);
 		} else if (aoFilters.size() == 1) {
 			oQueryFilter = aoFilters.get(0);
 		} else {
@@ -396,11 +432,13 @@ public class SubscriptionRepository extends MongoRepository {
 		}
 		
 		try {
-			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oQueryFilter).sort(new Document("name", 1));
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(oQueryFilter)
+					.sort(new Document(sOrderBy, iOrder));
 
 			fillList(aoReturnList, oWSDocuments, Subscription.class);
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("SubscriptionRepository.findSubscriptionsByFilters : error " + oEx.toString());
+			WasdiLog.errorLog("SubscriptionRepository.findSubscriptionsByFilters : error ", oEx);
 		}
 
 		return aoReturnList;

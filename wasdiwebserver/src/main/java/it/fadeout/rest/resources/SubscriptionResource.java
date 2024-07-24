@@ -957,7 +957,15 @@ public class SubscriptionResource {
 	@GET
 	@Path("/list")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("userfilter") String sUserFilter, @QueryParam("idfilter") String sIdFilter, @QueryParam("namefilter") String sNameFilter,@QueryParam("offset") Integer iOffset,@QueryParam("limit") Integer iLimit) {
+	public Response getSortedList(@HeaderParam("x-session-token") String sSessionId, 
+			@QueryParam("userfilter") String sUserFilter, 
+			@QueryParam("idfilter") String sIdFilter, 
+			@QueryParam("namefilter") String sNameFilter,
+			@QueryParam("statusfilter") String sStatus,
+			@QueryParam("offset") Integer iOffset,
+			@QueryParam("limit") Integer iLimit,
+			@QueryParam("sortby") String sSorting,
+			@QueryParam("order") String sOrder) {
 
 		WasdiLog.debugLog("SubscriptionResource.getList");
 
@@ -974,27 +982,59 @@ public class SubscriptionResource {
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
 		}
 		
-		if (iOffset==null) {
+		// cleaning of the input
+		if (iOffset == null) {
 			iOffset = 0;
 			WasdiLog.debugLog("SubscriptionResource.getList: setting offset to 0 as default");
 		}
 
-		if (iLimit==null) {
+		if (iLimit == null) {
 			iLimit = 10;
 			WasdiLog.debugLog("SubscriptionResource.getList: setting limit to 10 as default");
 		}
+		
+		if (Utils.isNullOrEmpty(sSorting)) {
+			sSorting = "name";
+			WasdiLog.debugLog("SubscriptionResource.getList: setting sorting to 'name' as default");
+		}
+		
+		if (Utils.isNullOrEmpty(sOrder)) {
+			sOrder = "asc";
+			WasdiLog.debugLog("SubscriptionResource.getList: setting ordering to 'asc' as default");
+		}
+		
+		// validation of the inputs
+		if (! (sSorting.equals("name") 
+				|| sSorting.equals("userId") 
+				|| sSorting.equals("endDate")
+				|| sSorting.equals(""))) {
+			sSorting = "userId"; 
+			WasdiLog.warnLog("SubscriptionResource.getList: setting the sorting to 'userId' because of a not valid option " + sSorting);
+		}
+		
+		int iOrder = 1;
+		
+		if (sOrder.equals("desc") || sOrder.equals("des") || sOrder.equals("0") || sOrder.equals("-1")) {
+			iOrder = -1;
+			WasdiLog.debugLog("SubscriptionResource.getList: setting iOrder to -1 due to order= " + sOrder);
+		}
 
+		
 		List<SubscriptionListViewModel> aoSubscriptionLVM = new ArrayList<>();
 
 		try {
 
-			WasdiLog.debugLog("SubscriptionResource.getList: subscriptions with User filter " + sUserFilter + " sIdFilter " + sIdFilter+ " sNameFilter " + sNameFilter);
+			WasdiLog.debugLog("SubscriptionResource.getList: subscriptions with User filter " + sUserFilter + " sIdFilter " + sIdFilter+ " sNameFilter " + sNameFilter 
+					+ ", sorting " + sSorting + " ordering " + iOrder);
 
 			// Get the list of Subscriptions owned by the user
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-			List<Subscription> aoSubscriptions = oSubscriptionRepository.findSubscriptionsByFilters(sNameFilter, sIdFilter, sUserFilter);
+			List<Subscription> aoSubscriptions = oSubscriptionRepository.findSubscriptionsByFilters(sNameFilter, sIdFilter, sUserFilter, sSorting, iOrder);
 			
-			Set<String> asOrganizationIds = aoSubscriptions.stream().map(Subscription::getOrganizationId).filter(Objects::nonNull).collect(Collectors.toSet());
+			Set<String> asOrganizationIds = aoSubscriptions.stream()
+					.map(Subscription::getOrganizationId)
+					.filter(Objects::nonNull)
+					.collect(Collectors.toSet());
 			Map<String, String> aoOrganizationNames = getOrganizationNamesById(asOrganizationIds);
 
 			// For each
@@ -1024,6 +1064,8 @@ public class SubscriptionResource {
 			return Response.serverError().build();
 		}
 	}
+	
+	
 	
 	
 	/**
