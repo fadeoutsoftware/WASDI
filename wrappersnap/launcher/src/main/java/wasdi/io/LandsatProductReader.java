@@ -19,7 +19,6 @@ import wasdi.shared.viewmodels.products.MetadataViewModel;
 import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
