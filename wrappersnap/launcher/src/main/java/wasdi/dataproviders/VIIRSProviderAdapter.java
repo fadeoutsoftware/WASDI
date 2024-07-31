@@ -91,7 +91,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 			if (oDirCreated)
 				WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile. Workspace directory has been crated");
 			
-			List<String> asProductInfo = getProductInformation(sFileURL);
+			List<String> asProductInfo = getProductInformation(sFileUrlForOnlineDataProvider);
 			
 			if (asProductInfo.isEmpty() || asProductInfo.stream().anyMatch(sInfo -> Utils.isNullOrEmpty(sInfo))) {
 				WasdiLog.warnLog("VIIRSProviderAdapter.executeDownloadFile: could not find relevant information about product from URL");
