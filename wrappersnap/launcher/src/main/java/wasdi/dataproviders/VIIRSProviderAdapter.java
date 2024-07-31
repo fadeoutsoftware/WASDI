@@ -40,7 +40,11 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 	public long getDownloadFileSize(String sFileURL) throws Exception {
 		long lSize = 0L;
 		
-		List<String> asProductInfo = getProductInformation(sFileURL);
+		String sFileUrlForOnlineDataProvider = sFileURL.replace(s_sOldSubstring, s_sNewSubstring);
+		
+		WasdiLog.debugLog("VIIRSProviderAdapter.getDownloadFileSize: modified file url " + sFileUrlForOnlineDataProvider);
+		
+		List<String> asProductInfo = getProductInformation(sFileUrlForOnlineDataProvider);
 		
 		if (asProductInfo.isEmpty() || asProductInfo.stream().anyMatch(sInfo -> Utils.isNullOrEmpty(sInfo))) {
 			WasdiLog.warnLog("VIIRSProviderAdapter.getDownloadFileSize: could not find relevant information about product from URL");
@@ -52,7 +56,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 		String sFilePrefixOnS3 = asProductInfo.get(3);
 
 		if (!isDateMoreThan30DaysOld(sProductDate)) {
-			lSize = getDownloadFileSizeViaHttp(sFileURL.replace(s_sOldSubstring, s_sNewSubstring));
+			lSize = getDownloadFileSizeViaHttp(sFileUrlForOnlineDataProvider);
 			
 		} else {
 			try {
@@ -72,42 +76,56 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 		// this is the example of a link that we receive: 
 		// https://floodlight.ssec.wisc.edu/composite/RIVER-FLDglobal-composite1_20240416_000000.part003.tif
 
-		WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: try to get " + sFileURL);
+		WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: url " + sFileURL + ", path to file on server " + sSaveDirOnServer);
 				
 		String sResult = "";
 		
-		List<String> asProductInfo = getProductInformation(sFileURL);
-		
-		if (asProductInfo.isEmpty() || asProductInfo.stream().anyMatch(sInfo -> Utils.isNullOrEmpty(sInfo))) {
-			WasdiLog.warnLog("VIIRSProviderAdapter.executeDownloadFile: could not find relevant information about product from URL");
-			return sResult;
-		}
+		try {
+			String sFileUrlForOnlineDataProvider = sFileURL.replace(s_sOldSubstring, s_sNewSubstring);
 			
-		String sWasdiFileName = asProductInfo.get(0);
-		String sProductDate  = asProductInfo.get(1);
-		String sTileNumber = asProductInfo.get(2);
-		String sFilePrefixOnS3 = asProductInfo.get(3);
-
-		if (!isDateMoreThan30DaysOld(sProductDate)) {
-			WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: the requested product is less than one month old. Downloading from Floodlight website");
-			sResult = executeDownloadFileFromFloodlight(sFileURL, sSaveDirOnServer, iMaxRetry);
+			WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: modified file url " + sFileUrlForOnlineDataProvider);
 			
-		} else {
-			WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: the requested product is more than one month old. Downloading from S3 volume");
+			File oSaveDir = new File(sSaveDirOnServer);
 			
-			String sProductPathOnS3Volume = getFilePathOnS3Volume(sFilePrefixOnS3, sProductDate, sTileNumber);
+			boolean oDirCreated = oSaveDir.mkdirs();
+			if (oDirCreated)
+				WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile. Workspace directory has been crated");
 			
-			if (!Utils.isNullOrEmpty(sProductPathOnS3Volume)) {
-				File oSourceProduct = new File(sProductPathOnS3Volume);
-				File oDestinationProduct = new File(sSaveDirOnServer + "/" + sWasdiFileName);
-				FileUtils.copyFile(oSourceProduct, oDestinationProduct);
-
-				sResult =  oDestinationProduct.getAbsolutePath();
-				WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: product copied from S3 to " + sResult);
+			List<String> asProductInfo = getProductInformation(sFileURL);
+			
+			if (asProductInfo.isEmpty() || asProductInfo.stream().anyMatch(sInfo -> Utils.isNullOrEmpty(sInfo))) {
+				WasdiLog.warnLog("VIIRSProviderAdapter.executeDownloadFile: could not find relevant information about product from URL");
+				return sResult;
+			}
+				
+			String sWasdiFileName = asProductInfo.get(0).replace(s_sNewSubstring, s_sOldSubstring);
+			String sProductDate  = asProductInfo.get(1);
+			String sTileNumber = asProductInfo.get(2);
+			String sFilePrefixOnS3 = asProductInfo.get(3);
+	
+			if (!isDateMoreThan30DaysOld(sProductDate)) {
+				WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: the requested product is less than one month old. Downloading from Floodlight website");
+				sResult = executeDownloadFileFromFloodlight(sFileUrlForOnlineDataProvider, sSaveDirOnServer, iMaxRetry);
 				
 			} else {
-				WasdiLog.warnLog("VIIRSProviderAdapter.executeDownloadFile: product not found on S3 volume");
-			}			
+				WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: the requested product is more than one month old. Downloading from S3 volume");
+				
+				String sProductPathOnS3Volume = getFilePathOnS3Volume(sFilePrefixOnS3, sProductDate, sTileNumber);
+				
+				if (!Utils.isNullOrEmpty(sProductPathOnS3Volume)) {
+					File oSourceProduct = new File(sProductPathOnS3Volume);
+					File oDestinationProduct = new File(sSaveDirOnServer + "/" + sWasdiFileName);
+					FileUtils.copyFile(oSourceProduct, oDestinationProduct);
+	
+					sResult =  oDestinationProduct.getAbsolutePath();
+					WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: product copied from S3 to " + sResult);
+					
+				} else {
+					WasdiLog.warnLog("VIIRSProviderAdapter.executeDownloadFile: product not found on S3 volume");
+				}			
+			}
+		} catch (Exception oEx) {
+			
 		}
 		
 		return sResult;
@@ -122,7 +140,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 	 * (iii) the tile number as a fixed-length string of three digits (e.g. 001)
 	 * (iv) prefix file on S3 bucket
 	 */
-	private List<String> getProductInformation(String sFileURL) {
+	private static List<String> getProductInformation(String sFileURL) {
 		String sWasdiFileName = "";
 		String sProductDate  = "";
 		String sTileNumber = "";
@@ -174,7 +192,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 			WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFileFromFloodlight: attemp #" + iAttemp);
 			
 			try {
-				sResult = downloadViaHttp(sFileURL.replace(s_sOldSubstring, s_sNewSubstring), "", "", sSaveDirOnServer);
+				sResult = downloadViaHttp(sFileURL, "", "", sSaveDirOnServer);
 				
 				File oOriginalFile = new File(sResult);
 				File oRenamedFile = new File(sResult.replace(s_sNewSubstring, s_sOldSubstring));
@@ -278,7 +296,11 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 
 	@Override
 	public String getFileName(String sFileURL) throws Exception {
-		if (Utils.isNullOrEmpty(sFileURL)) return "";
+		if (Utils.isNullOrEmpty(sFileURL)) 
+			return "";
+		
+		WasdiLog.debugLog("VIIRSProviderAdapter.getFileName: file url " + sFileURL);
+
 		
 		String sFileName = "";
 		
@@ -289,6 +311,8 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 			
 			sFileName = sFileName.replace(s_sNewSubstring, s_sOldSubstring);
 		}
+		
+		WasdiLog.debugLog("VIIRSProviderAdapter.getFileName: file name " + sFileName);
 		
 		return sFileName;
 	}
@@ -315,5 +339,5 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 		
 		return 0;
 	}
-	
+		
 }
