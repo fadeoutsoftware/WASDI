@@ -26,7 +26,8 @@ Recipe
 ------------------------------------------
 
 .. note::
-	We will save a JSON Payload. The payload is really saved only when the app is running in WASDI. When running locally the payload is not really saved.
+	We will save a JSON Payload. 
+	**The payload is really saved only when the app is running in WASDI. When running locally the payload is not really saved.**
 
 .. note::
 	It is not mandatory, but is good practice in the payload to also save the inputs received.

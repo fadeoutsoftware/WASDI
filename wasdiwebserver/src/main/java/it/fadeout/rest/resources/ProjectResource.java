@@ -112,13 +112,23 @@ public class ProjectResource {
 				WasdiLog.debugLog("ProjectResource.getListByUser: aoProjects is null");
 				return Response.ok(aoProjectList).build();
 			}			
+			
+			boolean bFoundActiveProject = false;
 
 			// For each
 			for (Project oProject : aoProjects) {
 				// Create View Model
 				ProjectListViewModel oProjectViewModel = convert(oProject, aoSubscriptionNames.get(oProject.getSubscriptionId()), oUser.getActiveProjectId());
-
 				aoProjectList.add(oProjectViewModel);
+				
+				if (oProjectViewModel.isActiveProject()) {
+					bFoundActiveProject = true;
+				}
+			}
+			
+			// Force a default project if available and none is selected
+			if (!bFoundActiveProject && aoProjectList.size()>0) {
+				aoProjectList.get(0).setActiveProject(true);
 			}
 
 			return Response.ok(aoProjectList).build();
