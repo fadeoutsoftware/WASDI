@@ -58,7 +58,7 @@ public class SnapProductReader extends WasdiProductReader {
         
 
         // Snap set the name of geotiff files as geotiff: let replace with the file name
-        if (oViewModel.getName().toLowerCase().equals("geotiff")) {
+        if (oViewModel.getName() != null && oViewModel.getName().toLowerCase().equals("geotiff")) {
         	oViewModel.setName(oViewModel.getFileName());
         }
 
