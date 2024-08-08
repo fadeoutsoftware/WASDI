@@ -107,8 +107,11 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 				WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: the requested product is less than one month old. Downloading from Floodlight website");
 				sResult = executeDownloadFileFromFloodlight(sFileUrlForOnlineDataProvider, sSaveDirOnServer, iMaxRetry);
 				
-			} else {
-				WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: the requested product is more than one month old. Downloading from S3 volume");
+			} 
+			
+			// if the download from the online data provider does not succeed, we always try to download the product from the volume, as a backup solution
+			if (Utils.isNullOrEmpty(sResult)) {
+				WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: downloading from S3 volume");
 				
 				String sProductPathOnS3Volume = getFilePathOnS3Volume(sFilePrefixOnS3, sProductDate, sTileNumber);
 				
@@ -125,7 +128,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 				}			
 			}
 		} catch (Exception oEx) {
-			
+			WasdiLog.errorLog("VIIRSProviderAdapter.executeDownloadFile: error downloading file", oEx);
 		}
 		
 		return sResult;
@@ -253,10 +256,15 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 						.map(File::getName)
 						.filter(sFileName -> sFileName.contains(sTileSubstring))
 						.collect(Collectors.toList());
+				
 				if (asProducts.isEmpty()) {
 					WasdiLog.warnLog("VIIRSProviderAdapter.getFilePathOnS3Volume: no products found with substrings \"" + sTileSubstring + "\"");
 				} else {
 					// in case of more than one result, it will return the first one
+					if (asProducts.size() > 1) {
+						WasdiLog.warnLog("VIIRSProviderAdapter.getFilePathOnS3Volume: " + asProducts.size()+ " products found. Only one of them will be returned");
+					}
+					
 					sResult = sS3VolumePath + "/" + asProducts.get(0);
 				}
 			}  else {
