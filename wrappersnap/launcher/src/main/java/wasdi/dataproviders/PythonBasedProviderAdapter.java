@@ -110,6 +110,11 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 		return asArgs;
 	}
 	
+	protected void addOperativeParametersToWasdiPayload(Map<String, Object> oPayloadMap, String sSaveFolderPath, String sDownloadedFileName, int iMaxRetries) {
+		oPayloadMap.put("downloadDirectory", sSaveFolderPath);
+		oPayloadMap.put("downloadFileName", sDownloadedFileName);
+		oPayloadMap.put("maxRetry", sDownloadedFileName); // not sure I need
+	}
 	
 	
 	
@@ -126,10 +131,9 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 		
 		try {		
 			// let's add the additional information to the json passed to the Python data provider
-			Map<String, Object> oMap = extractWasdiPayloadFromUrl(sFileURL);
-			oMap.put("downloadDirectory", sSaveDirOnServer);
-			oMap.put("downloadFileName", oProcessWorkspace.getProductName());
-			oMap.put("maxRetry", iMaxRetry); // not sure I need
+			Map<String, Object> oMap = fromtWasdiPayloadToObjectMap(sFileURL);
+			addOperativeParametersToWasdiPayload(oMap, sSaveDirOnServer, oProcessWorkspace.getProductName(), iMaxRetry);
+
 			
 			String sEnrichedJsonParameters = JsonUtils.stringify(oMap);
 			
@@ -174,10 +178,12 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 		} catch(Exception oEx) {
 			WasdiLog.errorLog("PythonBasedProviderAdapter.executeDonwloadFile: error ", oEx);
 		} finally {
+			/*
 			if (!Utils.isNullOrEmpty(sInputFullPath))
 				FileUtils.deleteQuietly(new File(sInputFullPath));
 			if (!Utils.isNullOrEmpty(sOutputFullPath))
 				FileUtils.deleteQuietly(new File(sOutputFullPath));
+			*/
 		}
 		
 		return sResultDownloadedFilePath;
@@ -185,7 +191,7 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 	
 	
 	
-	protected Map<String, Object> extractWasdiPayloadFromUrl(String sUrl) {
+	protected Map<String, Object> fromtWasdiPayloadToObjectMap(String sUrl) {
 		String sDecodedUrl = decodeUrl(sUrl);
 
 		String sPayload = null;
@@ -195,6 +201,24 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 				sPayload = asTokens[1];
 				WasdiLog.debugLog("PythonBasedProviderAdapter.extractWasdiPayloadFromUrl json string: " + sPayload);
 				return JsonUtils.jsonToMapOfObjects(sPayload);
+			}
+			WasdiLog.warnLog("PythonBasedProviderAdapter.extractWasdiPayloadFromUrl. Payload not found in url " + sUrl);
+		}
+		
+		WasdiLog.warnLog("PythonBasedProviderAdapter.extractWasdiPayloadFromUrl. Decoded url is null or empty " + sUrl);
+		return null;
+	}
+	
+	protected Map<String, String> fromWasdiPayloadToStringMap(String sUrl) {
+		String sDecodedUrl = decodeUrl(sUrl);
+
+		String sPayload = null;
+		if (!Utils.isNullOrEmpty(sDecodedUrl)) {
+			String[] asTokens = sDecodedUrl.split("payload=");
+			if (asTokens.length == 2) {
+				sPayload = asTokens[1];
+				WasdiLog.debugLog("PythonBasedProviderAdapter.extractWasdiPayloadFromUrl json string: " + sPayload);
+				return JsonUtils.jsonToMapOfStrings(sPayload);
 			}
 			WasdiLog.warnLog("PythonBasedProviderAdapter.extractWasdiPayloadFromUrl. Payload not found in url " + sUrl);
 		}

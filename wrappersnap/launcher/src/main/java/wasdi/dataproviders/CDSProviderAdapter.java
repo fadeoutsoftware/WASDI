@@ -236,7 +236,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		return null;
 	}
 	
-	private static Map<String, Object> prepareCdsPayload(Map<String, String> aoWasdiPayload) {
+	protected static Map<String, Object> prepareCdsPayload(Map<String, String> aoWasdiPayload) {
 		String sDataset = JsonUtils.getProperty(aoWasdiPayload, "dataset");
 		String sProductType = JsonUtils.getProperty(aoWasdiPayload, "productType");
 		String sVariables = JsonUtils.getProperty(aoWasdiPayload, "variables");
@@ -323,7 +323,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 	 * @param asWasdiPayload payload sent to the provider adapter by the query executor
 	 * @param aoEraPayload payload to be sent to the ERA5 data provider
 	 */
-	private static void addPressureLevels(String sDataset, Map<String, String> asWasdiPayload, Map<String, Object> aoEraPayload) {
+	protected static void addPressureLevels(String sDataset, Map<String, String> asWasdiPayload, Map<String, Object> aoEraPayload) {
 		if (sDataset.equalsIgnoreCase(CDSUtils.s_sPRESSURE_LEVELS_DATASET)) {
 			String sPresureLevels = JsonUtils.getProperty(asWasdiPayload, "presureLevels");
 			
@@ -343,7 +343,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 	 * @param asWasdiPayload payload sent to the provider adapter by the query executor
 	 * @param aoEraPayload payload to be sent to the ERA5 data provider
 	 */
-	private static void addSeaTemperatureParameters(String sDataset, Map<String, Object> aoEraPayload) {
+	protected static void addSeaTemperatureParameters(String sDataset, Map<String, Object> aoEraPayload) {
         if (sDataset.equalsIgnoreCase(CDSUtils.s_sSEA_TEMPERATURE_DATASET)) {
         	aoEraPayload.put("sensor_on_satellite", "combined_product");
         	aoEraPayload.put("version", "2_1");
