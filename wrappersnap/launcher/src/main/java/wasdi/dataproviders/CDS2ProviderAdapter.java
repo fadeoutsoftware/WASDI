@@ -108,42 +108,44 @@ public class CDS2ProviderAdapter extends PythonBasedProviderAdapter {
 			List<String> asArgs = getCommandLineArgsForDownload(sEnrichedJsonParameters);
 			
 			if (asArgs == null) {
-				WasdiLog.errorLog("PythonBasedProviderAdapter.executeDownloadFile: not arguments for shellExec");
+				WasdiLog.errorLog("CDS2ProviderAdapter.executeDownloadFile: not arguments for shellExec");
 			}
 			
 			if (asArgs.size() < 5) {
-				WasdiLog.errorLog("PythonBasedProviderAdapter.executeDownloadFile: not enough args");
+				WasdiLog.errorLog("CDS2ProviderAdapter.executeDownloadFile: not enough args");
 			}
 			
 			sInputFullPath = asArgs.get(2);
 			sOutputFullPath = asArgs.get(3);
 			
+			WasdiLog.debugLog("CDS2ProviderAdapter: input file path " + sInputFullPath);
+			WasdiLog.debugLog("CDS2ProviderAdapter: output file path " + sOutputFullPath);
 			
 			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
 			
-			WasdiLog.debugLog("PythonBasedProviderAdapter.executeDownloadFile: python output = " + oShellExecReturn.getOperationLogs());;
+			WasdiLog.debugLog("CDS2ProviderAdapter.executeDownloadFile: python output = " + oShellExecReturn.getOperationLogs());;
 			
 			File oOutputFile = new File(sOutputFullPath);
 			
 			if (!oOutputFile.exists()) {
-				WasdiLog.warnLog("PythonBasedProviderAdapter.executeDownloadFile: impossible to read the output file of the Python data provider");
+				WasdiLog.warnLog("CDS2ProviderAdapter.executeDownloadFile: impossible to read the output file of the Python data provider");
 			}
 			
-			WasdiLog.debugLog("PythonBasedProviderAdapter.executeDownloadFile: got output file form the Python data provider " + oOutputFile.getAbsolutePath());
+			WasdiLog.debugLog("CDS2ProviderAdapter.executeDownloadFile: got output file form the Python data provider " + oOutputFile.getAbsolutePath());
 			
 			// the output will simply be the path of the downloaded file
 			JSONObject oJsonOutput = JsonUtils.loadJsonFromFile(sOutputFullPath);
 			String sDownloadedFilePath = oJsonOutput.optString("outputFile");
 			
 			if (!Utils.isNullOrEmpty(sDownloadedFilePath)) {
-				WasdiLog.debugLog("PythonBasedProviderAdapter.executeDownloadFile: path to the downloaded file " + sDownloadedFilePath);
+				WasdiLog.debugLog("CDS2ProviderAdapter.executeDownloadFile: path to the downloaded file " + sDownloadedFilePath);
 				sResultDownloadedFilePath = sDownloadedFilePath;
 			} else {
-				WasdiLog.errorLog("PythonBasedProviderAdapter.executeDownloadFile: path to the downloaded file is null or empty");
+				WasdiLog.errorLog("CDS2ProviderAdapter.executeDownloadFile: path to the downloaded file is null or empty");
 			}
 			
 		} catch(Exception oEx) {
-			WasdiLog.errorLog("PythonBasedProviderAdapter.executeDonwloadFile: error ", oEx);
+			WasdiLog.errorLog("CDS2ProviderAdapter.executeDonwloadFile: error ", oEx);
 		} finally {
 			/*
 			if (!Utils.isNullOrEmpty(sInputFullPath))
