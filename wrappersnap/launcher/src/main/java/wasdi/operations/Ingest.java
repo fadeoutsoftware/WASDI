@@ -16,10 +16,8 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.payloads.IngestPayload;
 import wasdi.shared.utils.EndMessageProvider;
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
-import wasdi.shared.utils.gis.ShapeFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
@@ -99,46 +97,46 @@ public class Ingest extends Operation {
 
                 WasdiLog.warnLog("Ingest.executeOperation: Impossible to read the Product View Model");
 
-                // Check if this is a Zipped Shape File
-                if (oFileToIngestPath.getName().toLowerCase().endsWith(".zip")) {
-                    ShapeFileUtils oShapeFileUtils = new ShapeFileUtils(oParameter.getProcessObjId());
-                    if (oShapeFileUtils.isShapeFileZipped(oFileToIngestPath.getPath(), 30)) {
-
-                        // May be.
-                        WasdiLog.infoLog("Ingest.executeOperation: it looks like the File to ingest might be a zipped shape file, let's try to unzip it...");
-
-                        // Unzip
-                        ZipFileUtils oZipExtractor = new ZipFileUtils(oParameter.getProcessObjId());
-                        oZipExtractor.unzip(oFileToIngestPath.getCanonicalPath(), oFileToIngestPath.getParent());
-
-                        // Get the name of shp from the zip file (case safe)
-                        String sShapeFileTest = oShapeFileUtils.getShpFileNameFromZipFile(oFileToIngestPath.getPath(), 30);
-
-                        File oShapeFileIngestPath = null;
-                        if (!Utils.isNullOrEmpty(sShapeFileTest)) {
-                            // Ok, we have our file
-                            oShapeFileIngestPath = new File(oFileToIngestPath.getParent() + "/" + sShapeFileTest);
-							
-							WasdiProductReader oReadShapeProduct = WasdiProductReaderFactory.getProductReader(oShapeFileIngestPath);
-							
-                            // Now get the view model again
-							oImportProductViewModel = oReadShapeProduct.getProductViewModel();
-                            bUnzipAfterCopy = true;
-                            WasdiLog.infoLog("Ingest.executeOperation: Ok, zipped shape file found");
-
-                            m_oProcessWorkspaceLogger.log("Found shape file");
-
-                            sDestinationFileName = sShapeFileTest;
-                        }
-                        if(oShapeFileIngestPath != null && oFileToIngestPath.exists()) {
-	                        deleteZipFile(oFileToIngestPath);
-	                        //point the file to be ingested to the .shp extracted shapefile
-	                        oFileToIngestPath = new File(oShapeFileIngestPath.getAbsolutePath());
-
-	                        bUnzipAfterCopy = oShapeFileIngestPath.getAbsolutePath().toLowerCase().endsWith(".zip");
-                        }
-                    }
-                }
+//                // Check if this is a Zipped Shape File
+//                if (oFileToIngestPath.getName().toLowerCase().endsWith(".zip")) {
+//                    ShapeFileUtils oShapeFileUtils = new ShapeFileUtils(oParameter.getProcessObjId());
+//                    if (oShapeFileUtils.isShapeFileZipped(oFileToIngestPath.getPath(), 30)) {
+//
+//                        // May be.
+//                        WasdiLog.infoLog("Ingest.executeOperation: it looks like the File to ingest might be a zipped shape file, let's try to unzip it...");
+//
+//                        // Unzip
+//                        ZipFileUtils oZipExtractor = new ZipFileUtils(oParameter.getProcessObjId());
+//                        oZipExtractor.unzip(oFileToIngestPath.getCanonicalPath(), oFileToIngestPath.getParent());
+//
+//                        // Get the name of shp from the zip file (case safe)
+//                        String sShapeFileTest = oShapeFileUtils.getShpFileNameFromZipFile(oFileToIngestPath.getPath(), 30);
+//
+//                        File oShapeFileIngestPath = null;
+//                        if (!Utils.isNullOrEmpty(sShapeFileTest)) {
+//                            // Ok, we have our file
+//                            oShapeFileIngestPath = new File(oFileToIngestPath.getParent() + "/" + sShapeFileTest);
+//							
+//							WasdiProductReader oReadShapeProduct = WasdiProductReaderFactory.getProductReader(oShapeFileIngestPath);
+//							
+//                            // Now get the view model again
+//							oImportProductViewModel = oReadShapeProduct.getProductViewModel();
+//                            bUnzipAfterCopy = true;
+//                            WasdiLog.infoLog("Ingest.executeOperation: Ok, zipped shape file found");
+//
+//                            m_oProcessWorkspaceLogger.log("Found shape file");
+//
+//                            sDestinationFileName = sShapeFileTest;
+//                        }
+//                        if(oShapeFileIngestPath != null && oFileToIngestPath.exists()) {
+//	                        deleteZipFile(oFileToIngestPath);
+//	                        //point the file to be ingested to the .shp extracted shapefile
+//	                        oFileToIngestPath = new File(oShapeFileIngestPath.getAbsolutePath());
+//
+//	                        bUnzipAfterCopy = oShapeFileIngestPath.getAbsolutePath().toLowerCase().endsWith(".zip");
+//                        }
+//                    }
+//                }
             }
 
             // If we do not have the view model here, we were not able to open the file
