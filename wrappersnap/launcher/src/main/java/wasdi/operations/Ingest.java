@@ -92,11 +92,11 @@ public class Ingest extends Operation {
 
             String sDestinationFileName = oFileToIngestPath.getName();
 
-            // Did we got the View Model ?
-            if (oImportProductViewModel == null) {
-
-                WasdiLog.warnLog("Ingest.executeOperation: Impossible to read the Product View Model");
-
+//            // Did we got the View Model ?
+//            if (oImportProductViewModel == null) {
+//
+//                WasdiLog.warnLog("Ingest.executeOperation: Impossible to read the Product View Model");
+//
 //                // Check if this is a Zipped Shape File
 //                if (oFileToIngestPath.getName().toLowerCase().endsWith(".zip")) {
 //                    ShapeFileUtils oShapeFileUtils = new ShapeFileUtils(oParameter.getProcessObjId());
@@ -137,7 +137,7 @@ public class Ingest extends Operation {
 //                        }
 //                    }
 //                }
-            }
+//            }
 
             // If we do not have the view model here, we were not able to open the file
             if (oImportProductViewModel == null) {
