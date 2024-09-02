@@ -76,6 +76,7 @@ Automatic HASARD actually calls one more app, namely Flood Archive Generator. Th
 Flood Archive Generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 As anticipated above, the Flood Archive Generator is used to generate daily flood maps in the time range specified by the user. It detects floods in open areas, using Sentinel-1 images. The time range can be as long as the entire archive of Sentinel-1 images.
+
 .. image:: ../_static/FloodMapping/10.png
 
 .. image:: ../_static/FloodMapping/11.png
