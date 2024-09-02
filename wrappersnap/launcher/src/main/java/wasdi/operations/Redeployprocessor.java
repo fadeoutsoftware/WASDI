@@ -59,14 +59,10 @@ public class Redeployprocessor extends Operation {
 	        
 	        boolean bRet =  oEngine.redeploy(oParameter);
 	        
-	        m_oSendToRabbit.sendRedeployDoneMessage(oParameter, bRet, oEngine.isLocalBuild());	     
+	        // Re-read the processor: maybe has been updated in the re-deploy
+	        oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 	        
-	        oProcessor.setDeploymentOngoing(false);
-	        if (oProcessorRepository.updateProcessor(oProcessor)) {
-	        	WasdiLog.debugLog("Redeployprocessor.executeOperation: flag for tracking the in-progress deployment set back to false");
-	        } else {
-	        	WasdiLog.warnLog("Redeployprocessor.executeOperation: could not set back to false the flag for tracking the in-progress deployment");
-	        }
+	        m_oSendToRabbit.sendRedeployDoneMessage(oParameter, bRet, oEngine.isLocalBuild());	     
 
             return bRet;	        
 		}
@@ -74,17 +70,18 @@ public class Redeployprocessor extends Operation {
 			WasdiLog.errorLog("Redeployprocessor.executeOperation: exception", oEx);
 		} 
 		finally {
-			if (oProcessorRepository != null && oProcessor != null) {
-				if (oProcessor.isDeploymentOngoing())  {
-					oProcessor.setDeploymentOngoing(false);
-					if (oProcessorRepository.updateProcessor(oProcessor)) {
-			        	WasdiLog.debugLog("Redeployprocessor.executeOperation: flag for tracking the in-progress deployment set back to false after after exception handling");
-			        } else {
-			        	WasdiLog.warnLog("Redeployprocessor.executeOperation: could not set back to false the flag for tracking the in-progress deployment after exception handling");
-			        }
-				}
-				
-			}
+			// In any case, in the finally, we set the deployment on going flag to false
+			if (oParam!=null) {
+				ProcessorParameter oParameter = (ProcessorParameter) oParam;
+	            oProcessorRepository = new ProcessorRepository();
+	            oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
+	            oProcessor.setDeploymentOngoing(false);
+				if (oProcessorRepository.updateProcessor(oProcessor)) {
+		        	WasdiLog.debugLog("Redeployprocessor.executeOperation: flag for tracking the in-progress deployment set back to false");
+		        } else {
+		        	WasdiLog.warnLog("Redeployprocessor.executeOperation: could not set back to false the flag for tracking the in-progress deployment");
+		        }	            
+			}            
 		}
 		
 		return false;        
