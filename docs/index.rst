@@ -76,7 +76,7 @@ A good starting point to applications is the :doc:`App store overview </AppStore
    :caption: Wasdi Applications
 
    WasdiApplications/AppStoreTutorial.rst
-   WasdiApplications/eDriftTutorial.rst
+   WasdiApplications/FloodMapping.rst
    WasdiApplications/WheatLocator.rst
 
 
