@@ -1,22 +1,19 @@
 package wasdi.dataproviders;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.json.JSONObject;
 
+import org.apache.commons.io.FileUtils;
+
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.queryexecutors.cds.CDSUtils;
+import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.gis.BoundingBoxUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
 import wasdi.shared.utils.runtime.ShellExecReturn;
@@ -49,19 +46,6 @@ public class CDS2ProviderAdapter extends PythonBasedProviderAdapter {
 			// let's add the additional information to the json passed to the Python data provider
 			Map<String, Object> oInputMap = new HashMap<String, Object>();
 			Map<String, String> oWasdiPayloadMap = fromWasdiPayloadToStringMap(sFileURL);		
-						
-			/*
-			oMap.keySet().forEach(key -> System.out.println(key));
-			OUTPUT:
-				date
-				boundingBox
-				variables
-				presureLevels
-				format
-				dataset
-				monthlyAggregation
-				productType
-			*/
 			
 			String sCDSDataset = oWasdiPayloadMap.get("dataset");
 			
@@ -74,33 +58,9 @@ public class CDS2ProviderAdapter extends PythonBasedProviderAdapter {
 			
 			Map<String, Object> oCDSPayloadMap = CDSProviderAdapter.prepareCdsPayload(oWasdiPayloadMap);
 			
-			/*
-			oCDSPayloadMap.keySet().forEach(key -> System.out.println(key));
-			OUTPUT:
-			  		area
-					product_type
-					month
-					year
-					variable
-					format
-					time
-					pressure_level
-					day
-			 */
-			
 			oInputMap.put("cds_payload", oCDSPayloadMap);
 			
 			addOperativeParametersToWasdiPayload(oInputMap, sSaveDirOnServer, oProcessWorkspace.getProductName(), iMaxRetry);
-
-			/*
-			oInputMap.keySet().forEach(key -> System.out.println(key)); 
-			 OUTPUT:
-				maxRetry
-				downloadFileName
-				downloadDirectory
-				cds_payload
-				dataset
-			*/
 			
 			String sEnrichedJsonParameters = JsonUtils.stringify(oInputMap);
 			
@@ -147,24 +107,30 @@ public class CDS2ProviderAdapter extends PythonBasedProviderAdapter {
 		} catch(Exception oEx) {
 			WasdiLog.errorLog("CDS2ProviderAdapter.executeDonwloadFile: error ", oEx);
 		} finally {
-			/*
 			if (!Utils.isNullOrEmpty(sInputFullPath))
 				FileUtils.deleteQuietly(new File(sInputFullPath));
 			if (!Utils.isNullOrEmpty(sOutputFullPath))
 				FileUtils.deleteQuietly(new File(sOutputFullPath));
-			*/
 		}
 		
 		return sResultDownloadedFilePath;
 	}
 	
-	
+	@Override
+	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
+		if (sPlatformType.equals(Platforms.ERA5)) {
+			return DataProviderScores.DOWNLOAD.getValue();
+		}
 
+		return 0;
+	}
 	
 	
 	public static void main(String [] args) throws Exception {
-		String sPayload = "https%3A%2F%2Fcds.climate.copernicus.eu%2Fapi%2Fv2%2Fresources%3Fpayload%3D%7B%22date%22%3A%2220240802%22%2C%22boundingBox%22%3A%2252.58950154463953%2C+6.328125000000001%2C+47.98745256063311%2C+13.535156250000002%22%2C%22variables%22%3A%22RH+U+V%22%2C%22presureLevels%22%3A%221000%22%2C%22format%22%3A%22netcdf%22%2C%22dataset%22%3A%22reanalysis-era5-pressure-levels%22%2C%22monthlyAggregation%22%3A%22false%22%2C%22productType%22%3A%22reanalysis%22%7D";
-				
+		// String sPayload = "https%3A%2F%2Fcds.climate.copernicus.eu%2Fapi%2Fv2%2Fresources%3Fpayload%3D%7B%22date%22%3A%2220240802%22%2C%22boundingBox%22%3A%2252.58950154463953%2C+6.328125000000001%2C+47.98745256063311%2C+13.535156250000002%22%2C%22variables%22%3A%22RH+U+V%22%2C%22presureLevels%22%3A%221000%22%2C%22format%22%3A%22netcdf%22%2C%22dataset%22%3A%22reanalysis-era5-pressure-levels%22%2C%22monthlyAggregation%22%3A%22false%22%2C%22productType%22%3A%22reanalysis%22%7D";
+			
+		String sPayload = "https%3A%2F%2Fcds.climate.copernicus.eu%2Fapi%2Fv2%2Fresources%3Fpayload%3D%7B%22date%22%3A%2220240801%22%2C%22boundingBox%22%3A%2245.18978009667531%2C+7.525634765625001%2C+44.91035917458495%2C+7.866210937500001%22%2C%22variables%22%3A%22toa_incident_solar_radiation%22%2C%22format%22%3A%22netcdf%22%2C%22dataset%22%3A%22reanalysis-era5-single-levels%22%2C%22monthlyAggregation%22%3A%22false%22%2C%22productType%22%3A%22reanalysis%22%7D";
+		
 		WasdiConfig.readConfig("C:/temp/wasdi/wasdiLocalTESTConfig.json");
 		
 		ProcessWorkspace oPW = new ProcessWorkspace();

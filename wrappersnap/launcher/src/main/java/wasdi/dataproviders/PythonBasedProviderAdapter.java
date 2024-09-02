@@ -178,12 +178,10 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 		} catch(Exception oEx) {
 			WasdiLog.errorLog("PythonBasedProviderAdapter.executeDonwloadFile: error ", oEx);
 		} finally {
-			/*
 			if (!Utils.isNullOrEmpty(sInputFullPath))
 				FileUtils.deleteQuietly(new File(sInputFullPath));
 			if (!Utils.isNullOrEmpty(sOutputFullPath))
 				FileUtils.deleteQuietly(new File(sOutputFullPath));
-			*/
 		}
 		
 		return sResultDownloadedFilePath;
