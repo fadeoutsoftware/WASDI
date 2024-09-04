@@ -25,6 +25,9 @@ public class Redeployprocessor extends Operation {
 			return false;
 		}
 		
+		ProcessorRepository oProcessorRepository = null;
+		Processor oProcessor = null;
+		
 		try {
 	        // redeploy User Processor
 	        ProcessorParameter oParameter = (ProcessorParameter) oParam;			
@@ -33,8 +36,8 @@ public class Redeployprocessor extends Operation {
             String sProcessorName = oParameter.getName();
             String sProcessorId = oParameter.getProcessorID();
 
-            ProcessorRepository oProcessorRepository = new ProcessorRepository();
-            Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+            oProcessorRepository = new ProcessorRepository();
+            oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 
             // Check processor
             if (oProcessor == null) {
@@ -56,12 +59,29 @@ public class Redeployprocessor extends Operation {
 	        
 	        boolean bRet =  oEngine.redeploy(oParameter);
 	        
-	        m_oSendToRabbit.sendRedeployDoneMessage(oParameter, bRet, oEngine.isLocalBuild());	        
+	        // Re-read the processor: maybe has been updated in the re-deploy
+	        oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+	        
+	        m_oSendToRabbit.sendRedeployDoneMessage(oParameter, bRet, oEngine.isLocalBuild());	     
 
             return bRet;	        
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("Redeployprocessor.executeOperation: exception", oEx);
+		} 
+		finally {
+			// In any case, in the finally, we set the deployment on going flag to false
+			if (oParam!=null) {
+				ProcessorParameter oParameter = (ProcessorParameter) oParam;
+	            oProcessorRepository = new ProcessorRepository();
+	            oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
+	            oProcessor.setDeploymentOngoing(false);
+				if (oProcessorRepository.updateProcessor(oProcessor)) {
+		        	WasdiLog.debugLog("Redeployprocessor.executeOperation: flag for tracking the in-progress deployment set back to false");
+		        } else {
+		        	WasdiLog.warnLog("Redeployprocessor.executeOperation: could not set back to false the flag for tracking the in-progress deployment");
+		        }	            
+			}            
 		}
 		
 		return false;        

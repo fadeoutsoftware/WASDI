@@ -394,6 +394,7 @@ public class ProcessorsResource  {
 				oDeployedProcessorViewModel.setMinuteTimeout((int) (oProcessor.getTimeoutMs()/60000l));
 				oDeployedProcessorViewModel.setImgLink(ImageResourceUtils.getProcessorLogoPlaceholderPath(oProcessor));
 				oDeployedProcessorViewModel.setLogo(oProcessor.getLogo());
+				oDeployedProcessorViewModel.setDeploymentOngoing(oProcessor.isDeploymentOngoing());
 				
 				aoRet.add(oDeployedProcessorViewModel);
 			}
@@ -924,9 +925,15 @@ public class ProcessorsResource  {
 			}
 			
 			
-			// check if the app has an on-demand price: in that case, update the appspayments table to track the run date/time
+			// check if the app has an on-demand price and if the person is not the owner of tje app: 
+			// in that case, update the apps payments table to track the run date/time
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			Float fOnDemandPrice = oProcessorToRun.getOndemandPrice();
-			if (fOnDemandPrice != null && fOnDemandPrice > 0) {
+			if (fOnDemandPrice != null 
+					&& fOnDemandPrice > 0 
+					&& !oUser.getUserId().equals(oProcessorToRun.getUserId())
+					&& !oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, oProcessorToRun.getProcessorId())) {
+				
 				WasdiLog.debugLog("ProcessorsResource.internalRun: the app has an ondemand price");
 				AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
 				List<AppPayment> oAppPayments = oAppPaymentRepository.getAppPaymentByProcessorAndUser(oProcessorToRun.getProcessorId(), sUserId);
@@ -1571,6 +1578,16 @@ public class ProcessorsResource  {
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.REDEPLOYPROCESSOR.name(),oProcessorToReDeploy.getName(),oProcessorParameter);			
 			
 			if (oRes.getBoolValue()) {
+				
+				// if the launch of the redeployment was successful, then we set the flag to track the ongoing deployment
+				// set flag for ongoing deployment
+				oProcessorToReDeploy.setDeploymentOngoing(true);
+				if (oProcessorRepository.updateProcessor(oProcessorToReDeploy)) {
+					WasdiLog.debugLog("ProcessorResource.redeployProcessor. Flag set to true for ongoing deployment");
+				} else {
+					WasdiLog.warnLog("ProcessorResource.redeployProcessor. Could not set back to false the flag for ongoing deployment");
+				}
+				
 				return Response.ok().build();
 			}
 			else {
@@ -1582,6 +1599,7 @@ public class ProcessorsResource  {
 			return Response.serverError().build();
 		}
 	}
+	
 	
 	/**
 	 * Force the update of the lib of a processor
@@ -2289,7 +2307,9 @@ public class ProcessorsResource  {
 	}
 	
 	/**
-	 * Check if an app has being set for purchase and if the run of the app has been purchased
+	 * Check if an app has being set for purchase and if the run of the app has been purchased.
+	 * If the app has being set for being sold, it checks if the user needs actually to pay the app or exceptions apply.
+	 * An exception appies when the user is the owner of the app or the app has been shared with that user.
 	 * @param sSessionId user session id
 	 * @param sProcessorId the id of the app
 	 * @return true if the run has been correctly purchased, false otherwise
@@ -2323,6 +2343,21 @@ public class ProcessorsResource  {
 			
 			if (fOnDemandPrice != null && fOnDemandPrice == 0) {
 				WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: processor " + sProcessorId + " is free of charge");
+				return Response.ok(true).build();
+			}
+			
+			// the owner of the app can always run the app for free
+			if (oProcessor.getUserId().equals(oUser.getUserId())) {
+				WasdiLog.debugLog(
+						"ProcessorsResource.checkAppPurchase: processor " + sProcessorId + " is set for purchase but the user " + oProcessor.getUserId() + " is the app's owner");
+				return Response.ok(true).build();
+			}
+			
+			
+			// if there user has a "write" permission on the processor, then the user can run the app for free 
+			UserResourcePermissionRepository oPermissionRepo = new UserResourcePermissionRepository();
+			if (oPermissionRepo.isProcessorSharedWithUser(oUser.getUserId(), oProcessor.getProcessorId())) {
+				WasdiLog.debugLog("ProcessorsResource.checkAppPurchase: processor " + sProcessorId + " is set for purchase but the app is shared with the user");
 				return Response.ok(true).build();
 			}
 			

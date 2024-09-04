@@ -1012,5 +1012,5 @@ processorTypes/pipOneShotDocker/.pydevproject
 keycloak-events/target/
 docs/.vscode/
 docs/venv/
-wrappersnap/utils/dependency-reduced-pom.xml
 wrappersnap/utils/target/
+wrappersnap/utils/dependency-reduced-pom.xml

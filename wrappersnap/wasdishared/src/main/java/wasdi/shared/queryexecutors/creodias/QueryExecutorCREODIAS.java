@@ -45,6 +45,10 @@ public class QueryExecutorCREODIAS extends QueryExecutorHttpGet {
 			
 			String sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(sProduct);
 			
+			if (sPlatform.equals(Platforms.LANDSAT8)) {
+				sPlatform = "LANDSAT-8";
+			}
+			
 			Date oProductDate = MissionUtils.getDateFromSatelliteImageFileName(sProduct);
 			
 			String sBeginPositionStart = "1893-09-07T00:00:00.000Z";

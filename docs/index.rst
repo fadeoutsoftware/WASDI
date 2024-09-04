@@ -16,7 +16,7 @@ WASDI implements a unique, simple and intuitive interface to foster the exploita
 
  - experts/researchers in the field of Earth Sciences
  - managers of services and public administrations (i.e. civil protection decision makers)
- - private companies (i.e. insurance, agricolture)
+ - private companies (i.e. insurance, agriculture)
 
 WASDI allows researchers to gather satellite data, in particular the Sentinel ones, display them on-line, run algorithms, displaying and evaluating the results, and allows to share these projects among different users.
 
@@ -77,6 +77,7 @@ A good starting point to applications is the :doc:`App store overview </AppStore
 
    WasdiApplications/AppStoreTutorial.rst
    WasdiApplications/eDriftTutorial.rst
+   WasdiApplications/WheatLocator.rst
 
 
 Add your App to WASDI
@@ -102,6 +103,7 @@ If you already know WASDI features and you are a Python developer check out the 
    ProgrammingTutorials/JupyterNotebookTutorial.rst
    ProgrammingTutorials/PythonLandsatTutorial.rst
    ProgrammingTutorials/SearchImport.rst
+   ProgrammingTutorials/OctaveTutorial.rst
    ProgrammingTutorials/ConfigTutorial.rst
    ProgrammingTutorials/LibWorkspaces.rst
    ProgrammingTutorials/SynchAsynch.rst

@@ -28,7 +28,9 @@ public class QueryExecutorCreoDias2 extends QueryExecutorCREODIAS {
 						Platforms.SENTINEL3, 
 						Platforms.SENTINEL5P, 
 						Platforms.SENTINEL6,
-						Platforms.ENVISAT, 
+						Platforms.ENVISAT,
+						Platforms.LANDSAT5,
+						Platforms.LANDSAT7,
 						Platforms.LANDSAT8));
 	}
 

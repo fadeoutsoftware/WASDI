@@ -71,11 +71,19 @@ public abstract class QueryTranslator {
 	 */
 	private static final String s_sPLATFORMNAME_SENTINEL_6 = "platformname:Sentinel-6";	
 	/**
+	 * Token of Landsat-5 platform
+	 */
+	private static final String s_sPLATFORMNAME_LANDSAT_5 = "platformname:Landsat-5";
+	/**
+	 * Token of Landsat-7 platform
+	 */
+	private static final String s_sPLATFORMNAME_LANDSAT_7 = "platformname:Landsat-7";
+	/**
 	 * Token of Landsat platform
 	 */
 	private static final String s_sPLATFORMNAME_LANDSAT = "platformname:Landsat-*";
 	/**
-	 * Token of Landsat platform
+	 * Token of Prova-V platform
 	 */
 	private static final String s_sPLATFORMNAME_PROBAV = "platformname:Proba-V";
 	/**
@@ -149,6 +157,16 @@ public abstract class QueryTranslator {
 	 * Token of TERRA platform
 	 */
 	private static final String S_SPLATFORMNAME_TERRA = "platformname:TERRA";
+	
+	/**
+	 * Token of WSF platform
+	 */
+	private static final String S_SPLATFORMNAME_WSF = "platformname:WSF";
+
+	/**
+	 * Token of TERRA platform
+	 */
+	private static final String s_sPLATFORMNAME_BIGBANG = "platformname:BIGBANG";
 
 	/**
 	 * Token of product type
@@ -515,8 +533,11 @@ public abstract class QueryTranslator {
 
 			// Try get Info about CAMS
 			parseCAMS(sQuery, oResult);
+			
+			// Try to get info about Landsat-5 or Landsat-7
+			parseLandsat5And7(sQuery, oResult);
 
-			// Try to get info about Landsat
+			// Try to get info about Landsat-8
 			parseLandsat(sQuery, oResult);
 			
 			// Try to get Info about ProbaV
@@ -560,9 +581,33 @@ public abstract class QueryTranslator {
 			// Try get Info about Earthcache
 			parseEarthcache(sQuery, oResult);
 			
+			// Try to get info about Terra
 			parseTerra(sQuery, oResult);
 			
+			// Try to get the info for semi-static provided files
 			parseStaticTiles(sQuery, oResult);
+			
+			parseWFS(sQuery, oResult);
+						
+			parseBIGBANG(sQuery, oResult);
+						
+			if (Utils.isNullOrEmpty(oResult.platformName)) {
+				WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: platformName not found: try to read the generic one");
+				
+				int iStartIndex = sQuery.indexOf("platformname");
+				
+				if (iStartIndex>=0) {
+					int iEndIndex = sQuery.substring(iStartIndex).indexOf("AND");
+					if (iEndIndex>=0) {
+						int iStartIndex2 = iStartIndex + "platformname".length() + 1;
+						String sPlatform = sQuery.substring(iStartIndex2, iStartIndex+iEndIndex);
+						sPlatform = sPlatform.trim();
+						oResult.platformName = sPlatform;
+						WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: found platformName: " + sPlatform);
+					}
+				}
+			}
+			
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
@@ -940,6 +985,20 @@ public abstract class QueryTranslator {
 	}
 	
 	/**
+	 * Fills the Query View Model with WSF (World Settlement Footprint) info
+	 * 
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 */
+	private void parseWFS(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.S_SPLATFORMNAME_WSF)) {
+			sQuery = removePlatformToken(sQuery, QueryTranslator.S_SPLATFORMNAME_WSF);
+
+			oResult.platformName = Platforms.WSF;
+		}
+	}
+	
+	/**
 	 * Fills the Query View Model with STATIC TILES info
 	 * 
 	 * @param sQuery the query
@@ -1010,7 +1069,6 @@ public abstract class QueryTranslator {
 	 * @param oResult the resulting Query View Model
 	 */
 	private void parseCM(String sQuery, QueryViewModel oResult) {
-		//WasdiLog.debugLog("QueryTranslator.parseCM | sQuery: " + sQuery);
 
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_CM)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_CM);
@@ -1041,6 +1099,15 @@ public abstract class QueryTranslator {
 			}
 		}
 	}
+	
+	private void parseBIGBANG(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_BIGBANG)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_BIGBANG);
+			
+			oResult.platformName = Platforms.BIGBANG;
+			oResult.sensorMode = extractValue(sQuery, "dataset");
+		}
+	}
 
 	/**
 	 * Extract the value corresponding to the key from the simplifiedquery.
@@ -1056,27 +1123,78 @@ public abstract class QueryTranslator {
 		int iStart = -1;
 		int iEnd = -1;
 
-		if (sQuery.contains(sKey)) {
-			iStart = sQuery.indexOf(sKey);
+		try {
+			if (sQuery.contains(sKey)) {
+				iStart = sQuery.indexOf(sKey);
 
-			iStart += (sKey.length() + 1);
-			iEnd = sQuery.indexOf(" AND ", iStart);
+				iStart += (sKey.length() + 1);
+				iEnd = sQuery.indexOf(" AND ", iStart);
 
-			if (iEnd < 0) {
-				iEnd = sQuery.length();
-			}
+				if (iEnd < 0) {
+					
+					iEnd = sQuery.indexOf(" )", iStart);
+					
+					if (iEnd < 0) {
+						iEnd = sQuery.length();
+					}
+				}
 
-			String sType = sQuery.substring(iStart, iEnd);
-			sType = sType.trim();
+				String sType = sQuery.substring(iStart, iEnd);
+				sType = sType.trim();
 
-			return sType;
+				return sType;
+			}			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("QueryTranslator.extractValue: error ", oEx);
 		}
 
 		return null;
 	}
 	
 	/**
-	 * Parse Landsat filters
+	 * Parse Landsat-5 and Landsat-7 filters
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parseLandsat5And7(String sQuery, QueryViewModel oResult) {
+		try {
+			boolean bIsLandsatProduct = false;
+			
+			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_LANDSAT_5)) {
+				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_LANDSAT_5);
+				oResult.platformName = Platforms.LANDSAT5;
+				bIsLandsatProduct = true;
+			} else if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_LANDSAT_7)) {
+				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_LANDSAT_7);
+				oResult.platformName = Platforms.LANDSAT7;
+				bIsLandsatProduct = true;
+			}
+			
+			if (bIsLandsatProduct) {
+				oResult.productType = extractValue(sQuery, "producttype");
+				oResult.sensorMode = extractValue(sQuery, "sensoroperationalmode");
+				
+				try {
+					String sPathNumber = extractValue(sQuery, "relativeorbitnumber");
+					if (!Utils.isNullOrEmpty(sPathNumber))
+						oResult.relativeOrbit = Integer.parseInt(sPathNumber);
+					
+					String sRowNumber = extractValue(sQuery, "absoluteorbit");
+					if (!Utils.isNullOrEmpty(sRowNumber)) {
+						oResult.absoluteOrbit = Integer.parseInt(sRowNumber);
+					}
+				} catch (NumberFormatException oEx) {
+					WasdiLog.errorLog("QueryTranslator.parseLandsat5And7: error parsing filters with integer value " + sQuery, oEx);
+				}		
+			}
+		} catch (Exception oE) {
+			WasdiLog.errorLog("QueryTranslator.parseLandsat5And7 ( " + sQuery + " ): ", oE);
+		}
+	}
+	
+	/**
+	 * Parse Landsat-8 filters
 	 * @param sQuery
 	 * @param oResult
 	 */

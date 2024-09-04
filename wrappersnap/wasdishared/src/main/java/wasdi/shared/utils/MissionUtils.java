@@ -37,6 +37,49 @@ public class MissionUtils {
 		
 		return false;
 	}
+	
+	public static boolean isLandsat5File(File oFile) {
+		if (oFile == null) {
+			return false;
+		}
+		
+		String sFileName = oFile.getName();
+		if (sFileName.toUpperCase().startsWith("LS05_")) {
+			return true;
+		}
+		
+		return false;
+	}
+	public static boolean isAsciiFile(File oFile) {
+		try {
+			if (oFile == null) {
+				return false;
+			}
+			
+			String sFileName = oFile.getName();
+			
+			return sFileName.endsWith(".asc");
+			
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("WasdiFileUtils.isAsciiFile: exception ", oEx);
+		}
+		return false;
+	}
+	
+
+	
+	public static boolean isLandsat7File(File oFile) {
+		if (oFile == null) {
+			return false;
+		}
+		
+		String sFileName = oFile.getName();
+		if (sFileName.toUpperCase().startsWith("LS07_")) {
+			return true;
+		}
+		
+		return false;
+	}
 
 	public static boolean isGpmZipFile(File oFile) {
 		try {
@@ -183,10 +226,17 @@ public class MissionUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("S5P_")) {
 				return Platforms.SENTINEL5P;
-			} else if (sFileName.toUpperCase().startsWith("S6_") || sFileName.toUpperCase().startsWith("S6A_") || sFileName.toUpperCase().startsWith("S6B_")) {
+			} 
+			else if (sFileName.toUpperCase().startsWith("S6_") || sFileName.toUpperCase().startsWith("S6A_") || sFileName.toUpperCase().startsWith("S6B_")) {
 				return Platforms.SENTINEL6;
 			}
-			else if (sFileName.toUpperCase().startsWith("LC08_")) {
+			else if (sFileName.toUpperCase().startsWith("LS05_")) {
+				return Platforms.LANDSAT5;
+			}
+			else if (sFileName.toUpperCase().startsWith("LS07_")) {
+				return Platforms.LANDSAT7;
+			}
+			else if (sFileName.toUpperCase().startsWith("LC08") || sFileName.toUpperCase().startsWith("LC8")) {
 				return Platforms.LANDSAT8;
 			}
 			else if (sFileName.toUpperCase().startsWith("MER_") || sFileName.toUpperCase().startsWith("ASA_")) {
@@ -239,6 +289,17 @@ public class MissionUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("GHS_BUILT_S_E2018_GLOBE_R2023A_54009_10_V1_0_")) {
 				return Platforms.JRC_GHSL;
+			} else if (sFileName.toUpperCase().startsWith("WSF2019_V1_")) {
+				return Platforms.WSF;
+			}
+			else if (sFileName.toUpperCase().startsWith("SPEI01_") 
+					|| sFileName.toUpperCase().startsWith("SPEI03_") 
+					|| sFileName.toUpperCase().startsWith("SPEI06_")
+					|| sFileName.toUpperCase().startsWith("SPEI12_")) {
+				return Platforms.BIGBANG;
+			}
+			else if (sFileName.toUpperCase().startsWith("RETRAS_") && sFileName.toUpperCase().endsWith(".TIF")) {
+				return Platforms.RETURN_RASTER;
 			}
 			
 			return null;
@@ -295,6 +356,12 @@ public class MissionUtils {
 				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd");
 				return new Date(lTime);
 			}
+			else if (sPlatform.equals(Platforms.LANDSAT5)
+					|| sPlatform.equals(Platforms.LANDSAT7)) {
+				String sDate = sFileName.substring(21, 21+15);
+				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd");
+				return new Date(lTime);
+			}
 			else if (sPlatform.equals(Platforms.LANDSAT8)) {
 				String [] asL8Parts = sFileName.split("_");
 				String sDate = asL8Parts[3];
@@ -312,6 +379,7 @@ public class MissionUtils {
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
+			return null;
 		}
 		
 		return new Date();
@@ -353,7 +421,7 @@ public class MissionUtils {
 			// For Others are Not relevant 
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
+			WasdiLog.debugLog("WasdiFileUtils.getProductTypeSatelliteImageFileName: exception " + oEx.toString());
 		}
 		
 		return "";

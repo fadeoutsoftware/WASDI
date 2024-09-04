@@ -54,11 +54,16 @@ public class SnapProductReader extends WasdiProductReader {
         
         // Set name and path
         if (m_oProduct != null) oViewModel.setName(m_oProduct.getName());
-        if (m_oProductFile!=null) oViewModel.setFileName(m_oProductFile.getName());
+        if (m_oProductFile != null) oViewModel.setFileName(m_oProductFile.getName());
+        
+        // fix name, if it is null
+        if (!Utils.isNullOrEmpty(oViewModel.getFileName()) && Utils.isNullOrEmpty(oViewModel.getName())) {
+        	oViewModel.setName(oViewModel.getFileName());
+        }
         
 
         // Snap set the name of geotiff files as geotiff: let replace with the file name
-        if (oViewModel.getName().toLowerCase().equals("geotiff")) {
+        if (oViewModel.getName() != null && oViewModel.getName().toLowerCase().equals("geotiff")) {
         	oViewModel.setName(oViewModel.getFileName());
         }
 
@@ -208,8 +213,55 @@ public class SnapProductReader extends WasdiProductReader {
 	            WasdiLog.debugLog("SnapProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
 	            sFileName = sFolderName + "/" + "xfdumanifest.xml";
 	            WasdiLog.debugLog("SnapProductReader.adjustFileAfterDownload: File Name changed in: " + sFileName);
+	        } 
+	        else if(MissionUtils.getPlatformFromSatelliteImageFileName(sFileNameFromProvider).equals(Platforms.LANDSAT5)
+	        		&& sFileNameFromProvider.endsWith(".zip")) {
+	        	WasdiLog.debugLog("SnapProductReader.adjustFileAfterDownload: File is a Landsat-5 product, start unzip");
+	        	String sDownloadFolderPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
+	        	ZipFileUtils oZipExtractor = new ZipFileUtils();
+	        	oZipExtractor.unzip(sDownloadFolderPath + File.separator + sFileNameFromProvider, sDownloadFolderPath);
+	        	
+	        	String sLandsat5UnzippedFolderPath = sDownloadFolderPath + File.separator + sFileNameFromProvider.replace(".zip", "");
+	        	File oLandsat5UnzippedFolder = new File(sLandsat5UnzippedFolderPath);
+	        
+	        	if (!oLandsat5UnzippedFolder.exists() || !oLandsat5UnzippedFolder.isDirectory()) {
+	        		WasdiLog.warnLog("SnapProductReader.adjustFileAfterDownload: file does not exists or is not a folder " + sLandsat5UnzippedFolderPath);
+	        		return sFileName;
+	        	}
+	        	
+	        	// now we need to look for the ".TIFF" folder
+	        	File oTIFFolder = null;
+	        	for (File oFile : oLandsat5UnzippedFolder.listFiles()) {
+	        		if (oFile.isDirectory() && oFile.getName().endsWith(".TIFF")) {
+	        			oTIFFolder = oFile;
+	        			break;
+	        		}
+	        	}
+	        	
+	        	if (oTIFFolder == null) {
+	        		WasdiLog.warnLog("SnapProductReader.adjustFileAfterDownload: TIFF folder with Landsat-5 files not found");
+	        		return sFileName;
+	        	}
+	        	
+	        	// if we found the TIF folder, then we can access the "MTL" file
+	        	File oMTLFile = null;
+	        	for (File oFile : oTIFFolder.listFiles()) {
+	        		if (oFile.getName().endsWith("_MTL.txt")) {
+	        			oMTLFile = oFile;
+	        			break;
+	        		}
+ 	        	}
+	        	
+	        	if (oMTLFile == null) {
+	        		WasdiLog.warnLog("SnapProductReader.adjustFileAfterDownload: no MTL file that can be read by SNAP");
+	        		return sFileName;
+	        	}
+	        	
+	        	sFileName = oMTLFile.getAbsolutePath();
+	        	m_oProductFile = oMTLFile;
+	        	WasdiLog.debugLog("SnapProductReader.adjustFileAfterDownload: MTL file found " + sFileName);
 	        }
-		}
+ 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("SnapProductReader.adjustFileAfterDownload: error ", oEx);
 		}
@@ -320,7 +372,7 @@ public class SnapProductReader extends WasdiProductReader {
 			return sEPSG;
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("SnapProductReader.getEPSG(): exception " + oEx.toString());
+			WasdiLog.errorLog("SnapProductReader.getEPSG(): exception ", oEx);
 		}
 		return null;    	
     }
@@ -359,7 +411,7 @@ public class SnapProductReader extends WasdiProductReader {
 			}			
 		}
 		catch (Exception oEx) {
-			
+        	WasdiLog.errorLog("SnapProductReader.addPrjToMollweidTiffFiles: error ", oEx);
 		}
 	
 	}

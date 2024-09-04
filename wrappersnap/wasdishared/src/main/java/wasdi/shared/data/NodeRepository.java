@@ -65,8 +65,11 @@ public class NodeRepository extends MongoRepository {
 
 			UpdateResult oResult = getCollection(m_sThisCollection).updateOne(oFilter, oUpdateOperationDocument);
 
-			if (oResult.getModifiedCount() == 1)
+			if (oResult.getModifiedCount() == 1) return true;
+			else {
+				WasdiLog.errorLog("NodeRepository.updateNode: indeed there was no change! ");
 				return true;
+			}
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("NodeRepository.updateNode: error ", oEx);
 		}

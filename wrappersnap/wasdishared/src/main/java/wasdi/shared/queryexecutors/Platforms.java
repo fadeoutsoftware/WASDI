@@ -18,9 +18,9 @@ public class Platforms {
 	public static String SENTINEL_1_RTC = "Sentinel-1-RTC";
 	
 	public static String PROBAV = "Proba-V";
-	public static String LANDSAT5 = "Landsat-5"; // Creodias 2 new platforms
-	public static String LANDSAT7 = "Landsat-7"; // Creodias 2 new platforms
-	public static String LANDSAT8 = "Landsat-8";
+	public static String LANDSAT5 = "Landsat-5"; 
+	public static String LANDSAT7 = "Landsat-7";
+	public static String LANDSAT8 = "Landsat-*";
 	public static String ENVISAT = "Envisat";
 	
 	public static String COPERNICUS_MARINE = "Copernicus-Marine";
@@ -47,11 +47,17 @@ public class Platforms {
 	
 	public static String TERRA = "TERRA";
 	
+	public static String WSF = "WSF"; // World Settlement Footprint
+	
 	// Creodias 2 new platforms
 	public static String SMOS = "SMOS";
 	public static String TERRAAQUA = "Terraaqua";
 	public static String COP_DEM = "COP_DEM";
 	public static String S2GLC = "S2GLC";
 	
+	public static String BIGBANG = "BIGBANG";
+	
+	// Return Plaforms
+	public static String RETURN_RASTER = "ReturnRaster";
 
 }

@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('.'))
 # -- Project information -----------------------------------------------------
 
 project = 'WASDI documentation center'
-copyright = '2021, WASDI Sàrl'
+copyright = '2024, WASDI Sàrl'
 author = ''
 
 

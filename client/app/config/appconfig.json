@@ -87,20 +87,20 @@
 				{
 					"indexname": "Instrument",
 					"indexlabel": "Instrument",
-					"indexvalues": "SRAL|SLSTR",
+					"indexvalues": "SRAL|SLSTR|OLCI",
 					"regex": ".*"
 				},
 				{
 					"indexname": "producttype",
 					"indexlabel": "Product Type",
-					"indexvalues": "SR_1_SRA___|SR_1_SRA_A_|SR_1_SRA_BS|SL_1_RBT___",
+					"indexvalues": "SR_1_SRA___|SR_1_SRA_A_|SR_1_SRA_BS|SL_1_RBT___|OL_1_EFR___|OL_1_ERR___",
 					"regex": ".*",
 					"visibilityConditions": "productlevel:L1"
 				},
 				{
 					"indexname": "producttype",
 					"indexlabel": "Product Type",
-					"indexvalues": "SR_2_LAN___|SL_2_AOD___|SL_2_FRP___|SL_2_LST___|SL_2_WST___",
+					"indexvalues": "SR_2_LAN___|SL_2_AOD___|SL_2_FRP___|SL_2_LST___|SL_2_WST___|OL_2_LFR___|OL_2_LRR___|OL_2_WFR___|OL_2_WRR___",
 					"regex": ".*",
 					"visibilityConditions": "productlevel:L2"
 				},
@@ -308,6 +308,68 @@
 					"indexvalues": "",
 					"indexmin": "6",
 					"indexmax": "113",
+					"regex": ".*"
+				}
+			]
+		},
+		{
+			"name": "L5",
+			"indexname": "platformname",
+			"indexvalue": "Landsat-5",
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "L1G|L1T",
+					"regex": ".*"
+				},
+				{
+					"indexname": "sensoroperationalmode",
+					"indexlabel": "Operational Mode",
+					"indexvalues": "SAM|BUMPER",
+					"regex": ".*"
+				},
+				{
+					"indexname": "relativeorbitnumber",
+					"indexlabel": "Path Number",
+					"indexhint": "(from 1 to 233)",
+					"regex": ".*"
+				},
+				{
+					"indexname": "absoluteorbit",
+					"indexlabel": "Row Number",
+					"indexhint": "(from 1 to 248)",
+					"regex": ".*"
+				}
+			]
+		},
+		{
+			"name": "L7",
+			"indexname": "platformname",
+			"indexvalue": "Landsat-7",
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "L1G|L1T|L1GT|GTC_1P",
+					"regex": ".*"
+				},
+				{
+					"indexname": "sensoroperationalmode",
+					"indexlabel": "Operational Mode",
+					"indexvalues": "SAM|BUMPER",
+					"regex": ".*"
+				},
+				{
+					"indexname": "relativeorbitnumber",
+					"indexlabel": "Path Number",
+					"indexhint": "(from 1 to 233)",
+					"regex": ".*"
+				},
+				{
+					"indexname": "absoluteorbit",
+					"indexlabel": "Row Number",
+					"indexhint": "(from 1 to 248)",
 					"regex": ".*"
 				}
 			]
@@ -1001,7 +1063,50 @@
 					"indexvalue": "MOD11A2"
 				}
 			]
-		}
+		},
+		{
+			"name": "WSF",
+			"indexname": "platformname",
+			"indexvalue": "WSF",
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "WSF_2019",
+					"regex": ".*",
+					"indexvalue": "WSF_2019"
+				}
+			]
+		},
+		{
+			"name": "BIGBANG",
+			"indexname": "platformname",
+			"indexvalue": "BIGBANG",
+			"filters": [
+				{
+					"indexname": "dataset",
+					"indexlabel": "Dataset",
+					"indexvalues": "SPEI01",
+					"regex": ".*",
+					"indexvalue": "SPEI01"
+				}
+			]
+		},
+        {
+            "name": "Return Rasters",
+            "indexname": "platformname",
+            "indexvalue": "ReturnRaster",
+            "selected": false,
+            "ispublic": true,
+            "filters": [
+                {
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues": "CIMA_AIR_TEMP_AVG|CIMA_AIR_TEMP_MIN|CIMA_AIR_TEMP_MAX|CIMA_FAPAR|CIMA_PREC|CIMA_SPEI|CIMA_SSMI",
+                    "indexvalue": "CIMA_AIR_TEMP_AVG"
+                }
+            ]
+        }		
 	],
 	"orbitsearch": {
 		"sensortypes": [

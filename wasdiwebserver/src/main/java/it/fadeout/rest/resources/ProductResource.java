@@ -980,6 +980,10 @@ public class ProductResource {
                                     return true;
                             }
                         }
+                        
+                        if (sName.endsWith(".prj") && sProductName.endsWith(".asc") && sName.equals(sProductName.replace(".asc", ".prj"))) {
+                        	return true;
+                        }
 
                         return false;
                     }
@@ -1037,6 +1041,8 @@ public class ProductResource {
                     WasdiLog.errorLog("ProductResource.deleteProduct: Exception deleting layers: " + oEx);
                 }            	
             }
+            
+
 
             // delete the product-workspace related records on db and the Downloaded File Entry
             try {

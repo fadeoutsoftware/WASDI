@@ -76,7 +76,6 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.OgcProcessesClient;
-import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.StringUtils;
@@ -147,7 +146,7 @@ public class dbUtils {
             System.out.println("\t1 - List products with broken files");
             System.out.println("\t2 - Delete products with broken files");
             System.out.println("\t3 - Clear S1 S2 published bands");
-            System.out.println("\t4 - Clean by not existing ProcessWorkspace");
+            System.out.println("\t4 - Clean by not existing Product Workspace");
             System.out.println("\tx - back");
             System.out.println("");
 

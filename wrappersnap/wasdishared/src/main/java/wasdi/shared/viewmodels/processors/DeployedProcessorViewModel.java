@@ -23,6 +23,7 @@ public class DeployedProcessorViewModel {
 	private String type = "";
 	private Boolean sharedWithMe = false;
 	private boolean readOnly = false;
+	private boolean isDeploymentOngoing = false;
 	
 	public String getParamsSample() {
 		return paramsSample;
@@ -102,5 +103,10 @@ public class DeployedProcessorViewModel {
 	public void setLogo(String logo) {
 		this.logo = logo;
 	}
-
+	public boolean isDeploymentOngoing() {
+		return isDeploymentOngoing;
+	}
+	public void setDeploymentOngoing(boolean isDeploymentOngoing) {
+		this.isDeploymentOngoing = isDeploymentOngoing;
+	}
 }

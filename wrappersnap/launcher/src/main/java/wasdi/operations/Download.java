@@ -100,7 +100,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             	oProviderAdapter = getBestProviderAdapater(oParameter, oProcessWorkspace);
             	
             	if (oProviderAdapter != null) {
-                    WasdiLog.errorLog("Got Data Provider " + oProviderAdapter.getCode());
+                    WasdiLog.debugLog("Got Data Provider " + oProviderAdapter.getCode());
                     m_oProcessWorkspaceLogger.log("Fetch - SELECTED " + oProviderAdapter.getCode());            	            		
             	}
             	else {
