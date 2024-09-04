@@ -1095,20 +1095,32 @@ public class StyleResource {
 	 */
 	private void geoServerUpdateStyleIfExists(String sName, String sStyleFilePath) throws MalformedURLException {
 		WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists( " + "Name: " + sName + ", StyleFile: " + sStyleFilePath + " )");
+		
+		try {
+			GeoServerManager oGeoServerManager = new GeoServerManager();
 
-		GeoServerManager oGeoServerManager = new GeoServerManager();
-
-		if (oGeoServerManager.styleExists(sName)) {
-			WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: style exists, update it");
-			
-			
-			if (!oGeoServerManager.updateStyle(sName, sStyleFilePath)) {
-				WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: update style returned false!!");
+			if (oGeoServerManager.styleExists(sName)) {
+				WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: style exists, update it");
+				
+				
+				if (!oGeoServerManager.updateStyle(sName, sStyleFilePath)) {
+					WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: update style returned false!!");
+				}
 			}
+			else {
+				
+				WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: style does not exists");
+				
+				if (WasdiConfig.Current.isMainNode()) {
+					WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: this is the main server, we need the style! Adding it");
+					geoServerAddStyle(sStyleFilePath);
+				}
+			}			
 		}
-		else {
-			WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: style does not exists, no updating it");
+		catch (Exception oEx) {
+			WasdiLog.errorLog("StyleResource.geoServerUpdateStyleIfExists: error " + oEx.toString());
 		}
+
 	}
 	
 	/**
@@ -1204,11 +1216,13 @@ public class StyleResource {
 	 */
 	protected void updateStylePreview(String sName, String sSessionId) {
 		
+		
 		try {		
 			// Now try to get the preview			
 			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(WasdiConfig.Current.geoserver.address + "/wms?request=GetLegendGraphic&STYLE=" + sName + "&format=image/png&WIDTH=12&HEIGHT=12&LAYER=" + WasdiConfig.Current.geoserver.defaultLayerToGetStyleImages + "&legend_options=fontAntiAliasing:true;fontSize:10&LEGEND_OPTIONS=forceRule:True");
 	
 			if (oHttpCallResponse.getResponseCode()==200) {
+				WasdiLog.debugLog("StyleResource.updateStylePreview: wms call done, creating image");
 				ByteArrayInputStream oByteArrayInputStream = new ByteArrayInputStream(oHttpCallResponse.getResponseBytes());
 				ImagesResource oImagesResource = new ImagesResource();
 				
