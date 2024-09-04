@@ -1106,6 +1106,9 @@ public class StyleResource {
 				WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: update style returned false!!");
 			}
 		}
+		else {
+			WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: style does not exists, no updating it");
+		}
 	}
 	
 	/**
@@ -1215,8 +1218,12 @@ public class StyleResource {
 				
 				oImagesResource.uploadImage(oByteArrayInputStream, oFormDataContentDispositionBuilder.fileName(sImageName).build(), sSessionId, ImagesCollections.STYLES.getFolder(), "", sImageName, true, true);
 			}
+			else {
+				WasdiLog.errorLog("StyleResource.updateStylePreview: the WMS request returned " + oHttpCallResponse.getResponseCode());
+				WasdiLog.errorLog("StyleResource.updateStylePreview: Message " + oHttpCallResponse.getResponseBody());
+			}
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("StyleResource.computationalNodesDeleteStyle: error starting UpdateWorker " + oEx.getMessage());
+			WasdiLog.errorLog("StyleResource.updateStylePreview: error " + oEx.getMessage());
 		}
 		
 	}
