@@ -17,13 +17,17 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -611,6 +615,84 @@ public class WasdiFileUtils {
 		}
 		return false;
 	}
+	
+	
+	/**
+	 * Check if a file is a (presumed) Shape File: it checks if it contains a .shp file
+	 * It also checks that the total number of files inside the zip itself is 
+	 * limited, to avoid processor cycle waste. 
+	 * The limit imposed it 
+	 * @param sZipFile Full path of the zip file
+	 * @param iMaxFileInZipFile the maximum number of file allowed to be considered inside the zip file
+	 * @return True if the zip contains a .shp file, False if it's not contained and the value iMaxFileInZipFile is exceeded
+	 */
+	public static boolean isShapeFileZipped(String sZipFile, int iMaxFileInZipFile) {
+		int iFileCounter = 0;
+		Path oZipPath = Paths.get(sZipFile).toAbsolutePath().normalize();
+		if(!oZipPath.toFile().exists()) {
+			return false;
+		}
+		try (ZipFile oZipFile = new ZipFile(oZipPath.toString())){
+		
+			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
+			
+			while(aoEntries.hasMoreElements()) {
+				ZipEntry oZipEntry = aoEntries.nextElement();
+				
+				if (iFileCounter > iMaxFileInZipFile) {
+					WasdiLog.errorLog("WasdiFileUtils.isShapeFileZipped: too many files inside the zip. The limit is " + iMaxFileInZipFile);
+					return false;
+				}
+				
+				if (WasdiFileUtils.isShapeFile(oZipEntry.getName())) {
+					return true;
+				}
+				iFileCounter++;
+			}			
+			
+		} catch (Exception e) {
+			WasdiLog.errorLog("WasdiFileUtils.isShapeFileZipped: error", e);
+		}
+		
+		return false;
+	}
+
+	/**
+	 * Check if a file is a (presumed) Shape File: it checks if it contains a .shp file
+	 * @param sZipFile Full path of the zip file
+	 * @param iMaxFileInZipFile TODO
+	 * @return True if the zip contains a .shp file, False otherwise
+	 */
+	public static String getShpFileNameFromZipFile(String sZipFile, int iMaxFileInZipFile) {
+		Path oZipPath = Paths.get(sZipFile).toAbsolutePath().normalize(); 
+		if(!oZipPath.toFile().exists()) {
+			return "";
+		}
+		
+		int iFileCounter = 0;
+		try(ZipFile oZipFile = new ZipFile(oZipPath.toString())) {
+			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
+			
+			while(aoEntries.hasMoreElements()) {
+				ZipEntry oZipEntry = aoEntries.nextElement();
+				if (iFileCounter > iMaxFileInZipFile) {
+					WasdiLog.errorLog("WasdiFileUtils.isShapeFileZipped: too many files inside the zip. The limit is " + iMaxFileInZipFile);
+					return "";
+				}
+				
+				if (oZipEntry.getName().toLowerCase().endsWith(".shp")) {
+					return oZipEntry.getName();
+				}
+				iFileCounter++;
+			}			
+			
+		} catch (Exception e) {
+			WasdiLog.errorLog("WasdiFileUtils.getShpFileNameFromZipFile: error", e);
+		}
+		
+		return "";
+	}
+
 	
 	/***
 	 * Check if a file is a "classic" image type.
