@@ -282,7 +282,8 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		aoHashMap.put("year", sYear);
 		aoHashMap.put("month", sMonth);
 		aoHashMap.put("time", CDSUtils.s_asTIME_HOURS);
-		aoHashMap.put("format", sFormat);
+		aoHashMap.put("data_format", sFormat);
+		aoHashMap.put("download_format","unarchived");
 		if (sMonthlyAggregation.equalsIgnoreCase("true")) {
 			aoHashMap.put("day", asDays);
 		} else {
