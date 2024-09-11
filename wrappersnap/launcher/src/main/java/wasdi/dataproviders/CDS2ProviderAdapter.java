@@ -12,6 +12,7 @@ import org.apache.commons.io.FileUtils;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.queryexecutors.cds.CDSUtils;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -125,6 +126,31 @@ public class CDS2ProviderAdapter extends PythonBasedProviderAdapter {
 		return 0;
 	}
 	
+	@Override
+	public String getFileName(String sFileURL) throws Exception {
+		if (Utils.isNullOrEmpty(sFileURL)) return "";
+
+		Map<String, String> aoWasdiPayload = fromWasdiPayloadToStringMap(sFileURL);
+		if (aoWasdiPayload == null) {
+			return null;
+		}
+		
+		String sDataset = JsonUtils.getProperty(aoWasdiPayload, "dataset");
+		String sVariables = JsonUtils.getProperty(aoWasdiPayload, "variables");
+		String sDate =  JsonUtils.getProperty(aoWasdiPayload, "date");
+		String sStartDate = JsonUtils.getProperty(aoWasdiPayload, "startDate");
+		String sEndDate = JsonUtils.getProperty(aoWasdiPayload, "endDate");
+		String sFormat = JsonUtils.getProperty(aoWasdiPayload, "format");
+		String sFootprint = JsonUtils.getProperty(aoWasdiPayload, "boundingBox");
+		String sFootprintForFileName = CDSProviderAdapter.getFootprintForFileName(sFootprint, sDataset);
+		String sExtension = "." + sFormat;
+
+		// filename: reanalysis-era5-pressure-levels_UV_20211201
+		String sFileName = CDSUtils.getFileName(sDataset, sVariables, sDate, sStartDate, sEndDate, sExtension, sFootprintForFileName);
+			
+		return sFileName;
+	}
+	
 	
 	public static void main(String [] args) throws Exception {
 		// String sPayload = "https%3A%2F%2Fcds.climate.copernicus.eu%2Fapi%2Fv2%2Fresources%3Fpayload%3D%7B%22date%22%3A%2220240802%22%2C%22boundingBox%22%3A%2252.58950154463953%2C+6.328125000000001%2C+47.98745256063311%2C+13.535156250000002%22%2C%22variables%22%3A%22RH+U+V%22%2C%22presureLevels%22%3A%221000%22%2C%22format%22%3A%22netcdf%22%2C%22dataset%22%3A%22reanalysis-era5-pressure-levels%22%2C%22monthlyAggregation%22%3A%22false%22%2C%22productType%22%3A%22reanalysis%22%7D";
@@ -145,4 +171,5 @@ public class CDS2ProviderAdapter extends PythonBasedProviderAdapter {
 				oPW, 
 				2);
 	}
+
 }

@@ -384,7 +384,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 	 * @param sDatasetName the name of the ERA5 dataset
 	 * @return the string representing the bounding box, in the format used in the file name
 	 */
-	private String getFootprintForFileName(String sFootprint, String sDatasetName) {
+	protected static String getFootprintForFileName(String sFootprint, String sDatasetName) {
 		String sFootprintForFileName = "";
 		
 		if (sFootprint == null || sFootprint.contains("null")) {
