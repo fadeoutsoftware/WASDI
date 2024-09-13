@@ -5,8 +5,12 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.ws.rs.Consumes;
@@ -22,18 +26,26 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.Node;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
+import wasdi.shared.business.Workspace;
+import wasdi.shared.business.aggregators.ProcessWorkspaceAggregatorBySubscriptionAndProject;
 import wasdi.shared.business.users.User;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
+import wasdi.shared.data.NodeRepository;
+import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.ReadMetadataParameter;
@@ -43,9 +55,13 @@ import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.ProcessWorkspaceAPIClient;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.processworkspace.ComputingTimeViewModel;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
+import wasdi.shared.viewmodels.products.ProductPropertiesViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
 /**
@@ -299,7 +315,122 @@ public class ProductResource {
         // There was a problem
         return null;
     }
-    
+    /**
+	 * Get the product size 
+	 * @param sSessionId user session id
+	 * @param sProductName product name
+	 * @param sWorkSpaceId workspace id
+	 * @return the product Size
+	 */
+	/*
+	@GET
+	@Path("/byws/product-size")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public PrimitiveResult getProductSizeByWorkspace(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("filename") String sFilename, 
+			@QueryParam("workspace") String sWorkspaceId ) {
+
+		WasdiLog.debugLog("ProductResource.getProductSizeByWorkspace( WS: " + sWorkspaceId + " File Name: "+sFilename+" )");
+		PrimitiveResult oReturn = new PrimitiveResult();
+		try {
+			// Validate input
+            if (Utils.isNullOrEmpty(sWorkspaceId)) {
+                WasdiLog.warnLog("ProductResource.getProductSizeByWorkspace: workspace is null or empty");
+                oReturn.setBoolValue(false);
+                oReturn.setIntValue(404);
+                return oReturn;
+            }        	
+        	
+            User oUser = Wasdi.getUserFromSession(sSessionId);
+            
+            if (oUser == null) {
+                WasdiLog.warnLog("ProductResource.getProductSizeByWorkspace: invalid session");
+                oReturn.setBoolValue(false);
+                oReturn.setIntValue(404);
+                return oReturn;
+            }
+            
+            if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+                WasdiLog.warnLog("ProductResource.getProductSizeByWorkspace: user cannot access workspace");
+                oReturn.setBoolValue(false);
+                oReturn.setIntValue(403);
+                return oReturn;            	
+            }
+			// query the WorskpaceRepository to find the node code
+            WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+            Workspace oWorkspace=oWorkspaceRepository.getWorkspace(sWorkspaceId);
+            String nodeCode = oWorkspace.getNodeCode();
+            NodeRepository oNodeRepository=new NodeRepository();
+            Node oNode=oNodeRepository.getNodeByCode(nodeCode);
+            //got the baseAddress of the node
+            String sUrl = oNode.getNodeBaseAddress();
+			
+			if (!sUrl.endsWith("/")) sUrl += "/";
+			sUrl += "data/wasdi/"+oUser.getUserId()+"/"+oWorkspace.getName()+"/"+sFilename;
+			//TODO calculate the file Size
+			double fileSize=0;
+			File oFile = this.getEntryFile(sFilename,oWorkspace.getName());
+			if(oFile== null) {
+				oReturn.setBoolValue(false);
+	            oReturn.setIntValue(404);
+	            return oReturn;
+			}
+			fileSize=oFile.length();
+			oReturn.setBoolValue(true);
+            oReturn.setIntValue(200);
+            oReturn.setDoubleValue(fileSize);
+            return oReturn;
+			
+		}
+		catch (Exception e) {
+			oReturn.setBoolValue(false);
+            oReturn.setIntValue(403);
+            return oReturn;   
+		}
+		
+	}
+	/**
+	 * Get the file object corresponding to the input requests.
+	 * It returns null if the file is not registered in WASDI and or if the file is not physically present
+	 * @param sFileName
+	 * @return A File object if the file can be download, NULL if the file does not exist or is unreadable
+	 */
+	/*private File getEntryFile(String sFileName, String sWorkspace)
+	{
+		WasdiLog.debugLog("CatalogResources.getEntryFile( fileName : " + sFileName + " )");
+		try {
+			String sTargetFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
+
+			DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
+			DownloadedFile oDownloadedFile = oRepo.getDownloadedFileByPath(sTargetFilePath);
+
+			if (oDownloadedFile == null) {
+				oDownloadedFile = oRepo.getDownloadedFileByPath(WasdiFileUtils.fixPathSeparator(sTargetFilePath));
+			}
+
+			if (oDownloadedFile == null) 
+			{
+				WasdiLog.debugLog("CatalogResources.getEntryFile: file " + sFileName + " not found in path " + sTargetFilePath);
+				return null;
+			}
+			
+			File oFile = new File(sTargetFilePath);
+
+			if( oFile.canRead() == true) {
+				return oFile;
+			}
+			else {
+				WasdiLog.debugLog("CatalogResources.getEntryFile: cannot read file " + sFileName + " from " + sTargetFilePath + ", returning null");
+				return null; 
+			}			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogResources.getEntryFile: exception: ", oEx);
+		}
+		
+		return null;
+	}
+	*/
     /**
      * Get the list of products in a workspace.
      * 
@@ -373,6 +504,13 @@ public class ProductResource {
                         oGeoRefProductViewModel.setDescription(oDownloaded.getDescription());
 
                         oGeoRefProductViewModel.setMetadata(null);
+                        
+                        Long lProductSize=this.getProductSize(sSessionId, sWorkspaceId, oDownloaded.getFileName(), false);
+                        if(lProductSize==null) {
+                        	WasdiLog.debugLog("ProductResource.getListByWorkspace: ProductViewModel is Null: jump product");
+                        }
+                        oGeoRefProductViewModel.setProductSize(lProductSize);
+                        
                         aoProductList.add(oGeoRefProductViewModel);
                         asAddedFiles.add(oDownloaded.getFilePath());
 
@@ -392,7 +530,57 @@ public class ProductResource {
         return aoProductList;
     }
     
-    /**
+    private Long getProductSize(String sSessionId, String sWorkspaceId, String fileName, boolean checksum) {
+    	User oUser = Wasdi.getUserFromSession(sSessionId);
+		if (Utils.isNullOrEmpty(fileName)) {
+			WasdiLog.warnLog("CatalogResource.getProductSize: invalid file name");
+			return null;			
+		}
+		
+		// Check if there is no malicius attemp
+		if (fileName.contains("/") || fileName.contains("\\")) {
+			WasdiLog.warnLog("ProductResource.getProductSize: Injection attempt from users");
+			return null;
+		}
+		
+		try {
+			
+			// Get the user Id
+			String sUserId = oUser.getUserId();
+			
+			// Get the workspace path and the full path
+			String sWorkspacePath = PathsConfig.getWorkspacePath(sUserId, sWorkspaceId);
+			/*String sWorkspacePath="/data/wasdi/"+sUserId+"/"+sWorkspaceId+"/";*/
+			String sFullFilePath = sWorkspacePath + fileName;
+			
+			// Check if we have the file in the db
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFullFilePath);
+			
+			if (oDownloadedFile==null) {
+				WasdiLog.warnLog("ProductResource.getProductSize: file not found " + sFullFilePath);
+				return null;				
+			}
+			
+			// Check if the file exists
+			File oFile = new File(sFullFilePath);
+			
+			if (!oFile.exists()) {
+				WasdiLog.warnLog("ProductResource.getProductSize : entry is in the db but file not found " + sFullFilePath);
+				return null;			
+			}
+			return Files.size(oFile.toPath());
+			
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProductResource.getProductSize: ", oEx);
+			return null;
+		}
+		
+		
+	}
+
+	/**
      * Get a light list of the products in a workspace. The light list 
      * does not load all the Product View Model, but only the name and the bbox.
      * It is used by the client to populate the first list of products in the editor

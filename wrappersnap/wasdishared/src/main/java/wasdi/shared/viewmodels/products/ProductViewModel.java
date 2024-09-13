@@ -35,6 +35,9 @@ public class ProductViewModel {
 
     private String description;
     
+    private long productSize;
+    
+    
 	public ProductViewModel() {
 	}
     
@@ -113,12 +116,19 @@ public class ProductViewModel {
 		this.style = style;
 	}
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public String getDescription() {
+		return description;
+	}
+	
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	public long getProductSize() {
+		return productSize;
+	}
+	
+	public void setProductSize(long productSize) {
+		this.productSize= productSize;
+	}
 
 }
