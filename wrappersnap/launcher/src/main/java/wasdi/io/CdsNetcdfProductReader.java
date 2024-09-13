@@ -4,12 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -19,6 +19,7 @@ import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFiles;
 import ucar.nc2.Variable;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
@@ -31,8 +32,10 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 	
 	private static final String s_sLongitude = "longitude";
 	private static final String s_sLatitude = "latitude";
+	private static final String s_sTime = "valid_time";
+	private static final String s_sExpver = "expver";
+	private static final String s_sNumber = "number";
 	
-
 	public CdsNetcdfProductReader(File oProductFile) {
 		super(oProductFile);
 	}
@@ -60,16 +63,16 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 			NodeGroupViewModel oNodeGroupViewModel = new NodeGroupViewModel();
 			oNodeGroupViewModel.setNodeName("Bands");
 
-			Set<String> asExcludedVariableSet = new HashSet<>(Arrays.asList(s_sLongitude, s_sLatitude, "time"));
+			Set<String> asExcludedVariableSet = new HashSet<>(Arrays.asList(s_sLongitude, s_sLatitude, s_sTime, s_sExpver, s_sNumber));
 
-			List<Variable> asVariablesList = oFile.getVariables();
+			List<Variable> aoVariablesList = oFile.getVariables();
 
 			List<BandViewModel> oBands = new ArrayList<>();
 			int iLatitudeLength = 0;
 			int iLongitudeLength = 0;
-			List<Integer> aiTimeHoursList = Collections.emptyList();
+			List<Integer> aiTimeHoursList = new ArrayList<Integer>();
 
-			for (Variable oVariable : asVariablesList) {
+			for (Variable oVariable : aoVariablesList) {
 				String sVariableShortName = oVariable.getShortName();
 
 				if (sVariableShortName.equalsIgnoreCase(s_sLongitude)) {
@@ -80,17 +83,20 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 					iLatitudeLength = extractValueFromShape(oVariable);
 				}
 
-				if (sVariableShortName.equalsIgnoreCase("time")) {
-					int[] aiHoursArray = (int[]) (oVariable.read().getStorage());
-					aiTimeHoursList = IntStream.of(aiHoursArray).map(i -> i % 24).boxed().collect(Collectors.toList());
+				if (sVariableShortName.equalsIgnoreCase(s_sTime)) {
+					long[] alHoursArray = (long[]) (oVariable.read().getStorage());
+					for (long lTimeStamp : alHoursArray) {
+						LocalDateTime oUTCDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(lTimeStamp), ZoneId.of("UTC"));
+						aiTimeHoursList.add(oUTCDateTime.getHour());
+					}
 				}
 			}
 
-			for (Variable oVariable : asVariablesList) {
+			for (Variable oVariable : aoVariablesList) {
 				String sVariableShortName = oVariable.getShortName();
 				String sDescription = oVariable.getDescription();
 				if (!asExcludedVariableSet.contains(sVariableShortName)) {
-					for (Integer timeHour : aiTimeHoursList) {
+					for (Integer iTimeHour : aiTimeHoursList) {
 						// Create the single band representing the shape
 						BandViewModel oBandViewModel = new BandViewModel();
 						oBandViewModel.setPublished(false);
@@ -98,8 +104,13 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 						oBandViewModel.setHeight(iLatitudeLength);
 						oBandViewModel.setWidth(iLongitudeLength);
 						oBandViewModel.setPublished(false);
-						oBandViewModel.setName(sDescription.replaceAll("[\\W]", "_") + "_" + String.format("%02d" , timeHour) + "hh");
-
+						
+						if (!Utils.isNullOrEmpty(sDescription))
+							oBandViewModel.setName(sDescription.replaceAll("[\\W]", "_") + "_" + String.format("%02d" , iTimeHour) + "hh");
+						else if (!Utils.isNullOrEmpty(sVariableShortName))
+							oBandViewModel.setName(sVariableShortName.replaceAll("[\\W]", "_") + "_" + String.format("%02d" , iTimeHour) + "hh");
+						else
+							oBandViewModel.setName("null_" + String.format("%02d" , iTimeHour) + "hh");
 						oBands.add(oBandViewModel);
 					}
 				}
