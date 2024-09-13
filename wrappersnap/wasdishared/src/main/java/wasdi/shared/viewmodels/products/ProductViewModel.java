@@ -35,7 +35,7 @@ public class ProductViewModel {
 
     private String description;
     
-    private long productSize;
+    private String productSize;
     
     
 	public ProductViewModel() {
@@ -123,11 +123,11 @@ public class ProductViewModel {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public long getProductSize() {
+	public String getProductSize() {
 		return productSize;
 	}
 	
-	public void setProductSize(long productSize) {
+	public void setProductSize(String productSize) {
 		this.productSize= productSize;
 	}
 

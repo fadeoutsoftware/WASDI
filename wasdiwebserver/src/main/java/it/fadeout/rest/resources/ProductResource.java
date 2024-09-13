@@ -504,12 +504,15 @@ public class ProductResource {
                         oGeoRefProductViewModel.setDescription(oDownloaded.getDescription());
 
                         oGeoRefProductViewModel.setMetadata(null);
-                        
                         Long lProductSize=this.getProductSize(sSessionId, sWorkspaceId, oDownloaded.getFileName(), false);
                         if(lProductSize==null) {
                         	WasdiLog.debugLog("ProductResource.getListByWorkspace: ProductViewModel is Null: jump product");
+                        	oGeoRefProductViewModel.setProductSize(null);	
+                        }else {
+                        	 String normalizedSize = Utils.getNormalizedSize(lProductSize.doubleValue());
+                        	 oGeoRefProductViewModel.setProductSize(normalizedSize);
                         }
-                        oGeoRefProductViewModel.setProductSize(lProductSize);
+                        
                         
                         aoProductList.add(oGeoRefProductViewModel);
                         asAddedFiles.add(oDownloaded.getFilePath());
