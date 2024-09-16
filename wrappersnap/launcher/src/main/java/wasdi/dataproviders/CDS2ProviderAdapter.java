@@ -95,8 +95,14 @@ public class CDS2ProviderAdapter extends PythonBasedProviderAdapter {
 			WasdiLog.debugLog("CDS2ProviderAdapter.executeDownloadFile: got output file form the Python data provider " + oOutputFile.getAbsolutePath());
 			
 			// the output will simply be the path of the downloaded file
-			JSONObject oJsonOutput = JsonUtils.loadJsonFromFile(sOutputFullPath);
-			String sDownloadedFilePath = oJsonOutput.optString("outputFile");
+			String sDownloadedFilePath = "";
+			
+			try {
+				JSONObject oJsonOutput = JsonUtils.loadJsonFromFile(sOutputFullPath);
+				sDownloadedFilePath = oJsonOutput.optString("outputFile");
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("CDS2ProviderAdapter.executeDownloadFile: error reading the output file", oEx);
+			}
 			
 			if (!Utils.isNullOrEmpty(sDownloadedFilePath)) {
 				WasdiLog.debugLog("CDS2ProviderAdapter.executeDownloadFile: path to the downloaded file " + sDownloadedFilePath);
