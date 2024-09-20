@@ -1,8 +1,8 @@
-.. eDriftTutorial
+.. FloodMapping
 
-.. _eDriftTutorial:
+.. _FloodMapping:
 
-eDrift Tutorial
+Flood Mapping
 ==================
 
 The flood-related algorithms available in WASDI support automated mapping of flood in:
@@ -24,7 +24,7 @@ In WASDI there are several applications available to map floods in open areas us
 The scheme of Fig. 1 presents the algorithms for flood mapping in open area, using Sentinel-1 and/or Sentinel-2 and how they relate to each other. The algorithm to map flood from VIIRS sensor will be presented later and separately from the Sentinel missions.
 
 
-.. image:: ../_static/eDriftTutorial/1.png
+.. image:: ../_static/FloodMapping/1.png
 
 When landing in the WASDI marketplace, the used can select the filter “water” to subset only application related to water in general. 
 
@@ -33,23 +33,23 @@ moment and permanent water (“(S1) Snapshot water” and “(S2) Snapshot water
  there still remain a rather large number of apps to map floods.
 This guideline should help the user select the best app for the specific need.
 
-.. image:: ../_static/eDriftTutorial/2.png
+.. image:: ../_static/FloodMapping/2.png
 
 In case of flood map of open areas, the **most general app** is Automatic S1-S2 Floods.
 
-.. image:: ../_static/eDriftTutorial/3.png
+.. image:: ../_static/FloodMapping/3.png
 
-.. image:: ../_static/eDriftTutorial/4.png
+.. image:: ../_static/FloodMapping/4.png
 
 Automatic S1-S2 Floods generates a fully automatic flood map, in open areas, from **Sentinel-1 and Sentinel-2 images**.
 
-.. image:: ../_static/eDriftTutorial/5.png
+.. image:: ../_static/FloodMapping/5.png
 
 In practice, Automatic S1-S2 Floods calls 2 other apps available in WASDI, namely:
 #.	Automatic AUTOWADE 
 #.	Automatic HASARD
 
-.. image:: ../_static/eDriftTutorial/6.png
+.. image:: ../_static/FloodMapping/6.png
 
 Automatic AUTOWADE performs flood area detection in open areas from Sentinel-2 optical images, while Automatic HASARD executes flood area detection in open areas from Sentinel-1 SAR images. Both apps have their corresponding On Demand version. The difference between the automatic version and the On Demand version is:
 
@@ -65,20 +65,21 @@ Automatic HASARD
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Automatic HASARD can be used to map floods, in open area, in a given region and for a certain date. 
 
-.. image:: ../_static/eDriftTutorial/7.png
+.. image:: ../_static/FloodMapping/7.png
 
 Automatic HASARD actually calls one more app, namely Flood Archive Generator. The difference between Automatic HASARD and Flood Archive Generator is that the second one is used to generate daily flood maps in the time range specified by the user. On the other hand, Automatic HASARD calls the Flood Archive Generator to create daily flood map in the time range around the date specified by the user. By default it considers 15 days after the date specified by the user and 15 days before the date specified by the user. The reason behind this is that when using Automatic HASARD, the date of the flood might not be entirely clear. In fact, the daily maps will help narrow down the day of the largest extent, supporting also monitoring the evolution of the flood around the date selected by the user. Besides the daily maps of flood, Automatic HASARD will also produce a final composite map that represents the cumulative flood of all the daily flood maps.
 
-.. image:: ../_static/eDriftTutorial/8.png
+.. image:: ../_static/FloodMapping/8.png
 
-.. image:: ../_static/eDriftTutorial/9.png
+.. image:: ../_static/FloodMapping/9.png
 
 Flood Archive Generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 As anticipated above, the Flood Archive Generator is used to generate daily flood maps in the time range specified by the user. It detects floods in open areas, using Sentinel-1 images. The time range can be as long as the entire archive of Sentinel-1 images.
-.. image:: ../_static/eDriftTutorial/10.png
 
-.. image:: ../_static/eDriftTutorial/11.png
+.. image:: ../_static/FloodMapping/10.png
+
+.. image:: ../_static/FloodMapping/11.png
 
 Flood Frequency Map Generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -89,11 +90,11 @@ The Flood Frequency Map Generator is placed in Fig. 1 next to the Flood Archive 
 
 A frequency map can be then computed dividing the flood count map by the data count map.
 
-.. image:: ../_static/eDriftTutorial/12.png
+.. image:: ../_static/FloodMapping/12.png
 
-.. image:: ../_static/eDriftTutorial/13.png    
+.. image:: ../_static/FloodMapping/13.png    
 
-.. image:: ../_static/eDriftTutorial/14.png
+.. image:: ../_static/FloodMapping/14.png
 
 HASARD On Demand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -101,9 +102,9 @@ HASARD On Demand generates a flooded area map, in open area, using 2 Sentinel-1 
 
 Use this app when fairly certain of the date of the flood and when the 2 Sentinel-1 images have already been pre-processed from S1 GRD images and saved as .tif files.
 
-.. image:: ../_static/eDriftTutorial/15.png
+.. image:: ../_static/FloodMapping/15.png
 
-.. image:: ../_static/eDriftTutorial/16.png
+.. image:: ../_static/FloodMapping/16.png
 
 Parameters
 ^^^^^^^^^^^^^^^^^^^^
@@ -141,9 +142,9 @@ Automatic AUTOWADE
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Automatic AUTOWADE can be used to map floods, in open area, in a given region and for a certain date. It will search for Sentinel-2 images pre and post flood, try to detect the flooded areas for each pair of images and then it will mosaic the final result. All the single output maps and the final mosaic will be added to the workspace.
 
-.. image:: ../_static/eDriftTutorial/17.png
+.. image:: ../_static/FloodMapping/17.png
 
-.. image:: ../_static/eDriftTutorial/18.png    
+.. image:: ../_static/FloodMapping/18.png    
 
 AUTOWADE On Demand S2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -151,9 +152,9 @@ AUTOWADE On Demand S2 generates a flooded area map, in open area, using 2 Sentin
 
 Use this app when fairly certain of the date of the flood and when the 2 Sentinel-2 images have already been imported into the workspace. It can also work with only 1 Sentinel-2 image, which needs to be the one post the flood.
 
-.. image:: ../_static/eDriftTutorial/19.png
+.. image:: ../_static/FloodMapping/19.png
 
-.. image:: ../_static/eDriftTutorial/20.png
+.. image:: ../_static/FloodMapping/20.png
     
 **REFERENCES**
 Pulvirenti, Luca, Giuseppe Squicciarino, and Elisabetta Fiori. 2020. "A Method to Automatically Detect Changes in Multitemporal Spectral Indices: Application to Natural Disaster Damage Assessment" Remote Sensing 12, no. 17: 2681. https://doi.org/10.3390/rs12172681
@@ -166,11 +167,11 @@ VIIRS Flood
 
 VIIRS Flood produces VIIRS flood map for a specific event and a given areas: it searches the nearest VIIRS images with respect to the date  of the event date and it makes a mosaic in the area of interest. If more than one image is available, the closest to the event date is taken in order of priority. The ones of the following days are used to try and fill the cloud gaps. The user can control the number of such days.
 
-.. image:: ../_static/eDriftTutorial/21.png
+.. image:: ../_static/FloodMapping/21.png
 
-.. image:: ../_static/eDriftTutorial/22.png
+.. image:: ../_static/FloodMapping/22.png
 
-.. image:: ../_static/eDriftTutorial/23.png
+.. image:: ../_static/FloodMapping/23.png
 
 
 Floods in urban areas
@@ -187,8 +188,8 @@ Urban Flood can be used to map floods in urban on a specific date. It is based o
 * Step (1) allows the double-bounce map to be extracted, i.e., the building footprints.
 * Step (2) combines the double-bounce map and the change of ρpre–ρco. The underlying assumption is that urban areas affected by a flood have ρco < ρpre.
 
-.. image:: ../_static/eDriftTutorial/24.png
+.. image:: ../_static/FloodMapping/24.png
 
-.. image:: ../_static/eDriftTutorial/25.png
+.. image:: ../_static/FloodMapping/25.png
 
-.. image:: ../_static/eDriftTutorial/26.png
+.. image:: ../_static/FloodMapping/26.png
