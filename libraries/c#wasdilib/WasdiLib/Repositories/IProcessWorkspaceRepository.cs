@@ -7,7 +7,7 @@ namespace WasdiLib.Repositories
         Task<List<ProcessWorkspace>> GetProcessWorkspacesByWorkspaceId(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId);
 
         Task<List<ProcessWorkspace>> GetProcessWorkspacesByWorkspace(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId,
-            int iStartIndex, Int32 iEndIndex, string sStatus, string sOperationType, string sNamePattern);
+            int iStartIndex, int? iEndIndex, string sStatus, string sOperationType, string sNamePattern);
 
         Task<ProcessWorkspace> GetProcessWorkspaceByProcessId(string sWorkspaceBaseUrl, string sSessionId, string sProcessId);
 

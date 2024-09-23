@@ -54,7 +54,7 @@ namespace WasdiLib.Repositories
         }
 
         public async Task<List<ProcessWorkspace>> GetProcessWorkspacesByWorkspace(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId,
-            int iStartIndex, Int32 iEndIndex, string sStatus, string sOperationType, string sNamePattern)
+            int iStartIndex, int? iEndIndex, string sStatus, string sOperationType, string sNamePattern)
         {
             _logger.LogDebug("GetProcessWorkspacesByWorkspace()");
 
@@ -67,15 +67,15 @@ namespace WasdiLib.Repositories
             parameters.Add("startindex", iStartIndex.ToString());
 
             if (null != iEndIndex && iEndIndex > iStartIndex)
-                parameters.Add("endindex", iEndIndex.ToString());
+                parameters.Add("endindex", iEndIndex.Value.ToString());
 
             if (!String.IsNullOrEmpty(sStatus))
                 parameters.Add("status", sStatus);
 
-            if (!String.IsNullOrEmpty(sStatus))
+            if (!String.IsNullOrEmpty(sOperationType))
                 parameters.Add("operationType", sOperationType);
 
-            if (!String.IsNullOrEmpty(sStatus))
+            if (!String.IsNullOrEmpty(sNamePattern))
                 parameters.Add("namePattern", sNamePattern);
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
