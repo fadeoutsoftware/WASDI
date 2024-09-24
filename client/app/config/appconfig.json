@@ -1106,7 +1106,20 @@
                     "indexvalue": "CIMA_AIR_TEMP_AVG"
                 }
             ]
-        }		
+        },
+		{
+            "name": "ERS",
+            "indexname": "platformname",
+            "indexvalue": "ERS",
+            "filters": [
+                {
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues": "SAR_IMP_1P|SAR_IMS_1P|SAR_IMM_1P",
+                    "indexvalue": "SAR_IMP_1P"
+                }
+            ]
+        }
 	],
 	"orbitsearch": {
 		"sensortypes": [

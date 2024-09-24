@@ -59,5 +59,7 @@ public class Platforms {
 	
 	// Return Plaforms
 	public static String RETURN_RASTER = "ReturnRaster";
+	
+	public static String ERS = "ERS";
 
 }

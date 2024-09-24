@@ -167,7 +167,12 @@ public abstract class QueryTranslator {
 	 * Token of TERRA platform
 	 */
 	private static final String s_sPLATFORMNAME_BIGBANG = "platformname:BIGBANG";
-
+	
+	/**
+	 * Token of ERS platform
+	 */
+	private static final String s_sPLATFORMNAME_ERS = "platformname:ERS";
+	
 	/**
 	 * Token of product type
 	 */
@@ -590,6 +595,8 @@ public abstract class QueryTranslator {
 			parseWFS(sQuery, oResult);
 						
 			parseBIGBANG(sQuery, oResult);
+			
+			parseERS(sQuery, oResult);
 						
 			if (Utils.isNullOrEmpty(oResult.platformName)) {
 				WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: platformName not found: try to read the generic one");
@@ -1106,6 +1113,14 @@ public abstract class QueryTranslator {
 			
 			oResult.platformName = Platforms.BIGBANG;
 			oResult.sensorMode = extractValue(sQuery, "dataset");
+		}
+	}
+	
+	private void parseERS(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ERS)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_ERS);
+			
+			oResult.platformName = Platforms.ERS;
 		}
 	}
 
