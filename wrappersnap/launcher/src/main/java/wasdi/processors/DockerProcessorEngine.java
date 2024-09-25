@@ -343,6 +343,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Check if the processor is available on the node
             if (!isProcessorOnNode(oParameter)) {
                 WasdiLog.infoLog("DockerProcessorEngine.run: processor not available on node download it");
+                processWorkspaceLog("Application not available on this node: installing it...");
                 
                 m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "APP NOT ON NODE<BR>INSTALLATION STARTED", m_oParameter.getExchange());
 
@@ -361,10 +362,12 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             	
             	if (bBuildLocally) {
             		bResult = deploy(oParameter, false);
+            		processWorkspaceLog("Local build done, starting application!");
             	}
             	else {
             		File oZipFile = new File(sProcessorZipFile);
             		bResult = unzipProcessor(PathsConfig.getProcessorFolder(oProcessor), oZipFile.getName(), oParameter.getProcessObjId());
+            		processWorkspaceLog("Pulling Application image from register");
             	}
             	
             	if (!bResult) {

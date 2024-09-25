@@ -984,6 +984,10 @@ public class ProductResource {
                         if (sName.endsWith(".prj") && sProductName.endsWith(".asc") && sName.equals(sProductName.replace(".asc", ".prj"))) {
                         	return true;
                         }
+                        
+                        if (sProductName.endsWith(".grib") && (sName.equals(sProductName + ".gbx9") || sName.equals(sProductName + ".ncx4"))) {
+                        	return true;
+                        }
 
                         return false;
                     }
