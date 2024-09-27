@@ -10,7 +10,7 @@ To run this code you need:
  - A workspace
  - a Jupyter Notebook running in that workspace
  
-If this is not clear, you probably need to take a look to the `Jupyter Notebook Tutorial <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/JupyterNotebookTutorial.html>`_ before.
+If this is not clear, you probably need to take a look to the `Jupyter Notebook Tutorial <../ProgrammingTutorials/JupyterNotebookTutorial.html>`_ before.
 
 Recipe 
 ------------------------------------------

@@ -15,7 +15,7 @@ If this is not clear, you probably need to take a look to the `Jupyter Notebook 
 matplotlib recipe
 ------------------------------------------
 
-`Install the library <InstallCustomPackagesInNotebook.rst>`_
+`Install the library <InstallCustomPackagesInNotebook.html>`_
 
 .. code-block::
 
@@ -43,7 +43,7 @@ If you can see the images, then good, you don't need to re-execute the pip insta
 plotly recipe
 ------------------------------------------
 
-Install the library <InstallCustomPackagesInNotebook.rst>`_
+`Install the library <InstallCustomPackagesInNotebook.html>`_
 
 .. code-block::
 
@@ -65,10 +65,6 @@ And then test it:
        layout_title_text="A Figure Displayed with fig.show()"
    )
    fig.show()
-
-
-
-
 
 You should be able to see a bar plot like this one:
 
