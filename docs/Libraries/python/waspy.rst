@@ -52,6 +52,12 @@ Tested with: Python 2.7, Python 3.7
 Methods
 -------------------
 
+addChartToPayload
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: addChartToPayload
+   :noindex:
+
 addFileToWASDI
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: wasdi
