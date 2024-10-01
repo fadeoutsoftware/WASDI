@@ -39,6 +39,7 @@ To install GDAL:
 	
 	You can find the version of gdal you need for your python version.
 	
+
  - Download GDAL wheel, in this tutorial we will assume GDAL-3.9.2-cp312-cp312-win_amd64.whl
  - Open your python environment 
  - Install the wheel:
