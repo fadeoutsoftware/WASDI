@@ -1,0 +1,54 @@
+.. TestReadTheDocs documentation master file, created by
+   sphinx-quickstart on Mon Apr 19 16:00:28 2021.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+.. _UseLibAsClient
+
+
+Install GDAL in Windows
+=========================================
+This recipe shows how to install gdal in your Windows Environment
+
+
+Prerequisites
+------------------------------------------
+
+To run this code you need:
+ - A running Python 3.x Environment
+ - Know if your computer is 32 bit or 64 bit
+
+
+Recipe 
+------------------------------------------
+Often GDAL is a very important library to manipulate satellite data. 
+
+.. note::
+	You can find the architecture of your PC going in: Settings -> System -> About
+
+To install GDAL:
+
+ - Open the web page https://github.com/cgohlke/geospatial-wheels/releases
+ - If needed, click on the small "Show all XXX assets" link to expand the list
+ - Identify your GDAL wheel
+
+.. note::
+	A sample is: GDAL-3.9.2-cp312-cp312-win_amd64.whl
+	GDAL-3.9.2: means gdal version 3.9.2
+	cp312-cp312: means build for python 3.12
+	win_amd64: means a 64 bit windows
+	
+	You can find the version of gdal you need for your python version.
+	
+ - Download GDAL wheel, in this tutorial we will assume GDAL-3.9.2-cp312-cp312-win_amd64.whl
+ - Open your python environment 
+ - Install the wheel:
+
+.. code-block:: python
+
+   pip install "C:\Users\YOUR_USER\Downloads\GDAL-3.9.2-cp312-cp312-win_amd64.whl"
+
+Now, you should be able to import gdal in your code.
+
+.. code-block:: python
+
+   from osgeo import gdal
