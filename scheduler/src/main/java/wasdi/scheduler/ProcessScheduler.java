@@ -163,8 +163,8 @@ public class ProcessScheduler {
 				
 				try {
 					
-					if (!Utils.isNullOrEmpty(WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS)) {
-						long iStartWaitSleep = Long.parseLong( WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS);
+					if (!Utils.isNullOrEmpty(WasdiConfig.Current.scheduler.processingThreadWaitStartMS)) {
+						long iStartWaitSleep = Long.parseLong( WasdiConfig.Current.scheduler.processingThreadWaitStartMS);
 						if (iStartWaitSleep>0) {
 							m_lWaitProcessStartMS = iStartWaitSleep;
 							WasdiLog.infoLog(m_sLogPrefix + ".init: Wait Proc Start Ms: " + m_lWaitProcessStartMS);
@@ -409,11 +409,35 @@ public class ProcessScheduler {
 					Date oNow = new Date();
 					Date oStartDate = m_aoLaunchedProcesses.get(oCreatedProcess.getProcessObjId());
 					long lTimeSpan = oNow.getTime()-oStartDate.getTime();
+										
 					
-					// Wait 10 time more than standard waiting
-					if (lTimeSpan > 2000*m_lWaitProcessStartMS) {
+					// Wait 300 time more than standard waiting (10 mins by default!)
+					if (lTimeSpan > 300*m_lWaitProcessStartMS) {
 						// No good, set as ERROR
 						WasdiLog.warnLog(m_sLogPrefix + ".run: **************Process " + oCreatedProcess.getProcessObjId() + " is GETTING OLD.. ");
+						
+						// Get the PID
+						String sPidOrContainerId = "" + oCreatedProcess.getPid();
+
+						if (!WasdiConfig.Current.shellExecLocally) {
+							sPidOrContainerId = oCreatedProcess.getContainerId();
+						}						
+						
+						// Check if it is alive
+						if (!Utils.isNullOrEmpty(sPidOrContainerId)) {
+							if (!RunTimeUtils.isProcessStillAllive(sPidOrContainerId)) {
+								// PID does not exists: recheck and remove
+								WasdiLog.warnLog(m_sLogPrefix + ".run: Process " + oCreatedProcess.getProcessObjId() + " has PID " + sPidOrContainerId + ", status CREATED and is in the launched list, but the process does not exists. We remove it from launched");
+								m_aoLaunchedProcesses.remove(oCreatedProcess.getProcessObjId());
+							}
+							else {
+								WasdiLog.warnLog(m_sLogPrefix + ".run: Process " + oCreatedProcess.getProcessObjId() + " in theory is running, but the state is still CREATED");
+							}
+						}
+						else {
+							WasdiLog.warnLog(m_sLogPrefix + ".run: Process " + oCreatedProcess.getProcessObjId() + " with status CREATED and is in the launched list has null PID. We remove it from launched");
+							m_aoLaunchedProcesses.remove(oCreatedProcess.getProcessObjId());
+						}
 						
 						/*
 						oCreatedProcess.setStatus(ProcessStatus.ERROR.name());
@@ -677,7 +701,7 @@ public class ProcessScheduler {
 			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asCmd, false);
 			
 			if (oShellExecReturn.isOperationOk()) {
-				WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executed!!!");
+				WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executed " + oProcessWorkspace.getProcessObjId() + " !!!");
 				
 				if (!Utils.isNullOrEmpty(oShellExecReturn.getContainerId())) {
 					ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -693,22 +717,29 @@ public class ProcessScheduler {
 			}
 		} 
 		catch (Exception oEx) {
-			WasdiLog.errorLog(m_sLogPrefix + "executeProcess:  Exception" + oEx.toString());
-			WasdiLog.errorLog(m_sLogPrefix + "executeProcess : try to set the process in Error");
+			
+			String sProcessObjId = "NA";
+			if (oProcessWorkspace!=null) {
+				if (!Utils.isNullOrEmpty(oProcessWorkspace.getProcessObjId())) {
+					sProcessObjId = oProcessWorkspace.getProcessObjId();
+				}
+			}
+			WasdiLog.errorLog(m_sLogPrefix + "executeProcess [" + sProcessObjId +"]:  Exception: " + oEx.toString());
+			WasdiLog.errorLog(m_sLogPrefix + "executeProcess [" + sProcessObjId +"]: try to set the process in Error");
 			
 			try {
 				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 				m_oProcessWorkspaceRepository.updateProcess(oProcessWorkspace);				
-				WasdiLog.errorLog(m_sLogPrefix + "executeProcess: Error status set");
+				WasdiLog.errorLog(m_sLogPrefix + "executeProcess[" + sProcessObjId + "]: Error status set");
 			}
 			catch (Exception oInnerEx) {
-				WasdiLog.errorLog(m_sLogPrefix + "executeProcess:  INNER Exception ", oInnerEx);
+				WasdiLog.errorLog(m_sLogPrefix + "executeProcess[" + sProcessObjId + "]:  INNER Exception ", oInnerEx);
 			}
 			
 			return null;
 		}
 		catch(Throwable oThrowable) {
-			WasdiLog.errorLog(m_sLogPrefix + "executeProcess:  Exception" + oThrowable.toString());
+			WasdiLog.errorLog(m_sLogPrefix + "executeProcess:  Worst Exception" + oThrowable.toString());
 			return null;
 		}
 		

@@ -99,6 +99,10 @@ public class WasdiLog {
 	 * @param sMessage Log Message
 	 */
 	public static void log(String sLevel, String sMessage) {
+		
+		// Add safe code to avoid empty messages
+		if (Utils.isNullOrEmpty(sMessage)) return;
+		
 		String sPrefix = "";
 		if(!Utils.isNullOrEmpty(sLevel)) {
 			sPrefix = "[" + sLevel + "] ";
