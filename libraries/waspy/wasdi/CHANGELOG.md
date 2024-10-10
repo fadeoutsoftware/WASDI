@@ -4,6 +4,10 @@ WASDI python programming library CHANGELOG.md, according to the
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
 ## [0.8.6.3] - 2024-03-19
+### Added
+- Improved logs
+
+## [0.8.6.3] - 2024-03-19
 ### Fixed
 - Changed Lib licence from GNU to CCv4
 
