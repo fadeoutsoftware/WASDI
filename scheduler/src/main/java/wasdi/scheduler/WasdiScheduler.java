@@ -104,7 +104,8 @@ public class WasdiScheduler
             WasdiLog.debugLog("Logger added");
         }
         else { 
-        	WasdiLog.debugLog("WADSI Configured to log on console");
+        	WasdiLog.debugLog("WasdiScheduler.main: WASDI Configured to log on console");
+        	WasdiLog.initLogger();
         }
 		
 		WasdiLog.infoLog("main: Logger configured :-)\n");
