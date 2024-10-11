@@ -113,7 +113,11 @@ public abstract class WasdiProcessorEngine {
 		else if (sType.equals(ProcessorTypes.PYTHON_PIP_2_UBUNTU_20)) {
 			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type PYTHON_PIP_2_UBUNTU_20");
 			return new Ubuntu20Pip2ProcessorEngine();
-		}				
+		}
+		else if (sType.equals(ProcessorTypes.JAVA_17_UBUNTU_22)) {
+			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type JAVA_17_UBUNTU_22");
+			return new Java17Ubuntu22ProcessorEngine();
+		}		
 		else {
 			WasdiLog.warnLog("WasdiProcessorEngine.getProcessorEngine: DEFAULT CASE (type "  + sType+ " not recognized) return processor of type UbuntuPython37ProcessorEngine");
 			return new UbuntuPython37ProcessorEngine();
