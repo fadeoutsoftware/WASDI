@@ -184,10 +184,11 @@ public class LauncherMain  {
         if (WasdiConfig.Current.useLog4J) {
             // Set the logger for the shared lib
             WasdiLog.setLoggerWrapper(s_oLogger);
-            WasdiLog.debugLog("Logger added");
+            WasdiLog.debugLog("Launcher Main - Logger added");
         }
         else { 
-        	WasdiLog.debugLog("WADSI Configured to log on console");
+        	WasdiLog.debugLog("Launcher Main - WASDI Configured to log on console");
+        	WasdiLog.initLogger();
         }
 
         try {

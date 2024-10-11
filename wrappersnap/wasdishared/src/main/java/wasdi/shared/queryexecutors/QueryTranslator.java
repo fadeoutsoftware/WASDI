@@ -452,9 +452,7 @@ public abstract class QueryTranslator {
 								dEast = Double.max(dEast, dMeridian);
 								dWest = Double.min(dWest, dMeridian);
 							} catch (Exception oE) {
-								WasdiLog.log("ERROR",
-										"QueryTranslator.parseWasdiClientQuery: issue with current coordinate pair: "
-												+ sPair + ": " + oE);
+								WasdiLog.errorLog("QueryTranslator.parseWasdiClientQuery: issue with current coordinate pair: " + sPair + ": ", oE);
 							}
 						}
 						// todo check coordinates are within bounds
@@ -473,8 +471,7 @@ public abstract class QueryTranslator {
 						}
 
 					} catch (Exception oE) {
-						WasdiLog.log("ERROR",
-								"QueryTranslator.parseWasdiClientQuery: could not complete footprint detection: " + oE);
+						WasdiLog.errorLog("QueryTranslator.parseWasdiClientQuery: could not complete footprint detection: ", oE);
 					}
 				}
 				
@@ -483,9 +480,7 @@ public abstract class QueryTranslator {
 					reverseEngineerQueryFromProductName(oResult, oResult.productName);
 				}
 			} catch (Exception oE) {
-				WasdiLog.log("ERROR",
-						"QueryTranslator.parseWasdiClientQuery: could not identify footprint substring limits: "
-								+ oE);
+				WasdiLog.errorLog("QueryTranslator.parseWasdiClientQuery: could not identify footprint substring limits: ", oE);
 			}
 			
 			try {

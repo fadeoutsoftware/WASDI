@@ -102,6 +102,11 @@ public class WasdiConfig {
 	public boolean logHttpCalls=true;
 	
 	/**
+	 * Log level. Used if Log 4 J is NOT USED
+	 */
+	public String logLevel = "INFO";
+	
+	/**
 	 * Set to true to add date time to log lines
 	 */
 	public boolean addDateTimeToLogs=false;

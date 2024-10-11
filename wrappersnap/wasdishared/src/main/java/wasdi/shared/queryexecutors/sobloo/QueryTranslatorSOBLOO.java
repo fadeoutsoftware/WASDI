@@ -115,7 +115,7 @@ public class QueryTranslatorSOBLOO extends QueryTranslator {
 							dEast = Double.max(dEast, dMeridian);
 							dWest = Double.min(dWest, dMeridian);
 						} catch (Exception oE) {
-							WasdiLog.log("ERROR", "QueryTranslatorSOBLOO.parseFootprint: issue with current coordinate pair: " + sPair + ": " + oE);
+							WasdiLog.errorLog("QueryTranslatorSOBLOO.parseFootprint: issue with current coordinate pair: " + sPair + ": ", oE);
 						}
 					}
 
@@ -127,11 +127,11 @@ public class QueryTranslatorSOBLOO extends QueryTranslator {
 					}
 					sResult = sPrefix + sCoordinates;
 				} catch (Exception oE) {
-					WasdiLog.log("ERROR", "QueryTranslatorSOBLOO.parseFootprint: could not complete: " + oE);
+					WasdiLog.errorLog("QueryTranslatorSOBLOO.parseFootprint: could not complete: ", oE);
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.log("ERROR", "QueryTranslatorSOBLOO.parseFootprint: could not identify footprint substring limits: " + oE);
+			WasdiLog.errorLog("QueryTranslatorSOBLOO.parseFootprint: could not identify footprint substring limits: ", oE);
 		}
 		return sResult;
 	}
@@ -206,7 +206,7 @@ public class QueryTranslatorSOBLOO extends QueryTranslator {
 		try {
 			sUrl = "https://sobloo.eu/api/v1/services/explore/explore/catalog/_count?" + translateAndEncodeParams(sQuery);
 		} catch (Exception oE) {
-			WasdiLog.log("ERROR", "QueryExecutorSOBLOO.getCountUrl: " + oE);
+			WasdiLog.errorLog("QueryExecutorSOBLOO.getCountUrl: ", oE);
 		}
 		return sUrl;
 	}

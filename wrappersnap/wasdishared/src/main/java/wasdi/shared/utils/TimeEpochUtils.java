@@ -73,7 +73,7 @@ public class TimeEpochUtils {
 			Date oDate = oSimpleDateFormat.parse(sDate);
 			lEpochMilliSeconds = oDate.getTime();
 		} catch (Exception oE) {
-			WasdiLog.log("ERROR", "Utils.fromDateStringToTimestamp: " + oE);
+			WasdiLog.errorLog("Utils.fromDateStringToTimestamp: ", oE);
 		}
 		return lEpochMilliSeconds;
 

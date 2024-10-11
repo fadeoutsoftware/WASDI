@@ -568,17 +568,17 @@ public class ZipFileUtils {
 	 */
 	public static void cleanUnzipFile(File oZipFile, File sDestDir) throws Exception {
 		if (oZipFile == null) {
-			WasdiLog.log("ERROR", "ZipFileUtils.cleanUnzipFile: zipFile is null");
+			WasdiLog.errorLog("ZipFileUtils.cleanUnzipFile: zipFile is null");
 			return;
 		} else if (!oZipFile.exists()) {
-			WasdiLog.log("ERROR", "ZipFileUtils.cleanUnzipFile: zipFile does not exist: " + oZipFile.getAbsolutePath());
+			WasdiLog.errorLog("ZipFileUtils.cleanUnzipFile: zipFile does not exist: " + oZipFile.getAbsolutePath());
 		}
 
 		if (sDestDir == null) {
-			WasdiLog.log("ERROR", "ZipFileUtils.cleanUnzipFile: destDir is null");
+			WasdiLog.errorLog("ZipFileUtils.cleanUnzipFile: destDir is null");
 			return;
 		} else if (!sDestDir.exists()) {
-			WasdiLog.log("ERROR", "ZipFileUtils.cleanUnzipFile: destDir does not exist: " + sDestDir.getAbsolutePath());
+			WasdiLog.errorLog("ZipFileUtils.cleanUnzipFile: destDir does not exist: " + sDestDir.getAbsolutePath());
 		}
 
 		ZipFileUtils oZipExtractor = new ZipFileUtils();
@@ -604,17 +604,17 @@ public class ZipFileUtils {
 
 	public static void extractInnerZipFileAndCleanZipFile(File oZipFile, File oDestDir) throws Exception {
 		if (oZipFile == null) {
-			WasdiLog.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: zipFile is null");
+			WasdiLog.errorLog("ZipFileUtils.extractInnerZipFileAndCleanZipFile: zipFile is null");
 			return;
 		} else if (!oZipFile.exists()) {
-			WasdiLog.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: zipFile does not exist: " + oZipFile.getAbsolutePath());
+			WasdiLog.errorLog("ZipFileUtils.extractInnerZipFileAndCleanZipFile: zipFile does not exist: " + oZipFile.getAbsolutePath());
 		}
 
 		if (oDestDir == null) {
-			WasdiLog.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: destDir is null");
+			WasdiLog.errorLog("ZipFileUtils.extractInnerZipFileAndCleanZipFile: destDir is null");
 			return;
 		} else if (!oDestDir.exists()) {
-			WasdiLog.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: destDir does not exist: " + oDestDir.getAbsolutePath());
+			WasdiLog.errorLog("ZipFileUtils.extractInnerZipFileAndCleanZipFile: destDir does not exist: " + oDestDir.getAbsolutePath());
 		}
 
 		ZipFileUtils oZipExtractor = new ZipFileUtils();
@@ -642,13 +642,13 @@ public class ZipFileUtils {
 
 	public static void fixZipFileInnerSafePath(String zipFilePath) throws Exception {
 		if (zipFilePath == null) {
-			WasdiLog.log("ERROR", "ZipFileUtils.fixZipFileInnerSafePath: zipFilePath is null");
+			WasdiLog.errorLog("ZipFileUtils.fixZipFileInnerSafePath: zipFilePath is null");
 			return;
 		}
 
 		File zipFile = new File(zipFilePath);
 		if (!zipFile.exists()) {
-			WasdiLog.log("ERROR", "ZipFileUtils.fixZipFileInnerSafePath: zipFile does not exist: " + zipFile.getAbsolutePath());
+			WasdiLog.errorLog("ZipFileUtils.fixZipFileInnerSafePath: zipFile does not exist: " + zipFile.getAbsolutePath());
 			return;
 		}
 
