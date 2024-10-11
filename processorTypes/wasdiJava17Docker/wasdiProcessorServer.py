@@ -143,12 +143,11 @@ def run(processId):
 			oParamsFile.write(sKey+"=" + str(aoParameters[sKey])+"\r\n")
 		oParamsFile.close()
 		
-		oProcess = subprocess.Popen(["java -jar", "myProcessor.jar", sConfigFilePath])
+		oProcess = subprocess.Popen(["java", "-jar", "myProcessor.jar", sConfigFilePath])
 		
 		wasdi.wasdiLog("wasdiProcessorServer Process Started with local pid "  + str(oProcess.pid))
 		#Update the server with the subprocess pid
 		wasdi.setSubPid(processId, int(oProcess.pid))
-		
 	except Exception as oEx:
 		wasdi.wasdiLog("wasdiProcessorServer EXCEPTION")
 		wasdi.wasdiLog(repr(oEx))
