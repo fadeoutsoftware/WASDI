@@ -125,6 +125,11 @@ public class WasdiProductReaderFactory {
 			return new PyTorchModelReader(oFile);
 		}
 		
+		if (oFile.getName().endsWith(".hdr") || oFile.getName().endsWith(".bil")) {
+			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating ESRI HDR File Reader for " + oFile.getName());
+			return new EsriHDRLightReader(oFile);
+		}		
+		
 		WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating SNAP File Reader for " + oFile.getName());
 
 		return new SnapProductReader(oFile);
