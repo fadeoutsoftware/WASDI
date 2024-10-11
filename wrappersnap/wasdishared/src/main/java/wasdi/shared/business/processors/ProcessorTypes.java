@@ -23,6 +23,7 @@ public class ProcessorTypes {
 	public static String PYTHON_PIP_2_UBUNTU_20 = "python_pip_2_ubuntu_20";
 	public static String JAVA_17_UBUNTU_22 = "java_17_Ubuntu_22";
 	
+	
 	/**
 	 * Obtains the name of the subfolder where the docker template is stored.
 	 * @param sProcessorType Processor Type
