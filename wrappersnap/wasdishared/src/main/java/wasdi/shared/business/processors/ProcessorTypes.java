@@ -40,7 +40,7 @@ public class ProcessorTypes {
 		else if (sProcessorType.equals(PYTHON_PIP_2)) return "python_pip_2";
 		else if (sProcessorType.equals(PIP_ONESHOT)) return "pip_oneshot";
 		else if (sProcessorType.equals(PYTHON_PIP_2_UBUNTU_20)) return "wasdiUbuntuFocalPython";
-		else if (sProcessorType.equals(JAVA_17_UBUNTU_22)) return "wasdiJava17Docker";
+		else if (sProcessorType.equals(JAVA_17_UBUNTU_22)) return "java17";
 		return "";
 	}
 	
