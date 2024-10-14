@@ -1766,12 +1766,12 @@ def setPayload(data):
     try:
         m_sPayload = json.dumps(data)
     except:
-        _log('wasdi.setPayload() error saving m_sPayload')
+        _log('waspy.setPayload() error saving m_sPayload')
 
     if getIsOnServer() is True or getIsOnExternalServer() is True:
         setProcessPayload(getProcId(), data)
     else:
-        _log('wasdi.setPayload( ' + str(data))
+        _log('waspy.setPayload( ' + str(data))
 
 
 def getProcessorPayload(sProcessObjId, bAsJson=False):
