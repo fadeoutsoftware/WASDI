@@ -345,7 +345,7 @@ public class GdalUtils {
 			
 			if (!bVrt) {
 				
-				WasdiLog.debugLog("Virtual mosaic - set params for gdal_merge.py");
+				WasdiLog.debugLog("NOT Virtual mosaic - set params for gdal_merge.py");
 				
 				// Output file
 				asArgs.add("-o");
@@ -434,12 +434,32 @@ public class GdalUtils {
 			
 			if (oOutputFile.exists()) {
 				// Done
-				WasdiLog.debugLog("Mosaic.runGDALMosaic: created GDAL file = " + sOuptutFile);				
+				WasdiLog.infoLog("Mosaic.runGDALMosaic: created GDAL file = " + sOuptutFile);				
 			}
 			else {
-				// Error
-				WasdiLog.debugLog("Mosaic.runGDALMosaic: error creating mosaic = " + sOuptutFile);
-				return false;
+				
+				WasdiLog.warnLog("Mosaic.runGDALMosaic: output file not found. Retry in a while");
+				
+    			try {
+    				Thread.sleep(WasdiConfig.Current.msWaitAfterChmod);
+    			}
+    			catch (InterruptedException oEx) {
+					Thread.currentThread().interrupt();
+					WasdiLog.errorLog("Mosaic.runGDALMosaic: Current thread was interrupted", oEx);
+				}				
+				
+    			
+    			File oOutputFile2 = new File(sWorkspacePath+sOuptutFile); 
+    			
+    			if (oOutputFile2.exists()) {
+    				// Done
+    				WasdiLog.infoLog("Mosaic.runGDALMosaic: created GDAL file = " + sOuptutFile);				
+    			}
+    			else {
+    				// Error
+    				WasdiLog.errorLog("Mosaic.runGDALMosaic: error creating mosaic, the output file  = " + sOuptutFile + " does not exists");
+    				return false;
+    			}
 			}
 			
 		} 
@@ -449,7 +469,7 @@ public class GdalUtils {
 			return false;
 		}
 
-		return true;		
+		return true;
 	}
 	
 	/**
