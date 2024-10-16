@@ -22,18 +22,17 @@ import wasdi.shared.utils.runtime.ShellExecReturn;
 public class ProcessScheduler {
 	
 	/**
-	 * sleeping time between iterations
+	 * sleeping time after starting an app to let it really start
 	 */
 	protected long m_lWaitProcessStartMS = 2000;
 	/**
-	 * sleeping time between iterations
+	 * Timeout associated to this queue
 	 */
 	protected long m_lTimeOutMs = -1;	
 	/**
 	 * number concurrent process
 	 */
 	protected int m_iNumberOfConcurrentProcess = 1;
-
 	/**
 	 * launcher installation path
 	 */
@@ -75,6 +74,17 @@ public class ProcessScheduler {
 	 * Bool flag to stop the thread
 	 */
 	private volatile boolean m_bRunning = true;
+	
+	/**
+	 * Flag to know if this Process Scheduler applies the Special Wait Condition 
+	 * to avoid to trigger too many processes considering also the waiting queue
+	 */
+	protected boolean m_bSpecialWaitCondition = false;
+	
+	/**
+	 * Max number of waiting processes admitted before breaking the FIFO rules
+	 */
+	protected int m_iMaxWaitingQueue = 100;
 	
 	/**
 	 * List of operation types supported by this scheduler
@@ -160,21 +170,59 @@ public class ProcessScheduler {
 					
 				} catch (Exception e) {
 					WasdiLog.errorLog(m_sLogPrefix + ".init: error ", e);
-				}
+				}	
 				
+				m_bSpecialWaitCondition = oSchedulerQueueConfig.specialWaitCondition;
+				m_iMaxWaitingQueue = oSchedulerQueueConfig.maxWaitingQueue;
+			}
+			else if (sSchedulerKey.equals("DEFAULT")) {
+				WasdiLog.infoLog(m_sLogPrefix + ".init: this is the default scheduler");
+				
+				// Read Max Size of Concurrent Processes of this scheduler 
 				try {
 					
-					if (!Utils.isNullOrEmpty(WasdiConfig.Current.scheduler.processingThreadWaitStartMS)) {
-						long iStartWaitSleep = Long.parseLong( WasdiConfig.Current.scheduler.processingThreadWaitStartMS);
-						if (iStartWaitSleep>0) {
-							m_lWaitProcessStartMS = iStartWaitSleep;
-							WasdiLog.infoLog(m_sLogPrefix + ".init: Wait Proc Start Ms: " + m_lWaitProcessStartMS);
+					if (!Utils.isNullOrEmpty(WasdiConfig.Current.scheduler.maxQueue)) {
+						int iMaxConcurrents = Integer.parseInt(WasdiConfig.Current.scheduler.maxQueue);
+						if (iMaxConcurrents>0) {
+							m_iNumberOfConcurrentProcess = iMaxConcurrents;
+							WasdiLog.infoLog(m_sLogPrefix + ".init: Max Concurrent Processes: " + m_iNumberOfConcurrentProcess);
+						}					
+					}
+				} catch (Exception e) {
+					WasdiLog.errorLog(m_sLogPrefix + ".init: error ", e);
+				}
+				
+				// Read Timeout of this scheduler 
+				try {
+					if (!Utils.isNullOrEmpty(WasdiConfig.Current.scheduler.timeoutMs)) {
+						long lTimeout = Long.parseLong(WasdiConfig.Current.scheduler.timeoutMs);
+						if (lTimeout>0) {
+							m_lTimeOutMs = lTimeout;
+							WasdiLog.infoLog(m_sLogPrefix + ".init:  TimeOut Ms: " + m_lTimeOutMs);
 						}
 					}
 				} catch (Exception e) {
 					WasdiLog.errorLog(m_sLogPrefix + ".init: error ", e);
 				}				
+				
+				
 			}
+			else {
+				WasdiLog.errorLog(m_sLogPrefix + ".init: " + sSchedulerKey + " NOT RECOGNIZED");
+			}
+			
+			try {
+				
+				if (!Utils.isNullOrEmpty(WasdiConfig.Current.scheduler.processingThreadWaitStartMS)) {
+					long iStartWaitSleep = Long.parseLong( WasdiConfig.Current.scheduler.processingThreadWaitStartMS);
+					if (iStartWaitSleep>0) {
+						m_lWaitProcessStartMS = iStartWaitSleep;
+						WasdiLog.infoLog(m_sLogPrefix + ".init: Wait Proc Start Ms: " + m_lWaitProcessStartMS);
+					}
+				}
+			} catch (Exception e) {
+				WasdiLog.errorLog(m_sLogPrefix + ".init: error ", e);
+			}			
 			
 			// Read the Lancher Path
 			m_sLauncherPath = WasdiConfig.Current.scheduler.launcherPath;
@@ -204,7 +252,7 @@ public class ProcessScheduler {
 	 * @param aoReadyList
 	 * @param aoCreatedList
 	 */
-	public void cycle(List<ProcessWorkspace> aoRunningList, List<ProcessWorkspace> aoReadyList, List<ProcessWorkspace> aoCreatedList) {
+	public void cycle(List<ProcessWorkspace> aoRunningList, List<ProcessWorkspace> aoReadyList, List<ProcessWorkspace> aoCreatedList, List<ProcessWorkspace> aoWaitingList) {
 					
 		try {
 							
@@ -244,10 +292,47 @@ public class ProcessScheduler {
 																							
 					// If we fished free slots, stop the cycle
 					if (aoRunningList.size()>=m_iNumberOfConcurrentProcess) break;
+
+					boolean bFifo = true;
+					
+					if (m_bSpecialWaitCondition) {
+						if (aoWaitingList!=null) {
+							aoWaitingList = getWaitingList(aoWaitingList);
+							
+							if (aoWaitingList.size() > m_iMaxWaitingQueue) {
+								bFifo = false;
+							}
+						}
+					}
 					
 					// Get the Created process
 					ProcessWorkspace oCreatedProcess = aoCreatedList.get(0);
 
+					if (!bFifo) {
+						WasdiLog.warnLog(m_sLogPrefix + ".run: Waiting queue Emergency: activate NOT FIFO mitigation");
+						ProcessWorkspace oCandidate = null;
+						ProcessWorkspace oToUnblock = null;
+						
+						for (ProcessWorkspace oWaitingProcess : aoWaitingList) {
+							for (ProcessWorkspace oPotentialNewProcess : aoCreatedList) {
+								if (!Utils.isNullOrEmpty(oCreatedProcess.getParentId())) {
+									if (oPotentialNewProcess.getParentId().equals(oWaitingProcess.getProcessObjId())) {
+										oCandidate = oPotentialNewProcess;
+										oToUnblock = oWaitingProcess;
+									}
+								}
+							}
+						}
+						
+						if (oCandidate != null && oToUnblock != null) {
+							WasdiLog.warnLog(m_sLogPrefix + ".run: Found candiate created process " + oCandidate.getProcessObjId() + " that is blocking " + oToUnblock.getProcessObjId());
+							oCreatedProcess = oCandidate;
+						}
+						else {
+							WasdiLog.warnLog(m_sLogPrefix + ".run: in the waiting queue, no one is blocked by any of the created list. We jump this cycle waiting for the queue to be smaller");
+							return;
+						}
+					}						
 					
 					// Check if we did not launch this before
 					if (!m_aoLaunchedProcesses.containsKey(oCreatedProcess.getProcessObjId())) {
@@ -268,7 +353,12 @@ public class ProcessScheduler {
 						}
 					}
 					
-					aoCreatedList.remove(0);
+					if (bFifo) {
+						aoCreatedList.remove(0);
+					}
+					else {
+						return;
+					}
 				}
 			}			
 		} 

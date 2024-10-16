@@ -287,10 +287,11 @@ public class WasdiScheduler
 			List<ProcessWorkspace> aoRunningList = getStateList(aoProcessesList, "RUNNING");
 			List<ProcessWorkspace> aoReadyList = getStateList(aoProcessesList, "READY");
 			List<ProcessWorkspace> aoCreatedList = getStateList(aoProcessesList, "CREATED");
+			List<ProcessWorkspace> aoWaitingList = getStateList(aoProcessesList, "WAITING");
 			
 			for (ProcessScheduler oScheduler : aoProcessSchedulers) {
 				
-				oScheduler.cycle(aoRunningList, aoReadyList, aoCreatedList);
+				oScheduler.cycle(aoRunningList, aoReadyList, aoCreatedList, aoWaitingList);
 			}
 			
 			if (iSometimes == s_iSometimesCounter) {
@@ -301,7 +302,7 @@ public class WasdiScheduler
 				aoRunningList = getStateList(aoProcessesList, "RUNNING");
 				aoReadyList = getStateList(aoProcessesList, "READY");
 				aoCreatedList = getStateList(aoProcessesList, "CREATED");
-				List<ProcessWorkspace> aoWaitingList = getStateList(aoProcessesList, "WAITING");
+				aoWaitingList = getStateList(aoProcessesList, "WAITING");
 				
 				for (ProcessScheduler oScheduler : aoProcessSchedulers) {
 					
