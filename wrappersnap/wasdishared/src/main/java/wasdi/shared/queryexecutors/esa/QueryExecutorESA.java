@@ -82,7 +82,7 @@ public class QueryExecutorESA extends QueryExecutor {
 			return null;
 		}
 		
-		List<QueryResultViewModel> oResults = new ArrayList<>(); 
+		List<QueryResultViewModel> aoResults = new ArrayList<>(); 
 		try {
 			
 			String sResult =  getResultsFromEOCAT(oQueryViewModel);
@@ -92,10 +92,12 @@ public class QueryExecutorESA extends QueryExecutor {
 				return null;
 			}
 			
+			// process offset and limit
+			aoResults = m_oResponseTranslator.translateBatch(sResult, bFullViewModel);
 			
-			WasdiLog.debugLog("QueryExecutorESA.executeAndRetrieve. Returning results: " + oResults.size());
+			WasdiLog.debugLog("QueryExecutorESA.executeAndRetrieve. Returning results: " + aoResults.size());
 			
-			return oResults;
+			return aoResults;
 			
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("QueryExecutorESA.executeAndRetrieve. Error retrieving number of results: ", oEx);

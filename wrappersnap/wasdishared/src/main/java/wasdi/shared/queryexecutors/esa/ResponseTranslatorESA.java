@@ -49,6 +49,8 @@ public class ResponseTranslatorESA extends ResponseTranslator {
 					}
 				}
 			}
+			
+			return aoResults;
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("ResponseTranslatorESA.translateBatch. Exception when translating the results in the Wasdi view model ", oEx);
 		}
@@ -57,6 +59,7 @@ public class ResponseTranslatorESA extends ResponseTranslator {
 	}
 	
 	private QueryResultViewModel processProduct(JSONObject oJsonItem, boolean bFullViewModel) {
+		try {
 		// BASIC INFO
 		String sProductTitle = oJsonItem.optString("title");
 		String sProductId = oJsonItem.optString("id");
@@ -80,6 +83,10 @@ public class ResponseTranslatorESA extends ResponseTranslator {
 		setBasicProperties(oResult, sBeginningDateTime, sPlatformName, sPlatformSerialIdentifier, sInstrumentShortName, sMode, "0B");
 		if (bFullViewModel)
 			setAllProviderProperties(oResult, oJsonItem);
+		return oResult;
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ResponseTranslatorESA.processProduct. Error", oEx);
+		}
 
 		return null;
 	}
@@ -215,35 +222,40 @@ public class ResponseTranslatorESA extends ResponseTranslator {
 	private void setAllProviderProperties(QueryResultViewModel oViewModel, JSONObject oJsonItem) {
 		Map<String, String> oMapProperties = oViewModel.getProperties();
 		JSONObject oProperties = oJsonItem.getJSONObject("properties");
-		oMapProperties.putIfAbsent("id", oProperties.getString("id"));
+		oMapProperties.putIfAbsent("kind", oProperties.getString("id"));
 		oMapProperties.putIfAbsent("collection", oProperties.getString("collection"));
 		oMapProperties.putIfAbsent("title", oProperties.getString("title"));
 		oMapProperties.putIfAbsent("updated", oProperties.getString("updated"));
 		oMapProperties.putIfAbsent("status", oProperties.getString("status"));
 		
 		JSONObject oProductInformation = oProperties.getJSONObject("productInformation");
-		Iterator<String> oIterator = oProductInformation.keys();
-		while(oIterator.hasNext()) {
-			String sKey = oIterator.next();
+		Iterator<String> oProductInfoIterator = oProductInformation.keys();
+		while(oProductInfoIterator.hasNext()) {
+			String sKey = oProductInfoIterator.next();
 			oMapProperties.putIfAbsent(sKey, oProductInformation.getString(sKey));
 		}
 		
-		JSONObject oAcquisitionInformation = oProperties.getJSONObject("acquisitionInformation");
-		oIterator = oAcquisitionInformation.keys();
-		while(oIterator.hasNext()) {
-			String sKey = oIterator.next();
-			JSONArray oJsonArray = oAcquisitionInformation.optJSONArray(sKey);
-			
-			// if it is an array -> then get the elements of the array and, for each of them, put it in the properties
-			
-			// otherwise check if you can get the value as a string and, if possible, add it to the properties
+		JSONArray aoAcquisitionInformation = oProperties.getJSONArray("acquisitionInformation");
+		for (int i = 0; i < aoAcquisitionInformation.length(); i++) {
+			JSONObject oItem = aoAcquisitionInformation.getJSONObject(i);
+			Iterator<String> oAcquisitionInfoIteratorr = oItem.keys();
+			while (oAcquisitionInfoIteratorr.hasNext()) {
+				String sKey = oAcquisitionInfoIteratorr.next();
+				JSONObject oSubItem = oItem.getJSONObject(sKey);
+				if (oSubItem != null) {
+					setPropertiesFromJSONObject(oMapProperties, oSubItem);
+				}
+			}
 		}
-		
-		
 		
 	}
 	
-	
+	public void setPropertiesFromJSONObject(Map<String, String> oMapProperties, JSONObject oJsonObjectProperties) {
+		Map<String, Object> oProductProperties = oJsonObjectProperties.toMap();
+		for (String sKey : oProductProperties.keySet()) {
+			oMapProperties.put(sKey, oProductProperties.get(sKey).toString());
+		}
+	}
 
 	@Override
 	public int getCountResult(String sQueryResult) {
