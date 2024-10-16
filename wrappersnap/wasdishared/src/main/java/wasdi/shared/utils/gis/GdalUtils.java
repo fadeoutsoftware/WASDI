@@ -418,7 +418,7 @@ public class GdalUtils {
 				// Get full path
 				String sProductFile = sWorkspacePath+oMosaicSetting.getSources().get(iProducts);
 				WasdiLog.debugLog("Mosaic.runGDALMosaic: Adding input Product [" + iProducts +"] = " + sProductFile);
-				
+								
 				asArgs.add(sProductFile);
 			}
 			

@@ -96,6 +96,7 @@ public class ProcessScheduler {
 			// Init the scheduler log prefix
 			m_sLogPrefix = m_sSchedulerKey + ": ";
 			
+			// Read the queue config
 			SchedulerQueueConfig oSchedulerQueueConfig = WasdiConfig.Current.scheduler.getSchedulerQueueConfig(sSchedulerKey);
 			
 			if (oSchedulerQueueConfig!=null) {
@@ -191,6 +192,7 @@ public class ProcessScheduler {
 			WasdiLog.errorLog(m_sLogPrefix + ".init: init Exception: " + oEx);
 			return false;
 		}
+		
 		WasdiLog.infoLog(m_sLogPrefix + ".init: good to go :-)\n");
 		return true;
 	}
@@ -268,11 +270,7 @@ public class ProcessScheduler {
 					
 					aoCreatedList.remove(0);
 				}
-			}
-			else {
-				//if (iSometimes == m_iSometimesCounter) WasdiLog.infoLog(m_sLogPrefix + "Running Queue full, next cycle.");
-			}
-			
+			}			
 		} 
 		catch (Exception oEx) {
 			WasdiLog.errorLog(m_sLogPrefix + ".run: " + oEx); 
@@ -280,13 +278,27 @@ public class ProcessScheduler {
 	}
 	
 	
-	
+	/**
+	 * Periodic checks of the Scheduler
+	 * @param aoRunningList
+	 * @param aoCreatedList
+	 * @param aoReadyList
+	 * @param aoWaitingList
+	 */
 	public void sometimesCheck(List<ProcessWorkspace> aoRunningList, List<ProcessWorkspace> aoCreatedList, List<ProcessWorkspace> aoReadyList, List<ProcessWorkspace> aoWaitingList) {
 		
 		try {
 			if (m_aoLaunchedProcesses.size()!=0) {
-				WasdiLog.infoLog(m_sLogPrefix + ".run: Launched Processes Size: " + m_aoLaunchedProcesses.size());
+				WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Launched Processes Size: " + m_aoLaunchedProcesses.size());
 			}
+			
+			try {
+				WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Running = " + getRunningList(aoRunningList).size() + " Created = " + getCreatedList(aoCreatedList).size() +  " Ready = " + getReadyList(aoReadyList).size() + " Waiting = " + getWaitingList(aoWaitingList).size());
+			}
+			catch (Exception oInnerEx) {
+				WasdiLog.errorLog(m_sLogPrefix + ".sometimesCheck: Exception logging the queue status ", oInnerEx);
+			}
+			
 			
 			// Check Launched Proc list
 			ArrayList<String> asLaunchedToDelete = new ArrayList<String>();
@@ -302,14 +314,14 @@ public class ProcessScheduler {
 					}					
 				}
 				else {
-					WasdiLog.infoLog(m_sLogPrefix + ".run: Invalid Proc WS ID : " + sLaunchedProcessWorkspaceId);
+					WasdiLog.warnLog(m_sLogPrefix + ".sometimesCheck: Invalid Proc WS ID : " + sLaunchedProcessWorkspaceId);
 					asLaunchedToDelete.add(sLaunchedProcessWorkspaceId);
 				}
 			}
 			
 			// Remove launched elements
 			for (String sLaunchedToRemove : asLaunchedToDelete) {
-				WasdiLog.infoLog(m_sLogPrefix + ".run: Remove from launched : " + sLaunchedToRemove);
+				WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Remove from launched : " + sLaunchedToRemove);
 				m_aoLaunchedProcesses.remove(sLaunchedToRemove);
 			}
 			
@@ -335,7 +347,7 @@ public class ProcessScheduler {
 				if (!Utils.isNullOrEmpty(sPidOrContainerId)) {
 					if (!RunTimeUtils.isProcessStillAllive(sPidOrContainerId)) {
 						// PID does not exists: recheck and remove
-						WasdiLog.infoLog(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " has PID " + sPidOrContainerId + ", status RUNNING but the process does not exists");
+						WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Process " + oRunningPws.getProcessObjId() + " has PID " + sPidOrContainerId + ", status RUNNING but the process does not exists");
 						
 						// Read Again to be sure
 						ProcessWorkspace oCheckProcessWorkspace = m_oProcessWorkspaceRepository.getProcessByProcessObjId(oRunningPws.getProcessObjId());
@@ -352,13 +364,13 @@ public class ProcessScheduler {
 								}
 								// Update the process
 								m_oProcessWorkspaceRepository.updateProcess(oCheckProcessWorkspace);
-								WasdiLog.infoLog(m_sLogPrefix + ".run: **************Process " + oRunningPws.getProcessObjId() + " status changed to ERROR");
+								WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: **************Process " + oRunningPws.getProcessObjId() + " status changed to ERROR");
 							}								
 						}
 					}
 				}
 				else {
-					WasdiLog.infoLog(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " with status RUNNING has null PID");
+					WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Process " + oRunningPws.getProcessObjId() + " with status RUNNING has null PID");
 				}
 				
 				// Is there a timeout?
@@ -373,7 +385,7 @@ public class ProcessScheduler {
 						// We ran over?
 						if (lTimeSpan > m_lTimeOutMs) {
 							// Change the status to STOPPED
-							WasdiLog.infoLog(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " is in Timeout");
+							WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Process " + oRunningPws.getProcessObjId() + " is in Timeout");
 							
 							// Stop the process
 							stopProcess(sPidOrContainerId);
@@ -386,11 +398,11 @@ public class ProcessScheduler {
 							}
 
 							m_oProcessWorkspaceRepository.updateProcess(oRunningPws);
-							WasdiLog.infoLog(m_sLogPrefix + ".run: **************Process " + oRunningPws.getProcessObjId() + " Status changed to STOPPED");
+							WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: **************Process " + oRunningPws.getProcessObjId() + " Status changed to STOPPED");
 						}
 					}
 					else {
-						WasdiLog.infoLog(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " Does not have a last state change date");
+						WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Process " + oRunningPws.getProcessObjId() + " Does not have a last state change date");
 					}
 				}
 			}
@@ -414,7 +426,7 @@ public class ProcessScheduler {
 					// Wait 300 time more than standard waiting (10 mins by default!)
 					if (lTimeSpan > 300*m_lWaitProcessStartMS) {
 						// No good, set as ERROR
-						WasdiLog.warnLog(m_sLogPrefix + ".run: **************Process " + oCreatedProcess.getProcessObjId() + " is GETTING OLD.. ");
+						WasdiLog.warnLog(m_sLogPrefix + ".sometimesCheck: **************Process " + oCreatedProcess.getProcessObjId() + " is GETTING OLD.. ");
 						
 						// Get the PID
 						String sPidOrContainerId = "" + oCreatedProcess.getPid();
@@ -427,15 +439,15 @@ public class ProcessScheduler {
 						if (!Utils.isNullOrEmpty(sPidOrContainerId)) {
 							if (!RunTimeUtils.isProcessStillAllive(sPidOrContainerId)) {
 								// PID does not exists: recheck and remove
-								WasdiLog.warnLog(m_sLogPrefix + ".run: Process " + oCreatedProcess.getProcessObjId() + " has PID " + sPidOrContainerId + ", status CREATED and is in the launched list, but the process does not exists. We remove it from launched");
+								WasdiLog.warnLog(m_sLogPrefix + ".sometimesCheck: Process " + oCreatedProcess.getProcessObjId() + " has PID " + sPidOrContainerId + ", status CREATED and is in the launched list, but the process does not exists. We remove it from launched");
 								m_aoLaunchedProcesses.remove(oCreatedProcess.getProcessObjId());
 							}
 							else {
-								WasdiLog.warnLog(m_sLogPrefix + ".run: Process " + oCreatedProcess.getProcessObjId() + " in theory is running, but the state is still CREATED");
+								WasdiLog.warnLog(m_sLogPrefix + ".sometimesCheck: Process " + oCreatedProcess.getProcessObjId() + " in theory is running, but the state is still CREATED");
 							}
 						}
 						else {
-							WasdiLog.warnLog(m_sLogPrefix + ".run: Process " + oCreatedProcess.getProcessObjId() + " with status CREATED and is in the launched list has null PID. We remove it from launched");
+							WasdiLog.warnLog(m_sLogPrefix + ".sometimesCheck: Process " + oCreatedProcess.getProcessObjId() + " with status CREATED and is in the launched list has null PID. We remove it from launched");
 							m_aoLaunchedProcesses.remove(oCreatedProcess.getProcessObjId());
 						}
 						
@@ -479,7 +491,7 @@ public class ProcessScheduler {
 				if (!Utils.isNullOrEmpty(sPidOrContainerId)) {
 					if (!RunTimeUtils.isProcessStillAllive(sPidOrContainerId)) {
 						// PID does not exists: recheck and remove
-						WasdiLog.warnLog(m_sLogPrefix + ".run: Process " + oWaitingReadyPws.getProcessObjId() + " has PID " + sPidOrContainerId + ", is WAITING or READY but the process does not exists");
+						WasdiLog.warnLog(m_sLogPrefix + ".sometimesCheck: Process " + oWaitingReadyPws.getProcessObjId() + " has PID " + sPidOrContainerId + ", is WAITING or READY but the process does not exists");
 						
 						// Read Again to be sure
 						ProcessWorkspace oCheckProcessWorkspace = m_oProcessWorkspaceRepository.getProcessByProcessObjId(oWaitingReadyPws.getProcessObjId());
@@ -501,18 +513,18 @@ public class ProcessScheduler {
 								
 								// Update the process
 								m_oProcessWorkspaceRepository.updateProcess(oCheckProcessWorkspace);
-								WasdiLog.infoLog(m_sLogPrefix + ".run: **************Process " + oWaitingReadyPws.getProcessObjId() + " with WAITING or READY  status changed to ERROR");
+								WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: **************Process " + oWaitingReadyPws.getProcessObjId() + " with WAITING or READY  status changed to ERROR");
 							}							
 						}
 					}
 				}
 				else {
-					WasdiLog.infoLog(m_sLogPrefix + "Process " + oWaitingReadyPws.getProcessObjId() + " has null PID");
+					WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Process " + oWaitingReadyPws.getProcessObjId() + " has null PID");
 				}
 			}	
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog(m_sLogPrefix + ".run: ", oEx); 
+			WasdiLog.errorLog(m_sLogPrefix + ".sometimesCheck: ", oEx); 
 		}
 		
 	}

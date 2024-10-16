@@ -101,7 +101,7 @@ public class WasdiScheduler
         if (WasdiConfig.Current.useLog4J) {
             // Set the logger for the shared lib
             WasdiLog.setLoggerWrapper(oLoggerWrapper);
-            WasdiLog.debugLog("Logger added");
+            WasdiLog.debugLog("WasdiScheduler.main: Logger added");
         }
         else { 
         	WasdiLog.debugLog("WasdiScheduler.main: WASDI Configured to log on console: FORCING ADD DATE TIME");
@@ -109,22 +109,22 @@ public class WasdiScheduler
         	WasdiLog.initLogger();
         }
 		
-		WasdiLog.infoLog("main: Logger configured :-)\n");
+		WasdiLog.infoLog("WasdiScheduler.main: Logger configured :-)\n");
 				
-		WasdiLog.infoLog("main: lastChangeDateOrderByParameter = " + WasdiConfig.Current.scheduler.lastStateChangeDateOrderBy);
+		WasdiLog.infoLog("WasdiScheduler.main: lastChangeDateOrderByParameter = " + WasdiConfig.Current.scheduler.lastStateChangeDateOrderBy);
 
 		
 		//mongo config
 		try {
-			WasdiLog.infoLog("main: Configuring mongo...");
+			WasdiLog.infoLog("WasdiScheduler.main: Configuring mongo...");
 			// Init Mongo Configuration
 			MongoRepository.readConfig();	
 		} 
 		catch (Throwable oEx) {
-			WasdiLog.errorLog("main: Mongo configuration failed. Reason: " + oEx);
+			WasdiLog.errorLog("WasdiScheduler.main: Mongo configuration failed. Reason: " + oEx);
 			System.exit(-1);
 		}
-		WasdiLog.infoLog("main: Mongo configured :-)\n");
+		WasdiLog.infoLog("WasdiScheduler.main: Mongo configured :-)\n");
 		
 		// Computational nodes need to configure also the local dababase
 		try {
@@ -133,17 +133,17 @@ public class WasdiScheduler
 				
 				// Configure also the local connection
 				MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
-				WasdiLog.debugLog("-------Addded Mongo Configuration local for " + WasdiConfig.Current.nodeCode);
+				WasdiLog.debugLog("------- Addded Mongo Configuration local for " + WasdiConfig.Current.nodeCode);
 			}			
 		}
 		catch (Throwable oEx) {
-			WasdiLog.errorLog("main: Mongo configuration failed. Reason: " + oEx);
+			WasdiLog.errorLog("WasdiScheduler.main: Mongo configuration failed. Reason: " + oEx);
 		}		
 		
 		// Read the list of configured schedulers
 		ArrayList<String> asSchedulers = new ArrayList<String>();
 		try {
-			WasdiLog.infoLog("main: reading schedulers configurations...");
+			WasdiLog.infoLog("WasdiScheduler.main: reading schedulers configurations...");
 			
 			for (SchedulerQueueConfig oQueueConfig: WasdiConfig.Current.scheduler.schedulers) {
 				asSchedulers.add(oQueueConfig.name);
@@ -155,18 +155,18 @@ public class WasdiScheduler
 				long iThreadSleep = Long.parseLong(WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS);
 				if (iThreadSleep>0) {
 					s_lSleepingTimeMS = iThreadSleep;
-					WasdiLog.infoLog("main: CatNap Ms: " + s_lSleepingTimeMS);
+					WasdiLog.infoLog("WasdiScheduler.main: CatNap Ms: " + s_lSleepingTimeMS);
 				}
 			} catch (Exception e) {
-				WasdiLog.errorLog("Could not read schedulers configurations. Reason: " + e);
+				WasdiLog.errorLog("WasdiScheduler.main: Could not read schedulers configurations. Reason: " + e);
 			}			
 		} 
 		catch (Exception oEx) {
-			WasdiLog.errorLog("Could not read schedulers configurations. Reason: " + oEx);
+			WasdiLog.errorLog("WasdiScheduler.main: Could not read schedulers configurations. Reason: " + oEx);
 			System.exit(-1);
 		}
 		
-		WasdiLog.infoLog("main: preparing operations...");
+		WasdiLog.infoLog("WasdiScheduler.main: preparing operations...");
 		
 		// List of active schedulers
 		ArrayList<ProcessScheduler> aoProcessSchedulers = new ArrayList<ProcessScheduler>();
@@ -186,7 +186,7 @@ public class WasdiScheduler
 			for (String sScheduler : asSchedulers) {
 				
 				// Create and init the scheduler
-				WasdiLog.infoLog("main: Creating Scheduler: " + sScheduler);
+				WasdiLog.infoLog("WasdiScheduler.main: Creating Scheduler: " + sScheduler);
 				ProcessScheduler oProcessScheduler = new ProcessScheduler();
 				oProcessScheduler.init(sScheduler);
 				
@@ -200,11 +200,11 @@ public class WasdiScheduler
 						
 						if (Utils.isNullOrEmpty(oProcessScheduler.getOperationSubType())) {
 							// No: remove from the scheduler
-							WasdiLog.errorLog("main: Scheduler " + sScheduler + " support type " + sSupportedType + " that does not exists or has already been supported by other scheduler. It will be removed");
+							WasdiLog.errorLog("WasdiScheduler.main: Scheduler " + sScheduler + " support type " + sSupportedType + " that does not exists or has already been supported by other scheduler. It will be removed");
 							oProcessScheduler.removeSupportedType(sSupportedType);							
 						}
 						else {
-							WasdiLog.infoLog("main: Assigning to Scheduler " + sScheduler + " support type " + sSupportedType + " SubType " + oProcessScheduler.getOperationSubType());
+							WasdiLog.infoLog("WasdiScheduler.main: Assigning to Scheduler " + sScheduler + " support type " + sSupportedType + " SubType " + oProcessScheduler.getOperationSubType());
 						}
 					}
 					else {
@@ -216,7 +216,7 @@ public class WasdiScheduler
 						}
 						
 						// Yes: remove from the full list
-						WasdiLog.infoLog("main: Assigning to Scheduler: " + sScheduler + " support type: " + sSupportedType + sSubTypeLog);
+						WasdiLog.infoLog("WasdiScheduler.main: Assigning to Scheduler: " + sScheduler + " support type: " + sSupportedType + sSubTypeLog);
 						asWasdiOperationTypes.remove(sSupportedType);
 					}
 				}
@@ -227,11 +227,11 @@ public class WasdiScheduler
 				
 				if (sSchedulerEnabled.equals("1")) {
 					// Start the scheduler
-					WasdiLog.infoLog("main: Adding Scheduler: " + sScheduler);
+					WasdiLog.infoLog("WasdiScheduler.main: Adding Scheduler: " + sScheduler);
 					aoProcessSchedulers.add(oProcessScheduler);		
 				}
 				else {
-					WasdiLog.warnLog("main: Scheduler: " + sScheduler + " not enabled, will not start");
+					WasdiLog.warnLog("WasdiScheduler.main: Scheduler: " + sScheduler + " not enabled, will not start");
 				}
 			}
 			
@@ -239,33 +239,33 @@ public class WasdiScheduler
 			if (asWasdiOperationTypes.size() > 0) {
 				
 				// Create and Init the Default Scheduler
-				WasdiLog.infoLog("main: Creating DEFAULT Scheduler");
+				WasdiLog.infoLog("WasdiScheduler.main: Creating DEFAULT Scheduler");
 				ProcessScheduler oProcessScheduler = new ProcessScheduler();
 				oProcessScheduler.init("DEFAULT");
 				
 				// Assign all the types
 				for (String sOtherType : asWasdiOperationTypes) {
-					WasdiLog.infoLog("main: Assigning to Scheduler: DEFAULT support type: " + sOtherType);
+					WasdiLog.infoLog("WasdiScheduler.main: Assigning to Scheduler: DEFAULT support type: " + sOtherType);
 					oProcessScheduler.addSupportedType(sOtherType);
 				}
 				
 				// Start
-				WasdiLog.infoLog("main: Adding Scheduler: DEFAULT");
+				WasdiLog.infoLog("WasdiScheduler.main: Adding Scheduler: DEFAULT");
 				aoProcessSchedulers.add(oProcessScheduler);
 			}
 			else {
-				WasdiLog.infoLog("main: All types covered, do not start DEFAULT scheduler");
+				WasdiLog.infoLog("WasdiScheduler.main: All types covered, do not start DEFAULT scheduler");
 			}
 			
 		}
 		catch( Exception oEx ) {
-			WasdiLog.errorLog("Could not complete operations preparations. Reason: " + oEx);
+			WasdiLog.errorLog("WasdiScheduler.main: Could not complete operations preparations. Reason: " + oEx);
 		}
-		WasdiLog.infoLog("main: operations prepared, lets start \n");
+		WasdiLog.infoLog("WasdiScheduler.main: operations prepared, lets start \n");
 		
 		run(aoProcessSchedulers);
 		
-		WasdiLog.debugLog(new EndMessageProvider().getGood() + '\n');
+		WasdiLog.debugLog("WasdiScheduler.main: " + new EndMessageProvider().getGood() + '\n');
 
 	}
 	
