@@ -17,7 +17,7 @@ public class Mosaic extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 
-		WasdiLog.debugLog("Mosaic.executeOperation");
+		WasdiLog.infoLog("Mosaic.executeOperation");
         
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");
@@ -34,10 +34,26 @@ public class Mosaic extends Operation {
         	
         	m_oProcessWorkspaceLogger.log("Running Mosaic");
         	
+            try {
+                // Create the payload
+                MosaicPayload oMosaicPayload = new MosaicPayload();
+                // Get the settings
+                MosaicSetting oSettings = (MosaicSetting) oParameter.getSettings();
+                oMosaicPayload.setOutput(oParameter.getDestinationProductName());
+                if (oSettings.getSources()!=null)   {
+                	oMosaicPayload.setInputs(oSettings.getSources().toArray(new String[0]));
+                }
+                
+                setPayload(oProcessWorkspace, oMosaicPayload);
+                
+            } catch (Exception oPayloadException) {
+                WasdiLog.errorLog("Mosaic.executeOperation: Exception creating operation payload: ", oPayloadException);
+            }        	
+        	
             // Run the gdal mosaic
             if (GdalUtils.runGDALMosaic(oParameter)) {
             	
-                WasdiLog.debugLog("Mosaic.executeOperation done");
+                WasdiLog.infoLog("Mosaic.executeOperation done");
                 
                 oProcessWorkspace.setProgressPerc(100);
                 oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
@@ -54,29 +70,19 @@ public class Mosaic extends Operation {
 
                 m_oProcessWorkspaceLogger.log("Done " + new EndMessageProvider().getGood());
 
-                try {
-                    // Create the payload
-                    MosaicPayload oMosaicPayload = new MosaicPayload();
-                    // Get the settings
-                    MosaicSetting oSettings = (MosaicSetting) oParameter.getSettings();
-                    oMosaicPayload.setOutput(oParameter.getDestinationProductName());
-                    oMosaicPayload.setInputs(oSettings.getSources().toArray(new String[0]));
-                    
-                    setPayload(oProcessWorkspace, oMosaicPayload);
-                    
-                } catch (Exception oPayloadException) {
-                    WasdiLog.errorLog("Mosaic.executeOperation: Exception creating operation payload: ", oPayloadException);
-                }
-
                 WasdiLog.debugLog("Mosaic.executeOperation: product added to workspace");
+                
                 
                 updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
                 
                 return true;
             } 
             else {
+            	
+            	m_oProcessWorkspaceLogger.log("The mosaic operation returned false, there was an error");
                 // error
-                WasdiLog.debugLog("Mosaic.executeOperation: error");
+                WasdiLog.warnLog("Mosaic.executeOperation: error");
+                m_oProcessWorkspaceLogger.log(":( " + new EndMessageProvider().getBad());
                 
                 return false;
             }
