@@ -84,44 +84,51 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/usersByPartialName")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response findUsersByPartialName(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("partialName") String sPartialName) {
-
-		WasdiLog.debugLog("AdminDashboardResource.findUsersByPartialName(" + " Partial name: " + sPartialName + " )");
-
-		// Validate Session
-		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
-		if (oRequesterUser == null) {
-			WasdiLog.debugLog("AdminDashboardResource.findUsersByPartialName: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
-		}
-
-		// Can the user access this section?
-		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
-			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
-		}
+	public Response findUsersByPartialName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("partialName") String sPartialName) {
 		
-		// Do we have at least 3 chars to make our search?
-		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
-			WasdiLog.debugLog("AdminDashboardResource.findUsersByPartialName: invalid partialName");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_PARTIAL_NAME.name())).build();
+		try {
+			WasdiLog.debugLog("AdminDashboardResource.findUsersByPartialName(" + " Partial name: " + sPartialName + " )");
+
+			// Validate Session
+			User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+			if (oRequesterUser == null) {
+				WasdiLog.warnLog("AdminDashboardResource.findUsersByPartialName: invalid session");
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+			}
+
+			// Can the user access this section?
+			if (!UserApplicationRole.isAdmin(oRequesterUser)) {
+				WasdiLog.warnLog("AdminDashboardResource.findUsersByPartialName: user is not an admin");
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
+			}
+			
+			// Do we have at least 3 chars to make our search?
+			if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
+				WasdiLog.warnLog("AdminDashboardResource.findUsersByPartialName: invalid partialName");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_PARTIAL_NAME.name())).build();
+			}
+			
+			// Create the repo and get the list
+			UserRepository oUserRepository = new UserRepository();
+			List<User> aoUsers = oUserRepository.findUsersByPartialName(sPartialName);
+
+			List<UserViewModel> aoUserVMs = new ArrayList<>();
+
+			if (aoUsers != null) {
+				aoUserVMs = aoUsers.stream()
+						.map(AdminDashboardResource::convert)
+						.collect(Collectors.toList());
+			}
+
+			GenericEntity<List<UserViewModel>> entity = new GenericEntity<List<UserViewModel>>(aoUserVMs, List.class);
+
+			return Response.ok(entity).build();			
 		}
-		
-		// Create the repo and get the list
-		UserRepository oUserRepository = new UserRepository();
-		List<User> aoUsers = oUserRepository.findUsersByPartialName(sPartialName);
-
-		List<UserViewModel> aoUserVMs = new ArrayList<>();
-
-		if (aoUsers != null) {
-			aoUserVMs = aoUsers.stream()
-					.map(AdminDashboardResource::convert)
-					.collect(Collectors.toList());
+		catch (Exception oEx) {
+			WasdiLog.errorLog("AdminDashboardResource.findUsersByPartialName: invalid partialName");
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
-		GenericEntity<List<UserViewModel>> entity = new GenericEntity<List<UserViewModel>>(aoUserVMs, List.class);
-
-		return Response.ok(entity).build();
 	}
 
 	@GET
@@ -135,17 +142,18 @@ public class AdminDashboardResource {
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
-			WasdiLog.debugLog("AdminDashboardResource.findWorkspacesByPartialName: invalid session");
+			WasdiLog.warnLog("AdminDashboardResource.findWorkspacesByPartialName: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 
 		// Can the user access this section?
 		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
+			WasdiLog.warnLog("AdminDashboardResource.findWorkspacesByPartialName: user is not an admin");
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
 		}
 
 		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
-			WasdiLog.debugLog("AdminDashboardResource.findWorkspacesByPartialName: invalid partialName");
+			WasdiLog.warnLog("AdminDashboardResource.findWorkspacesByPartialName: invalid partialName");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_PARTIAL_NAME.name())).build();
 		}
 

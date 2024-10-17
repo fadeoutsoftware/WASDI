@@ -369,7 +369,7 @@ public class QueryTranslatorEODC extends QueryTranslator {
 							dEast = Double.max(dEast, dMeridian);
 							dWest = Double.min(dWest, dMeridian);
 						} catch (Exception oE) {
-							WasdiLog.log(s_sErrorMessage, "QueryTranslatorEODC.parseFootprint: issue with current coordinate pair: " + sPair + ": " + oE);
+							WasdiLog.errorLog("QueryTranslatorEODC.parseFootprint: issue with current coordinate pair: " + sPair + ": ", oE);
 						}
 					}
 					//todo check coordinates are within bounds
@@ -387,11 +387,11 @@ public class QueryTranslatorEODC extends QueryTranslator {
 					}
 
 				} catch (Exception oE) {
-					WasdiLog.log(s_sErrorMessage, "QueryTranslatorEODC.parseFootprint: could not complete: " + oE);
+					WasdiLog.errorLog("QueryTranslatorEODC.parseFootprint: could not complete: ", oE);
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.log(s_sErrorMessage, "QueryTranslatorEODC.parseFootprint: could not identify footprint substring limits: " + oE);
+			WasdiLog.errorLog("QueryTranslatorEODC.parseFootprint: could not identify footprint substring limits: ", oE);
 		}
 		return sResult;
 	}

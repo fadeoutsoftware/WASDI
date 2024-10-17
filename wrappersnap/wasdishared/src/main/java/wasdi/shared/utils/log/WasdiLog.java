@@ -31,6 +31,11 @@ public class WasdiLog {
 	protected static String s_sPrefix = "";
 	
 	/**
+	 * Configured log level	
+	 */
+	protected static WasdiLogLevels s_oLogLevel = WasdiLogLevels.INFO;
+	
+	/**
 	 * Set the active logger wrapper
 	 * @param oLoggerWrapper
 	 */
@@ -44,7 +49,9 @@ public class WasdiLog {
 	 * @param sMessage
 	 */
 	public static void debugLog(String sMessage) {
-		log(WasdiLogLevels.DEBUG, sMessage);
+		if (s_oLogLevel.equals(WasdiLogLevels.DEBUG)) {
+			log(WasdiLogLevels.DEBUG, sMessage);	
+		}
 	}
 	
 	/**
@@ -52,7 +59,9 @@ public class WasdiLog {
 	 * @param sMessage
 	 */
 	public static void infoLog(String sMessage) {
-		log(WasdiLogLevels.INFO, sMessage);
+		if (s_oLogLevel.equals(WasdiLogLevels.INFO) || s_oLogLevel.equals(WasdiLogLevels.DEBUG)) {
+			log(WasdiLogLevels.INFO, sMessage);
+		}
 	}
 	
 	/**
@@ -60,7 +69,9 @@ public class WasdiLog {
 	 * @param sMessage
 	 */
 	public static void warnLog(String sMessage) {
-		log(WasdiLogLevels.WARNING, sMessage);
+		if (s_oLogLevel.equals(WasdiLogLevels.WARNING) || s_oLogLevel.equals(WasdiLogLevels.INFO) || s_oLogLevel.equals(WasdiLogLevels.DEBUG)) {
+			log(WasdiLogLevels.WARNING, sMessage);
+		}
 	}
 	
 	/**
@@ -89,7 +100,7 @@ public class WasdiLog {
 	 * @param oLevel Log Level
 	 * @param sMessage Log Message
 	 */
-	public static void log(WasdiLogLevels oLevel, String sMessage) {
+	protected static void log(WasdiLogLevels oLevel, String sMessage) {
 		log(oLevel.name(), sMessage);
 	}
 	
@@ -98,7 +109,11 @@ public class WasdiLog {
 	 * @param sLevel Log Level
 	 * @param sMessage Log Message
 	 */
-	public static void log(String sLevel, String sMessage) {
+	protected static void log(String sLevel, String sMessage) {
+		
+		// Add safe code to avoid empty messages
+		if (Utils.isNullOrEmpty(sMessage)) return;
+		
 		String sPrefix = "";
 		if(!Utils.isNullOrEmpty(sLevel)) {
 			sPrefix = "[" + sLevel + "] ";
@@ -156,5 +171,27 @@ public class WasdiLog {
 
 	public static void setPrefix(String s_sPrefix) {
 		WasdiLog.s_sPrefix = s_sPrefix;
+	}
+
+	public static WasdiLogLevels getLogLevel() {
+		return s_oLogLevel;
+	}
+
+	public static void setLogLevel(WasdiLogLevels oLogLevel) {
+		WasdiLog.s_oLogLevel = oLogLevel;
+	}
+	
+	public static void initLogger() {
+		
+		try {
+			if (WasdiConfig.Current.useLog4J == false) {
+				String sLogLevel = WasdiConfig.Current.logLevel;
+				WasdiLogLevels oLevel = WasdiLogLevels.valueOf(sLogLevel);
+				WasdiLog.setLogLevel(oLevel);
+			}
+		}
+		catch (Exception oLoggingException) {
+			WasdiLog.errorLog("WasdiLog.initLogger: Error configuring the log level ", oLoggingException);
+		}		
 	}
 }

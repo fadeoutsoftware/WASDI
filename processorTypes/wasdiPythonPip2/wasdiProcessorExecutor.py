@@ -17,6 +17,7 @@ def log(sLogString):
 	print("[" + m_sProcId + "] wasdiProcessorExecutor PIP2 Engine v.2.1.3 - " + sLogString)
 
 def executeProcessor(parameters, processId):
+
     global m_sProcId
     m_sProcId = processId
 
@@ -106,6 +107,26 @@ def executeProcessor(parameters, processId):
 
     return
 
+def handleAllExceptions(e_type, e_value, e_traceback):
+    try:
+        global m_sProcId
+
+        if e_type is not None:
+            print("wasdi.handleAllExceptions: " + str(e_type))
+            print("wasdi.handleAllExceptions: " + str(e_value))
+
+        if m_sProcId is not None:
+            sForceStatus = "ERROR"
+            sFinalStatus = wasdi.getProcessStatus(processId)
+
+            if sFinalStatus != 'STOPPED' and sFinalStatus != 'DONE' and sFinalStatus != 'ERROR':
+                wasdi.wasdiLog("wasdi.handleAllExceptions Process finished. Forcing status to " + sForceStatus)
+                wasdi.updateProcessStatus(processId, sForceStatus, 100)
+        else:
+            print("handleAllExceptions: no proc id available.")
+    except:
+        print("handleAllExceptions: exception in exception. I surrender.")
+
 if __name__ == '__main__':
     
     aoParameters = {}
@@ -118,5 +139,6 @@ if __name__ == '__main__':
         
     if len(sys.argv)>=3:
         processId = sys.argv[2]
-    
+
+    sys.excepthook = handleAllExceptions
     executeProcessor(aoParameters, processId)

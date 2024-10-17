@@ -37,4 +37,15 @@ public class SchedulerQueueConfig {
 	 * Flag to enable or disable this queue
 	 */
 	public String enabled;
+	
+	/**
+	 * Flag to know if this Process Scheduler applies the Special Wait Condition 
+	 * to avoid to trigger too many processes considering also the waiting queue
+	 */	
+	public boolean specialWaitCondition = false;
+	
+	/**
+	 * Max number of waiting processes admitted before breaking the FIFO rules
+	 */
+	public int maxWaitingQueue = 100;
 }
