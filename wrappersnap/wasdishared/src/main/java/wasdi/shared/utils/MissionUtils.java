@@ -236,7 +236,7 @@ public class MissionUtils {
 			else if (sFileName.toUpperCase().startsWith("LS07_")) {
 				return Platforms.LANDSAT7;
 			}
-			else if (sFileName.toUpperCase().startsWith("LC08_")) {
+			else if (sFileName.toUpperCase().startsWith("LC08") || sFileName.toUpperCase().startsWith("LC8")) {
 				return Platforms.LANDSAT8;
 			}
 			else if (sFileName.toUpperCase().startsWith("MER_") || sFileName.toUpperCase().startsWith("ASA_")) {
@@ -379,6 +379,7 @@ public class MissionUtils {
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
+			return null;
 		}
 		
 		return new Date();
@@ -420,7 +421,7 @@ public class MissionUtils {
 			// For Others are Not relevant 
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
+			WasdiLog.debugLog("WasdiFileUtils.getProductTypeSatelliteImageFileName: exception " + oEx.toString());
 		}
 		
 		return "";

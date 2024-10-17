@@ -604,20 +604,26 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 				sPlatformType.equals(Platforms.LANDSAT8)) {
 			Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName);
 			
-			Date oNow = new Date();
-			
-			long lDistance = oNow.getTime() - oImageDate.getTime();
-			
-			if (lDistance> 4*30*24*60*60*1000) {
+			if (oImageDate!=null) {
+				Date oNow = new Date();
+				
+				long lDistance = oNow.getTime() - oImageDate.getTime();
+				
+				if (lDistance> 4*30*24*60*60*1000) {
+					return DataProviderScores.LTA.getValue();
+				}
+				
+				if (isWorkspaceOnSameCloud()) {
+					return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
+				}
+				else {
+					return DataProviderScores.DOWNLOAD.getValue();
+				}				
+			}
+			else {
 				return DataProviderScores.LTA.getValue();
 			}
 			
-			if (isWorkspaceOnSameCloud()) {
-				return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
-			}
-			else {
-				return DataProviderScores.DOWNLOAD.getValue();
-			}
 		}
 		else if (sPlatformType.equals(Platforms.ENVISAT)) {
 			if (sFileName.startsWith("ASA_")) {

@@ -168,7 +168,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			// Is this istance under authentication?		
 			if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.user) && !Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.password)) {
 				// Authenticate to the eoepca installation
-				String sScope = "openid user_name is_operator";
+				String sScope = "openid profile email";
 				
 				Map<String, String> asNoCacheHeaders = new HashMap<>();
 				asNoCacheHeaders.put("Cache-Control", "no-cache");
@@ -177,8 +177,8 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				WasdiLog.debugLog("EoepcaProcessorEngin.loginInEOEpca: calling obtainOpenidConnectToken");
 				
 				// We need an openId Connection Token
-				String sToken = HttpUtils.obtainOpenidConnectToken(WasdiConfig.Current.dockers.eoepca.authServerAddress, WasdiConfig.Current.dockers.eoepca.user, WasdiConfig.Current.dockers.eoepca.password
-						, WasdiConfig.Current.dockers.eoepca.clientId, sScope, WasdiConfig.Current.dockers.eoepca.clientSecret, asNoCacheHeaders, "id_token");
+				String sToken = HttpUtils.obtainOpenidConnectToken(WasdiConfig.Current.dockers.eoepca.authServerAddress, WasdiConfig.Current.dockers.eoepca.user, WasdiConfig.Current.dockers.eoepca.password, 
+						WasdiConfig.Current.dockers.eoepca.clientId, sScope, WasdiConfig.Current.dockers.eoepca.clientSecret, asNoCacheHeaders, "access_token");
 				
 				// And the relative headers
 				Map<String, String> asHeaders = HttpUtils.getOpenIdConnectHeaders(sToken);
@@ -336,7 +336,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				sBaseAddress += WasdiConfig.Current.dockers.eoepca.user + "/";
 			}
 			
-			sBaseAddress += "wps3/";
+			sBaseAddress += "ogc-api/";
 			
 			return sBaseAddress;
 		}
@@ -379,8 +379,12 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			
 			// Login
 			if (!loginInEOEpca(oOgcProcessesClient)) {
-				WasdiLog.debugLog("EoepcaProcessorEngine.run: error logging in Eoepca Server"); 
+				WasdiLog.debugLog("EoepcaProcessorEngine.run: error logging in Eoepca Server");
+				processWorkspaceLog("Error logging in Eoepca Server");
 				return false;
+			}
+			else {
+				processWorkspaceLog("Logged in the EOEPCA Server");
 			}
 			
 			String sJsonParams = oParameter.getJson();
@@ -418,16 +422,22 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				oOgcProcessesClient.getHeaders().put("Prefer", "respond-async");				
 			}
 			
-			StatusInfo oStatusInfo = oOgcProcessesClient.executeProcess(oParameter.getName()+"-1_0", oExecute);
+			StatusInfo oStatusInfo = oOgcProcessesClient.executeProcess(oParameter.getName(), oExecute);
 			String sJobId = oStatusInfo.getJobID();
 			
 			if (Utils.isNullOrEmpty(sJobId)) {
+				processWorkspaceLog("Error getting a valid Job Id from EOEPCA Server");
 				WasdiLog.errorLog("EoepcaProcessorEngine.run: unable to get a valid Job Id");
 				return false;
+			}
+			else {
+				processWorkspaceLog("Got Job Id " + sJobId);
 			}
 			
             long lTimeSpentMs = 0;
             int iThreadSleepMs = 2000;
+            
+            processWorkspaceLog("Start to poll EOEPCA Server to check the status of the Application");
 			
 			while(true) {
 				
@@ -484,7 +494,12 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				if (oStatusInfo.getStatus() == StatusCode.FAILED) oStatus = ProcessStatus.ERROR;
 				if (oStatusInfo.getStatus() == StatusCode.DISMISSED) oStatus = ProcessStatus.STOPPED;
 				
+				processWorkspaceLog("Process finished with status " + oStatus.toString());
+				
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, oStatus, 100);
+			}
+			else {
+				processWorkspaceLog("Out of the loop, status is null, there should be some problem");
 			}
 			
             // Check and set the operation end-date

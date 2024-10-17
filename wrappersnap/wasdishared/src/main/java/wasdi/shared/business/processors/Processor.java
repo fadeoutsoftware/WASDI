@@ -136,6 +136,11 @@ public class Processor {
 	private ArrayList<String> buildLogs = new ArrayList<String>();
 	
 	/**
+	 * Flag to keep track of an ongoing deployment/redeployment
+	 */
+	private boolean isDeploymentOngoing = false;
+	
+	/**
 	 * List of associated categories
 	 */
 	private ArrayList<String> categories = new ArrayList<String>();
@@ -306,5 +311,10 @@ public class Processor {
 	public void setBuildLogs(ArrayList<String> buildLogs) {
 		this.buildLogs = buildLogs;
 	}
-	
+	public boolean isDeploymentOngoing() {
+		return isDeploymentOngoing;
+	}
+	public void setDeploymentOngoing(boolean isDeploymentOngoing) {
+		this.isDeploymentOngoing = isDeploymentOngoing;
+	}
 }
