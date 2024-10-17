@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
@@ -45,6 +46,16 @@ public class WasdiScheduler
 	 * done only every m_iSometimesCounter cycles
 	 */
 	private static  int s_iSometimesCounter = 30;	
+	
+	/**
+	 * Limit of the watch dog to force in error in the state of hanging waiting processes
+	 */
+	private static  int s_iWatchDogCounter = 30;
+	
+	/**
+	 * Flag to activate or not the watch dog
+	 */
+	private static boolean s_bActivateWatchDog = true;
 	
 	/**
 	 * Scheduler Constructor
@@ -257,6 +268,13 @@ public class WasdiScheduler
 				WasdiLog.infoLog("WasdiScheduler.main: All types covered, do not start DEFAULT scheduler");
 			}
 			
+			// Flag to activate or not the watch dog
+			WasdiScheduler.s_bActivateWatchDog = WasdiConfig.Current.scheduler.activateWatchDog;
+			// Read the number of cycles needed for some time check
+			WasdiScheduler.s_iSometimesCounter = WasdiConfig.Current.scheduler.sometimesCheckCounter;
+			// Read the number of times we detect the blocking situation before triggering the watch dog 
+			WasdiScheduler.s_iWatchDogCounter = WasdiConfig.Current.scheduler.watchDogCounter;
+			
 		}
 		catch( Exception oEx ) {
 			WasdiLog.errorLog("WasdiScheduler.main: Could not complete operations preparations. Reason: " + oEx);
@@ -275,7 +293,11 @@ public class WasdiScheduler
 	 */
 	public static void run(ArrayList<ProcessScheduler> aoProcessSchedulers) {
 		
+		// Counter of the cycles for the periodic checks
 		int iSometimes = 0;
+		
+		// Counter of the number of cycle with only waiting processes, to trigger the watch dog
+		int iWatchDogCount = 0;
 		
 		while(true) {
 			
@@ -305,10 +327,38 @@ public class WasdiScheduler
 				aoWaitingList = getStateList(aoProcessesList, "WAITING");
 				
 				for (ProcessScheduler oScheduler : aoProcessSchedulers) {
-					
 					oScheduler.sometimesCheck(aoRunningList, aoCreatedList, aoReadyList, aoWaitingList);
-				}				
+				}
 				
+				if (WasdiScheduler.s_bActivateWatchDog) {
+					// Now lets take a look to the blocking situations
+					if (aoRunningList.size()==0 && aoReadyList.size()==0 && aoWaitingList.size()>0 && aoCreatedList.size()>0) {
+						
+						// We have people waiting, but nothinng running or ready. Is not good
+						iWatchDogCount++;
+						
+						if (iWatchDogCount == s_iWatchDogCounter) {
+							// We got it for too many time! We force the waiting in stopped
+							iWatchDogCount = 0;
+							WasdiLog.warnLog("WasdiScheduler.main: watchdog triggered: we have " + aoWaitingList.size() + " waiting to stop");
+							
+							for(int iWaiting = 0; iWaiting<aoWaitingList.size(); iWaiting++) {
+								try {
+									ProcessWorkspace oProcessWorkspace = aoWaitingList.get(iWaiting);
+									oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
+									oProcessWorkspace.setStatus(ProcessStatus.STOPPED.name());
+									s_oProcessWorkspaceRepository.updateProcess(oProcessWorkspace);								
+								}
+								catch (Exception oInnerEx) {
+									WasdiLog.errorLog("WasdiScheduler.main: exception in the watchdog stopping loop: ", oInnerEx);
+								}
+							}
+						}
+					}
+					else {
+						iWatchDogCount = 0;
+					}					
+				}
 			}
 			
 			try {
