@@ -100,7 +100,7 @@ def countResults(aoInputMap):
     # so far we get the name of the local dataset, but it will need to be replaced with the access to the S3 bucket
     # TODO: replace with the access to the bucket
 
-    sDatasetFolderPath = "C:/.../wave_dataset"
+    sDatasetFolderPath = "C:/Users/valentina.leone/Desktop/WORK/Return/104435/wave_dataset"
 
     # get the name of the file to access
     # TODO: we try with HINDCAST, then we extend to other models
@@ -148,50 +148,56 @@ def executeAndRetrieve(aoInputMap):
 
     # preliminary controls. Check the inputs for validation
     if not isInputValid(aoInputMap):
-        logging.warning("countResults. some of the input parameters are not valid")
+        logging.warning("executeAndRetrieve. some of the input parameters are not valid")
         return None
 
-        # if the inputs are valid, we can proceed to check if there are data in the bounding box specified in the query
+    # if the inputs are valid, we can proceed to check if there are data in the bounding box specified in the query
 
-        # so far we get the name of the local dataset, but it will need to be replaced with the access to the S3 bucket
-        # TODO: replace with the access to the bucket
+    # so far we get the name of the local dataset, but it will need to be replaced with the access to the S3 bucket
+    # TODO: replace with the access to the bucket
+    sDatasetFolderPath = "C:/Users/valentina.leone/Desktop/WORK/Return/104435/wave_dataset"
 
-        sDatasetFolderPath = "C:/.../wave_dataset"
+    # get the name of the file to access
+    # TODO: we try with HINDCAST, then we extend to other models
 
-        # get the name of the file to access
-        # TODO: we try with HINDCAST, then we extend to other models
+    sFileName = ""
+    sDataset = aoInputMap.get('productType')
+    sVariable = aoInputMap.get('productLevel')
+    sCase = aoInputMap.get('sensorMode')
+    dNorth = aoInputMap.get('north')
+    dSouth = aoInputMap.get('south')
+    dWest = aoInputMap.get('west')
+    dEast = aoInputMap.get('east')
 
-        sFileName = ""
-        sDataset = aoInputMap.get('productType')
-        sVariable = aoInputMap.get('productLevel')
-        sCase = aoInputMap.get('sensorMode')
-        dNorth = aoInputMap.get('north')
-        dSouth = aoInputMap.get('south')
-        dWest = aoInputMap.get('west')
-        dEast = aoInputMap.get('east')
+    if sDataset.lower() == 'hindcast':
+        logging.info("countResults. Selected dataset: hindcast")
+        sFileName += 'hindcast_' + sVariable + '_1979_2005__' + sCase + ".nc"
+        sProductFilePath = sDatasetFolderPath + '/' + sFileName
+        logging.info("countResults. product path: " + sProductFilePath)
 
-        if sDataset.lower() == 'hindcast':
-            logging.info("countResults. Selected dataset: hindcast")
-            sFileName += 'hindcast_' + sVariable + '_1979_2005__' + sCase + ".nc"
-            sProductFilePath = sDatasetFolderPath + '/' + sFileName
-            logging.info("countResults. product path: " + sProductFilePath)
+        oHindcastDataset = xr.open_dataset(sProductFilePath, engine='h5netcdf')
+        oDatasetVariableData = oHindcastDataset[sVariable]
 
-            oHindcastDataset = xr.open_dataset(sProductFilePath, engine='h5netcdf')
-            oDatasetVariableData = oHindcastDataset[sVariable]
+        bIsInBoundingBox = (oDatasetVariableData['longitude'] >= dWest) \
+                           & (oDatasetVariableData['longitude'] <= dEast) \
+                           & (oDatasetVariableData['latitude'] >= dSouth) \
+                           & (oDatasetVariableData['latitude'] >= dNorth)
 
-            bIsInBoundingBox = (oDatasetVariableData['longitude'] >= dWest) & (
-                        oDatasetVariableData['longitude'] <= dEast) \
-                               & (oDatasetVariableData['latitude'] >= dSouth) & (
-                                           oDatasetVariableData['latitude'] >= dNorth)
+        oValuesInBoundingBox = oDatasetVariableData.where(bIsInBoundingBox, drop=True)
 
-            oValuesInBoundingBox = oDatasetVariableData.where(bIsInBoundingBox, drop=True)
-
-            if np.any(~np.isnan(oValuesInBoundingBox)):
-                logging.info("countResults. some values in the selected bounding box")
-
-            else:
-                logging.info("countResults. no data in the selected bounding box")
-                return 0
+        if np.any(~np.isnan(oValuesInBoundingBox)):
+            logging.info("executeAndRetrieve. some values in the selected bounding box")
+            dSouth = oValuesInBoundingBox['latitude'].min().values
+            dNorth = oValuesInBoundingBox['latitude'].max().values
+            dWest = oValuesInBoundingBox['longitude'].min().values
+            dEast = oValuesInBoundingBox['longitude'].max().values
+            oResultViewModel = createQueryResultViewModel(sDataset, sFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast)
+            aoResults = list()
+            aoResults.append(oResultViewModel)
+        else:
+            logging.info("executeAndRetrieve. no data in the selected bounding box")
+            aoResults = list()
+    return aoResults
 
 def createQueryResultViewModel(sDataset, sOriginalFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast):
     sTitle = f"{sDataset}_{sVariable}_{sCase}_{formatDecimal(dWest)}W_{formatDecimal(dNorth)}N_{formatDecimal(dEast)}E_{formatDecimal(dSouth)}S.nc"
@@ -221,9 +227,11 @@ def formatDecimal(dValue):
 
 if __name__ == '__main__':
     # let's read the input from a file. It will be something else then
-    sInputFileName = "C:/.../test_input_meteocean"
+    sInputFileName = "C:/Users/valentina.leone/Desktop/WORK/Return/test_input_meteocean"
     with open(sInputFileName, 'r') as oJsonInputFile:
         aoInputMap = json.load(oJsonInputFile)
 
     iResultsCount = countResults(aoInputMap)
     print("Count of results: " + str(iResultsCount))
+
+    print(executeAndRetrieve(aoInputMap))
