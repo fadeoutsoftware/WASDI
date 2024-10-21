@@ -55,9 +55,10 @@ public class Platforms {
 	public static String COP_DEM = "COP_DEM";
 	public static String S2GLC = "S2GLC";
 	
-	public static String BIGBANG = "BIGBANG";
 	
 	// Return Plaforms
+	public static String BIGBANG = "BIGBANG";
 	public static String RETURN_RASTER = "ReturnRaster";
+	public static String METEOCEAN = "MeteOcean"; 
 
 }
