@@ -3,6 +3,10 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.8.6.6] - 2024-10-21
+### Fixed
+- Wrong assumptions in the answer of fileExistsOnWasdi. 200 is a correct code!
+
 ## [0.8.6.5] - 2024-10-16
 ### Fixed
 - Better handling of requests exceptions

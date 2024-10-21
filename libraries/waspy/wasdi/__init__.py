@@ -34,7 +34,7 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.6.5
+Version 0.8.6.6
 
 Last Update: 16/10/2024
 
@@ -2565,7 +2565,7 @@ def fileExistsOnWasdi(sFileName):
                  '  ******************************************************************************')
         return False
 
-    if oResult.ok and not 500 == oResult.status_code:
+    if oResult.ok and not 200 == oResult.status_code:
         wasdiLog('[ERROR] waspy.fileExistsOnWasdi: unexpected failure, server returned: ' + str(oResult.status_code) +
                  '  ******************************************************************************')
         return False

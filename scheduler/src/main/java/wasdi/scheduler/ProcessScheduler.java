@@ -8,11 +8,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -465,34 +469,61 @@ public class ProcessScheduler {
 				
 				// Is there a timeout?
 				if (m_lTimeOutMs != -1) {
-					// Check the last state change
-					if (!Utils.isNullOrEmpty(oRunningPws.getLastStateChangeTimestamp())) {
+					
+					long lTimeoutMs = m_lTimeOutMs;
+					
+					// Check if this is an application with an override of the timeout
+					
+					// We need an operation type That must run a processor
+					if (LauncherOperationsUtils.doesOperationLaunchApplication(oRunningPws.getOperationType())) {
 						
-						Double oLastChange = oRunningPws.getLastStateChangeTimestamp();
-						Date oNow = new Date();
-						long lTimeSpan = oNow.getTime() - oLastChange.longValue();
+						// Name of the app
+						String sAppName = oRunningPws.getProductName();
 						
-						// We ran over?
-						if (lTimeSpan > m_lTimeOutMs) {
-							// Change the status to STOPPED
-							WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Process " + oRunningPws.getProcessObjId() + " is in Timeout");
+						// Do we have this processor?
+						ProcessorRepository oProcessorRepository = new ProcessorRepository();
+						Processor oProcessor = oProcessorRepository.getProcessorByName(sAppName);
+						
+						if (oProcessor != null) {
+							// Yes !! We can read its timeout!!
+							lTimeoutMs = oProcessor.getTimeoutMs();
 							
-							// Stop the process
-							stopProcess(sPidOrContainerId);
-							
-							// Update the state
-							oRunningPws.setStatus(ProcessStatus.STOPPED.name());
-							
-							if (Utils.isNullOrEmpty(oRunningPws.getOperationEndTimestamp())) {
-								oRunningPws.setOperationEndTimestamp(Utils.nowInMillis());
+							if (lTimeoutMs != m_lTimeOutMs) {
+								WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Process " + oRunningPws.getProcessObjId() + " is a processor with own Timeout " + lTimeoutMs);
 							}
-
-							m_oProcessWorkspaceRepository.updateProcess(oRunningPws);
-							WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: **************Process " + oRunningPws.getProcessObjId() + " Status changed to STOPPED");
 						}
-					}
-					else {
-						WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Process " + oRunningPws.getProcessObjId() + " Does not have a last state change date");
+					}						
+					
+					if (lTimeoutMs != -1) {
+						// Check the last state change
+						if (!Utils.isNullOrEmpty(oRunningPws.getLastStateChangeTimestamp())) {
+							
+							Double oLastChange = oRunningPws.getLastStateChangeTimestamp();
+							Date oNow = new Date();
+							long lTimeSpan = oNow.getTime() - oLastChange.longValue();
+							
+							// We ran over?
+							if (lTimeSpan > m_lTimeOutMs) {
+								// Change the status to STOPPED
+								WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Process " + oRunningPws.getProcessObjId() + " is in Timeout");
+								
+								// Stop the process
+								stopProcess(sPidOrContainerId);
+								
+								// Update the state
+								oRunningPws.setStatus(ProcessStatus.STOPPED.name());
+								
+								if (Utils.isNullOrEmpty(oRunningPws.getOperationEndTimestamp())) {
+									oRunningPws.setOperationEndTimestamp(Utils.nowInMillis());
+								}
+
+								m_oProcessWorkspaceRepository.updateProcess(oRunningPws);
+								WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: **************Process " + oRunningPws.getProcessObjId() + " Status changed to STOPPED");
+							}
+						}
+						else {
+							WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Process " + oRunningPws.getProcessObjId() + " Does not have a last state change date");
+						}						
 					}
 				}
 			}

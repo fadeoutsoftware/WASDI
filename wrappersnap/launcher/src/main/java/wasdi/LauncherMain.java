@@ -24,6 +24,7 @@ import org.esa.snap.lib.openjpeg.utils.OpenJpegExecRetriever;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.esa.snap.runtime.EngineConfig;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -190,6 +191,18 @@ public class LauncherMain  {
         	WasdiLog.debugLog("Launcher Main - WASDI Configured to log on console");
         	WasdiLog.initLogger();
         }
+        
+        // Filter the mongodb logs
+		try {
+			ch.qos.logback.classic.Logger oMongoLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.mongodb.driver.cluster");
+			oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);	
+			
+			oMongoLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.mongodb.driver");
+			oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("Disabling mongo driver logging exception " + oEx.toString());
+		}        
 
         try {
 
