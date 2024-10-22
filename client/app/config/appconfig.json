@@ -1127,29 +1127,66 @@
 					"indexvalue": "hs"
 				},
 				{
-					"indexname": "sensorMode",
-					"indexlabel": "case",
-					"indexvalues": "monthlymax|seasonalmax|monthlymean|seasonalmean|monthlyquantiles|seasonalquantiles|meanseastates_over_p90__monthlymean|meanseastates_over_p90__seasonalmean|meanseastates_over_p95__monthlymean|meanseastates_over_p95__seasonalmean|nseastates_over_p90__monthlymean|nseastates_over_p90__seasonalmean|nseastates_over_p95__monthlymean|nseastates_over_p95__seasonalmean|nseastates_over_p90__monthlymean_perc|nseastates_over_p90__seasonalmean_perc|nseastates_over_p95__monthlymean_perc|nseastates_over_p95__seasonalmean_perc|meanseastates_over_ss3-1p25__monthlymean|meanseastates_over_ss3-1p25__seasonalmean|meanseastates_over_ss4-2p5__monthlymean|meanseastates_over_ss4-2p5__seasonalmean|meanseastates_over_ss5-4__monthlymean|meanseastates_over_ss5-4__seasonalmean|nseastates_over_ss3-1p25__monthlymean|nseastates_over_ss3-1p25__seasonalmean|nseastates_over_ss4-2p5__monthlymean|nseastates_over_ss4-2p5__seasonalmean|nseastates_over_ss5-4__monthlymean|nseastates_over_ss5-4__seasonalmean|nseastates_over_ss3-1p25__monthlymean_perc|nseastates_over_ss3-1p25__seasonalmean_perc|nseastates_over_ss4-2p5__monthlymean_perc|nseastates_over_ss4-2p5__seasonalmean_perc|nseastates_over_ss5-4__monthlymean_perc|nseastates_over_ss5-4__seasonalmean_perc|ndays_dmax_over_p90_2consecdays__monthlymean|ndays_dmax_over_p90_2consecdays__seasonalmean|ndays_dmax_over_p95_2consecdays__monthlymean|ndays_dmax_over_p95_2consecdays__seasonalmean|ndays_dmax_over_p90_2consecdays__monthlymean_perc|ndays_dmax_over_p90_2consecdays__seasonalmean_perc|ndays_dmax_over_p95_2consecdays__monthlymean_perc|ndays_dmax_over_p95_2consecdays__seasonalmean_perc",
-					"visibilityConditions": "productlevel:hs",
-					"indexvalue": "tm"
+					"indexname": "Instrument",
+					"indexlabel": "frequency",
+					"indexvalues": "monthly|seasonal",
+					"indexvalue": "monthly"
 				},
 				{
 					"indexname": "sensorMode",
 					"indexlabel": "case",
-					"indexvalues": "monthlymax|seasonalmax|monthlymean|seasonalmean|monthlyquantiles|seasonalquantiles",
-					"visibilityConditions": "productlevel:tm"
+					"indexvalues": "monthlymax|monthlymean|monthlyquantiles|meanseastates_over_p90__monthlymean|meanseastates_over_p95__monthlymean|nseastates_over_p90__monthlymean|nseastates_over_p95__monthlymean|nseastates_over_p90__monthlymean_perc|nseastates_over_p95__monthlymean_perc|meanseastates_over_ss3-1p25__monthlymean|meanseastates_over_ss4-2p5__monthlymean|meanseastates_over_ss5-4__monthlymean|nseastates_over_ss3-1p25__monthlymean|nseastates_over_ss4-2p5__monthlymean|nseastates_over_ss5-4__monthlymean|nseastates_over_ss3-1p25__monthlymean_perc|nseastates_over_ss4-2p5__monthlymean_perc|nseastates_over_ss5-4__monthlymean_perc|ndays_dmax_over_p90_2consecdays__monthlymean|ndays_dmax_over_p95_2consecdays__monthlymean|ndays_dmax_over_p90_2consecdays__monthlymean_perc|ndays_dmax_over_p95_2consecdays__monthlymean_perc",
+					"visibilityConditions": "productlevel:hs&Instrument:monthly",
+					"indexvalue": "monthlymax"
 				},
 				{
 					"indexname": "sensorMode",
 					"indexlabel": "case",
-					"indexvalues": "monthlymax|seasonalmax|monthlymean|seasonalmean|monthlyquantiles|seasonalquantiles",
-					"visibilityConditions": "productlevel:tp"
+					"indexvalues": "monthlymax|monthlymean|monthlyquantiles",
+					"visibilityConditions": "productlevel:tm&Instrument:monthly",
+					"indexvalue": "monthlymax"
 				},
 				{
 					"indexname": "sensorMode",
 					"indexlabel": "case",
-					"indexvalues": "monthlymean|seasonalmean|monthlystd|seasonalstd",
-					"visibilityConditions": "productlevel:dirm"
+					"indexvalues": "monthlymax|monthlymean|monthlyquantiles",
+					"visibilityConditions": "productlevel:tp&Instrument:monthly",
+					"indexvalue": "monthlymax"
+				},
+				{
+					"indexname": "sensorMode",
+					"indexlabel": "case",
+					"indexvalues": "monthlymean|monthlystd",
+					"visibilityConditions": "productlevel:dirm&Instrument:monthly",
+					"indexvalue": "monthlymean"
+				},
+				{
+					"indexname": "sensorMode",
+					"indexlabel": "case",
+					"indexvalues": "seasonalmax|seasonalmean|seasonalquantiles|meanseastates_over_p90__seasonalmean|meanseastates_over_p95__seasonalmean|nseastates_over_p90__seasonalmean|nseastates_over_p95__seasonalmean|nseastates_over_p90__seasonalmean_perc|nseastates_over_p95__seasonalmean_perc|meanseastates_over_ss3-1p25__seasonalmean|meanseastates_over_ss4-2p5__seasonalmean|meanseastates_over_ss5-4__seasonalmean|nseastates_over_ss3-1p25__seasonalmean|nseastates_over_ss4-2p5__seasonalmean|nseastates_over_ss5-4__seasonalmean|nseastates_over_ss3-1p25__seasonalmean_perc|nseastates_over_ss4-2p5__seasonalmean_perc|nseastates_over_ss5-4__seasonalmean_perc|ndays_dmax_over_p90_2consecdays__seasonalmean|ndays_dmax_over_p95_2consecdays__seasonalmean|ndays_dmax_over_p90_2consecdays__seasonalmean_perc|ndays_dmax_over_p95_2consecdays__seasonalmean_perc",
+					"visibilityConditions": "productlevel:hs&Instrument:seasonal",
+					"indexvalue": "seasonalmax"
+				},
+				{
+					"indexname": "sensorMode",
+					"indexlabel": "case",
+					"indexvalues": "seasonalmax|seasonalmean|seasonalquantiles",
+					"visibilityConditions": "productlevel:tm&Instrument:seasonal",
+					"indexvalue": "seasonalmax"
+				},
+				{
+					"indexname": "sensorMode",
+					"indexlabel": "case",
+					"indexvalues": "seasonalmax|seasonalmean|seasonalquantiles",
+					"visibilityConditions": "productlevel:tp&Instrument:seasonal",
+					"indexvalue": "seasonalmax"
+				},
+				{
+					"indexname": "sensorMode",
+					"indexlabel": "case",
+					"indexvalues": "seasonalmean|seasonalstd",
+					"visibilityConditions": "productlevel:dirm&Instrument:seasonal",
+					"indexvalue": "seasonalmean"
 				}
 			]
 		}
