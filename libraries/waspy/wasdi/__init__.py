@@ -2565,7 +2565,7 @@ def fileExistsOnWasdi(sFileName):
                  '  ******************************************************************************')
         return False
 
-    if oResult.ok and not 200 == oResult.status_code:
+    if oResult.status_code <200 or oResult.status_code >299:
         wasdiLog('[ERROR] waspy.fileExistsOnWasdi: unexpected failure, server returned: ' + str(oResult.status_code) +
                  '  ******************************************************************************')
         return False

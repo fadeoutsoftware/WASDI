@@ -85,11 +85,17 @@ public class Mosaic extends Operation {
 			
 			// If we are missing inputs, we cannot proceed
 			if (bMissingInputs) {
-            	m_oProcessWorkspaceLogger.log("Impossible to run the mosaic due to missing inputs");
-                WasdiLog.warnLog("Mosaic.executeOperation: Impossible to run the mosaic due to missing inputs");
-                m_oProcessWorkspaceLogger.log(":( " + new EndMessageProvider().getBad());
-                
-                return false;				
+				
+				if (oSettings.getSources().size() == 1) {
+	            	m_oProcessWorkspaceLogger.log("Impossible to run the mosaic due to one single and missing input");
+	                WasdiLog.warnLog("Mosaic.executeOperation: Impossible to run the mosaic due to one single and missing input");
+	                m_oProcessWorkspaceLogger.log(":( " + new EndMessageProvider().getBad());
+	                return false;
+				}
+				else {
+	            	m_oProcessWorkspaceLogger.log("Try to execute the mosaic with the inputs we have");
+	                WasdiLog.warnLog("Mosaic.executeOperation: Try to execute the mosaic with the inputs we have");					
+				}
 			}
 			
 			m_oProcessWorkspaceLogger.log("Running Mosaic");
