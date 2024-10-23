@@ -26,119 +26,143 @@ def countResults():
     print(oData)
     return jsonify({"message": "ok"}), 200
     """
-    iCount = -1
+    try:
+        aoInputMap = request.get_json()
 
-    aoInputMap = request.get_json()
+        # preliminary controls. Check the inputs for validation
+        if not isInputValid(aoInputMap):
+            logging.warning("countResults. some of the input parameters are not valid")
+            return "-1", 400
 
-    # preliminary controls. Check the inputs for validation
-    if not isInputValid(aoInputMap):
-        logging.warning("countResults. some of the input parameters are not valid")
-        return iCount
+        # TODO: replace with the access to the bucket
+        sDatasetFolderPath = "C:/Users/valentina.leone/Desktop/WORK/Return/104435/wave_dataset"
 
-    # if the inputs are valid, we can proceed to check if there are data in the bounding box specified in the query
+        sDatasetName = aoInputMap.get('productType')
+        sVariable = aoInputMap.get('productLevel')
+        sCase = aoInputMap.get('sensorMode')
+        sModel = aoInputMap.get('polarisation')
+        bBiasAdjustment = aoInputMap.get('timeliness') # TODO: check if it is a boolean or a string
+        dNorth = aoInputMap.get('north')
+        dSouth = aoInputMap.get('south')
+        dWest = aoInputMap.get('west')
+        dEast = aoInputMap.get('east')
 
-    # so far we get the name of the local dataset, but it will need to be replaced with the access to the S3 bucket
-    # TODO: replace with the access to the bucket
+        sFileName = getFileName(sDatasetName, sVariable, sCase, bBiasAdjustment, sModel)
 
-    sDatasetFolderPath = "C:/Users/valentina.leone/Desktop/WORK/Return/104435/wave_dataset"
-
-    # get the name of the file to access
-    # TODO: we try with HINDCAST, then we extend to other models
-
-    sFileName = ""
-    sDataset = aoInputMap.get('productType')
-    sVariable = aoInputMap.get('productLevel')
-    sCase = aoInputMap.get('sensorMode')
-    dNorth = aoInputMap.get('north')
-    dSouth = aoInputMap.get('south')
-    dWest = aoInputMap.get('west')
-    dEast = aoInputMap.get('east')
-
-    if sDataset.lower() == 'hindcast':
         logging.info("countResults. Selected dataset: hindcast")
-        sFileName += 'hindcast_' + sVariable + '_1979_2005__' + sCase + ".nc"
         sProductFilePath = sDatasetFolderPath + '/' + sFileName
         logging.info("countResults. product path: " + sProductFilePath)
 
-        oHindcastDataset = xr.open_dataset(sProductFilePath, engine='h5netcdf')
-        oDatasetVariableData = oHindcastDataset[sVariable]
+        oDataset = xr.open_dataset(sProductFilePath, engine='h5netcdf')
+        oDatasetVariableData = oDataset[sVariable]
 
-        bIsInBoundingBox = (oDatasetVariableData['longitude'] >= dWest) & (oDatasetVariableData['longitude'] <= dEast) \
-                           & (oDatasetVariableData['latitude'] >= dSouth) & (oDatasetVariableData['latitude'] >= dNorth)
+        if oDatasetVariableData is None:
+            return "-1", 500
 
-        oValuesInBoundingBox = oDatasetVariableData.where(bIsInBoundingBox, drop=True)
-
-        if np.any(~np.isnan(oValuesInBoundingBox)):
-            logging.info("countResults. some values in the selected bounding box")
+        if isBoundBoxEmpty(dNorth, dSouth, dWest, dEast):
             return "1", 200
+
+        if isSinglePoint(dNorth, dSouth, dWest, dEast):
+            logging.info(f"countResults. bounding box is a single point with latitude {dNorth} and longitude {dWest}")
+            oDataPoint = oDatasetVariableData.sel(latitude=dNorth, longitude=dWest, method="nearest")
+            if np.any(~np.isnan(oDataPoint)):
+                logging.info("countResults. found a value close to the point")
+                return "1", 200
+            else:
+                logging.info("executeAndRetrieve. no data in the selected bounding box")
+                return "0", 200
         else:
-            logging.info("countResults. no data in the selected bounding box")
-            return "0", 200
+            oValuesInBoundingBox = selectValuesInBoundingBox(oDatasetVariableData, dNorth, dSouth, dWest, dEast)
 
-        """
-        oNewDataset = oValuesInBoundingBox.to_dataset()
+            if np.any(~np.isnan(oValuesInBoundingBox)):
+                logging.info("countResults. some values in the selected bounding box")
+                return "1", 200
 
-        oNewDataset.to_netcdf("C:/Users/valentina.leone/Desktop/WORK/Return/subsample.nc", engine="h5netcdf")
-        """
+            else:
+                logging.info("countResults. no data in the selected bounding box")
+                return "0", 200
+
+    except Exception as oEx:
+        logging.error(f"countResults. exception {oEx}")
+
+    return "-1", 500
+
 
 @oServerApp.route('/query/list', methods=['POST'])
 def executeAndRetrieve():
     aoResults = None
 
-    aoInputMap = request.get_json()
+    try:
+        aoInputMap = request.get_json()
 
-    # preliminary controls. Check the inputs for validation
-    if not isInputValid(aoInputMap):
-        logging.warning("executeAndRetrieve. some of the input parameters are not valid")
-        return None
+        # preliminary controls. Check the inputs for validation
+        if not isInputValid(aoInputMap):
+            logging.warning("executeAndRetrieve. some of the input parameters are not valid")
+            return None
 
-    # if the inputs are valid, we can proceed to check if there are data in the bounding box specified in the query
+        # TODO: replace with the access to the bucket
+        sDatasetFolderPath = "C:/Users/valentina.leone/Desktop/WORK/Return/104435/wave_dataset"
 
-    # so far we get the name of the local dataset, but it will need to be replaced with the access to the S3 bucket
-    # TODO: replace with the access to the bucket
-    sDatasetFolderPath = "C:/Users/valentina.leone/Desktop/WORK/Return/104435/wave_dataset"
+        sDatasetName = aoInputMap.get('productType')
+        sVariable = aoInputMap.get('productLevel')
+        sCase = aoInputMap.get('sensorMode')
+        sModel = aoInputMap.get('polarisation')
+        bBiasAdjustment = aoInputMap.get('timeliness')  # TODO: check if it is a boolean or a string
+        dNorth = aoInputMap.get('north')
+        dSouth = aoInputMap.get('south')
+        dWest = aoInputMap.get('west')
+        dEast = aoInputMap.get('east')
 
-    # get the name of the file to access
-    # TODO: we try with HINDCAST, then we extend to other models
-
-    sFileName = ""
-    sDataset = aoInputMap.get('productType')
-    sVariable = aoInputMap.get('productLevel')
-    sCase = aoInputMap.get('sensorMode')
-    dNorth = aoInputMap.get('north')
-    dSouth = aoInputMap.get('south')
-    dWest = aoInputMap.get('west')
-    dEast = aoInputMap.get('east')
-
-    if sDataset.lower() == 'hindcast':
-        logging.info("countResults. Selected dataset: hindcast")
-        sFileName += 'hindcast_' + sVariable + '_1979_2005__' + sCase + ".nc"
+        sFileName = getFileName(sDatasetName, sVariable, sCase, bBiasAdjustment, sModel)
         sProductFilePath = sDatasetFolderPath + '/' + sFileName
-        logging.info("countResults. product path: " + sProductFilePath)
+        logging.info("executeAndRetrieve. product path: " + sProductFilePath)
 
-        oHindcastDataset = xr.open_dataset(sProductFilePath, engine='h5netcdf')
-        oDatasetVariableData = oHindcastDataset[sVariable]
+        oDataset = xr.open_dataset(sProductFilePath, engine='h5netcdf')
+        oDatasetVariableData = oDataset[sVariable]
 
-        bIsInBoundingBox = (oDatasetVariableData['longitude'] >= dWest) \
-                           & (oDatasetVariableData['longitude'] <= dEast) \
-                           & (oDatasetVariableData['latitude'] >= dSouth) \
-                           & (oDatasetVariableData['latitude'] <= dNorth)
+        if oDatasetVariableData is None:
+            return None, 500   # TODO: what should I return here?
 
-        oValuesInBoundingBox = oDatasetVariableData.where(bIsInBoundingBox, drop=True)
-
-        if np.any(~np.isnan(oValuesInBoundingBox)):
-            logging.info("executeAndRetrieve. some values in the selected bounding box")
-            dSouth = oValuesInBoundingBox['latitude'].min().values
-            dNorth = oValuesInBoundingBox['latitude'].max().values
-            dWest = oValuesInBoundingBox['longitude'].min().values
-            dEast = oValuesInBoundingBox['longitude'].max().values
-            oResultViewModel = createQueryResultViewModel(sDataset, sFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast)
+        if isBoundBoxEmpty(dNorth, dSouth, dWest, dEast):
+            dWest, dNorth, dEast, dSouth = getBoundingBoxFromDataset(oDatasetVariableData)
+            oResultViewModel = createQueryResultViewModel(sDatasetName, sFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast)
             aoResults = list()
             aoResults.append(oResultViewModel)
+        elif isSinglePoint(dNorth, dSouth, dWest, dEast):
+            logging.info(f"executeAndRetrieve. bounding box is a single point with latitude {dNorth} and longitude {dWest}")
+            oDataPoint = oDatasetVariableData.sel(latitude=dNorth, longitude=dWest, method="nearest")
+            if np.any(~np.isnan(oDataPoint)):
+                logging.info("executeAndRetrieve. found a value close to the point")
+                oResultViewModel = createQueryResultViewModel(sDatasetName, sFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast)
+                aoResults = list()
+                aoResults.append(oResultViewModel)
+            else:
+                logging.info("executeAndRetrieve. no data in the selected bounding box")
+                aoResults = list()
         else:
-            logging.info("executeAndRetrieve. no data in the selected bounding box")
-            aoResults = list()
+            oValuesInBoundingBox = selectValuesInBoundingBox(oDatasetVariableData, dNorth, dSouth, dWest, dEast)
+
+            if np.any(~np.isnan(oValuesInBoundingBox)):
+                logging.info("executeAndRetrieve. some values in the selected bounding box")
+                dWest, dNorth, dEast, dSouth = getBoundingBoxFromDataset(oValuesInBoundingBox)
+                oResultViewModel = createQueryResultViewModel(sDatasetName, sFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast)
+                aoResults = list()
+                aoResults.append(oResultViewModel)
+            else:
+                logging.info("executeAndRetrieve. no data in the selected bounding box")
+                aoResults = list()
+    except Exception as oEx:
+        logging.error(f"executeAndRetrieve. Exception {oEx}")
     return aoResults
+
+
+def getBoundingBoxFromDataset(oDataset):
+    dSouth = oDataset['latitude'].min().values
+    dNorth = oDataset['latitude'].max().values
+    dWest = oDataset['longitude'].min().values
+    dEast = oDataset['longitude'].max().values
+
+    return dWest, dNorth, dEast, dSouth
 
 def isInputValid(aoInputMap):
     # - check that the data provider is valid
@@ -207,9 +231,16 @@ def isStringNullOrEmpty(sString):
     return sString is None or sString == ''
 
 
+def isBoundBoxEmpty(dNorth, dSouth, dWest, dEast):
+    if dNorth is None and dSouth is None and dWest is None and dEast is None:
+        return True
+
+    return False
+
+
 def isBoudningBoxValid(dNorth, dSouth, dWest, dEast):
     # an empty bounding box is valid
-    if dNorth is None and dSouth is None and dWest is None and dEast is None:
+    if isBoundBoxEmpty(dNorth, dSouth, dWest, dEast):
         return True
 
     return isLatitudeValid(dNorth, dSouth) and isLongitudeValid(dEast, dWest)
@@ -241,31 +272,63 @@ def isLongitudeValid(dEast, dWest):
     return dWest <= dEast
 
 
+def isSinglePoint(dNorth, dSouth, dWest, dEast):
+    return not isBoundBoxEmpty(dNorth, dSouth, dWest, dEast) and dNorth == dSouth and dWest == dEast
+
+
+def selectValuesInBoundingBox(oDataset, dNorth, dSouth, dWest, dEast):
+    bIsInBoundingBox = (oDataset['longitude'] >= dWest) & (oDataset['longitude'] <= dEast) \
+                       & (oDataset['latitude'] >= dSouth) & (oDataset['latitude'] >= dNorth)
+
+    # TODO: should I apply the same extraction also to the other variables???
+    oValuesInBoundingBox = oDataset.where(bIsInBoundingBox, drop=True)
+
+    return oValuesInBoundingBox
+
 def createQueryResultViewModel(sDataset, sOriginalFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast):
     sTitle = f"{sDataset}_{sVariable}_{sCase}_{formatDecimal(dWest)}W_{formatDecimal(dNorth)}N_{formatDecimal(dEast)}E_{formatDecimal(dSouth)}S.nc"
     oResultVM = dict()
     oResultVM['preview'] = None
     oResultVM['title'] = sTitle
-    oResultVM['summary'] = None
+    oResultVM['summary'] = ""
     oResultVM['id'] = sTitle
     oResultVM['link'] = f"{sOriginalFileName},{sVariable},{sCase},{dNorth},{dSouth},{dWest},{dEast}"
     oResultVM['footprint'] = f"POLYGON (({dWest} {dSouth}, {dWest} {dNorth}, {dEast} {dNorth}, {dEast} {dSouth}, {dWest} {dSouth}))"
     oResultVM['provider'] = "MeteOcean"
     oResultVM['volumeName'] = None
     oResultVM['volumePath'] = None
-    oResultVM['properties'] = None
+
+    sDate = str()
+    if sDataset == "hindcast":
+        sDate = "1979-01-01T00:00:00.00Z"
+    elif sDataset == 'rcp85_mid':
+        sDate = "2034-01-01T00:00:00.00Z"
+    elif sDataset == 'rcp85_end':
+        sDate = '2074-01-01T00:00:00.00Z'
+
+    oProperties = dict()
+    oProperties['date'] = sDate
+    oProperties["productType"] = sDataset
+
+    oResultVM['properties'] = oProperties
+
 
     return oResultVM
 
 def formatDecimal(dValue):
     sSign = 'P' if dValue >= 0 else 'N'
     dAbsValue = abs(dValue)
-    sIntegerPart, sDecimalPart = str(dAbsValue).split('.')
-    sIntegerPart = sIntegerPart.zfill(3)
-    sDecimalPart = sDecimalPart.ljust(4, '0')
-    formatted_value = f"{sSign}{sIntegerPart}.{sDecimalPart}"
+    # Separate integer and decimal parts
+    iIntpart = int(dAbsValue)
+    decimal_part = dAbsValue - iIntpart
 
-    return formatted_value
+    # Format the integer part to be  3 digits, padded with zeroes
+    iIntStr = f'{iIntpart:03}'
+
+    # Format the decimal part to have exactly 4 digits, truncate if needed
+    dDecimalStr = f'{decimal_part:.4f}'.split('.')[1]  # Get the decimal part as string
+
+    return f'{sSign}{iIntStr}{dDecimalStr}'
 
 def getFileName(sDataset, sVariable, sCase, bBiasAdjustment, sModel):
     if sDataset == 'hindcast':
@@ -282,9 +345,17 @@ def getFileName(sDataset, sVariable, sCase, bBiasAdjustment, sModel):
 
     if sDataset == 'rcp85_end':
         return f"{sModel}_{sDataBias}_2074_{sVariable}_2100_{sCase}.nc"
-    s
+
     return None
 
 
 if __name__ == '__main__':
     oServerApp.run(debug=True)
+
+
+    """
+    oNewDataset = oValuesInBoundingBox.to_dataset()
+
+    oNewDataset.to_netcdf("C:/Users/valentina.leone/Desktop/WORK/Return/subsample.nc", engine="h5netcdf")
+    """
+
