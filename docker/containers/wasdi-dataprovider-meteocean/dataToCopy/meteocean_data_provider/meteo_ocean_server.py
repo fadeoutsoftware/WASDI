@@ -1,4 +1,7 @@
-from flask import Flask, request, jsonify
+import os.path
+import fsspec
+
+from flask import Flask, request, jsonify, Response, send_file
 import logging
 import xarray as xr
 import numpy as np
@@ -13,19 +16,6 @@ def hello():
 
 @oServerApp.route('/query/count', methods=['POST'])
 def countResults():
-    """
-    oData = request.get_json()
-
-    if oData is None:
-        return jsonify({"error":"No JSON data fount"}), 400
-
-    if not isinstance(oData, dict):
-        return jsonify({"error": "Expected a JSON object (map)"}), 400
-
-    # Now 'data' is a Python dictionary
-    print(oData)
-    return jsonify({"message": "ok"}), 200
-    """
     try:
         aoInputMap = request.get_json()
 
@@ -35,7 +25,7 @@ def countResults():
             return "-1", 400
 
         # TODO: replace with the access to the bucket
-        sDatasetFolderPath = "C:/Users/valentina.leone/Desktop/WORK/Return/104435/wave_dataset"
+        # sDatasetFolderPath = "C:/Users/valentina.leone/Desktop/WORK/Return/104435/wave_dataset"
 
         sDatasetName = aoInputMap.get('productType')
         sVariable = aoInputMap.get('productLevel')
@@ -50,10 +40,10 @@ def countResults():
         sFileName = getFileName(sDatasetName, sVariable, sCase, bBiasAdjustment, sModel)
 
         logging.info("countResults. Selected dataset: hindcast")
-        sProductFilePath = sDatasetFolderPath + '/' + sFileName
-        logging.info("countResults. product path: " + sProductFilePath)
+        # sProductFilePath = sDatasetFolderPath + '/' + sFileName
 
-        oDataset = xr.open_dataset(sProductFilePath, engine='h5netcdf')
+        sS3Product = readFileFromS3(sFileName)
+        oDataset = xr.open_dataset(sS3Product, engine='h5netcdf')
         oDatasetVariableData = oDataset[sVariable]
 
         if oDatasetVariableData is None:
@@ -100,9 +90,6 @@ def executeAndRetrieve():
             logging.warning("executeAndRetrieve. some of the input parameters are not valid")
             return None
 
-        # TODO: replace with the access to the bucket
-        sDatasetFolderPath = "C:/Users/valentina.leone/Desktop/WORK/Return/104435/wave_dataset"
-
         sDatasetName = aoInputMap.get('productType')
         sVariable = aoInputMap.get('productLevel')
         sCase = aoInputMap.get('sensorMode')
@@ -114,10 +101,9 @@ def executeAndRetrieve():
         dEast = aoInputMap.get('east')
 
         sFileName = getFileName(sDatasetName, sVariable, sCase, bBiasAdjustment, sModel)
-        sProductFilePath = sDatasetFolderPath + '/' + sFileName
-        logging.info("executeAndRetrieve. product path: " + sProductFilePath)
 
-        oDataset = xr.open_dataset(sProductFilePath, engine='h5netcdf')
+        sS3Product = readFileFromS3(sFileName)
+        oDataset = xr.open_dataset(sS3Product, engine='h5netcdf')
         oDatasetVariableData = oDataset[sVariable]
 
         if oDatasetVariableData is None:
@@ -154,6 +140,35 @@ def executeAndRetrieve():
     except Exception as oEx:
         logging.error(f"executeAndRetrieve. Exception {oEx}")
     return aoResults
+
+
+@oServerApp.route('/download', methods=['GET'])
+def download():
+    # TODO: check the API key
+
+    sFileNameFromRequest = request.args.get('fileName') # f"{sOriginalFileName},{sVariable},{sCase},{dNorth},{dSouth},{dWest},{dEast};MeteOcean"
+
+    asDownloadInfo = sFileNameFromRequest.split(",")
+
+    # TODO: replace this with the S3 bucket connection
+    sDatasetFolderPath = "C:/Users/valentina.leone/Desktop/WORK/Return/104435/wave_dataset"
+
+    sFileName = asDownloadInfo[0]
+    # sProductFilePath = os.path.join(sDatasetFolderPath, sFileName)
+
+    sS3Product = readFileFromS3(sFileName)
+    try:
+
+        oResponse = send_file(sS3Product, as_attachment=True, download_name=sFileName)
+        oResponse.headers["Content-Disposition"] = f"attachment; filename={sFileName}"
+
+        return oResponse
+
+    except Exception as oEx:
+        logging.error(f"download. Exception {oEx}")
+        return Response(f"Error occurred: {str(oEx)}", status=500)
+
+
 
 
 def getBoundingBoxFromDataset(oDataset):
@@ -292,7 +307,7 @@ def createQueryResultViewModel(sDataset, sOriginalFileName, sVariable, sCase, dN
     oResultVM['title'] = sTitle
     oResultVM['summary'] = ""
     oResultVM['id'] = sTitle
-    oResultVM['link'] = f"{sOriginalFileName},{sVariable},{sCase},{dNorth},{dSouth},{dWest},{dEast}"
+    oResultVM['link'] = f"{sOriginalFileName},{sVariable},{sCase},{dNorth},{dSouth},{dWest},{dEast};MeteOcean"
     oResultVM['footprint'] = f"POLYGON (({dWest} {dSouth}, {dWest} {dNorth}, {dEast} {dNorth}, {dEast} {dSouth}, {dWest} {dSouth}))"
     oResultVM['provider'] = "MeteOcean"
     oResultVM['volumeName'] = None
@@ -347,6 +362,17 @@ def getFileName(sDataset, sVariable, sCase, bBiasAdjustment, sModel):
         return f"{sModel}_{sDataBias}_2074_{sVariable}_2100_{sCase}.nc"
 
     return None
+
+def readFileFromS3(sFileName):
+    oFileSystemRead = fsspec.filesystem('s3',
+                                        anon=True,
+                                        skip_instance_cache=True,
+                                        client_kwargs={'endpoint_url': 'https://usgs.osn.mghpcc.org'})
+
+    sBasePath = "s3://genoatest/aloarca/wave_dataset/"
+    sFullPath = sBasePath + sFileName
+
+    return oFileSystemRead.open(sFullPath)
 
 
 if __name__ == '__main__':
