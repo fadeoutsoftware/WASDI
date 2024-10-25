@@ -376,7 +376,7 @@ def readFileFromS3(sFileName):
 
 
 if __name__ == '__main__':
-    oServerApp.run(debug=True)
+    oServerApp.run(debug=True,host='0.0.0.0')
 
 
     """
