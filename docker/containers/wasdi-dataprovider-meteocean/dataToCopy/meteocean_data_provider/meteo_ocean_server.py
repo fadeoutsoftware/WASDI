@@ -293,7 +293,7 @@ def isSinglePoint(dNorth, dSouth, dWest, dEast):
 
 def selectValuesInBoundingBox(oDataset, dNorth, dSouth, dWest, dEast):
     bIsInBoundingBox = (oDataset['longitude'] >= dWest) & (oDataset['longitude'] <= dEast) \
-                       & (oDataset['latitude'] >= dSouth) & (oDataset['latitude'] >= dNorth)
+                       & (oDataset['latitude'] >= dSouth) & (oDataset['latitude'] <= dNorth)
 
     # TODO: should I apply the same extraction also to the other variables???
     oValuesInBoundingBox = oDataset.where(bIsInBoundingBox, drop=True)
