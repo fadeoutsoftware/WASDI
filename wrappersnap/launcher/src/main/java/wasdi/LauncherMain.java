@@ -203,6 +203,18 @@ public class LauncherMain  {
 		catch (Exception oEx) {
 			WasdiLog.errorLog("Disabling mongo driver logging exception " + oEx.toString());
 		}        
+		
+        // Filter the apache logs
+		try {
+			ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("httpclient");
+			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);	
+			
+			oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache");
+			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("Disabling apache logging exception " + oEx.toString());
+		}        		
 
         try {
 
