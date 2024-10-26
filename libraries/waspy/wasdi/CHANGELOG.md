@@ -3,6 +3,13 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.8.7.0] - 2024-10-26
+### Fixed
+- Again fileExistsOnWasdi
+- Added code to drop the base path from Add File To Wasdi in case the user uses the full path
+### Added
+- setParameter: it is just a call to addParameter
+
 ## [0.8.6.6] - 2024-10-21
 ### Fixed
 - Wrong assumptions in the answer of fileExistsOnWasdi. 200 is a correct code!
