@@ -292,7 +292,7 @@ public class CatalogResources {
 			else {
 				WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found!");
 				oResult.setBoolValue(false);
-				return Response.status(Status.INTERNAL_SERVER_ERROR).entity(oResult).build();
+				return Response.status(Status.NOT_FOUND).entity(oResult).build();
 			}
 			
 						
