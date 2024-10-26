@@ -287,13 +287,15 @@ public class CatalogResources {
 			if (oFile!=null) {
 				WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file found!");
 				oResult.setBoolValue(true);
+				return Response.ok(oResult).build();
 			}
 			else {
 				WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found!");
 				oResult.setBoolValue(false);
+				return Response.status(Status.NOT_FOUND).entity(oResult).build();
 			}
 			
-			return Response.ok(oResult).build();			
+						
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("CatalogResources.checkDownloadEntryAvailabilityByName: exception " + oEx.toString());
