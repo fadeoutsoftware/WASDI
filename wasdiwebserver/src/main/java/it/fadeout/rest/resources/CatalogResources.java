@@ -282,15 +282,17 @@ public class CatalogResources {
 				}
 			}
 
+			PrimitiveResult oResult = new PrimitiveResult();
+			
 			if (oFile!=null) {
-				WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file found!");	
+				WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file found!");
+				oResult.setBoolValue(true);
 			}
 			else {
 				WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found!");
+				oResult.setBoolValue(false);
 			}
 			
-			PrimitiveResult oResult = new PrimitiveResult();
-			oResult.setBoolValue(oFile != null);
 			return Response.ok(oResult).build();			
 		}
 		catch (Exception oEx) {
