@@ -187,8 +187,6 @@ org.esa.s2tbx.grm.GenericRegionMergingOp$Spi
 org.esa.s2tbx.mosaic.S2tbxMosaicOp$Spi
 org.esa.s2tbx.mosaic.reproject.S2tbxReprojectionOp$Spi
 
-org.esa.s2tbx.mapper.SpectralAngleMapperOp$Spi
-
 #S3
 org.esa.s3tbx.aatsr.sst.AatsrSstOp$Spi
 org.esa.s3tbx.arc.ArcSstOp$Spi
