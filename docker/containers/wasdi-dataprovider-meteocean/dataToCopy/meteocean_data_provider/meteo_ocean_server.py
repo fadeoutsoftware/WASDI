@@ -1,13 +1,10 @@
-import io
-import os.path
-import fsspec
-import ast
+from flask import Flask, request, Response, send_file
 
-from flask import Flask, request, jsonify, Response, send_file
 import logging
 import xarray as xr
 import numpy as np
 import ast
+import fsspec
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
@@ -15,7 +12,7 @@ oServerApp = Flask(__name__)
 
 @oServerApp.route('/hello', methods=['GET'])
 def hello():
-    return "hello from the flask server", 200
+    return "hello from the MeteOcean flask server", 200
 
 @oServerApp.route('/query/count', methods=['POST'])
 def countResults():
@@ -27,8 +24,6 @@ def countResults():
             logging.warning("countResults. some of the input parameters are not valid")
             return "-1", 400
 
-        # TODO: replace with the access to the bucket
-        # sDatasetFolderPath = "C:/Users/valentina.leone/Desktop/WORK/Return/104435/wave_dataset"
 
         sDatasetName = aoInputMap.get('productType')
         sVariable = aoInputMap.get('productLevel')
@@ -43,7 +38,6 @@ def countResults():
         sFileName = getFileName(sDatasetName, sVariable, sCase, bBiasAdjustment, sModel)
 
         logging.info("countResults. Selected dataset: hindcast")
-        # sProductFilePath = sDatasetFolderPath + '/' + sFileName
 
         sS3Product = readFileFromS3(sFileName)
         oDataset = xr.open_dataset(sS3Product, engine='h5netcdf')
@@ -110,7 +104,7 @@ def executeAndRetrieve():
         oDatasetVariableData = oDataset[sVariable]
 
         if oDatasetVariableData is None:
-            return None, 500   # TODO: what should I return here?
+            return Response("Error occurred", status=500)
 
         if isBoundBoxEmpty(dNorth, dSouth, dWest, dEast):
             dWest, dNorth, dEast, dSouth = getBoundingBoxFromDataset(oDatasetVariableData)
@@ -148,17 +142,15 @@ def executeAndRetrieve():
 @oServerApp.route('/download', methods=['GET'])
 def download():
 
-    # formato in cui arriva la richiesta:
     # https://hindcast_hs_1979_2005__monthlymax.nc,hs,monthlymax,46.11,29.99999999999947,-5.899999999999977,36.75671199999988
     if not (request.headers.get("x-api-key") == 'super-secret-WASDI-key'):
         return Response(f"Invalid API key", status=401)
 
     try:
         sFileNameFromRequest = request.args.get('fileName') # f"{sOriginalFileName},{sVariable},{sCase},{dNorth},{dSouth},{dWest},{dEast},downloadFileName;MeteOcean"
-        # let's split the file name to get all the information
+
         asDownloadInformation = sFileNameFromRequest.split(",")
 
-        # nome di base da cui scaricare il file
         sBaseFile = asDownloadInformation[0].replace("https://", "")
         sVariable = asDownloadInformation[1]
         sNorth = asDownloadInformation[3]
@@ -179,7 +171,7 @@ def download():
                 or ast.literal_eval(sSouth) is None \
                 or ast.literal_eval(sWest) is None \
                 or ast.literal_eval(sEast) is None:
-            # se la bounding box e' vuota, allora prendiamo tutto il file
+            # if the bounding box is empty, then we download all the file
             oResponse = send_file(sS3Product, as_attachment=True, download_name=sBaseFile)
             oResponse.headers["Content-Disposition"] = f"attachment; filename={sDownloadFileName}"
             return oResponse
@@ -189,20 +181,18 @@ def download():
             oDatasetVariableData = oDataset[sVariable]
             oValuesInBoundingBox = selectValuesInBoundingBox(oDatasetVariableData, float(sNorth), float(sSouth), float(sWest), float(sEast))
             oNewDataset = oValuesInBoundingBox.to_dataset()
+            oNetcdfBytes = oNewDataset.to_netcdf()
 
-            oBuffer = io.BytesIO()
-            oNewDataset.to_netcdf(oBuffer)
-            oBuffer = io.BytesIO(oBuffer.getvalue())
-
-            oResponse = send_file(oBuffer, as_attachment=True, download_name=sDownloadFileName)
-            oResponse.headers["Content-Disposition"] = f"attachment; filename={sDownloadFileName}"
-            return oResponse
-
+            oResponse = Response(oNetcdfBytes,
+                                 mimetype="application/x-netcdf",
+                                 headers={
+                                    "Content-Disposition":f"attachment; filename={sDownloadFileName}",
+                                    "Content-Length": str(len(oNetcdfBytes)),
+                                })
+            return oResponse, 200
     except Exception as oEx:
         logging.error(f"download. Exception {oEx}")
         return Response(f"Error occurred: {str(oEx)}", status=500)
-
-    return Response("Could not find dataset", status=404)
 
 
 def getBoundingBoxFromDataset(oDataset):
@@ -212,6 +202,7 @@ def getBoundingBoxFromDataset(oDataset):
     dEast = oDataset['longitude'].max().values
 
     return dWest, dNorth, dEast, dSouth
+
 
 def isInputValid(aoInputMap):
     # - check that the data provider is valid
@@ -358,9 +349,9 @@ def createQueryResultViewModel(sDataset, sOriginalFileName, sVariable, sCase, dN
     oProperties = dict()
     oProperties['date'] = sDate
     oProperties["productType"] = sDataset
+    oProperties["fileName"] = sTitle
 
     oResultVM['properties'] = oProperties
-
 
     return oResultVM
 
@@ -390,10 +381,10 @@ def getFileName(sDataset, sVariable, sCase, bBiasAdjustment, sModel):
         sDataBias = 'raw'
 
     if sDataset == 'rcp85_mid':
-        return f"{sModel}_{sDataBias}_2034_{sVariable}_2060_{sCase}.nc"
+        return f"{sModel}_{sDataBias}_rcp85_mid_{sVariable}_2034_2060__{sCase}.nc"
 
     if sDataset == 'rcp85_end':
-        return f"{sModel}_{sDataBias}_2074_{sVariable}_2100_{sCase}.nc"
+        return f"{sModel}_{sDataBias}_rcp85_end_{sVariable}_2074_2100__{sCase}.nc"
 
     return None
 
@@ -411,11 +402,3 @@ def readFileFromS3(sFileName):
 
 if __name__ == '__main__':
     oServerApp.run(debug=True)
-
-
-    """
-    oNewDataset = oValuesInBoundingBox.to_dataset()
-
-    oNewDataset.to_netcdf("C:/Users/valentina.leone/Desktop/WORK/Return/subsample.nc", engine="h5netcdf")
-    """
-
