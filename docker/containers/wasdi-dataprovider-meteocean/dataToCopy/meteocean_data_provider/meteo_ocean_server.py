@@ -1,10 +1,13 @@
+import io
 import os.path
 import fsspec
+import ast
 
 from flask import Flask, request, jsonify, Response, send_file
 import logging
 import xarray as xr
 import numpy as np
+import ast
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
@@ -144,31 +147,62 @@ def executeAndRetrieve():
 
 @oServerApp.route('/download', methods=['GET'])
 def download():
-    # TODO: check the API key
 
-    sFileNameFromRequest = request.args.get('fileName') # f"{sOriginalFileName},{sVariable},{sCase},{dNorth},{dSouth},{dWest},{dEast};MeteOcean"
+    # formato in cui arriva la richiesta:
+    # https://hindcast_hs_1979_2005__monthlymax.nc,hs,monthlymax,46.11,29.99999999999947,-5.899999999999977,36.75671199999988
+    if not (request.headers.get("x-api-key") == 'super-secret-WASDI-key'):
+        return Response(f"Invalid API key", status=401)
 
-    asDownloadInfo = sFileNameFromRequest.split(",")
-
-    # TODO: replace this with the S3 bucket connection
-    sDatasetFolderPath = "C:/Users/valentina.leone/Desktop/WORK/Return/104435/wave_dataset"
-
-    sFileName = asDownloadInfo[0]
-    # sProductFilePath = os.path.join(sDatasetFolderPath, sFileName)
-
-    sS3Product = readFileFromS3(sFileName)
     try:
+        sFileNameFromRequest = request.args.get('fileName') # f"{sOriginalFileName},{sVariable},{sCase},{dNorth},{dSouth},{dWest},{dEast},downloadFileName;MeteOcean"
+        # let's split the file name to get all the information
+        asDownloadInformation = sFileNameFromRequest.split(",")
 
-        oResponse = send_file(sS3Product, as_attachment=True, download_name=sFileName)
-        oResponse.headers["Content-Disposition"] = f"attachment; filename={sFileName}"
+        # nome di base da cui scaricare il file
+        sBaseFile = asDownloadInformation[0].replace("https://", "")
+        sVariable = asDownloadInformation[1]
+        sNorth = asDownloadInformation[3]
+        sSouth = asDownloadInformation[4]
+        sWest = asDownloadInformation[5]
+        sEast = asDownloadInformation[6]
+        sDownloadFileName = asDownloadInformation[7]
 
-        return oResponse
+        if isStringNullOrEmpty(sBaseFile):
+            return Response("No base file specified", status=400)
+
+        if isStringNullOrEmpty(sDownloadFileName):
+            return Response("No download file name specified", status=400)
+
+        sS3Product = readFileFromS3(sBaseFile)
+
+        if ast.literal_eval(sNorth) is None \
+                or ast.literal_eval(sSouth) is None \
+                or ast.literal_eval(sWest) is None \
+                or ast.literal_eval(sEast) is None:
+            # se la bounding box e' vuota, allora prendiamo tutto il file
+            oResponse = send_file(sS3Product, as_attachment=True, download_name=sBaseFile)
+            oResponse.headers["Content-Disposition"] = f"attachment; filename={sDownloadFileName}"
+            return oResponse
+
+        else:
+            oDataset = xr.open_dataset(sS3Product, engine='h5netcdf')
+            oDatasetVariableData = oDataset[sVariable]
+            oValuesInBoundingBox = selectValuesInBoundingBox(oDatasetVariableData, float(sNorth), float(sSouth), float(sWest), float(sEast))
+            oNewDataset = oValuesInBoundingBox.to_dataset()
+
+            oBuffer = io.BytesIO()
+            oNewDataset.to_netcdf(oBuffer)
+            oBuffer = io.BytesIO(oBuffer.getvalue())
+
+            oResponse = send_file(oBuffer, as_attachment=True, download_name=sDownloadFileName)
+            oResponse.headers["Content-Disposition"] = f"attachment; filename={sDownloadFileName}"
+            return oResponse
 
     except Exception as oEx:
         logging.error(f"download. Exception {oEx}")
         return Response(f"Error occurred: {str(oEx)}", status=500)
 
-
+    return Response("Could not find dataset", status=404)
 
 
 def getBoundingBoxFromDataset(oDataset):
@@ -301,13 +335,13 @@ def selectValuesInBoundingBox(oDataset, dNorth, dSouth, dWest, dEast):
     return oValuesInBoundingBox
 
 def createQueryResultViewModel(sDataset, sOriginalFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast):
-    sTitle = f"{sDataset}_{sVariable}_{sCase}_{formatDecimal(dWest)}W_{formatDecimal(dNorth)}N_{formatDecimal(dEast)}E_{formatDecimal(dSouth)}S.nc"
+    sTitle = f"MeteOcean_{sDataset}_{sVariable}_{sCase}_{formatDecimal(dWest)}W_{formatDecimal(dNorth)}N_{formatDecimal(dEast)}E_{formatDecimal(dSouth)}S.nc"
     oResultVM = dict()
     oResultVM['preview'] = None
     oResultVM['title'] = sTitle
     oResultVM['summary'] = ""
     oResultVM['id'] = sTitle
-    oResultVM['link'] = f"{sOriginalFileName},{sVariable},{sCase},{dNorth},{dSouth},{dWest},{dEast};MeteOcean"
+    oResultVM['link'] = f"https://{sOriginalFileName},{sVariable},{sCase},{dNorth},{dSouth},{dWest},{dEast},{sTitle};MeteOcean"
     oResultVM['footprint'] = f"POLYGON (({dWest} {dSouth}, {dWest} {dNorth}, {dEast} {dNorth}, {dEast} {dSouth}, {dWest} {dSouth}))"
     oResultVM['provider'] = "MeteOcean"
     oResultVM['volumeName'] = None
