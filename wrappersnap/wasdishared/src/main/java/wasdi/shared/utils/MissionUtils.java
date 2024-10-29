@@ -278,9 +278,6 @@ public class MissionUtils {
 					|| sFileName.toUpperCase().startsWith("ECOSTRESS")) {
 				return Platforms.ECOSTRESS;
 			}
-			else if (sFileName.toLowerCase().endsWith(".nc")) {
-				return Platforms.CM;
-			}
 			else if (sFileName.toUpperCase().startsWith("SKYWATCH_")) {
 				return Platforms.EARTHCACHE;
 			} 
@@ -301,7 +298,12 @@ public class MissionUtils {
 			else if (sFileName.toUpperCase().startsWith("RETRAS_") && sFileName.toUpperCase().endsWith(".TIF")) {
 				return Platforms.RETURN_RASTER;
 			}
-			
+			else if (sFileName.toLowerCase().startsWith("meteocean_") && sFileName.toLowerCase().endsWith(".nc")) {
+				return Platforms.METEOCEAN;
+			}
+			else if (sFileName.toLowerCase().endsWith(".nc")) {
+				return Platforms.CM;
+			}
 			return null;
 		}
 		catch (Exception oEx) {
