@@ -146,6 +146,8 @@ def download():
     if not (request.headers.get("x-api-key") == 'super-secret-WASDI-key'):
         return Response(f"Invalid API key", status=401)
 
+    logging.info("download. API key is valid")
+
     try:
         sFileNameFromRequest = request.args.get('fileName') # f"{sOriginalFileName},{sVariable},{sCase},{dNorth},{dSouth},{dWest},{dEast},downloadFileName;MeteOcean"
 
@@ -158,6 +160,8 @@ def download():
         sWest = asDownloadInformation[5]
         sEast = asDownloadInformation[6]
         sDownloadFileName = asDownloadInformation[7]
+
+        logging.info(f"download. base file on S3: {sBaseFile}, download file name: {sDownloadFileName}, coordinates: {sWest}W, {sNorth}N, {sEast}E, {sSouth}S")
 
         if isStringNullOrEmpty(sBaseFile):
             return Response("No base file specified", status=400)
@@ -172,11 +176,13 @@ def download():
                 or ast.literal_eval(sWest) is None \
                 or ast.literal_eval(sEast) is None:
             # if the bounding box is empty, then we download all the file
+            logging.info("download. No bounding box specified. Sending the whole file")
             oResponse = send_file(sS3Product, as_attachment=True, download_name=sBaseFile)
             oResponse.headers["Content-Disposition"] = f"attachment; filename={sDownloadFileName}"
             return oResponse
 
         else:
+            logging.info("download. Bounding box specified. Sending a subset of the file")
             oDataset = xr.open_dataset(sS3Product, engine='h5netcdf')
             oDatasetVariableData = oDataset[sVariable]
             oValuesInBoundingBox = selectValuesInBoundingBox(oDatasetVariableData, float(sNorth), float(sSouth), float(sWest), float(sEast))
