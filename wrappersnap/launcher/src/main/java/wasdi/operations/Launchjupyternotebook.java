@@ -17,7 +17,7 @@ public class Launchjupyternotebook extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
-		WasdiLog.debugLog("Launchjupyternotebook.executeOperation");
+		WasdiLog.infoLog("Launchjupyternotebook.executeOperation");
 
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");

@@ -22,7 +22,7 @@ public class Regrid extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 
-		WasdiLog.debugLog("Regrid.executeOperation");
+		WasdiLog.infoLog("Regrid.executeOperation");
         
 		if (oParam == null) {
 			WasdiLog.errorLog("Regrid.executeOperation: Parameter is null");

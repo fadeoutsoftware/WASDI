@@ -189,7 +189,7 @@ public class LauncherMain  {
         }
         else { 
         	WasdiLog.debugLog("Launcher Main - WASDI Configured to log on console");
-        	WasdiLog.initLogger();
+        	WasdiLog.initLogger(WasdiConfig.Current.logLevelLauncher);
         }
         
         // Filter the mongodb logs
@@ -530,7 +530,7 @@ public class LauncherMain  {
             	else s_oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());        		
         	}
 
-        	WasdiLog.debugLog("LauncherMain.executeOperation: Operation Result " + bOperationResult);
+        	WasdiLog.infoLog("LauncherMain.executeOperation: Operation Result " + bOperationResult);
         	
         	// Check if we have to send a notification
         	if (s_oProcessWorkspace.isNotifyOwnerByMail()) {
@@ -583,7 +583,7 @@ public class LauncherMain  {
         	}
         }
 
-        WasdiLog.debugLog("Launcher did his job. Bye bye, see you soon. [" + sParameter + "]");
+        WasdiLog.infoLog("Launcher did his job. Bye bye, see you soon. [" + sParameter + "]");
     }
 
     /**

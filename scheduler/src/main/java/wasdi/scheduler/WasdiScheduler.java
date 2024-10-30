@@ -117,7 +117,7 @@ public class WasdiScheduler
         else { 
         	WasdiLog.debugLog("WasdiScheduler.main: WASDI Configured to log on console: FORCING ADD DATE TIME");
         	WasdiConfig.Current.addDateTimeToLogs = true;
-        	WasdiLog.initLogger();
+        	WasdiLog.initLogger(WasdiConfig.Current.logLevelScheduler);
         }
 		
 		WasdiLog.infoLog("WasdiScheduler.main: Logger configured :-)\n");
