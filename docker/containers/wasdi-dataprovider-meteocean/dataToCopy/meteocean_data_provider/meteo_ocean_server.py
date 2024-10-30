@@ -41,7 +41,10 @@ def countResults():
 
         sS3Product = readFileFromS3(sFileName)
         oDataset = xr.open_dataset(sS3Product, engine='h5netcdf')
-        oDatasetVariableData = oDataset[sVariable]
+
+        sRelevantVariable = recoverRelevantVariable(oDataset, sVariable)
+
+        oDatasetVariableData = oDataset[sRelevantVariable]
 
         if oDatasetVariableData is None:
             return "-1", 500
@@ -101,7 +104,10 @@ def executeAndRetrieve():
 
         sS3Product = readFileFromS3(sFileName)
         oDataset = xr.open_dataset(sS3Product, engine='h5netcdf')
-        oDatasetVariableData = oDataset[sVariable]
+
+        sRelevantVariable = recoverRelevantVariable(oDataset, sVariable)
+
+        oDatasetVariableData = oDataset[sRelevantVariable]
 
         if oDatasetVariableData is None:
             return Response("Error occurred", status=500)
@@ -184,7 +190,10 @@ def download():
         else:
             logging.info("download. Bounding box specified. Sending a subset of the file")
             oDataset = xr.open_dataset(sS3Product, engine='h5netcdf')
-            oDatasetVariableData = oDataset[sVariable]
+
+            sRelevantVariable = recoverRelevantVariable(oDataset, sVariable)
+
+            oDatasetVariableData = oDataset[sRelevantVariable]
             oValuesInBoundingBox = selectValuesInBoundingBox(oDatasetVariableData, float(sNorth), float(sSouth), float(sWest), float(sEast))
             oNewDataset = oValuesInBoundingBox.to_dataset()
             oNetcdfBytes = oNewDataset.to_netcdf()
@@ -199,6 +208,26 @@ def download():
     except Exception as oEx:
         logging.error(f"download. Exception {oEx}")
         return Response(f"Error occurred: {str(oEx)}", status=500)
+
+
+def recoverRelevantVariable(oDataset, sTentativeVariable):
+    sActualVariable = sTentativeVariable
+    asDatasetVariables = list(oDataset.variables)
+
+    if sActualVariable in asDatasetVariables:
+        logging.info(f"recoverRelevantVariable. Variable {sTentativeVariable} found in the dataset")
+        return sActualVariable
+
+    asExcludedVariables = ["longitude", "latitude", "quantile", "season", "surface", "month"]
+
+    asActualVariables = [sVariable for sVariable in asDatasetVariables if sVariable not in asExcludedVariables]
+
+    if len(asActualVariables) > 0:
+        sActualVariable = asActualVariables[0]
+        logging.info(f"recoverRelevantVariable. Variable {sTentativeVariable} NOT found in the dataset, using instead {sActualVariable}")
+
+    return sActualVariable
+
 
 
 def getBoundingBoxFromDataset(oDataset):
@@ -407,4 +436,4 @@ def readFileFromS3(sFileName):
 
 
 if __name__ == '__main__':
-        oServerApp.run(debug=True,host='0.0.0.0')
+    oServerApp.run(debug=True, host='0.0.0.0')
