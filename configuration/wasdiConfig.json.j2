@@ -640,7 +640,9 @@
                 "timeoutMs": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['timeoutMs'] }}",
                 "opTypes": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['opTypes'] }}",
                 "opSubType": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['opSubType'] }}",
-                "enabled": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['enabled'] }}"
+                "enabled": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['enabled'] }}",
+                "specialWaitCondition": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['specialWaitCondition'] }}",
+                "maxWaitingQueue": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['maxWaitingQueue'] }}"
             }{% if not loop.last %},
 {% endif %}
 {% endfor %}
