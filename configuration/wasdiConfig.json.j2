@@ -631,7 +631,7 @@
         "redirectLauncherOutput": {{ aoWasdiConfiguration['scheduler']['redirectLauncherOutput'] }},
         "sometimesCheckCounter":  {{ aoWasdiConfiguration['scheduler']['sometimesCheckCounter'] }},
         "watchDogCounter": {{ aoWasdiConfiguration['scheduler']['watchDogCounter'] }},
-        "activateWatchDog":  {{ aoWasdiConfiguration['scheduler']['activateWatchDog'] }},
+        "activateWatchDog":  {{ aoWasdiConfiguration['addDateTimeToLogs'] | lower }},
         "schedulers": [
 {% for sCurrentScheduler in ( aoWasdiConfiguration['scheduler']['schedulers'] | sort ) %}
             {
@@ -641,7 +641,7 @@
                 "opTypes": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['opTypes'] }}",
                 "opSubType": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['opSubType'] }}",
                 "enabled": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['enabled'] }}",
-                "specialWaitCondition": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['specialWaitCondition'] }}",
+                "specialWaitCondition": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['specialWaitCondition'] | lower  }}",
                 "maxWaitingQueue": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['maxWaitingQueue'] }}"
             }{% if not loop.last %},
 {% endif %}
