@@ -417,7 +417,7 @@ public class Publishband extends Operation {
             sStyle = "s5p_so2";
         }
         
-        if (sFile.startsWith("MeteOcean"))  {
+        if (sFile.contains("MeteOcean"))  {
         	sStyle = "MeteOcean";
         }
         
