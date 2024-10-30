@@ -365,10 +365,7 @@ public class Publishband extends Operation {
 	}
 
 	protected String getStyleByFileName(String sFile) {
-        // Default Style: can be changed in the following lines depending by the product
-		
-		WasdiLog.errorLog("PublishBand.getStyleByFileName: File Name" + sFile);
-		
+        // Default Style: can be changed in the following lines depending by the product		
 		
         String sStyle = "raster";
 
@@ -424,9 +421,7 @@ public class Publishband extends Operation {
         if (WasdiFileUtils.isShapeFile(sFile)) {
         	sStyle = "polygon";
         }
-        
-		WasdiLog.errorLog("PublishBand.getStyleByFileName: style " + sStyle);
-        
+                
         return sStyle;
 	}
 	
