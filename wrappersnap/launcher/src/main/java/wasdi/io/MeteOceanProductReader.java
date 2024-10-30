@@ -25,7 +25,7 @@ import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class MeteOceanProductReader extends WasdiProductReader {
 
-	private static final List<String> s_asExcludedVariables = Arrays.asList("longitude", "latitude", "quantile", "season", "surface");
+	private static final List<String> s_asExcludedVariables = Arrays.asList("longitude", "latitude", "quantile", "season", "surface", "month");
 	
 	public MeteOceanProductReader(File oProductFile) {
 		super(oProductFile);
