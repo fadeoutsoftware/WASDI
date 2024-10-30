@@ -628,10 +628,7 @@
         "maxQueue": "{{ aoWasdiConfiguration['scheduler']['maxQueue'] }}",
         "processingThreadSleepingTimeMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadSleepingTimeMS'] }}",
         "processingThreadWaitStartMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadWaitStartMS'] }}",
-        "redirectLauncherOutput": {{ aoWasdiConfiguration['scheduler']['redirectLauncherOutput'] }},
-        "sometimesCheckCounter":  {{ aoWasdiConfiguration['scheduler']['sometimesCheckCounter'] }},
-        "watchDogCounter": {{ aoWasdiConfiguration['scheduler']['watchDogCounter'] }},
-        "activateWatchDog":  {{ aoWasdiConfiguration['scheduler']['activateWatchDog'] }},
+        "redirectLauncherOutput": {{ aoWasdiConfiguration['scheduler']['redirectLauncherOutput'] }}
         "schedulers": [
 {% for sCurrentScheduler in ( aoWasdiConfiguration['scheduler']['schedulers'] | sort ) %}
             {
