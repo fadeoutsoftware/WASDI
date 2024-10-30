@@ -81,9 +81,7 @@ public class Killprocesstree extends Operation {
 				}
 				
 				//from here on collect children
-				LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
-				
-				boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcess.getOperationType());
+				boolean bCanSpawnChildren = LauncherOperationsUtils.canOperationSpawnChildren(oProcess.getOperationType());
 				
 				if (!bCanSpawnChildren) {
 					WasdiLog.debugLog("Killprocesstree.executeOperation: process " + oProcess.getProcessObjId() + " cannot spawn children, skipping");
@@ -146,9 +144,8 @@ public class Killprocesstree extends Operation {
 	 */
 	private void terminate(ProcessWorkspace oProcessToKill) {
 		try {
-			LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
 
-			if (oLauncherOperationsUtils.doesOperationLaunchApplication(oProcessToKill.getOperationType())) {
+			if (LauncherOperationsUtils.doesOperationLaunchApplication(oProcessToKill.getOperationType())) {
 				WasdiLog.infoLog("Killprocesstree.killProcessAndDocker: about to kill docker instance of process " + oProcessToKill.getProcessObjId());
 				killApplication(oProcessToKill);
 			}

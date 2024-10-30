@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.6.5
+Version 0.8.7.0
 
-Last Update: 16/10/2024
+Last Update: 26/10/2024
 
 Tested with: Python 3.7, Python 3.8, Python 3.9, Python 3.10
 
@@ -243,6 +243,11 @@ def getParameter(sKey, oDefault=None):
     except:
         return oDefault
 
+def setParameter(sKey, oValue):
+    """
+    Same as add Parameter
+    """
+    addParameter(sKey, oValue)
 
 def setUser(sUser):
     """
@@ -2565,12 +2570,17 @@ def fileExistsOnWasdi(sFileName):
                  '  ******************************************************************************')
         return False
 
-    if oResult.ok and not 500 == oResult.status_code:
-        wasdiLog('[ERROR] waspy.fileExistsOnWasdi: unexpected failure, server returned: ' + str(oResult.status_code) +
-                 '  ******************************************************************************')
+    if oResult.status_code <200 or oResult.status_code >299:
         return False
     else:
-        return oResult.ok
+        try:
+            oJsonResponse = oResult.json()
+            if "boolValue" in oJsonResponse:
+                return oJsonResponse["boolValue"]
+            else:
+                return False
+        except:
+            return False
 
 
 def getProductBBOX(sFileName):
@@ -4023,6 +4033,14 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None, sStyle=""):
         except:
             wasdiLog('[ERROR] waspy._internalAddFileToWASDI: cannot convert style name into string, set empty')
             sStyle = ""
+
+    try:
+        sBasePath = getSavePath()
+        if sFileName.startswith(str(sBasePath)):
+            wasdiLog('[WARNING] waspy._internalAddFileToWASDI: the input file has the base path in it. We remove it')
+            sFileName = sFileName.replace(str(sBasePath),"")
+    except:
+        wasdiLog('[WARNING] waspy._internalAddFileToWASDI: exception trying to clean the base path on file name')
 
     sResult = ''
     try:

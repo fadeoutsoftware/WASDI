@@ -22,6 +22,7 @@ public class ProcessorTypes {
 	public static String PIP_ONESHOT = "pip_oneshot";
 	public static String PYTHON_PIP_2_UBUNTU_20 = "python_pip_2_ubuntu_20";
 	public static String JAVA_17_UBUNTU_22 = "java_17_Ubuntu_22";
+	public static String PERSONALIZED_DOCKER = "personalized_docker";
 	
 	
 	/**
@@ -41,6 +42,7 @@ public class ProcessorTypes {
 		else if (sProcessorType.equals(PIP_ONESHOT)) return "pip_oneshot";
 		else if (sProcessorType.equals(PYTHON_PIP_2_UBUNTU_20)) return "wasdiUbuntuFocalPython";
 		else if (sProcessorType.equals(JAVA_17_UBUNTU_22)) return "java17";
+		else if (sProcessorType.equals(PERSONALIZED_DOCKER)) return "personalized_docker";
 		return "";
 	}
 	

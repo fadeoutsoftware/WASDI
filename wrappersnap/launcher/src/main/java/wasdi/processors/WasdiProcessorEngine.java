@@ -118,6 +118,10 @@ public abstract class WasdiProcessorEngine {
 			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type JAVA_17_UBUNTU_22");
 			return new Java17Ubuntu22ProcessorEngine();
 		}		
+		else if (sType.equals(ProcessorTypes.PERSONALIZED_DOCKER)) {
+			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type PERSONALIZED_DOCKER");
+			return new PersonalizedDockerProcessor();
+		}		
 		else {
 			WasdiLog.warnLog("WasdiProcessorEngine.getProcessorEngine: DEFAULT CASE (type "  + sType+ " not recognized) return processor of type UbuntuPython37ProcessorEngine");
 			return new UbuntuPython37ProcessorEngine();

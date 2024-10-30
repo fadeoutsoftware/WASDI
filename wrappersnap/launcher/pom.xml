@@ -32,7 +32,6 @@
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionJUniversalChardet>2.4.0</sVersionJUniversalChardet>
         <sVersionLog4j>2.20.0</sVersionLog4j>
-        <sVersionLombok>1.18.22</sVersionLombok>
         <sVersionMavenJarPlugin>3.3.0</sVersionMavenJarPlugin>
         <sVersionMavenShadePlugin>3.5.0</sVersionMavenShadePlugin>
         <sVersionMockFtpServer>2.7.1</sVersionMockFtpServer>
@@ -45,6 +44,7 @@
         <sVersionSnap>9.0.8</sVersionSnap>
         <sVersionSshj>0.29.0</sVersionSshj>
         <sVersionXercesImpl>2.12.2</sVersionXercesImpl>
+        <sVersionLogback>1.2.13</sVersionLogback>
     </properties>
 
     <build>
@@ -195,6 +195,21 @@
             <artifactId>sshj</artifactId>
             <version>${sVersionSshj}</version>
         </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${sVersionLogback}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-core -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${sVersionLogback}</version>
+            <scope>compile</scope>
+        </dependency>        
 
 
         <!-- SNAP -->

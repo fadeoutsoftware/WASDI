@@ -278,14 +278,24 @@ public class CatalogResources {
 						WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found in any volume");
 					}				
 
-					return Response.serverError().build();					
+					//return Response.serverError().build();					
 				}
 			}
 
-			WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file found!");
 			PrimitiveResult oResult = new PrimitiveResult();
-			oResult.setBoolValue(oFile != null);
-			return Response.ok(oResult).build();			
+			
+			if (oFile!=null) {
+				WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file found!");
+				oResult.setBoolValue(true);
+				return Response.ok(oResult).build();
+			}
+			else {
+				WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found!");
+				oResult.setBoolValue(false);
+				return Response.status(Status.NOT_FOUND).entity(oResult).build();
+			}
+			
+						
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("CatalogResources.checkDownloadEntryAvailabilityByName: exception " + oEx.toString());
