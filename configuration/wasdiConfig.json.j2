@@ -631,7 +631,7 @@
         "redirectLauncherOutput": {{ aoWasdiConfiguration['scheduler']['redirectLauncherOutput'] }},
         "sometimesCheckCounter":  {{ aoWasdiConfiguration['scheduler']['sometimesCheckCounter'] }},
         "watchDogCounter": {{ aoWasdiConfiguration['scheduler']['watchDogCounter'] }},
-        "activateWatchDog":  {{ aoWasdiConfiguration['addDateTimeToLogs'] | lower }},
+        "activateWatchDog":  {{ aoWasdiConfiguration['scheduler']['activateWatchDog'] | lower }},
         "schedulers": [
 {% for sCurrentScheduler in ( aoWasdiConfiguration['scheduler']['schedulers'] | sort ) %}
             {
