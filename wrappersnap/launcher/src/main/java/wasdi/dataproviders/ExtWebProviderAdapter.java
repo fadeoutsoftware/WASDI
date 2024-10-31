@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.extweb.config.ExtWebConfig;
 import wasdi.shared.queryexecutors.extweb.config.ExtWebDataProviderConfig;
 import wasdi.shared.utils.HttpUtils;
@@ -94,7 +95,14 @@ public class ExtWebProviderAdapter extends ProviderAdapter {
 			
 			if (!sSaveDirOnServer.endsWith("/")) sSaveDirOnServer = "/";
 			
-			String sFilePath = HttpUtils.downloadFile(sUrl, asHeaders, sSaveDirOnServer + asNamePlatform[0].replace("file://", ""));
+			String sOutputFilePath = sSaveDirOnServer + asNamePlatform[0].replace("file://", "");
+			
+			if (asNamePlatform.length >= 2 && asNamePlatform[1].equals(Platforms.METEOCEAN)) {
+				sOutputFilePath = sSaveDirOnServer + asNamePlatform[0].split(",")[7];
+			}
+			
+			
+			String sFilePath = HttpUtils.downloadFile(sUrl, asHeaders, sOutputFilePath);
 			
 			if (Utils.isNullOrEmpty(sFilePath)) {
 				WasdiLog.errorLog("ExtWebProviderAdapter.executeDownloadFile: impossible to get a valid file Path");
@@ -114,8 +122,14 @@ public class ExtWebProviderAdapter extends ProviderAdapter {
 	@Override
 	public String getFileName(String sFileURL) throws Exception {
 		
+		
+		
 		try {
 			String [] asNamePlatform = sFileURL.split(";");
+			
+			if (asNamePlatform.length >= 2 && asNamePlatform[1].equals(Platforms.METEOCEAN)) {
+				return asNamePlatform[0].split(",")[7];
+			}
 						
 			return asNamePlatform[0].replace("file://", "");
 			
