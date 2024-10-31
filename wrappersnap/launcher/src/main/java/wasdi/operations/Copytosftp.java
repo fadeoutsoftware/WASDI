@@ -34,7 +34,7 @@ public class Copytosftp extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 
-        WasdiLog.debugLog("Copytosftp.executeOperation");
+        WasdiLog.infoLog("Copytosftp.executeOperation");
         
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");

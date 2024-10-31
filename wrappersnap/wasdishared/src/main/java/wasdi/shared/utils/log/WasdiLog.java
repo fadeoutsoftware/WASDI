@@ -181,17 +181,22 @@ public class WasdiLog {
 		WasdiLog.s_oLogLevel = oLogLevel;
 	}
 	
-	public static void initLogger() {
+	public static void initLogger(String sSpecificLogLevel) {
 		
 		try {
 			if (WasdiConfig.Current.useLog4J == false) {
 				String sLogLevel = WasdiConfig.Current.logLevel;
+				
+				if (!Utils.isNullOrEmpty(sSpecificLogLevel)) {
+					sLogLevel = sSpecificLogLevel;
+				}
+				
 				WasdiLogLevels oLevel = WasdiLogLevels.valueOf(sLogLevel);
 				WasdiLog.setLogLevel(oLevel);
 			}
 		}
 		catch (Exception oLoggingException) {
-			WasdiLog.errorLog("WasdiLog.initLogger: Error configuring the log level ", oLoggingException);
+			WasdiLog.errorLog("WasdiLog.initLogger: Error configuring the log level (default will be kept) ", oLoggingException);
 		}		
 	}
 }

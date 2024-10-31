@@ -102,7 +102,7 @@ public class Trigger {
 	            System.exit(-1);        	
 	        }	        
 			
-	        WasdiLog.initLogger();
+	        WasdiLog.initLogger(WasdiConfig.Current.logLevelTrigger);
 						
 			Trigger oTrigger = new Trigger();
 

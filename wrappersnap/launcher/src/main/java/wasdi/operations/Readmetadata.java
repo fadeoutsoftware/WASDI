@@ -17,7 +17,7 @@ public class Readmetadata extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		WasdiLog.debugLog("Readmetadata.executeOperation");
+		WasdiLog.infoLog("Readmetadata.executeOperation");
 		
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");
@@ -67,17 +67,17 @@ public class Readmetadata extends Operation {
                     oDownloadedFile.getProductViewModel().setMetadataFileCreated(true);
                     oDownloadedFile.getProductViewModel().setMetadataFileReference(asynchSaveMetadata(sProductPath));
 
-                    WasdiLog.infoLog("Readmetadata.executeOperation: Metadata File Creation Thread started. Saving Metadata in path " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
+                    WasdiLog.debugLog("Readmetadata.executeOperation: Metadata File Creation Thread started. Saving Metadata in path " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
 
                     oDownloadedFilesRepository.updateDownloadedFile(oDownloadedFile);
                 } else {
-                    WasdiLog.infoLog("Readmetadata.executeOperation: attemp to create metadata file has already been done");
+                    WasdiLog.debugLog("Readmetadata.executeOperation: attemp to create metadata file has already been done");
                 }
             } else {
-                WasdiLog.infoLog("Readmetadata.executeOperation: metadata file reference already present " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
+                WasdiLog.debugLog("Readmetadata.executeOperation: metadata file reference already present " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
             }
 
-            WasdiLog.infoLog("Readmetadata.executeOperation: done, bye");
+            WasdiLog.debugLog("Readmetadata.executeOperation: done, bye");
             
             return true;
             

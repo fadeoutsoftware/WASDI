@@ -13,7 +13,7 @@ public class Libraryupdate extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		WasdiLog.debugLog("Libraryupdate.executeOperation");
+		WasdiLog.infoLog("Libraryupdate.executeOperation");
 		
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");

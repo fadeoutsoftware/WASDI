@@ -27,7 +27,7 @@ public class Killprocesstree extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
-		WasdiLog.debugLog("Killprocesstree.executeOperation");
+		WasdiLog.infoLog("Killprocesstree.executeOperation");
 
 		try {
 			Preconditions.checkNotNull(oProcessWorkspace, "process workspace is null");

@@ -386,15 +386,25 @@ public class ProcessScheduler {
 				WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Launched Processes Size: " + m_aoLaunchedProcesses.size());
 			}
 			
+			
+			// Log if some queue is not empty
 			try {
-				WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Running = " + getRunningList(aoRunningList).size() + " Created = " + getCreatedList(aoCreatedList).size() +  " Ready = " + getReadyList(aoReadyList).size() + " Waiting = " + getWaitingList(aoWaitingList).size());
+				
+				int iRunningSize = getRunningList(aoRunningList).size();
+				int iCreatedSize = getCreatedList(aoCreatedList).size();
+				int iReadySize = getReadyList(aoReadyList).size();
+				int iWaitingSize = getWaitingList(aoWaitingList).size();
+				
+				if (iRunningSize>0 || iCreatedSize >0 || iReadySize >0 || iWaitingSize>0) {
+					WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Running = " + iRunningSize + " Created = " + iCreatedSize +  " Ready = " + iReadySize + " Waiting = " + iWaitingSize);					
+				}
 			}
 			catch (Exception oInnerEx) {
 				WasdiLog.errorLog(m_sLogPrefix + ".sometimesCheck: Exception logging the queue status ", oInnerEx);
 			}
 			
 			
-			// Check Launched Proc list
+			// Check Launched Procesess list to remove from launched array
 			ArrayList<String> asLaunchedToDelete = new ArrayList<String>();
 			
 			for (String sLaunchedProcessWorkspaceId : m_aoLaunchedProcesses.keySet()) {

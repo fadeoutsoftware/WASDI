@@ -35,7 +35,7 @@ public class Environmentupdate extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 
-		WasdiLog.debugLog("Environmentupdate.executeOperation");
+		WasdiLog.infoLog("Environmentupdate.executeOperation");
 
 		if (oParam == null) {
 			WasdiLog.errorLog("Environmentupdate.executeOperation: Parameter is null");
@@ -118,7 +118,7 @@ public class Environmentupdate extends Operation {
 					} else {
 						String sUpdateCommand = (String) oUpdateCommand;
 						
-						WasdiLog.debugLog("Environmentupdate.executeOperation: adding " + sUpdateCommand + " to the envActionsList");
+						WasdiLog.infoLog("Environmentupdate.executeOperation: adding " + sUpdateCommand + " to the envActionsList");
 					
 						// we re-read all the actions line per line
 						ArrayList<String> asActionLines = new ArrayList<>(); 

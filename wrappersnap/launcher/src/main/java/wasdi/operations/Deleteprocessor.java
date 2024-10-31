@@ -26,7 +26,7 @@ public class Deleteprocessor extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		WasdiLog.debugLog("Deleteprocessor.executeOperation");
+		WasdiLog.infoLog("Deleteprocessor.executeOperation");
 		
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");

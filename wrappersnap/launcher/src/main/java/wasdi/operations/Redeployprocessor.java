@@ -13,7 +13,7 @@ public class Redeployprocessor extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		WasdiLog.debugLog("Redeployprocessor.executeOperation");
+		WasdiLog.infoLog("Redeployprocessor.executeOperation");
 		
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");
