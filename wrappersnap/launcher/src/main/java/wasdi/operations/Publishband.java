@@ -365,7 +365,8 @@ public class Publishband extends Operation {
 	}
 
 	protected String getStyleByFileName(String sFile) {
-        // Default Style: can be changed in the following lines depending by the product
+        // Default Style: can be changed in the following lines depending by the product		
+		
         String sStyle = "raster";
 
         // Hard Coded set Flood Style - STYLES HAS TO BE MANAGED
@@ -413,10 +414,14 @@ public class Publishband extends Operation {
             sStyle = "s5p_so2";
         }
         
+        if (sFile.contains("MeteOcean"))  {
+        	sStyle = "MeteOcean";
+        }
+        
         if (WasdiFileUtils.isShapeFile(sFile)) {
         	sStyle = "polygon";
         }
-        
+                
         return sStyle;
 	}
 	
