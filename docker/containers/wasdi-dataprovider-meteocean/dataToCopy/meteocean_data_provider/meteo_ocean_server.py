@@ -171,13 +171,13 @@ def executeAndRetrieve():
             if oDatasetVariableData is None:
                 continue
             """
-
-            if isStringNullOrEmpty(sModel):
-                sModel = extractModelFromFilename(sFileName)
+            sActualModel = sModel
+            if isStringNullOrEmpty(sActualModel):
+                sActualModel = extractModelFromFilename(sFileName)
 
             if isBoundBoxEmpty(dNorth, dSouth, dWest, dEast):
                 # dWest, dNorth, dEast, dSouth = getBoundingBoxFromDataset(oDatasetVariableData)
-                oResultViewModel = createQueryResultViewModel(sDatasetName, sModel, bBiasAdjustment, sFileName, sVariable, sCase, dDatasetNorth, dDatasetSouth,
+                oResultViewModel = createQueryResultViewModel(sDatasetName, sActualModel, bBiasAdjustment, sFileName, sVariable, sCase, dDatasetNorth, dDatasetSouth,
                                                               dDatasetWest, dDatasetEast)
                 aoResults.append(oResultViewModel)
                 continue
@@ -190,7 +190,7 @@ def executeAndRetrieve():
                 if np.any(~np.isnan(oDataPoint)):
                 """
                 logging.info("executeAndRetrieve. found a value close to the point")
-                oResultViewModel = createQueryResultViewModel(sDatasetName, sModel, bBiasAdjustment, sFileName, sVariable, sCase, dNorth,
+                oResultViewModel = createQueryResultViewModel(sDatasetName, sActualModel, bBiasAdjustment, sFileName, sVariable, sCase, dNorth,
                                                               dSouth, dWest, dEast)
                 aoResults.append(oResultViewModel)
             else:
@@ -201,7 +201,7 @@ def executeAndRetrieve():
                     logging.info("executeAndRetrieve. some values in the selected bounding box")
                     dWest, dNorth, dEast, dSouth = getBoundingBoxFromDataset(oValuesInBoundingBox)
                 """
-                oResultViewModel = createQueryResultViewModel(sDatasetName, sModel, bBiasAdjustment, sFileName, sVariable, sCase, dNorth,
+                oResultViewModel = createQueryResultViewModel(sDatasetName, sActualModel, bBiasAdjustment, sFileName, sVariable, sCase, dNorth,
                                                               dSouth, dWest, dEast)
                 aoResults.append(oResultViewModel)
 
