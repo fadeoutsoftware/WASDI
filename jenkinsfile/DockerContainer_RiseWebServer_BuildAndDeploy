@@ -1,0 +1,172 @@
+def getMavenBuildProject() {
+  def aMavenBuildProject = []
+  
+  aMavenBuildProject.add('lib')
+  aMavenBuildProject.add('riseserver')
+	
+  aMavenBuildProject.unique()
+
+  if ( aMavenBuildProject.size() > 0 ) {
+    return '--projects ' + aMavenBuildProject.join(',') + ' --also-make'
+  }
+
+  return ''
+}
+
+pipeline {
+  agent any
+
+  environment {
+    sCurrentRevision             = "${env.BUILD_ID}"
+    sEnvironmentLower            = env.sAnsibleLimit.split('-')[0].toLowerCase()
+    sMavenBuildProject           = getMavenBuildProject()
+    sMavenProfile                = "wasdi-${env.sEnvironmentLower}"
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '365'))
+    disableConcurrentBuilds()
+  }
+
+  tools {
+    jdk "WASDI_JDK_17"
+    maven "WASDI_MAVEN"
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        echo "env.bDeployConfigurationFile         = " + env.bDeployConfigurationFile
+        echo "env.GIT_BRANCH                       = " + env.GIT_BRANCH
+        echo "env.sAnsibleInventory                = " + env.sAnsibleInventory
+        echo "env.sAnsibleLimit                    = " + env.sAnsibleLimit
+        echo "env.sCurrentRevision                 = " + env.sCurrentRevision
+        echo "env.sMavenBuildProject               = " + env.sMavenBuildProject
+        echo "env.sMavenProfile                    = " + env.sMavenProfile
+        echo "env.sSourceBranch                    = " + env.sSourceBranch
+        echo "env.sWasdiAnsiblePath                = " + env.sWasdiAnsiblePath
+        echo "env.sWasdiLauncher                   = " + env.sWasdiLauncher
+        echo "env.sWasdiScheduler                  = " + env.sWasdiScheduler
+        echo "env.sWasdiTomcatOgcProcessesServer   = " + env.sWasdiTomcatOgcProcessesServer
+        echo "env.sWasdiTomcatOpenEoServer         = " + env.sWasdiTomcatOpenEoServer
+        echo "env.sWasdiTomcatWasdiWebServer       = " + env.sWasdiTomcatWasdiWebServer
+        echo "env.sWasdiTrigger                    = " + env.sWasdiTrigger
+        echo "env.sWasdiUtils                      = " + env.sWasdiUtils
+        echo "env.WORKSPACE                        = " + env.WORKSPACE
+
+        sh script: "pwd", label: "Current location"
+        sh script: "cat pom.xml", label: "Content of the main pom.xml file"
+
+        sh script: "which mvn", label: "Tool > mvn > path"
+        sh script: "mvn --version", label: "Tool > mvn > current version"
+        sh script: "which java", label: "Tool > java > path"
+        sh script: "java -version", label: "Tool > java > current version"
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          sh script: """
+            mkdir --parents `dirname ${sWasdiAnsibleVaultFile}`
+            echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
+          """,
+          label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloudSsh', url: "${env.sWasdiAnsibleGitRepositorySshUrl}"]]])
+        }
+      }
+    }
+
+    stage('BUILD THE CODE WITH MAVEN') {
+      steps {
+        sh script: """
+          mvn \
+            --batch-mode \
+            --activate-profiles ${env.sMavenProfile} \
+            --define revision=${env.sCurrentRevision} \
+            --define skipTests \
+            --update-snapshots \
+            ${env.sMavenBuildProject} \
+            clean package
+        """,
+        label: "Create the right packages"
+      }
+    }
+
+    stage('BUILD THE CONTAINER(S)') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/buildWasdiDockerContainer.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sEnvironmentLower} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Build the container(s)"
+      }
+    }
+
+    stage('DEPLOY THE CONTAINER(S) AND THEIR RUN ELEMENTS') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deployDockerContainerWasdiJavaArtifact.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}  sDeployWasdiConfigurationFileAll=${env.bDeployConfigurationFile}'
+        """,
+        label: "Deploy the container(s) and their run elements"
+      }
+    }
+
+    stage('START OR RESTART THE CONTAINER(S)') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/startOrRestartDockerContainer.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} '
+        """,
+        label: "Start or restart the container(s)"
+      }
+    }
+
+    stage('CLEAN THE DOCKER IMAGE(S)') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deleteDockerImage.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sEnvironmentLower} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} '
+        """,
+        label: "Clean the Docker image(s)"
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
