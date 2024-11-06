@@ -1208,6 +1208,63 @@ services:
 {% endfor %}
 {% endif %}
 {% endif %}
+
+
+{% if bRiseServerEnabled == True %}
+  {{ sRiseServerServiceName }}:
+    depends_on:
+{% if bWasdiMongoEnabled == True %}
+      {{ sWasdiMongoServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
+{% endif %}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
+{% if ( aoRiseServerEnvironmentVariableDefault | default([]) | length ) > 0 %}
+    environment:
+{% for oVariable in aoRiseServerEnvironmentVariableDefault %}
+      - {{ oVariable['key'] }}={{ oVariable['value'] }}
+{% endfor %}
+{% endif %}
+    image: "{{ sRiseServerServiceName }}:latest"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.r_{{ sRiseServerServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sRiseServerServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`/rise`)"
+      - "traefik.http.routers.r_{{ sRiseServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sRiseServerServiceName }}.service=s_{{ sRiseServerServiceName }}"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sRiseServerServiceName }}.tls=true"
+{% endif %}
+      - "traefik.http.services.s_{{ sRiseServerServiceName }}.loadbalancer.server.port={{ sRiseServerInternalPort }}"
+{% if ( aWasdiTomcatWasdiWebServerPorts | length ) > 0 %}
+    ports:
+{% for sWasdiTomcatWasdiWebServerCurrentPort in aWasdiTomcatWasdiWebServerPorts %}
+      - "{{ sWasdiTomcatWasdiWebServerCurrentPort | regex_replace('^:', '') }}"
+{% endfor %}
+{% endif %}
+    pull_policy: "never"
+    restart: "always"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiTomcatWasdiWebServerUlimitNofile }}
+        hard: {{ sWasdiTomcatWasdiWebServerUlimitNofile }}
+{% if ( aoRiseTomcatWasdiWebServerVolume | length ) > 0 %}
+    volumes:
+{% for sVolume in aoRiseTomcatWasdiWebServerVolume %}
+      - {{ sVolume }}
+{% endfor %}
+{% endif %}
+{% endif %}
+
+
   {{ sWasdiTraefikServiceName }}:
     command:
       - "--global.sendanonymoususage=false"

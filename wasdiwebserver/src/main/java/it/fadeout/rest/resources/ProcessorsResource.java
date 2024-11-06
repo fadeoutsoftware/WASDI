@@ -463,9 +463,18 @@ public class ProcessorsResource  {
 			oDeployedProcessorViewModel.setParamsSample(oProcessor.getParameterSample());
 			oDeployedProcessorViewModel.setIsPublic(oProcessor.getIsPublic());
 			oDeployedProcessorViewModel.setType(oProcessor.getType());
-			oDeployedProcessorViewModel.setMinuteTimeout((int) (oProcessor.getTimeoutMs()/60000l));
-			oDeployedProcessorViewModel.setDeploymentOngoing(oProcessor.isDeploymentOngoing());
 			
+			int iTimeoutMinutes = 0;
+			
+			if (oProcessor.getTimeoutMs()<=0) {
+				iTimeoutMinutes = -1;
+			}
+			else {
+				iTimeoutMinutes = (int) (oProcessor.getTimeoutMs()/60000l);
+			}
+			
+			oDeployedProcessorViewModel.setMinuteTimeout(iTimeoutMinutes);
+			oDeployedProcessorViewModel.setDeploymentOngoing(oProcessor.isDeploymentOngoing());
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessorsResource.getSingleDeployedProcessor error: " + oEx);
@@ -1763,7 +1772,13 @@ public class ProcessorsResource  {
 			oProcessorToUpdate.setDescription(oUpdatedProcessorVM.getProcessorDescription());
 			oProcessorToUpdate.setIsPublic(oUpdatedProcessorVM.getIsPublic());
 			oProcessorToUpdate.setParameterSample(oUpdatedProcessorVM.getParamsSample());
-			oProcessorToUpdate.setTimeoutMs(((long)oUpdatedProcessorVM.getMinuteTimeout())*1000l*60l);
+			
+			if (oUpdatedProcessorVM.getMinuteTimeout() <= 0) {
+				oProcessorToUpdate.setTimeoutMs(-1);
+			}
+			else {
+				oProcessorToUpdate.setTimeoutMs(((long)oUpdatedProcessorVM.getMinuteTimeout())*1000l*60l);
+			}
 			
 			Date oDate = new Date();
 			oProcessorToUpdate.setUpdateDate((double)oDate.getTime());
