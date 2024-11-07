@@ -147,6 +147,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    PythonCookbook/SearchCMImages.rst
    PythonCookbook/SearchEcostressProducts.rst
    PythonCookbook/SearchERA5Images.rst
+   PythonCookbook/CallCDSAPIsFromWASDI.rst
    PythonCookbook/ImportSearchedImages.rst
    PythonCookbook/ImportAndPreprocess.rst
    PythonCookbook/RunSnapWorkflow.rst
