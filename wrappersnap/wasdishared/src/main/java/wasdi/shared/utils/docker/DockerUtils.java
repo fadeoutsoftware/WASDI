@@ -425,6 +425,7 @@ public class DockerUtils {
             
         } catch (Exception oEx) {
         	WasdiLog.errorLog("DockerUtils.build: " + oEx.toString());
+        	oEx.printStackTrace();
             return "";
         }
 
