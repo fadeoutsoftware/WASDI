@@ -1162,7 +1162,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             	
             	if (m_oParameter!=null) {
             		ProcessorRepository oProcessorRepository = new ProcessorRepository();
-            		//oProcessorRepository.deleteProcessor(m_oParameter.getProcessorID());
+            		oProcessorRepository.deleteProcessor(m_oParameter.getProcessorID());
             	}
             	
             	ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
