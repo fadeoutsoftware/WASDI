@@ -37,7 +37,7 @@ public class Publishband extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		WasdiLog.debugLog("Publishband.executeOperation");
+		WasdiLog.infoLog("Publishband.executeOperation");
 		
         String sLayerId = "";
         
@@ -63,7 +63,7 @@ public class Publishband extends Operation {
             // Check integrity
             if (Utils.isNullOrEmpty(sInputFile)) {
                 // File not good!!
-                WasdiLog.debugLog("Publishband.executeOperation: file is null or empty");
+                WasdiLog.warnLog("Publishband.executeOperation: file is null or empty");
                 String sError = "Input File path is null";
 
                 m_oProcessWorkspaceLogger.log(sError);
@@ -274,7 +274,7 @@ public class Publishband extends Operation {
             if (sLayerId == null) {
                 m_oProcessWorkspaceLogger.log("Error publishing in Geoserver... :(");
                 bResultPublishBand = false;
-                WasdiLog.debugLog("Publishband.executeOperation: Image not published . ");
+                WasdiLog.errorLog("Publishband.executeOperation: Image not published . ");
                 throw new Exception("Layer Id is null. Image not published");
             } else {
 
@@ -309,7 +309,7 @@ public class Publishband extends Operation {
                 // Add it the the db
                 oPublishedBandsRepository.insertPublishedBand(oPublishedBand);
 
-                WasdiLog.debugLog("Publishband.executeOperation: Index Updated");
+                WasdiLog.debugLog("Publishband.executeOperation: Band instered in db");
 
                 // Create the View Model
                 PublishBandResultViewModel oVM = new PublishBandResultViewModel();
@@ -365,7 +365,8 @@ public class Publishband extends Operation {
 	}
 
 	protected String getStyleByFileName(String sFile) {
-        // Default Style: can be changed in the following lines depending by the product
+        // Default Style: can be changed in the following lines depending by the product		
+		
         String sStyle = "raster";
 
         // Hard Coded set Flood Style - STYLES HAS TO BE MANAGED
@@ -413,10 +414,14 @@ public class Publishband extends Operation {
             sStyle = "s5p_so2";
         }
         
+        if (sFile.contains("MeteOcean"))  {
+        	sStyle = "MeteOcean";
+        }
+        
         if (WasdiFileUtils.isShapeFile(sFile)) {
         	sStyle = "polygon";
         }
-        
+                
         return sStyle;
 	}
 	

@@ -236,7 +236,7 @@ public class MissionUtils {
 			else if (sFileName.toUpperCase().startsWith("LS07_")) {
 				return Platforms.LANDSAT7;
 			}
-			else if (sFileName.toUpperCase().startsWith("LC08_")) {
+			else if (sFileName.toUpperCase().startsWith("LC08") || sFileName.toUpperCase().startsWith("LC8")) {
 				return Platforms.LANDSAT8;
 			}
 			else if (sFileName.toUpperCase().startsWith("MER_") || sFileName.toUpperCase().startsWith("ASA_")) {
@@ -278,9 +278,6 @@ public class MissionUtils {
 					|| sFileName.toUpperCase().startsWith("ECOSTRESS")) {
 				return Platforms.ECOSTRESS;
 			}
-			else if (sFileName.toLowerCase().endsWith(".nc")) {
-				return Platforms.CM;
-			}
 			else if (sFileName.toUpperCase().startsWith("SKYWATCH_")) {
 				return Platforms.EARTHCACHE;
 			} 
@@ -306,7 +303,12 @@ public class MissionUtils {
 					|| sFileName.toUpperCase().startsWith("SAR_IMM_1P")) {
 				return Platforms.ERS;
 			}
-			
+			else if (sFileName.toLowerCase().startsWith("meteocean_") && sFileName.toLowerCase().endsWith(".nc")) {
+				return Platforms.METEOCEAN;
+			}
+			else if (sFileName.toLowerCase().endsWith(".nc")) {
+				return Platforms.CM;
+			}
 			return null;
 		}
 		catch (Exception oEx) {
@@ -384,6 +386,7 @@ public class MissionUtils {
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
+			return null;
 		}
 		
 		return new Date();
@@ -425,7 +428,7 @@ public class MissionUtils {
 			// For Others are Not relevant 
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
+			WasdiLog.debugLog("WasdiFileUtils.getProductTypeSatelliteImageFileName: exception " + oEx.toString());
 		}
 		
 		return "";

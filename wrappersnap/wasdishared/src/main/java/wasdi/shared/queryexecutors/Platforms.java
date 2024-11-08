@@ -20,7 +20,7 @@ public class Platforms {
 	public static String PROBAV = "Proba-V";
 	public static String LANDSAT5 = "Landsat-5"; 
 	public static String LANDSAT7 = "Landsat-7";
-	public static String LANDSAT8 = "Landsat-8";
+	public static String LANDSAT8 = "Landsat-*";
 	public static String ENVISAT = "Envisat";
 	
 	public static String COPERNICUS_MARINE = "Copernicus-Marine";
@@ -55,11 +55,11 @@ public class Platforms {
 	public static String COP_DEM = "COP_DEM";
 	public static String S2GLC = "S2GLC";
 	
-	public static String BIGBANG = "BIGBANG";
+	public static String ERS = "ERS";
 	
 	// Return Plaforms
+	public static String BIGBANG = "BIGBANG";
 	public static String RETURN_RASTER = "ReturnRaster";
-	
-	public static String ERS = "ERS";
+	public static String METEOCEAN = "MeteOcean"; 
 
 }

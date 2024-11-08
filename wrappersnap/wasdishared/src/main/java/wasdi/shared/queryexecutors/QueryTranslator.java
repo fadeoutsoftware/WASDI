@@ -169,10 +169,15 @@ public abstract class QueryTranslator {
 	private static final String s_sPLATFORMNAME_BIGBANG = "platformname:BIGBANG";
 	
 	/**
-	 * Token of ERS platform
+	 *  Token of ERS platform
 	 */
 	private static final String s_sPLATFORMNAME_ERS = "platformname:ERS";
 	
+	/**
+	 * Token of TERRA platform
+	 */
+	private static final String s_sPLATFORMNAME_METEOCEAN = "platformname:MeteOcean";
+
 	/**
 	 * Token of product type
 	 */
@@ -592,6 +597,8 @@ public abstract class QueryTranslator {
 			parseBIGBANG(sQuery, oResult);
 			
 			parseERS(sQuery, oResult);
+
+			parseMeteOcean(sQuery, oResult);
 						
 			if (Utils.isNullOrEmpty(oResult.platformName)) {
 				WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: platformName not found: try to read the generic one");
@@ -1118,6 +1125,23 @@ public abstract class QueryTranslator {
 			oResult.platformName = Platforms.ERS;
 		}
 	}
+	
+	private void parseMeteOcean(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_METEOCEAN)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_METEOCEAN);
+			
+			oResult.platformName = Platforms.METEOCEAN;
+			oResult.productLevel = extractValue(sQuery, "productlevel");
+			oResult.sensorMode = extractValue(sQuery, "sensorMode");
+			oResult.instrument = extractValue(sQuery, "Instrument");
+			if (!Utils.isNullOrEmpty(oResult.productLevel) && oResult.productLevel.equals("hs")) {
+				oResult.timeliness = extractValue(sQuery, "timeliness");
+			}
+			if (!Utils.isNullOrEmpty(oResult.productType) && (oResult.productType.equals("rcp85_mid") || oResult.productType.equals("rcp85_end"))) {
+				oResult.polarisation = extractValue(sQuery, "polarisationmode");
+			}
+		}
+	}
 
 	/**
 	 * Extract the value corresponding to the key from the simplifiedquery.
@@ -1133,20 +1157,30 @@ public abstract class QueryTranslator {
 		int iStart = -1;
 		int iEnd = -1;
 
-		if (sQuery.contains(sKey)) {
-			iStart = sQuery.indexOf(sKey);
+		try {
+			if (sQuery.contains(sKey)) {
+				iStart = sQuery.indexOf(sKey);
 
-			iStart += (sKey.length() + 1);
-			iEnd = sQuery.indexOf(" AND ", iStart);
+				iStart += (sKey.length() + 1);
+				iEnd = sQuery.indexOf(" AND ", iStart);
 
-			if (iEnd < 0) {
-				iEnd = sQuery.length();
-			}
+				if (iEnd < 0) {
+					
+					iEnd = sQuery.indexOf(" )", iStart);
+					
+					if (iEnd < 0) {
+						iEnd = sQuery.length();
+					}
+				}
 
-			String sType = sQuery.substring(iStart, iEnd);
-			sType = sType.trim();
+				String sType = sQuery.substring(iStart, iEnd);
+				sType = sType.trim();
 
-			return sType;
+				return sType;
+			}			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("QueryTranslator.extractValue: error ", oEx);
 		}
 
 		return null;

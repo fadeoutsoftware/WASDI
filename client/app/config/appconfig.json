@@ -87,20 +87,20 @@
 				{
 					"indexname": "Instrument",
 					"indexlabel": "Instrument",
-					"indexvalues": "SRAL|SLSTR",
+					"indexvalues": "SRAL|SLSTR|OLCI",
 					"regex": ".*"
 				},
 				{
 					"indexname": "producttype",
 					"indexlabel": "Product Type",
-					"indexvalues": "SR_1_SRA___|SR_1_SRA_A_|SR_1_SRA_BS|SL_1_RBT___",
+					"indexvalues": "SR_1_SRA___|SR_1_SRA_A_|SR_1_SRA_BS|SL_1_RBT___|OL_1_EFR___|OL_1_ERR___",
 					"regex": ".*",
 					"visibilityConditions": "productlevel:L1"
 				},
 				{
 					"indexname": "producttype",
 					"indexlabel": "Product Type",
-					"indexvalues": "SR_2_LAN___|SL_2_AOD___|SL_2_FRP___|SL_2_LST___|SL_2_WST___",
+					"indexvalues": "SR_2_LAN___|SL_2_AOD___|SL_2_FRP___|SL_2_LST___|SL_2_WST___|OL_2_LFR___|OL_2_LRR___|OL_2_WFR___|OL_2_WRR___",
 					"regex": ".*",
 					"visibilityConditions": "productlevel:L2"
 				},
@@ -1092,34 +1092,130 @@
 				}
 			]
 		},
-        {
-            "name": "Return Rasters",
-            "indexname": "platformname",
-            "indexvalue": "ReturnRaster",
-            "selected": false,
-            "ispublic": true,
-            "filters": [
-                {
-                    "indexname": "producttype",
-                    "indexlabel": "Product Type",
-                    "indexvalues": "CIMA_AIR_TEMP_AVG|CIMA_AIR_TEMP_MIN|CIMA_AIR_TEMP_MAX|CIMA_FAPAR|CIMA_PREC|CIMA_SPEI|CIMA_SSMI",
-                    "indexvalue": "CIMA_AIR_TEMP_AVG"
-                }
-            ]
-        },
 		{
-            "name": "ERS",
-            "indexname": "platformname",
-            "indexvalue": "ERS",
-            "filters": [
-                {
-                    "indexname": "producttype",
-                    "indexlabel": "Product Type",
-                    "indexvalues": "SAR_IMP_1P|SAR_IMS_1P|SAR_IMM_1P",
-                    "indexvalue": "SAR_IMP_1P"
-                }
-            ]
-        }
+			"name": "ERS",
+			"indexname": "platformname",
+			"indexvalue": "ERS",
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "SAR_IMP_1P|SAR_IMS_1P|SAR_IMM_1P",
+					"indexvalue": "SAR_IMP_1P"
+				}
+			]
+		},
+		{
+			"name": "Return Rasters",
+			"indexname": "platformname",
+			"indexvalue": "ReturnRaster",
+			"selected": false,
+			"ispublic": true,
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "CIMA_AIR_TEMP_AVG|CIMA_AIR_TEMP_MIN|CIMA_AIR_TEMP_MAX|CIMA_FAPAR|CIMA_PREC|CIMA_SPEI|CIMA_SSMI",
+					"indexvalue": "CIMA_AIR_TEMP_AVG"
+				}
+			]
+		},
+		{
+			"name": "MeteOcean",
+			"indexname": "platformname",
+			"indexvalue": "MeteOcean",
+			"selected": "false",
+			"ispublic": true,
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "dataset",
+					"indexvalues": "hindcast|rcp85_mid|rcp85_end",
+					"indexvalue": "hindcast"
+				},
+				{
+					"indexname": "productlevel",
+					"indexlabel": "variable",
+					"indexvalues": "hs|tm|tp|dirm",
+					"indexvalue": "hs"
+				},
+				{
+					"indexname": "Instrument",
+					"indexlabel": "frequency",
+					"indexvalues": "monthly|seasonal",
+					"indexvalue": "monthly"
+				},
+				{
+					"indexname": "sensorMode",
+					"indexlabel": "case",
+					"indexvalues": "monthlymax|monthlymean|monthlyquantiles|meanseastates_over_p90__monthlymean|meanseastates_over_p95__monthlymean|nseastates_over_p90__monthlymean|nseastates_over_p95__monthlymean|nseastates_over_p90__monthlymean_perc|nseastates_over_p95__monthlymean_perc|meanseastates_over_ss3-1p25__monthlymean|meanseastates_over_ss4-2p5__monthlymean|meanseastates_over_ss5-4__monthlymean|nseastates_over_ss3-1p25__monthlymean|nseastates_over_ss4-2p5__monthlymean|nseastates_over_ss5-4__monthlymean|nseastates_over_ss3-1p25__monthlymean_perc|nseastates_over_ss4-2p5__monthlymean_perc|nseastates_over_ss5-4__monthlymean_perc|ndays_dmax_over_p90_2consecdays__monthlymean|ndays_dmax_over_p95_2consecdays__monthlymean|ndays_dmax_over_p90_2consecdays__monthlymean_perc|ndays_dmax_over_p95_2consecdays__monthlymean_perc",
+					"visibilityConditions": "productlevel:hs&Instrument:monthly",
+					"indexvalue": "monthlymax"
+				},
+				{
+					"indexname": "sensorMode",
+					"indexlabel": "case",
+					"indexvalues": "monthlymax|monthlymean|monthlyquantiles",
+					"visibilityConditions": "productlevel:tm&Instrument:monthly",
+					"indexvalue": "monthlymax"
+				},
+				{
+					"indexname": "sensorMode",
+					"indexlabel": "case",
+					"indexvalues": "monthlymax|monthlymean|monthlyquantiles",
+					"visibilityConditions": "productlevel:tp&Instrument:monthly",
+					"indexvalue": "monthlymax"
+				},
+				{
+					"indexname": "sensorMode",
+					"indexlabel": "case",
+					"indexvalues": "monthlymean|monthlystd",
+					"visibilityConditions": "productlevel:dirm&Instrument:monthly",
+					"indexvalue": "monthlymean"
+				},
+				{
+					"indexname": "sensorMode",
+					"indexlabel": "case",
+					"indexvalues": "seasonalmax|seasonalmean|seasonalquantiles|meanseastates_over_p90__seasonalmean|meanseastates_over_p95__seasonalmean|nseastates_over_p90__seasonalmean|nseastates_over_p95__seasonalmean|nseastates_over_p90__seasonalmean_perc|nseastates_over_p95__seasonalmean_perc|meanseastates_over_ss3-1p25__seasonalmean|meanseastates_over_ss4-2p5__seasonalmean|meanseastates_over_ss5-4__seasonalmean|nseastates_over_ss3-1p25__seasonalmean|nseastates_over_ss4-2p5__seasonalmean|nseastates_over_ss5-4__seasonalmean|nseastates_over_ss3-1p25__seasonalmean_perc|nseastates_over_ss4-2p5__seasonalmean_perc|nseastates_over_ss5-4__seasonalmean_perc|ndays_dmax_over_p90_2consecdays__seasonalmean|ndays_dmax_over_p95_2consecdays__seasonalmean|ndays_dmax_over_p90_2consecdays__seasonalmean_perc|ndays_dmax_over_p95_2consecdays__seasonalmean_perc",
+					"visibilityConditions": "productlevel:hs&Instrument:seasonal",
+					"indexvalue": "seasonalmax"
+				},
+				{
+					"indexname": "sensorMode",
+					"indexlabel": "case",
+					"indexvalues": "seasonalmax|seasonalmean|seasonalquantiles",
+					"visibilityConditions": "productlevel:tm&Instrument:seasonal",
+					"indexvalue": "seasonalmax"
+				},
+				{
+					"indexname": "sensorMode",
+					"indexlabel": "case",
+					"indexvalues": "seasonalmax|seasonalmean|seasonalquantiles",
+					"visibilityConditions": "productlevel:tp&Instrument:seasonal",
+					"indexvalue": "seasonalmax"
+				},
+				{
+					"indexname": "sensorMode",
+					"indexlabel": "case",
+					"indexvalues": "seasonalmean|seasonalstd",
+					"visibilityConditions": "productlevel:dirm&Instrument:seasonal",
+					"indexvalue": "seasonalmean"
+				},
+				{
+					"indexname": "timeliness",
+					"indexlabel": "bias-adjusted",
+					"indexvalues": "false|true",
+					"visibilityConditions": "productlevel:hs",
+					"indexvalue": "false"
+				},
+				{
+					"indexname": "polarisationmode",
+					"indexlabel": "GCM-RCM",
+					"indexvalues": "CCLM4-CanESM2|CCLM4-MIROC5|COSMO-crCLIM1-EC-EARTH|COSMO-crCLIM1-HadGEM2-ES|COSMO-crCLIM1-NorESM1-M|HIRHAM5-CNRM-CM5|HIRHAM5-EC-EARTH|HIRHAM5-HadGEM2-ES|HIRHAM5-IPSL-CM5A-MR|HIRHAM5-MPI-ESM-LR|HIRHAM5-NorESM1-M|RCA4-CNRM-CM5|RCA4-EC-EARTH|RCA4-HadGEM2-ES|RCA4-IPSL-CM5A-MR|RCA4-MPI-ESM-LR|RCA4-NorESM1",
+					"visibilityConditions": "producttype:rcp85_mid|rcp85_end"
+				}
+			]
+		}
 	],
 	"orbitsearch": {
 		"sensortypes": [

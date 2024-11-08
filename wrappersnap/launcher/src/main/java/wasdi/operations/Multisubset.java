@@ -23,7 +23,7 @@ public class Multisubset extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
         
-		WasdiLog.debugLog("Multisubset.executeOperation");
+		WasdiLog.infoLog("Multisubset.executeOperation");
         
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");
@@ -71,25 +71,25 @@ public class Multisubset extends Operation {
                 // Check th bbox
                 if (oSettings.getLatNList().size() <= iTiles) {
                     m_oProcessWorkspaceLogger.log(s_sLogMessage);
-                    WasdiLog.debugLog("Multisubset.executeOperation: Lat N List does not have " + iTiles + " element. continue");
+                    WasdiLog.warnLog("Multisubset.executeOperation: Lat N List does not have " + iTiles + " element. continue");
                     continue;
                 }
 
                 if (oSettings.getLatSList().size() <= iTiles) {
                     m_oProcessWorkspaceLogger.log(s_sLogMessage);
-                    WasdiLog.debugLog("Multisubset.executeOperation: Lat S List does not have " + iTiles + " element. continue");
+                    WasdiLog.warnLog("Multisubset.executeOperation: Lat S List does not have " + iTiles + " element. continue");
                     continue;
                 }
 
                 if (oSettings.getLonEList().size() <= iTiles) {
                     m_oProcessWorkspaceLogger.log(s_sLogMessage);
-                    WasdiLog.debugLog("Multisubset.executeOperation: Lon E List does not have " + iTiles + " element. continue");
+                    WasdiLog.warnLog("Multisubset.executeOperation: Lon E List does not have " + iTiles + " element. continue");
                     continue;
                 }
 
                 if (oSettings.getLonWList().size() <= iTiles) {
                     m_oProcessWorkspaceLogger.log(s_sLogMessage);
-                    WasdiLog.debugLog("Multisubset.executeOperation: Lon W List does not have " + iTiles + " element. continue");
+                    WasdiLog.warnLog("Multisubset.executeOperation: Lon W List does not have " + iTiles + " element. continue");
                     continue;
                 }
 

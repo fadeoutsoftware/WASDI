@@ -22,8 +22,8 @@ public class EndMessageProvider {
 	
 	static {
 		
-		String sPrefix =  "----WASDI:";
-		String sSuffix = "----";
+		String sPrefix =  "----WASDI: ";
+		String sSuffix = " ----";
 		
 		List<String> asTmpGoodMessages = new ArrayList<>();
 		
@@ -40,7 +40,7 @@ public class EndMessageProvider {
 		asTmpGoodMessages.add(sPrefix + "I find your lack of faith disturbing." + sSuffix);
 		asTmpGoodMessages.add(sPrefix + "Try not. Do, or do not. There is no try." + sSuffix);
 		asTmpGoodMessages.add(sPrefix + "Goonies never say die." + sSuffix);
-		asTmpGoodMessages.add(sPrefix + "Nothing shocks me–I'm a scientist." + sSuffix);
+		asTmpGoodMessages.add(sPrefix + "Nothing shocks me I'm a scientist." + sSuffix);
 		asTmpGoodMessages.add(sPrefix + "Are you telling me you built a time machine... out of a DeLorean?" + sSuffix);
 		asTmpGoodMessages.add(sPrefix + "Yeah, well. The Dude abides." + sSuffix);
 		

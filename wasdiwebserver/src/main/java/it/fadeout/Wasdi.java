@@ -145,7 +145,7 @@ public class Wasdi extends ResourceConfig {
 			WasdiLog.warnLog("Wasdi.initWasdi: ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
 		}
 		
-		WasdiLog.initLogger();
+		WasdiLog.initLogger(WasdiConfig.Current.logLevelServer);
 		
 		// set nfs properties download folder
 		String sUserHome = System.getProperty("user.home");

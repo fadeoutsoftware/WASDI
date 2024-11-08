@@ -394,6 +394,7 @@ public class ProcessorsResource  {
 				oDeployedProcessorViewModel.setMinuteTimeout((int) (oProcessor.getTimeoutMs()/60000l));
 				oDeployedProcessorViewModel.setImgLink(ImageResourceUtils.getProcessorLogoPlaceholderPath(oProcessor));
 				oDeployedProcessorViewModel.setLogo(oProcessor.getLogo());
+				oDeployedProcessorViewModel.setDeploymentOngoing(oProcessor.isDeploymentOngoing());
 				
 				aoRet.add(oDeployedProcessorViewModel);
 			}
@@ -462,8 +463,18 @@ public class ProcessorsResource  {
 			oDeployedProcessorViewModel.setParamsSample(oProcessor.getParameterSample());
 			oDeployedProcessorViewModel.setIsPublic(oProcessor.getIsPublic());
 			oDeployedProcessorViewModel.setType(oProcessor.getType());
-			oDeployedProcessorViewModel.setMinuteTimeout((int) (oProcessor.getTimeoutMs()/60000l));
 			
+			int iTimeoutMinutes = 0;
+			
+			if (oProcessor.getTimeoutMs()<=0) {
+				iTimeoutMinutes = -1;
+			}
+			else {
+				iTimeoutMinutes = (int) (oProcessor.getTimeoutMs()/60000l);
+			}
+			
+			oDeployedProcessorViewModel.setMinuteTimeout(iTimeoutMinutes);
+			oDeployedProcessorViewModel.setDeploymentOngoing(oProcessor.isDeploymentOngoing());
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessorsResource.getSingleDeployedProcessor error: " + oEx);
@@ -1577,6 +1588,16 @@ public class ProcessorsResource  {
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.REDEPLOYPROCESSOR.name(),oProcessorToReDeploy.getName(),oProcessorParameter);			
 			
 			if (oRes.getBoolValue()) {
+				
+				// if the launch of the redeployment was successful, then we set the flag to track the ongoing deployment
+				// set flag for ongoing deployment
+				oProcessorToReDeploy.setDeploymentOngoing(true);
+				if (oProcessorRepository.updateProcessor(oProcessorToReDeploy)) {
+					WasdiLog.debugLog("ProcessorResource.redeployProcessor. Flag set to true for ongoing deployment");
+				} else {
+					WasdiLog.warnLog("ProcessorResource.redeployProcessor. Could not set back to false the flag for ongoing deployment");
+				}
+				
 				return Response.ok().build();
 			}
 			else {
@@ -1588,6 +1609,7 @@ public class ProcessorsResource  {
 			return Response.serverError().build();
 		}
 	}
+	
 	
 	/**
 	 * Force the update of the lib of a processor
@@ -1670,9 +1692,18 @@ public class ProcessorsResource  {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
-			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.LIBRARYUPDATE.name(),oProcessorToForceUpdate.getName(),oProcessorParameter);			
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.LIBRARYUPDATE.name(),oProcessorToForceUpdate.getName(),oProcessorParameter);
 			
 			if (oRes.getBoolValue()) {
+				// if the launch of the library update was successful, then we set the flag to track the ongoing deployment
+				// set flag for ongoing deployment
+				oProcessorToForceUpdate.setDeploymentOngoing(true);
+				if (oProcessorRepository.updateProcessor(oProcessorToForceUpdate)) {
+					WasdiLog.debugLog("ProcessorResource.libraryUpdate. Flag set to true for ongoing deployment");
+				} else {
+					WasdiLog.warnLog("ProcessorResource.libraryUpdate. Could not set back to false the flag for ongoing deployment");
+				}
+				
 				return Response.ok().build();
 			}
 			else {
@@ -1741,9 +1772,13 @@ public class ProcessorsResource  {
 			oProcessorToUpdate.setDescription(oUpdatedProcessorVM.getProcessorDescription());
 			oProcessorToUpdate.setIsPublic(oUpdatedProcessorVM.getIsPublic());
 			oProcessorToUpdate.setParameterSample(oUpdatedProcessorVM.getParamsSample());
-			oProcessorToUpdate.setTimeoutMs(((long)oUpdatedProcessorVM.getMinuteTimeout())*1000l*60l);
-			// NOTE: The version is handled only on server side in automatic way
-			//oProcessorToUpdate.setVersion(oUpdatedProcessorVM.getProcessorVersion());
+			
+			if (oUpdatedProcessorVM.getMinuteTimeout() <= 0) {
+				oProcessorToUpdate.setTimeoutMs(-1);
+			}
+			else {
+				oProcessorToUpdate.setTimeoutMs(((long)oUpdatedProcessorVM.getMinuteTimeout())*1000l*60l);
+			}
 			
 			Date oDate = new Date();
 			oProcessorToUpdate.setUpdateDate((double)oDate.getTime());
@@ -1935,7 +1970,18 @@ public class ProcessorsResource  {
 					oProcessorParameter.setProcessorType(oProcessorToUpdate.getType());
 					
 					// Trigger the library update in this node
-					Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.LIBRARYUPDATE.name(), oProcessorToUpdate.getName(), oProcessorParameter);
+					PrimitiveResult oRes = Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.LIBRARYUPDATE.name(), oProcessorToUpdate.getName(), oProcessorParameter);
+					
+					if (oRes.getBoolValue()) {
+						// if the launch of the library update was successful, then we set the flag to track the ongoing deployment
+						// set flag for ongoing deployment
+						oProcessorToUpdate.setDeploymentOngoing(true);
+						if (oProcessorRepository.updateProcessor(oProcessorToUpdate)) {
+							WasdiLog.debugLog("ProcessorResource.updateProcessorFiles. Flag set to true for ongoing deployment");
+						} else {
+							WasdiLog.warnLog("ProcessorResource.updateProcessorFiles. Could not set back to false the flag for ongoing deployment");
+						}
+					}
 					
 					WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: LIBRARYUPDATE process scheduled");
 				}

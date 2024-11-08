@@ -24,6 +24,7 @@ import org.esa.snap.lib.openjpeg.utils.OpenJpegExecRetriever;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.esa.snap.runtime.EngineConfig;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -188,8 +189,32 @@ public class LauncherMain  {
         }
         else { 
         	WasdiLog.debugLog("Launcher Main - WASDI Configured to log on console");
-        	WasdiLog.initLogger();
+        	WasdiLog.initLogger(WasdiConfig.Current.logLevelLauncher);
         }
+        
+        // Filter the mongodb logs
+		try {
+			ch.qos.logback.classic.Logger oMongoLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.mongodb.driver.cluster");
+			oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);	
+			
+			oMongoLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.mongodb.driver");
+			oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("Disabling mongo driver logging exception " + oEx.toString());
+		}        
+		
+        // Filter the apache logs
+		try {
+			ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("httpclient");
+			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);	
+			
+			oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache");
+			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("Disabling apache logging exception " + oEx.toString());
+		}        		
 
         try {
 
@@ -222,7 +247,7 @@ public class LauncherMain  {
 
             // Set the process object id as Logger Prefix: it will help to filter logs
             WasdiLog.setPrefix("[" + s_oProcessWorkspace.getProcessObjId() + "]");
-            WasdiLog.debugLog("Executing " + sOperation + " Parameter " + sParameter);
+            WasdiLog.infoLog("Executing " + sOperation + " Parameter " + sParameter);
 
             // Set the ProcessWorkspace STATUS as running
             WasdiLog.debugLog("LauncherMain: setting ProcessWorkspace start date to now");
@@ -241,7 +266,7 @@ public class LauncherMain  {
             oLauncher.executeOperation(sOperation, oBaseParameter);
 
             // Operation Done
-            WasdiLog.debugLog(getBye());
+            WasdiLog.infoLog(getBye());
 
         }
         catch (Throwable oException) {
@@ -505,7 +530,7 @@ public class LauncherMain  {
             	else s_oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());        		
         	}
 
-        	WasdiLog.debugLog("LauncherMain.executeOperation: Operation Result " + bOperationResult);
+        	WasdiLog.infoLog("LauncherMain.executeOperation: Operation Result " + bOperationResult);
         	
         	// Check if we have to send a notification
         	if (s_oProcessWorkspace.isNotifyOwnerByMail()) {
@@ -558,7 +583,7 @@ public class LauncherMain  {
         	}
         }
 
-        WasdiLog.debugLog("Launcher did his job. Bye bye, see you soon. [" + sParameter + "]");
+        WasdiLog.infoLog("Launcher did his job. Bye bye, see you soon. [" + sParameter + "]");
     }
 
     /**

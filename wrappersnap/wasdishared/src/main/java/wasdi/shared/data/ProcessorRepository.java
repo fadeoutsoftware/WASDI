@@ -73,6 +73,8 @@ public class ProcessorRepository extends  MongoRepository {
      */
     public Processor getProcessorByName(String sName) {
 
+    	if (Utils.isNullOrEmpty(sName)) return null;
+    	
         try {
             Document oWSDocument = getCollection(m_sThisCollection).find(new Document("name", sName)).first();
             if (null != oWSDocument) {

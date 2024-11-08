@@ -11,7 +11,7 @@ public class Runprocessor extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		WasdiLog.debugLog("Runprocessor.executeOperation");
+		WasdiLog.infoLog("Runprocessor.executeOperation");
 		
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");

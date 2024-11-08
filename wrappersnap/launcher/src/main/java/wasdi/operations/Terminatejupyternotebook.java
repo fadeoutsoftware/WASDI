@@ -11,7 +11,7 @@ public class Terminatejupyternotebook extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
-		WasdiLog.debugLog("Terminatejupyternotebook.executeOperation");
+		WasdiLog.infoLog("Terminatejupyternotebook.executeOperation");
 
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");	
@@ -34,7 +34,7 @@ public class Terminatejupyternotebook extends Operation {
 
 			boolean bRet = oEngine.terminateJupyterNotebook(oParameter);
 			
-			WasdiLog.errorLog("Terminatejupyternotebook.executeOperation: delete result " + bRet);
+			WasdiLog.debugLog("Terminatejupyternotebook.executeOperation: delete result " + bRet);
 			
 			return true;
 			

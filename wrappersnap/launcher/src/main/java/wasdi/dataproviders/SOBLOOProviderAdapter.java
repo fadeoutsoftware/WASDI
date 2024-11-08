@@ -367,20 +367,26 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 				|| sPlatformType.equals(Platforms.SENTINEL3)) {
 			Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName);
 			
-			Date oNow = new Date();
-			
-			long lDistance = oNow.getTime() - oImageDate.getTime();
-			
-			if (lDistance> 2*30*24*60*60*1000) {
-				return DataProviderScores.LTA.getValue();
-			}
-			
-			if (isWorkspaceOnSameCloud()) {
-				return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
+			if (oImageDate!=null) {
+				Date oNow = new Date();
+				
+				long lDistance = oNow.getTime() - oImageDate.getTime();
+				
+				if (lDistance> 2*30*24*60*60*1000) {
+					return DataProviderScores.LTA.getValue();
+				}
+				
+				if (isWorkspaceOnSameCloud()) {
+					return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
+				}
+				else {
+					return DataProviderScores.DOWNLOAD.getValue();
+				}				
 			}
 			else {
-				return DataProviderScores.DOWNLOAD.getValue();
+				return DataProviderScores.LTA.getValue();
 			}
+
 		}
 		
 		return 0;

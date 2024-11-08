@@ -77,6 +77,8 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
+		
+		WasdiLog.infoLog("Share.executeOperation");
 
 		if (oParam == null) {
 			WasdiLog.errorLog("Share.executeOperation:Parameter is null");
@@ -189,7 +191,6 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 
 				m_oProcessWorkspaceLogger.log("Got File, try to read");
 
-
 				// Save it in the register
 				DownloadedFile oAlreadyDownloaded = new DownloadedFile();
 				oAlreadyDownloaded.setFileName(sFileNameWithoutPath);
@@ -201,7 +202,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 				if (!Utils.isNullOrEmpty(sBoundingBox)) {
 					oAlreadyDownloaded.setBoundingBox(sBoundingBox);
 				} else {
-					WasdiLog.infoLog("Share.executeOperation: bounding box not available in the parameter");
+					WasdiLog.debugLog("Share.executeOperation: bounding box not available in the parameter");
 				}
 
 				if (oProduct != null) {
@@ -222,7 +223,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 			// Final Check: do we have at the end a valid file name?
 			if (Utils.isNullOrEmpty(sFileName)) {
 				// No, we are in error
-				WasdiLog.debugLog("Share.executeOperation: file is null there must be an error");
+				WasdiLog.errorLog("Share.executeOperation: file is null there must be an error");
 
 				String sError = "The name of the file to share result null";
 				m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.SHARE.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());

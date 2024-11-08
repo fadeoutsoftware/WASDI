@@ -611,16 +611,21 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			else if (sType.equals("RAW")) {
 				Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName);
 				
-				Date oNow = new Date();
-				
-				long lDistance = oNow.getTime() - oImageDate.getTime();
-				
-				if (lDistance> 365*24*60*60*1000) {
-					return -1;
-				}				
+				if (oImageDate!=null) {
+					Date oNow = new Date();
+					
+					long lDistance = oNow.getTime() - oImageDate.getTime();
+					
+					if (lDistance> 365*24*60*60*1000) {
+						return -1;
+					}				
+					else {
+						if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
+						else return DataProviderScores.DOWNLOAD.getValue();					
+					}					
+				}
 				else {
-					if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
-					else return DataProviderScores.DOWNLOAD.getValue();					
+					return DataProviderScores.LTA.getValue();
 				}
 			}
 			
