@@ -113,7 +113,7 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 	protected void addOperativeParametersToWasdiPayload(Map<String, Object> oPayloadMap, String sSaveFolderPath, String sDownloadedFileName, int iMaxRetries) {
 		oPayloadMap.put("downloadDirectory", sSaveFolderPath);
 		oPayloadMap.put("downloadFileName", sDownloadedFileName);
-		oPayloadMap.put("maxRetry", sDownloadedFileName); // not sure I need
+		oPayloadMap.put("maxRetry", iMaxRetries); // not sure I need
 	}
 	
 	
@@ -197,13 +197,13 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 			String[] asTokens = sDecodedUrl.split("payload=");
 			if (asTokens.length == 2) {
 				sPayload = asTokens[1];
-				WasdiLog.debugLog("PythonBasedProviderAdapter.extractWasdiPayloadFromUrl json string: " + sPayload);
+				WasdiLog.debugLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap json string: " + sPayload);
 				return JsonUtils.jsonToMapOfObjects(sPayload);
 			}
-			WasdiLog.warnLog("PythonBasedProviderAdapter.extractWasdiPayloadFromUrl. Payload not found in url " + sUrl);
+			WasdiLog.warnLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap. Payload not found in url " + sUrl);
 		}
 		
-		WasdiLog.warnLog("PythonBasedProviderAdapter.extractWasdiPayloadFromUrl. Decoded url is null or empty " + sUrl);
+		WasdiLog.warnLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap. Decoded url is null or empty " + sUrl);
 		return null;
 	}
 	

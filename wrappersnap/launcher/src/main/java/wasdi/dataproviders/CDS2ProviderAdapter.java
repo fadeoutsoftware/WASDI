@@ -41,7 +41,7 @@ public class CDS2ProviderAdapter extends PythonBasedProviderAdapter {
 		String sInputFullPath = "";
 		String sOutputFullPath = "";
 		
-		WasdiLog.debugLog("PythonBasedProviderAdapter.executeDownloadFile: product name " + oProcessWorkspace.getProductName());	
+		WasdiLog.debugLog("CDS2ProviderAdapter.executeDownloadFile: product name " + oProcessWorkspace.getProductName());	
 		
 		try {		
 			// let's add the additional information to the json passed to the Python data provider
