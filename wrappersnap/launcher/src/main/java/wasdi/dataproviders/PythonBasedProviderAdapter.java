@@ -129,9 +129,18 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 		
 		WasdiLog.debugLog("PythonBasedProviderAdapter.executeDownloadFile: product name " + oProcessWorkspace.getProductName());	
 		
-		try {		
+		try {	
+			
+			// sSaveDirOnServer contains the path until the workspace. However, if the workspace has just been created, the workspace
+			// directory is not yet present and needs to be created
+			File oTargetDir = new File(sSaveDirOnServer);
+			boolean oDirCreated = oTargetDir.mkdirs();
+			if (oDirCreated)
+				WasdiLog.debugLog("PythonBasedProviderAdapter.executeDownloadFile. Workspace directory has been crated");
+			
+			
 			// let's add the additional information to the json passed to the Python data provider
-			Map<String, Object> oMap = fromtWasdiPayloadToObjectMap(sFileURL);
+			Map<String, Object> oMap = fromWasdiPayloadToObjectMap(sFileURL);
 			addOperativeParametersToWasdiPayload(oMap, sSaveDirOnServer, oProcessWorkspace.getProductName(), iMaxRetry);
 
 			
@@ -189,7 +198,7 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 	
 	
 	
-	protected Map<String, Object> fromtWasdiPayloadToObjectMap(String sUrl) {
+	protected Map<String, Object> fromWasdiPayloadToObjectMap(String sUrl) {
 		String sDecodedUrl = decodeUrl(sUrl);
 
 		String sPayload = null;

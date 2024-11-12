@@ -32,6 +32,16 @@ public class QueryExecutorESA extends QueryExecutor {
 				? oESADataProvider.link 
 				: null;
 	}
+	
+	@Override
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+		if (sProduct.toUpperCase().startsWith("SAR_IMP_1P")
+				|| sProduct.toUpperCase().startsWith("SAR_IMS_1P")
+				|| sProduct.toUpperCase().startsWith("SAR_IMM_1P" )) {
+			return sOriginalUrl;
+		}
+		return null;
+	}
 
 	@Override
 	public int executeCount(String sQuery) {
@@ -60,6 +70,9 @@ public class QueryExecutorESA extends QueryExecutor {
 				
 			if (iMatches != null) {
 				iCount = iMatches;
+			}
+			else if (!Utils.isNullOrEmpty(oQueryViewModel.productName) && !Utils.isNullOrEmpty(oJsonBody.optString("id"))){
+				iCount = 1;
 			}
 				
 			WasdiLog.debugLog("QueryExecutorESA.executeCount. Number of matches found: " + iMatches);
@@ -94,9 +107,7 @@ public class QueryExecutorESA extends QueryExecutor {
 			
 			// process offset and limit
 			aoResults = m_oResponseTranslator.translateBatch(sResult, bFullViewModel);
-			
-			WasdiLog.debugLog("QueryExecutorESA.executeAndRetrieve. Returning results: " + aoResults.size());
-			
+						
 			return aoResults;
 			
 		} catch (Exception oEx) {
@@ -131,6 +142,8 @@ public class QueryExecutorESA extends QueryExecutor {
 		if (!Utils.isNullOrEmpty(sFileName)) {
 			// example: https://eocat.esa.int/eo-catalogue/collections/SAR_IMP_1P/items/SAR_IMP_1PNESA20110212_100804_00000015A165_00165_82684_0000
 			// search by name
+			if (!sURL.endsWith("/"))
+				sURL += "/";
 			sURL += sFileName;
 		}
 		else {
@@ -180,10 +193,6 @@ public class QueryExecutorESA extends QueryExecutor {
 		return null;
 	}
 	
-	public static void main(String[]args) throws Exception {
-		boolean bResult = WasdiConfig.readConfig("C:/temp/wasdi/wasdiLocalTESTConfig.json");
-		QueryExecutorESA oExecutor = new QueryExecutorESA();
-		
-	}
+
 
 }

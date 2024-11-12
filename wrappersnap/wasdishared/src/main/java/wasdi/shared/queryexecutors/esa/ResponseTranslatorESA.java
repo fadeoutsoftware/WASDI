@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 import wasdi.shared.queryexecutors.ResponseTranslator;
 import wasdi.shared.utils.Utils;
@@ -16,7 +17,7 @@ import wasdi.shared.viewmodels.search.QueryResultViewModel;
 public class ResponseTranslatorESA extends ResponseTranslator {
 
 	public ResponseTranslatorESA() {
-		// TODO Auto-generated constructor stub
+		super();
 	}
 
 	@Override
@@ -31,13 +32,19 @@ public class ResponseTranslatorESA extends ResponseTranslator {
 		
 		JSONArray aoFeatureArray = oJSONResponse.optJSONArray("features");
 		
+		List<QueryResultViewModel> aoResults = null;
+
 		if (aoFeatureArray == null) {
-			WasdiLog.debugLog("ResponseTranslatorESA.translateBatch. No 'features' entry found in the response");
+			WasdiLog.debugLog("ResponseTranslatorESA.translateBatch. No 'features' entry found in the response.");
+			// might be a single result
+			QueryResultViewModel oResultVM = processProduct(oJSONResponse, bFullViewModel); 
+			if (oResultVM != null) {
+				aoResults = Arrays.asList(oResultVM);
+				return aoResults;
+			}
 			return null;
 		}
-		
-		List<QueryResultViewModel> aoResults = null;
-		
+			
 		try {
 			for (Object oItem : aoFeatureArray) {
 				if (oItem != null) {
@@ -60,30 +67,48 @@ public class ResponseTranslatorESA extends ResponseTranslator {
 	
 	private QueryResultViewModel processProduct(JSONObject oJsonItem, boolean bFullViewModel) {
 		try {
-		// BASIC INFO
-		String sProductTitle = oJsonItem.optString("title");
-		String sProductId = oJsonItem.optString("id");
-		String sLink = getDownloadLink(oJsonItem); 
-		String sFootprint = getFootprint(oJsonItem);
-		
-		// INFO FOR THE SUMMARY: date, size, instrument, mode, platform, platform serial id
-		JSONObject oJsonAcquisitionParameters = oJsonItem.getJSONObject("acquisitionParameters");
-		String sBeginningDateTime = oJsonAcquisitionParameters.getString("beginningDateTime");
-		String sMode = oJsonAcquisitionParameters.getString("operationalMode");
-		JSONObject oJsonInstrument = oJsonItem.getJSONObject("instrument");
-		String sInstrumentShortName = oJsonInstrument.getString("instumentShortName");
-		JSONObject oJsonPlatform = oJsonItem.getJSONObject("platform");
-		String sPlatformName = oJsonPlatform.getString("platfromShortName");
-		String sPlatformSerialIdentifier = oJsonItem.getString("platformSerialIdentifier");
-		
-		String sSummary = getSummary(sBeginningDateTime, "0B", sInstrumentShortName, sMode, sPlatformName, sPlatformSerialIdentifier);
-		
-		QueryResultViewModel oResult = new QueryResultViewModel();
-		setBasicInfo(oResult, sProductId, sProductTitle, sLink, sSummary, sFootprint);
-		setBasicProperties(oResult, sBeginningDateTime, sPlatformName, sPlatformSerialIdentifier, sInstrumentShortName, sMode, "0B");
-		if (bFullViewModel)
-			setAllProviderProperties(oResult, oJsonItem);
-		return oResult;
+			// BASIC INFO
+			String sProductId = oJsonItem.optString("id");
+			String sProductTitle = oJsonItem.optString("title");
+			if (Utils.isNullOrEmpty(sProductTitle))
+				sProductTitle = sProductId;
+			String sLink = getDownloadLink(oJsonItem); 
+			String sFootprint = getFootprint(oJsonItem);
+			
+			// INFO FOR THE SUMMARY: date, size, instrument, mode, platform, platform serial id
+			JSONObject oJsonAcquisitionInfo = oJsonItem.optJSONObject("acquisitionInformation");
+			String sBeginningDateTime = "";
+			String sMode = "";
+			String sInstrumentShortName = "";
+			String sPlatformName = "";
+			String sPlatformSerialIdentifier = "";
+			
+			if (oJsonAcquisitionInfo != null) {
+				JSONObject oJsonAcquisitionParameters = oJsonAcquisitionInfo.optJSONObject("acquisitionParameters");
+				
+				if (oJsonAcquisitionInfo != null) {
+					sBeginningDateTime = oJsonAcquisitionParameters.getString("beginningDateTime");
+					sMode = oJsonAcquisitionParameters.getString("operationalMode");
+					JSONObject oJsonInstrument = oJsonItem.optJSONObject("instrument");
+					
+					if (oJsonInstrument != null) {
+						sInstrumentShortName = oJsonInstrument.getString("instumentShortName");
+					}
+					
+					JSONObject oJsonPlatform = oJsonItem.optJSONObject("platform");
+					sPlatformName = oJsonPlatform.optString("platfromShortName", "");
+					sPlatformSerialIdentifier = oJsonItem.optString("platformSerialIdentifier", "");
+				}		
+			}
+			
+			String sSummary = getSummary(sBeginningDateTime, "0B", sInstrumentShortName, sMode, sPlatformName, sPlatformSerialIdentifier);
+			
+			QueryResultViewModel oResult = new QueryResultViewModel();
+			setBasicInfo(oResult, sProductId, sProductTitle, sLink, sSummary, sFootprint);
+			setBasicProperties(oResult, sBeginningDateTime, sPlatformName, sPlatformSerialIdentifier, sInstrumentShortName, sMode, "0B");
+			if (bFullViewModel)
+				setAllProviderProperties(oResult, oJsonItem);
+			return oResult;
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("ResponseTranslatorESA.processProduct. Error", oEx);
 		}
@@ -93,12 +118,15 @@ public class ResponseTranslatorESA extends ResponseTranslator {
 	
 	private String getDownloadLink(JSONObject oJsonItem) {
 		JSONArray aoLinks = oJsonItem.optJSONArray("links");
-		String sDownloadLink = null;
+		String sDownloadLink = "https://payload={}"; 
+		String sTitle = "";
 		
 		for (int i = 0; i < aoLinks.length(); i++) {
 			JSONObject oItem = aoLinks.getJSONObject(i);
-			if (oItem.getString("title").equalsIgnoreCase("Download")) {
-				sDownloadLink = oItem.getString("href");
+			sTitle = oItem.optString("title");
+			if (!Utils.isNullOrEmpty(sTitle) && sTitle.equalsIgnoreCase("Download")) {
+				String sHref = oItem.getString("href");
+				sDownloadLink = "https://payload={" + sHref + "}";
 				break;
 			}
 		}
@@ -222,28 +250,42 @@ public class ResponseTranslatorESA extends ResponseTranslator {
 	private void setAllProviderProperties(QueryResultViewModel oViewModel, JSONObject oJsonItem) {
 		Map<String, String> oMapProperties = oViewModel.getProperties();
 		JSONObject oProperties = oJsonItem.getJSONObject("properties");
-		oMapProperties.putIfAbsent("kind", oProperties.getString("id"));
-		oMapProperties.putIfAbsent("collection", oProperties.getString("collection"));
-		oMapProperties.putIfAbsent("title", oProperties.getString("title"));
-		oMapProperties.putIfAbsent("updated", oProperties.getString("updated"));
-		oMapProperties.putIfAbsent("status", oProperties.getString("status"));
 		
-		JSONObject oProductInformation = oProperties.getJSONObject("productInformation");
-		Iterator<String> oProductInfoIterator = oProductInformation.keys();
-		while(oProductInfoIterator.hasNext()) {
-			String sKey = oProductInfoIterator.next();
-			oMapProperties.putIfAbsent(sKey, oProductInformation.getString(sKey));
+		if (!Utils.isNullOrEmpty(oProperties.optString("id")))
+			oMapProperties.putIfAbsent("kind", oProperties.getString("id"));
+		
+		if (!Utils.isNullOrEmpty(oProperties.optString("collection")))
+			oMapProperties.putIfAbsent("collection", oProperties.getString("collection"));
+		
+		if (!Utils.isNullOrEmpty(oProperties.optString("title")))
+			oMapProperties.putIfAbsent("title", oProperties.getString("title"));
+		
+		if (!Utils.isNullOrEmpty(oProperties.optString("updated")))
+			oMapProperties.putIfAbsent("updated", oProperties.getString("updated"));
+		
+		if (!Utils.isNullOrEmpty(oProperties.optString("status")))			
+			oMapProperties.putIfAbsent("status", oProperties.getString("status"));
+		
+		JSONObject oProductInformation = oProperties.optJSONObject("productInformation");
+		if (oProductInformation != null) {		
+			Iterator<String> oProductInfoIterator = oProductInformation.keys();
+			while(oProductInfoIterator.hasNext()) {
+				String sKey = oProductInfoIterator.next();
+				oMapProperties.putIfAbsent(sKey, oProductInformation.getString(sKey));
+			}
 		}
 		
-		JSONArray aoAcquisitionInformation = oProperties.getJSONArray("acquisitionInformation");
-		for (int i = 0; i < aoAcquisitionInformation.length(); i++) {
-			JSONObject oItem = aoAcquisitionInformation.getJSONObject(i);
-			Iterator<String> oAcquisitionInfoIteratorr = oItem.keys();
-			while (oAcquisitionInfoIteratorr.hasNext()) {
-				String sKey = oAcquisitionInfoIteratorr.next();
-				JSONObject oSubItem = oItem.getJSONObject(sKey);
-				if (oSubItem != null) {
-					setPropertiesFromJSONObject(oMapProperties, oSubItem);
+		JSONArray aoAcquisitionInformation = oProperties.optJSONArray("acquisitionInformation");
+		if (aoAcquisitionInformation != null) {
+			for (int i = 0; i < aoAcquisitionInformation.length(); i++) {
+				JSONObject oItem = aoAcquisitionInformation.getJSONObject(i);
+				Iterator<String> oAcquisitionInfoIteratorr = oItem.keys();
+				while (oAcquisitionInfoIteratorr.hasNext()) {
+					String sKey = oAcquisitionInfoIteratorr.next();
+					JSONObject oSubItem = oItem.getJSONObject(sKey);
+					if (oSubItem != null) {
+						setPropertiesFromJSONObject(oMapProperties, oSubItem);
+					}
 				}
 			}
 		}
