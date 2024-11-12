@@ -231,7 +231,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sRiseClientServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sRiseClientServiceName }}.rule=Host(`{{ sWasdiClientV2BaseUrl }}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.r_{{ sRiseClientServiceName }}.rule=Host(`{{ sWasdiClientV2BaseUrl }}`) && PathPrefix(`/rise`)"
       - "traefik.http.routers.r_{{ sRiseClientServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sRiseClientServiceName }}.service=s_{{ sRiseClientServiceName }}"
 {% if bWasdiSslEnabled == True %}
