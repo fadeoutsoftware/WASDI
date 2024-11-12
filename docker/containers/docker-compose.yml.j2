@@ -111,6 +111,7 @@ services:
         soft: {{ sWasdiClientUlimitNofile }}
         hard: {{ sWasdiClientUlimitNofile }}
 {% endif %}
+
 {% if bWasdiClientV2Enabled == True %}
   {{ sWasdiClientV2ServiceName }}:
     depends_on:
@@ -198,6 +199,54 @@ services:
         soft: {{ sWasdiClientV2UlimitNofile }}
         hard: {{ sWasdiClientV2UlimitNofile }}
 {% endif %}
+
+
+
+{% if bDeployRiseClient == True %}
+  {{ sRiseClientServiceName }}:
+    depends_on:
+{% if bWasdiGeoserverEnabled == True %}
+      {{ sWasdiGeoserverServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
+{% endif %}
+{% if bRiseServerEnabled == True %}
+      {{ sRiseServerServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
+{% endif %}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
+    image: "{{ sRiseClientServiceName }}:latest"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.r_{{ sRiseClientServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sRiseClientServiceName }}.rule=Host(`{{ sWasdiClientV2BaseUrl }}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.r_{{ sRiseClientServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sRiseClientServiceName }}.service=s_{{ sRiseClientServiceName }}"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sRiseClientServiceName }}.tls=true"
+{% endif %}
+      - "traefik.http.services.s_{{ sRiseClientServiceName }}.loadbalancer.server.port={{ sRiseClientInternalPort }}"
+    pull_policy: "never"
+    restart: "always"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiClientV2UlimitNofile }}
+        hard: {{ sWasdiClientV2UlimitNofile }}
+{% endif %}
+
+
 {% if bWasdiGeoserverEnabled == True %}
   {{ sWasdiGeoserverServiceName }}:
     depends_on:
