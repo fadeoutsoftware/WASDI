@@ -215,9 +215,6 @@ services:
 {% endif %}
 {% if bRiseServerEnabled == True %}
       {{ sRiseServerServiceName }}:
-{% if sEnvironmentName == "test" %}
-        condition: service_healthy
-{% else %}
         condition: service_started
 {% endif %}
 {% endif %}
