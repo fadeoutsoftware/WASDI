@@ -217,7 +217,6 @@ services:
       {{ sRiseServerServiceName }}:
         condition: service_started
 {% endif %}
-{% endif %}
       {{ sWasdiTraefikServiceName }}:
 {% if sEnvironmentName == "test" %}
         condition: service_healthy
