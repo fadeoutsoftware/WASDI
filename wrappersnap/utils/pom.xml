@@ -45,6 +45,7 @@
         <sVersionSnap>9.0.8</sVersionSnap>
         <sVersionSshj>0.29.0</sVersionSshj>
         <sVersionXercesImpl>2.12.2</sVersionXercesImpl>
+		<sVersionLogback>1.2.13</sVersionLogback>
     </properties>
 
     <build>
@@ -197,6 +198,20 @@
             <version>${sVersionSshj}</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${sVersionLogback}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-core -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${sVersionLogback}</version>
+            <scope>compile</scope>
+        </dependency>        
 
         <!-- SNAP -->
         <dependency>
