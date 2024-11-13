@@ -65,9 +65,12 @@ public class QueryExecutorESA extends QueryExecutor {
 			}
 			
 			JSONObject oJsonBody = new JSONObject(sResult);
+			Integer iMatches = null; 
+					
+			if (oJsonBody.keySet().contains("numberMatched")) {
+				iMatches = oJsonBody.optInt("numberMatched");				
+			}
 			
-			Integer iMatches = oJsonBody.optInt("numberMatched");
-				
 			if (iMatches != null) {
 				iCount = iMatches;
 			}
@@ -98,14 +101,32 @@ public class QueryExecutorESA extends QueryExecutor {
 		List<QueryResultViewModel> aoResults = new ArrayList<>(); 
 		try {
 			
-			String sResult =  getResultsFromEOCAT(oQueryViewModel);
+			int iLimit = 10;
+			int iOffset = 0;
+			
+			try {
+				if (!Utils.isNullOrEmpty(oQuery.getLimit())) {
+					iLimit = Integer.parseInt(oQuery.getLimit());
+				}
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("QueryExecutorESA.executeAndRetrieve. Impossible to parse limit", oEx);
+			}
+			
+			try {
+				if (!Utils.isNullOrEmpty(oQuery.getOffset())) {
+					iOffset = Integer.parseInt(oQuery.getOffset());					
+				}
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("QueryExecutorESA.executeAndRetrieve. Impossible to parse offset", oEx);
+			}
+			
+			String sResult =  getResultsFromEOCAT(oQueryViewModel, iLimit, iOffset);
 			
 			if (Utils.isNullOrEmpty(sResult)) {
 				WasdiLog.debugLog("QueryExecutorESA.executeAndRetrieve. Error getting the results from EOCAt");
 				return null;
 			}
 			
-			// process offset and limit
 			aoResults = m_oResponseTranslator.translateBatch(sResult, bFullViewModel);
 						
 			return aoResults;
@@ -120,6 +141,11 @@ public class QueryExecutorESA extends QueryExecutor {
 	
 	
 	public String getResultsFromEOCAT(QueryViewModel oQueryViewModel) {
+		return getResultsFromEOCAT(oQueryViewModel, -1, 1);
+	}
+	
+	
+	public String getResultsFromEOCAT(QueryViewModel oQueryViewModel, int iLimit, int iOffset) {
 		
 		// product type filter
 		String sProductType = oQueryViewModel.productType;
@@ -169,7 +195,13 @@ public class QueryExecutorESA extends QueryExecutor {
 			
 			sURL += "?bbox=" + dWest + "," + dSouth + "," + dEast + "," + dNorth; 
 			
-			sURL += "&datetime=" + sDateFrom + "/" + sDateTo;			
+			sURL += "&datetime=" + sDateFrom + "/" + sDateTo;	
+			
+			if (iLimit > -1 && iOffset > -1) {
+				// offset in WASDI start from 0, but in ESA APIs starts from 1
+				iOffset += 1;
+				sURL += "&startRecord=" + iOffset + "&limit=" + iLimit;
+			}
 		}
 		
 		WasdiLog.debugLog("QueryExecutorESA.getResultsFromEOCAT. Sending  query to data provider: " + sURL);

@@ -126,7 +126,7 @@ public class ResponseTranslatorESA extends ResponseTranslator {
 			sTitle = oItem.optString("title");
 			if (!Utils.isNullOrEmpty(sTitle) && sTitle.equalsIgnoreCase("Download")) {
 				String sHref = oItem.getString("href");
-				sDownloadLink = "https://payload={" + sHref + "}";
+				sDownloadLink = "https://payload={\"url\": \"" + sHref + "\"}";
 				break;
 			}
 		}
