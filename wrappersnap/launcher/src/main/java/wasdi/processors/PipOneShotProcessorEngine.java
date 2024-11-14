@@ -23,6 +23,7 @@ import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.packagemanagers.PipOneShotPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
@@ -95,6 +96,11 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
         	oEnvVariable = new EnvironmentVariableConfig();
         	oEnvVariable.key = "WASDI_ONESHOT_ENCODED_PARAMS";
         	oProcessorTypeConfig.environmentVariables.add(oEnvVariable);
+        }
+        
+        if (sEncodedJson.startsWith("{")) {
+        	WasdiLog.infoLog("PipOneShotProcessorEngine.addEnvironmentVariablesToProcessorType: ");
+        	sEncodedJson = StringUtils.encodeUrl(sEncodedJson);
         }
         
         oEnvVariable.value = sEncodedJson;
