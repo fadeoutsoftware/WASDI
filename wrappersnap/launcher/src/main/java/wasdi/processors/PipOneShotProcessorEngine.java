@@ -100,7 +100,14 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
         
         if (sEncodedJson.startsWith("{")) {
         	WasdiLog.infoLog("PipOneShotProcessorEngine.addEnvironmentVariablesToProcessorType: param is not encoded, encoding it");
-        	sEncodedJson = StringUtils.encodeUrl(sEncodedJson);
+        	
+        	sEncodedJson = StringUtils.encodeUrl(sEncodedJson).replace("+", "%20");
+        	
+//			if (sEncodedJson.contains("+")) {
+//				// The + char is not encoded but then in the launcher, when is decode, become a space. Replace the char with the correct representation
+//				sEncodedJson = sEncodedJson.replaceAll("\\+", "%2B");
+//				WasdiLog.debugLog("PipOneShotProcessorEngine.addEnvironmentVariablesToProcessorType: replaced + with %2B in encoded JSON " + sEncodedJson);
+//			}
         }
         
         oEnvVariable.value = sEncodedJson;
