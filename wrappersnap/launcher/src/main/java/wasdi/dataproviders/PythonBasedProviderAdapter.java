@@ -127,7 +127,7 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 		String sInputFullPath = "";
 		String sOutputFullPath = "";
 		
-		WasdiLog.debugLog("PythonBasedProviderAdapter.executeDownloadFile: product name " + oProcessWorkspace.getProductName());	
+		WasdiLog.infoLog("PythonBasedProviderAdapter.executeDownloadFile: product name " + oProcessWorkspace.getProductName());	
 		
 		try {	
 			
@@ -136,7 +136,7 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 			File oTargetDir = new File(sSaveDirOnServer);
 			boolean oDirCreated = oTargetDir.mkdirs();
 			if (oDirCreated)
-				WasdiLog.debugLog("PythonBasedProviderAdapter.executeDownloadFile. Workspace directory has been crated");
+				WasdiLog.infoLog("PythonBasedProviderAdapter.executeDownloadFile. Workspace directory has been crated");
 			
 			
 			// let's add the additional information to the json passed to the Python data provider
@@ -163,7 +163,7 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 			
 			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
 			
-			WasdiLog.debugLog("PythonBasedProviderAdapter.executeDownloadFile: python output = " + oShellExecReturn.getOperationLogs());;
+			WasdiLog.infoLog("PythonBasedProviderAdapter.executeDownloadFile: python output = " + oShellExecReturn.getOperationLogs());;
 			
 			File oOutputFile = new File(sOutputFullPath);
 			
@@ -171,14 +171,14 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 				WasdiLog.warnLog("PythonBasedProviderAdapter.executeDownloadFile: impossible to read the output file of the Python data provider");
 			}
 			
-			WasdiLog.debugLog("PythonBasedProviderAdapter.executeDownloadFile: got output file form the Python data provider " + oOutputFile.getAbsolutePath());
+			WasdiLog.infoLog("PythonBasedProviderAdapter.executeDownloadFile: got output file form the Python data provider " + oOutputFile.getAbsolutePath());
 			
 			// the output will simply be the path of the downloaded file
 			JSONObject oJsonOutput = JsonUtils.loadJsonFromFile(sOutputFullPath);
 			String sDownloadedFilePath = oJsonOutput.optString("outputFile");
 			
 			if (!Utils.isNullOrEmpty(sDownloadedFilePath)) {
-				WasdiLog.debugLog("PythonBasedProviderAdapter.executeDownloadFile: path to the downloaded file " + sDownloadedFilePath);
+				WasdiLog.infoLog("PythonBasedProviderAdapter.executeDownloadFile: path to the downloaded file " + sDownloadedFilePath);
 				sResultDownloadedFilePath = sDownloadedFilePath;
 			} else {
 				WasdiLog.errorLog("PythonBasedProviderAdapter.executeDownloadFile: path to the downloaded file is null or empty");
@@ -245,19 +245,16 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public String getFileName(String sFileURL) throws Exception {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
