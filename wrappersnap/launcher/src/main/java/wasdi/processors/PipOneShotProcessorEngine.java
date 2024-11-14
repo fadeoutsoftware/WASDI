@@ -99,7 +99,7 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
         }
         
         if (sEncodedJson.startsWith("{")) {
-        	WasdiLog.infoLog("PipOneShotProcessorEngine.addEnvironmentVariablesToProcessorType: ");
+        	WasdiLog.infoLog("PipOneShotProcessorEngine.addEnvironmentVariablesToProcessorType: param is not encoded, encoding it");
         	sEncodedJson = StringUtils.encodeUrl(sEncodedJson);
         }
         
@@ -246,7 +246,7 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
 
             // Check if is started otherwise start it
-            String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter, false, true, false);
+            String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter, false, false, false);
             
             // If we do not have a container name here, we are not in the position to continue
             if (Utils.isNullOrEmpty(sContainerName)) {
