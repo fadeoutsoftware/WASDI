@@ -1,4 +1,4 @@
 {
-    "pythonScript": "data_provider_ers.py",
-	"exchangeFolder": "/data/wasdi/tmp/",
+	"pythonScript": "data_provider_ers.py",
+	"exchangeFolder": "/data/wasdi/tmp/"
 }
