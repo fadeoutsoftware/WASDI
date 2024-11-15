@@ -77,6 +77,13 @@ RUN apt-get update && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
+	
+# install specific libraries for ERS Python script
+RUN python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv
+RUN chmod +x {{ sWasdiSystemUserHome }}/venv/bin/activate
+RUN {{ sWasdiSystemUserHome }}/venv/bin/activate
+RUN {{ sWasdiSystemUserHome }}/venv/bin/pip3 install --no-cache-dir --no-compile requests lxml urllib3
+
 
 # From now, all commands executed are executed with the user '{{ sWasdiSystemUserName }}'
 USER {{ sWasdiSystemUserName }}
