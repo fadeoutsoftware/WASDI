@@ -1117,7 +1117,7 @@
 				{
 					"indexname": "producttype",
 					"indexlabel": "dataset",
-					"indexvalues": "hindcast|rcp85_mid|rcp85_end",
+					"indexvalues": "hindcast|historical|rcp85_mid|rcp85_end",
 					"indexvalue": "hindcast"
 				},
 				{
@@ -1200,6 +1200,12 @@
 					"indexlabel": "GCM-RCM",
 					"indexvalues": "CCLM4-CanESM2|CCLM4-MIROC5|COSMO-crCLIM1-EC-EARTH|COSMO-crCLIM1-HadGEM2-ES|COSMO-crCLIM1-NorESM1-M|HIRHAM5-CNRM-CM5|HIRHAM5-EC-EARTH|HIRHAM5-HadGEM2-ES|HIRHAM5-IPSL-CM5A-MR|HIRHAM5-MPI-ESM-LR|HIRHAM5-NorESM1-M|RCA4-CNRM-CM5|RCA4-EC-EARTH|RCA4-HadGEM2-ES|RCA4-IPSL-CM5A-MR|RCA4-MPI-ESM-LR|RCA4-NorESM1",
 					"visibilityConditions": "producttype:rcp85_mid|rcp85_end"
+				},
+				{
+					"indexname": "platformSerialIdentifier",
+					"indexlabel": "quantile",
+					"indexvalues": "0.1|0.5|0.9|0.95|0.99",
+					"visibilityConditions": "sensorMode:seasonalquantiles|monthlyquantiles"
 				}
 			]
 		}

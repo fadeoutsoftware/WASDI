@@ -1126,6 +1126,7 @@ public abstract class QueryTranslator {
 			if (!Utils.isNullOrEmpty(oResult.productType) && (oResult.productType.equals("rcp85_mid") || oResult.productType.equals("rcp85_end"))) {
 				oResult.polarisation = extractValue(sQuery, "polarisationmode");
 			}
+			oResult.platformSerialIdentifier = extractValue(sQuery, "platformSerialIdentifier");
 		}
 	}
 

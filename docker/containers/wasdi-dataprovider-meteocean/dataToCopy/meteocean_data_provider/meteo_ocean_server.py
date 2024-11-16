@@ -39,73 +39,14 @@ def hello():
 
 @oServerApp.route('/query/count', methods=['POST'])
 def countResults():
+    iCount = -1;
     try:
         aoInputMap = request.get_json()
 
-        # preliminary controls. Check the inputs for validation
-        if not isInputValid(aoInputMap):
-            logging.warning("countResults. some of the input parameters are not valid")
-            return "-1", 400
+        aoResults = getResults(aoInputMap)
 
-        sDatasetName = aoInputMap.get('productType')
-        sVariable = aoInputMap.get('productLevel')
-        sCase = aoInputMap.get('sensorMode')
-        sModel = aoInputMap.get('polarisation')
-        bBiasAdjustment = aoInputMap.get('timeliness') # TODO: check if it is a boolean or a string
-        dNorth = aoInputMap.get('north')
-        dSouth = aoInputMap.get('south')
-        dWest = aoInputMap.get('west')
-        dEast = aoInputMap.get('east')
-
-        # get file name from one of the files
-        sReferenceFileForBoundingBox = os.path.join(sMeteOceanBasePath, "hindcast_hs_1979_2005__monthlymax.nc")
-
-        oS3FileSystem = getS3FileSystem()
-        sS3Product = oS3FileSystem.open(sReferenceFileForBoundingBox)
-        oDataset = xr.open_dataset(sS3Product, engine='h5netcdf')
-
-        dDatasetWest, dDatasetNorth, dDatasetEast, dDatasetSouth = getBoundingBoxFromDataset(oDataset)
-        if not isBoundBoxEmpty(dNorth, dSouth, dWest, dEast):
-            if not doesBoundingBoxIntersect(dDatasetWest, dDatasetNorth, dDatasetEast, dDatasetSouth, dNorth, dSouth, dEast, dWest):
-                return "0", 200
-
-        asFileNamesList = getFileNamesList(sDatasetName, sVariable, sCase, bBiasAdjustment, sModel)
-
-        iCount = 0
-        for sFileName in asFileNamesList:
-            iCount += 1
-            """
-            sFileNameFullPath = os.path.join(sMeteOceanBasePath, sFileName)
-            logging.info(f"countResults. Looking for file {sFileName}")
-
-            sS3Product = oS3FileSystem.open(sFileNameFullPath)
-            oDataset = xr.open_dataset(sS3Product, engine='h5netcdf')
-
-            sRelevantVariable = recoverRelevantVariable(oDataset, sVariable)
-
-            oDatasetVariableData = oDataset[sRelevantVariable]
-            
-            if oDatasetVariableData is None:
-                continue
-
-            if isBoundBoxEmpty(dNorth, dSouth, dWest, dEast):
-                iCount += 1
-                continue
-
-            if isSinglePoint(dNorth, dSouth, dWest, dEast):
-                logging.info(f"countResults. bounding box is a single point with latitude {dNorth} and longitude {dWest}")
-                
-                oDataPoint = oDatasetVariableData.sel(latitude=dNorth, longitude=dWest, method="nearest")
-                if np.any(~np.isnan(oDataPoint)):
-                    logging.info("countResults. found a value close to the point")
-                
-                iCount += 1
-            else:
-                oValuesInBoundingBox = selectValuesInBoundingBox(oDatasetVariableData, dNorth, dSouth, dWest, dEast)
-
-                if np.any(~np.isnan(oValuesInBoundingBox)):
-                    logging.info("countResults. some values in the selected bounding box")
-            """
+        if aoResults is not None:
+            iCount = len(aoResults)
 
     except Exception as oEx:
         logging.error(f"countResults. exception {oEx}")
@@ -126,20 +67,34 @@ def executeAndRetrieve():
     try:
         aoInputMap = request.get_json()
 
-        # preliminary controls. Check the inputs for validation
-        if not isInputValid(aoInputMap):
-            logging.warning("executeAndRetrieve. some of the input parameters are not valid")
-            return None
+        aoResults = getResults(aoInputMap)
 
+    except Exception as oEx:
+        logging.error(f"executeAndRetrieve. Exception {oEx}")
+        return aoResults, 500
+
+    return aoResults, 200
+
+
+
+
+def getResults(aoInputMap):
+    # preliminary controls. Check the inputs for validation
+    if not isInputValid(aoInputMap):
+        logging.warning("getResults. some of the input parameters are not valid")
+        return None
+
+    try:
         sDatasetName = aoInputMap.get('productType')
         sVariable = aoInputMap.get('productLevel')
         sCase = aoInputMap.get('sensorMode')
         sModel = aoInputMap.get('polarisation')
-        bBiasAdjustment = aoInputMap.get('timeliness')  # TODO: check if it is a boolean or a string
+        bBiasAdjustment = aoInputMap.get('timeliness')
         dNorth = aoInputMap.get('north')
         dSouth = aoInputMap.get('south')
         dWest = aoInputMap.get('west')
         dEast = aoInputMap.get('east')
+        sQuantiles = aoInputMap.get('platformSerialIdentifier')
 
         # get file name from one of the files
         sReferenceFileForBoundingBox = os.path.join(sMeteOceanBasePath, "hindcast_hs_1979_2005__monthlymax.nc")
@@ -151,65 +106,43 @@ def executeAndRetrieve():
 
         dDatasetWest, dDatasetNorth, dDatasetEast, dDatasetSouth = getBoundingBoxFromDataset(oDataset)
         if not isBoundBoxEmpty(dNorth, dSouth, dWest, dEast):
-            if not doesBoundingBoxIntersect(dDatasetWest, dDatasetNorth, dDatasetEast, dDatasetSouth, dNorth, dSouth, dEast, dWest):
-                return aoResults, 200
+            if not doesBoundingBoxIntersect(dDatasetWest, dDatasetNorth, dDatasetEast, dDatasetSouth, dNorth, dSouth, dEast,
+                                            dWest):
+                return aoResults
 
         asFileNamesList = getFileNamesList(sDatasetName, sVariable, sCase, bBiasAdjustment, sModel)
 
         for sFileName in asFileNamesList:
-            """
-            sFileNameFullPath = os.path.join(sMeteOceanBasePath, sFileName)
-            logging.info(f"countResults. Looking for file {sFileName}")
-
-            sS3Product = oS3FileSystem.open(sFileNameFullPath)
-            oDataset = xr.open_dataset(sS3Product, engine='h5netcdf')
-
-            sRelevantVariable = recoverRelevantVariable(oDataset, sVariable)
-
-            oDatasetVariableData = oDataset[sRelevantVariable]
-
-            if oDatasetVariableData is None:
-                continue
-            """
             sActualModel = sModel
             if isStringNullOrEmpty(sActualModel):
                 sActualModel = extractModelFromFilename(sFileName)
 
             if isBoundBoxEmpty(dNorth, dSouth, dWest, dEast):
                 # dWest, dNorth, dEast, dSouth = getBoundingBoxFromDataset(oDatasetVariableData)
-                oResultViewModel = createQueryResultViewModel(sDatasetName, sActualModel, bBiasAdjustment, sFileName, sVariable, sCase, dDatasetNorth, dDatasetSouth,
-                                                              dDatasetWest, dDatasetEast)
-                aoResults.append(oResultViewModel)
+                aoResultViewModelList = getQueryResultViewModelList(sDatasetName, sActualModel, bBiasAdjustment, sFileName,
+                                                                    sVariable, sCase, dDatasetNorth, dDatasetSouth,
+                                                                    dDatasetWest, dDatasetEast, sQuantiles)
+                aoResults.extend(aoResultViewModelList)
                 continue
 
             if isSinglePoint(dNorth, dSouth, dWest, dEast):
                 logging.info(
-                    f"executeAndRetrieve. bounding box is a single point with latitude {dNorth} and longitude {dWest}")
-                """
-                oDataPoint = oDatasetVariableData.sel(latitude=dNorth, longitude=dWest, method="nearest")
-                if np.any(~np.isnan(oDataPoint)):
-                """
-                logging.info("executeAndRetrieve. found a value close to the point")
-                oResultViewModel = createQueryResultViewModel(sDatasetName, sActualModel, bBiasAdjustment, sFileName, sVariable, sCase, dNorth,
-                                                              dSouth, dWest, dEast)
-                aoResults.append(oResultViewModel)
+                    f"getResults. bounding box is a single point with latitude {dNorth} and longitude {dWest}")
+                logging.info("getResults. found a value close to the point")
+                aoResultViewModelList = getQueryResultViewModelList(sDatasetName, sActualModel, bBiasAdjustment, sFileName,
+                                                                    sVariable, sCase, dNorth,
+                                                                    dSouth, dWest, dEast, sQuantiles)
+                aoResults.extend(aoResultViewModelList)
             else:
-                """
-                oValuesInBoundingBox = selectValuesInBoundingBox(oDatasetVariableData, dNorth, dSouth, dWest, dEast)
-
-                if np.any(~np.isnan(oValuesInBoundingBox)):
-                    logging.info("executeAndRetrieve. some values in the selected bounding box")
-                    dWest, dNorth, dEast, dSouth = getBoundingBoxFromDataset(oValuesInBoundingBox)
-                """
-                oResultViewModel = createQueryResultViewModel(sDatasetName, sActualModel, bBiasAdjustment, sFileName, sVariable, sCase, dNorth,
-                                                              dSouth, dWest, dEast)
-                aoResults.append(oResultViewModel)
-
+                aoResultViewModel = getQueryResultViewModelList(sDatasetName, sActualModel, bBiasAdjustment, sFileName,
+                                                                sVariable, sCase, dNorth,
+                                                                dSouth, dWest, dEast, sQuantiles)
+                aoResults.extend(aoResultViewModel)
     except Exception as oEx:
-        logging.error(f"executeAndRetrieve. Exception {oEx}")
-        return aoResults, 500
+        logging.error(f"getResults. Exception {oEx}")
+        return None
 
-    return aoResults, 200
+    return aoResults
 
 
 @oServerApp.route('/download', methods=['GET'])
@@ -233,6 +166,7 @@ def download():
         sWest = asDownloadInformation[5]
         sEast = asDownloadInformation[6]
         sDownloadFileName = asDownloadInformation[7]
+        sQuantile = asDownloadInformation[8]
 
         logging.info(f"download. base file on S3: {sBaseFile}, download file name: {sDownloadFileName}, coordinates: {sWest}W, {sNorth}N, {sEast}E, {sSouth}S")
 
@@ -261,8 +195,11 @@ def download():
             sRelevantVariable = recoverRelevantVariable(oDataset, sVariable)
 
             oDatasetVariableData = oDataset[sRelevantVariable]
-            oValuesInBoundingBox = selectValuesInBoundingBox(oDatasetVariableData, float(sNorth), float(sSouth), float(sWest), float(sEast))
-            oNewDataset = oValuesInBoundingBox.to_dataset()
+            oResultDataset = selectValuesInBoundingBox(oDatasetVariableData, float(sNorth), float(sSouth), float(sWest), float(sEast))
+            if not isStringNullOrEmpty(sQuantile):
+               oResultDataset = selectValuesForQuantile(oResultDataset, sQuantile)
+
+            oNewDataset = oResultDataset.to_dataset()
             oNetcdfBytes = oNewDataset.to_netcdf()
 
             oResponse = Response(oNetcdfBytes,
@@ -294,7 +231,6 @@ def recoverRelevantVariable(oDataset, sTentativeVariable):
         logging.info(f"recoverRelevantVariable. Variable {sTentativeVariable} NOT found in the dataset, using instead {sActualVariable}")
 
     return sActualVariable
-
 
 
 def getBoundingBoxFromDataset(oDataset):
@@ -429,22 +365,42 @@ def selectValuesInBoundingBox(oDataset, dNorth, dSouth, dWest, dEast):
 
     return oValuesInBoundingBox
 
-def createQueryResultViewModel(sDataset, sModel, bBiasAdjustment, sOriginalFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast):
+def selectValuesForQuantile(oDataset, sQuantile):
+    return oDataset.sel(quantile=sQuantile)
+
+
+def getQueryResultViewModelList(sDataset, sModel, bBiasAdjustment, sOriginalFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast, sQuantile):
+    asQuantilesList = ["0.1", "0.5", "0.9", "0.95", "0.99"]
+    asResults = []
+
+    if isStringNullOrEmpty(sQuantile):
+        for sQuantile in asQuantilesList:
+            oViewModel = createQueryResultViewModel(sDataset, sModel, bBiasAdjustment, sOriginalFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast, sQuantile)
+            asResults.append(oViewModel)
+    else:
+        if sQuantile in asQuantilesList:
+            oViewModel = createQueryResultViewModel(sDataset, sModel, bBiasAdjustment, sOriginalFileName, sVariable, sCase,
+                                                    dNorth, dSouth, dWest, dEast, sQuantile)
+            asResults.append(oViewModel)
+    return asResults
+
+
+def createQueryResultViewModel(sDataset, sModel, bBiasAdjustment, sOriginalFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast, sQuantiles):
     # sTitle = f"MeteOcean_{sDataset}_{sVariable}_{sCase}_{formatDecimal(dWest)}W_{formatDecimal(dNorth)}N_{formatDecimal(dEast)}E_{formatDecimal(dSouth)}S.nc"
-    sTitle = getWasdiProductName(sDataset, sModel, bBiasAdjustment, sVariable, sCase, dNorth, dSouth, dWest, dEast)
+    sTitle = getWasdiProductName(sDataset, sModel, bBiasAdjustment, sVariable, sCase, dNorth, dSouth, dWest, dEast, sQuantiles)
     oResultVM = dict()
     oResultVM['preview'] = None
     oResultVM['title'] = sTitle
     oResultVM['summary'] = ""
     oResultVM['id'] = sTitle
-    oResultVM['link'] = f"https://{sOriginalFileName},{sVariable},{sCase},{dNorth},{dSouth},{dWest},{dEast},{sTitle};MeteOcean"
+    oResultVM['link'] = f"https://{sOriginalFileName},{sVariable},{sCase},{dNorth},{dSouth},{dWest},{dEast},{sTitle},{sQuantiles};MeteOcean"
     oResultVM['footprint'] = f"POLYGON (({dWest} {dSouth}, {dWest} {dNorth}, {dEast} {dNorth}, {dEast} {dSouth}, {dWest} {dSouth}))"
     oResultVM['provider'] = "MeteOcean"
     oResultVM['volumeName'] = None
     oResultVM['volumePath'] = None
 
     sDate = str()
-    if sDataset == "hindcast":
+    if sDataset == "hindcast" or sDataset == 'historical':
         sDate = "1979-01-01T00:00:00.00Z"
     elif sDataset == 'rcp85_mid':
         sDate = "2034-01-01T00:00:00.00Z"
@@ -460,9 +416,16 @@ def createQueryResultViewModel(sDataset, sModel, bBiasAdjustment, sOriginalFileN
 
     return oResultVM
 
-def getWasdiProductName(sDataset, sModel, bBiasAdjustment, sVariable, sCase, dNorth, dSouth, dWest, dEast):
+def getWasdiProductName(sDataset, sModel, bBiasAdjustment, sVariable, sCase, dNorth, dSouth, dWest, dEast, sQuantile):
+    sExtension = ".nc"
     if sDataset == 'hindcast':
-        return f"MeteOcean_{sDataset}_{sVariable}_{sCase}_{formatDecimal(dWest)}W_{formatDecimal(dNorth)}N_{formatDecimal(dEast)}E_{formatDecimal(dSouth)}S.nc"
+        sWasdiProductName = f"MeteOcean_{sDataset}_{sVariable}_{sCase}_{formatDecimal(dWest)}W_{formatDecimal(dNorth)}N_{formatDecimal(dEast)}E_{formatDecimal(dSouth)}S"
+
+        if not isStringNullOrEmpty(sQuantile):
+            sWasdiProductName += "_" + sQuantile.replace(".", "")
+        sWasdiProductName += sExtension
+
+        return sWasdiProductName
 
     sDataBias = None
     if sVariable == 'hs' and bBiasAdjustment == 'true':
@@ -470,7 +433,13 @@ def getWasdiProductName(sDataset, sModel, bBiasAdjustment, sVariable, sCase, dNo
     else:
         sDataBias = 'raw'
 
-    return f"MeteOcean_{sDataset}_{sModel}_{sVariable}_{sCase}_{sDataBias}_{formatDecimal(dWest)}W_{formatDecimal(dNorth)}N_{formatDecimal(dEast)}E_{formatDecimal(dSouth)}S.nc"
+    sWasdiProductName = f"MeteOcean_{sDataset}_{sModel}_{sVariable}_{sCase}_{sDataBias}_{formatDecimal(dWest)}W_{formatDecimal(dNorth)}N_{formatDecimal(dEast)}E_{formatDecimal(dSouth)}S"
+
+    if not isStringNullOrEmpty(sQuantile):
+        sWasdiProductName += "_" + sQuantile.replace(".", "")
+    sWasdiProductName += sExtension
+
+    return sWasdiProductName
 
 
 def formatDecimal(dValue):
@@ -502,14 +471,19 @@ def getFileNamesList(sDataset, sVariable, sCase, bBiasAdjustment, sModel):
     else:
         sDataBias = 'raw'
 
-    if sDataset == 'rcp85_mid':
+    if sDataset == "historical":
+        if not isStringNullOrEmpty(sModel):
+            oResults.append(f"{sModel}_{sDataBias}_historical_{sVariable}_1979_2005__{sCase}.nc")
+        else:
+            for sMeteOceanModel in asMeteOceanModels:
+                oResults.append(f"{sMeteOceanModel}_{sDataBias}_historical_{sVariable}__1979_2005__{sCase}.nc")
+    elif sDataset == 'rcp85_mid':
         if not isStringNullOrEmpty(sModel):
             oResults.append(f"{sModel}_{sDataBias}_rcp85_mid_{sVariable}_2034_2060__{sCase}.nc")
         else:
             for sMeteOceanModel in asMeteOceanModels:
                 oResults.append(f"{sMeteOceanModel}_{sDataBias}_rcp85_mid_{sVariable}_2034_2060__{sCase}.nc")
-
-    if sDataset == 'rcp85_end':
+    elif sDataset == 'rcp85_end':
         if not isStringNullOrEmpty(sModel):
             oResults.append(f"{sModel}_{sDataBias}_rcp85_end_{sVariable}_2074_2100__{sCase}.nc")
         else:
@@ -525,6 +499,7 @@ def getS3FileSystem():
                                         skip_instance_cache=True,
                                         client_kwargs={'endpoint_url': 'https://usgs.osn.mghpcc.org'})
     return oFileSystemRead
+
 
 def readFileFromS3(sFileName):
     oFileSystemRead = fsspec.filesystem('s3',
