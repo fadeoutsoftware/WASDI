@@ -93,7 +93,7 @@ public class ExtWebProviderAdapter extends ProviderAdapter {
 			asHeaders.put("Content-Type", "application/json");			
 			asHeaders.put("x-api-key", oConfig.apiKey);
 			
-			if (!sSaveDirOnServer.endsWith("/")) sSaveDirOnServer = "/";
+			if (!sSaveDirOnServer.endsWith("/")) sSaveDirOnServer += "/";
 			
 			String sOutputFilePath = sSaveDirOnServer + asNamePlatform[0].replace("file://", "");
 			
