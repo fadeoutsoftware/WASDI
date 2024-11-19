@@ -4,7 +4,6 @@ from flask import Flask, request, Response, send_file
 
 import logging
 import xarray as xr
-import numpy as np
 import ast
 import fsspec
 
@@ -95,6 +94,11 @@ def getResults(aoInputMap):
         dWest = aoInputMap.get('west')
         dEast = aoInputMap.get('east')
         sQuantiles = aoInputMap.get('platformSerialIdentifier')
+        sMonth = aoInputMap.get('startFromDate')
+        sSeason = aoInputMap.get('endFromDate')
+
+        iLimit = aoInputMap.get('limit')
+        iOffset = aoInputMap.get('offset')
 
         # get file name from one of the files
         sReferenceFileForBoundingBox = os.path.join(sMeteOceanBasePath, "hindcast_hs_1979_2005__monthlymax.nc")
@@ -118,10 +122,9 @@ def getResults(aoInputMap):
                 sActualModel = extractModelFromFilename(sFileName)
 
             if isBoundBoxEmpty(dNorth, dSouth, dWest, dEast):
-                # dWest, dNorth, dEast, dSouth = getBoundingBoxFromDataset(oDatasetVariableData)
                 aoResultViewModelList = getQueryResultViewModelList(sDatasetName, sActualModel, bBiasAdjustment, sFileName,
                                                                     sVariable, sCase, dDatasetNorth, dDatasetSouth,
-                                                                    dDatasetWest, dDatasetEast, sQuantiles)
+                                                                    dDatasetWest, dDatasetEast, sQuantiles, sMonth, sSeason)
                 aoResults.extend(aoResultViewModelList)
                 continue
 
@@ -131,13 +134,23 @@ def getResults(aoInputMap):
                 logging.info("getResults. found a value close to the point")
                 aoResultViewModelList = getQueryResultViewModelList(sDatasetName, sActualModel, bBiasAdjustment, sFileName,
                                                                     sVariable, sCase, dNorth,
-                                                                    dSouth, dWest, dEast, sQuantiles)
+                                                                    dSouth, dWest, dEast, sQuantiles, sMonth, sSeason)
                 aoResults.extend(aoResultViewModelList)
             else:
-                aoResultViewModel = getQueryResultViewModelList(sDatasetName, sActualModel, bBiasAdjustment, sFileName,
+                aoResultViewModelList = getQueryResultViewModelList(sDatasetName, sActualModel, bBiasAdjustment, sFileName,
                                                                 sVariable, sCase, dNorth,
-                                                                dSouth, dWest, dEast, sQuantiles)
-                aoResults.extend(aoResultViewModel)
+                                                                dSouth, dWest, dEast, sQuantiles, sMonth, sSeason)
+                aoResults.extend(aoResultViewModelList)
+
+        if len(aoResults) > iLimit \
+                and iLimit is not None \
+                and iOffset is not None \
+                and iLimit > 0 \
+                and iOffset >= 0:
+            iStart = iOffset
+            iEnd = iStart + iLimit
+            aoResults = aoResults[iStart:iEnd]
+
     except Exception as oEx:
         logging.error(f"getResults. Exception {oEx}")
         return None
@@ -167,6 +180,8 @@ def download():
         sEast = asDownloadInformation[6]
         sDownloadFileName = asDownloadInformation[7]
         sQuantile = asDownloadInformation[8]
+        sMonth = asDownloadInformation[9]
+        sSeason = asDownloadInformation[10]
 
         logging.info(f"download. base file on S3: {sBaseFile}, download file name: {sDownloadFileName}, coordinates: {sWest}W, {sNorth}N, {sEast}E, {sSouth}S")
 
@@ -196,8 +211,13 @@ def download():
 
             oDatasetVariableData = oDataset[sRelevantVariable]
             oResultDataset = selectValuesInBoundingBox(oDatasetVariableData, float(sNorth), float(sSouth), float(sWest), float(sEast))
+            print(oResultDataset)
             if not isStringNullOrEmpty(sQuantile):
-               oResultDataset = selectValuesForQuantile(oResultDataset, sQuantile)
+               oResultDataset = oResultDataset.sel(quantile=float(sQuantile))
+            if not isStringNullOrEmpty(sMonth):
+                oResultDataset = oResultDataset.sel(month=int(sMonth))
+            if not isStringNullOrEmpty(sSeason):
+                oResultDataset = oResultDataset.sel(season=sSeason)
 
             oNewDataset = oResultDataset.to_dataset()
             oNetcdfBytes = oNewDataset.to_netcdf()
@@ -308,6 +328,7 @@ def isInputValid(aoInputMap):
     return True
 
 def isStringNullOrEmpty(sString):
+    sString = None if sString == 'None' else sString
     return sString is None or sString == ''
 
 
@@ -369,31 +390,37 @@ def selectValuesForQuantile(oDataset, sQuantile):
     return oDataset.sel(quantile=sQuantile)
 
 
-def getQueryResultViewModelList(sDataset, sModel, bBiasAdjustment, sOriginalFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast, sQuantile):
+def getQueryResultViewModelList(sDataset, sModel, bBiasAdjustment, sOriginalFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast, sQuantile, sMonth, sSeason):
     asQuantilesList = ["0.1", "0.5", "0.9", "0.95", "0.99"]
     asResults = []
 
-    if isStringNullOrEmpty(sQuantile):
-        for sQuantile in asQuantilesList:
-            oViewModel = createQueryResultViewModel(sDataset, sModel, bBiasAdjustment, sOriginalFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast, sQuantile)
-            asResults.append(oViewModel)
+    if "quantiles" in sCase:
+        if isStringNullOrEmpty(sQuantile):
+            for sQuantile in asQuantilesList:
+                oViewModel = createQueryResultViewModel(sDataset, sModel, bBiasAdjustment, sOriginalFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast, sQuantile, sMonth, sSeason)
+                asResults.append(oViewModel)
+        else:
+            if sQuantile in asQuantilesList:
+                oViewModel = createQueryResultViewModel(sDataset, sModel, bBiasAdjustment, sOriginalFileName, sVariable, sCase,
+                                                        dNorth, dSouth, dWest, dEast, sQuantile, sMonth, sSeason)
+                asResults.append(oViewModel)
     else:
-        if sQuantile in asQuantilesList:
-            oViewModel = createQueryResultViewModel(sDataset, sModel, bBiasAdjustment, sOriginalFileName, sVariable, sCase,
-                                                    dNorth, dSouth, dWest, dEast, sQuantile)
-            asResults.append(oViewModel)
+        oViewModel = createQueryResultViewModel(sDataset, sModel, bBiasAdjustment, sOriginalFileName, sVariable, sCase,
+                                                dNorth, dSouth, dWest, dEast, sQuantile, sMonth, sSeason)
+        asResults.append(oViewModel)
+
     return asResults
 
 
-def createQueryResultViewModel(sDataset, sModel, bBiasAdjustment, sOriginalFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast, sQuantiles):
+def createQueryResultViewModel(sDataset, sModel, bBiasAdjustment, sOriginalFileName, sVariable, sCase, dNorth, dSouth, dWest, dEast, sQuantiles, sMonth, sSeason):
     # sTitle = f"MeteOcean_{sDataset}_{sVariable}_{sCase}_{formatDecimal(dWest)}W_{formatDecimal(dNorth)}N_{formatDecimal(dEast)}E_{formatDecimal(dSouth)}S.nc"
-    sTitle = getWasdiProductName(sDataset, sModel, bBiasAdjustment, sVariable, sCase, dNorth, dSouth, dWest, dEast, sQuantiles)
+    sTitle = getWasdiProductName(sDataset, sModel, bBiasAdjustment, sVariable, sCase, dNorth, dSouth, dWest, dEast, sQuantiles, sMonth, sSeason)
     oResultVM = dict()
     oResultVM['preview'] = None
     oResultVM['title'] = sTitle
     oResultVM['summary'] = ""
     oResultVM['id'] = sTitle
-    oResultVM['link'] = f"https://{sOriginalFileName},{sVariable},{sCase},{dNorth},{dSouth},{dWest},{dEast},{sTitle},{sQuantiles};MeteOcean"
+    oResultVM['link'] = f"https://{sOriginalFileName},{sVariable},{sCase},{dNorth},{dSouth},{dWest},{dEast},{sTitle},{sQuantiles},{sMonth},{sSeason};MeteOcean"
     oResultVM['footprint'] = f"POLYGON (({dWest} {dSouth}, {dWest} {dNorth}, {dEast} {dNorth}, {dEast} {dSouth}, {dWest} {dSouth}))"
     oResultVM['provider'] = "MeteOcean"
     oResultVM['volumeName'] = None
@@ -416,27 +443,28 @@ def createQueryResultViewModel(sDataset, sModel, bBiasAdjustment, sOriginalFileN
 
     return oResultVM
 
-def getWasdiProductName(sDataset, sModel, bBiasAdjustment, sVariable, sCase, dNorth, dSouth, dWest, dEast, sQuantile):
+def getWasdiProductName(sDataset, sModel, bBiasAdjustment, sVariable, sCase, dNorth, dSouth, dWest, dEast, sQuantile, sMonth, sSeason):
     sExtension = ".nc"
+    sWasdiProductName = ""
+
     if sDataset == 'hindcast':
         sWasdiProductName = f"MeteOcean_{sDataset}_{sVariable}_{sCase}_{formatDecimal(dWest)}W_{formatDecimal(dNorth)}N_{formatDecimal(dEast)}E_{formatDecimal(dSouth)}S"
-
-        if not isStringNullOrEmpty(sQuantile):
-            sWasdiProductName += "_" + sQuantile.replace(".", "")
-        sWasdiProductName += sExtension
-
-        return sWasdiProductName
-
-    sDataBias = None
-    if sVariable == 'hs' and bBiasAdjustment == 'true':
-        sDataBias = 'ba_eqm_month'
     else:
-        sDataBias = 'raw'
+        sDataBias = None
+        if sVariable == 'hs' and bBiasAdjustment == 'true':
+            sDataBias = 'ba_eqm_month'
+        else:
+            sDataBias = 'raw'
 
-    sWasdiProductName = f"MeteOcean_{sDataset}_{sModel}_{sVariable}_{sCase}_{sDataBias}_{formatDecimal(dWest)}W_{formatDecimal(dNorth)}N_{formatDecimal(dEast)}E_{formatDecimal(dSouth)}S"
+        sWasdiProductName = f"MeteOcean_{sDataset}_{sModel}_{sVariable}_{sCase}_{sDataBias}_{formatDecimal(dWest)}W_{formatDecimal(dNorth)}N_{formatDecimal(dEast)}E_{formatDecimal(dSouth)}S"
 
     if not isStringNullOrEmpty(sQuantile):
         sWasdiProductName += "_" + sQuantile.replace(".", "")
+
+    if not isStringNullOrEmpty(sMonth):
+        sWasdiProductName += "_" + sMonth
+    elif not isStringNullOrEmpty(sSeason):
+        sWasdiProductName += "_" + sSeason
     sWasdiProductName += sExtension
 
     return sWasdiProductName

@@ -7,6 +7,8 @@
 package wasdi.shared.queryexecutors;
 
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -1123,10 +1125,46 @@ public abstract class QueryTranslator {
 			if (!Utils.isNullOrEmpty(oResult.productLevel) && oResult.productLevel.equals("hs")) {
 				oResult.timeliness = extractValue(sQuery, "timeliness");
 			}
-			if (!Utils.isNullOrEmpty(oResult.productType) && (oResult.productType.equals("rcp85_mid") || oResult.productType.equals("rcp85_end"))) {
+			if (!Utils.isNullOrEmpty(oResult.productType) 
+					&& (oResult.productType.equals("rcp85_mid") || oResult.productType.equals("rcp85_end") || oResult.productType.equals("historical"))) {
 				oResult.polarisation = extractValue(sQuery, "polarisationmode");
 			}
-			oResult.platformSerialIdentifier = extractValue(sQuery, "platformSerialIdentifier");
+			
+			// more complex regex, not handled well from the extractValue method
+			String sRegex = "month:(1[0-2]|[1-9])";
+			Pattern oPattern = Pattern.compile(sRegex);
+			Matcher oMatcher = oPattern.matcher(sQuery);
+			
+			if (oMatcher.find()) {
+				String sMonth = oMatcher.group().split(":")[1];
+				oResult.startFromDate = sMonth;
+			} else {
+				oResult.startFromDate = null;
+			}
+			
+			sRegex = "season:(DJF|JJA|MAM|SON)";
+			oPattern = Pattern.compile(sRegex);
+			oMatcher = oPattern.matcher(sQuery);
+			
+			if (oMatcher.find()) {
+				String sSeason = oMatcher.group(1);;
+				oResult.endFromDate = sSeason;
+			} else {
+				oResult.endFromDate = null;
+			}
+			
+			sRegex = "quantile:(0\\.99|0\\.95|0\\.9|0\\.5|0\\.1)";
+			oPattern = Pattern.compile(sRegex);
+			oMatcher = oPattern.matcher(sQuery);
+			
+			if (oMatcher.find()) {
+				String sQuantile = oMatcher.group(1);;
+				oResult.platformSerialIdentifier = sQuantile;
+			} else {
+				oResult.platformName = null;
+			}
+			
+			
 		}
 	}
 
