@@ -1093,6 +1093,19 @@
 			]
 		},
 		{
+			"name": "ERS",
+			"indexname": "platformname",
+			"indexvalue": "ERS",
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "SAR_IMP_1P|SAR_IMS_1P|SAR_IMM_1P",
+					"indexvalue": "SAR_IMP_1P"
+				}
+			]
+		},
+		{
 			"name": "Return Rasters",
 			"indexname": "platformname",
 			"indexvalue": "ReturnRaster",
