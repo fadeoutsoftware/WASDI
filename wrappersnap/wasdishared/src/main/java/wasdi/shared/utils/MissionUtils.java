@@ -297,6 +297,11 @@ public class MissionUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("RETRAS_") && sFileName.toUpperCase().endsWith(".TIF")) {
 				return Platforms.RETURN_RASTER;
+			} 
+			else if (sFileName.toUpperCase().startsWith("SAR_IMP_1P")
+					|| sFileName.toUpperCase().startsWith("SAR_IMS_1P")
+					|| sFileName.toUpperCase().startsWith("SAR_IMM_1P")) {
+				return Platforms.ERS;
 			}
 			else if (sFileName.toLowerCase().startsWith("meteocean_") && sFileName.toLowerCase().endsWith(".nc")) {
 				return Platforms.METEOCEAN;
