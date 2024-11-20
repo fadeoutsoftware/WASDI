@@ -905,7 +905,7 @@ public class ProcessorsResource  {
 			}
 			
 			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
-				WasdiLog.warnLog("ProcessorsResource.internalRun: user does not have a valid subscription");
+				WasdiLog.warnLog("ProcessorsResource.internalRun: user " + oUser.getUserId() + " does not have a valid subscription");
 				oRunningProcessorViewModel.setStatus("ERROR");
 				return oRunningProcessorViewModel;
 			}
