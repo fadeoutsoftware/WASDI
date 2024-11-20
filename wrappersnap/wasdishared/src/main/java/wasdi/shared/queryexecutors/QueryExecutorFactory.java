@@ -22,6 +22,7 @@ import wasdi.shared.queryexecutors.creodias.QueryExecutorCREODIAS;
 import wasdi.shared.queryexecutors.creodias2.QueryExecutorCreoDias2;
 import wasdi.shared.queryexecutors.dlr.QueryExecutorDLR;
 import wasdi.shared.queryexecutors.eodc.QueryExecutorEODC;
+import wasdi.shared.queryexecutors.esa.QueryExecutorESA;
 import wasdi.shared.queryexecutors.extweb.ExtWebQueryExecutor;
 import wasdi.shared.queryexecutors.gpm.QueryExecutorGPM;
 import wasdi.shared.queryexecutors.jrc.QueryExecutorJRC;
@@ -75,6 +76,7 @@ public class QueryExecutorFactory {
 		aoMap.put("EXT_WEB", ExtWebQueryExecutor::new);
 		aoMap.put("DLR", QueryExecutorDLR::new);		
 		aoMap.put("SINA", QueryExecutorSina::new);
+		aoMap.put("ESA", QueryExecutorESA::new);
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
 		

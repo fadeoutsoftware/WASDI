@@ -288,6 +288,12 @@ public class SnapProductReader extends WasdiProductReader {
 			return m_oProductFile;
 		}
 		else if (sPlatform!=null) {
+			
+			if (sPlatform.equals(Platforms.ERS)) {
+				WasdiLog.debugLog("SnapProductReader.getFileForPublishBand: publishing bands for ERS products is not yet supported");
+				return null;
+			}
+			
 	        // Check if it is a S2
 	        if (sPlatform.equals(Platforms.SENTINEL2)) {
 

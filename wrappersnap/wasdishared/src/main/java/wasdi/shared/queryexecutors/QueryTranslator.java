@@ -171,6 +171,11 @@ public abstract class QueryTranslator {
 	private static final String s_sPLATFORMNAME_BIGBANG = "platformname:BIGBANG";
 	
 	/**
+	 *  Token of ERS platform
+	 */
+	private static final String s_sPLATFORMNAME_ERS = "platformname:ERS";
+	
+	/**
 	 * Token of TERRA platform
 	 */
 	private static final String s_sPLATFORMNAME_METEOCEAN = "platformname:MeteOcean";
@@ -593,6 +598,8 @@ public abstract class QueryTranslator {
 						
 			parseBIGBANG(sQuery, oResult);
 			
+			parseERS(sQuery, oResult);
+
 			parseMeteOcean(sQuery, oResult);
 						
 			if (Utils.isNullOrEmpty(oResult.platformName)) {
@@ -1113,6 +1120,13 @@ public abstract class QueryTranslator {
 		}
 	}
 	
+	private void parseERS(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ERS)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_ERS);
+			
+			oResult.platformName = Platforms.ERS;
+		}
+	}
 	
 	private void parseMeteOcean(String sQuery, QueryViewModel oResult) {
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_METEOCEAN)) {

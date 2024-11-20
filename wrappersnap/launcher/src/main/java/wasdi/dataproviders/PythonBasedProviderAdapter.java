@@ -113,7 +113,7 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 	protected void addOperativeParametersToWasdiPayload(Map<String, Object> oPayloadMap, String sSaveFolderPath, String sDownloadedFileName, int iMaxRetries) {
 		oPayloadMap.put("downloadDirectory", sSaveFolderPath);
 		oPayloadMap.put("downloadFileName", sDownloadedFileName);
-		oPayloadMap.put("maxRetry", sDownloadedFileName); // not sure I need
+		oPayloadMap.put("maxRetry", iMaxRetries); // not sure I need
 	}
 	
 	
@@ -127,11 +127,20 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 		String sInputFullPath = "";
 		String sOutputFullPath = "";
 		
-		WasdiLog.debugLog("PythonBasedProviderAdapter.executeDownloadFile: product name " + oProcessWorkspace.getProductName());	
+		WasdiLog.infoLog("PythonBasedProviderAdapter.executeDownloadFile: product name " + oProcessWorkspace.getProductName());	
 		
-		try {		
+		try {	
+			
+			// sSaveDirOnServer contains the path until the workspace. However, if the workspace has just been created, the workspace
+			// directory is not yet present and needs to be created
+			File oTargetDir = new File(sSaveDirOnServer);
+			boolean oDirCreated = oTargetDir.mkdirs();
+			if (oDirCreated)
+				WasdiLog.infoLog("PythonBasedProviderAdapter.executeDownloadFile. Workspace directory has been crated");
+			
+			
 			// let's add the additional information to the json passed to the Python data provider
-			Map<String, Object> oMap = fromtWasdiPayloadToObjectMap(sFileURL);
+			Map<String, Object> oMap = fromWasdiPayloadToObjectMap(sFileURL);
 			addOperativeParametersToWasdiPayload(oMap, sSaveDirOnServer, oProcessWorkspace.getProductName(), iMaxRetry);
 
 			
@@ -154,7 +163,7 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 			
 			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
 			
-			WasdiLog.debugLog("PythonBasedProviderAdapter.executeDownloadFile: python output = " + oShellExecReturn.getOperationLogs());;
+			WasdiLog.infoLog("PythonBasedProviderAdapter.executeDownloadFile: python output = " + oShellExecReturn.getOperationLogs());;
 			
 			File oOutputFile = new File(sOutputFullPath);
 			
@@ -162,14 +171,14 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 				WasdiLog.warnLog("PythonBasedProviderAdapter.executeDownloadFile: impossible to read the output file of the Python data provider");
 			}
 			
-			WasdiLog.debugLog("PythonBasedProviderAdapter.executeDownloadFile: got output file form the Python data provider " + oOutputFile.getAbsolutePath());
+			WasdiLog.infoLog("PythonBasedProviderAdapter.executeDownloadFile: got output file form the Python data provider " + oOutputFile.getAbsolutePath());
 			
 			// the output will simply be the path of the downloaded file
 			JSONObject oJsonOutput = JsonUtils.loadJsonFromFile(sOutputFullPath);
 			String sDownloadedFilePath = oJsonOutput.optString("outputFile");
 			
 			if (!Utils.isNullOrEmpty(sDownloadedFilePath)) {
-				WasdiLog.debugLog("PythonBasedProviderAdapter.executeDownloadFile: path to the downloaded file " + sDownloadedFilePath);
+				WasdiLog.infoLog("PythonBasedProviderAdapter.executeDownloadFile: path to the downloaded file " + sDownloadedFilePath);
 				sResultDownloadedFilePath = sDownloadedFilePath;
 			} else {
 				WasdiLog.errorLog("PythonBasedProviderAdapter.executeDownloadFile: path to the downloaded file is null or empty");
@@ -189,7 +198,7 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 	
 	
 	
-	protected Map<String, Object> fromtWasdiPayloadToObjectMap(String sUrl) {
+	protected Map<String, Object> fromWasdiPayloadToObjectMap(String sUrl) {
 		String sDecodedUrl = decodeUrl(sUrl);
 
 		String sPayload = null;
@@ -197,13 +206,13 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 			String[] asTokens = sDecodedUrl.split("payload=");
 			if (asTokens.length == 2) {
 				sPayload = asTokens[1];
-				WasdiLog.debugLog("PythonBasedProviderAdapter.extractWasdiPayloadFromUrl json string: " + sPayload);
+				WasdiLog.debugLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap json string: " + sPayload);
 				return JsonUtils.jsonToMapOfObjects(sPayload);
 			}
-			WasdiLog.warnLog("PythonBasedProviderAdapter.extractWasdiPayloadFromUrl. Payload not found in url " + sUrl);
+			WasdiLog.warnLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap. Payload not found in url " + sUrl);
 		}
 		
-		WasdiLog.warnLog("PythonBasedProviderAdapter.extractWasdiPayloadFromUrl. Decoded url is null or empty " + sUrl);
+		WasdiLog.warnLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap. Decoded url is null or empty " + sUrl);
 		return null;
 	}
 	
@@ -236,19 +245,16 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public String getFileName(String sFileURL) throws Exception {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
