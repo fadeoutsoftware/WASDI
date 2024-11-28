@@ -70,7 +70,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		WasdiLog.debugLog("Download.executeOperation");
+		WasdiLog.infoLog("Download.executeOperation");
 		
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");
@@ -219,7 +219,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                         oProviderAdapter.subscribe(this);
                         
                         m_oProcessWorkspaceLogger.log("Download.executeOperation: got next data provider " + oProviderAdapter.getCode());
-                        WasdiLog.warnLog("Download.executeOperation: got next data provider " + oProviderAdapter.getCode());                    	
+                        WasdiLog.infoLog("Download.executeOperation: got next data provider " + oProviderAdapter.getCode());                    	
                     }
                 }
 
@@ -244,7 +244,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
                     oAlreadyDownloaded.setBoundingBox(sBoundingBox);
                 } else {
-                    WasdiLog.infoLog("Download.executeOperation: bounding box not available in the parameter");
+                    WasdiLog.debugLog("Download.executeOperation: bounding box not available in the parameter");
                 }
 
 				if (oProduct != null) {
@@ -287,7 +287,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             if (Utils.isNullOrEmpty(sFileName)) {
             	
             	// No, we are in error
-                WasdiLog.debugLog("Download.executeOperation: file is null there must be an error");
+                WasdiLog.warnLog("Download.executeOperation: file is null there must be an error");
 
                 String sError = "The name of the file to download result null";
                 m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.DOWNLOAD.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());

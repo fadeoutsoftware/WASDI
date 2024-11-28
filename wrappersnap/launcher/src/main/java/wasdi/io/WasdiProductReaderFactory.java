@@ -91,11 +91,7 @@ public class WasdiProductReaderFactory {
 			return new LandsatProductReader(oFile);
 		}
 
-		if (oFile.getName().toLowerCase().endsWith(".nc")) {
-			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating CM NetCDF File Reader for " + oFile.getName());
-			return new CmNcProductReader(oFile);
-		}
-		
+
 		if (WasdiFileUtils.isDocumentFormatFile(oFile)) { 
 			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating Documents File Reader for " + oFile.getName());
 			return new DocumentFormatsProductReader(oFile);
@@ -124,6 +120,21 @@ public class WasdiProductReaderFactory {
 		if (oFile.getName().endsWith(".pth") || oFile.getName().endsWith(".pt")) {
 			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating PyTorchModel File Reader for " + oFile.getName());
 			return new PyTorchModelReader(oFile);
+		}
+		
+		if (oFile.getName().endsWith(".hdr") || oFile.getName().endsWith(".bil")) {
+			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating ESRI HDR File Reader for " + oFile.getName());
+			return new EsriHDRLightReader(oFile);
+		}
+		
+		if (oFile.getName().startsWith("MeteOcean_")) {
+			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating MeteOcean file reader for " + oFile.getName());
+			return new MeteOceanProductReader(oFile);
+		}
+		
+		if (oFile.getName().toLowerCase().endsWith(".nc")) {
+			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating CM NetCDF File Reader for " + oFile.getName());
+			return new CmNcProductReader(oFile);
 		}
 		
 		WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating SNAP File Reader for " + oFile.getName());

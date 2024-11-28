@@ -279,16 +279,6 @@ public class User {
 	public void setActiveProjectId(String activeProjectId) {
 		this.activeProjectId = activeProjectId;
 	}
-
-	/**
-	 * Return true if the user is professional
-	 * False if is Free or Standard
-	 * @return
-	 */
-	@JsonIgnore
-	public boolean isProfessionalUser() {
-		return type.equals(UserType.PROFESSIONAL.name());
-	}
 	
 	/**
 	 * Get a safe full user name string.

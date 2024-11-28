@@ -50,6 +50,29 @@ public class SchedulerConfig {
 	public int lastStateChangeDateOrderBy = -1;
 	
 	/**
+	 * Number of cycles that must be executed before starting the periodic checks of the scheduler.
+	 * This will mean that the checks are done, in seconds, maximum every: 
+	 * (processingThreadSleepingTimeMS * sometimesCheckCounter)/1000 [seconds].
+	 * By default is 2000 * 30 / 1000 = 60 secs, 1 min,.
+	 * In reality we need to add to this time the time needed by the scheduler to do his job 
+	 */
+	public int sometimesCheckCounter = 30;
+	
+	/**
+	 * Counter of the watch Dog. 
+	 * We assume that if we have only waiting processes, no running, no ready for more that X times, this is 
+	 * a deadlock. How can the waiting processes become ready if nothing is running? 
+	 * So if we see this of X times, we stop the waiting ones.
+	 * This is the X.
+	 */
+	public int watchDogCounter = 30;
+	
+	/**
+	 * Flag to activate or diasctivate the watch dog
+	 */
+	public boolean activateWatchDog = true;
+	
+	/**
 	 * List of configured schedulers
 	 */
 	public ArrayList<SchedulerQueueConfig> schedulers;

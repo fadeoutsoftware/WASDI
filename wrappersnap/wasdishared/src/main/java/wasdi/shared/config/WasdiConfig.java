@@ -102,6 +102,31 @@ public class WasdiConfig {
 	public boolean logHttpCalls=true;
 	
 	/**
+	 * General Log level. Used if Log 4 J is NOT USED
+	 */
+	public String logLevel = "INFO";
+	
+	/**
+	 * Spefic Log Level for the web-server. Overrides logLevel. Used if Log 4 J is NOT USED
+	 */
+	public String logLevelServer = "";
+	
+	/**
+	 * Spefic Log Level for the launcher. Overrides logLevel. Used if Log 4 J is NOT USED
+	 */
+	public String logLevelLauncher = "";
+	
+	/**
+	 * Spefic Log Level for the scheduler. Overrides logLevel. Used if Log 4 J is NOT USED
+	 */
+	public String logLevelScheduler = "";
+	
+	/**
+	 * Spefic Log Level for the trigger. Overrides logLevel. Used if Log 4 J is NOT USED
+	 */
+	public String logLevelTrigger = "";
+	
+	/**
 	 * Set to true to add date time to log lines
 	 */
 	public boolean addDateTimeToLogs=false;

@@ -265,7 +265,7 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 				sResult ="&geometry=POLYGON((" + sQuery.substring(iStart, iEnd) + "))";
 			}
 		} catch (Exception oE) {
-			WasdiLog.log("ERROR", "QueryTranslatorCREODIAS.parseFootprint: could not identify footprint substring limits: " + oE);
+			WasdiLog.errorLog("QueryTranslatorCREODIAS.parseFootprint: could not identify footprint substring limits: ", oE);
 		}
 		return sResult;
 	}

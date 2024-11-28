@@ -27,7 +27,7 @@ public class Ingest extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 
-		WasdiLog.debugLog("Ingest.executeOperation");
+		WasdiLog.infoLog("Ingest.executeOperation");
 
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");

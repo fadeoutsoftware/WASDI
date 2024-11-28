@@ -45,6 +45,7 @@ public class ProviderAdapterFactory {
 		aoDownloaders.put("DLR", DLRProviderAdapter::new);
 		aoDownloaders.put("SINA", SinaProviderAdapter::new);		
 		aoDownloaders.put("EXT_WEB", ExtWebProviderAdapter::new);
+		aoDownloaders.put("ESA", ESAProviderAdapter::new);
 		s_aoDownloaderSuppliers = Collections.unmodifiableMap(aoDownloaders);
 	}
 

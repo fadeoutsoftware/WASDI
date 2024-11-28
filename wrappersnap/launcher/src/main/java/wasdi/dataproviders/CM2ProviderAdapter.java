@@ -31,7 +31,7 @@ public class CM2ProviderAdapter extends PythonBasedProviderAdapter {
 		
 		try {
 			// the link is a JSON string that we can parse into a map
-			Map<String, Object> oJsonMap =  fromtWasdiPayloadToObjectMap(sFileURL);
+			Map<String, Object> oJsonMap =  fromWasdiPayloadToObjectMap(sFileURL);
 			String sDatasetId = (String) oJsonMap.getOrDefault(s_sDatasetId, "");
 			
 			if (!Utils.isNullOrEmpty(sDatasetId)) {

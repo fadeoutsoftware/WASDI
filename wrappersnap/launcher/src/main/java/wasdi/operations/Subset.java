@@ -29,7 +29,7 @@ public class Subset extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
         
-		WasdiLog.debugLog("Subset.executeOperation");
+		WasdiLog.infoLog("Subset.executeOperation");
         
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");

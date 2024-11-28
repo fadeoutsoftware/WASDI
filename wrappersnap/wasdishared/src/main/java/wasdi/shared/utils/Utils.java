@@ -411,7 +411,7 @@ public class Utils {
 				return getNormalizedSize(dSize, i);
 			}
 		}
-		WasdiLog.log("WARNING", "Utils.getNormalizedSize( " + dSize + ", " + sInputUnit + " ): could not find requested unit");
+		WasdiLog.warnLog("Utils.getNormalizedSize( " + dSize + ", " + sInputUnit + " ): could not find requested unit");
 		return "";
 	}
 	

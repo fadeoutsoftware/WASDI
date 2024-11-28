@@ -4,6 +4,11 @@
 			"baseUrl": "https://wasdi-box.fadeout.cloud/return/",
 			"mission":"ReturnRaster",
 			"apiKey": "super-secret-WASDI-key"
-		}		
+		},		
+		{
+			"baseUrl": "https://wasdi-box.fadeout.cloud/meteocean/",
+			"mission":"MeteOcean",
+			"apiKey": "super-secret-WASDI-key"
+		}
 	]
 }

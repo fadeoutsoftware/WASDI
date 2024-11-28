@@ -7,6 +7,8 @@
 package wasdi.shared.queryexecutors;
 
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -167,6 +169,16 @@ public abstract class QueryTranslator {
 	 * Token of TERRA platform
 	 */
 	private static final String s_sPLATFORMNAME_BIGBANG = "platformname:BIGBANG";
+	
+	/**
+	 *  Token of ERS platform
+	 */
+	private static final String s_sPLATFORMNAME_ERS = "platformname:ERS";
+	
+	/**
+	 * Token of TERRA platform
+	 */
+	private static final String s_sPLATFORMNAME_METEOCEAN = "platformname:MeteOcean";
 
 	/**
 	 * Token of product type
@@ -447,9 +459,7 @@ public abstract class QueryTranslator {
 								dEast = Double.max(dEast, dMeridian);
 								dWest = Double.min(dWest, dMeridian);
 							} catch (Exception oE) {
-								WasdiLog.log("ERROR",
-										"QueryTranslator.parseWasdiClientQuery: issue with current coordinate pair: "
-												+ sPair + ": " + oE);
+								WasdiLog.errorLog("QueryTranslator.parseWasdiClientQuery: issue with current coordinate pair: " + sPair + ": ", oE);
 							}
 						}
 						// todo check coordinates are within bounds
@@ -468,8 +478,7 @@ public abstract class QueryTranslator {
 						}
 
 					} catch (Exception oE) {
-						WasdiLog.log("ERROR",
-								"QueryTranslator.parseWasdiClientQuery: could not complete footprint detection: " + oE);
+						WasdiLog.errorLog("QueryTranslator.parseWasdiClientQuery: could not complete footprint detection: ", oE);
 					}
 				}
 				
@@ -478,9 +487,7 @@ public abstract class QueryTranslator {
 					reverseEngineerQueryFromProductName(oResult, oResult.productName);
 				}
 			} catch (Exception oE) {
-				WasdiLog.log("ERROR",
-						"QueryTranslator.parseWasdiClientQuery: could not identify footprint substring limits: "
-								+ oE);
+				WasdiLog.errorLog("QueryTranslator.parseWasdiClientQuery: could not identify footprint substring limits: ", oE);
 			}
 			
 			try {
@@ -590,6 +597,10 @@ public abstract class QueryTranslator {
 			parseWFS(sQuery, oResult);
 						
 			parseBIGBANG(sQuery, oResult);
+			
+			parseERS(sQuery, oResult);
+
+			parseMeteOcean(sQuery, oResult);
 						
 			if (Utils.isNullOrEmpty(oResult.platformName)) {
 				WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: platformName not found: try to read the generic one");
@@ -1106,6 +1117,68 @@ public abstract class QueryTranslator {
 			
 			oResult.platformName = Platforms.BIGBANG;
 			oResult.sensorMode = extractValue(sQuery, "dataset");
+		}
+	}
+	
+	private void parseERS(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ERS)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_ERS);
+			
+			oResult.platformName = Platforms.ERS;
+		}
+	}
+	
+	private void parseMeteOcean(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_METEOCEAN)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_METEOCEAN);
+			
+			oResult.platformName = Platforms.METEOCEAN;
+			oResult.productLevel = extractValue(sQuery, "productlevel");
+			oResult.sensorMode = extractValue(sQuery, "sensorMode");
+			oResult.instrument = extractValue(sQuery, "Instrument");
+			if (!Utils.isNullOrEmpty(oResult.productLevel) && oResult.productLevel.equals("hs")) {
+				oResult.timeliness = extractValue(sQuery, "timeliness");
+			}
+			if (!Utils.isNullOrEmpty(oResult.productType) 
+					&& (oResult.productType.equals("rcp85_mid") || oResult.productType.equals("rcp85_end") || oResult.productType.equals("historical"))) {
+				oResult.polarisation = extractValue(sQuery, "polarisationmode");
+			}
+			
+			// more complex regex, not handled well from the extractValue method
+			String sRegex = "month:(1[0-2]|[1-9])";
+			Pattern oPattern = Pattern.compile(sRegex);
+			Matcher oMatcher = oPattern.matcher(sQuery);
+			
+			if (oMatcher.find()) {
+				String sMonth = oMatcher.group().split(":")[1];
+				oResult.startFromDate = sMonth;
+			} else {
+				oResult.startFromDate = null;
+			}
+			
+			sRegex = "season:(DJF|JJA|MAM|SON)";
+			oPattern = Pattern.compile(sRegex);
+			oMatcher = oPattern.matcher(sQuery);
+			
+			if (oMatcher.find()) {
+				String sSeason = oMatcher.group(1);;
+				oResult.endFromDate = sSeason;
+			} else {
+				oResult.endFromDate = null;
+			}
+			
+			sRegex = "quantile:(0\\.99|0\\.95|0\\.9|0\\.5|0\\.1)";
+			oPattern = Pattern.compile(sRegex);
+			oMatcher = oPattern.matcher(sQuery);
+			
+			if (oMatcher.find()) {
+				String sQuantile = oMatcher.group(1);;
+				oResult.platformSerialIdentifier = sQuantile;
+			} else {
+				oResult.platformName = null;
+			}
+			
+			
 		}
 	}
 

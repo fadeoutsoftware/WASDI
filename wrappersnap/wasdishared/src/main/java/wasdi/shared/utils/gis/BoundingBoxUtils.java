@@ -76,7 +76,7 @@ public class BoundingBoxUtils {
 					return Arrays.asList(dNorth, dWest, dSouth, dEast);
 				}
 			} catch(PatternSyntaxException | NullPointerException | NumberFormatException oE) {
-				WasdiLog.log("ERROR", "BoundingBoxUtils.parseBoundingBox: issue with the bounding box: " + sBoundingBox + ": " + oE);
+				WasdiLog.errorLog("BoundingBoxUtils.parseBoundingBox: issue with the bounding box: " + sBoundingBox + ": ", oE);
 			}
 		}
 

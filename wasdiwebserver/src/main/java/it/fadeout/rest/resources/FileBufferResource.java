@@ -76,16 +76,15 @@ public class FileBufferResource {
 	 * Trigger a sharing of an image (from one workspace to another) in WASDI.
 	 * The method checks the input, create the parameter and call WASDI.runProcess
 	 * 
-	 * @param sSessionId User Session
-	 * @param sFileUrl Url of the file to import
-	 * @param sProvider Data Provider
-	 * @param sWorkspaceId Workspace Id
-	 * @param sBoundingBox if available, bbox of the product to import
-	 * @param sParentProcessWorkspaceId Proc Id of the Parent Process
+	 * @param sSessionId Session Id
+	 * @param sOriginWorkspaceId Id of origin workspace 
+	 * @param sDestinationWorkspaceId Id of destination workpsace
+	 * @param sProductName Name of the product
+	 * @param sParentProcessWorkspaceId Optional parent process Obj Id
 	 * @return
 	 * @throws IOException
 	 */
-	@GET
+		@GET
 	@Path("share")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response share(@HeaderParam("x-session-token") String sSessionId,
@@ -392,6 +391,14 @@ public class FileBufferResource {
 			DataProvider oProvider = null;
 			if (Utils.isNullOrEmpty(sProvider)) {
 				oProvider = m_oDataProviderCatalog.getDefaultProvider(WasdiConfig.Current.nodeCode);
+				
+				sProvider = oProvider.getName();
+				
+				if (Utils.isNullOrEmpty(sProvider)) {
+					WasdiLog.warnLog("FileBufferResource.imageImport: provider is null, assume AUTO");
+					sProvider = "AUTO";
+				}
+				
 			} else {
 				oProvider = m_oDataProviderCatalog.getProvider(sProvider);
 			}

@@ -26,7 +26,7 @@ public class Deployprocessor extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		WasdiLog.debugLog("Deployprocessor.executeOperation");
+		WasdiLog.infoLog("Deployprocessor.executeOperation");
 		
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");
