@@ -832,13 +832,15 @@ public abstract class QueryTranslator {
 	private void parseVIIRS(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_VIIRS)) {
-				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_VIIRS);
+				// sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_VIIRS);
 
 				oResult.platformName = Platforms.VIIRS;
 
 				// check for product type
 				try {
 					if (sQuery.contains(QueryTranslator.s_sPRODUCTTYPE)) {
+						
+						/*
 						int iStart = sQuery.indexOf(s_sPRODUCTTYPE);
 						if (iStart < 0) {
 							throw new IllegalArgumentException("Could not find product type");
@@ -859,6 +861,8 @@ public abstract class QueryTranslator {
 						sType = sType.trim();
 
 						oResult.productType = sType;
+						*/
+						oResult.productType = extractValue(sQuery, "producttype");
 					}
 				} catch (Exception oE) {
 					WasdiLog.debugLog("QueryTranslator.parseVIIRS( " + sQuery + " ): error while parsing product type: " + oE);

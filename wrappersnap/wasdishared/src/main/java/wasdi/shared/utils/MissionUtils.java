@@ -242,7 +242,9 @@ public class MissionUtils {
 			else if (sFileName.toUpperCase().startsWith("MER_") || sFileName.toUpperCase().startsWith("ASA_")) {
 				return Platforms.ENVISAT;
 			}
-			else if (sFileName.toUpperCase().startsWith("RIVER-FLD")) {
+			else if (sFileName.toUpperCase().startsWith("RIVER-FLD") 
+					|| sFileName.toUpperCase().startsWith("VNP21A1D.")
+					|| sFileName.toUpperCase().startsWith("VNP21A1N.")) {
 				return Platforms.VIIRS;
 			}
 			else if (sFileName.toUpperCase().startsWith("PROBAV_")) {

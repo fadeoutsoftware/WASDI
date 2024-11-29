@@ -307,11 +307,11 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 			JSONObject oLinkItem = oLinks.getJSONObject(i);
 			String sHref = oLinkItem.optString("href", null);
 			String sRel = oLinkItem.optString("rel", null);
+			String sDownloadTitle = oLinkItem.optString("title", null);
 			if (!Utils.isNullOrEmpty(sHref) 
-					&& !Utils.isNullOrEmpty(sRel) 
-					&& sHref.startsWith("https://e4ftl01.cr.usgs.gov") 
+					&& !Utils.isNullOrEmpty(sRel)  
 					&& sRel.equals("http://esipfed.org/ns/fedsearch/1.1/data#")) {
-				if (sTitle.startsWith("MOD11A2") && (sHref.endsWith("MOD11A2.061/") || sHref.endsWith("MOD11A2.061"))) {
+				if (sHref.startsWith("https://e4ftl01.cr.usgs.gov") && sTitle.startsWith("MOD11A2") && (sHref.endsWith("MOD11A2.061/") || sHref.endsWith("MOD11A2.061"))) {
 					// let's build back the url
 					// we first add the start date
 					if (!sHref.endsWith("/"))
@@ -321,6 +321,9 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 					sHref += sDateFolder + "/" + sTitle;
 					sLink = sHref;
 					break;
+				}
+				else if (!Utils.isNullOrEmpty(sDownloadTitle) && sDownloadTitle.startsWith("Download " + sTitle)) {
+					sLink = sHref;
 				}
 			}
 		} 

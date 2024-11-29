@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,7 +37,9 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		
 		this.m_oQueryTranslator = new QueryTranslatorLpDaac();
 		this.m_oResponseTranslator = new ResponseTranslatorLpDaac();
-		this.m_asSupportedPlatforms.add(Platforms.TERRA);
+		this.m_asSupportedPlatforms.addAll(Arrays.asList(
+				Platforms.TERRA, 
+				Platforms.VIIRS));
 	}
 	
 	@Override
@@ -67,19 +70,9 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 
 		String sDateFrom = oQueryViewModel.startFromDate;
 		String sDateTo = oQueryViewModel.endToDate;
-
-//		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
-//		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
 		
 		String sFileName = oQueryViewModel.productName; // TODO
 		String sProductType = oQueryViewModel.productType;
-
-
-		/*
-		ModisRepository oModisRepositroy = new ModisRepository();
-		
-		long lCount = oModisRepositroy.countItems(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo, sFileName);
-		*/
 		
 		// TODO: check where the name of the collection is coming from
 		
@@ -87,6 +80,10 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		
 		if (sProductType.equals("MOD11A2")) {
 			sEarthDataCollectionId = "C2269056084-LPCLOUD";
+		} else if (sProductType.equals("VNP21A1D")) {
+			sEarthDataCollectionId = "C2545314555-LPCLOUD";
+		} else if (sProductType.equals("VNP21A1N")) {
+			sEarthDataCollectionId = "C2545314559-LPCLOUD";
 		}
 		
 		if (Utils.isNullOrEmpty(sEarthDataCollectionId)) {
@@ -191,7 +188,12 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		
 		if (sProductType.equals("MOD11A2")) {
 			sEarthDataCollectionId = "C2269056084-LPCLOUD";
+		} else if (sProductType.equals("VNP21A1D")) {
+			sEarthDataCollectionId = "C2545314555-LPCLOUD";
+		} else if (sProductType.equals("VNP21A1N")) {
+			sEarthDataCollectionId = "C2545314559-LPCLOUD";
 		}
+		
 		
 		if (Utils.isNullOrEmpty(sEarthDataCollectionId)) {
 			WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product trype " + sProductType + " not supported by WASDI" );
