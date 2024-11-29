@@ -3,6 +3,8 @@ package wasdi.shared.data.missions;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.HashMap;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -152,6 +154,7 @@ public class MissionsRepository {
 		return aoMissions;
 	}
 	
+	
 	/**
 	 * Get a Mission Entity by the Mission Index Value
 	 * @param sMissionIndexValue
@@ -174,5 +177,19 @@ public class MissionsRepository {
 			WasdiLog.debugLog("MissionsRepository.readAppConfig: could not parse the JSON payload due to " + oE + ".");
 		}
 		return null;
-	}	
+	}
+	
+	public HashMap<String, String> getMissionIndexValueNameMapping() {
+		HashMap<String, String> oMissionIndexValueNameMapping = new HashMap<String, String>();
+		
+		oMissionIndexValueNameMapping.putAll(
+			    s_oClientConfig.getMissions().stream()
+			        .collect(Collectors.toMap(Mission::getIndexvalue, Mission::getName, (aExistingValue, sNewValue) -> aExistingValue)) 
+			);
+		
+		return oMissionIndexValueNameMapping;
+		
+	}
+	
+
 }
