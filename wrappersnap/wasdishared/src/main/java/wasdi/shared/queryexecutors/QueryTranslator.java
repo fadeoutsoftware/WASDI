@@ -840,28 +840,6 @@ public abstract class QueryTranslator {
 				try {
 					if (sQuery.contains(QueryTranslator.s_sPRODUCTTYPE)) {
 						
-						/*
-						int iStart = sQuery.indexOf(s_sPRODUCTTYPE);
-						if (iStart < 0) {
-							throw new IllegalArgumentException("Could not find product type");
-						}
-						iStart += s_sPRODUCTTYPE.length();
-						int iEnd = sQuery.indexOf(" AND ", iStart);
-						if (iEnd < 0) {
-							iEnd = sQuery.indexOf(')', iStart);
-						}
-						if (iEnd < 0) {
-							iEnd = sQuery.indexOf(' ', iStart);
-						}
-						if (iEnd < 0) {
-							// the types can be VIIRS_1d_composite, VIIRS_5d_composite all 18 letters
-							iEnd = iStart + 18;
-						}
-						String sType = sQuery.substring(iStart, iEnd);
-						sType = sType.trim();
-
-						oResult.productType = sType;
-						*/
 						oResult.productType = extractValue(sQuery, "producttype");
 					}
 				} catch (Exception oE) {

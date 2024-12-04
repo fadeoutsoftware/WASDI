@@ -107,9 +107,15 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 			WasdiLog.errorLog("ResponseTranslatorLpDaac.translate: no title found for the product. It will be impossible to download it");
 			return null;
 		} else {
-			sTitle += ".hdf";
+			if (sTitle.startsWith("MOD11A2")) {
+				sTitle += ".hdf";
+			} else if (sTitle.startsWith("VNP21A1D") || sTitle.startsWith("VNP21A1N")) {
+				sTitle += ".h5";
+			}
 			oResult.setTitle(sTitle);
 		}
+		
+		
 		
 		// footprint
 		addFootprint(oJsonEntry, oResult);
@@ -179,7 +185,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 	// This method will need to be deleted
 	@Deprecated
 	public QueryResultViewModel translate(ModisItemForReading oItem) {
-		Preconditions.checkNotNull(oItem, "ResponseTranslatorModis.translate: null object");
+		Preconditions.checkNotNull(oItem, "ResponseTranslatorLpDaac.translate: null object");
 		
 		QueryResultViewModel oResult = new QueryResultViewModel();
 		oResult.setProvider("LPDAAC");		
@@ -211,8 +217,8 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 	 */
 	@Deprecated
 	private void addFootPrint(ModisLocation sLocation, QueryResultViewModel oResult) {
-		Preconditions.checkNotNull(sLocation, "ResponseTranslatorModis.addFootPrint: input sLocation is null");
-		Preconditions.checkNotNull(oResult, "ResponseTranslatorModis.addFootPrint: QueryResultViewModel is null");
+		Preconditions.checkNotNull(sLocation, "ResponseTranslatorLpDaac.addFootPrint: input sLocation is null");
+		Preconditions.checkNotNull(oResult, "ResponseTranslatorLpDaac.addFootPrint: QueryResultViewModel is null");
 
 		if (sLocation.getType().equalsIgnoreCase("Polygon")) {
 			StringBuilder oFootPrint = new StringBuilder("POLYGON");
@@ -362,8 +368,8 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 	 */
 	@Deprecated
 	private void addProperties(ModisItemForReading oItem, QueryResultViewModel oResult) {
-		Preconditions.checkNotNull(oItem, "ResponseTranslatorModis.addProperties: input oItem is null");
-		Preconditions.checkNotNull(oResult, "ResponseTranslatorModis.addProperties: QueryResultViewModel is null");
+		Preconditions.checkNotNull(oItem, "ResponseTranslatorLpDaac.addProperties: input oItem is null");
+		Preconditions.checkNotNull(oResult, "ResponseTranslatorLpDaac.addProperties: QueryResultViewModel is null");
 
 		oResult.getProperties().put(STITLE, oItem.getFileName());
 		oResult.getProperties().put(SHREF, oItem.getUrl());
@@ -401,7 +407,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 	 * @param oResult the result view model
 	 */
 	private void addLink(QueryResultViewModel oResult) {
-		Preconditions.checkNotNull(oResult, "ResponseTranslatorModis.addProperties: result view model is null");
+		Preconditions.checkNotNull(oResult, "ResponseTranslatorLpDaac.addProperties: result view model is null");
 
 		StringBuilder oLink = new StringBuilder("");
 
@@ -409,7 +415,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 
 		sItem = oResult.getProperties().get(SHREF); //0 - url
 		if (sItem == null || sItem.isEmpty()) {
-			WasdiLog.debugLog("ResponseTranslatorModis.addLink: the download URL is null or empty. Product title: " + oResult.getTitle());
+			WasdiLog.debugLog("ResponseTranslatorLpDaac.addLink: the download URL is null or empty. Product title: " + oResult.getTitle());
 			sItem = "http://";
 		}
 		oLink.append(sItem).append(SLINK_SEPARATOR); 
@@ -435,7 +441,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 	 * @param oResult the result view model
 	 */
 	private void addSummary(QueryResultViewModel oResult) {
-		Preconditions.checkNotNull(oResult, "ResponseTranslatorModis.addSummary: QueryResultViewModel is null");
+		Preconditions.checkNotNull(oResult, "ResponseTranslatorLpDaac.addSummary: QueryResultViewModel is null");
 
 		Map<String, String> aoProperties = oResult.getProperties();
 		
