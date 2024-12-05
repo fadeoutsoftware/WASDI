@@ -283,7 +283,9 @@ public class MissionUtils {
 			else if (sFileName.toUpperCase().startsWith("SKYWATCH_")) {
 				return Platforms.EARTHCACHE;
 			} 
-			else if (sFileName.toUpperCase().startsWith("MOD11A2")) {
+			else if (sFileName.toUpperCase().startsWith("MOD11A2")
+					|| sFileName.toUpperCase().startsWith("MCD43A3")
+					|| sFileName.toUpperCase().startsWith("MCD43A4")) {
 				return Platforms.TERRA;
 			}
 			else if (sFileName.toUpperCase().startsWith("GHS_BUILT_S_E2018_GLOBE_R2023A_54009_10_V1_0_")) {

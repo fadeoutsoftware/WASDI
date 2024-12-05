@@ -203,7 +203,6 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 			
 			if (iResponseCode >= 200 && iResponseCode <= 299) {
 				String sResponseBody = oHttpResponse.getResponseBody();
-				System.out.println(sResponseBody);
 				List<QueryResultViewModel> oResultList = this.m_oResponseTranslator.translateBatch(sResponseBody, bFullViewModel);
 				return oResultList;
 				
