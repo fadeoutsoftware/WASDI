@@ -226,7 +226,7 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		
 		// add collection concept id
 		if (!Utils.isNullOrEmpty(sCollectionConceptId)) {
-			asParameters.add(sCollectionConceptId);
+			asParameters.add("collection_concept_id=" + sCollectionConceptId);
 		}
 		
 		// add temporal filter
