@@ -405,7 +405,7 @@
 				{
 					"indexname": "producttype",
 					"indexlabel": "Product",
-					"indexvalues": "VIIRS_1d_composite|VIIRS_5d_composite",
+					"indexvalues": "VIIRS_1d_composite|VIIRS_5d_composite|VNP21A1D|VNP21A1N",
 					"regex": ".*",
 					"indexvalue": "VIIRS_1d_composite"
 				}
@@ -1058,7 +1058,7 @@
 				{
 					"indexname": "producttype",
 					"indexlabel": "Product Type",
-					"indexvalues": "MOD11A2",
+					"indexvalues": "MOD11A2|MCD43A4|MCD43A3",
 					"regex": ".*",
 					"indexvalue": "MOD11A2"
 				}
