@@ -974,6 +974,8 @@ public abstract class QueryTranslator {
 			sQuery = removePlatformToken(sQuery, QueryTranslator.S_SPLATFORMNAME_TERRA);
 
 			oResult.platformName = Platforms.TERRA;
+			
+			oResult.productType = extractValue(sQuery, "producttype");
 		}
 	}
 	
