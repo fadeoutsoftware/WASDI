@@ -341,7 +341,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 	@Override
 	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
 		
-		if (sPlatformType.equals(Platforms.VIIRS)) {
+		if (sPlatformType.equals(Platforms.VIIRS) && sFileName.startsWith("RIVER-FLD")) {
 			return DataProviderScores.DOWNLOAD.getValue();
 		}
 		
