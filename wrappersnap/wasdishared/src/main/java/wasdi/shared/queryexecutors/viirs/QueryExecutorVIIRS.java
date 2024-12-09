@@ -78,7 +78,9 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 			}
 			
 			
-			if (!oVIIRSQuery.productType.equals("VIIRS_1d_composite") && !oVIIRSQuery.productType.equals("VIIRS_5d_composite")) {
+			if (!Utils.isNullOrEmpty(oVIIRSQuery.productType) 
+					&& !oVIIRSQuery.productType.equals("VIIRS_1d_composite") 
+					&& !oVIIRSQuery.productType.equals("VIIRS_5d_composite")) {
 				return -1;
 			}
 			
@@ -116,7 +118,9 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 				return aoResults;
 			}
 			
-			if (!oVIIRSQuery.productType.equals("VIIRS_1d_composite") && !oVIIRSQuery.productType.equals("VIIRS_5d_composite")) {
+			if (!Utils.isNullOrEmpty(oVIIRSQuery.productType) 
+					&& !oVIIRSQuery.productType.equals("VIIRS_1d_composite") 
+					&& !oVIIRSQuery.productType.equals("VIIRS_5d_composite")) {
 				return null;
 			}
 			
