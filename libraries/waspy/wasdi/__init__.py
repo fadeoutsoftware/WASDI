@@ -2271,7 +2271,7 @@ def searchEOImages(sPlatform, sDateFrom=None, sDateTo=None,
 
     if sPlatform == "VIIRS":
         if sProductType is not None:
-            if not (sProductType == "VIIRS_5d_composite" or sProductType == "VIIRS_1d_composite"):
+            if not (sProductType == "VIIRS_5d_composite" or sProductType == "VIIRS_1d_composite" or sProductType == "VNP21A1D" or sProductType == "VNP21A1N"):
                 wasdiLog(
                     "[WARNING] waspy.searchEOImages: Available Product Types for VIIRS; VIIRS_1d_composite, VIIRS_5d_composite. Received ["
                     + sProductType + "]" +
