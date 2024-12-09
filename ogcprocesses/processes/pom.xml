@@ -24,7 +24,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
-        <sVersionJackson>2.14.1</sVersionJackson>
+        <sVersionJackson>2.18.2</sVersionJackson>
         <sVersionJersey2>2.45</sVersionJersey2>
         <sVersionServletApi>2.5</sVersionServletApi>
         <sVersionMavenCompilerPlugin>3.11.0</sVersionMavenCompilerPlugin>
