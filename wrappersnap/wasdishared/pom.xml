@@ -39,7 +39,7 @@
         <sVersionJunitJupiter>5.7.0</sVersionJunitJupiter>
         <sVersionLog4j>2.24.2</sVersionLog4j>
         <sVersionMongoDb>4.11.5</sVersionMongoDb>
-        <sVersionGeoTools>29.5</sVersionGeoTools>
+        <sVersionGeoTools>28.2</sVersionGeoTools>
         <sVersionJersey2>2.43</sVersionJersey2>
         <sVersionMercurius>1.0</sVersionMercurius>
     </properties>

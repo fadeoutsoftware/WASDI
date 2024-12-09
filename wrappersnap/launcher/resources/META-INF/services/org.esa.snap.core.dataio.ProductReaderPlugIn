@@ -1,6 +1,7 @@
 org.esa.snap.dataio.rtp.RawTiledPyramidsProductCodecSpi
 eu.esa.microwave.io.generic.GenericComplexReaderPlugIn
-eu.esa.microwave.io.generic.GenericReaderPlugIneu.esa.sar.io.capella.CapellaProductReaderPlugIn
+eu.esa.microwave.io.generic.GenericReaderPlugIn
+eu.esa.sar.io.capella.CapellaProductReaderPlugIn
 eu.esa.sar.io.ceos.ers.ERSProductReaderPlugIn
 eu.esa.sar.io.ceos.jers.JERSProductReaderPlugIn
 eu.esa.sar.io.ceos.alos.AlosPalsarProductReaderPlugIn
@@ -26,13 +27,17 @@ eu.esa.sar.io.strix.grd.StriXGRDProductReaderPlugIn
 eu.esa.sar.io.strix.StriXProductReaderPlugIn
 eu.esa.sar.io.terrasarx.TerraSarXProductReaderPlugIn
 eu.esa.sar.io.TAXI.RATProductReaderPlugIn
-eu.esa.sar.io.uavsar.UAVSARReaderPlugIneu.esa.sar.iogdal.sentinel1.Sentinel1ProductReaderPlugIneu.esa.opt.dataio.alos.ceos.avnir2.Avnir2ProductReaderPlugIn
+eu.esa.sar.io.uavsar.UAVSARReaderPlugIn
+eu.esa.sar.iogdal.sentinel1.Sentinel1GDALProductReaderPlugIn
+eu.esa.opt.dataio.alos.ceos.avnir2.Avnir2ProductReaderPlugIn
 eu.esa.opt.dataio.alos.ceos.prism.PrismProductReaderPlugIn
 eu.esa.opt.dataio.alos.geotiff.pri.AlosPRIProductReaderPlugin
 eu.esa.opt.dataio.alos.geotiff.av2.AlosAV2ProductReaderPlugin
-eu.esa.opt.dataio.atsr.AtsrProductReaderPlugIneu.esa.opt.dataio.avhrr.AvhrrReaderPlugIn
+eu.esa.opt.dataio.atsr.AtsrProductReaderPlugIn
+eu.esa.opt.dataio.avhrr.AvhrrReaderPlugIn
 eu.esa.opt.dataio.avhrr.noaa.pod.PodAvhrrReaderPlugIn
-eu.esa.opt.dataio.avhrr.metop.MetopReaderPlugIn#
+eu.esa.opt.dataio.avhrr.metop.MetopReaderPlugIn
+#
 # Copyright (C) 2014-2015 CS SI
 #
 # This program is free software; you can redistribute it and/or modify it
@@ -48,13 +53,20 @@ eu.esa.opt.dataio.avhrr.metop.MetopReaderPlugIn#
 #  with this program; if not, see http://www.gnu.org/licenses/
 #
 
-eu.esa.opt.dataio.deimos.DeimosProductReaderPlugineu.esa.opt.dataio.enmap.EnmapProductReaderPlugIn
-eu.esa.opt.dataio.ikonos.IkonosProductReaderPlugineu.esa.opt.dataio.kompsat2.Kompsat2ProductReaderPlugineu.esa.opt.dataio.landsat.geotiff.LandsatGeotiffReaderPlugin
+eu.esa.opt.dataio.deimos.DeimosProductReaderPlugin
+eu.esa.opt.dataio.enmap.EnmapProductReaderPlugIn
+eu.esa.opt.dataio.ikonos.IkonosProductReaderPlugin
+eu.esa.opt.dataio.kompsat2.Kompsat2ProductReaderPlugin
+eu.esa.opt.dataio.landsat.geotiff.LandsatGeotiffReaderPlugin
 eu.esa.opt.dataio.landsat.geotiff.LandsatGeotiffColl2L2ReaderPlugin
 eu.esa.opt.dataio.landsat.geotiff.Landsat8Geotiff15mReaderPlugin
 eu.esa.opt.dataio.landsat.geotiff.Landsat8Geotiff30mReaderPlugin
 eu.esa.opt.dataio.landsat.LandsatTMReaderPlugIn
-eu.esa.opt.dataio.landsat.geotiff.level2.LandsatL2GeotiffReaderPlugineu.esa.opt.dataio.merisl3.MerisL3ProductReaderPlugIneu.esa.opt.dataio.modis.ModisProductReaderPlugIneu.esa.opt.dataio.muscate.MuscateProductReaderPlugin#
+eu.esa.opt.dataio.landsat.geotiff.level2.LandsatL2GeotiffReaderPlugin
+eu.esa.opt.dataio.merisl3.MerisL3ProductReaderPlugIn
+eu.esa.opt.dataio.modis.ModisProductReaderPlugIn
+eu.esa.opt.dataio.muscate.MuscateProductReaderPlugin
+#
 # Copyright (C) 2014-2015 CS SI
 #
 # This program is free software; you can redistribute it and/or modify it
@@ -70,7 +82,9 @@ eu.esa.opt.dataio.landsat.geotiff.level2.LandsatL2GeotiffReaderPlugineu.esa.opt.
 #  with this program; if not, see http://www.gnu.org/licenses/
 #
 
-eu.esa.opt.dataio.pleiades.PleiadesProductReaderPlugineu.esa.opt.dataio.probav.ProbaVProductReaderPlugIn#
+eu.esa.opt.dataio.pleiades.PleiadesProductReaderPlugin
+eu.esa.opt.dataio.probav.ProbaVProductReaderPlugIn
+#
 # Copyright (C) 2014-2015 CS SI
 #
 # This program is free software; you can redistribute it and/or modify it
@@ -89,7 +103,8 @@ eu.esa.opt.dataio.pleiades.PleiadesProductReaderPlugineu.esa.opt.dataio.probav.P
 eu.esa.opt.dataio.rapideye.RapidEyeL1ReaderPlugin
 eu.esa.opt.dataio.rapideye.RapidEyeL3ReaderPlugin
 # Leaving out for now the NITF plugin
-# eu.esa.opt.dataio.nitf.NITFReaderPlugineu.esa.opt.dataio.s2.l1b.S2L1BProductReaderPlugIn
+# eu.esa.opt.dataio.nitf.NITFReaderPlugin
+eu.esa.opt.dataio.s2.l1b.S2L1BProductReaderPlugIn
 eu.esa.opt.dataio.s2.l1b.S2L1BProduct10MReaderPlugIn
 eu.esa.opt.dataio.s2.l1b.S2L1BProduct20MReaderPlugIn
 eu.esa.opt.dataio.s2.l1b.S2L1BProduct60MReaderPlugIn
@@ -212,7 +227,8 @@ eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM56S_ReaderPlugIn
 eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM57S_ReaderPlugIn
 eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM58S_ReaderPlugIn
 eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM59S_ReaderPlugIn
-eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM60S_ReaderPlugIngov.nasa.gsfc.seadas.dataio.L1ProductReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM60S_ReaderPlugIn
+gov.nasa.gsfc.seadas.dataio.L1ProductReaderPlugIn
 gov.nasa.gsfc.seadas.dataio.AncillaryProductReaderPlugIn
 gov.nasa.gsfc.seadas.dataio.L1BModisProductReaderPlugIn
 gov.nasa.gsfc.seadas.dataio.L1BHicoProductReaderPlugIn
@@ -255,7 +271,8 @@ eu.esa.opt.dataio.s3.aatsr.AatsrLevel1ProductReaderPlugIn
 eu.esa.opt.dataio.spot.SpotDimapProductReaderPlugin
 eu.esa.opt.dataio.spot.SpotViewProductReaderPlugin
 eu.esa.opt.dataio.spot.SpotTake5ProductReaderPlugin
-eu.esa.opt.dataio.spot.Spot5Take5ProductReaderPlugineu.esa.opt.dataio.spot.SpotVgtProductReaderPlugIn
+eu.esa.opt.dataio.spot.Spot5Take5ProductReaderPlugin
+eu.esa.opt.dataio.spot.SpotVgtProductReaderPlugIn
 #
 # Copyright (C) 2014-2015 CS SI
 #
@@ -272,7 +289,11 @@ eu.esa.opt.dataio.spot.Spot5Take5ProductReaderPlugineu.esa.opt.dataio.spot.SpotV
 #  with this program; if not, see http://www.gnu.org/licenses/
 #
 
-eu.esa.opt.dataio.spot6.Spot6ProductReaderPlugineu.esa.opt.dataio.worldview2.WorldView2ProductReaderPlugineu.esa.opt.dataio.worldview2esa.WorldView2ESAProductReaderPluginorg.esa.smos.ee2netcdf.reader.NetcdfProductReaderPluginorg.esa.smos.dataio.smos.SmosProductReaderPlugIn
+eu.esa.opt.dataio.spot6.Spot6ProductReaderPlugin
+eu.esa.opt.dataio.worldview2.WorldView2ProductReaderPlugin
+eu.esa.opt.dataio.worldview2esa.WorldView2ESAProductReaderPlugin
+org.esa.smos.ee2netcdf.reader.NetcdfProductReaderPlugin
+org.esa.smos.dataio.smos.SmosProductReaderPlugIn
 org.esa.smos.dataio.smos.bufr.SmosBufrReaderPlugIn
 org.esa.smos.dataio.smos.bufr.SmosLightBufrReaderPlugIn
 org.esa.snap.dataio.arcbin.ArcBinGridReaderPlugIn
@@ -283,7 +304,8 @@ org.esa.snap.core.dataio.rgb.ImageProductReaderPlugIn
 org.esa.snap.csv.dataio.reader.CsvProductReaderPlugIn
 org.esa.snap.dem.dataio.ace.ACEReaderPlugIn
 org.esa.snap.dem.dataio.ace2_5min.ACE2_5MinReaderPlugIn
-org.esa.snap.dem.dataio.srtm1_hgt.SRTMHGTReaderPlugInorg.esa.snap.dataio.envi.EnviProductReaderPlugIn
+org.esa.snap.dem.dataio.srtm1_hgt.SRTMHGTReaderPlugIn
+org.esa.snap.dataio.envi.EnviProductReaderPlugIn
 org.esa.snap.dataio.hico.HicoProductReaderPlugin
 org.esa.snap.dataio.envisat.EnvisatProductReaderPlugIn
 org.esa.snap.dataio.gdal.reader.plugins.BTDriverProductReaderPlugIn
@@ -302,9 +324,11 @@ org.esa.snap.dataio.gdal.reader.plugins.RSTDriverProductReaderPlugIn
 org.esa.snap.dataio.gdal.reader.plugins.SAGADriverProductReaderPlugIn
 org.esa.snap.dataio.gdal.reader.plugins.SGIDriverProductReaderPlugIn
 org.esa.snap.dataio.gdal.reader.plugins.GTiffDriverProductReaderPlugIn
-org.esa.snap.dataio.gdal.reader.plugins.JP2OpenJPEGDriverProductReaderPlugInorg.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.JP2OpenJPEGDriverProductReaderPlugIn
+org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn
 org.esa.snap.dataio.getasse30.GETASSE30ReaderPlugIn
-org.esa.snap.jp2.reader.JP2ProductReaderPluginorg.esa.snap.dataio.netcdf.GenericNetCdfReaderPlugIn
+org.esa.snap.jp2.reader.JP2ProductReaderPlugin
+org.esa.snap.dataio.netcdf.GenericNetCdfReaderPlugIn
 org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdfReaderPlugIn
 org.esa.snap.dataio.netcdf.metadata.profiles.hdfeos.HdfEosNetCdfReaderPlugIn
 org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamNetCdfReaderPlugIn

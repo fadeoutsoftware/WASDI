@@ -1,4 +1,6 @@
-eu.esa.opt.dataio.avhrr.noaa.pod.PodGeoCodingPersistenceSpigov.nasa.gsfc.seadas.dataio.BowtieGeoCodingPersistenceSpiorg.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistenceSpi
+eu.esa.opt.dataio.avhrr.noaa.pod.PodGeoCodingPersistenceSpi
+gov.nasa.gsfc.seadas.dataio.BowtieGeoCodingPersistenceSpi
+org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistenceSpi
 org.esa.snap.core.datamodel.TiePointGeoCodingPersistenceSpi
 org.esa.snap.core.datamodel.FXYGeoCodingPersistenceSpi
 org.esa.snap.core.datamodel.GcpGeoCodingPersistenceSpi

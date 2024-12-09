@@ -4,7 +4,9 @@ eu.esa.sar.io.polsarpro.PolsarProProductWriterPlugIn
 eu.esa.sar.io.gamma.GammaProductWriterPlugIn
 eu.esa.sar.io.geotiffxml.GeoTiffXMLProductWriterPlugIn
 eu.esa.sar.io.generic.GenericBSQWriterPlugIn
-eu.esa.sar.io.pyrate.PyRateProductWriterPlugIneu.esa.opt.dataio.jp2.JP2ProductWriterPlugInorg.esa.snap.dataio.bigtiff.BigGeoTiffProductWriterPlugIn
+eu.esa.sar.io.pyrate.PyRateProductWriterPlugIn
+eu.esa.opt.dataio.jp2.JP2ProductWriterPlugIn
+org.esa.snap.dataio.bigtiff.BigGeoTiffProductWriterPlugIn
 org.esa.snap.core.dataio.dimap.DimapProductWriterPlugIn
 org.esa.snap.csv.dataio.writer.CsvProductWriterPlugIn
 org.esa.snap.dataio.envi.EnviProductWriterPlugIn
@@ -25,7 +27,8 @@ org.esa.snap.dataio.gdal.writer.plugins.PNMDriverProductWriterPlugIn
 org.esa.snap.dataio.gdal.writer.plugins.RMFDriverProductWriterPlugIn
 org.esa.snap.dataio.gdal.writer.plugins.RSTDriverProductWriterPlugIn
 org.esa.snap.dataio.gdal.writer.plugins.SAGADriverProductWriterPlugIn
-org.esa.snap.dataio.gdal.writer.plugins.SGIDriverProductWriterPlugInorg.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn
+org.esa.snap.dataio.gdal.writer.plugins.SGIDriverProductWriterPlugIn
+org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn
 org.esa.snap.dataio.hdf5.Hdf5ProductWriterPlugIn
 org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdf4WriterPlugIn
 org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn
