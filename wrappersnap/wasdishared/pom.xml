@@ -22,23 +22,23 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionAmqpClient>5.21.0</sVersionAmqpClient>
-        <sVersionAssertjCore>3.26.0</sVersionAssertjCore>
-        <sVersionAwsJavaSdkS3>1.12.731</sVersionAwsJavaSdkS3>
-        <sVersionCommonsCompress>1.26.2</sVersionCommonsCompress>
-        <sVersionCommonsLang3>3.14.0</sVersionCommonsLang3>
-        <sVersionCommonsNet>3.10.0</sVersionCommonsNet>
+        <sVersionAmqpClient>5.23.0</sVersionAmqpClient>
+        <sVersionAssertjCore>3.26.3</sVersionAssertjCore>
+        <sVersionAwsJavaSdkS3>1.12.779</sVersionAwsJavaSdkS3>
+        <sVersionCommonsCompress>1.27.1</sVersionCommonsCompress>
+        <sVersionCommonsLang3>3.17.0</sVersionCommonsLang3>
+        <sVersionCommonsNet>3.11.1</sVersionCommonsNet>
         <sVersionCommonsValidator>1.9.0</sVersionCommonsValidator>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionGeoserverManager>1.7.0</sVersionGeoserverManager>
         <sVersionGson>2.11.0</sVersionGson>
-        <sVersionGuava>33.2.0-jre</sVersionGuava>
-        <sVersionJackson>2.17.1</sVersionJackson>
+        <sVersionGuava>33.3.1-jre</sVersionGuava>
+        <sVersionJackson>2.18.2</sVersionJackson>
         <sVersionJson>20240303</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionJunitJupiter>5.7.0</sVersionJunitJupiter>
-        <sVersionLog4j>2.20.0</sVersionLog4j>
-        <sVersionMongoDb>4.3.4</sVersionMongoDb>
+        <sVersionLog4j>2.24.2</sVersionLog4j>
+        <sVersionMongoDb>4.11.5</sVersionMongoDb>
         <sVersionGeoTools>29.5</sVersionGeoTools>
         <sVersionJersey2>2.43</sVersionJersey2>
         <sVersionMercurius>1.0</sVersionMercurius>
@@ -95,13 +95,13 @@
 		<dependency>
 		    <groupId>com.github.docker-java</groupId>
 		    <artifactId>docker-java</artifactId>
-		    <version>3.3.6</version>
+		    <version>3.4.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.github.docker-java/docker-java-transport-httpclient5 -->
 		<dependency>
 		    <groupId>com.github.docker-java</groupId>
 		    <artifactId>docker-java-transport-httpclient5</artifactId>
-		    <version>3.3.6</version>
+		    <version>3.4.0</version>
 		</dependency>
         <!-- https://mvnrepository.com/artifact/org.mongodb/mongodb-driver-sync -->
         <dependency>
@@ -236,13 +236,13 @@
 		<dependency>
 		    <groupId>org.jsoup</groupId>
 		    <artifactId>jsoup</artifactId>
-		    <version>1.17.2</version>
+		    <version>1.18.3</version>
 		</dependency>        
 		<!-- https://mvnrepository.com/artifact/com.hubspot.jinjava/jinjava -->
 		<dependency>
 		    <groupId>com.hubspot.jinjava</groupId>
 		    <artifactId>jinjava</artifactId>
-		    <version>2.7.2</version>
+		    <version>2.7.4</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-client -->
 		<dependency>

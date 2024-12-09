@@ -22,13 +22,13 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionAssertjCore>3.26.0</sVersionAssertjCore>
-        <sVersionBcpkixJdk15on>1.78.1</sVersionBcpkixJdk15on>
-        <sVersionCommonsCli>1.8.0</sVersionCommonsCli>
+        <sVersionAssertjCore>3.26.3</sVersionAssertjCore>
+        <sVersionBcpkixJdk15on>1.79</sVersionBcpkixJdk15on>
+        <sVersionCommonsCli>1.9.0</sVersionCommonsCli>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionJson>20240303</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
-        <sVersionJUniversalChardet>2.4.0</sVersionJUniversalChardet>
+        <sVersionJUniversalChardet>2.5.0</sVersionJUniversalChardet>
         <sVersionLog4j>2.23.1</sVersionLog4j>
         <sVersionMavenJarPlugin>3.3.0</sVersionMavenJarPlugin>
         <sVersionMavenShadePlugin>3.5.0</sVersionMavenShadePlugin>
@@ -37,7 +37,7 @@
         <sVersionMicrowavetbx>11.0.0</sVersionMicrowavetbx>
         <sVersionOpticaltbx>11.0.0</sVersionOpticaltbx>
         <sVersionSnap>11.0.0</sVersionSnap>
-        <sVersionSshj>0.38.0</sVersionSshj>
+        <sVersionSshj>0.39.0</sVersionSshj>
         <sVersionLogback>1.2.13</sVersionLogback>
     </properties>
 
