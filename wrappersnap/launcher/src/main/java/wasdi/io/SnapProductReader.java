@@ -294,6 +294,12 @@ public class SnapProductReader extends WasdiProductReader {
 				return null;
 			}
 			
+			if (sPlatform.equals(Platforms.VIIRS) 
+					&& (m_oProductFile.getName().startsWith("VNP21A1D") || m_oProductFile.getName().startsWith("VNP21A1N"))) {
+				WasdiLog.debugLog("SnapProductReader.getFileForPublishBand: publishing bands for this VIIRS products is not yet supported");
+				return null;
+			}
+			
 	        // Check if it is a S2
 	        if (sPlatform.equals(Platforms.SENTINEL2)) {
 
