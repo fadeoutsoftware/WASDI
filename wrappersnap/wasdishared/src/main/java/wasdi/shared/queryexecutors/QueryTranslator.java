@@ -839,8 +839,11 @@ public abstract class QueryTranslator {
 				// check for product type
 				try {
 					if (sQuery.contains(QueryTranslator.s_sPRODUCTTYPE)) {
-						
-						oResult.productType = extractValue(sQuery, "producttype");
+						String sProductType = extractValue(sQuery, "producttype");
+						if (sProductType.endsWith(" )")) {
+							sProductType = sProductType.substring(0, sProductType.length() - 1).trim();
+						}
+						oResult.productType = sProductType;
 					}
 				} catch (Exception oE) {
 					WasdiLog.debugLog("QueryTranslator.parseVIIRS( " + sQuery + " ): error while parsing product type: " + oE);
