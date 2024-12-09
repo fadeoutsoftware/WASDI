@@ -72,7 +72,8 @@ pipeline {
             echo '  "sDeployWasdiTomcatOpenEoServerContainer": "'${env.sDeployWasdiTomcatOpenEoServerContainer}'",' >> DockerContainer_Run_Variables.json
             echo '  "sDeployWasdiTomcatWasdiWebServerContainer": "'${env.sDeployWasdiTomcatWasdiWebServerContainer}'",' >> DockerContainer_Run_Variables.json
             echo '  "sDeployWasdiTraefikContainer": "'${env.sDeployWasdiTraefikContainer}'",' >> DockerContainer_Run_Variables.json
-            echo '  "sDeployWasdiUpdateMetricContainer": "'${env.sDeployWasdiUpdateMetricContainer}'"' >> DockerContainer_Run_Variables.json
+            echo '  "sDeployWasdiUpdateMetricContainer": "'${env.sDeployWasdiUpdateMetricContainer}'",' >> DockerContainer_Run_Variables.json
+            echo '  "sRiseServerContainer": "'${env.sRiseServerContainer}'"' >> DockerContainer_Run_Variables.json
             echo '}' >> DockerContainer_Run_Variables.json
             cat ${WORKSPACE}/DockerContainer_Run_Variables.json
         """

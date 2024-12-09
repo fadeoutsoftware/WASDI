@@ -152,6 +152,9 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return getPermissionsByTypeAndUserId(ResourceTypes.PARAMETER.getResourceType(), sUserId);
 	}
 
+	public List<UserResourcePermission> getMissionsharingByUserId(String sUserId) {
+		return getPermissionsByTypeAndUserId(ResourceTypes.MISSION.getResourceType(), sUserId);
+	}
 
 
 	public List<UserResourcePermission> getPermissionsByResourceId(String sResourceId) {

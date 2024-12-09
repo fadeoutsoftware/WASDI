@@ -3,6 +3,9 @@ package it.fadeout.rest.resources;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.inject.Inject;
 import javax.ws.rs.DELETE;
@@ -25,14 +28,17 @@ import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.Project;
 import wasdi.shared.business.Subscription;
 import wasdi.shared.business.missions.ClientConfig;
+import wasdi.shared.business.missions.Mission;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserApplicationRole;
+import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserSession;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.missions.MissionsRepository;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.JsonUtils;
@@ -41,6 +47,7 @@ import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.missions.PrivateMissionViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.users.ChangeUserPasswordViewModel;
 import wasdi.shared.viewmodels.users.LoginInfo;
@@ -1165,5 +1172,91 @@ public class AuthResource {
 			WasdiLog.errorLog("AuthResource.getClientConfig error: " + oEx);
 			return Response.serverError().build();
 		}
-	}	
+	}
+	
+	@GET
+	@Path("/privatemissions")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response getPrivateMissions(@HeaderParam("x-session-token") String sSessionId) {
+		
+		WasdiLog.debugLog("AuthResource.getPrivateMissions");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		// domain Check
+		if (oUser == null) {
+			WasdiLog.warnLog("AuthResource.getPrivateMissions: invalid session");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}		
+
+		try {
+			String sUserId = oUser.getUserId();
+			MissionsRepository oMissionsRepository = new MissionsRepository();
+			
+			// get the missions owned by the user
+			List<Mission> asMissionsOwnedByUser = oMissionsRepository.getMissionsOwnedBy(sUserId);
+			List<PrivateMissionViewModel> aoPrivateMissionsList = new ArrayList<>(); 
+			if (!asMissionsOwnedByUser.isEmpty()) {
+				List<PrivateMissionViewModel> aoPrivateOwnedMissions = asMissionsOwnedByUser.stream()
+							.map(oMission -> createPrivateMissionViewModel(oMission, sUserId))
+							.collect(Collectors.toList());
+				aoPrivateMissionsList.addAll(aoPrivateOwnedMissions);
+			}
+			
+			// get the missions shared with the user (in read or write)
+			UserResourcePermissionRepository oUserResourcePermissionRepo = new UserResourcePermissionRepository();
+			List<UserResourcePermission> aoUserPermissionsOnMissions = oUserResourcePermissionRepo.getMissionsharingByUserId(sUserId);
+			
+	
+			if (!aoUserPermissionsOnMissions.isEmpty()) {
+				HashMap<String, String> aoMissionsIndexValuesNamesMappings = oMissionsRepository.getMissionIndexValueNameMapping();
+				List<PrivateMissionViewModel>  aoPrivateMissionsSharedWithUser = aoUserPermissionsOnMissions.stream()
+						.filter(oPermission -> !oPermission.getOwnerId().equals(oPermission.getUserId()))								// first we make sure that the user is not the owner of the mission
+						.map(oPermission -> createPrivateMissionViewModel(oPermission, sUserId, aoMissionsIndexValuesNamesMappings))
+						.collect(Collectors.toList());
+				aoPrivateMissionsList.addAll(aoPrivateMissionsSharedWithUser);
+			}
+			
+			return Response.ok(aoPrivateMissionsList).build();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("AuthResource.getPrivateMissions error: ", oEx);
+			return Response.serverError().build();
+		}
+		
+	}
+	
+	/** 
+	 * Fill the view model for the missions owned by the user
+	 * @param sMissionOwnerUserId: id of the user owning a mission
+	 * @return the view model representing a private mission
+	 */
+	private PrivateMissionViewModel createPrivateMissionViewModel(Mission oMission, String sMissionOwnerUserId) {
+		PrivateMissionViewModel oPrivateMissionVM = new PrivateMissionViewModel();
+		oPrivateMissionVM.setMissionName(oMission.getName());
+		oPrivateMissionVM.setMissionIndexValue(oMission.getIndexvalue());
+		oPrivateMissionVM.setMissionOwner(sMissionOwnerUserId);
+		oPrivateMissionVM.setUserId(sMissionOwnerUserId);
+		
+		return oPrivateMissionVM;
+	}
+	
+	/** 
+	 * Fill the view model for the missions owned by the user
+	 * @param sMissionOwnerUserId: id of the user owning a mission
+	 * @return the view model representing a private mission
+	 */
+	private PrivateMissionViewModel createPrivateMissionViewModel(UserResourcePermission oPermission, String sUserId, HashMap<String, String> aoMissionsIndexValuesNamesMappings) {
+		PrivateMissionViewModel oPrivateMissionVM = new PrivateMissionViewModel();
+		oPrivateMissionVM.setMissionName(aoMissionsIndexValuesNamesMappings.getOrDefault(oPermission.getResourceId(), "null"));
+		oPrivateMissionVM.setMissionIndexValue(oPermission.getResourceId());
+		oPrivateMissionVM.setMissionOwner(oPermission.getOwnerId());
+		oPrivateMissionVM.setUserId(sUserId);
+		oPrivateMissionVM.setPermissionCreatedBy(oPermission.getCreatedBy());
+		oPrivateMissionVM.setPermissionCreationDate(oPermission.getCreatedDate());
+		oPrivateMissionVM.setPermissionType(oPermission.getPermissions());
+		return oPrivateMissionVM;	
+	}
+	
+	
+
 }
