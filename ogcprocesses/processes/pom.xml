@@ -26,6 +26,7 @@
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionJackson>2.14.1</sVersionJackson>
         <sVersionJersey2>2.43</sVersionJersey2>
+        <sVersionServletApi>2.5</sVersionServletApi>
         <sVersionMavenCompilerPlugin>3.11.0</sVersionMavenCompilerPlugin>
         <sVersionMavenWarPlugin>3.4.0</sVersionMavenWarPlugin>
     </properties>
@@ -124,6 +125,13 @@
             <artifactId>jackson-databind</artifactId>
             <version>${sVersionJackson}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>${sVersionServletApi}</version>
+            <scope>provided</scope>
+        </dependency>        
         <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
         <dependency>
             <groupId>fadeout.software.wasdi</groupId>
