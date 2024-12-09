@@ -25,7 +25,7 @@
         <revision>1.0</revision>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionJackson>2.14.1</sVersionJackson>
-        <sVersionJersey2>2.38</sVersionJersey2>
+        <sVersionJersey2>2.43</sVersionJersey2>
         <sVersionMavenCompilerPlugin>3.11.0</sVersionMavenCompilerPlugin>
         <sVersionMavenWarPlugin>3.4.0</sVersionMavenWarPlugin>
     </properties>
