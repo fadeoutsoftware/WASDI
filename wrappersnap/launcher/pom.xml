@@ -35,7 +35,7 @@
         <sVersionNetcdfAll>5.5.2</sVersionNetcdfAll>
         <sVersionOkHttp>4.12.0</sVersionOkHttp>
         <sVersionMicrowavetbx>11.0.0</sVersionMicrowavetbx>
-        <sVersionOpticaltbx>10.0.1</sVersionOpticaltbx>
+        <sVersionOpticaltbx>11.0.0</sVersionOpticaltbx>
         <sVersionSnap>11.0.0</sVersionSnap>
         <sVersionSshj>0.38.0</sVersionSshj>
         <sVersionLogback>1.2.13</sVersionLogback>
