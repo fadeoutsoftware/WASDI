@@ -280,6 +280,36 @@
             <artifactId>snap-sta</artifactId>
             <version>${sVersionSnap}</version>
         </dependency>        
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-change-detection</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-classification</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-cluster-analysis</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-pixel-extraction</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>             
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-temporal-percentile</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>             
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-watermask</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>             
         
         <!-- S1 -->
         <dependency>
@@ -754,6 +784,11 @@
             <artifactId>opttbx-unmix</artifactId>
             <version>${sVersionOpticaltbx}</version>
         </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-ecostress-swath2grid</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			        
         
         <!-- SMOS -->
    		<dependency>
