@@ -74,7 +74,8 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 		String sDownloadPassword = m_sProviderPassword;
 		//String sUrl = "https://sso.vgt.vito.be/auth/realms/terrascope/protocol/openid-connect/token";
 		String sUrl = "https://sso.terrascope.be/auth/realms/terrascope/protocol/openid-connect/token";
-		String sClientId = "terracatalogueclient";
+		//String sClientId = "terracatalogueclient";
+		String sClientId = "public";
 
 		return HttpUtils.obtainOpenidConnectToken(sUrl, sDownloadUser, sDownloadPassword, sClientId);
 	}
