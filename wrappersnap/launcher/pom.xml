@@ -275,6 +275,11 @@
             <artifactId>snap-gdal-writer</artifactId>
             <version>${sVersionSnap}</version>
         </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-sta</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>        
         
         <!-- S1 -->
         <dependency>
@@ -756,6 +761,11 @@
             <artifactId>smos-reader</artifactId>
             <version>${sVersionSMOSTbx}</version>
         </dependency>	     
+   		<dependency>
+            <groupId>org.esa.smostbx</groupId>
+            <artifactId>smos-ee2netcdf</artifactId>
+            <version>${sVersionSMOSTbx}</version>
+        </dependency>        
 
         <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
         <dependency>
