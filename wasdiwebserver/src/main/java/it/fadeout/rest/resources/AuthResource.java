@@ -1213,7 +1213,7 @@ public class AuthResource {
 			if (!aoUserPermissionsOnMissions.isEmpty()) {
 				HashMap<String, String> aoMissionsIndexValuesNamesMappings = oMissionsRepository.getMissionIndexValueNameMapping();
 				List<PrivateMissionViewModel>  aoPrivateMissionsSharedWithUser = aoUserPermissionsOnMissions.stream()
-						.filter(oPermission -> !oPermission.getOwnerId().equals(oPermission.getUserId()))								// first we make sure that the user is not the owner of the mission
+						.filter(oPermission -> !Utils.isNullOrEmpty(oPermission.getOwnerId()) && !oPermission.getOwnerId().equals(oPermission.getUserId()))								// first we make sure that the user is not the owner of the mission
 						.map(oPermission -> createPrivateMissionViewModel(oPermission, sUserId, aoMissionsIndexValuesNamesMappings))
 						.collect(Collectors.toList());
 				aoPrivateMissionsList.addAll(aoPrivateMissionsSharedWithUser);

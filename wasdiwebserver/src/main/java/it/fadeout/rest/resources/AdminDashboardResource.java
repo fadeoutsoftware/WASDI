@@ -485,9 +485,11 @@ public class AdminDashboardResource {
 			WasdiLog.debugLog("AdminDashboardResource.findResourcePermissions: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
-
+		
+		boolean bIsAccessForMissions = sResourceType.equals(ResourceTypes.MISSION.getResourceType()) && !Utils.isNullOrEmpty(sUserId);
+		boolean bIsAdminUser = UserApplicationRole.isAdmin(oRequesterUser);
 		// Can the user access this section?
-		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
+		if (!bIsAccessForMissions && !bIsAdminUser) {
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
 		}
 
