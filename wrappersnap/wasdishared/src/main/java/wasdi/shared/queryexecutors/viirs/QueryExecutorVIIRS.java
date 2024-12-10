@@ -77,6 +77,13 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 				return 0;
 			}
 			
+			
+			if (!Utils.isNullOrEmpty(oVIIRSQuery.productType) 
+					&& !oVIIRSQuery.productType.equals("VIIRS_1d_composite") 
+					&& !oVIIRSQuery.productType.equals("VIIRS_5d_composite")) {
+				return -1;
+			}
+			
 			ArrayList<String> asSections = getInvolvedSections(oVIIRSQuery);
 
 			int iDays = Utils.isNullOrEmpty(m_sSearchIntervalStartDate) 
@@ -109,6 +116,12 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 			
 			if (m_asSupportedPlatforms.contains(oVIIRSQuery.platformName) == false) {
 				return aoResults;
+			}
+			
+			if (!Utils.isNullOrEmpty(oVIIRSQuery.productType) 
+					&& !oVIIRSQuery.productType.equals("VIIRS_1d_composite") 
+					&& !oVIIRSQuery.productType.equals("VIIRS_5d_composite")) {
+				return null;
 			}
 			
 			// If the user is requesting a specific file

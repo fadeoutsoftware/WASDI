@@ -6,6 +6,8 @@ import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,19 +31,35 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 
 public class QueryExecutorLpDaac extends QueryExecutor {
 	
-	private static String s_sEARTH_DATA_BASE_URL = "https://cmr.earthdata.nasa.gov/search/granules";
+	private static final String s_sEARTH_DATA_BASE_URL = "https://cmr.earthdata.nasa.gov/search/granules";
+	
+	private static final HashMap<String, String> as_WASDI_NASA_PRODUCT_MAPPING = new HashMap<String, String>();
+	
+	static {
+		as_WASDI_NASA_PRODUCT_MAPPING.put("MOD11A2", "C2269056084-LPCLOUD");
+		as_WASDI_NASA_PRODUCT_MAPPING.put("VNP21A1D", "C2545314555-LPCLOUD");
+		as_WASDI_NASA_PRODUCT_MAPPING.put("VNP21A1N", "C2545314559-LPCLOUD");
+		as_WASDI_NASA_PRODUCT_MAPPING.put("MCD43A4", "C2218719731-LPCLOUD");
+		as_WASDI_NASA_PRODUCT_MAPPING.put("MCD43A3", "C2278860820-LPCLOUD");
+	}
 	
 	public QueryExecutorLpDaac() {
 		m_sProvider = "LPDAAC";
 		
 		this.m_oQueryTranslator = new QueryTranslatorLpDaac();
 		this.m_oResponseTranslator = new ResponseTranslatorLpDaac();
-		this.m_asSupportedPlatforms.add(Platforms.TERRA);
+		this.m_asSupportedPlatforms.addAll(Arrays.asList(
+				Platforms.TERRA, 
+				Platforms.VIIRS));
 	}
 	
 	@Override
 	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
-		if (sProduct.toUpperCase().startsWith("MOD11A2")) {
+		if (sProduct.toUpperCase().startsWith("MOD11A2")
+				|| sProduct.toUpperCase().startsWith("VNP21A1D")
+				|| sProduct.toUpperCase().startsWith("VNP21A1N")
+				|| sProduct.toUpperCase().startsWith("MCD43A4")
+				|| sProduct.toUpperCase().startsWith("MCD43A3")) {
 			return sOriginalUrl;
 		}
 		return null;
@@ -53,89 +71,65 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		
 		int lCount = -1;
 		
-		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
-
-		if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
-			WasdiLog.debugLog("QueryExecutorLpDaac.executeCount. Unsupported platform: " + oQueryViewModel.platformName);
-			return lCount;
-		}
-		
-		Double dWest = oQueryViewModel.west;
-		Double dNorth = oQueryViewModel.north;
-		Double dEast = oQueryViewModel.east;
-		Double dSouth = oQueryViewModel.south;
-
-		String sDateFrom = oQueryViewModel.startFromDate;
-		String sDateTo = oQueryViewModel.endToDate;
-
-//		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
-//		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
-		
-		String sFileName = oQueryViewModel.productName; // TODO
-		String sProductType = oQueryViewModel.productType;
-
-
-		/*
-		ModisRepository oModisRepositroy = new ModisRepository();
-		
-		long lCount = oModisRepositroy.countItems(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo, sFileName);
-		*/
-		
-		// TODO: check where the name of the collection is coming from
-		
-		String sEarthDataCollectionId = null;
-		
-		if (sProductType.equals("MOD11A2")) {
-			sEarthDataCollectionId = "C2269056084-LPCLOUD";
-		}
-		
-		if (Utils.isNullOrEmpty(sEarthDataCollectionId)) {
-			WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Product trype " + sProductType + " not supported by WASDI" );
-			return lCount;
-		}
-		
-		// PREPARE QUERY FOR EARTHDATA (HERE WE WILL GET THE RESPONSE IN XML FORMAT SINCE WE ARE ONLY INTERESTED TO GET THE NUMBER OF HITS)
-		String sUrlCount = s_sEARTH_DATA_BASE_URL;
-		
-		// add concept id
-		sUrlCount += "?collection_concept_id=" + sEarthDataCollectionId;
-		
-		// add temporal filter
-		DateTimeFormatter oFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-		
-		ZonedDateTime oDateTimeInstant = ZonedDateTime.parse(sDateFrom);
-		String sEarthDataStartTime = oFormatter.format(oDateTimeInstant);
-		
-		oDateTimeInstant = ZonedDateTime.parse(sDateTo);
-		String sEarthDataEndTime = oFormatter.format(oDateTimeInstant);
-		
-		sUrlCount += "&temporal=" + sEarthDataStartTime + "," + sEarthDataEndTime;
-		
-		// add spatial filter
-		if (dNorth != null && dSouth != null && dWest != null && dEast != null) {
-			sUrlCount += "&bounding_box=" + dWest + "," + dSouth + "," + dEast + "," + dNorth;
-		} else {
-			WasdiLog.debugLog("QueryExecutorLpDaac.executeCount. one or more points of the WASDI bounding box are null. Spatial filter will be omitted");
-		}
-		
-		HttpCallResponse oHttpResponse = HttpUtils.httpGet(sUrlCount);
-		
-		int iResponseCode = oHttpResponse.getResponseCode();
-		
-		if (iResponseCode >= 200 && iResponseCode <= 299) {
-			String sResponseBody = oHttpResponse.getResponseBody();
-			Pattern oPattern = Pattern.compile("<hits>(\\d+)</hits>");
-			Matcher oMatcher = oPattern.matcher(sResponseBody);
-			
-			if (oMatcher.find()) {
-				String sHitsValue = oMatcher.group(1);
-				lCount = Integer.parseInt(sHitsValue);
-				WasdiLog.debugLog("QueryExecutorLpDaac.executeCount. Retrieved number of results: " + lCount);
-			} else {
-				WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Hits not found in the response");
+		try {
+			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
+	
+			if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
+				WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Unsupported platform: " + oQueryViewModel.platformName);
+				return lCount;
 			}
-		} else {
-			WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Error contacting the data privider " + iResponseCode);
+			
+			Double dWest = oQueryViewModel.west;
+			Double dNorth = oQueryViewModel.north;
+			Double dEast = oQueryViewModel.east;
+			Double dSouth = oQueryViewModel.south;
+	
+			String sDateFrom = oQueryViewModel.startFromDate;
+			String sDateTo = oQueryViewModel.endToDate;
+			
+			String sFileName = oQueryViewModel.productName; // TODO
+			String sProductType = oQueryViewModel.productType;
+			
+			// TODO: check where the name of the collection is coming from
+			
+			if (Utils.isNullOrEmpty(sProductType)) {
+				WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Product type not specified " + oQueryViewModel.platformName);
+				return lCount;
+			}
+			
+			String sEarthDataCollectionId = as_WASDI_NASA_PRODUCT_MAPPING.get(sProductType);
+			
+			if (Utils.isNullOrEmpty(sEarthDataCollectionId)) {
+				WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Product trype " + sProductType + " not supported by WASDI" );
+				return lCount;
+			}
+			
+			// PREPARE QUERY FOR EARTHDATA (HERE WE WILL GET THE RESPONSE IN XML FORMAT SINCE WE ARE ONLY INTERESTED TO GET THE NUMBER OF HITS)
+			String sUrlCount = s_sEARTH_DATA_BASE_URL;
+			
+			sUrlCount += getEarthDataQueryParameters(sEarthDataCollectionId, sDateFrom, sDateTo,  dWest, dNorth, dEast, dSouth);
+			
+			HttpCallResponse oHttpResponse = HttpUtils.httpGet(sUrlCount);
+			
+			int iResponseCode = oHttpResponse.getResponseCode();
+			
+			if (iResponseCode >= 200 && iResponseCode <= 299) {
+				String sResponseBody = oHttpResponse.getResponseBody();
+				Pattern oPattern = Pattern.compile("<hits>(\\d+)</hits>");
+				Matcher oMatcher = oPattern.matcher(sResponseBody);
+				
+				if (oMatcher.find()) {
+					String sHitsValue = oMatcher.group(1);
+					lCount = Integer.parseInt(sHitsValue);
+					WasdiLog.debugLog("QueryExecutorLpDaac.executeCount. Retrieved number of results: " + lCount);
+				} else {
+					WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Hits not found in the response");
+				}
+			} else {
+				WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Error contacting the data privider " + iResponseCode);
+			}
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("QueryExecutorLpDaac.executeCount. Exception", oEx);
 		}
 
 		return lCount;
@@ -164,93 +158,110 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		}
 
 		List<QueryResultViewModel> aoResults = new ArrayList<>();
+		
+		try {
 
-		// Parse the query
-		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
-
-		if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
-			WasdiLog.debugLog("QueryExecutorLpDaac.executeAndRetrieve. Unsupported platform: " + oQueryViewModel.platformName);
-			return null;
+			// Parse the query
+			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
+	
+			if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
+				WasdiLog.debugLog("QueryExecutorLpDaac.executeAndRetrieve. Unsupported platform: " + oQueryViewModel.platformName);
+				return null;
+			}
+	
+			Double dWest = oQueryViewModel.west;
+			Double dNorth = oQueryViewModel.north;
+			Double dEast = oQueryViewModel.east;
+			Double dSouth = oQueryViewModel.south;
+	
+			String sDateFrom = oQueryViewModel.startFromDate;
+			String sDateTo = oQueryViewModel.endToDate;
+			
+			String sProductType = oQueryViewModel.productType;
+			String sFileName = oQueryViewModel.productName; // TODO
+			
+			if (Utils.isNullOrEmpty(sProductType)) {
+				WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product trype not specified");
+				return null;
+			}
+			
+			String sEarthDataCollectionId = as_WASDI_NASA_PRODUCT_MAPPING.get(sProductType);
+			
+			if (Utils.isNullOrEmpty(sEarthDataCollectionId)) {
+				WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product trype " + sProductType + " not supported by WASDI" );
+				return null;
+			}
+			
+			// PREPARE QUERY FOR EARTHDATA (HERE WE WILL GET THE RESPONSE IN JSON FORMAT SINCE WE WANT THE TO FILL THE RESULT VIEW MODELS)
+			String sSearchUrl = s_sEARTH_DATA_BASE_URL + ".json";
+					
+			sSearchUrl += getEarthDataQueryParameters(sEarthDataCollectionId, sDateFrom, sDateTo,  dWest, dNorth, dEast, dSouth, iLimit, iOffset);
+			
+			HttpCallResponse oHttpResponse = HttpUtils.httpGet(sSearchUrl);
+			
+			int iResponseCode = oHttpResponse.getResponseCode();
+			
+			if (iResponseCode >= 200 && iResponseCode <= 299) {
+				String sResponseBody = oHttpResponse.getResponseBody();
+				List<QueryResultViewModel> oResultList = this.m_oResponseTranslator.translateBatch(sResponseBody, bFullViewModel);
+				return oResultList;
+				
+			} else {
+				WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Error contacting the data privider " + iResponseCode);
+			}
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("QueryExecutorLpDaac.executeAndRetrieve. Exception", oEx);
 		}
 
-		Double dWest = oQueryViewModel.west;
-		Double dNorth = oQueryViewModel.north;
-		Double dEast = oQueryViewModel.east;
-		Double dSouth = oQueryViewModel.south;
-
-		String sDateFrom = oQueryViewModel.startFromDate;
-		String sDateTo = oQueryViewModel.endToDate;
-
-//		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
-//		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
+		return aoResults;
+	}
+	
+	public String getEarthDataQueryParameters(String sCollectionConceptId, String sDateFrom, String sDateTo, Double dWest, Double dNorth, Double dEast, Double dSouth) {
+		return getEarthDataQueryParameters(sCollectionConceptId, sDateFrom, sDateTo, dWest, dNorth, dEast, dSouth, -1, -1);
+	}
+	
+	public String getEarthDataQueryParameters(String sCollectionConceptId, String sDateFrom, String sDateTo, Double dWest, Double dNorth, Double dEast, Double dSouth, int iLimit, int iOffset) {
+		List<String> asParameters = new ArrayList<>();
 		
-		String sProductType = oQueryViewModel.productType;
-		String sFileName = oQueryViewModel.productName; // TODO
-		
-		String sEarthDataCollectionId = null;
-		
-		if (sProductType.equals("MOD11A2")) {
-			sEarthDataCollectionId = "C2269056084-LPCLOUD";
+		// add collection concept id
+		if (!Utils.isNullOrEmpty(sCollectionConceptId)) {
+			asParameters.add("collection_concept_id=" + sCollectionConceptId);
 		}
-		
-		if (Utils.isNullOrEmpty(sEarthDataCollectionId)) {
-			WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product trype " + sProductType + " not supported by WASDI" );
-			return null;
-		}
-		
-		// PREPARE QUERY FOR EARTHDATA (HERE WE WILL GET THE RESPONSE IN JSON FORMAT SINCE WE ARE ONLY INTERESTED TO GET THE NUMBER OF HITS)
-		String sSearchUrl = s_sEARTH_DATA_BASE_URL;
-		
-		sSearchUrl += ".json";	
-		
-		// add concept id
-		sSearchUrl += "?collection_concept_id=" + sEarthDataCollectionId;
 		
 		// add temporal filter
-		DateTimeFormatter oFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-		
-		ZonedDateTime oDateTimeInstant = ZonedDateTime.parse(sDateFrom);
-		String sEarthDataStartTime = oFormatter.format(oDateTimeInstant);
-		
-		oDateTimeInstant = ZonedDateTime.parse(sDateTo);
-		String sEarthDataEndTime = oFormatter.format(oDateTimeInstant);
-		
-		sSearchUrl += "&temporal=" + sEarthDataStartTime + "," + sEarthDataEndTime;
+		if (!Utils.isNullOrEmpty(sDateFrom) && !Utils.isNullOrEmpty(sDateTo)) {
+			DateTimeFormatter oFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+				
+			ZonedDateTime oDateTimeInstant = ZonedDateTime.parse(sDateFrom);
+			String sEarthDataStartTime = oFormatter.format(oDateTimeInstant);
+				
+			oDateTimeInstant = ZonedDateTime.parse(sDateTo);
+			String sEarthDataEndTime = oFormatter.format(oDateTimeInstant);
+				
+			 asParameters.add("temporal=" + sEarthDataStartTime + "," + sEarthDataEndTime);
+		}
 		
 		// add spatial filter
 		if (dNorth != null && dSouth != null && dWest != null && dEast != null) {
-			sSearchUrl += "&bounding_box=" + dWest + "," + dSouth + "," + dEast + "," + dNorth;
-		} else {
-			WasdiLog.debugLog("QueryExecutorLpDaac.executeAndRetrieve. one or more points of the WASDI bounding box are null. Spatial filter will be omitted");
+			asParameters.add("bounding_box=" + dWest + "," + dSouth + "," + dEast + "," + dNorth);
+		} 
+		
+		// add limit
+		if (iLimit >= 0) {
+			asParameters.add("page_size=" + iLimit);
 		}
 		
-		// add pagination
-		sSearchUrl += "&page_size=" + iLimit + "&offset=" + iOffset;
-		
-		HttpCallResponse oHttpResponse = HttpUtils.httpGet(sSearchUrl);
-		
-		int iResponseCode = oHttpResponse.getResponseCode();
-		
-		if (iResponseCode >= 200 && iResponseCode <= 299) {
-			String sResponseBody = oHttpResponse.getResponseBody();
-			System.out.println(sResponseBody);
-			List<QueryResultViewModel> oResultList = this.m_oResponseTranslator.translateBatch(sResponseBody, bFullViewModel);
-			return oResultList;
-			
-		} else {
-			WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Error contacting the data privider " + iResponseCode);
+		// add offset
+		if (iOffset >= 0) {
+			asParameters.add("offset=" + iOffset);
 		}
 		
+		if (asParameters.size() > 0) {
+			return "?" + String.join("&", asParameters);
+		}
 		
-//		ModisRepository oModisRepositroy = new ModisRepository();
-//
-//		List<ModisItemForReading> aoItemList = oModisRepositroy.getModisItemList(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo, iOffset, iLimit, sFileName);
-//
-//		aoResults = aoItemList.stream()
-//				.map((ModisItemForReading t) -> ((ResponseTranslatorLpDaac) this.m_oResponseTranslator).translate(t))
-//				.collect(Collectors.toList());
+		return "";	
 
-		return aoResults;
 	}
 	
 	@Override
