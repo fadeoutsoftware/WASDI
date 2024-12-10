@@ -26,11 +26,6 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.zip.ZipOutputStream;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.io.CopyStreamException;
 import org.apache.commons.net.io.Util;
@@ -1186,24 +1181,7 @@ public final class HttpUtils {
 		try {
 			URL oURL = new URL(sUrl);
 
-			 // Create all-trusting host name verifier
-	        HostnameVerifier oAllHostsValid = new HostnameVerifier() {
-	        	@Override
-	            public boolean verify(String hostname, SSLSession session) {
-	                return true;
-	            }
-	        };
-	        
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			
-			if (oConnection instanceof HttpsURLConnection) {
-			    HttpsURLConnection oHttpsConn = (HttpsURLConnection) oConnection;
-			    oHttpsConn.setHostnameVerifier(oAllHostsValid);
-			    SSLContext oSc = SSLContext.getInstance("SSL");
-			    oSc.init(null, null, null);
-			    oHttpsConn.setSSLSocketFactory(oSc.getSocketFactory());
-			}
-			
 			oConnection.setRequestMethod("POST");
 			oConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			
