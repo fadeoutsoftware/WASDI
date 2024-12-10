@@ -1,1 +1,2 @@
-eu.esa.microwave.SARProcessingBenchmarkOperatorProviderorg.esa.snap.smart.configurator.SNAPEngineBenchmarkOperatorProvider
+eu.esa.microwave.SARProcessingBenchmarkOperatorProvider
+org.esa.snap.smart.configurator.SNAPEngineBenchmarkOperatorProvider

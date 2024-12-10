@@ -1,5 +1,6 @@
 org.esa.snap.ui.tooladapter.model.FileListEditor
-org.esa.snap.ui.tooladapter.model.FolderEditororg.esa.snap.ui.color.ColorEditor
+org.esa.snap.ui.tooladapter.model.FolderEditor
+org.esa.snap.ui.color.ColorEditor
 org.esa.snap.ui.product.ExpressionEditor$GeneralExpressionEditor
 org.esa.snap.ui.product.ExpressionEditor$BooleanExpressionEditor
 com.bc.ceres.swing.binding.internal.CheckBoxEditor

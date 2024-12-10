@@ -54,6 +54,7 @@ eu.esa.opt.dataio.avhrr.metop.MetopReaderPlugIn
 #
 
 eu.esa.opt.dataio.deimos.DeimosProductReaderPlugin
+eu.esa.opt.dataio.ecostress.EcostressProductReaderPlugIn
 eu.esa.opt.dataio.enmap.EnmapProductReaderPlugIn
 eu.esa.opt.dataio.ikonos.IkonosProductReaderPlugin
 eu.esa.opt.dataio.kompsat2.Kompsat2ProductReaderPlugin
@@ -83,6 +84,7 @@ eu.esa.opt.dataio.muscate.MuscateProductReaderPlugin
 #
 
 eu.esa.opt.dataio.pleiades.PleiadesProductReaderPlugin
+eu.esa.opt.dataio.prisma.PrismaProductReaderPlugin
 eu.esa.opt.dataio.probav.ProbaVProductReaderPlugIn
 #
 # Copyright (C) 2014-2015 CS SI
@@ -102,8 +104,6 @@ eu.esa.opt.dataio.probav.ProbaVProductReaderPlugIn
 
 eu.esa.opt.dataio.rapideye.RapidEyeL1ReaderPlugin
 eu.esa.opt.dataio.rapideye.RapidEyeL3ReaderPlugin
-# Leaving out for now the NITF plugin
-# eu.esa.opt.dataio.nitf.NITFReaderPlugin
 eu.esa.opt.dataio.s2.l1b.S2L1BProductReaderPlugIn
 eu.esa.opt.dataio.s2.l1b.S2L1BProduct10MReaderPlugIn
 eu.esa.opt.dataio.s2.l1b.S2L1BProduct20MReaderPlugIn

@@ -7,5 +7,9 @@ eu.esa.snap.hdf.HdfActivator
 org.esa.snap.lib.openjpeg.activator.OpenJPEGActivator
 org.esa.snap.core.util.EngineVersionCheckActivator
 org.esa.snap.dataio.netcdf.NetCdfActivator
+org.esa.snap.runtime.ActivatorsTest$A1
+org.esa.snap.runtime.ActivatorsTest$A2
+org.esa.snap.runtime.ActivatorsTest$A3
+org.esa.snap.core.gpf.operators.tooladapter.ToolAdapterActivator
 org.esa.snap.vfs.activator.VFSPlugInActivator
 org.csa.rstb.soilmoisture.SoilMoistureActivator
