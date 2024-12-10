@@ -1200,6 +1200,7 @@ public final class HttpUtils {
 			    HttpsURLConnection oHttpsConn = (HttpsURLConnection) oConnection;
 			    oHttpsConn.setHostnameVerifier(oAllHostsValid);
 			    SSLContext oSc = SSLContext.getInstance("SSL");
+			    oSc.init(null, null, null);
 			    oHttpsConn.setSSLSocketFactory(oSc.getSocketFactory());
 			}
 			
