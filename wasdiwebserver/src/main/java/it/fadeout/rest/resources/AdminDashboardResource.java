@@ -486,7 +486,7 @@ public class AdminDashboardResource {
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 		
-		boolean bIsAccessForMissions = sResourceType.equals(ResourceTypes.MISSION.getResourceType()) && !Utils.isNullOrEmpty(sUserId);
+		boolean bIsAccessForMissions = sResourceType.equals(ResourceTypes.MISSION.getResourceType());
 		boolean bIsAdminUser = UserApplicationRole.isAdmin(oRequesterUser);
 		// Can the user access this section?
 		if (!bIsAccessForMissions && !bIsAdminUser) {
