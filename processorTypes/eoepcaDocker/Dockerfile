@@ -1,7 +1,7 @@
 FROM ubuntu:20.04
 
 
-MAINTAINER "WASDI SARL"
+LABEL org.opencontainers.image.authors="WASDI SARL"
 
 
 # From now, all commands executed are executed with the user 'root'
