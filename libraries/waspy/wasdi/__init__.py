@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.7.0
+Version 0.8.7.1
 
-Last Update: 26/10/2024
+Last Update: 12/12/2024
 
 Tested with: Python 3.7, Python 3.8, Python 3.9, Python 3.10
 
@@ -2950,10 +2950,13 @@ def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvid
             # Get the status
             sImportProcId = asRunningDownloadList[iImports]
 
-            if sImportProcId == "DONE" or sImportProcId == "ERROR" or sImportProcId == "WAITING":
+            if sImportProcId == "ERROR" or sImportProcId == "WAITING":
                 continue
 
-            sImportStatus = getProcessStatus(sImportProcId)
+            if sImportProcId == "DONE":
+                sImportStatus = sImportProcId
+            else:
+                sImportStatus = getProcessStatus(sImportProcId)
 
             if sImportStatus == "DONE":
                 # Yes, start the workflow
