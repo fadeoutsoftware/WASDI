@@ -11,6 +11,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -60,6 +61,7 @@ public class ConsoleResource {
 	 */
 	@POST
 	@Path("/create")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public PrimitiveResult create(@Context HttpServletRequest oRequest, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspaceId") String sWorkspaceId) {
 		WasdiLog.infoLog("ConsoleResource.create( WorkspaceId: " + sWorkspaceId + " )");
 
@@ -278,6 +280,7 @@ public class ConsoleResource {
 
 	@GET
 	@Path("/active")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public PrimitiveResult isJupyterNotebookActive(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspaceId") String sWorkspaceId) {
 		WasdiLog.debugLog("ConsoleResource.isJupyterNotebookActive( WS: " + sWorkspaceId + " )");
@@ -345,6 +348,7 @@ public class ConsoleResource {
 	 */
 	@GET
 	@Path("/ready")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response isNotebookReady(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspaceId") String sWorkspaceId) {
 		
 		try {

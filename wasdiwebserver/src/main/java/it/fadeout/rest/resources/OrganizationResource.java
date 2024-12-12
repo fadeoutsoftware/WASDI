@@ -304,6 +304,7 @@ public class OrganizationResource {
 	 */
 	@DELETE
 	@Path("/delete")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response deleteOrganization(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("organization") String sOrganizationId) {
 		WasdiLog.debugLog("OrganizationResource.deleteOrganization( Organization: " + sOrganizationId + " )");
