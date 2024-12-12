@@ -18,36 +18,29 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionAbderaClient>1.1.3</sVersionAbderaClient>
-        <sVersionAbderaCore>1.1.3</sVersionAbderaCore>
-        <sVersionAbderaExtensionsJson>1.1.3</sVersionAbderaExtensionsJson>
-        <sVersionAmqpClient>5.18.0</sVersionAmqpClient>
-        <sVersionAssertjCore>3.18.1</sVersionAssertjCore>
-        <sVersionAwsJavaSdkS3>1.12.392</sVersionAwsJavaSdkS3>
-        <sVersionCommonsCompress>1.21</sVersionCommonsCompress>
-        <sVersionCommonsLang>2.6</sVersionCommonsLang>
-        <sVersionCommonsLang3>3.12.0</sVersionCommonsLang3>
-        <sVersionCommonsNet>3.9.0</sVersionCommonsNet>
-        <sVersionCommonsValidator>1.4.1</sVersionCommonsValidator>
+        <sVersionAmqpClient>5.23.0</sVersionAmqpClient>
+        <sVersionAssertjCore>3.26.3</sVersionAssertjCore>
+        <sVersionAwsJavaSdkS3>1.12.779</sVersionAwsJavaSdkS3>
+        <sVersionCommonsCompress>1.27.1</sVersionCommonsCompress>
+        <sVersionCommonsLang3>3.17.0</sVersionCommonsLang3>
+        <sVersionCommonsNet>3.11.1</sVersionCommonsNet>
+        <sVersionCommonsValidator>1.9.0</sVersionCommonsValidator>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionGeoserverManager>1.7.0</sVersionGeoserverManager>
-        <sVersionGson>2.10.1</sVersionGson>
-        <sVersionGuava>33.0.0-jre</sVersionGuava>
-        <sVersionJackson>2.14.1</sVersionJackson>
-        <sVersionJaxbApi>2.3.1</sVersionJaxbApi>
-        <sVersionJson>20230227</sVersionJson>
+        <sVersionGson>2.11.0</sVersionGson>
+        <sVersionGuava>33.3.1-jre</sVersionGuava>
+        <sVersionJackson>2.18.2</sVersionJackson>
+        <sVersionJson>20240303</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionJunitJupiter>5.7.0</sVersionJunitJupiter>
-        <sVersionLog4j>2.20.0</sVersionLog4j>
-        <sVersionLombok>1.18.22</sVersionLombok>
-        <sVersionMockFtpServer>2.7.1</sVersionMockFtpServer>
-        <sVersionMongoDb>4.3.4</sVersionMongoDb>
-        <sVersionGeoTools>20.0</sVersionGeoTools>
-        <sVersionJersey2>2.38</sVersionJersey2>
+        <sVersionLog4j>2.24.2</sVersionLog4j>
+        <sVersionMongoDb>4.11.5</sVersionMongoDb>
+        <sVersionGeoTools>28.2</sVersionGeoTools>
+        <sVersionJersey2>2.43</sVersionJersey2>
         <sVersionMercurius>1.0</sVersionMercurius>
     </properties>
 
@@ -97,18 +90,18 @@
         </plugins>
     </build>
 
-    <dependencies>
+    <dependencies>	
 		<!-- https://mvnrepository.com/artifact/com.github.docker-java/docker-java -->
 		<dependency>
 		    <groupId>com.github.docker-java</groupId>
 		    <artifactId>docker-java</artifactId>
-		    <version>3.3.3</version>
+		    <version>3.4.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.github.docker-java/docker-java-transport-httpclient5 -->
 		<dependency>
 		    <groupId>com.github.docker-java</groupId>
 		    <artifactId>docker-java-transport-httpclient5</artifactId>
-		    <version>3.3.3</version>
+		    <version>3.4.0</version>
 		</dependency>
         <!-- https://mvnrepository.com/artifact/org.mongodb/mongodb-driver-sync -->
         <dependency>
@@ -121,24 +114,6 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${sVersionJackson}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-core -->
-        <dependency>
-            <groupId>org.apache.abdera</groupId>
-            <artifactId>abdera-core</artifactId>
-            <version>${sVersionAbderaCore}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-client -->
-        <dependency>
-            <groupId>org.apache.abdera</groupId>
-            <artifactId>abdera-client</artifactId>
-            <version>${sVersionAbderaClient}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-extensions-json -->
-        <dependency>
-            <groupId>org.apache.abdera</groupId>
-            <artifactId>abdera-extensions-json</artifactId>
-            <version>${sVersionAbderaExtensionsJson}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
         <dependency>
@@ -157,12 +132,6 @@
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
             <version>${sVersionAmqpClient}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang -->
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>${sVersionCommonsLang}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>
@@ -227,25 +196,12 @@
             <version>${sVersionJunitJupiter}</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.mockftpserver/MockFtpServer -->
-        <dependency>
-            <groupId>org.mockftpserver</groupId>
-            <artifactId>MockFtpServer</artifactId>
-            <version>${sVersionMockFtpServer}</version>
-            <scope>test</scope>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${sVersionAssertjCore}</version>
             <scope>test</scope>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>${sVersionJaxbApi}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
@@ -280,18 +236,14 @@
 		<dependency>
 		    <groupId>org.jsoup</groupId>
 		    <artifactId>jsoup</artifactId>
-		    <version>1.14.2</version>
+		    <version>1.18.3</version>
 		</dependency>        
-        <dependency>
-		    <groupId>org.osgeo</groupId>
-		    <artifactId>proj4j</artifactId>
-		    <version>0.1.0</version> 
-		</dependency>		
-		 <dependency>
+		<!-- https://mvnrepository.com/artifact/com.hubspot.jinjava/jinjava -->
+		<dependency>
 		    <groupId>com.hubspot.jinjava</groupId>
 		    <artifactId>jinjava</artifactId>
-		    <version>2.7.1</version>
-		  </dependency>
+		    <version>2.7.4</version>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-client -->
 		<dependency>
 		    <groupId>org.glassfish.jersey.core</groupId>

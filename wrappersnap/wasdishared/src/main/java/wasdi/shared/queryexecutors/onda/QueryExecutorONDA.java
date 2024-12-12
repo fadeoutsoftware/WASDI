@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.abdera.i18n.templates.Template;
-
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.opensearch.QueryExecutorOpenSearch;
 import wasdi.shared.utils.Utils;
@@ -45,14 +43,6 @@ public class QueryExecutorONDA extends QueryExecutorOpenSearch {
 	 */
 	@Override
 	protected String[] getUrlPath() {
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see wasdi.shared.opensearch.QueryExecutor#getTemplate()
-	 */
-	@Override
-	protected Template getTemplate() {
 		return null;
 	}
 

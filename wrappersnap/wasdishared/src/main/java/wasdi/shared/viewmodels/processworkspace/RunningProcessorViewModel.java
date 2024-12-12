@@ -1,5 +1,7 @@
 package wasdi.shared.viewmodels.processworkspace;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * Used by the processor resource to return info about the new started
  * application. It merges name and id of the processor with the process workspace id,
@@ -8,6 +10,7 @@ package wasdi.shared.viewmodels.processworkspace;
  * @author p.campanella
  *
  */
+@XmlRootElement
 public class RunningProcessorViewModel {
 	private String processorId;
 	private String name;

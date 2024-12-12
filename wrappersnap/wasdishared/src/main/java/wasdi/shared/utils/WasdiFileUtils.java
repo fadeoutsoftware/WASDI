@@ -6,8 +6,6 @@
  */
 package wasdi.shared.utils;
 
-import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -31,6 +29,7 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 
@@ -817,7 +816,7 @@ public class WasdiFileUtils {
 	}
 
 	private static void setExecutablePermissions(Path executablePathName) {
-		if (IS_OS_UNIX) {
+		if (SystemUtils.IS_OS_UNIX) {
 			Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ,
 					PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ,
 					PosixFilePermission.GROUP_EXECUTE, PosixFilePermission.OTHERS_READ,

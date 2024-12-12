@@ -1,238 +1,233 @@
-org.esa.s1tbx.io.capella.CapellaProductReaderPlugIn
-org.esa.s1tbx.io.ceos.ers.ERSProductReaderPlugIn
-org.esa.s1tbx.io.ceos.jers.JERSProductReaderPlugIn
-org.esa.s1tbx.io.ceos.alos.AlosPalsarProductReaderPlugIn
-org.esa.s1tbx.io.ceos.alos2.Alos2ProductReaderPlugIn
-org.esa.s1tbx.io.ceos.basic.BasicCeosProductReaderPlugIn
-org.esa.s1tbx.io.cosmo.CosmoSkymedReaderPlugIn
-org.esa.s1tbx.io.gamma.GammaProductReaderPlugIn
-org.esa.s1tbx.io.gtopo30.GTOPO30ReaderPlugIn
-org.esa.s1tbx.io.kompsat5.Kompsat5ReaderPlugIn
-org.esa.s1tbx.io.paz.PazProductReaderPlugIn
-org.esa.s1tbx.io.polsarpro.PolsarProProductReaderPlugIn
-org.esa.s1tbx.io.risat1.Risat1ProductReaderPlugIn
-org.esa.s1tbx.io.saocom.SaocomProductReaderPlugIn
-org.esa.s1tbx.io.seasat.SeaSatProductReaderPlugIn
-org.esa.s1tbx.io.sentinel1.Sentinel1ProductReaderPlugIn
-org.esa.s1tbx.io.snaphu.SNAPHUProductReaderPlugIn
-org.esa.s1tbx.io.spacety.SpacetyProductReaderPlugIn
-org.esa.s1tbx.io.terrasarx.TerraSarXProductReaderPlugIn
-org.esa.s1tbx.io.TAXI.RATProductReaderPlugIn
-org.esa.s1tbx.io.generic.GenericComplexReaderPlugIn
-org.esa.s1tbx.io.generic.GenericReaderPlugIn
-
-org.csa.rstb.io.radarsat1.RadarsatProductReaderPlugIn
-org.csa.rstb.io.radarsat2.Radarsat2ProductReaderPlugIn
-org.csa.rstb.io.rcm.RCMProductReaderPlugIn
-org.csa.rstb.soilmoisture.io.matlab.MatlabReaderPlugIn
-
-org.esa.snap.dataio.bigtiff.BigGeoTiffProductReaderPlugIn
-org.esa.snap.core.dataio.dimap.DimapProductReaderPlugIn
-org.esa.snap.core.dataio.rgb.ImageProductReaderPlugIn
-org.esa.snap.csv.dataio.reader.CsvProductReaderPlugIn
-org.esa.snap.dem.dataio.ace.ACEReaderPlugIn
-org.esa.snap.dem.dataio.ace2_5min.ACE2_5MinReaderPlugIn
-org.esa.snap.dem.dataio.srtm1_hgt.SRTMHGTReaderPlugIn
-org.esa.snap.dataio.envi.EnviProductReaderPlugIn
-org.esa.snap.dataio.hico.HicoProductReaderPlugin
-org.esa.snap.dataio.envisat.EnvisatProductReaderPlugIn
-org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn
-org.esa.snap.dataio.netcdf.GenericNetCdfReaderPlugIn
-org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdfReaderPlugIn
-org.esa.snap.dataio.netcdf.metadata.profiles.hdfeos.HdfEosNetCdfReaderPlugIn
-org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamNetCdfReaderPlugIn
 org.esa.snap.dataio.rtp.RawTiledPyramidsProductCodecSpi
+eu.esa.microwave.io.generic.GenericComplexReaderPlugIn
+eu.esa.microwave.io.generic.GenericReaderPlugIn
+eu.esa.sar.io.capella.CapellaProductReaderPlugIn
+eu.esa.sar.io.ceos.ers.ERSProductReaderPlugIn
+eu.esa.sar.io.ceos.jers.JERSProductReaderPlugIn
+eu.esa.sar.io.ceos.alos.AlosPalsarProductReaderPlugIn
+eu.esa.sar.io.ceos.alos2.Alos2ProductReaderPlugIn
+eu.esa.sar.io.ceos.alos2.Alos2GeoTiffProductReaderPlugIn
+eu.esa.sar.io.ceos.basic.BasicCeosProductReaderPlugIn
+eu.esa.sar.io.cosmo.CosmoSkymedReaderPlugIn
+eu.esa.sar.io.gamma.GammaProductReaderPlugIn
+eu.esa.sar.io.gaofen3.Gaofen3ProductReaderPlugIn
+eu.esa.sar.io.gtopo30.GTOPO30ReaderPlugIn
+eu.esa.sar.io.iceye.IceyeProductReaderPlugIn
+eu.esa.sar.io.kompsat5.Kompsat5ReaderPlugIn
+eu.esa.sar.io.paz.PazProductReaderPlugIn
+eu.esa.sar.io.polsarpro.PolsarProProductReaderPlugIn
+eu.esa.sar.io.risat1.Risat1ProductReaderPlugIn
+eu.esa.sar.io.saocom.SaocomProductReaderPlugIn
+eu.esa.sar.io.seasat.SeaSatProductReaderPlugIn
+eu.esa.sar.io.sentinel1.Sentinel1ProductReaderPlugIn
+eu.esa.sar.io.sentinel1.Sentinel1ETADProductReaderPlugIn
+eu.esa.sar.io.snaphu.SNAPHUProductReaderPlugIn
+eu.esa.sar.io.spacety.SpacetyProductReaderPlugIn
+eu.esa.sar.io.strix.grd.StriXGRDProductReaderPlugIn
+eu.esa.sar.io.strix.StriXProductReaderPlugIn
+eu.esa.sar.io.terrasarx.TerraSarXProductReaderPlugIn
+eu.esa.sar.io.TAXI.RATProductReaderPlugIn
+eu.esa.sar.io.uavsar.UAVSARReaderPlugIn
+eu.esa.sar.iogdal.sentinel1.Sentinel1GDALProductReaderPlugIn
+eu.esa.opt.dataio.alos.ceos.avnir2.Avnir2ProductReaderPlugIn
+eu.esa.opt.dataio.alos.ceos.prism.PrismProductReaderPlugIn
+eu.esa.opt.dataio.alos.geotiff.pri.AlosPRIProductReaderPlugin
+eu.esa.opt.dataio.alos.geotiff.av2.AlosAV2ProductReaderPlugin
+eu.esa.opt.dataio.atsr.AtsrProductReaderPlugIn
+eu.esa.opt.dataio.avhrr.AvhrrReaderPlugIn
+eu.esa.opt.dataio.avhrr.noaa.pod.PodAvhrrReaderPlugIn
+eu.esa.opt.dataio.avhrr.metop.MetopReaderPlugIn
+#
+# Copyright (C) 2014-2015 CS SI
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 3 of the License, or (at your option)
+# any later version.
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+#  with this program; if not, see http://www.gnu.org/licenses/
+#
 
-#Sentinel-2
+eu.esa.opt.dataio.deimos.DeimosProductReaderPlugin
+eu.esa.opt.dataio.ecostress.EcostressProductReaderPlugIn
+eu.esa.opt.dataio.enmap.EnmapProductReaderPlugIn
+eu.esa.opt.dataio.ikonos.IkonosProductReaderPlugin
+eu.esa.opt.dataio.kompsat2.Kompsat2ProductReaderPlugin
+eu.esa.opt.dataio.landsat.geotiff.LandsatGeotiffReaderPlugin
+eu.esa.opt.dataio.landsat.geotiff.LandsatGeotiffColl2L2ReaderPlugin
+eu.esa.opt.dataio.landsat.geotiff.Landsat8Geotiff15mReaderPlugin
+eu.esa.opt.dataio.landsat.geotiff.Landsat8Geotiff30mReaderPlugin
+eu.esa.opt.dataio.landsat.LandsatTMReaderPlugIn
+eu.esa.opt.dataio.landsat.geotiff.level2.LandsatL2GeotiffReaderPlugin
+eu.esa.opt.dataio.merisl3.MerisL3ProductReaderPlugIn
+eu.esa.opt.dataio.modis.ModisProductReaderPlugIn
+eu.esa.opt.dataio.muscate.MuscateProductReaderPlugin
+#
+# Copyright (C) 2014-2015 CS SI
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 3 of the License, or (at your option)
+# any later version.
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+#  with this program; if not, see http://www.gnu.org/licenses/
+#
 
-org.esa.s2tbx.dataio.spot.SpotDimapProductReaderPlugin
-org.esa.s2tbx.dataio.spot.SpotViewProductReaderPlugin
-org.esa.s2tbx.dataio.spot.SpotTake5ProductReaderPlugin
-org.esa.s2tbx.dataio.spot.Spot5Take5ProductReaderPlugin
+eu.esa.opt.dataio.pleiades.PleiadesProductReaderPlugin
+eu.esa.opt.dataio.prisma.PrismaProductReaderPlugin
+eu.esa.opt.dataio.probav.ProbaVProductReaderPlugIn
+#
+# Copyright (C) 2014-2015 CS SI
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 3 of the License, or (at your option)
+# any later version.
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+#  with this program; if not, see http://www.gnu.org/licenses/
+#
 
-org.esa.s2tbx.dataio.spot6.Spot6ProductReaderPlugin
-
-org.esa.s2tbx.dataio.s2.l1b.S2L1BProductReaderPlugIn
-org.esa.s2tbx.dataio.s2.l1b.S2L1BProduct10MReaderPlugIn
-org.esa.s2tbx.dataio.s2.l1b.S2L1BProduct20MReaderPlugIn
-org.esa.s2tbx.dataio.s2.l1b.S2L1BProduct60MReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM01N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM02N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM03N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM04N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM05N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM06N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM07N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM08N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM09N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM10N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM11N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM12N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM13N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM14N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM15N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM16N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM17N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM18N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM19N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM20N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM21N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM22N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM23N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM24N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM25N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM26N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM27N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM28N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM29N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM30N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM31N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM32N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM33N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM34N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM35N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM36N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM37N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM38N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM39N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM40N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM41N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM42N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM43N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM44N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM45N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM46N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM47N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM48N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM49N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM50N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM51N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM52N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM53N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM54N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM55N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM56N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM57N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM58N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM59N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM60N_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM01S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM02S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM03S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM04S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM05S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM06S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM07S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM08S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM09S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM10S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM11S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM12S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM13S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM14S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM15S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM16S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM17S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM18S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM19S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM20S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM21S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM22S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM23S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM24S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM25S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM26S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM27S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM28S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM29S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM30S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM31S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM32S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM33S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM34S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM35S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM36S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM37S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM38S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM39S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM40S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM41S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM42S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM43S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM44S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM45S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM46S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM47S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM48S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM49S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM50S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM51S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM52S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM53S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM54S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM55S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM56S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM57S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM58S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM59S_ReaderPlugIn
-org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM60S_ReaderPlugIn
-
-org.esa.s2tbx.dataio.rapideye.RapidEyeL1ReaderPlugin
-org.esa.s2tbx.dataio.rapideye.RapidEyeL3ReaderPlugin
-
-#org.esa.s2tbx.dataio.jp2.JP2ProductReaderPlugin
-
-
-org.esa.s2tbx.dataio.gdal.reader.plugins.BTDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.ERMapperDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.GS7BGDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.GSBGDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.GTXDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.HFADriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.ILWISDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.KRODriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.MFFDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.NITFDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.PCIDSKDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.RMFDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.RSTDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.SAGADriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.SGIDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.GTiffDriverProductReaderPlugIn
-org.esa.s2tbx.dataio.gdal.reader.plugins.JP2OpenJPEGDriverProductReaderPlugIn
-
-
-org.esa.s2tbx.dataio.alos.av2.AlosAV2ProductReaderPlugin
-org.esa.s2tbx.dataio.deimos.DeimosProductReaderPlugin
-org.esa.s2tbx.dataio.ikonos.IkonosProductReaderPlugin
-
-org.esa.s2tbx.dataio.kompsat2.Kompsat2ProductReaderPlugin
-
-org.esa.s2tbx.dataio.pleiades.PleiadesProductReaderPlugin
-
-#VITO
-org.vito.probavbox.dataio.probav.ProbaVProductReaderPlugIn
-
-#S3TBX
-org.esa.s3tbx.dataio.ceos.avnir2.Avnir2ProductReaderPlugIn
-org.esa.s3tbx.dataio.ceos.prism.PrismProductReaderPlugIn
-org.esa.s3tbx.dataio.atsr.AtsrProductReaderPlugIn
-org.esa.s3tbx.dataio.avhrr.AvhrrReaderPlugIn
-org.esa.s3tbx.dataio.avhrr.noaa.pod.PodAvhrrReaderPlugIn
-org.esa.s3tbx.dataio.avhrr.metop.MetopReaderPlugIn
-org.esa.s3tbx.dataio.landsat.geotiff.LandsatGeotiffReaderPlugin
-org.esa.s3tbx.dataio.landsat.geotiff.Landsat8Geotiff15mReaderPlugin
-org.esa.s3tbx.dataio.landsat.geotiff.Landsat8Geotiff30mReaderPlugin
-org.esa.s3tbx.dataio.landsat.LandsatTMReaderPlugIn
-org.esa.s3tbx.dataio.merisl3.MerisL3ProductReaderPlugIn
-org.esa.s3tbx.dataio.modis.ModisProductReaderPlugIn
-org.esa.s3tbx.dataio.s3.Sentinel3ProductReaderPlugIn
-org.esa.s3tbx.dataio.s3.slstr.SlstrLevel1B1kmProductReaderPlugIn
-org.esa.s3tbx.dataio.s3.slstr.SlstrLevel1B500mProductReaderPlugIn
-org.esa.s3tbx.dataio.s3.meris.MerisLevel1ProductPlugIn
-org.esa.s3tbx.dataio.s3.meris.MerisLevel2ProductPlugIn
-org.esa.s3tbx.dataio.s3.aatsr.AatsrLevel1ProductReaderPlugIn
-org.esa.s3tbx.dataio.spot.SpotVgtProductReaderPlugIn
+eu.esa.opt.dataio.rapideye.RapidEyeL1ReaderPlugin
+eu.esa.opt.dataio.rapideye.RapidEyeL3ReaderPlugin
+eu.esa.opt.dataio.s2.l1b.S2L1BProductReaderPlugIn
+eu.esa.opt.dataio.s2.l1b.S2L1BProduct10MReaderPlugIn
+eu.esa.opt.dataio.s2.l1b.S2L1BProduct20MReaderPlugIn
+eu.esa.opt.dataio.s2.l1b.S2L1BProduct60MReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM01N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM02N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM03N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM04N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM05N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM06N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM07N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM08N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM09N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM10N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM11N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM12N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM13N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM14N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM15N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM16N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM17N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM18N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM19N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM20N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM21N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM22N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM23N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM24N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM25N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM26N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM27N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM28N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM29N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM30N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM31N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM32N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM33N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM34N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM35N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM36N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM37N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM38N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM39N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM40N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM41N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM42N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM43N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM44N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM45N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM46N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM47N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM48N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM49N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM50N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM51N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM52N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM53N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM54N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM55N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM56N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM57N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM58N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM59N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM60N_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM01S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM02S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM03S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM04S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM05S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM06S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM07S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM08S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM09S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM10S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM11S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM12S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM13S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM14S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM15S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM16S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM17S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM18S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM19S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM20S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM21S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM22S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM23S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM24S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM25S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM26S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM27S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM28S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM29S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM30S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM31S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM32S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM33S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM34S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM35S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM36S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM37S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM38S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM39S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM40S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM41S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM42S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM43S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM44S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM45S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM46S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM47S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM48S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM49S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM50S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM51S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM52S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM53S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM54S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM55S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM56S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM57S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM58S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM59S_ReaderPlugIn
+eu.esa.opt.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM60S_ReaderPlugIn
 gov.nasa.gsfc.seadas.dataio.L1ProductReaderPlugIn
 gov.nasa.gsfc.seadas.dataio.AncillaryProductReaderPlugIn
 gov.nasa.gsfc.seadas.dataio.L1BModisProductReaderPlugIn
@@ -245,6 +240,101 @@ gov.nasa.gsfc.seadas.dataio.ViirsProductReaderPlugIn
 gov.nasa.gsfc.seadas.dataio.L3ProductReaderPlugIn
 gov.nasa.gsfc.seadas.dataio.BrowseProductReaderPlugIn
 gov.nasa.gsfc.seadas.dataio.L1BViirsProductReaderPlugin
+gov.nasa.gsfc.seadas.dataio.L1BPaceProductReaderPlugIn
+gov.nasa.gsfc.seadas.dataio.L1CPaceProductReaderPlugIn
+gov.nasa.gsfc.seadas.dataio.L2DscovrEpicProductReaderPlugIn
+gov.nasa.gsfc.seadas.dataio.NSIDCProductReaderPlugIn
 
 
+eu.esa.opt.dataio.s3.Sentinel3ProductReaderPlugIn
+eu.esa.opt.dataio.s3.slstr.SlstrLevel1B1kmProductReaderPlugIn
+eu.esa.opt.dataio.s3.slstr.SlstrLevel1B500mProductReaderPlugIn
+eu.esa.opt.dataio.s3.meris.MerisLevel1ProductPlugIn
+eu.esa.opt.dataio.s3.meris.MerisLevel2ProductPlugIn
+eu.esa.opt.dataio.s3.aatsr.AatsrLevel1ProductReaderPlugIn
+#
+# Copyright (C) 2014-2015 CS SI
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 3 of the License, or (at your option)
+# any later version.
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+#  with this program; if not, see http://www.gnu.org/licenses/
+#
 
+eu.esa.opt.dataio.spot.SpotDimapProductReaderPlugin
+eu.esa.opt.dataio.spot.SpotViewProductReaderPlugin
+eu.esa.opt.dataio.spot.SpotTake5ProductReaderPlugin
+eu.esa.opt.dataio.spot.Spot5Take5ProductReaderPlugin
+eu.esa.opt.dataio.spot.SpotVgtProductReaderPlugIn
+#
+# Copyright (C) 2014-2015 CS SI
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 3 of the License, or (at your option)
+# any later version.
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+#  with this program; if not, see http://www.gnu.org/licenses/
+#
+
+eu.esa.opt.dataio.spot6.Spot6ProductReaderPlugin
+eu.esa.opt.dataio.worldview2.WorldView2ProductReaderPlugin
+eu.esa.opt.dataio.worldview2esa.WorldView2ESAProductReaderPlugin
+org.esa.smos.ee2netcdf.reader.NetcdfProductReaderPlugin
+org.esa.smos.dataio.smos.SmosProductReaderPlugIn
+org.esa.smos.dataio.smos.bufr.SmosBufrReaderPlugIn
+org.esa.smos.dataio.smos.bufr.SmosLightBufrReaderPlugIn
+org.esa.snap.dataio.arcbin.ArcBinGridReaderPlugIn
+org.esa.snap.dataio.bigtiff.BigGeoTiffProductReaderPlugIn
+org.esa.snap.binning.reader.BinnedProductReaderPlugin
+org.esa.snap.core.dataio.dimap.DimapProductReaderPlugIn
+org.esa.snap.core.dataio.rgb.ImageProductReaderPlugIn
+org.esa.snap.csv.dataio.reader.CsvProductReaderPlugIn
+org.esa.snap.dem.dataio.ace.ACEReaderPlugIn
+org.esa.snap.dem.dataio.ace2_5min.ACE2_5MinReaderPlugIn
+org.esa.snap.dem.dataio.srtm1_hgt.SRTMHGTReaderPlugIn
+org.esa.snap.dataio.envi.EnviProductReaderPlugIn
+org.esa.snap.dataio.hico.HicoProductReaderPlugin
+org.esa.snap.dataio.envisat.EnvisatProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.BTDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.ERMapperDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.GS7BGDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.GSBGDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.GTXDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.HFADriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.ILWISDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.KRODriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.MFFDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.NITFDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.PCIDSKDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.RMFDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.RSTDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.SAGADriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.SGIDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.GTiffDriverProductReaderPlugIn
+org.esa.snap.dataio.gdal.reader.plugins.JP2OpenJPEGDriverProductReaderPlugIn
+org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn
+org.esa.snap.dataio.getasse30.GETASSE30ReaderPlugIn
+org.esa.snap.jp2.reader.JP2ProductReaderPlugin
+org.esa.snap.dataio.netcdf.GenericNetCdfReaderPlugIn
+org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdfReaderPlugIn
+org.esa.snap.dataio.netcdf.metadata.profiles.hdfeos.HdfEosNetCdfReaderPlugIn
+org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamNetCdfReaderPlugIn
+org.esa.snap.dataio.pgx.PgxProductReaderPlugIn
+org.esa.snap.dataio.znap.ZnapProductReaderPlugIn
+org.csa.rstb.io.radarsat1.RadarsatProductReaderPlugIn
+org.csa.rstb.io.radarsat2.Radarsat2ProductReaderPlugIn
+org.csa.rstb.io.rcm.RCMProductReaderPlugIn
+org.csa.rstb.soilmoisture.io.matlab.MatlabReaderPlugIn

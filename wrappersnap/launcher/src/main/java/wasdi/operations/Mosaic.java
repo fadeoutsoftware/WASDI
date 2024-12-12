@@ -1,6 +1,9 @@
 package wasdi.operations;
 
+
 import java.io.File;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
@@ -135,14 +138,14 @@ public class Mosaic extends Operation {
 
         } 
         catch (Exception oEx) {
-            WasdiLog.errorLog("Mosaic.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Mosaic.executeOperation: exception " + ExceptionUtils.getStackTrace(oEx));
             
             m_oProcessWorkspaceLogger.log("The mosaic operation had an exception");
             m_oProcessWorkspaceLogger.log(":( " + new EndMessageProvider().getBad());
             
             oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 
-            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+            String sError = ExceptionUtils.getMessage(oEx);
             
             m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.MOSAIC.name(), oParam.getWorkspace(), sError, oParam.getExchange());
         }

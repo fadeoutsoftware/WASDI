@@ -83,7 +83,7 @@ pipeline {
   }
 
   tools {
-    jdk "WASDI_JDK_8"
+    jdk "WASDI_JDK_17"
     maven "WASDI_MAVEN"
   }
 

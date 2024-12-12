@@ -3,6 +3,8 @@ package wasdi.operations;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -175,9 +177,9 @@ public class Multisubset extends Operation {
             return true;
         } catch (Exception oEx) {
 
-            WasdiLog.errorLog("Multisubset.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Multisubset.executeOperation: exception " + ExceptionUtils.getStackTrace(oEx));
 
-            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+            String sError = ExceptionUtils.getMessage(oEx);
 
             m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.MULTISUBSET.name(), oParam.getWorkspace(), sError, oParam.getExchange());
         } 

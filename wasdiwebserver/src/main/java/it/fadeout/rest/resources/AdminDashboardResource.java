@@ -19,7 +19,7 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.Organization;
@@ -485,9 +485,11 @@ public class AdminDashboardResource {
 			WasdiLog.debugLog("AdminDashboardResource.findResourcePermissions: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
-
+		
+		boolean bIsAccessForMissions = sResourceType.equals(ResourceTypes.MISSION.getResourceType());
+		boolean bIsAdminUser = UserApplicationRole.isAdmin(oRequesterUser);
 		// Can the user access this section?
-		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
+		if (!bIsAccessForMissions && !bIsAdminUser) {
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
 		}
 

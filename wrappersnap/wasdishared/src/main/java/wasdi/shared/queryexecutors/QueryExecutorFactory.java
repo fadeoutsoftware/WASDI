@@ -31,7 +31,6 @@ import wasdi.shared.queryexecutors.lsa.QueryExecutorLSA;
 import wasdi.shared.queryexecutors.onda.QueryExecutorONDA;
 import wasdi.shared.queryexecutors.planet.QueryExecutorPLANET;
 import wasdi.shared.queryexecutors.probav.QueryExecutorPROBAV;
-import wasdi.shared.queryexecutors.sentinelhub.QueryExecutorSENTINEL;
 import wasdi.shared.queryexecutors.sina.QueryExecutorSina;
 import wasdi.shared.queryexecutors.skywatch.QueryExecutorSkywatch;
 import wasdi.shared.queryexecutors.sobloo.QueryExecutorSOBLOO;
@@ -54,7 +53,6 @@ public class QueryExecutorFactory {
 		final Map<String, Supplier<QueryExecutor>> aoMap = new HashMap<>();
 
 		aoMap.put("ONDA", QueryExecutorONDA::new);
-		aoMap.put("SENTINEL", QueryExecutorSENTINEL::new);
 		aoMap.put("SOBLOO", QueryExecutorSOBLOO::new);
 		aoMap.put("EODC", QueryExecutorEODC::new);
 		aoMap.put("CREODIAS", QueryExecutorCREODIAS::new);

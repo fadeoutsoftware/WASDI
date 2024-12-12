@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.inject.Inject;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -399,13 +397,13 @@ public class AuthResource {
 			WasdiLog.debugLog("AuthResource.createSftpAccount: email null or empty, aborting");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
-		try {
-			InternetAddress oEmailAddr = new InternetAddress(sEmail);
-			oEmailAddr.validate();
-		} catch (AddressException oEx) {
-			WasdiLog.errorLog("AuthResource.createSftpAccount: email is invalid, aborting");
-			return Response.status(Status.BAD_REQUEST).build();
-		}
+//		try {
+//			InternetAddress oEmailAddr = new InternetAddress(sEmail);
+//			oEmailAddr.validate();
+//		} catch (AddressException oEx) {
+//			WasdiLog.errorLog("AuthResource.createSftpAccount: email is invalid, aborting");
+//			return Response.status(Status.BAD_REQUEST).build();
+//		}
 		
 		try {	
 			
@@ -1213,7 +1211,7 @@ public class AuthResource {
 			if (!aoUserPermissionsOnMissions.isEmpty()) {
 				HashMap<String, String> aoMissionsIndexValuesNamesMappings = oMissionsRepository.getMissionIndexValueNameMapping();
 				List<PrivateMissionViewModel>  aoPrivateMissionsSharedWithUser = aoUserPermissionsOnMissions.stream()
-						.filter(oPermission -> !oPermission.getOwnerId().equals(oPermission.getUserId()))								// first we make sure that the user is not the owner of the mission
+						.filter(oPermission -> !Utils.isNullOrEmpty(oPermission.getOwnerId()) && !oPermission.getOwnerId().equals(oPermission.getUserId()))								// first we make sure that the user is not the owner of the mission
 						.map(oPermission -> createPrivateMissionViewModel(oPermission, sUserId, aoMissionsIndexValuesNamesMappings))
 						.collect(Collectors.toList());
 				aoPrivateMissionsList.addAll(aoPrivateMissionsSharedWithUser);

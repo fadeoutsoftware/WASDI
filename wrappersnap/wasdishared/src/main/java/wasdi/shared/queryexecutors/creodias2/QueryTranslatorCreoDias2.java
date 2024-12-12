@@ -1,12 +1,11 @@
 package wasdi.shared.queryexecutors.creodias2;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.HashMap;
-
-import java.util.LinkedList;
 
 import com.google.common.base.Preconditions;
 

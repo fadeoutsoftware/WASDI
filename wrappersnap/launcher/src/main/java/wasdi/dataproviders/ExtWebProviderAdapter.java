@@ -40,7 +40,7 @@ public class ExtWebProviderAdapter extends ProviderAdapter {
 				for (ExtWebDataProviderConfig oDataProviderConfig : m_oExtWebConfig.providers) {
 					if (m_asSupportedPlatforms.contains(oDataProviderConfig.mission)) {
 						m_asSupportedPlatforms.add(oDataProviderConfig.mission);
-						WasdiLog.infoLog("ExtWebProviderAdapter.internalReadConfig: adding support to " + oDataProviderConfig.mission);						
+						WasdiLog.debugLog("ExtWebProviderAdapter.internalReadConfig: adding support to " + oDataProviderConfig.mission);						
 					}
 				}
 				

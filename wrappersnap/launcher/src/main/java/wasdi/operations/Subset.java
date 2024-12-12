@@ -4,6 +4,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.GeoCoding;
@@ -122,11 +123,11 @@ public class Subset extends Operation {
             return true;
 
         } catch (Exception oEx) {
-            WasdiLog.errorLog("Subset.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Subset.executeOperation: exception " + ExceptionUtils.getStackTrace(oEx));
             
             oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 
-            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+            String sError = ExceptionUtils.getMessage(oEx);
             m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.SUBSET.name(), oParam.getWorkspace(), sError, oParam.getExchange());
         }
         

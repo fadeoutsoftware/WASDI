@@ -3,7 +3,7 @@ package wasdi.operations;
 import java.io.File;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.esa.snap.core.datamodel.Product;
 
 import wasdi.ProcessWorkspaceUpdateSubscriber;
@@ -71,7 +71,6 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 			}
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("Share.executeOperationFile: Exception: " + oEx);
-			WasdiLog.debugLog("Share.executeOperationFile: " + ExceptionUtils.getStackTrace(oEx));
 		}
 	}
 
@@ -250,10 +249,9 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 			return true;			
 
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("Share.executeOperation: Exception "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			WasdiLog.errorLog("Share.executeOperation: Exception " + ExceptionUtils.getStackTrace(oEx));
 
-			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+			String sError = ExceptionUtils.getMessage(oEx);
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 			m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.SHARE.name(), oParam.getWorkspace(),
 					sError, oParam.getExchange());

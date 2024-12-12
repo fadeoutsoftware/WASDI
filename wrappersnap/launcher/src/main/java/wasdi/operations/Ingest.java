@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
@@ -183,7 +184,7 @@ public class Ingest extends Operation {
         catch (Throwable e) {
             WasdiLog.errorLog("Ingest.executeOperation: ERROR: Exception occurrend during file ingestion");
             
-            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
+            String sError = ExceptionUtils.getMessage(e);
             WasdiLog.errorLog("Ingest.executeOperation: " + sError);
             
             m_oProcessWorkspaceLogger.log("Exception ingesting the file");

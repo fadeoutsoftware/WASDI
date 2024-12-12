@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
 Main-Class: wasdi.LauncherMain
-OpenIDE-Module-Specification-Version: 9.0.8
+OpenIDE-Module-Specification-Version: 11.0.0
 

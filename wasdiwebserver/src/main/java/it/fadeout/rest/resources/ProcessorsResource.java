@@ -343,6 +343,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/getdeployed")
+	@Produces({ "application/json", "text/xml" })
 	public List<DeployedProcessorViewModel> getDeployedProcessors(@HeaderParam("x-session-token") String sSessionId) throws Exception {
 
 		ArrayList<DeployedProcessorViewModel> aoRet = new ArrayList<>(); 
@@ -415,6 +416,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/getprocessor")
+	@Produces({ "application/json", "text/xml" })
 	public DeployedProcessorViewModel getSingleDeployedProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) throws Exception {
 
 		DeployedProcessorViewModel oDeployedProcessorViewModel = new DeployedProcessorViewModel(); 
@@ -495,6 +497,7 @@ public class ProcessorsResource  {
 	 */
 	@POST
 	@Path("/getmarketlist")
+	@Produces({ "application/json", "text/xml" })
 	public List<AppListViewModel> getMarketPlaceAppList(@HeaderParam("x-session-token") String sSessionId, AppFilterViewModel oFilters) throws Exception {
 
 		ArrayList<AppListViewModel> aoRet = new ArrayList<>(); 
@@ -692,6 +695,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/getmarketdetail")
+	@Produces({ "application/json", "text/xml" })
 	public Response getMarketPlaceAppDetail(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorname") String sProcessorName) throws Exception {
 		sProcessorName = URLDecoder.decode(sProcessorName, StandardCharsets.UTF_8.name());
 		WasdiLog.debugLog("ProcessorsResource.getMarketPlaceAppDetail");
@@ -843,6 +847,7 @@ public class ProcessorsResource  {
 	 */
 	@POST
 	@Path("/run")
+	@Produces({ "application/json", "text/xml" })
 	public RunningProcessorViewModel runPost(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("workspace") String sWorkspaceId,
 			@QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("notify") Boolean bNotify, String sEncodedJson) throws Exception {
@@ -866,6 +871,7 @@ public class ProcessorsResource  {
 
 	@GET
 	@Path("/run")
+	@Produces({ "application/json", "text/xml" })
 	public RunningProcessorViewModel run(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("encodedJson") String sEncodedJson,
 			@QueryParam("workspace") String sWorkspaceId,
@@ -1045,6 +1051,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/help")
+	@Produces({ "application/json", "text/xml" })
 	public PrimitiveResult help(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) throws Exception {
 		WasdiLog.debugLog("ProcessorsResource.help( Name: " + sName + " )");
 		PrimitiveResult oPrimitiveResult = new PrimitiveResult();
@@ -1152,6 +1159,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/logs/count")
+	@Produces({ "application/json", "text/xml" })
 	public int countLogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processworkspace") String sProcessWorkspaceId){
 		
 		WasdiLog.debugLog("ProcessorResource.countLogs( ProcWsId: " + sProcessWorkspaceId + " )");
@@ -1196,6 +1204,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/logs/list")
+	@Produces({ "application/json", "text/xml" })
 	public ArrayList<ProcessorLogViewModel> getLogs(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processworkspace") String sProcessWorkspaceId,
 			//note: range extremes are included
@@ -1264,6 +1273,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/nodedelete")
+	@Produces({ "application/json", "text/xml" })
 	public Response nodeDeleteProcessor(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId,
@@ -1355,6 +1365,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/delete")
+	@Produces({ "application/json", "text/xml" })
 	public Response deleteProcessor(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId) {
@@ -1513,6 +1524,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/redeploy")
+	@Produces({ "application/json", "text/xml" })
 	public Response redeployProcessor(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId) {
@@ -1621,6 +1633,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/libupdate")
+	@Produces({ "application/json", "text/xml" })
 	public Response libraryUpdate(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId) {
@@ -1727,6 +1740,7 @@ public class ProcessorsResource  {
 	 */
 	@POST
 	@Path("/update")
+	@Produces({ "application/json", "text/xml" })
 	public Response updateProcessor(DeployedProcessorViewModel oUpdatedProcessorVM, @HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
 		
 		WasdiLog.debugLog("ProcessorResources.updateProcessor( Processor: " + sProcessorId + " )");
@@ -2012,6 +2026,7 @@ public class ProcessorsResource  {
 	 */
 	@POST
 	@Path("/updatedetails")
+	@Produces({ "application/json", "text/xml" })
 	public Response updateProcessorDetails(AppDetailViewModel oUpdatedProcessorVM, @HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId) {
 		
@@ -2275,6 +2290,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/stripe/onDemandPaymentUrl")
+	@Produces({ "application/json", "text/xml" })
 	public Response getStripeOnDemandPaymentUrl(@HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("processor") String sProcessorId, @QueryParam("appPayment") String sAppPaymentId) {
 
@@ -2350,6 +2366,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/isAppPurchased")
+	@Produces({ "application/json", "text/xml" })
 	public Response checkAppPurchase(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processor")String sProcessorId) {
 		
 		try {
@@ -2493,6 +2510,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/byAppPaymentId")
+	@Produces({ "application/json", "text/xml" })
 	public Response getAppPaymentById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("appPayment") String sAppPaymentId) {
 		
 		if (Utils.isNullOrEmpty(sAppPaymentId)) {
@@ -2548,6 +2566,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/stripe/confirmation/{CHECKOUT_SESSION_ID}")
+	@Produces({ "application/json", "text/xml" })
 	public String confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
 		WasdiLog.debugLog("ProcessorResource.confirmation. sCheckoutSessionId: " + sCheckoutSessionId);
 
@@ -2932,6 +2951,7 @@ public class ProcessorsResource  {
 	 */
 	@GET
 	@Path("/ui")
+	@Produces({ "application/json", "text/xml" })
 	public Response getUI(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) throws Exception {
 		WasdiLog.debugLog("ProcessorsResource.getUI( Name: " + sName + " )");
 		sName = URLDecoder.decode(sName, StandardCharsets.UTF_8.name());
@@ -2987,6 +3007,7 @@ public class ProcessorsResource  {
 	 */
 	@POST
 	@Path("/saveui")
+	@Produces({ "application/json", "text/xml" })
 	public Response saveUI(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName, String sUIJson) throws Exception {
 		WasdiLog.debugLog("ProcessorsResource.saveUI( Name: " + sName + " )");
 		
