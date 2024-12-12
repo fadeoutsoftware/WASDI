@@ -123,22 +123,6 @@ services:
         condition: service_started
 {% endif %}
 {% endif %}
-{% if bWasdiTomcatOgcProcessesServerEnabled == True %}
-      {{ sWasdiTomcatOgcProcessesServerServiceName }}:
-{% if sEnvironmentName == "test" %}
-        condition: service_healthy
-{% else %}
-        condition: service_started
-{% endif %}
-{% endif %}
-{% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
-      {{ sWasdiTomcatWasdiOpenEoServerServiceName }}:
-{% if sEnvironmentName == "test" %}
-        condition: service_healthy
-{% else %}
-        condition: service_started
-{% endif %}
-{% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
       {{ sWasdiTomcatWasdiWebServerServiceName }}:
 {% if sEnvironmentName == "test" %}
