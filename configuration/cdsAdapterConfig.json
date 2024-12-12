@@ -1,0 +1,11 @@
+{
+
+    "pythonScript": "data_provider_cds.py",
+
+    "exchangeFolder": "/data/wasdi/tmp/",
+
+    "apiUrl": "https://cds-beta.climate.copernicus.eu/api",
+
+    "key": "{{sWasdiDataProviderCdsApiKey}}"
+
+}

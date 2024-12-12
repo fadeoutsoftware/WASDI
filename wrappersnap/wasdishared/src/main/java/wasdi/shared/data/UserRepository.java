@@ -192,26 +192,62 @@ public class UserRepository extends  MongoRepository{
     	
     	return aoReturnList;
     }
-
+    
+    /**
+     * Get a sorted list of users
+     * @param sOrderBy db field on which to perform the sorting operation
+     * @param iOrder decreasing or increasing order
+     * @return
+     */
+    public ArrayList<User> getAllUsersSorted(String sOrderBy, int iOrder) {
+    	
+    	ArrayList<User> aoReturnList = new ArrayList<User>();
+    	
+    	try {
+	    	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+	    			.find()
+	    			.sort(new Document(sOrderBy, iOrder));
+	        
+	        fillList(aoReturnList, oWSDocuments, User.class);
+    	} catch(Exception oEx) {
+    		WasdiLog.errorLog("UserRepository.getAllUsersSorted. Error retrieving users", oEx);
+    	}
+    	
+    	return aoReturnList;  	
+    }
+    
+    /**
+     * Get a list of users matching a partial name
+     * @param sPartialName
+     * @return
+     */
 	public List<User> findUsersByPartialName(String sPartialName) {
+		return findUsersByPartialName(sPartialName, "userId", 1);
+	}
+    
+    public List<User> findUsersByPartialName(String sPartialName, String sOrderBy, int iOrder) {
 		List<User> aoReturnList = new ArrayList<>();
 
-		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
-			return aoReturnList;
+		if (Utils.isNullOrEmpty(sPartialName) && !Utils.isNullOrEmpty(sOrderBy)) {
+			return getAllUsersSorted(sOrderBy, iOrder);
+		} else if (Utils.isNullOrEmpty(sPartialName) && Utils.isNullOrEmpty(sOrderBy)) {
+			return getAllUsers();
 		}
 
-		Pattern regex = Pattern.compile(Pattern.quote(sPartialName), Pattern.CASE_INSENSITIVE);
+		Pattern oRegex = Pattern.compile(Pattern.quote(sPartialName), Pattern.CASE_INSENSITIVE);
 
-		Bson oFilterLikeUserId = Filters.eq("userId", regex);
-		Bson oFilterLikeName = Filters.eq("name", regex);
-		Bson oFilterLikeSurname = Filters.eq("surname", regex);
+		Bson oFilterLikeUserId = Filters.eq("userId", oRegex);
+		Bson oFilterLikeName = Filters.eq("name", oRegex);
+		Bson oFilterLikeSurname = Filters.eq("surname", oRegex);
 
 		Bson oFilter = Filters.or(oFilterLikeUserId, oFilterLikeName, oFilterLikeSurname);
 
 		try {
 			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
 					.find(oFilter)
-					.sort(new Document("userId", 1));
+					.sort(new Document(sOrderBy, iOrder));
+			
+			
 
 			fillList(aoReturnList, oWSDocuments, User.class);
 		} catch (Exception oEx) {
@@ -219,9 +255,9 @@ public class UserRepository extends  MongoRepository{
 		}
 
 		return aoReturnList;
-	}
+    }    
 
-	public long countUsers() {
+	public long getUsersCount() {
 		return getCollection(m_sThisCollection).countDocuments();
 	}
 

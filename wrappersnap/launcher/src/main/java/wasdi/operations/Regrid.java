@@ -3,6 +3,8 @@ package wasdi.operations;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.LauncherOperations;
@@ -22,7 +24,7 @@ public class Regrid extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 
-		WasdiLog.debugLog("Regrid.executeOperation");
+		WasdiLog.infoLog("Regrid.executeOperation");
         
 		if (oParam == null) {
 			WasdiLog.errorLog("Regrid.executeOperation: Parameter is null");
@@ -119,9 +121,9 @@ public class Regrid extends Operation {
             
             return true;
         } catch (Exception oEx) {
-            WasdiLog.errorLog("Regrid.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Regrid.executeOperation: exception " + ExceptionUtils.getStackTrace(oEx));
             
-            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+            String sError = ExceptionUtils.getMessage(oEx);
             
             m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.REGRID.name(), oParam.getWorkspace(), sError, oParam.getExchange());
 

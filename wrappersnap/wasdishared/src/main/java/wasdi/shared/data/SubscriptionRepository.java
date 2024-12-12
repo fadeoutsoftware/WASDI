@@ -354,33 +354,91 @@ public class SubscriptionRepository extends MongoRepository {
 
 		return aoReturnList;
 	}
-
+	
 	/**
-	 * Find subscriptions by partial name or by partial id
-	 * @param sPartialName the partial name or partial id
-	 * @return the list of subscriptions that partially match the name or id
+	 * Get the sorted list of subscriptions.
+	 * @return the sorted list of subscriptions
 	 */
-	public List<Subscription> findSubscriptionsByPartialName(String sPartialName) {
-		List<Subscription> aoReturnList = new ArrayList<>();
-
-		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
-			return aoReturnList;
+	public List<Subscription> getSubscriptionsSortedList(String sOrderBy, int iOrder) {
+		final List<Subscription> aoReturnList = new ArrayList<>();
+		
+		if (Utils.isNullOrEmpty(sOrderBy)) {
+			sOrderBy = "name";
+		}
+		
+		if (iOrder != -1 && iOrder != 1) {
+			iOrder = 1;
 		}
 
-		Pattern regex = Pattern.compile(Pattern.quote(sPartialName), Pattern.CASE_INSENSITIVE);
-
-		Bson oFilterLikeSubscriptionId = Filters.eq("subscriptionId", regex);
-		Bson oFilterLikeName = Filters.eq("name", regex);
-
-		Bson oFilter = Filters.or(oFilterLikeSubscriptionId, oFilterLikeName);
-
 		try {
-			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter)
-					.sort(new Document("name", 1));
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find()
+					.sort(new Document(sOrderBy, iOrder));
 
 			fillList(aoReturnList, oWSDocuments, Subscription.class);
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("SubscriptionRepository.findSubscriptionsByPartialName : error " + oEx.toString());
+			WasdiLog.errorLog("SubscriptionRepository.getSubscriptionsSortedList : error ", oEx);
+		}
+
+		return aoReturnList;
+	}
+
+	/**
+	 * Find subscriptions by partial name, by partial id or partial user id
+	 * @param sNameFilter the partial name of the subscription
+	 * @param sIdFilter the partial id of the subscription
+	 * @param sUserIdFilter the partial user id of the subscription
+	 * @return the list of subscriptions that partially match the name or id
+	 */
+	public List<Subscription> findSubscriptionsByFilters(String sNameFilter, String sIdFilter, String sUserIdFilter, String sOrderBy, int iOrder) {
+		
+		List<Subscription> aoReturnList = new ArrayList<>();
+		
+		List<Bson> aoFilters = new ArrayList<>();
+
+		if (!Utils.isNullOrEmpty(sNameFilter)) {
+			Pattern oNameRegEx = Pattern.compile(Pattern.quote(sNameFilter), Pattern.CASE_INSENSITIVE);
+			Bson oFilterLikeName = Filters.eq("name", oNameRegEx);
+			aoFilters.add(oFilterLikeName);	
+		}
+		
+		if (!Utils.isNullOrEmpty(sIdFilter)) {
+			Pattern oIdRegEx = Pattern.compile(Pattern.quote(sIdFilter), Pattern.CASE_INSENSITIVE);
+			Bson oFilterLikeSubscriptionId = Filters.eq("subscriptionId", oIdRegEx);
+			aoFilters.add(oFilterLikeSubscriptionId);
+		}
+		
+		if (!Utils.isNullOrEmpty(sUserIdFilter)) {
+			Pattern oUserIdRegEx = Pattern.compile(Pattern.quote(sUserIdFilter), Pattern.CASE_INSENSITIVE);
+			Bson oFilterLikeUserId = Filters.eq("userId", oUserIdRegEx);
+			aoFilters.add(oFilterLikeUserId);
+		}
+		
+		if (Utils.isNullOrEmpty(sOrderBy)) {
+			sOrderBy = "name";
+		}
+		
+		if (iOrder != -1 && iOrder != 1) {
+			iOrder = 1;
+		}
+		
+		Bson oQueryFilter = null;
+		if (aoFilters.isEmpty()) {
+			return getSubscriptionsSortedList(sOrderBy, iOrder);
+		} else if (aoFilters.size() == 1) {
+			oQueryFilter = aoFilters.get(0);
+		} else {
+			oQueryFilter = Filters.or(aoFilters);
+		}
+		
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(oQueryFilter)
+					.sort(new Document(sOrderBy, iOrder));
+
+			fillList(aoReturnList, oWSDocuments, Subscription.class);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("SubscriptionRepository.findSubscriptionsByFilters : error ", oEx);
 		}
 
 		return aoReturnList;
@@ -501,6 +559,39 @@ public class SubscriptionRepository extends MongoRepository {
 
 		return aoReturnList;
 		
+	}
+	
+	/**
+	 * Find a subscription that  matches a given partial name, description or id
+	 * @param sPartialName the partial name of the subscription
+	 * @return
+	 */
+	public List<Subscription> findSubscriptionByPartialName(String sPartialName) {
+		
+		List<Subscription> aoReturnList = new ArrayList<>();
+
+		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
+			return aoReturnList;
+		}
+
+		Pattern regex = Pattern.compile(Pattern.quote(sPartialName), Pattern.CASE_INSENSITIVE);
+
+		Bson oFilterLikeSubscriptionId = Filters.eq("subscriptionId", regex);
+		Bson oFilterLikeName = Filters.eq("name", regex);
+
+		Bson oFilter = Filters.or(oFilterLikeSubscriptionId, oFilterLikeName);
+
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(oFilter)
+					.sort(new Document("name", 1));
+
+			fillList(aoReturnList, oWSDocuments, Subscription.class);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("SubscriptionRepository.findSubscriptionByPartialName: error: ", oEx);
+		}
+
+		return aoReturnList;
 	}
 
 }

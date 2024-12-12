@@ -1,4 +1,5 @@
 package dbUtils;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -25,6 +26,7 @@ import org.apache.commons.io.FileUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import wasdi.processors.DockerProcessorEngine;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -47,6 +49,7 @@ import wasdi.shared.business.statistics.Job;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserSession;
+import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.MongoConfig;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
@@ -145,7 +148,7 @@ public class dbUtils {
             System.out.println("\t1 - List products with broken files");
             System.out.println("\t2 - Delete products with broken files");
             System.out.println("\t3 - Clear S1 S2 published bands");
-            System.out.println("\t4 - Clean by not existing ProcessWorkspace");
+            System.out.println("\t4 - Clean by not existing Product Workspace");
             System.out.println("\tx - back");
             System.out.println("");
 
@@ -251,6 +254,7 @@ public class dbUtils {
 
             System.out.println("\t1 - Clean by not existing Workspace");
             System.out.println("\t2 - Clean by not existing Product Name");
+            System.out.println("\t3 - Change Workspace Owner");
             System.out.println("\tx - Back");
             System.out.println("");
 
@@ -323,7 +327,55 @@ public class dbUtils {
                     System.out.println("productWorkspace: Deleted " + iDeleted + " Product Workspace");
                 }
             }
+            else if (sInputString.equals("3")) {
+                System.out.println("Workspace Id?");
+                String sWorkspaceId = s_oScanner.nextLine();
 
+                System.out.println("Old User Id?");
+                String sOldUser = s_oScanner.nextLine();
+
+                System.out.println("New User Id?");
+                String sNewUser = s_oScanner.nextLine();
+                
+                ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+                
+                System.out.println("Reading Product Workspaces");
+
+                List<ProductWorkspace> aoAllProductWorkspace = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
+                
+                System.out.println("Update Product Workspaces");
+                
+                for (ProductWorkspace oProductWorkspace : aoAllProductWorkspace) {
+                	
+                	if (oProductWorkspace.getProductName().contains(sOldUser)) {
+                		String sOldProductName = oProductWorkspace.getProductName();
+                		oProductWorkspace.setProductName(oProductWorkspace.getProductName().replace(sOldUser, sNewUser));
+                		oProductWorkspaceRepository.updateProductWorkspace(oProductWorkspace, sOldProductName);
+                	}
+                	else {
+                		System.out.println("WARNING Product Workspace " + oProductWorkspace.getProductName() + " DOES NOT includes the old user!!");
+                	}
+				}
+                
+                System.out.println("Reading Downloaded Files");
+                
+                DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+                
+                List<DownloadedFile> aoFiles = oDownloadedFilesRepository.getByWorkspace(sWorkspaceId);
+                
+                System.out.println("Updating Downloaded Files");
+                
+                for (DownloadedFile oFile : aoFiles) {
+                	if (oFile.getFilePath().contains(sOldUser)) {
+                		String sOldPath = oFile.getFilePath();
+                		oFile.setFilePath(oFile.getFilePath().replace(sOldUser, sNewUser));
+                		oDownloadedFilesRepository.updateDownloadedFile(oFile, sOldPath);
+                	}
+                	else {
+                		System.out.println("WARNING Downloaded File " + oFile.getFilePath() + " DOES NOT includes the old user!!");
+                	}
+				}                            	
+            }
 
         } catch (Exception oEx) {
             System.out.println("productWorkspace: exception " + oEx);
@@ -367,6 +419,7 @@ public class dbUtils {
             System.out.println("\t5 - Update db UI from local ui.json files");
             System.out.println("\t6 - Force Lib Update");
             System.out.println("\t7 - Redeploy all processors");
+            System.out.println("\t8 - Force Delete");
             System.out.println("\tx - Back");
             System.out.println("");
 
@@ -571,6 +624,39 @@ public class dbUtils {
 					}
                 }                    
             } 
+            else if (sInputString.equals("8")) {
+                System.out.println("Please input Processor Name to Delete:");
+                String sProcessorName = s_oScanner.nextLine();
+
+                ProcessorRepository oProcessorRepository = new ProcessorRepository();
+                Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
+
+                if (oProcessor == null) {
+                    System.out.println(sProcessorName + " does NOT exists");
+                    return;
+                }
+                
+                ProcessorParameter oParameter = new ProcessorParameter();
+                oParameter.setName(oProcessor.getName());
+                oParameter.setUserId(oProcessor.getUserId());
+                oParameter.setProcessorID(oProcessor.getProcessorId());
+                oParameter.setProcessorType(oProcessor.getType());
+                
+                ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
+                
+    	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType());
+    	        
+    	        if (oEngine instanceof DockerProcessorEngine) {
+    	        	((DockerProcessorEngine)oEngine).setDockerRegistry(getDockerRegisterAddress());
+    	        }
+    	        
+    	        oEngine.setSendToRabbit(null);
+    	        oEngine.setParameter(oParameter);
+    	        oEngine.setProcessWorkspaceLogger(null);
+    	        oEngine.setProcessWorkspace(oProcessWorkspace);
+    	        boolean bRet = oEngine.delete(oParameter);
+    	        System.out.println("Engine.delete return " + bRet);
+            }
       
         } catch (Exception oEx) {
             System.out.println("processors redeploying Exception: " + oEx);
@@ -578,6 +664,30 @@ public class dbUtils {
     }
 
 
+    public static String getDockerRegisterAddress() {
+    	try {
+			// We read  the registers from the config
+			List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+			
+			if (aoRegisters == null) {
+				System.out.println("DockerProcessorEngine.getDockerRegisterAddress: registers list is null, return empty string.");
+				return "";
+			}
+			
+			if (aoRegisters.size() == 0) {
+				System.out.println("DockerProcessorEngine.getDockerRegisterAddress: registers list is empty, return empty string.");
+				return "";			
+			}
+			
+			// And we work with our main register
+			return aoRegisters.get(0).address;
+    	}
+    	catch (Exception oEx) {
+    		System.out.println("DockerProcessorEngine.getDockerRegisterAddress: exception creating ws folder: " + oEx);
+        }
+    	
+    	return "";
+    }
     public static void metadata() {
 
         try {
@@ -2529,8 +2639,7 @@ public class dbUtils {
     			
             } catch (Exception exp) {
                 // no log4j configuration
-                System.err.println("DbUtils - Error loading log configuration.  Reason: "
-                        + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
+                System.err.println("DbUtils - Error loading log configuration.  Reason: " + exp.toString());
             }
 
             // If this is not the main node

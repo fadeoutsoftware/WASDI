@@ -3,7 +3,6 @@ package wasdi.shared.packagemanagers;
 import java.util.List;
 import java.util.Map;
 
-import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.packagemanagers.PackageManagerUtils;
 import wasdi.shared.viewmodels.processors.PackageManagerViewModel;
 import wasdi.shared.viewmodels.processors.PackageViewModel;
@@ -38,10 +37,6 @@ public class PipOneShotPackageManager implements IPackageManager {
 
 	@Override
 	public Map<String, Object> getPackagesInfo() {
-		
-		DockerUtils oDockerUtils = new DockerUtils();
-		//oDockerUtils.run(sFlag, sFlag, null, false, null, false)
-				
 		
 		return null;
 	}

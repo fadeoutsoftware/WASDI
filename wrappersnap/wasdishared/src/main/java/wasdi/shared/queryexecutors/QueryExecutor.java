@@ -8,8 +8,8 @@ import java.util.List;
 
 import wasdi.shared.business.AuthenticationCredentials;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
@@ -146,7 +146,7 @@ public abstract class QueryExecutor {
 			
 			sClientQuery = sProduct + " AND ( beginPosition:[1893-09-07T00:00:00.000Z TO 2893-09-07T00:00:00.000Z] AND endPosition:[1893-09-07T23:59:59.999Z TO 2893-09-07T23:59:59.999Z] ) ";
 			
-			String sPlatform = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sProduct);
+			String sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(sProduct);
 			
 			if (!Utils.isNullOrEmpty(sPlatform)) {
 				sClientQuery = sClientQuery + "AND (platformname:" + sPlatform + " )";

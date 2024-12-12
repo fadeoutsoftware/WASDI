@@ -110,4 +110,17 @@ public class CommentRepository extends MongoRepository {
 		return bIsTheOwner;
 	}
 
+	/**
+	 * Delete all the comments of a specific user
+	 * @param sUserId
+	 * @return
+	 */
+    public int deleteCommentsByUser(String sUserId) {
+    	if (Utils.isNullOrEmpty(sUserId)) return 0;
+
+		BasicDBObject oCriteria = new BasicDBObject();
+		oCriteria.append("userId", sUserId);
+
+        return deleteMany(oCriteria, m_sThisCollection);
+    }
 }

@@ -1,5 +1,7 @@
 package wasdi.operations;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -14,7 +16,7 @@ public class Graph extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		WasdiLog.debugLog("Graph.executeOperation");
+		WasdiLog.infoLog("Graph.executeOperation");
 		
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");
@@ -36,7 +38,7 @@ public class Graph extends Operation {
             
         } catch (Exception oEx) {
             WasdiLog.errorLog("Graph.executeOperation: Exception", oEx);
-            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+            String sError = ExceptionUtils.getMessage(oEx);
             
          // P.Campanella 2024/01/23: log the error also on the web user interface
             if (m_oProcessWorkspaceLogger != null) {

@@ -8,7 +8,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
@@ -157,8 +157,13 @@ public abstract class WasdiProductReader {
         	return null;
         }
         
-        if (WasdiFileUtils.isSentinel5PFile(m_oProductFile)) {
+        if (MissionUtils.isSentinel5PFile(m_oProductFile)) {
         	WasdiLog.debugLog("WasdiProductReader.readSnapProduct: we do not want SNAP to read S5P, return null ");
+        	return null;        	
+        }
+        
+        if (MissionUtils.isSentinel6File(m_oProductFile)) {
+           	WasdiLog.debugLog("WasdiProductReader.readSnapProduct: we do not want SNAP to read S6, return null ");
         	return null;        	
         }
         

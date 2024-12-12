@@ -3,8 +3,6 @@ package wasdi;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Security;
@@ -18,16 +16,18 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.lib.openjpeg.utils.OpenJpegExecRetriever;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.esa.snap.runtime.EngineConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import sun.management.VMManagement;
 import wasdi.operations.Operation;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
@@ -120,7 +120,7 @@ public class LauncherMain  {
             WasdiFileUtils.loadLogConfigFile(sThisFilePath);
             
         } catch (Exception exp) {
-            System.err.println("Launcher Main - Error setting the crypto policy.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
+            System.err.println("Launcher Main - Error setting the crypto policy.  Reason: " + ExceptionUtils.getStackTrace(exp));
         }
 
         WasdiLog.debugLog("WASDI Launcher Main Start");
@@ -184,11 +184,40 @@ public class LauncherMain  {
         if (WasdiConfig.Current.useLog4J) {
             // Set the logger for the shared lib
             WasdiLog.setLoggerWrapper(s_oLogger);
-            WasdiLog.debugLog("Logger added");
+            WasdiLog.debugLog("Launcher Main - Logger added");
         }
         else { 
-        	WasdiLog.debugLog("WADSI Configured to log on console");
+        	WasdiLog.debugLog("Launcher Main - WASDI Configured to log on console");
+        	WasdiLog.initLogger(WasdiConfig.Current.logLevelLauncher);
         }
+        
+//        // Filter the mongodb logs
+//		try {
+//			Object oTest = LoggerFactory.getLogger("httpclient");
+//			
+//			Logger oMongoLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.mongodb.driver.cluster");
+//			oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);	
+//			
+//			oMongoLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.mongodb.driver");
+//			oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+//		}
+//		catch (Exception oEx) {
+//			WasdiLog.errorLog("Disabling mongo driver logging exception " + oEx.toString());
+//		}        
+//		
+//        // Filter the apache logs
+//		try {
+//			Object oTest = LoggerFactory.getLogger("httpclient");
+//			
+//			ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("httpclient");
+//			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);	
+//			
+//			oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache");
+//			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+//		}
+//		catch (Exception oEx) {
+//			WasdiLog.errorLog("Disabling apache logging exception " + oEx.toString());
+//		}        		
 
         try {
 
@@ -221,7 +250,7 @@ public class LauncherMain  {
 
             // Set the process object id as Logger Prefix: it will help to filter logs
             WasdiLog.setPrefix("[" + s_oProcessWorkspace.getProcessObjId() + "]");
-            WasdiLog.debugLog("Executing " + sOperation + " Parameter " + sParameter);
+            WasdiLog.infoLog("Executing " + sOperation + " Parameter " + sParameter);
 
             // Set the ProcessWorkspace STATUS as running
             WasdiLog.debugLog("LauncherMain: setting ProcessWorkspace start date to now");
@@ -240,13 +269,13 @@ public class LauncherMain  {
             oLauncher.executeOperation(sOperation, oBaseParameter);
 
             // Operation Done
-            WasdiLog.debugLog(getBye());
+            WasdiLog.infoLog(getBye());
 
         }
         catch (Throwable oException) {
 
         	// ERROR: we need to put the ProcessWorkspace in a end-state, error in this case
-            WasdiLog.errorLog("Launcher Main Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oException));
+            WasdiLog.errorLog("Launcher Main Exception " + ExceptionUtils.getStackTrace(oException));
 
             try {
                 System.err.println("LauncherMain: try to put process [" + sParameter + "] in Safe ERROR state");
@@ -264,7 +293,7 @@ public class LauncherMain  {
                     }
                 }
             } catch (Exception oInnerEx) {
-                WasdiLog.errorLog("Launcher Main FINAL-catch Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oInnerEx));
+                WasdiLog.errorLog("Launcher Main FINAL-catch Exception " + ExceptionUtils.getStackTrace(oInnerEx));
             }
 
             // Exit with error
@@ -345,7 +374,7 @@ public class LauncherMain  {
             configureSNAP();
 
         } catch (Throwable oEx) {
-            WasdiLog.errorLog("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Launcher Main Constructor Exception " + ExceptionUtils.getStackTrace(oEx));
         }
     }
 
@@ -447,11 +476,11 @@ public class LauncherMain  {
             	}
             }
             catch (Throwable oEx) {
-            	WasdiLog.errorLog("LauncherMain.configureSNAP Exception OpenJpegExecRetriever.getOpenJPEGAuxDataPath(): " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            	WasdiLog.errorLog("LauncherMain.configureSNAP Exception OpenJpegExecRetriever.getOpenJPEGAuxDataPath(): " + ExceptionUtils.getStackTrace(oEx));
 			}
     	}
     	catch (Throwable oEx) {
-            WasdiLog.errorLog("LauncherMain.configureSNAP Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("LauncherMain.configureSNAP Exception " + ExceptionUtils.getStackTrace(oEx));
         }
     }
 
@@ -504,7 +533,7 @@ public class LauncherMain  {
             	else s_oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());        		
         	}
 
-        	WasdiLog.debugLog("LauncherMain.executeOperation: Operation Result " + bOperationResult);
+        	WasdiLog.infoLog("LauncherMain.executeOperation: Operation Result " + bOperationResult);
         	
         	// Check if we have to send a notification
         	if (s_oProcessWorkspace.isNotifyOwnerByMail()) {
@@ -537,7 +566,7 @@ public class LauncherMain  {
         }
         catch (Exception oEx) {
 
-            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+            String sError = ExceptionUtils.getMessage(oEx);
 
             WasdiLog.errorLog("LauncherMain.executeOperation Exception ", oEx);
 
@@ -557,7 +586,7 @@ public class LauncherMain  {
         	}
         }
 
-        WasdiLog.debugLog("Launcher did his job. Bye bye, see you soon. [" + sParameter + "]");
+        WasdiLog.infoLog("Launcher did his job. Bye bye, see you soon. [" + sParameter + "]");
     }
 
     /**
@@ -649,8 +678,7 @@ public class LauncherMain  {
                 s_oSendToRabbit.SendUpdateProcessMessage(s_oProcessWorkspace);
             }
         } catch (Exception oEx) {
-            WasdiLog.debugLog("LauncherMain.CloseProcessWorkspace: Exception closing process workspace "
-                    + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.debugLog("LauncherMain.CloseProcessWorkspace: Exception closing process workspace " + ExceptionUtils.getStackTrace(oEx));
         }
     }
 
@@ -663,17 +691,10 @@ public class LauncherMain  {
         Integer iPid = 0;
         try {
             RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-            Field jvmField = runtimeMXBean.getClass().getDeclaredField("jvm");
-            jvmField.setAccessible(true);
-            VMManagement vmManagement = (VMManagement) jvmField.get(runtimeMXBean);
-            Method getProcessIdMethod = vmManagement.getClass().getDeclaredMethod("getProcessId");
-            getProcessIdMethod.setAccessible(true);
-            iPid = (Integer) getProcessIdMethod.invoke(vmManagement);
-
+            iPid = (int) runtimeMXBean.getPid();
         } catch (Throwable oEx) {
             try {
-                WasdiLog.errorLog("LauncherMain.GetProcessId: Error getting processId: "
-                        + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                WasdiLog.errorLog("LauncherMain.GetProcessId: Error getting processId: " + oEx.toString());
             } finally {
                 WasdiLog.errorLog("LauncherMain.GetProcessId: finally here");
             }

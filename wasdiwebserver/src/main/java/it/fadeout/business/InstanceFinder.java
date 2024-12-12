@@ -101,7 +101,7 @@ public class InstanceFinder {
 	}
 	
 	public static Map<String, String> getOrbitSatsMap() {
-	return s_asOrbitSatsMap;
+		return s_asOrbitSatsMap;
 	}
 	
 	/**

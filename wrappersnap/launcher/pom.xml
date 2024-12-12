@@ -18,33 +18,28 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionAbderaCore>1.1.3</sVersionAbderaCore>
-        <sVersionAssertjCore>2.1.0</sVersionAssertjCore>
-        <sVersionBcpkixJdk15on>1.58</sVersionBcpkixJdk15on>
-        <sVersionCommonsCli>1.3.1</sVersionCommonsCli>
+        <sVersionAssertjCore>3.26.3</sVersionAssertjCore>
+        <sVersionBcpkixJdk15on>1.79</sVersionBcpkixJdk15on>
+        <sVersionCommonsCli>1.9.0</sVersionCommonsCli>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
-        <sVersionJson>20160810</sVersionJson>
-        <sVersionJts>1.13</sVersionJts>
+        <sVersionJson>20240303</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
-        <sVersionJUniversalChardet>2.4.0</sVersionJUniversalChardet>
-        <sVersionLog4j>2.20.0</sVersionLog4j>
-        <sVersionLombok>1.18.22</sVersionLombok>
+        <sVersionJUniversalChardet>2.5.0</sVersionJUniversalChardet>
+        <sVersionLog4j>2.23.1</sVersionLog4j>
         <sVersionMavenJarPlugin>3.3.0</sVersionMavenJarPlugin>
         <sVersionMavenShadePlugin>3.5.0</sVersionMavenShadePlugin>
-        <sVersionMockFtpServer>2.7.1</sVersionMockFtpServer>
-        <sVersionNetcdfAll>5.3.1</sVersionNetcdfAll>
-        <sVersionOkHttp>4.9.0</sVersionOkHttp>
-        <sVersionProbav>2.3.0</sVersionProbav>
-        <sVersionS1tbx>9.0.4</sVersionS1tbx>
-        <sVersionS2tbx>9.0.2</sVersionS2tbx>
-        <sVersionS3tbx>9.0.3</sVersionS3tbx>
-        <sVersionSnap>9.0.8</sVersionSnap>
-        <sVersionSshj>0.29.0</sVersionSshj>
-        <sVersionXercesImpl>2.12.2</sVersionXercesImpl>
+        <sVersionNetcdfAll>5.5.2</sVersionNetcdfAll>
+        <sVersionOkHttp>4.12.0</sVersionOkHttp>
+        <sVersionMicrowavetbx>11.0.0</sVersionMicrowavetbx>
+        <sVersionOpticaltbx>11.0.0</sVersionOpticaltbx>
+        <sVersionSnap>11.0.0</sVersionSnap>
+        <sVersionSMOSTbx>11.0.0</sVersionSMOSTbx>
+        <sVersionSshj>0.39.0</sVersionSshj>
+        <sVersionLogback>1.2.13</sVersionLogback>
     </properties>
 
     <build>
@@ -123,6 +118,20 @@
                         <manifest>
                             <mainClass>wasdi.LauncherMain</mainClass>
                         </manifest>
+			            <manifestEntries>
+			              <Implementation-Title>com.sun.media.imageio</Implementation-Title>
+			              
+			              <Implementation-Version>1.0_01</Implementation-Version>
+			              <Specification-Vendor>Sun Microsystems, Inc.</Specification-Vendor>
+			              <Implementation-Vendor>Sun Microsystems, Inc.</Implementation-Vendor>
+			              <Specification-Title>Java Advanced Imaging Image I/O Tools</Specification-Title>
+			              <OpenIDE-Module-Specification-Version>unknown</OpenIDE-Module-Specification-Version>
+			              <!--key>value</key>
+			              <key>value</key>
+			              <key>value</key>
+			              <key>value</key>
+			              <key>value</key-->
+			            </manifestEntries>                        
                     </archive>
                 </configuration>
             </plugin>
@@ -149,12 +158,12 @@
             <version>${sVersionOkHttp}</version>
         </dependency>
         <!-- Bouncy Castle is necessary to enable outgoing ssh connections -->
-        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk15on -->
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
-            <version>${sVersionBcpkixJdk15on}</version>
-        </dependency>
+		<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
+			<version>${sVersionBcpkixJdk15on}</version>
+		</dependency>
         <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
         <dependency>
             <groupId>commons-cli</groupId>
@@ -167,34 +176,27 @@
             <artifactId>json</artifactId>
             <version>${sVersionJson}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-core -->
-        <dependency>
-            <groupId>org.apache.abdera</groupId>
-            <artifactId>abdera-core</artifactId>
-            <version>${sVersionAbderaCore}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>xerces</groupId>
-                    <artifactId>xml-apis</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>xerces</groupId>
-                    <artifactId>xercesImpl</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/xerces/xercesImpl -->
-        <dependency>
-            <groupId>xerces</groupId>
-            <artifactId>xercesImpl</artifactId>
-            <version>${sVersionXercesImpl}</version>
-        </dependency>
         <!-- https://search.maven.org/artifact/com.hierynomus/sshj -->
         <dependency>
             <groupId>com.hierynomus</groupId>
             <artifactId>sshj</artifactId>
             <version>${sVersionSshj}</version>
         </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${sVersionLogback}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-core -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${sVersionLogback}</version>
+            <scope>compile</scope>
+        </dependency>        
 
 
         <!-- SNAP -->
@@ -230,11 +232,6 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-ndvi</artifactId>
-            <version>${sVersionSnap}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
             <artifactId>snap-jp2-reader</artifactId>
             <version>${sVersionSnap}</version>
         </dependency>
@@ -253,389 +250,564 @@
             <artifactId>snap-rtp-codec</artifactId>
             <version>${sVersionSnap}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-arcbingrid-reader</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-getasse30-dem</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-pgx-reader</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-znap</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>   
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-gdal-writer</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-sta</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-change-detection</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-classification</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-cluster-analysis</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-pixel-extraction</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>             
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-temporal-percentile</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>             
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-watermask</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>             
+        
         <!-- S1 -->
         <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-cloud</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>microwavetbx-kit</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-commons</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>microwavetbx-rcp</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-io</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-cloud</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-io-ephemeris</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-commons</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-calibration</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-io</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-feature-extraction</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-io-ephemeris</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-insar</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-io-gdal</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-insar-ui</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-calibration</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-sar-processing</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-feature-extraction</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-sar-processing-ui</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-insar</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-sentinel1-ui</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-insar-ui</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-utilities</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-sar-processing</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-sar-processing-ui</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-sentinel1</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-sentinel1-ui</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-utilities</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-utilities-ui</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+		
         
         <!--  Radarsat -->
         <dependency>
             <groupId>org.csa.rstb</groupId>
             <artifactId>rstb-io</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>
         <dependency>
             <groupId>org.csa.rstb</groupId>
             <artifactId>rstb-kit</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>
         <dependency>
             <groupId>org.csa.rstb</groupId>
             <artifactId>rstb-op-calibration</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency> 
         <dependency>
             <groupId>org.csa.rstb</groupId>
             <artifactId>rstb-op-classification</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>             
         <dependency>
             <groupId>org.csa.rstb</groupId>
             <artifactId>rstb-op-polarimetric-tools</artifactId>
-            <version>${sVersionS1tbx}</version>
+            <version>${sVersionMicrowavetbx}</version>
         </dependency>                        
         <dependency>
             <groupId>org.csa.rstb</groupId>
             <artifactId>rstb-op-soil-moisture</artifactId>
-            <version>${sVersionS1tbx}</version>
-        </dependency>                                
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>                          
+        
+        <!-- JLINDA -->
+        <dependency>
+  			<groupId>org.jlinda</groupId>
+  			<artifactId>jlinda-nest</artifactId>
+  			<version>${sVersionMicrowavetbx}</version>
+		</dependency>
         
         <!-- S2 -->
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-biophysical</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-preferences-ui</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-cache</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-s2msi-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>            
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-forest-cover-change</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-s2msi-reader-ui</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-gdal-reader</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-jp2-writer</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-gdal-writer</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-commons</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-mosaic</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-spot-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-radiometric-indices</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-spot6-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-rapideye-reader</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-alos-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
+        </dependency>        
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-mosaic</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-s2msi-reader</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-mosaic-ui</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-spot-reader</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-s2msi-mci</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-spot6-reader</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-s2msi-mci-ui</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-s2msi-mci</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-rapideye-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-alosAV2-reader</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-deimos-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>       
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-coregistration</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-sta-adapters-help</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>      
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-deimos-reader</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-radiometric-indices</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-grm</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-radiometric-indices-ui</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-ikonos-reader</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-biophysical</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-jp2-writer</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-reflectance-to-radiance</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>        
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-kompsat2-reader</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-grm</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-land-cover</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-land-cover</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-pleiades-reader</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-s2msi-resampler</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>        
         <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-reflectance-to-radiance</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-muscate-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
         </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-pleiades-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-forest-cover-change</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-kompsat2-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-worldview2-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-spectral-angle-mapper</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-coregistration</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-ikonos-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-worldview2esa-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-ecostress-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-prisma</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>          
+
+		
+		<!-- S3 -->
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-aatsr-sst</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-arc</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-atsr-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-avhrr-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-c2rcc</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-dos</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-flhmci</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-fub-wew</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-fu-operator</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-landsat-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-meris-operators-ui</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-meris-operators</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-merisl3-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-modis-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>	
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-mphchl</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>	
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-rad2refl</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-olci-preprocessing</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-owt-classification</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-probav-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-sentinel3-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-sentinel3-reader-ui</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-slstr-pdu-stitching</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-slstr-regrid</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-spot-vgt-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-enmap-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-seadas-reader</artifactId>
+            <version>1.10.2</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-unmix</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-ecostress-swath2grid</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			        
         
-        <!-- S3 -->
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-aatsr-sst</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-alos-reader</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-arc</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-atsr-reader</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-avhrr-reader</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-c2rcc</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <!-- dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-chris-reader</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency> -->
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-flhmci</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-fub-wew</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-fu-operator</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-kit</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-landsat-reader</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-meris-cloud</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-meris-brr</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-meris-sdr</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-meris-l2auxdata</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-meris-radiometry</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-meris-smac</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-meris-ops</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-merisl3-reader</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-modis-reader</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-mphchl</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-rad2refl</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-olci-radiometry</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-owt-classification</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-sentinel3-reader</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-slstr-pdu-stitching</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-slstr-regrid</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-spot-vgt-reader</artifactId>
-            <version>${sVersionS3tbx}</version>
-        </dependency>
-        <!-- PROBAV -->
-        <dependency>
-            <groupId>org.vito.probavbox</groupId>
-            <artifactId>probavbox-kit</artifactId>
-            <version>${sVersionProbav}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.vito.probavbox</groupId>
-            <artifactId>probavbox-reader</artifactId>
-            <version>${sVersionProbav}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.mockftpserver/MockFtpServer -->
-        <dependency>
-            <groupId>org.mockftpserver</groupId>
-            <artifactId>MockFtpServer</artifactId>
-            <version>${sVersionMockFtpServer}</version>
-            <scope>test</scope>
-        </dependency>
+        <!-- SMOS -->
+   		<dependency>
+            <groupId>org.esa.smostbx</groupId>
+            <artifactId>smos-reader</artifactId>
+            <version>${sVersionSMOSTbx}</version>
+        </dependency>	     
+   		<dependency>
+            <groupId>org.esa.smostbx</groupId>
+            <artifactId>smos-ee2netcdf</artifactId>
+            <version>${sVersionSMOSTbx}</version>
+        </dependency>        
+
         <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${sVersionAssertjCore}</version>
             <scope>test</scope>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.vividsolutions/jts -->
-        <dependency>
-            <groupId>com.vividsolutions</groupId>
-            <artifactId>jts</artifactId>
-            <version>${sVersionJts}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/edu.ucar/netcdfAll -->
         <dependency>

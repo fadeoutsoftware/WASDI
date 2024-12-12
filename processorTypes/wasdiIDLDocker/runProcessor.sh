@@ -37,7 +37,7 @@ function getStatus() {
     local _sStatus=""
     local _returnCode=0
 
-    _sStatus="$(curl --silent --insecure --location --request GET "${WASDI_WEBSERVER_URL}/process/getstatusbyid?procws=${_sProcessObjId}" --header "x-session-token: ${_sSessionId}")"
+    _sStatus="$(curl --silent --insecure --location --request GET "${WASDI_WEBSERVER_NODE_URL}/process/getstatusbyid?procws=${_sProcessObjId}" --header "x-session-token: ${_sSessionId}")"
     _returnCode=${?}
     echo "${_sStatus^^}"
     return ${_returnCode}
@@ -49,7 +49,7 @@ function setStatusError() {
     local _sResult=""
     local _returnCode=0
 
-    _sResult="$(curl --silent --insecure --location --request GET "${WASDI_WEBSERVER_URL}/process/updatebyid?procws=${_sProcessObjId}&status=ERROR&perc=-1" --header "x-session-token: ${_sSessionId}")"
+    _sResult="$(curl --silent --insecure --location --request GET "${WASDI_WEBSERVER_NODE_URL}/process/updatebyid?procws=${_sProcessObjId}&status=ERROR&perc=-1" --header "x-session-token: ${_sSessionId}")"
     _returnCode=${?}
     echo "${_sResult^^}"
     return ${_returnCode}

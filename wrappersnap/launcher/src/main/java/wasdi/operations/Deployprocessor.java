@@ -3,9 +3,11 @@ package wasdi.operations;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -24,7 +26,7 @@ public class Deployprocessor extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		WasdiLog.debugLog("Deployprocessor.executeOperation");
+		WasdiLog.infoLog("Deployprocessor.executeOperation");
 		
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");
@@ -48,6 +50,13 @@ public class Deployprocessor extends Operation {
 	        
 	        // Deploy
 	        boolean bRet = oEngine.deploy(oParameter);
+	        
+	        if (!bRet) {
+	        	// If there was an error, we need to clean the processor folder
+	        	WasdiLog.warnLog("Deployprocessor.executeOperation: deploy returned false, clean the processor folder");
+	        	String sProcessorFolder = PathsConfig.getProcessorFolder(oParameter.getName());
+	        	WasdiFileUtils.deleteFile(sProcessorFolder);
+	        }
 	        
 	        // Notify the user
 	        try {

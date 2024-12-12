@@ -118,5 +118,26 @@ public class JupyterNotebookRepository extends MongoRepository {
 
 		return  false;
 	}
+	
+	/**
+	 * Delete a JupyterNotebook by User Id
+	 * @param sJupyterNotebookId JupyterNotebook Id
+	 * @return True or false in case of exception
+	 */
+	public int deleteJupyterNotebookByUser(String sJupyterNotebookId) {
+		if (Utils.isNullOrEmpty(sJupyterNotebookId)) return 0;
+
+		try {
+			DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteMany(new Document("userId", sJupyterNotebookId));
+
+			if (oDeleteResult != null) {
+				return (int) oDeleteResult.getDeletedCount();
+			}
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("JupyterNotebookRepository.deleteJupyterNotebook: error", oEx);
+		}
+
+		return 0;
+	}	
 
 }

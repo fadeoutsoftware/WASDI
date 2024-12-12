@@ -15,7 +15,7 @@ networks:
       com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"
       com.docker.network.bridge.name: "br-{{ sWasdiDockerNetworkName }}"
       com.docker.network.driver.mtu: "1500"
-    external: {% if bWasdiDockerNetworkMustBeCreated %}false{% else %}true{% endif %}
+    external: {% if bWasdiDockerNetworkMustBeCreated %}true{% else %}false{% endif %}
 
     ipam:
       driver: "default"
@@ -28,24 +28,59 @@ services:
   {{ sWasdiClientServiceName }}:
     depends_on:
 {% if bWasdiGeoserverEnabled == True %}
-      - {{ sWasdiGeoserverServiceName }}
+      {{ sWasdiGeoserverServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
-      - {{ sWasdiKeycloakServiceName }}
+      {{ sWasdiKeycloakServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
-      - {{ sWasdiRabbitMqServiceName }}
+      {{ sWasdiRabbitMqServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatOgcProcessesServerEnabled == True %}
-      - {{ sWasdiTomcatOgcProcessesServerServiceName }}
+      {{ sWasdiTomcatOgcProcessesServerServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
-      - {{ sWasdiTomcatWasdiOpenEoServerServiceName }}
+      {{ sWasdiTomcatWasdiOpenEoServerServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
-      - {{ sWasdiTomcatWasdiWebServerServiceName }}
+      {{ sWasdiTomcatWasdiWebServerServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
 {% endif %}
-      - {{ sWasdiTraefikServiceName }}
+{% endif %}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiClientEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiClientCurrentEnvironmentVariable in aoWasdiClientEnvironmentVariable %}
@@ -76,28 +111,64 @@ services:
         soft: {{ sWasdiClientUlimitNofile }}
         hard: {{ sWasdiClientUlimitNofile }}
 {% endif %}
+
 {% if bWasdiClientV2Enabled == True %}
   {{ sWasdiClientV2ServiceName }}:
     depends_on:
 {% if bWasdiGeoserverEnabled == True %}
-      - {{ sWasdiGeoserverServiceName }}
+      {{ sWasdiGeoserverServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
-      - {{ sWasdiKeycloakServiceName }}
+      {{ sWasdiKeycloakServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
-      - {{ sWasdiRabbitMqServiceName }}
+      {{ sWasdiRabbitMqServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatOgcProcessesServerEnabled == True %}
-      - {{ sWasdiTomcatOgcProcessesServerServiceName }}
+      {{ sWasdiTomcatOgcProcessesServerServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
-      - {{ sWasdiTomcatWasdiOpenEoServerServiceName }}
+      {{ sWasdiTomcatWasdiOpenEoServerServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
-      - {{ sWasdiTomcatWasdiWebServerServiceName }}
+      {{ sWasdiTomcatWasdiWebServerServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
 {% endif %}
-      - {{ sWasdiTraefikServiceName }}
+{% endif %}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiClientV2EnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiClientV2CurrentEnvironmentVariable in aoWasdiClientV2EnvironmentVariable %}
@@ -128,15 +199,86 @@ services:
         soft: {{ sWasdiClientV2UlimitNofile }}
         hard: {{ sWasdiClientV2UlimitNofile }}
 {% endif %}
+
+
+
+{% if bRiseClientEnabled == True %}
+  {{ sRiseClientServiceName }}:
+    depends_on:
+{% if bWasdiGeoserverEnabled == True %}
+      {{ sWasdiGeoserverServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
+{% endif %}
+{% if bRiseServerEnabled == True %}
+      {{ sRiseServerServiceName }}:
+        condition: service_started
+{% endif %}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
+    image: "{{ sRiseClientServiceName }}:latest"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.r_{{ sRiseClientServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sRiseClientServiceName }}.rule=Host(`{{ sRiseClientV2BaseUrl }}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.r_{{ sRiseClientServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sRiseClientServiceName }}.service=s_{{ sRiseClientServiceName }}"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sRiseClientServiceName }}.tls=true"
+{% endif %}
+      - "traefik.http.services.s_{{ sRiseClientServiceName }}.loadbalancer.server.port={{ sRiseClientInternalPort }}"
+    pull_policy: "never"
+    restart: "always"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiClientV2UlimitNofile }}
+        hard: {{ sWasdiClientV2UlimitNofile }}
+{% endif %}
+
+
 {% if bWasdiGeoserverEnabled == True %}
   {{ sWasdiGeoserverServiceName }}:
     depends_on:
-      - {{ sWasdiTraefikServiceName }}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiGeoserverEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiGeoserverCurrentEnvironmentVariable in aoWasdiGeoserverEnvironmentVariable %}
       - {{ aoWasdiGeoserverCurrentEnvironmentVariable['key'] }}={{ aoWasdiGeoserverCurrentEnvironmentVariable['value'] }}
 {% endfor %}
+{% endif %}
+{% if sEnvironmentName == "test" %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "curl"
+        - "--fail"
+        - "--head"
+        - "--max-time"
+        - "5"
+        - "--output"
+        - "/dev/null"
+        - "--silent"
+        - "--show-error"
+        - "--write-out"
+        - "HTTP CODE: %{http_code}\n"
+        - "http://127.0.0.1:{{ sWasdiGeoserverInternalPort }}/{{ sWasdiGeoserverDefaultContextPath.lstrip('/') }}/ows?service=WFS&acceptversions=2.0.0&request=GetCapabilities"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
 {% endif %}
     image: "{{ sWasdiGeoserverServiceName }}:latest"
     labels:
@@ -168,7 +310,8 @@ services:
   {{ sWasdiGrafanaServiceName }}:
 {% if bWasdiInfluxDbGrafanaEnabled == True %}
     depends_on:
-      - {{ sWasdiInfluxDbGrafanaServiceName }}
+      {{ sWasdiInfluxDbGrafanaServiceName }}:
+        condition: service_started
 {% endif %}
 {% if ( aoWasdiGrafanaEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
@@ -297,7 +440,12 @@ services:
 {% endif %}
 {% if bWasdiPostgresqlKeycloakEnabled == True %}
     depends_on:
-      - {{ sWasdiPostgresqlKeycloakServiceName }}
+      {{ sWasdiPostgresqlKeycloakServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
     entrypoint:
       - {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/bin/kc.sh
@@ -306,6 +454,28 @@ services:
 {% for aoWasdiKeycloakCurrentEnvironmentVariable in aoWasdiKeycloakEnvironmentVariable %}
       - {{ aoWasdiKeycloakCurrentEnvironmentVariable['key'] }}={{ aoWasdiKeycloakCurrentEnvironmentVariable['value'] }}
 {% endfor %}
+{% endif %}
+{% if sEnvironmentName == "test" %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "curl"
+        - "--fail"
+        - "--head"
+        - "--max-time"
+        - "5"
+        - "--output"
+        - "/dev/null"
+        - "--silent"
+        - "--show-error"
+        - "--write-out"
+        - "HTTP CODE: %{http_code}\n"
+        - "http://127.0.0.1:{{ sWasdiKeycloakInternalPort }}/{{ sWasdiKeycloakDefaultContextPath.lstrip('/') }}/health/ready"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
 {% endif %}
     image: "{{ sWasdiKeycloakServiceName }}:latest"
     labels:
@@ -353,6 +523,21 @@ services:
 {% for aoWasdiMongoCurrentEnvironmentVariable in aoWasdiMongoEnvironmentVariable %}
       - {{ aoWasdiMongoCurrentEnvironmentVariable['key'] }}={{ aoWasdiMongoCurrentEnvironmentVariable['value'] }}
 {% endfor %}
+{% endif %}
+{% if sEnvironmentName == "test" %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "mongo"
+        - "--quiet"
+        - "127.0.0.1:{{ sWasdiMongoInternalPort }}/test"
+        - "--eval"
+        - "'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
 {% endif %}
     image: "{{ sWasdiMongoImageName }}:{{ sWasdiMongoVersion }}"
 {% if ( aWasdiMongoPorts | length ) > 0 %}
@@ -417,7 +602,12 @@ services:
 {% if bWasdiNexusEnabled == True %}
   {{ sWasdiNexusServiceName }}:
     depends_on:
-      - {{ sWasdiTraefikServiceName }}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiNexusEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiNexusCurrentEnvironmentVariable in aoWasdiNexusEnvironmentVariable %}
@@ -478,6 +668,17 @@ services:
       - {{ aoWasdiPostgresqlKeycloakCurrentEnvironmentVariable['key'] }}={{ aoWasdiPostgresqlKeycloakCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
+{% if sEnvironmentName == "test" %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "pg_isready"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
+{% endif %}
     image: "{{ sWasdiPostgresqlKeycloakImageName }}:{{ sWasdiPostgresqlKeycloakVersion }}"
 {% if ( aWasdiPostgresqlKeycloakPorts | length ) > 0 %}
     ports:
@@ -506,6 +707,17 @@ services:
       - {{ aoWasdiPostgresqlSonarqubeCurrentEnvironmentVariable['key'] }}={{ aoWasdiPostgresqlSonarqubeCurrentEnvironmentVariable['value'] }}
 {% endfor %}
 {% endif %}
+{% if sEnvironmentName == "test" %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "pg_isready"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
+{% endif %}
     image: "{{ sWasdiPostgresqlSonarqubeImageName }}:{{ sWasdiPostgresqlSonarqubeVersion }}"
 {% if ( aWasdiPostgresqlSonarqubePorts | length ) > 0 %}
     ports:
@@ -526,12 +738,30 @@ services:
 {% if bWasdiRabbitMqEnabled == True %}
   {{ sWasdiRabbitMqServiceName }}:
     depends_on:
-      - {{ sWasdiTraefikServiceName }}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiRabbitMqEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiRabbitMqCurrentEnvironmentVariable in aoWasdiRabbitMqEnvironmentVariable %}
       - {{ aoWasdiRabbitMqCurrentEnvironmentVariable['key'] }}={{ aoWasdiRabbitMqCurrentEnvironmentVariable['value'] }}
 {% endfor %}
+{% endif %}
+{% if sEnvironmentName == "test" %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "rabbitmq-diagnostics"
+        - "--quiet"
+        - "check_port_connectivity"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
 {% endif %}
     image: "{{ sWasdiRabbitMqServiceName }}:latest"
     labels:
@@ -586,7 +816,12 @@ services:
   {{ sWasdiSchedulerServiceName }}:
 {% if bWasdiMongoEnabled == True %}
     depends_on:
-      - {{ sWasdiMongoServiceName }}
+      {{ sWasdiMongoServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
     image: "{{ sWasdiSchedulerServiceName }}:latest"
     restart: "always"
@@ -603,9 +838,19 @@ services:
   {{ sWasdiSonarqubeServiceName }}:
     depends_on:
 {% if bWasdiPostgresqlSonarqubeEnabled == True %}
-      - {{ sWasdiPostgresqlSonarqubeServiceName }}
+      {{ sWasdiPostgresqlSonarqubeServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
 {% endif %}
-      - {{ sWasdiTraefikServiceName }}
+{% endif %}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiSonarqubeEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiSonarqubeCurrentEnvironmentVariable in aoWasdiSonarqubeEnvironmentVariable %}
@@ -646,19 +891,44 @@ services:
   {{ sWasdiTelegrafServiceName }}:
     depends_on:
 {% if bWasdiMongoEnabled == True %}
-      - {{ sWasdiMongoServiceName }}
+      {{ sWasdiMongoServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
-      - {{ sWasdiRabbitMqServiceName }}
+      {{ sWasdiRabbitMqServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatOgcProcessesServerEnabled == True %}
-      - {{ sWasdiTomcatOgcProcessesServerServiceName }}
+      {{ sWasdiTomcatOgcProcessesServerServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
-      - {{ sWasdiTomcatWasdiOpenEoServerServiceName }}
+      {{ sWasdiTomcatWasdiOpenEoServerServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
-      - {{ sWasdiTomcatWasdiWebServerServiceName }}
+      {{ sWasdiTomcatWasdiWebServerServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if ( aoWasdiTelegrafEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
@@ -690,21 +960,70 @@ services:
   {{ sWasdiTomcatOgcProcessesServerServiceName }}:
     depends_on:
 {% if bWasdiGeoserverEnabled == True %}
-      - {{ sWasdiGeoserverServiceName }}
+      {{ sWasdiGeoserverServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
-      - {{ sWasdiKeycloakServiceName }}
+      {{ sWasdiKeycloakServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
 {% endif %}
-      - {{ sWasdiMongoServiceName }}
+{% endif %}
+{% if bWasdiMongoEnabled == True %}
+      {{ sWasdiMongoServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
+{% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
-      - {{ sWasdiRabbitMqServiceName }}
+      {{ sWasdiRabbitMqServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
 {% endif %}
-      - {{ sWasdiTraefikServiceName }}
+{% endif %}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiTomcatOgcProcessesServerEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable in aoWasdiTomcatOgcProcessesServerEnvironmentVariable %}
       - {{ aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable['key'] }}={{ aoWasdiTomcatOgcProcessesServerCurrentEnvironmentVariable['value'] }}
 {% endfor %}
+{% endif %}
+{% if sEnvironmentName == "test" %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "curl"
+        - "--fail"
+        - "--head"
+        - "--max-time"
+        - "5"
+        - "--output"
+        - "/dev/null"
+        - "--silent"
+        - "--show-error"
+        - "--write-out"
+        - "HTTP CODE: %{http_code}\n"
+        - "http://127.0.0.1:{{ sWasdiTomcatOgcProcessesServerInternalPort }}/{{ sWasdiTomcatOgcProcessesServerDefaultContextPath.lstrip('/') }}/rest"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
 {% endif %}
     image: "{{ sWasdiTomcatOgcProcessesServerServiceName }}:latest"
     labels:
@@ -740,21 +1059,70 @@ services:
   {{ sWasdiTomcatWasdiOpenEoServerServiceName }}:
     depends_on:
 {% if bWasdiGeoserverEnabled == True %}
-      - {{ sWasdiGeoserverServiceName }}
+      {{ sWasdiGeoserverServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
-      - {{ sWasdiKeycloakServiceName }}
+      {{ sWasdiKeycloakServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
 {% endif %}
-      - {{ sWasdiMongoServiceName }}
+{% endif %}
+{% if bWasdiMongoEnabled == True %}
+      {{ sWasdiMongoServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
+{% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
-      - {{ sWasdiRabbitMqServiceName }}
+      {{ sWasdiRabbitMqServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
 {% endif %}
-      - {{ sWasdiTraefikServiceName }}
+{% endif %}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiTomcatWasdiOpenEoServerEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable in aoWasdiTomcatWasdiOpenEoServerEnvironmentVariable %}
       - {{ aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable['key'] }}={{ aoWasdiTomcatWasdiOpenEoServerCurrentEnvironmentVariable['value'] }}
 {% endfor %}
+{% endif %}
+{% if sEnvironmentName == "test" %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "curl"
+        - "--fail"
+        - "--head"
+        - "--max-time"
+        - "5"
+        - "--output"
+        - "/dev/null"
+        - "--silent"
+        - "--show-error"
+        - "--write-out"
+        - "HTTP CODE: %{http_code}\n"
+        - "http://127.0.0.1:{{ sWasdiTomcatWasdiOpenEoServerInternalPort }}/{{ sWasdiTomcatWasdiOpenEoServerDefaultContextPath.lstrip('/') }}/rest"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
 {% endif %}
     image: "{{ sWasdiTomcatWasdiOpenEoServerServiceName }}:latest"
     labels:
@@ -790,21 +1158,70 @@ services:
   {{ sWasdiTomcatWasdiWebServerServiceName }}:
     depends_on:
 {% if bWasdiGeoserverEnabled == True %}
-      - {{ sWasdiGeoserverServiceName }}
+      {{ sWasdiGeoserverServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
-      - {{ sWasdiKeycloakServiceName }}
+      {{ sWasdiKeycloakServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
 {% endif %}
-      - {{ sWasdiMongoServiceName }}
+{% endif %}
+{% if bWasdiMongoEnabled == True %}
+      {{ sWasdiMongoServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
+{% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
-      - {{ sWasdiRabbitMqServiceName }}
+      {{ sWasdiRabbitMqServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
 {% endif %}
-      - {{ sWasdiTraefikServiceName }}
+{% endif %}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% if ( aoWasdiTomcatWasdiWebServerEnvironmentVariable | default([]) | length ) > 0 %}
     environment:
 {% for aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable in aoWasdiTomcatWasdiWebServerEnvironmentVariable %}
       - {{ aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable['key'] }}={{ aoWasdiTomcatWasdiWebServerCurrentEnvironmentVariable['value'] }}
 {% endfor %}
+{% endif %}
+{% if sEnvironmentName == "test" %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "curl"
+        - "--fail"
+        - "--head"
+        - "--max-time"
+        - "5"
+        - "--output"
+        - "/dev/null"
+        - "--silent"
+        - "--show-error"
+        - "--write-out"
+        - "HTTP CODE: %{http_code}\n"
+        - "http://127.0.0.1:{{ sWasdiTomcatWasdiWebServerInternalPort }}/{{ sWasdiTomcatWasdiWebServerDefaultContextPath.lstrip('/') }}/rest/wasdi/hello"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
 {% endif %}
     image: "{{ sWasdiTomcatWasdiWebServerServiceName }}:latest"
     labels:
@@ -836,6 +1253,63 @@ services:
 {% endfor %}
 {% endif %}
 {% endif %}
+
+
+{% if bRiseServerEnabled == True %}
+  {{ sRiseServerServiceName }}:
+    depends_on:
+{% if bWasdiMongoEnabled == True %}
+      {{ sWasdiMongoServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
+{% endif %}
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
+{% if ( aoRiseServerEnvironmentVariableDefault | default([]) | length ) > 0 %}
+    environment:
+{% for oVariable in aoRiseServerEnvironmentVariableDefault %}
+      - {{ oVariable['key'] }}={{ oVariable['value'] }}
+{% endfor %}
+{% endif %}
+    image: "{{ sRiseServerServiceName }}:latest"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.r_{{ sRiseServerServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sRiseServerServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`/rise`)"
+      - "traefik.http.routers.r_{{ sRiseServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sRiseServerServiceName }}.service=s_{{ sRiseServerServiceName }}"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sRiseServerServiceName }}.tls=true"
+{% endif %}
+      - "traefik.http.services.s_{{ sRiseServerServiceName }}.loadbalancer.server.port={{ sRiseServerInternalPort }}"
+{% if ( aWasdiTomcatWasdiWebServerPorts | length ) > 0 %}
+    ports:
+{% for sWasdiTomcatWasdiWebServerCurrentPort in aWasdiTomcatWasdiWebServerPorts %}
+      - "{{ sWasdiTomcatWasdiWebServerCurrentPort | regex_replace('^:', '') }}"
+{% endfor %}
+{% endif %}
+    pull_policy: "never"
+    restart: "always"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiTomcatWasdiWebServerUlimitNofile }}
+        hard: {{ sWasdiTomcatWasdiWebServerUlimitNofile }}
+{% if ( aoRiseTomcatWasdiWebServerVolume | length ) > 0 %}
+    volumes:
+{% for sVolume in aoRiseTomcatWasdiWebServerVolume %}
+      - {{ sVolume }}
+{% endfor %}
+{% endif %}
+{% endif %}
+
+
   {{ sWasdiTraefikServiceName }}:
     command:
       - "--global.sendanonymoususage=false"
@@ -851,14 +1325,30 @@ services:
       - "--accesslog=true"
 {% endif %}
       - "--log=true"
-      - "--log.level=DEBUG"
+      - "--log.level=ERROR"
       - "--log.format=common"
+{% if sEnvironmentName == "test" %}
+      - "--ping"
+{% endif %}
       - "--providers.docker=true"
       - "--providers.docker.endpoint={{ sWasdiTraefikDockerEndpoint }}"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.watch=true"
       - "--providers.file.directory=/etc/traefik/conf.d"
       - "--providers.file.watch=true"
+{% if sEnvironmentName == "test" %}
+    healthcheck:
+      test:
+        - "CMD"
+        - "traefik"
+        - "healthcheck"
+        - "--ping"
+      interval: "5s"
+      retries: "3"
+      start_period: "2m"
+      start_interval: "2s"
+      timeout: "5s"
+{% endif %}
     image: "{{ sWasdiTraefikImageName }}:{{ sWasdiTraefikVersion }}"
     labels:
       - "traefik.enable=true"
@@ -899,10 +1389,20 @@ services:
   {{ sWasdiUpdateMetricServiceName }}:
     depends_on:
 {% if bWasdiKeycloakEnabled == True %}
-      - {{ sWasdiKeycloakServiceName }}
+      {{ sWasdiKeycloakServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
-      - {{ sWasdiTomcatWasdiWebServerServiceName }}
+      {{ sWasdiTomcatWasdiWebServerServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
 {% endif %}
 {% if ( aoWasdiUpdateMetricEnvironmentVariable | default([]) | length ) > 0 %}
     environment:

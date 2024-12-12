@@ -581,13 +581,15 @@ public class OpportunitySearchResource {
 	@Produces({ "application/xml", "application/json", "text/html" })
 	// @Consumes(MediaType.APP)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public ArrayList<SatelliteResourceViewModel> getSatellitesResources(
-			@HeaderParam("x-session-token") String sSessionId) {
+	public ArrayList<SatelliteResourceViewModel> getSatellitesResources(@HeaderParam("x-session-token") String sSessionId) {
+		
 		WasdiLog.debugLog("OpportunitySearchResource.getSatellitesResources");
 
 		ArrayList<SatelliteResourceViewModel> aaoReturnValue = new ArrayList<SatelliteResourceViewModel>();
+		
 		try {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
+			
 			if(null==oUser) {
 				WasdiLog.warnLog("OpportunitySearchResource.getSatellitesResources: invalid session");
 				return aaoReturnValue;
@@ -596,6 +598,7 @@ public class OpportunitySearchResource {
 			String[] asSatellites = null;
 
 			String sSatellites = WasdiConfig.Current.plan.listOfSatellites;
+			
 			if (sSatellites != null && sSatellites.length() > 0) {
 				asSatellites = sSatellites.split(",|;");
 			}
@@ -604,10 +607,16 @@ public class OpportunitySearchResource {
 				return aaoReturnValue;
 			}
 
-			for (Integer iIndexSarellite = 0; iIndexSarellite < asSatellites.length; iIndexSarellite++) {
+			for (Integer iIndexSatellite = 0; iIndexSatellite < asSatellites.length; iIndexSatellite++) {
 				try {
-					String satres = InstanceFinder.getOrbitSatsMap().get(asSatellites[iIndexSarellite]);
-					Satellite oSatellite = SatFactory.buildSat(satres);
+					String sSatres = InstanceFinder.getOrbitSatsMap().get(asSatellites[iIndexSatellite]);
+					Satellite oSatellite = SatFactory.buildSat(sSatres);
+					
+					if (oSatellite == null) {
+						WasdiLog.warnLog("OpportunitySearchResource: impossible to build satellite: " + sSatres);
+						continue;
+					}
+					
 					ArrayList<SatSensor> aoSatelliteSensors = oSatellite.getSensors();
 					
 					// Convert the Sat Sensor List in the view model

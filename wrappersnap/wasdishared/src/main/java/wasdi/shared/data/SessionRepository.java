@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.bson.Document;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
@@ -192,4 +193,24 @@ public class SessionRepository extends MongoRepository {
 
         return false;
     }
+    
+    /**
+     * Delete a Session
+     * @param oSession
+     * @return
+     */
+    public int deleteSessionsByUserId(String sUserId) {
+    	if (Utils.isNullOrEmpty(sUserId)) return 0;
+    	
+    	try {
+    		BasicDBObject oCriteria = new BasicDBObject();
+    		oCriteria.append("userId", sUserId);
+
+            return deleteMany(oCriteria);    		
+    	}
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("SessionRepository.deleteSessionsByUserId: error ", oEx);
+        	return -1;
+        }
+    }    
 }

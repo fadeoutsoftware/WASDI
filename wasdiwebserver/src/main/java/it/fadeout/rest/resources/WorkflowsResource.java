@@ -58,6 +58,7 @@ import wasdi.shared.parameters.settings.GraphSetting;
 import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.workflows.SnapWorkflowViewModel;
@@ -608,7 +609,7 @@ public class WorkflowsResource {
                 return oResult;
             }
             
-            if (oRequesterUser.getUserId().equals(sUserId)) {
+            if (oRequesterUser.getUserId().equals(sUserId) && !UserApplicationRole.isAdmin(oRequesterUser)) {
                 WasdiLog.warnLog("WorkflowsResource.ShareWorkflow: auto sharing not so smart");
                 oResult.setStringValue("Impossible to autoshare.");
                 return oResult;
@@ -904,7 +905,7 @@ public class WorkflowsResource {
 
                 if (oSnapWorkflowViewModel.getInputFileNames().size() > 0) {
                     sSourceProductName = oSnapWorkflowViewModel.getInputFileNames().get(0);
-                    sDestinationProdutName = Utils.getFileNameWithoutLastExtension(sSourceProductName) + "_" + sWorkFlowName + Utils.getFileNameExtension(sSourceProductName); 
+                    sDestinationProdutName = WasdiFileUtils.getFileNameWithoutLastExtension(sSourceProductName) + "_" + sWorkFlowName + WasdiFileUtils.getFileNameExtension(sSourceProductName); 
                 }
                 
                 if (oGraphSettings.getOutputFileNames().size()>0) {
@@ -1033,9 +1034,10 @@ public class WorkflowsResource {
      * @return true if ok, false in case of problems
      */
     protected boolean fillWorkflowIONodes(File oFile, SnapWorkflow oSnapWorflow) {
+    	
 		DocumentBuilderFactory oDocBuildFactory = DocumentBuilderFactory.newInstance();
-		
 		DocumentBuilder oDocBuilder;
+		
 		try {
 			
 			oDocBuilder = oDocBuildFactory.newDocumentBuilder();

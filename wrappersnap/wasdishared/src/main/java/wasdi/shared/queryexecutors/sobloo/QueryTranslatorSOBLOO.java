@@ -13,9 +13,9 @@ import com.google.common.base.Preconditions;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryTranslationParser;
 import wasdi.shared.queryexecutors.QueryTranslator;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -36,8 +36,8 @@ public class QueryTranslatorSOBLOO extends QueryTranslator {
 
 		String sResult = null;
 		try {
-			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sAppConfigPath);
-			JSONObject oParseConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
+			JSONObject oAppConf = JsonUtils.loadJsonFromFile(m_sAppConfigPath);
+			JSONObject oParseConf = JsonUtils.loadJsonFromFile(m_sParserConfigPath);
 			String sQuery = this.prepareQuery(sQueryFromClient);
 			QueryViewModel oQueryViewModel = parseWasdiClientQuery(sQuery);
 
@@ -115,7 +115,7 @@ public class QueryTranslatorSOBLOO extends QueryTranslator {
 							dEast = Double.max(dEast, dMeridian);
 							dWest = Double.min(dWest, dMeridian);
 						} catch (Exception oE) {
-							WasdiLog.log("ERROR", "QueryTranslatorSOBLOO.parseFootprint: issue with current coordinate pair: " + sPair + ": " + oE);
+							WasdiLog.errorLog("QueryTranslatorSOBLOO.parseFootprint: issue with current coordinate pair: " + sPair + ": ", oE);
 						}
 					}
 
@@ -127,11 +127,11 @@ public class QueryTranslatorSOBLOO extends QueryTranslator {
 					}
 					sResult = sPrefix + sCoordinates;
 				} catch (Exception oE) {
-					WasdiLog.log("ERROR", "QueryTranslatorSOBLOO.parseFootprint: could not complete: " + oE);
+					WasdiLog.errorLog("QueryTranslatorSOBLOO.parseFootprint: could not complete: ", oE);
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.log("ERROR", "QueryTranslatorSOBLOO.parseFootprint: could not identify footprint substring limits: " + oE);
+			WasdiLog.errorLog("QueryTranslatorSOBLOO.parseFootprint: could not identify footprint substring limits: ", oE);
 		}
 		return sResult;
 	}
@@ -206,7 +206,7 @@ public class QueryTranslatorSOBLOO extends QueryTranslator {
 		try {
 			sUrl = "https://sobloo.eu/api/v1/services/explore/explore/catalog/_count?" + translateAndEncodeParams(sQuery);
 		} catch (Exception oE) {
-			WasdiLog.log("ERROR", "QueryExecutorSOBLOO.getCountUrl: " + oE);
+			WasdiLog.errorLog("QueryExecutorSOBLOO.getCountUrl: ", oE);
 		}
 		return sUrl;
 	}

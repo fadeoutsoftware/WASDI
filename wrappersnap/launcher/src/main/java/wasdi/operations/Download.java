@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.esa.snap.core.datamodel.Product;
 
 import wasdi.ProcessWorkspaceUpdateSubscriber;
@@ -30,6 +31,7 @@ import wasdi.shared.queryexecutors.QueryExecutorFactory;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.gis.BoundingBoxUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
@@ -68,7 +70,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		WasdiLog.debugLog("Download.executeOperation");
+		WasdiLog.infoLog("Download.executeOperation");
 		
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");
@@ -98,7 +100,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             	oProviderAdapter = getBestProviderAdapater(oParameter, oProcessWorkspace);
             	
             	if (oProviderAdapter != null) {
-                    WasdiLog.errorLog("Got Data Provider " + oProviderAdapter.getCode());
+                    WasdiLog.debugLog("Got Data Provider " + oProviderAdapter.getCode());
                     m_oProcessWorkspaceLogger.log("Fetch - SELECTED " + oProviderAdapter.getCode());            	            		
             	}
             	else {
@@ -217,7 +219,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                         oProviderAdapter.subscribe(this);
                         
                         m_oProcessWorkspaceLogger.log("Download.executeOperation: got next data provider " + oProviderAdapter.getCode());
-                        WasdiLog.warnLog("Download.executeOperation: got next data provider " + oProviderAdapter.getCode());                    	
+                        WasdiLog.infoLog("Download.executeOperation: got next data provider " + oProviderAdapter.getCode());                    	
                     }
                 }
 
@@ -237,12 +239,12 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
                 if (!Utils.isNullOrEmpty(sBoundingBox)) {
                     if (sBoundingBox.startsWith("POLY") || sBoundingBox.startsWith("MULTI")) {
-                        sBoundingBox = Utils.polygonToBounds(sBoundingBox);
+                        sBoundingBox = BoundingBoxUtils.polygonToBounds(sBoundingBox);
                     }
 
                     oAlreadyDownloaded.setBoundingBox(sBoundingBox);
                 } else {
-                    WasdiLog.infoLog("Download.executeOperation: bounding box not available in the parameter");
+                    WasdiLog.debugLog("Download.executeOperation: bounding box not available in the parameter");
                 }
 
 				if (oProduct != null) {
@@ -285,7 +287,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             if (Utils.isNullOrEmpty(sFileName)) {
             	
             	// No, we are in error
-                WasdiLog.debugLog("Download.executeOperation: file is null there must be an error");
+                WasdiLog.warnLog("Download.executeOperation: file is null there must be an error");
 
                 String sError = "The name of the file to download result null";
                 m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.DOWNLOAD.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
@@ -301,7 +303,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             m_oProcessWorkspaceLogger.log(new EndMessageProvider().getGood());
 
             DownloadPayload oDownloadPayload = new DownloadPayload();
-            oDownloadPayload.setFileName(Utils.getFileNameWithoutLastExtension(sFileName));
+            oDownloadPayload.setFileName(WasdiFileUtils.getFileNameWithoutLastExtension(sFileName));
             oDownloadPayload.setProvider(oParameter.getProvider());
             if (oProviderAdapter != null) {
             	oDownloadPayload.setSelectedProvider(oProviderAdapter.getCode());
@@ -316,10 +318,9 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             
         } catch (Exception oEx) {
         	
-            WasdiLog.errorLog("Download.executeOperation: Exception "
-                    + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Download.executeOperation: Exception ", oEx);
 
-            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+            String sError = oEx.toString();
             oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
             m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.DOWNLOAD.name(), oParam.getWorkspace(),
                         sError, oParam.getExchange());
@@ -351,7 +352,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             }
         } catch (Exception oEx) {
         	WasdiLog.errorLog("Download.executeOperationFile: Exception: " + oEx);
-        	WasdiLog.debugLog("Download.executeOperationFile: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+        	WasdiLog.debugLog("Download.executeOperationFile: " + ExceptionUtils.getStackTrace(oEx));
         }
     }
     
@@ -497,7 +498,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 		catch (Exception oEx) {
         	
             WasdiLog.errorLog("Download.getBestProviderAdapater: Exception "
-                    + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                    + ExceptionUtils.getStackTrace(oEx));
         }
 		
 		return null;
@@ -582,9 +583,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
 		}
 		catch (Exception oEx) {
-        	
-            WasdiLog.errorLog("Download.getProviderAdapater: Exception "
-                    + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Download.getProviderAdapater: Exception " + ExceptionUtils.getStackTrace(oEx));
         }
 		
 		return null;

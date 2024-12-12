@@ -11,7 +11,6 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
@@ -23,7 +22,19 @@ import wasdi.shared.viewmodels.products.ProductViewModel;
 public class ShapeProductReader extends WasdiProductReader{
 
 	public ShapeProductReader(File oProductFile) {
+		
 		super(oProductFile);
+		
+		try {
+			if (oProductFile.getName().endsWith(".zip")) {
+				String sFileName = m_oProductFile.getCanonicalPath();
+				sFileName=sFileName.replace(".zip", ".shp");
+				m_oProductFile = new File(sFileName);
+			}			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ShapeProductReader.ShapeProductReader: error " + oEx.toString());
+		}
 	}
 
 	@Override
@@ -47,7 +58,7 @@ public class ShapeProductReader extends WasdiProductReader{
             	
             	// Set name values
             	oRetViewModel.setFileName(m_oProductFile.getName());
-            	oRetViewModel.setName(Utils.getFileNameWithoutLastExtension(m_oProductFile.getName()));
+            	oRetViewModel.setName(WasdiFileUtils.getFileNameWithoutLastExtension(m_oProductFile.getName()));
             	oRetViewModel.setProductFriendlyName(oRetViewModel.getName());
             	
             	// Create the sub folder
@@ -78,7 +89,7 @@ public class ShapeProductReader extends WasdiProductReader{
             oRetViewModel.setBbox(sBbox);
     	}
     	catch (Exception oEx) {
-    		WasdiLog.debugLog("WasdiProductReader.getShapeFileProduct: exception reading the shape file");
+    		WasdiLog.errorLog("WasdiProductReader.getShapeFileProduct: exception reading the shape file " + oEx.toString());
 		}
     	
     	return oRetViewModel;

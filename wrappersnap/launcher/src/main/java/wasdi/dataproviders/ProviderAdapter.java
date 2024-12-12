@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.esa.snap.core.datamodel.Product;
 
 import com.google.common.base.Charsets;
@@ -38,8 +39,8 @@ import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -107,6 +108,8 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      * Data Provider Config
      */
     protected DataProviderConfig m_oDataProviderConfig;
+    
+    protected int m_iHttpDownloadReadTimeoutMultiplier = 1;
 
     /**
      * Constructor: uses LauncerMain logger
@@ -185,7 +188,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     	
     	try {
     		
-    		String sPlatformType = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sFileName);
+    		String sPlatformType = MissionUtils.getPlatformFromSatelliteImageFileName(sFileName);
     		
     		if (Utils.isNullOrEmpty(sPlatformType)) {
     			WasdiLog.debugLog("ProviderAdapter.getScoreForFile: platform not recognized. DataProvider: " + m_sDataProviderCode + " File: " + sFileName);
@@ -371,8 +374,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 					try {
 						return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
 					} catch (Exception oEx) {
-						WasdiLog.errorLog("ProviderAdapter.getFileNameViaHttp: exception setting auth "
-								+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+						WasdiLog.errorLog("ProviderAdapter.getFileNameViaHttp: exception setting auth " + ExceptionUtils.getStackTrace(oEx));
 					}
 					return null;
 				}
@@ -498,7 +500,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 						try {
 							return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
 						} catch (Exception oEx) {
-							WasdiLog.errorLog("ProviderAdapter.downloadViaHttp: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+							WasdiLog.errorLog("ProviderAdapter.downloadViaHttp: exception setting auth " + ExceptionUtils.getStackTrace(oEx));
 						}
 						return null;
 					}
@@ -582,7 +584,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
 		
 		// Set Read Timeout
-		oHttpConn.setReadTimeout(WasdiConfig.Current.readTimeout);
+		oHttpConn.setReadTimeout(WasdiConfig.Current.readTimeout*m_iHttpDownloadReadTimeoutMultiplier);
 		// Set Connection Timeout
 		oHttpConn.setConnectTimeout(WasdiConfig.Current.connectionTimeout);			
 		
@@ -834,7 +836,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
                     return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
                 }
                 catch (Exception oEx){
-                    WasdiLog.errorLog("ProviderAdapter.getDownloadFileSizeViaHttp: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                    WasdiLog.errorLog("ProviderAdapter.getDownloadFileSizeViaHttp: exception setting auth " + ExceptionUtils.getStackTrace(oEx));
                 }
                 return null;
             }

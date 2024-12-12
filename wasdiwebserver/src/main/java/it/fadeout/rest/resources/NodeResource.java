@@ -6,10 +6,12 @@ import java.util.List;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
@@ -24,11 +26,14 @@ import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.utils.MailUtils;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ClientMessageCodes;
-import wasdi.shared.viewmodels.NodeSharingViewModel;
-import wasdi.shared.viewmodels.NodeViewModel;
+import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.nodes.NodeFullViewModel;
+import wasdi.shared.viewmodels.nodes.NodeSharingViewModel;
+import wasdi.shared.viewmodels.nodes.NodeViewModel;
 
 /**
  * Node Resource.
@@ -48,9 +53,11 @@ public class NodeResource {
 	@GET
 	@Path("/allnodes")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<NodeViewModel> getAllNodes(@HeaderParam("x-session-token") String sSessionId) {
+	public List<NodeViewModel> getAllNodes(@HeaderParam("x-session-token") String sSessionId, @QueryParam("all") Boolean bAlsoNotActive) {
 		
 		WasdiLog.debugLog("NodeResource.getAllNodes( Session: " + sSessionId + ")");
+		
+		if (bAlsoNotActive == null) bAlsoNotActive = false;
 		
 		// Check the user
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -77,7 +84,7 @@ public class NodeResource {
 			try {
 				
 				// checks whether the node is active
-				if (oNode.getActive()) {
+				if (oNode.getActive() || bAlsoNotActive) {
 					
 					// Create the view model and fill it
 					NodeViewModel oNodeViewModel = new NodeViewModel();
@@ -159,16 +166,6 @@ public class NodeResource {
 			return oResult;
 		}
 
-//		// Can the user access this section?
-//		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), NODE_READ)) {
-//			WasdiLog.warnLog("NodeResource.shareNode: " + oRequesterUser.getUserId() + " cannot access the section " + ", aborting");
-//
-//			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
-//			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_NODE);
-//
-//			return oResult;
-//		}
-
 		// Can the user access this resource?
 		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
 			WasdiLog.warnLog("NodeResource.shareNode: " + sNodeCode + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
@@ -196,8 +193,7 @@ public class NodeResource {
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
 			if (!oUserResourcePermissionRepository.isNodeSharedWithUser(sDestinationUserId, sNodeCode)) {
-				UserResourcePermission oNodeSharing =
-						new UserResourcePermission(ResourceTypes.NODE.getResourceType(), sNodeCode, sDestinationUserId, null, oRequesterUser.getUserId(), sRights);
+				UserResourcePermission oNodeSharing = new UserResourcePermission(ResourceTypes.NODE.getResourceType(), sNodeCode, sDestinationUserId, null, oRequesterUser.getUserId(), sRights);
 
 				oUserResourcePermissionRepository.insertPermission(oNodeSharing);				
 			} else {
@@ -326,7 +322,8 @@ public class NodeResource {
 
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			oUserResourcePermissionRepository.deletePermissionsByUserIdAndNodeCode(sUserId, sNodeCode);
-		} catch (Exception oEx) {
+		} 
+		catch (Exception oEx) {
 			WasdiLog.errorLog("NodeResource.deleteUserSharedNode: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
@@ -340,8 +337,165 @@ public class NodeResource {
 		oResult.setIntValue(Status.OK.getStatusCode());
 
 		return oResult;
-
 	}
 	
 	
+	/**
+	 * Get the details of a WASDI Nodes
+	 * @param sSessionId User Session
+	 * @return NodeFullViewModel
+	 */
+	@GET
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response getNode(@HeaderParam("x-session-token") String sSessionId, @QueryParam("node") String sNodeCode) {
+		
+		WasdiLog.debugLog("NodeResource.getNode( Session: " + sSessionId + ", NodeCode " + sNodeCode + " )");
+		
+		// Check the user
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
+		if (oUser == null) {
+			WasdiLog.warnLog("NodeResource.getNode: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+		
+		if (!UserApplicationRole.isAdmin(oUser)) {
+			WasdiLog.warnLog("NodeResource.getNode: must be admin");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();			
+		}
+		
+		try {
+			// get the node of interest
+			NodeRepository oNodeRepository = new NodeRepository();
+			Node oNode = oNodeRepository.getNodeByCode(sNodeCode);
+		
+			if (oNode == null) {
+				WasdiLog.warnLog("NodeResource.getNode: Node is null");
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+			
+			NodeFullViewModel oNodeFullViewModel = NodeFullViewModel.fromEntity(oNode);
+			
+			// done, return the view model to the user
+			return Response.ok(oNodeFullViewModel).build();			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("NodeResource.getNode: exception ", oEx);
+			return Response.serverError().build();
+		}
+	}
+	
+	
+	@POST
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response createNode(@HeaderParam("x-session-token") String sSessionId, NodeFullViewModel oNodeViewModel) {
+		
+		WasdiLog.debugLog("NodeResource.createNode( Session: " + sSessionId + " )");
+		
+		// Check the user
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
+		if (oUser == null) {
+			WasdiLog.warnLog("NodeResource.createNode: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+		
+		if (!UserApplicationRole.isAdmin(oUser)) {
+			WasdiLog.warnLog("NodeResource.createNode: must be admin");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();			
+		}
+		
+		if (oNodeViewModel==null) {
+			WasdiLog.warnLog("NodeResource.createNode: input view model is null");
+			return Response.status(Status.BAD_REQUEST).build();			
+		}
+		
+		if (Utils.isNullOrEmpty(oNodeViewModel.getNodeCode())) {
+			WasdiLog.warnLog("NodeResource.createNode: node code cannot be null");
+			return Response.status(Status.BAD_REQUEST).build();				
+		}
+		
+		try {
+			// Check if the node existst
+			NodeRepository oNodeRepository = new NodeRepository();
+			Node oNode = oNodeRepository.getNodeByCode(oNodeViewModel.getNodeCode());
+		
+			if (oNode != null) {
+				WasdiLog.warnLog("NodeResource.getNode: there is already a node named " + oNodeViewModel.getNodeCode());
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+			
+			// Convert to entity
+			oNode = NodeFullViewModel.toEntity(oNodeViewModel);
+			
+			// Insert it
+			if (!Utils.isNullOrEmpty(oNodeRepository.insertNode(oNode))) {
+				return Response.ok().build();	
+			}
+			else {
+				return Response.serverError().build();
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("NodeResource.getNode: exception ", oEx);
+			return Response.serverError().build();
+		}
+	}
+	
+	@PUT
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response updateNode(@HeaderParam("x-session-token") String sSessionId, NodeFullViewModel oNodeViewModel) {
+		
+		WasdiLog.debugLog("NodeResource.updateNode( Session: " + sSessionId + " )");
+		
+		// Check the user
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
+		if (oUser == null) {
+			WasdiLog.warnLog("NodeResource.updateNode: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+		
+		if (!UserApplicationRole.isAdmin(oUser)) {
+			WasdiLog.warnLog("NodeResource.updateNode: must be admin");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();			
+		}
+		
+		if (oNodeViewModel==null) {
+			WasdiLog.warnLog("NodeResource.updateNode: input view model is null");
+			return Response.status(Status.BAD_REQUEST).build();			
+		}
+		
+		if (Utils.isNullOrEmpty(oNodeViewModel.getNodeCode())) {
+			WasdiLog.warnLog("NodeResource.updateNode: node code cannot be null");
+			return Response.status(Status.BAD_REQUEST).build();				
+		}
+		
+		try {
+			// Check if the node existst
+			NodeRepository oNodeRepository = new NodeRepository();
+			Node oNode = oNodeRepository.getNodeByCode(oNodeViewModel.getNodeCode());
+		
+			if (oNode == null) {
+				WasdiLog.warnLog("NodeResource.getNode: impossible to find a node named " + oNodeViewModel.getNodeCode());
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+			
+			// Convert to entity
+			Node oConvertedNode = NodeFullViewModel.toEntity(oNodeViewModel);
+				
+			// Insert it
+			if (oNodeRepository.updateNode(oConvertedNode)) {
+				return Response.ok().build();	
+			}
+			else {
+				WasdiLog.warnLog("NodeResource.getNode: the update of the repo for the node returned false");
+				return Response.serverError().build();
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("NodeResource.getNode: exception ", oEx);
+			return Response.serverError().build();
+		}
+	}	
 }

@@ -30,12 +30,15 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition.FormDataContentDispositionBuilder;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.threads.styles.StyleDeleteFileWorker;
 import it.fadeout.threads.styles.StyleUpdateFileWorker;
+import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.Style;
 import wasdi.shared.business.users.ResourceTypes;
@@ -50,11 +53,13 @@ import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.styles.StyleSharingViewModel;
 import wasdi.shared.viewmodels.styles.StyleViewModel;
@@ -155,6 +160,8 @@ public class StyleResource {
 			//geoserver-side work
 			geoServerAddStyle(oStyleSldFile.getPath());
 			
+			updateStylePreview(sName, sSessionId);
+						
 			oResult.setBoolValue(true);
 			return Response.ok().entity(oResult).build();
 			
@@ -302,6 +309,8 @@ public class StyleResource {
 
 			//geoserver-side work
 			geoServerUpdateStyleIfExists(oStyle.getName(), oStyleSldFile.getPath());
+			
+			updateStylePreview(oStyle.getName(), sSessionId);
 		} catch (Exception oEx2) {
 			WasdiLog.errorLog("StyleResource.updateFile: " + oEx2);
 			return Response.serverError().build();
@@ -433,6 +442,18 @@ public class StyleResource {
 
 		return Response.ok().build();
 	}
+	
+	/**
+	 * Get the link to access the style image
+	 * @param sImageName
+	 * @param sSessionId
+	 * @return
+	 */
+	protected String getStyleImageLink(String sImageName, String sSessionId) {
+		//https://test.wasdi.net/wasdiwebserver/rest/images/get?collection=processors&folder=hellowasdi&name=logo.jpg&token=32f32b02-7c34-41e8-9990-ef003031a4ed
+		String sImageLink = WasdiConfig.Current.baseUrl+"images/get?collection=" + ImagesCollections.STYLES.getFolder()+"&name=" + sImageName + "&token="+sSessionId;
+		return sImageLink;
+	}
 
 	@GET
 	@Path("/getbyuser")
@@ -453,6 +474,9 @@ public class StyleResource {
 		List<StyleViewModel> aoRetStyles = new ArrayList<>();
 
 		try {
+			
+			ImagesResource oImageResource = new ImagesResource();
+			
 			// Here we take the list of all the users' styles + the public ones
 			List<Style> aoDbStyles = oStyleRepository.getStylePublicAndByUser(sUserId);
 			
@@ -469,6 +493,14 @@ public class StyleResource {
 				else {
 					// For now lets assume is read only
 					oStyleViewModel.setReadOnly(true);
+				}
+				
+				String sImageName = oStyleViewModel.getName() + ".png";
+				
+				Response oResponse = oImageResource.existsImage(sSessionId, sSessionId, ImagesCollections.STYLES.getFolder(), "", sImageName);
+				
+				if (oResponse.getStatus() == 200) {
+					oStyleViewModel.setImgLink(getStyleImageLink(sImageName, sSessionId));					
 				}
 				
 				aoRetStyles.add(oStyleViewModel);
@@ -490,7 +522,17 @@ public class StyleResource {
 					oStyleViewModel.setSharedWithMe(true);
 					// Keep if read only or not
 					oStyleViewModel.setReadOnly(!oSharing.canWrite());
+					
+					String sImageName = oStyleViewModel.getName() + ".png";
+					
+					Response oResponse = oImageResource.existsImage(sSessionId, sSessionId, ImagesCollections.STYLES.getFolder(), "", sImageName);
+					
+					if (oResponse.getStatus() == 200) {
+						oStyleViewModel.setImgLink(getStyleImageLink(sImageName, sSessionId));					
+					}
+					
 					aoRetStyles.add(oStyleViewModel);
+					
 				} 
 				else {
 					// This is shared but public, so this must be already in our return list
@@ -673,7 +715,7 @@ public class StyleResource {
 				return oResult;
 			}
 
-			if (oRequestingUser.getUserId().equals(sUserId)) {
+			if (oRequestingUser.getUserId().equals(sUserId) && !UserApplicationRole.isAdmin(oRequestingUser)) {
 				WasdiLog.warnLog("StyleResource.shareStyle: auto sharing not so smart");
 				oResult.setStringValue("Impossible to autoshare.");
 				return oResult;
@@ -690,7 +732,7 @@ public class StyleResource {
 				return oResult;
 			}
 			
-			if (!PermissionsUtils.canUserWriteStyle(oRequestingUser.getUserId(), sStyleId)) {
+			if (!PermissionsUtils.canUserWriteStyle(oRequestingUser.getUserId(), sStyleId) && !UserApplicationRole.isAdmin(oRequestingUser)) {
 				WasdiLog.warnLog("StyleResource.shareStyle: requesting user cannot write the style");
 				oResult.setStringValue("Can't write this style");
 				return oResult;				
@@ -1053,17 +1095,32 @@ public class StyleResource {
 	 */
 	private void geoServerUpdateStyleIfExists(String sName, String sStyleFilePath) throws MalformedURLException {
 		WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists( " + "Name: " + sName + ", StyleFile: " + sStyleFilePath + " )");
+		
+		try {
+			GeoServerManager oGeoServerManager = new GeoServerManager();
 
-		GeoServerManager oGeoServerManager = new GeoServerManager();
-
-		if (oGeoServerManager.styleExists(sName)) {
-			WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: style exists, update it");
-			
-			
-			if (!oGeoServerManager.updateStyle(sName, sStyleFilePath)) {
-				WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: update style returned false!!");
+			if (oGeoServerManager.styleExists(sName)) {
+				WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: style exists, update it");
+				
+				
+				if (!oGeoServerManager.updateStyle(sName, sStyleFilePath)) {
+					WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: update style returned false!!");
+				}
 			}
+			else {
+				
+				WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: style does not exists");
+				
+				if (WasdiConfig.Current.isMainNode()) {
+					WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: this is the main server, we need the style! Adding it");
+					geoServerAddStyle(sStyleFilePath);
+				}
+			}			
 		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("StyleResource.geoServerUpdateStyleIfExists: error " + oEx.toString());
+		}
+
 	}
 	
 	/**
@@ -1150,5 +1207,38 @@ public class StyleResource {
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("StyleResource.computationalNodesDeleteStyle: error starting UpdateWorker " + oEx.getMessage());
 		}
-	}	
+	}
+	
+	/**
+	 * Create the style preview from geoserver and uploads it in the WASDI images collection
+	 * @param sName Style Name
+	 * @param sSessionId User Session Id
+	 */
+	protected void updateStylePreview(String sName, String sSessionId) {
+		
+		
+		try {		
+			// Now try to get the preview			
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(WasdiConfig.Current.geoserver.address + "/wms?request=GetLegendGraphic&STYLE=" + sName + "&format=image/png&WIDTH=12&HEIGHT=12&LAYER=" + WasdiConfig.Current.geoserver.defaultLayerToGetStyleImages + "&legend_options=fontAntiAliasing:true;fontSize:10&LEGEND_OPTIONS=forceRule:True");
+	
+			if (oHttpCallResponse.getResponseCode()==200) {
+				WasdiLog.debugLog("StyleResource.updateStylePreview: wms call done, creating image");
+				ByteArrayInputStream oByteArrayInputStream = new ByteArrayInputStream(oHttpCallResponse.getResponseBytes());
+				ImagesResource oImagesResource = new ImagesResource();
+				
+				String sImageName = sName + ".png";
+				FormDataContentDispositionBuilder oFormDataContentDispositionBuilder = FormDataContentDisposition.name(sImageName);
+				
+				
+				oImagesResource.uploadImage(oByteArrayInputStream, oFormDataContentDispositionBuilder.fileName(sImageName).build(), sSessionId, ImagesCollections.STYLES.getFolder(), "", sImageName, true, true);
+			}
+			else {
+				WasdiLog.errorLog("StyleResource.updateStylePreview: the WMS request returned " + oHttpCallResponse.getResponseCode());
+				WasdiLog.errorLog("StyleResource.updateStylePreview: Message " + oHttpCallResponse.getResponseBody());
+			}
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("StyleResource.updateStylePreview: error " + oEx.getMessage());
+		}
+		
+	}
 }

@@ -1,12 +1,19 @@
 package wasdi.shared.utils;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -22,6 +29,47 @@ public final class JsonUtils {
 
 	private JsonUtils() {
 		throw new java.lang.UnsupportedOperationException("This is a utility class and cannot be instantiated");
+	}
+	
+	public static boolean writeMapAsJsonFile(Map<String, Object> aoJSONMap, String sFileFullPath) throws FileNotFoundException, IOException {
+
+		if (aoJSONMap == null) {
+			WasdiLog.errorLog("WasdiFileUtils.writeMapAsJsonFile: aoJSONMap is null");
+
+			return false;
+		}
+
+		if (Utils.isNullOrEmpty(sFileFullPath)) {
+			WasdiLog.errorLog("WasdiFileUtils.writeMapAsJsonFile: sFileFullPath is null");
+
+			return false;
+		}
+
+		String sJson = JsonUtils.stringify(aoJSONMap);
+
+		return WasdiFileUtils.writeFile(sJson, sFileFullPath);
+	}
+
+	
+	/**
+	 * Load the JSON content of a file.
+	 * @param sFileFullPath the full path of the file
+	 * @return the JSONObject that contains the payload
+	 */
+	public static JSONObject loadJsonFromFile(String sFileFullPath) {
+		Preconditions.checkNotNull(sFileFullPath);
+
+		JSONObject oJson = null;
+		try(FileReader oReader = new FileReader(sFileFullPath);){
+			
+			JSONTokener oTokener = new JSONTokener(oReader);
+			oJson = new JSONObject(oTokener);
+		} catch (FileNotFoundException oFnf) {
+			WasdiLog.errorLog("WasdiFileUtils.loadJsonFromFile: file " + sFileFullPath + " was not found: " + oFnf);
+		} catch (Exception oE) {
+			WasdiLog.errorLog("WasdiFileUtils.loadJsonFromFile: " + oE);
+		}
+		return oJson;
 	}
 
 	/**

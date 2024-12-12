@@ -174,6 +174,32 @@ public class ProcessWorkspaceAPIClient {
 	}
 	
 	/**
+	 * Call process/byusr
+	 * @param oNode
+	 * @param sSessionId
+	 * @param sProcessorName
+	 * @return
+	 */
+	public static HttpCallResponse getByUser(Node oNode, String sSessionId, boolean bOgcOnly) {
+		try {
+			
+			String sUrl = oNode.getNodeBaseAddress();
+			
+			if (!sUrl.endsWith("/")) sUrl += "/";
+			sUrl += "process/byusr?ogc=" + bOgcOnly;
+
+			WasdiLog.debugLog("ProcessWorkspaceAPIClient.getByUser: calling url: " + sUrl);
+			return HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId)); 
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessWorkspaceAPIClient.getByUser: error ", oEx);
+		}
+		
+		return new HttpCallResponse();
+	}
+	
+	
+	/**
 	 * Call process/runningTime/SP
 	 * @param oNode
 	 * @param sSessionId

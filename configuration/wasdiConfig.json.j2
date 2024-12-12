@@ -10,6 +10,13 @@
     "shellExecLocally": {{ aoWasdiConfiguration['shellExecLocally'] | lower }},
     "logHttpCalls": {{ aoWasdiConfiguration['logHttpCalls'] | lower }},
     "filterInternalHttpCalls": {{ aoWasdiConfiguration['filterInternalHttpCalls'] | lower }},
+    "useLog4J": {{ aoWasdiConfiguration['useLog4J'] | lower }},
+    "logLevel": "INFO",
+    "logLevelServer": "",
+    "logLevelLauncher": "",
+    "logLevelScheduler": "",
+    "logLevelTrigger": "",
+    "addDateTimeToLogs": false,
     "mongoMain": {
         "address": "{{ aoWasdiConfiguration['mongoMain']['address'] }}",
         "dbName": "{{ aoWasdiConfiguration['mongoMain']['dbName'] }}",
@@ -480,6 +487,16 @@
         "internalDockerAPIAddress": "{{ aoWasdiConfiguration['dockers']['internalDockerAPIAddress'] }}",
         "internalDockersBaseAddress": "{{ aoWasdiConfiguration['dockers']['internalDockersBaseAddress'] }}",
         "logDockerAPICallsPayload": {{ aoWasdiConfiguration['dockers']['logDockerAPICallsPayload'] | lower }},
+        "meluxina": {
+            "apiUrl": "{{ aoWasdiConfiguration['dockers']['meluxina']['apiUrl'] }}",
+            "apiVersion": "{{ aoWasdiConfiguration['dockers']['meluxina']['apiVersion'] }}",
+            "home": "{{ aoWasdiConfiguration['dockers']['meluxina']['home'] }}",
+            "project": "{{ aoWasdiConfiguration['dockers']['meluxina']['project'] }}",
+            "registryPassword": "{{ aoWasdiConfiguration['dockers']['meluxina']['registryPassword'] }}",
+            "registryUserName": "{{ aoWasdiConfiguration['dockers']['meluxina']['registryUserName'] }}",
+            "token": "{{ aoWasdiConfiguration['dockers']['meluxina']['token'] }}",
+            "user": "{{ aoWasdiConfiguration['dockers']['meluxina']['user'] }}"
+        },
         "millisBetweenAttmpts": {{ aoWasdiConfiguration['dockers']['millisBetweenAttmpts'] }},
         "millisBetweenStatusPolling": {{ aoWasdiConfiguration['dockers']['millisBetweenStatusPolling'] }},
         "millisWaitAfterDelete": {{ aoWasdiConfiguration['dockers']['millisWaitAfterDelete'] }},
@@ -612,6 +629,9 @@
         "processingThreadSleepingTimeMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadSleepingTimeMS'] }}",
         "processingThreadWaitStartMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadWaitStartMS'] }}",
         "redirectLauncherOutput": {{ aoWasdiConfiguration['scheduler']['redirectLauncherOutput'] }},
+        "sometimesCheckCounter":  {{ aoWasdiConfiguration['scheduler']['sometimesCheckCounter'] }},
+        "watchDogCounter": {{ aoWasdiConfiguration['scheduler']['watchDogCounter'] }},
+        "activateWatchDog":  {{ aoWasdiConfiguration['scheduler']['activateWatchDog'] | lower }},
         "schedulers": [
 {% for sCurrentScheduler in ( aoWasdiConfiguration['scheduler']['schedulers'] | sort ) %}
             {
@@ -620,7 +640,9 @@
                 "timeoutMs": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['timeoutMs'] }}",
                 "opTypes": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['opTypes'] }}",
                 "opSubType": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['opSubType'] }}",
-                "enabled": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['enabled'] }}"
+                "enabled": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['enabled'] }}",
+                "specialWaitCondition": {{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['specialWaitCondition'] | lower  }},
+                "maxWaitingQueue": {{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['maxWaitingQueue'] }}
             }{% if not loop.last %},
 {% endif %}
 {% endfor %}
@@ -664,6 +686,5 @@
         ]
 {% endif %}
     },
-    "useLog4J": {{ aoWasdiConfiguration['useLog4J'] | lower }},
     "useNotebooksDockerAddress": {{ aoWasdiConfiguration['useNotebooksDockerAddress'] | lower }}
 }

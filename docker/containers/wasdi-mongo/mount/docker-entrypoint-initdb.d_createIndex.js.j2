@@ -19,27 +19,27 @@ print('[{{ sWasdiMongoGeneralDatabaseName }}] OK')
 
 
 {% for aoWasdiMongoGeneralCurrentIndex in aoWasdiMongoGeneralIndexes %}
+{% if ( aoWasdiMongoGeneralCurrentIndex['state'] | default('present') | lower ) == 'present' %}
 print('[{{ sWasdiMongoGeneralDatabaseName }}] Create an index on the collection \'{{ aoWasdiMongoGeneralCurrentIndex['collection'] }}\'...')
 oCurrentDatabase.{{ aoWasdiMongoGeneralCurrentIndex['collection'] }}.createIndex(
     {
-{% for aoWasdiMongoGeneralCurrentIndexKey in aoWasdiMongoGeneralCurrentIndex['keys'] %}
-        '{{ aoWasdiMongoGeneralCurrentIndexKey['name'] }}': {{ aoWasdiMongoGeneralCurrentIndexKey['value'] }}{% if not loop.last %},
+{% for sKey in aoWasdiMongoGeneralCurrentIndex['keys'] %}
+        '{{ sKey }}': {{ aoWasdiMongoGeneralCurrentIndex['keys'][sKey] }}{% if not loop.last %},
 {% endif %}
-
 {% endfor %}
+
     },
     {
-{% for aoWasdiMongoGeneralCurrentIndexOption in aoWasdiMongoGeneralCurrentIndex['options'] %}
-{% for key, value in aoWasdiMongoGeneralCurrentIndexOption.items() %}
-        {{ key }}: '{{ value }}'{% if not loop.last %},
+{% for sKey in aoWasdiMongoGeneralCurrentIndex['options'] %}
+        {{ sKey }}: '{{ aoWasdiMongoGeneralCurrentIndex['options'][sKey] }}'{% if not loop.last %},
 {% endif %}
+{% endfor %}
 
-{% endfor %}
-{% endfor %}
     }
 );
 print('[{{ sWasdiMongoGeneralDatabaseName }}] OK')
 {% if not loop.last %}
 
+{% endif %}
 {% endif %}
 {% endfor %}

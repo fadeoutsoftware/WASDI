@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.util.List;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Logger;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -122,7 +123,7 @@ public class GeoServerManager {
         	
     	}
     	catch (Exception oEx) {
-    		String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+    		String sError = ExceptionUtils.getMessage(oEx);
     		WasdiLog.debugLog("GeoServerManager.getLayerBBox: ERROR " + sError);
     		return "";
 		}
@@ -135,7 +136,7 @@ public class GeoServerManager {
           	return asNames;    		
     	}
     	catch (Exception oEx) {
-    		String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+    		String sError = ExceptionUtils.getMessage(oEx);
     		WasdiLog.debugLog("GeoServerManager.getLayers: ERROR " + sError);
     		return null;
 		}        	 
@@ -154,7 +155,7 @@ public class GeoServerManager {
           	return oBbox;    		
     	}
     	catch (Exception oEx) {
-    		String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+    		String sError = ExceptionUtils.getMessage(oEx);
     		WasdiLog.debugLog("GeoServerManager.getLayerBBox: ERROR " + sError);
     		return null;
 		}    	
@@ -172,7 +173,7 @@ public class GeoServerManager {
           	return oLayer.getDefaultStyle();    		
     	}
     	catch (Exception oEx) {
-    		String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+    		String sError = ExceptionUtils.getMessage(oEx);
     		WasdiLog.debugLog("GeoServerManager.getLayerStyle: ERROR " + sError);
     		return null;
 		}    	
@@ -320,7 +321,7 @@ public class GeoServerManager {
     	File oFile = new File(sStyleFile);
     	
     	if (oFile.exists()) {
-    		String sStyleName = Utils.getFileNameWithoutLastExtension(oFile.getName());
+    		String sStyleName = WasdiFileUtils.getFileNameWithoutLastExtension(oFile.getName());
     		return m_oGsPublisher.publishStyle(oFile, sStyleName);
     	}
     	else {

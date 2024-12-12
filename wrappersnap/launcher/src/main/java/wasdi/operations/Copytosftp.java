@@ -3,6 +3,7 @@ package wasdi.operations;
 import java.io.File;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
@@ -34,7 +35,7 @@ public class Copytosftp extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 
-        WasdiLog.debugLog("Copytosftp.executeOperation");
+        WasdiLog.infoLog("Copytosftp.executeOperation");
         
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");
@@ -130,11 +131,10 @@ public class Copytosftp extends Operation {
 
             return true;
 
-        } catch (Throwable e) {
+        } catch (Throwable oEx) {
         	
             WasdiLog.errorLog("Copytosftp.executeOperation: ERROR: Throwable occurrend moving the file to sftp server");
-            
-            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
+            String sError = ExceptionUtils.getMessage(oEx);
             WasdiLog.errorLog("Copytosftp.executeOperation: " + sError);
 
             oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());

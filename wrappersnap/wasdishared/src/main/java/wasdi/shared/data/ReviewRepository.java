@@ -18,6 +18,11 @@ public class ReviewRepository extends MongoRepository {
 		m_sThisCollection = "reviews";
 	}
 	
+	/**
+	 * Get all the reviews of a processor
+	 * @param sProcessorId
+	 * @return
+	 */
     public List<Review> getReviews(String sProcessorId) {
 
         final ArrayList<Review> aoReturnList = new ArrayList<Review>();
@@ -54,12 +59,21 @@ public class ReviewRepository extends MongoRepository {
         return  null;
     }
     
+    /**
+     * Create a new review
+     * @param oReview
+     * @return
+     */
 	public String addReview(Review oReview) {
 		return add(oReview,m_sThisCollection,"ReviewRepository.InsertReview");
 	}
 	
-	
-
+	/**
+	 * Delete a specific Review
+	 * @param sProcessorId
+	 * @param sReviewId
+	 * @return
+	 */
     public int deleteReview(String sProcessorId, String sReviewId) {
     	
     	if (Utils.isNullOrEmpty(sProcessorId)) return 0;
@@ -76,9 +90,34 @@ public class ReviewRepository extends MongoRepository {
 			WasdiLog.errorLog("ReviewRepository.deleteReview: ", oEx);
 			return -1;
 		}
-    	
     }
     
+	/**
+	 * Delete a specific Review
+	 * @param sProcessorId
+	 * @param sReviewId
+	 * @return
+	 */
+    public int deleteReviewsByUser(String sUserId) {
+    	
+    	if (Utils.isNullOrEmpty(sUserId)) return 0;
+
+    	try {
+    		BasicDBObject oCriteria = new BasicDBObject();
+    		oCriteria.append("userId", sUserId);
+
+            return deleteMany(oCriteria,m_sThisCollection);
+    	}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ReviewRepository.deleteReviewsByUser: ", oEx);
+			return -1;
+		}
+    }
+    /**
+     * Update a review
+     * @param oReview
+     * @return
+     */
     public boolean updateReview(Review oReview) {
     	
     	try {
@@ -92,10 +131,15 @@ public class ReviewRepository extends MongoRepository {
 			WasdiLog.errorLog("ReviewRepository.updateReview: ", oEx);
 			return false;
 		}
-
-       
     }
     
+    /**
+     * Check if user id is the owner of a specific review
+     * @param sProcessorId
+     * @param sReviewId
+     * @param sUserId
+     * @return
+     */
 	public boolean isTheOwnerOfTheReview(String sProcessorId, String sReviewId ,String sUserId) {
 		
 		boolean bIsTheOwner = false;
@@ -121,6 +165,12 @@ public class ReviewRepository extends MongoRepository {
 		return bIsTheOwner;
 	}
     
+	/**
+	 * Check if the user already left a review for this specific processor
+	 * @param sProcessorId
+	 * @param sUserId
+	 * @return
+	 */
 	public boolean alreadyVoted(String sProcessorId, String sUserId) {
 		boolean bAlreadyVoted = false;
 		try {

@@ -167,6 +167,7 @@ public final class HttpUtils {
 						Util.copyStream(oInputStream, oBytearrayOutputStream);
 						sResult = oBytearrayOutputStream.toString();
 						oHttpCallResponse.setResponseBody(sResult);
+						oHttpCallResponse.setResponseBytes(oBytearrayOutputStream.toByteArray());
 					}
 				} 
 				else {
@@ -240,6 +241,106 @@ public final class HttpUtils {
 	
 	public static HttpCallResponse httpPost(String sUrl, byte []ayBytes, Map<String, String> asHeaders) {
 		return httpPost(sUrl, ayBytes, asHeaders, "", null);
+	}
+	
+	public static HttpCallResponse httpPost(String sUrl, File oFile, Map<String, String> asHeaders) {
+		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
+
+		String sResult = null;
+		try {
+			
+			if (sUrl.startsWith("unix:///")) {
+				return SocketUtils.httpPost(sUrl, oFile, asHeaders);
+			}
+			
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			
+			// Set Read Timeout
+			oConnection.setReadTimeout(WasdiConfig.Current.readTimeout);
+			// Set Connection Timeout
+			oConnection.setConnectTimeout(WasdiConfig.Current.connectionTimeout);
+			
+			// optional default is GET
+			oConnection.setRequestMethod("POST");
+			oConnection.setRequestProperty("Accept", "*/*");
+			oConnection.setDoOutput(true);
+
+			if (asHeaders != null) {
+				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
+					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
+				}
+			}
+			
+			oConnection.setFixedLengthStreamingMode(oFile.length());
+			oConnection.connect();
+			
+			try (OutputStream oOutputStream = oConnection.getOutputStream()) {
+				InputStream oFileStream = FileUtils.openInputStream(oFile);
+				Util.copyStream(oFileStream, oOutputStream);
+			}			
+
+			// Avoid log spam when we call local addresses
+			boolean bLog = true;
+			
+			if (WasdiConfig.Current.filterInternalHttpCalls) {
+				if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
+					bLog = false;
+				}
+				if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
+					bLog = false;
+				}				
+			}
+			
+			if (WasdiConfig.Current.logHttpCalls && bLog) {
+				WasdiLog.debugLog("HttpUtils.httpPost: Sending 'POST' request to URL : " + sUrl);
+			}
+
+			try {
+				int iResponseCode = oConnection.getResponseCode();
+				
+				if (WasdiConfig.Current.logHttpCalls && bLog) {
+					WasdiLog.debugLog("HttpUtils.httpPost: Response Code : " + iResponseCode);
+				}
+				
+				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
+
+				if (iResponseCode >= 200 && iResponseCode <=299) {
+					InputStream oInputStream = oConnection.getInputStream();
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+
+					if (null != oInputStream) {
+						Util.copyStream(oInputStream, oBytearrayOutputStream);
+						sResult = oBytearrayOutputStream.toString();
+						oHttpCallResponse.setResponseBody(sResult);
+					}
+				} else {
+					WasdiLog.debugLog("HttpUtils.httpPost: provider did not return 200 but "
+							+ iResponseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
+
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					InputStream oErrorStream = oConnection.getErrorStream();
+					
+					if (oErrorStream!=null) {
+						Util.copyStream(oErrorStream, oBytearrayOutputStream);
+
+						if (oBytearrayOutputStream!=null) {
+							sResult = oBytearrayOutputStream.toString();
+							oHttpCallResponse.setResponseBody(sResult);							
+						}
+					}
+				}
+			} catch (Exception oEint) {
+				WasdiLog.debugLog("HttpUtils.httpPost error internal: " + oEint);
+			} finally {
+				oConnection.disconnect();
+			}
+
+		} catch (Exception oE) {
+			WasdiLog.debugLog("HttpUtils.httpPost error external: " + oE);
+		}
+
+		return oHttpCallResponse;		
 	}
 	
 	/**
@@ -828,9 +929,9 @@ public final class HttpUtils {
 				oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
 			}
 
-			int responseCode =  oConnection.getResponseCode();
+			int iResponseCode =  oConnection.getResponseCode();
 
-			if (responseCode == HttpURLConnection.HTTP_OK) {
+			if (iResponseCode == HttpURLConnection.HTTP_OK) {
 
 				Map<String, List<String>> aoHeaders = oConnection.getHeaderFields();
 				List<String> asContents = null;
@@ -849,8 +950,6 @@ public final class HttpUtils {
 					}
 					WasdiLog.debugLog("HttpUtils.downloadFile: attachment name: " + sAttachmentName);
 				}
-				
-
 				
 				File oTargetFile = new File(sOutputFilePath);
 				File oTargetDir = oTargetFile.getParentFile();
@@ -878,7 +977,7 @@ public final class HttpUtils {
 				return sOutputFilePath;
 			} else {
 				String sMessage = "HttpUtils.downloadFile: response message: " + oConnection.getResponseMessage();
-				WasdiLog.debugLog(sMessage);
+				WasdiLog.warnLog(sMessage);
 				return "";
 			}
 

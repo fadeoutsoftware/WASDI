@@ -3,6 +3,33 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.8.7.0] - 2024-10-26
+### Fixed
+- Again fileExistsOnWasdi
+- Added code to drop the base path from Add File To Wasdi in case the user uses the full path
+### Added
+- setParameter: it is just a call to addParameter
+
+## [0.8.6.6] - 2024-10-21
+### Fixed
+- Wrong assumptions in the answer of fileExistsOnWasdi. 200 is a correct code!
+
+## [0.8.6.5] - 2024-10-16
+### Fixed
+- Better handling of requests exceptions
+
+## [0.8.6.4] - 2024-10-10
+### Fixed
+- Even better logs 
+
+## [0.8.6.3] - 2024-03-19
+### Added
+- Improved logs
+
+## [0.8.6.3] - 2024-03-19
+### Fixed
+- Changed Lib licence from GNU to CCv4
+
 ## [0.8.6.2] - 2024-03-04
 ### Added
 - sleep parameter to control the waiting time while polling api

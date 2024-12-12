@@ -1,1 +1,2 @@
-org.esa.s1tbx.sar.gpf.S1TBXSarProcessingBenchmarkOperatorProvider
+eu.esa.microwave.SARProcessingBenchmarkOperatorProvider
+org.esa.snap.smart.configurator.SNAPEngineBenchmarkOperatorProvider

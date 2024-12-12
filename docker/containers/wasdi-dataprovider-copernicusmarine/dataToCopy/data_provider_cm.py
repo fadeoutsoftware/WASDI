@@ -4,6 +4,7 @@ import json
 import os
 import re
 import logging
+import time
 from datetime import datetime
 
 s_sDataProviderName = 'COPERNICUSMARINE'
@@ -651,7 +652,7 @@ if __name__ == '__main__':
     except Exception as oE:
         logging.error('__main__: Exception ' + str(oE))
         sys.exit(1)
-
+    
     if sOperation == "0":
         logging.debug('__main__: chosen operation is EXECUTE AND RETRIEVE')
         executeAndRetrieve(sInputFile, sOutputFile)

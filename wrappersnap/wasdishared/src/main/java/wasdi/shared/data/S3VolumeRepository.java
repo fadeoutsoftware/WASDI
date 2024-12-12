@@ -113,4 +113,24 @@ public class S3VolumeRepository extends MongoRepository {
 
         return aoReturnList;    	
     }
+    
+    /**
+     * Delete all the volumes of a user
+     * @param sUserId
+     * @return
+     */
+    public int deleteByUserId(String sUserId) {
+    	if (Utils.isNullOrEmpty(sUserId)) return 0;
+    	
+    	try {
+    		BasicDBObject oCriteria = new BasicDBObject();
+    		oCriteria.append("userId", sUserId);
+
+            return deleteMany(oCriteria);    		
+    	}
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("S3VolumeRepository.delete: error ", oEx);
+        	return -1;
+        }
+    }    
 }

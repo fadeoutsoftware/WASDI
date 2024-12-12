@@ -39,6 +39,7 @@ import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.ShareFileParameter;
 import wasdi.shared.rabbit.Send;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -75,16 +76,15 @@ public class FileBufferResource {
 	 * Trigger a sharing of an image (from one workspace to another) in WASDI.
 	 * The method checks the input, create the parameter and call WASDI.runProcess
 	 * 
-	 * @param sSessionId User Session
-	 * @param sFileUrl Url of the file to import
-	 * @param sProvider Data Provider
-	 * @param sWorkspaceId Workspace Id
-	 * @param sBoundingBox if available, bbox of the product to import
-	 * @param sParentProcessWorkspaceId Proc Id of the Parent Process
+	 * @param sSessionId Session Id
+	 * @param sOriginWorkspaceId Id of origin workspace 
+	 * @param sDestinationWorkspaceId Id of destination workpsace
+	 * @param sProductName Name of the product
+	 * @param sParentProcessWorkspaceId Optional parent process Obj Id
 	 * @return
 	 * @throws IOException
 	 */
-	@GET
+		@GET
 	@Path("share")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response share(@HeaderParam("x-session-token") String sSessionId,
@@ -328,23 +328,27 @@ public class FileBufferResource {
 			
 			WasdiLog.debugLog("FileBufferResource.imageImport");
 			
+			// We get the user from session
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
+				// Invalid credentials
 				WasdiLog.warnLog("FileBufferResource.imageImport: session is not valid");
 				oResult.setIntValue(401);
 				return oResult;
 			}
 			
 			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+				// Need a subscription valid to import data
 				WasdiLog.warnLog("FileBufferResource.imageImport: No valid Subscription");
 				oResult.setIntValue(401);
-				return oResult;				
+				return oResult;
 			}
 
 			String sUserId = oUser.getUserId();
 
 			if (oImageImportViewModel == null) {
+				// This is a bad request
 				WasdiLog.warnLog("FileBufferResource.imageImport: request is not valid");
 				oResult.setIntValue(401);
 				return oResult;
@@ -371,11 +375,30 @@ public class FileBufferResource {
 				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
 				return oResult;
 			}
+			
+			String sMission = MissionUtils.getPlatformFromSatelliteImageFileName(sFileName);
+			
+			WasdiLog.warnLog("FileBufferResource.imageImport: Detected Mission: " + sMission);
+			
+			if (!PermissionsUtils.canUserAccessMission(oUser.getUserId(), sMission)) {
+				// Invalid credentials
+				WasdiLog.warnLog("FileBufferResource.imageImport: user cannot access mission " + sMission);
+				oResult.setIntValue(401);
+				return oResult;				
+			}
 
 			// if the provider is not specified, we fallback on the node default provider
 			DataProvider oProvider = null;
 			if (Utils.isNullOrEmpty(sProvider)) {
 				oProvider = m_oDataProviderCatalog.getDefaultProvider(WasdiConfig.Current.nodeCode);
+				
+				sProvider = oProvider.getName();
+				
+				if (Utils.isNullOrEmpty(sProvider)) {
+					WasdiLog.warnLog("FileBufferResource.imageImport: provider is null, assume AUTO");
+					sProvider = "AUTO";
+				}
+				
 			} else {
 				oProvider = m_oDataProviderCatalog.getProvider(sProvider);
 			}
@@ -395,7 +418,6 @@ public class FileBufferResource {
 			if (sNode.equals(WasdiConfig.Current.nodeCode)) {
 				// Local Node: no need to make any API
 				CatalogResources oCatalogResources = new CatalogResources();
-				//Response oCallResponse = oCatalogResources.checkFileByNode(sSessionId, sFileName, sWorkspaceId);
 				Response oCallResponse = oCatalogResources.checkDownloadEntryAvailabilityByName(sSessionId, sFileName, sWorkspaceId, oImageImportViewModel.getParent(), oImageImportViewModel.getVolumePath());
 				if (oCallResponse.getStatus()>=200 && oCallResponse.getStatus()<299) {
 					oFileOnNode = (PrimitiveResult) oCallResponse.getEntity();
@@ -548,7 +570,7 @@ public class FileBufferResource {
 
 			if (oPublishBand != null)
 			{
-				String sProductName = Utils.getFileNameWithoutLastExtension(oPublishBand.getProductName());
+				String sProductName = WasdiFileUtils.getFileNameWithoutLastExtension(oPublishBand.getProductName());
 				WasdiLog.debugLog("FileBufferResource.publishBand: band already published: product Name : " + sProductName + " LayerId: " + oPublishBand.getLayerId());
 				PublishBandResultViewModel oPublishBandResultViewModel = new PublishBandResultViewModel();
 				oPublishBandResultViewModel.setBoundingBox(oPublishBand.getBoundingBox());

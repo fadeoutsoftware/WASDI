@@ -23,7 +23,7 @@ public class Sen2cor extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		WasdiLog.debugLog("Sen2core.executeOperation");
+		WasdiLog.infoLog("Sen2core.executeOperation");
 		
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");

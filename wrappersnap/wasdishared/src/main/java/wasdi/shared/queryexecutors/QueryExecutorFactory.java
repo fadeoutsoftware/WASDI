@@ -17,11 +17,13 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.ads.QueryExecutorADS;
 import wasdi.shared.queryexecutors.cds.QueryExecutorCDS;
 import wasdi.shared.queryexecutors.cloudferro.QueryExecutorCloudferro;
-import wasdi.shared.queryexecutors.cm.QueryExecutorCM;
 import wasdi.shared.queryexecutors.cm2.QueryExecutorCM2;
 import wasdi.shared.queryexecutors.creodias.QueryExecutorCREODIAS;
 import wasdi.shared.queryexecutors.creodias2.QueryExecutorCreoDias2;
+import wasdi.shared.queryexecutors.dlr.QueryExecutorDLR;
 import wasdi.shared.queryexecutors.eodc.QueryExecutorEODC;
+import wasdi.shared.queryexecutors.esa.QueryExecutorESA;
+import wasdi.shared.queryexecutors.extweb.ExtWebQueryExecutor;
 import wasdi.shared.queryexecutors.gpm.QueryExecutorGPM;
 import wasdi.shared.queryexecutors.jrc.QueryExecutorJRC;
 import wasdi.shared.queryexecutors.lpdaac.QueryExecutorLpDaac;
@@ -29,7 +31,7 @@ import wasdi.shared.queryexecutors.lsa.QueryExecutorLSA;
 import wasdi.shared.queryexecutors.onda.QueryExecutorONDA;
 import wasdi.shared.queryexecutors.planet.QueryExecutorPLANET;
 import wasdi.shared.queryexecutors.probav.QueryExecutorPROBAV;
-import wasdi.shared.queryexecutors.sentinelhub.QueryExecutorSENTINEL;
+import wasdi.shared.queryexecutors.sina.QueryExecutorSina;
 import wasdi.shared.queryexecutors.skywatch.QueryExecutorSkywatch;
 import wasdi.shared.queryexecutors.sobloo.QueryExecutorSOBLOO;
 import wasdi.shared.queryexecutors.statics.QueryExecutorSTATICS;
@@ -51,7 +53,6 @@ public class QueryExecutorFactory {
 		final Map<String, Supplier<QueryExecutor>> aoMap = new HashMap<>();
 
 		aoMap.put("ONDA", QueryExecutorONDA::new);
-		aoMap.put("SENTINEL", QueryExecutorSENTINEL::new);
 		aoMap.put("SOBLOO", QueryExecutorSOBLOO::new);
 		aoMap.put("EODC", QueryExecutorEODC::new);
 		aoMap.put("CREODIAS", QueryExecutorCREODIAS::new);
@@ -70,6 +71,10 @@ public class QueryExecutorFactory {
 		aoMap.put("CLOUDFERRO", QueryExecutorCloudferro::new);
 		aoMap.put("SKYWATCH", QueryExecutorSkywatch::new);
 		aoMap.put("LPDAAC", QueryExecutorLpDaac::new);
+		aoMap.put("EXT_WEB", ExtWebQueryExecutor::new);
+		aoMap.put("DLR", QueryExecutorDLR::new);		
+		aoMap.put("SINA", QueryExecutorSina::new);
+		aoMap.put("ESA", QueryExecutorESA::new);
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
 		

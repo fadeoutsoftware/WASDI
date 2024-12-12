@@ -18,30 +18,25 @@
     <packaging>war</packaging>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionAbderaClient>1.1.3</sVersionAbderaClient>
-        <sVersionAbderaCore>1.1.3</sVersionAbderaCore>
-        <sVersionAbderaExtensionsJson>1.1.3</sVersionAbderaExtensionsJson>
-        <sVersionCommonsIo>2.7</sVersionCommonsIo>
-        <sVersionCommonsLang>2.6</sVersionCommonsLang>
-        <sVersionCommonsNet>3.9.0</sVersionCommonsNet>
+        <sVersionCommonsIo>2.18.0</sVersionCommonsIo>
+        <sVersionCommonsLang3>3.17.0</sVersionCommonsLang3>
+        <sVersionCommonsNet>3.11.1</sVersionCommonsNet>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
-        <sVersionGenson>1.4</sVersionGenson>
         <sVersionGoogleApiClient>2.2.0</sVersionGoogleApiClient>
-        <sVersionHttpClient>4.5.13</sVersionHttpClient>
-        <sVersionJackson>2.14.1</sVersionJackson>
+        <sVersionHttpClient>4.5.14</sVersionHttpClient>
+        <sVersionJackson>2.18.2</sVersionJackson>
         <sVersionJavaApiForKml>2.2.1</sVersionJavaApiForKml>
         <sVersionJavaxWebsocketApi>1.1</sVersionJavaxWebsocketApi>
-        <sVersionJersey2>2.38</sVersionJersey2>
-        <sVersionJson>20230227</sVersionJson>
-        <sVersionJunit>3.8.1</sVersionJunit>
-        <sVersionLombok>1.18.22</sVersionLombok>
+        <sVersionJson>20240303</sVersionJson>
+        <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionMavenCompilerPlugin>3.11.0</sVersionMavenCompilerPlugin>
         <sVersionMavenWarPlugin>3.4.0</sVersionMavenWarPlugin>
-        <sVersionOrbit>1.0.0</sVersionOrbit>
+        <sVersionOrbit>1.0.1</sVersionOrbit>
+        <sVersionJersey2>2.45</sVersionJersey2>
         <sVersionServletApi>2.5</sVersionServletApi>
         <sVersionStripeJava>22.0.0</sVersionStripeJava>
     </properties>
@@ -150,36 +145,12 @@
             <version>${sVersionServletApi}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-core -->
-        <dependency>
-            <groupId>org.apache.abdera</groupId>
-            <artifactId>abdera-core</artifactId>
-            <version>${sVersionAbderaCore}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-client -->
-        <dependency>
-            <groupId>org.apache.abdera</groupId>
-            <artifactId>abdera-client</artifactId>
-            <version>${sVersionAbderaClient}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-extensions-json -->
-        <dependency>
-            <groupId>org.apache.abdera</groupId>
-            <artifactId>abdera-extensions-json</artifactId>
-            <version>${sVersionAbderaExtensionsJson}</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>${sVersionHttpClient}</version>
         </dependency>        
-        <!-- https://mvnrepository.com/artifact/com.owlike/genson -->
-        <dependency>
-            <groupId>com.owlike</groupId>
-            <artifactId>genson</artifactId>
-            <version>${sVersionGenson}</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider -->
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -223,11 +194,11 @@
             <artifactId>json</artifactId>
             <version>${sVersionJson}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-lang/commons-lang -->
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>${sVersionCommonsLang}</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${sVersionCommonsLang3}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/commons-net/commons-net -->
         <dependency>

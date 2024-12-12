@@ -13,9 +13,9 @@ import java.util.List;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.http.QueryExecutorHttpGet;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
@@ -43,9 +43,13 @@ public class QueryExecutorCREODIAS extends QueryExecutorHttpGet {
 		try {
 			String sClientQuery = "";
 			
-			String sPlatform = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sProduct);
+			String sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(sProduct);
 			
-			Date oProductDate = WasdiFileUtils.getDateFromSatelliteImageFileName(sProduct);
+			if (sPlatform.equals(Platforms.LANDSAT8)) {
+				sPlatform = "LANDSAT-8";
+			}
+			
+			Date oProductDate = MissionUtils.getDateFromSatelliteImageFileName(sProduct);
 			
 			String sBeginPositionStart = "1893-09-07T00:00:00.000Z";
 			String sBeginPositionEnd = "2893-09-07T00:00:00.000Z";

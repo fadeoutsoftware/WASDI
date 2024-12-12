@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -399,7 +397,7 @@ public class DockerUtils {
     		WasdiLog.debugLog("DockerUtils.build: start build");
     		
         	// Finally make the call
-        	HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, FileUtils.readFileToByteArray(new File(sTarFileOuput)), asHeaders);
+        	HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, new File(sTarFileOuput), asHeaders);
         	
         	WasdiLog.debugLog("DockerUtils.build: build done");
         	
@@ -740,6 +738,14 @@ public class DockerUtils {
                     	}
                     }
                     
+                    if (WasdiConfig.Current.nvidiaGPUAvailable) {
+                    	WasdiLog.warnLog("DockerUtils.start: Node has a GPU, enabling NVIDIA in the Container");
+                    	oContainerCreateParams.HostConfig.EnableGpu = true;
+                    }
+                    else {
+                    	oContainerCreateParams.HostConfig.EnableGpu = false;
+                    }
+                    
                     // Convert the payload in JSON (NOTE: is hand-made !!)
             		String sContainerCreateParams = oContainerCreateParams.toJson();
             		
@@ -862,10 +868,13 @@ public class DockerUtils {
 
         try {            
             
+        	// Get the version of the Docker
             int iVersion = StringUtils.getAsInteger(sVersion);
             
+            // If it is a WASDI Valid one
         	while (iVersion>0)  {
         		
+        		// We start removing the requested version
         		WasdiLog.debugLog("DockerUtils.delete: Removing " + sProcessorName + " version "  + sVersion);
         		
                 String sBaseDockerName = "wasdi/" + sProcessorName + ":" + sVersion;
@@ -875,9 +884,11 @@ public class DockerUtils {
                 	sDockerName = m_sDockerRegistry + "/" + sDockerName;
                 }
                 
+                // Check if we have a container
                 String sId = getContainerIdFromWasdiAppName(sProcessorName, sVersion);
                 
                 if (!Utils.isNullOrEmpty(sId)) {
+                	// Clean the container
                     WasdiLog.debugLog("DockerUtils.delete: call Remove Container " + sId);
                     
                     boolean bContainersRemoved = removeContainer(sId, true);
@@ -890,16 +901,18 @@ public class DockerUtils {
                 	WasdiLog.debugLog("DockerUtils.delete: no container found for " + sProcessorName + " version "  + sVersion);
                 }
                 
+                // Check the image
                 if (isImageAvailable(sProcessorName,sVersion)) {
 
+                	// Remove the image
                     WasdiLog.debugLog("DockerUtils.delete: Removing image for " + sProcessorName + " version "  + sVersion + " Docker Image: " + sDockerName);
-                    
                     boolean bImageRemoved = removeImage(sDockerName, true);
                     
                     if (!bImageRemoved) {
                     	WasdiLog.errorLog("DockerUtils.delete: error removing the image for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
                     }
                     
+                    // Try to delete local version
                     if (!sBaseDockerName.equals(sDockerName)) {
                         WasdiLog.debugLog("DockerUtils.delete: Removing also local image for " + sProcessorName + " version "  + sVersion + " Docker Image: " + sBaseDockerName);
                         bImageRemoved = removeImage(sBaseDockerName, true);
@@ -908,18 +921,52 @@ public class DockerUtils {
                         }                    
                     }                
                     
-                    if (WasdiConfig.Current.isMainNode()) {            	
+                    // And if we are in the main node
+                    if (WasdiConfig.Current.isMainNode()) {           
+                    	// With registers..
                         if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
+                        	// Check if we have to clean also other registries
                         	WasdiLog.infoLog("DockerUtils.delete: This is a registry stored docker: clean all our registers");
                         	for (DockerRegistryConfig oRegistryConfig : WasdiConfig.Current.dockers.registers) {
-                        		this.removeImageFromRegistry(sBaseDockerName, sVersion, oRegistryConfig);					
+                        		
+                        		if (!m_sDockerRegistry.equals(oRegistryConfig.address)) {
+                        			sDockerName = oRegistryConfig.address + "/" + sBaseDockerName;
+                        			WasdiLog.infoLog("DockerUtils.delete: this is a backup registry, clean also the image " + sDockerName);
+                        			this.removeImage(sDockerName);
+                        		}
+                        		
+                        		this.removeImageFromRegistry(sBaseDockerName, sVersion, oRegistryConfig);
             				}
                         }
-                    }                
-
+                    }
                 }
                 else {
-                	WasdiLog.debugLog("DockerUtils.delete: no image found for " + sProcessorName + " version "  + sVersion);
+                	WasdiLog.debugLog("DockerUtils.delete: no image found for " + sProcessorName + " version "  + sVersion );
+                	
+                	// But what about the other registries?
+                    if (WasdiConfig.Current.isMainNode()) {            	
+                        if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
+                        	WasdiLog.debugLog("DockerUtils.delete:  Search back up registries");
+                        	
+                        	// For all the registers
+                        	for (DockerRegistryConfig oRegistryConfig : WasdiConfig.Current.dockers.registers) {
+                        		
+                        		// If this is not the main one
+                        		if (!m_sDockerRegistry.equals(oRegistryConfig.address)) {
+                        			
+                        			// Do we have a backup?
+                        			WasdiLog.debugLog("DockerUtils.delete: delete " + sProcessorName + " version "  + sVersion + " in registry " + oRegistryConfig.address);
+                        			if (isImageAvailable(sProcessorName, sVersion, oRegistryConfig.address)) {
+                        				
+                        				// Yes! Clean also it!!
+                            			sDockerName = oRegistryConfig.address + "/" + sBaseDockerName;
+                            			this.removeImage(sDockerName);
+                            			this.removeImageFromRegistry(sBaseDockerName, sVersion, oRegistryConfig);                				
+                        			}
+                        		}
+            				}   	
+                        }
+                    }
                 }
                         		
                 sVersion = StringUtils.decrementIntegerString(sVersion);
@@ -1627,13 +1674,24 @@ public class DockerUtils {
     }
     
     /**
+     * Search if an image is availalbe using the registry set as member property (m_sDockerRegistry)
+     * @param sProcessorName Processor Name
+     * @param sVersion Processor Version
+     * @return true if the image is available
+     */
+    public boolean isImageAvailable(String sProcessorName, String sVersion) {
+    	return isImageAvailable(sProcessorName, sVersion, m_sDockerRegistry);
+    }
+    
+    /**
      * Check if an image is available on the local registry
      * @param sProcessorName Processor Name
      * @param sVersion Processor Version
-     * @return true if the image is available locally
+     * @param sRegistry optional Docker registry
+     * @return true if the image is available
      */
     @SuppressWarnings("unchecked")
-	public boolean isImageAvailable(String sProcessorName, String sVersion) {
+	public boolean isImageAvailable(String sProcessorName, String sVersion, String sRegistry) {
     	
     	try {
     		// Get the internal API address
@@ -1662,7 +1720,7 @@ public class DockerUtils {
             // Define the name of our image
             String sMyImage = "";
             
-            if (!Utils.isNullOrEmpty(m_sDockerRegistry)) sMyImage = m_sDockerRegistry + "/";
+            if (!Utils.isNullOrEmpty(sRegistry)) sMyImage = sRegistry + "/";
             sMyImage += "wasdi/" + sProcessorName + ":" + sVersion;
             
             // Search all the available images

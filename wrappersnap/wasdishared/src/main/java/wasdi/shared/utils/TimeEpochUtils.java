@@ -73,7 +73,7 @@ public class TimeEpochUtils {
 			Date oDate = oSimpleDateFormat.parse(sDate);
 			lEpochMilliSeconds = oDate.getTime();
 		} catch (Exception oE) {
-			WasdiLog.log("ERROR", "Utils.fromDateStringToTimestamp: " + oE);
+			WasdiLog.errorLog("Utils.fromDateStringToTimestamp: ", oE);
 		}
 		return lEpochMilliSeconds;
 
@@ -118,6 +118,27 @@ public class TimeEpochUtils {
 		cal.add(Calendar.DATE, iDaysLater);
 
 		return cal.getTime();
+	}
+	
+	/**
+	 * Get a date in in the future obtained by adding a specified number of days to the specified starting date, in a certain time zone
+	 * 
+	 * @param lTimeInMillis the time in millis of the starting date
+	 * @param iDaysLater the number of days to be added
+	 * @param sTimeZone the id of the time zone. If null or empty, then  the GMT time zone will be taken by default
+	 * @return the new date
+	 */
+	public static Date getLaterDate(long lTimeInMillis, int iDaysLater, String sTimeZone) {
+		String sFinalTimeZone = Utils.isNullOrEmpty(sTimeZone)
+				? "GMT"
+				: sTimeZone;
+		
+		Calendar oCal = Calendar.getInstance();
+		oCal.setTimeZone(TimeZone.getTimeZone(sFinalTimeZone));
+		oCal.setTimeInMillis(lTimeInMillis);
+		oCal.add(Calendar.DATE, iDaysLater);
+
+		return oCal.getTime();
 	}
 
 	/**

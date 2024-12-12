@@ -37,6 +37,7 @@ import wasdi.shared.payloads.ExecuteGraphPayload;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
@@ -270,7 +271,7 @@ public class WasdiGraph {
 				// First Try: corresponding input plus workflowname
 				if (oGraphSettings.getInputFileNames() != null) {
 					if (oGraphSettings.getInputFileNames().size()>iNode) {
-						sOutputName = Utils.getFileNameWithoutLastExtension(oGraphSettings.getInputFileNames().get(iNode));
+						sOutputName = WasdiFileUtils.getFileNameWithoutLastExtension(oGraphSettings.getInputFileNames().get(iNode));
 						sOutputName = sOutputName + "_" + oGraphSettings.getWorkflowName();						
 					}
 				}
@@ -314,8 +315,7 @@ public class WasdiGraph {
 			
 			Product[] aoOutputs = oContext.getOutputProducts();
 			if (aoOutputs==null || aoOutputs.length==0)  {
-				m_oProcessWorkspaceLogger.log("No output created!!");
-				throw new Exception("No output created");
+				m_oProcessWorkspaceLogger.log("No output created by the Workflow");
 			}
 			
 			for (int iOutputs = 0; iOutputs<aoOutputs.length; iOutputs++) {
@@ -334,7 +334,17 @@ public class WasdiGraph {
 	            	sBbox = oDownloadedFile.getBoundingBox();
 	            }
 	            
-	            addProductToDb(oProduct, sBbox, aoOutputFiles.get(iOutputs));				
+	            if (iOutputs < aoOutputFiles.size()) {
+	            	addProductToDb(oProduct, sBbox, aoOutputFiles.get(iOutputs));
+	            }
+	            else {
+	            	File oFile = oProduct.getFileLocation();
+	            	if (oFile != null) {
+	            		WasdiLog.infoLog("WasdiGraph.execute: The output is not in the original list of outputs. Adding file " + oFile.getName());
+	            		addProductToDb(oProduct, sBbox, aoOutputFiles.get(iOutputs));
+	            	}
+	            	
+	            }
 			}
 			
 			try {

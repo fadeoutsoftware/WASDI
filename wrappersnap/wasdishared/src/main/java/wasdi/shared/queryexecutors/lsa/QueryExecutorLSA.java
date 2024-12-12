@@ -6,17 +6,19 @@ import java.net.CookieManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.abdera.Abdera;
-import org.apache.abdera.model.Element;
-import org.apache.abdera.model.Feed;
-import org.apache.abdera.parser.Parser;
-import org.apache.abdera.parser.ParserOptions;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
@@ -50,7 +52,7 @@ public class QueryExecutorLSA extends QueryExecutor {
 		super.init();
 		
 		try {
-			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
+			JSONObject oAppConf = JsonUtils.loadJsonFromFile(m_sParserConfigPath);
 			boolean bEnableFast24 = oAppConf.getBoolean("enableFast24");
 			
 			((QueryTranslatorLSA)m_oQueryTranslator).setEnableFast24(bEnableFast24);
@@ -87,53 +89,40 @@ public class QueryExecutorLSA extends QueryExecutor {
 		// Make the query
 		String sRLSAResults = LSAHttpUtils.httpGetResults(sLSAQuery, (CookieManager) CookieHandler.getDefault());
 		
-		WasdiLog.debugLog("QueryExecutorLSA: get Results, extract the total count");
+		WasdiLog.debugLog("QueryExecutorLSA.executeCount: get Results, extract the total count");
+		DocumentBuilderFactory oDocBuildFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder oDocBuilder;		
 		
 		try {
 			
-			// Parse results with abdera
-			Abdera oAbdera = new Abdera();
+			oDocBuilder = oDocBuildFactory.newDocumentBuilder();
 			
-			Parser oParser = oAbdera.getParser();
-			ParserOptions oParserOptions = oParser.getDefaultParserOptions();
+			Document oResultsXml = oDocBuilder.parse(new InputSource(new StringReader(sRLSAResults)));
 			
-			oParserOptions.setCharset("UTF-8");
-			oParserOptions.setFilterRestrictedCharacterReplacement('_');
-			oParserOptions.setFilterRestrictedCharacters(true);
-			oParserOptions.setMustPreserveWhitespace(false);
-			oParserOptions.setParseFilter(null);
-
-			org.apache.abdera.model.Document<Feed> oDocument = null;
+			oResultsXml.getDocumentElement().normalize();
 			
-			oDocument = oParser.parse(new StringReader(sRLSAResults), oParserOptions);
+			WasdiLog.debugLog("QueryExecutorLSA.executeCount root element: " + oResultsXml.getDocumentElement().getNodeName());
 			
-			if (oDocument == null) {
-				WasdiLog.debugLog("QueryExecutorLSA.executeCount: Document response null, aborting");
-				return -1;
+			// loop through each Entry item
+			NodeList aoItems = oResultsXml.getElementsByTagName("os:totalResults");
+			
+			for (int iItem = 0; iItem < aoItems.getLength(); iItem++)
+			{
+				// We need an Element Node
+				org.w3c.dom.Node oNode = aoItems.item(iItem);
+				if (oNode.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE)  continue;
+				
+				Element oEntry = (Element) oNode;
+				
+				String sCount = oEntry.getTextContent();
+				iCount = Integer.parseInt(sCount);
 			}
 			
-			// Extract the count
-			Feed oFeed = (Feed) oDocument.getRoot();
-			String sText = null;
-			for (Element oElement : oFeed.getElements()) {
-				if (oElement.getQName().getLocalPart().equals("totalResults")) {
-					sText = oElement.getText();
-					break;
-				}
-			} 
-			
-			WasdiLog.debugLog("QueryExecutorLSA.executeCount: " + sText);
-			
-			try {
-				// Cast the result
-				iCount = Integer.parseInt(sText);
-			}
-			catch (Exception oEx) {
-				WasdiLog.debugLog("QueryExecutorLSA.executeCount: Exception = " + oEx.toString());
-			}
+			WasdiLog.debugLog("QueryExecutorLSA.executeCount: Search Done: found " + iCount + " results");		
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("QueryExecutorLSA.executeCount: Exception = " + oEx.toString());
+			iCount = -1;
 		}
 		
 		return iCount;

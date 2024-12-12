@@ -72,6 +72,25 @@ public class DownloadedFilesRepository extends MongoRepository {
 
         return  false;
     }
+    
+    public boolean updateDownloadedFile(DownloadedFile oFile, String sOldPath) {
+        try {
+            String sJSON = s_oMapper.writeValueAsString(oFile);
+            
+            Bson oFilter = new Document("filePath", sOldPath);
+            Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
+            
+            //UpdateResult oResult = getCollection(m_sThisCollection).updateOne(Filters.eq("fileName", oFile.getFileName()), new Document(Document.parse(sJSON)));
+            UpdateResult oResult = getCollection(m_sThisCollection).updateOne(oFilter, oUpdateOperationDocument);
+
+            if (oResult.getModifiedCount()==1) return  true;
+        }
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("CommentRepository.updateDownloadedFile: error", oEx);
+        }
+
+        return  false;
+    }
 
     /**
      * Get Downloaded file by the fulle Path

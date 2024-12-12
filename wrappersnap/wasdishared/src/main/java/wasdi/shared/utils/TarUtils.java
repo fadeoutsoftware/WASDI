@@ -2,6 +2,7 @@ package wasdi.shared.utils;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -10,6 +11,7 @@ import java.util.List;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.net.io.Util;
 
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -34,7 +36,6 @@ public class TarUtils {
 	public static boolean tarFiles(List<String> asInputFilesFullPath, String sInputFilesBaseFolder, String sOutputTarFileFullPath) {
 		boolean bRes = false;
 		
-		
 		try (OutputStream oOutputStream = Files.newOutputStream(Paths.get(sOutputTarFileFullPath)); // Stream to the output file
 				// Lets tar this stream
 				BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oOutputStream);
@@ -42,6 +43,8 @@ public class TarUtils {
 						
 			// For all the files to add to the TAR
 			for (String sInputFile : asInputFilesFullPath) {
+				
+				if (sInputFile.equals(sOutputTarFileFullPath)) continue;
 				
 				// This is the input file
 				File oFile = new File(sInputFile);
@@ -54,7 +57,12 @@ public class TarUtils {
 				// Write in the tar
 				oTarArchiveEntry.setSize(Files.size(oFile.toPath()));
 				oTarOutputStream.putArchiveEntry(oTarArchiveEntry);
-				oTarOutputStream.write(FileUtils.readFileToByteArray(oFile));
+				
+				// Use a stream
+				InputStream oFileInputStream = FileUtils.openInputStream(oFile);
+				Util.copyStream(oFileInputStream, oTarOutputStream);
+				
+				oTarOutputStream.flush();
 				
 				// Close it
 				oTarOutputStream.closeArchiveEntry();

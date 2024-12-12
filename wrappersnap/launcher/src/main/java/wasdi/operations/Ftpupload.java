@@ -21,7 +21,7 @@ public class Ftpupload extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		WasdiLog.debugLog("Ftpupload.executeOperation");
+		WasdiLog.infoLog("Ftpupload.executeOperation");
 		
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");

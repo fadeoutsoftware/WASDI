@@ -40,11 +40,12 @@ import wasdi.shared.payloads.DeleteProcessorPayload;
 import wasdi.shared.payloads.DeployProcessorPayload;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
 /**
@@ -343,6 +344,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Check if the processor is available on the node
             if (!isProcessorOnNode(oParameter)) {
                 WasdiLog.infoLog("DockerProcessorEngine.run: processor not available on node download it");
+                processWorkspaceLog("Application not available on this node: installing it...");
                 
                 m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "APP NOT ON NODE<BR>INSTALLATION STARTED", m_oParameter.getExchange());
 
@@ -361,10 +363,12 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             	
             	if (bBuildLocally) {
             		bResult = deploy(oParameter, false);
+            		processWorkspaceLog("Local build done, starting application!");
             	}
             	else {
             		File oZipFile = new File(sProcessorZipFile);
             		bResult = unzipProcessor(PathsConfig.getProcessorFolder(oProcessor), oZipFile.getName(), oParameter.getProcessObjId());
+            		processWorkspaceLog("Pulling Application image from register");
             	}
             	
             	if (!bResult) {
@@ -1029,7 +1033,22 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
             
             long lTimeSpentMs = 0;
-            int iThreadSleepMs = 2000;
+            
+            long iThreadSleepMs = 2000;
+            
+			// Read the sleep time beween steps
+			try {
+				long iThreadSleep = Long.parseLong(WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS);
+				if (iThreadSleep>0) {
+					iThreadSleepMs = iThreadSleep;
+				}
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("DockerProcessorEngine.waitForApplicationToFinish: Could not read processingThreadSleepingTimeMS config: " + oEx);
+			}	
+			
+			int iSometimesCheck = 30;
+			int iCycleCount = 0;
+            
             boolean bForcedError = false;
 
             // Wait for the process to finish, while checking timeout
@@ -1044,9 +1063,35 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
+                
+                if (sStatus.equals(ProcessStatus.RUNNING.name())) {
+                    // Increase the time only if it is in RUNNING
+                    lTimeSpentMs += iThreadSleepMs;                	
+                }
+                
+                iCycleCount++;
+                
+                if (iCycleCount == iSometimesCheck) {
+                	iCycleCount = 0;
+                	
+					// Get the PID
+					String sPidOrContainerId = "" + oProcessWorkspace.getPid();
 
-                // Increase the time
-                lTimeSpentMs += iThreadSleepMs;
+					if (!WasdiConfig.Current.shellExecLocally) {
+						sPidOrContainerId = oProcessWorkspace.getContainerId();
+					}						
+					
+					// Check if it is alive
+					if (!Utils.isNullOrEmpty(sPidOrContainerId)) {
+						if (!RunTimeUtils.isProcessStillAllive(sPidOrContainerId)) {
+							// PID does not exists: recheck and remove
+							WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has PID " + sPidOrContainerId + ", but looks not existing. I would KILL it");
+						}
+					}
+					else {
+						WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has null PID. I would KILL it");
+					}                	
+                }
 
                 if (oProcessor.getTimeoutMs() > 0) {
                     if (lTimeSpentMs > oProcessor.getTimeoutMs()) {
@@ -1054,10 +1099,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                         WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToFinish: Timeout of Processor with ProcId " + oProcessWorkspace.getProcessObjId() + " Time spent [ms] " + lTimeSpentMs);
 
                         // Update process and rabbit users
-                        LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+                        LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.STOPPED, 100);
                         bForcedError = true;
                         // Force cycle to exit
-                        sStatus = ProcessStatus.ERROR.name();
+                        sStatus = ProcessStatus.STOPPED.name();
                     }
                 }
             }
@@ -1310,7 +1355,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 				String sFileFullPath = sProcessorFolder + "packagesInfo.json";
 
-				bResult= WasdiFileUtils.writeMapAsJsonFile(aoPackagesInfo, sFileFullPath);
+				bResult= JsonUtils.writeMapAsJsonFile(aoPackagesInfo, sFileFullPath);
 
 				if (!bResult) {
 					WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: the packagesInfo.json file was not created.");

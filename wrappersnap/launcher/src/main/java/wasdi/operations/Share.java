@@ -3,7 +3,7 @@ package wasdi.operations;
 import java.io.File;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.esa.snap.core.datamodel.Product;
 
 import wasdi.ProcessWorkspaceUpdateSubscriber;
@@ -71,12 +71,13 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 			}
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("Share.executeOperationFile: Exception: " + oEx);
-			WasdiLog.debugLog("Share.executeOperationFile: " + ExceptionUtils.getStackTrace(oEx));
 		}
 	}
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
+		
+		WasdiLog.infoLog("Share.executeOperation");
 
 		if (oParam == null) {
 			WasdiLog.errorLog("Share.executeOperation:Parameter is null");
@@ -189,7 +190,6 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 
 				m_oProcessWorkspaceLogger.log("Got File, try to read");
 
-
 				// Save it in the register
 				DownloadedFile oAlreadyDownloaded = new DownloadedFile();
 				oAlreadyDownloaded.setFileName(sFileNameWithoutPath);
@@ -201,7 +201,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 				if (!Utils.isNullOrEmpty(sBoundingBox)) {
 					oAlreadyDownloaded.setBoundingBox(sBoundingBox);
 				} else {
-					WasdiLog.infoLog("Share.executeOperation: bounding box not available in the parameter");
+					WasdiLog.debugLog("Share.executeOperation: bounding box not available in the parameter");
 				}
 
 				if (oProduct != null) {
@@ -222,7 +222,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 			// Final Check: do we have at the end a valid file name?
 			if (Utils.isNullOrEmpty(sFileName)) {
 				// No, we are in error
-				WasdiLog.debugLog("Share.executeOperation: file is null there must be an error");
+				WasdiLog.errorLog("Share.executeOperation: file is null there must be an error");
 
 				String sError = "The name of the file to share result null";
 				m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.SHARE.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
@@ -239,8 +239,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 			m_oProcessWorkspaceLogger.log(new EndMessageProvider().getGood());
 
 			DownloadPayload oDownloadPayload = new DownloadPayload();
-			oDownloadPayload.setFileName(Utils.getFileNameWithoutLastExtension(sFileName));
-//			oDownloadPayload.setProvider(oParameter.getProvider());
+			oDownloadPayload.setFileName(WasdiFileUtils.getFileNameWithoutLastExtension(sFileName));
 
 			setPayload(oProcessWorkspace, oDownloadPayload);
 
@@ -250,10 +249,9 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 			return true;			
 
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("Share.executeOperation: Exception "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			WasdiLog.errorLog("Share.executeOperation: Exception " + ExceptionUtils.getStackTrace(oEx));
 
-			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+			String sError = ExceptionUtils.getMessage(oEx);
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 			m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.SHARE.name(), oParam.getWorkspace(),
 					sError, oParam.getExchange());

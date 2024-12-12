@@ -38,8 +38,9 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	public static final String  SODATA_SIZE = "ContentLength";
 	private static final String SODATA_TYPE = "type";
 	private static final String SODATA_VALUE = "Value";
+	private static final String SODATA_BEGINNING_DATE_TIME = "beginningDateTime";
 	
-	private static final String SODATA_BASE_DOWNLOAD_URL = "https://datahub.creodias.eu/odata/v1/Products(";
+	private static final String SODATA_BASE_DOWNLOAD_URL = "https://zipper.creodias.eu/odata/v1/Products(";
 	private static final String SODATA_END_DOWNLOAD_URL = ")/$value";
 	
 	// WASDI  keywords
@@ -80,20 +81,25 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ResponseTranslatorCREODIAS.translateBatch: " + oE);
+			WasdiLog.errorLog("ResponseTranslatorCREODIAS.translateBatch. Exception when translating the Creodias results in the Wasdi view model ", oE);
 			return Collections.emptyList();
 		}
 		
 		return aoResults;
 	}
 	
+	/**
+	 * Method for extracting the information related to a single product returned by Creodias in Json format and saving it in a view model.
+	 * @param oJsonItem the Json representation of a product, as returned by the Creodias API.
+	 * @param bFullViewModel determines the amount of information to be stored in the view model. When true, the view model is populated with complete information about the product. When false only the essential information is added.
+	 * @return the WASDI result view model for a product
+	 */
 	private QueryResultViewModel processProduct(JSONObject oJsonItem, boolean bFullViewModel) {
 		// BASIC INFO: title, summary, product id, link, footprint, provider id
 		String sProductTitle =  removeExtensionFromProductTitle(oJsonItem.optString(SODATA_NAME));
 		String sProductId = oJsonItem.optString(SODATA_PRODUCT_ID);
 		String sLink = SODATA_BASE_DOWNLOAD_URL + sProductId + SODATA_END_DOWNLOAD_URL;
 		String sFootprint = parseFootPrint(oJsonItem);
-		String sDate = oJsonItem.optString(SODATA_DATE);
 		double dByteSize = (double) oJsonItem.optLong(SODATA_SIZE, -1L);
 		String sSize = dByteSize > 0 ? Utils.getNormalizedSize(dByteSize) : "";
 		String sS3Path = oJsonItem.optString(SODATA_S3_PATH);
@@ -105,6 +111,12 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		String sPlatform = getAttribute(aoAttributes, SODATA_PLATFORM_SHORT_NAME);
 		String sPlatformSerialId = getAttribute(aoAttributes, SODATA_PLATFORM_SERIAL_ID);
 		String sRelativeOrbit = getAttribute(aoAttributes, SODATA_RELATIVE_ORBIT);
+		String sBeginningDateTime = getAttribute(aoAttributes, SODATA_BEGINNING_DATE_TIME);
+		
+		// retrieve product date
+		String sDate = !Utils.isNullOrEmpty(sBeginningDateTime) 
+				? sBeginningDateTime 
+				: oJsonItem.optString(SODATA_DATE);
 				
 		String sSummary = getSummary(sDate, sSize, sInstrument, sMode, sPlatform, sPlatformSerialId);
 		
@@ -118,13 +130,27 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	}
 	
 	
+	/**
+	 * Remove the file extension from the title of the product
+	 * @param sProductTitle the title of the product
+	 * @return the sama title, without the file extension at the end
+	 */
 	public static String removeExtensionFromProductTitle(String sProductTitle) {
 		return sProductTitle.replace(".SAFE", "")	// extension for Sentinel-1 and Sentinel-2
-				.replace(".SEN3", "") 	// extension for Sentinel-3
-				.replace(".nc", ""); // extension for Sentine-5
+				.replace(".SEN3", "") 				// extension for Sentinel-3
+				.replace(".nc", "")					// extension for Sentine-5
+				.replace(".SEN6", ""); 				// extension for Sentine-6
 	}
 	
 	
+	/**
+	 * Set the minimum set of information of a product in the view model
+	 * @param oViewModel the view model to be sent to the client
+	 * @param sProductId the id of the product on Creodias
+	 * @param sProductTitle the title of the product
+	 * @param sSummary the string representing the summary of the the main properties of the product
+	 * @param sFootprint the string representing the footprint of the product
+	 */
 	private void setBasicInfo(QueryResultViewModel oViewModel, String sProductId, String sProductTitle, String sLink, String sSummary, String sFootprint) {
 		oViewModel.setProvider("CREODIAS2");
 		
@@ -144,6 +170,17 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 			oViewModel.setFootprint(sFootprint);
 	}
 	
+	/**
+	 * Set the minimum set of properties in the map of the view model
+	 * @param oViewModel the view model to be sent to the client
+	 * @param sDate the reference date for the product
+	 * @param sPlatform the product's platform
+	 * @param sPlatformSerialId the platform's serial id (e.g. A or Be, for Sentinel-1)
+	 * @param sInstrument the instrument
+	 * @param sMode the sensor mode
+	 * @param sSize the size of the file
+	 * @param sRelativeOrbit the relative orbit 
+	 */
 	private void setBasicProperties(QueryResultViewModel oViewModel, String sDate, String sPlatform, String sPlatformSerialId, String sInstrument, String sMode, String sSize, String sRelativeOrbit) {
 		Map<String, String> oMapProperties = oViewModel.getProperties();
 		
@@ -168,7 +205,16 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		
 	}
 	
-	
+	/**
+	 * Creates and stores in the view model the link that the provider adapter will use to download a product from Creodias.
+	 * The link is actually a string made by a concatenation of four values, separated by comma: the URL to download the file from Creodias,
+	 * the name that will be used to save the downloaded copy of the file (with the zip extension), the size of the file and its S3Path on creodias. 
+	 * @param oResult the view model where the link string will be stored
+	 * @param sDownloadLink the URL to be used for downloading a product from Creodias
+	 * @param sProductTitle the name of the product to download (without any extension)
+	 * @param dSizeInBytes the size of the product 
+	 * @param sS3Path the S3 path on Creodias
+	 */
 	private void setLink(QueryResultViewModel oResult, double dSizeInBytes, String sS3Path) {
 		Preconditions.checkNotNull(oResult, "result view model is null");
 		try {
@@ -177,7 +223,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 			
 			String sLink = oResult.getLink(); 
 			if(Utils.isNullOrEmpty(sLink)) {
-				WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: the download URL is null or empty. Product title: " + oResult.getTitle() );
+				WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: the download URL is null or empty. ");
 				sLink = "http://";
 			} 
 			oLink.append(sLink).append(SLINK_SEPARATOR_CREODIAS2); //0: on-line download link
@@ -212,7 +258,11 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	}
 	
 	
-	
+	/**
+	 * Takes all the product's attributes sent by Creodias and stores them in the view model's attribute 
+	 * @param oViewModel the view model 
+	 * @param aoAttributes the json array of attributes, as sent by Creodias
+	 */
 	private void setAllProviderProperties(QueryResultViewModel oViewModel, JSONArray aoAttributes) {
 		Map<String, String> oMapProperties = oViewModel.getProperties();
 		for (Object oAtt : aoAttributes) {
@@ -222,7 +272,12 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	}
 	
 	
-
+	/**
+	 * Returns the value of a given attribute from the array of attributes sent by Creodias
+	 * @param aoAttributes the array of attributes
+	 * @param sAttributeName the name of the attribute to look for
+	 * @return the value of the attribute
+	 */
 	private String getAttribute(JSONArray aoAttributes, String sAttributeName) {
 		for (Object oAtt : aoAttributes) {
 			JSONObject oJsonAtt = (JSONObject) oAtt;
@@ -232,7 +287,15 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		return "";
 	}
 	
-	
+	/**
+	 * @param sDate date of reference
+	 * @param sSize size of the file
+	 * @param sInstrument instrument
+	 * @param sMode sensor mode
+	 * @param sPlatform platform name (e.g. Sentinel-1)
+	 * @param sPlatformSerialId the id of the platform (e.g. A or B for Sentinel-1)
+	 * @return the string representing the summary of the main info about the product
+	 */
 	private String getSummary(String sDate, String sSize, String sInstrument, String sMode, String sPlatform, String sPlatformSerialId) {
 		List<String> asRes = new ArrayList<>();
 		if (!Utils.isNullOrEmpty(sDate))
@@ -249,7 +312,10 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		
 	}
 	
-	
+	/**
+	 * @param oJsonObject the whole Json object describing the product, as sent by Creosias
+	 * @return the string representing the footprint in the WASDI format
+	 */
 	private String parseFootPrint(JSONObject oJsonObject) {
 		try {
 			JSONObject oJsonFootprint = new JSONObject(oJsonObject.optString(SODATA_FOOTPRINT));
@@ -275,6 +341,10 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		return "";	
 	}
 	
+	/**
+	 * @param aoCoordinates the json array of coordinates sent by Creodias
+	 * @return the string representing the concatenation of coordinates, in the format: "X1 Y1, X2 Y2, X3 Y3"
+	 */
 	private String parseCoordinates(JSONArray aoCoordinates) {
 		List<String> asCoordinates = new ArrayList<>();
 		for (Object oItem: aoCoordinates) {
@@ -305,23 +375,6 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		iCount = (Integer) aoProperties.get("@odata.count");
 		
 		return iCount;
-	}
-	
-	public static void main(String[] args) throws Exception {
-		System.out.println("here");
-		String sJson = "{\"@odata.context\":\"$metadata#Products(Attributes())\",\"value\":[{\"@odata.mediaContentType\":\"application/octet-stream\",\"Id\":\"b01f1287-eba8-4faf-8600-f0733470b30a\",\"Name\":\"LC08_L1TP_195028_20230703_20230703_02_RT\",\"ContentType\":\"application/octet-stream\",\"ContentLength\":1369917440,\"OriginDate\":\"2023-07-03T10:16:32.529Z\",\"PublicationDate\":\"2023-07-05T10:52:09.616Z\",\"ModificationDate\":\"2023-07-05T10:52:09.616Z\",\"Online\":true,\"EvictionDate\":\"\",\"S3Path\":\"/eodata/Landsat-8/OLI_TIRS/L1TP/2023/07/03/LC08_L1TP_195028_20230703_20230703_02_RT\",\"Checksum\":[{}],\"ContentDate\":{\"Start\":\"2023-07-03T10:16:32.529Z\",\"End\":\"2023-07-03T10:16:32.529Z\"},\"Footprint\":\"geography'SRID=4326;POLYGON ((5.82802 47.07606, 5.94948 44.91108, 8.95943 44.95183, 8.95781 47.12, 5.82802 47.07606))'\",\"GeoFootprint\":{\"type\":\"Polygon\",\"coordinates\":[[[5.82802,47.07606],[5.94948,44.91108],[8.95943,44.95183],[8.95781,47.12],[5.82802,47.07606]]]},\"Attributes\":[{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"authority\",\"Value\":\"ESA\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"rowNumber\",\"Value\":28,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.DoubleAttribute\",\"Name\":\"cloudCover\",\"Value\":29.0,\"ValueType\":\"Double\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"pathNumber\",\"Value\":195,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sensorType\",\"Value\":\"OPTICAL\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"composition\",\"Value\":\"LC\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"numberOfBands\",\"Value\":12,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"acquisitionType\",\"Value\":\"NOMINAL\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"operationalMode\",\"Value\":\"DEFAULT\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"processingLevel\",\"Value\":\"LEVEL1TP\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sunAzimuthAngle\",\"Value\":139.02850055,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"platformShortName\",\"Value\":\"LANDSAT-8\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"spatialResolution\",\"Value\":100,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sunElevationAngle\",\"Value\":62.05285548,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"collectionCategory\",\"Value\":\"RT\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"instrumentShortName\",\"Value\":\"OLI_TIRS\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"productType\",\"Value\":\"L1TP\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.DateTimeOffsetAttribute\",\"Name\":\"beginningDateTime\",\"Value\":\"2023-07-03T10:16:32.529Z\",\"ValueType\":\"DateTimeOffset\"},{\"@odata.type\":\"#OData.CSC.DateTimeOffsetAttribute\",\"Name\":\"endingDateTime\",\"Value\":\"2023-07-03T10:16:32.529Z\",\"ValueType\":\"DateTimeOffset\"}]},{\"@odata.mediaContentType\":\"application/octet-stream\",\"Id\":\"5d82719f-7c52-42bf-b6a3-28d7f27113b0\",\"Name\":\"LC08_L1TP_195029_20230703_20230703_02_RT\",\"ContentType\":\"application/octet-stream\",\"ContentLength\":1340897280,\"OriginDate\":\"2023-07-03T10:16:56.415Z\",\"PublicationDate\":\"2023-07-05T10:54:38.185Z\",\"ModificationDate\":\"2023-07-05T10:54:38.185Z\",\"Online\":true,\"EvictionDate\":\"\",\"S3Path\":\"/eodata/Landsat-8/OLI_TIRS/L1TP/2023/07/03/LC08_L1TP_195029_20230703_20230703_02_RT\",\"Checksum\":[{}],\"ContentDate\":{\"Start\":\"2023-07-03T10:16:56.415Z\",\"End\":\"2023-07-03T10:16:56.415Z\"},\"Footprint\":\"geography'SRID=4326;POLYGON ((5.34363 45.6494, 5.47694 43.48494, 8.41456 43.53775, 8.39235 45.70634, 5.34363 45.6494))'\",\"GeoFootprint\":{\"type\":\"Polygon\",\"coordinates\":[[[5.34363,45.6494],[5.47694,43.48494],[8.41456,43.53775],[8.39235,45.70634],[5.34363,45.6494]]]},\"Attributes\":[{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"authority\",\"Value\":\"ESA\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"rowNumber\",\"Value\":29,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.DoubleAttribute\",\"Name\":\"cloudCover\",\"Value\":18.0,\"ValueType\":\"Double\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"pathNumber\",\"Value\":195,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sensorType\",\"Value\":\"OPTICAL\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"composition\",\"Value\":\"LC\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"numberOfBands\",\"Value\":12,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"acquisitionType\",\"Value\":\"NOMINAL\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"operationalMode\",\"Value\":\"DEFAULT\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"processingLevel\",\"Value\":\"LEVEL1TP\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sunAzimuthAngle\",\"Value\":136.47892546,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"platformShortName\",\"Value\":\"LANDSAT-8\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"spatialResolution\",\"Value\":100,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sunElevationAngle\",\"Value\":62.90773812,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"collectionCategory\",\"Value\":\"RT\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"instrumentShortName\",\"Value\":\"OLI_TIRS\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"productType\",\"Value\":\"L1TP\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.DateTimeOffsetAttribute\",\"Name\":\"beginningDateTime\",\"Value\":\"2023-07-03T10:16:56.415Z\",\"ValueType\":\"DateTimeOffset\"},{\"@odata.type\":\"#OData.CSC.DateTimeOffsetAttribute\",\"Name\":\"endingDateTime\",\"Value\":\"2023-07-03T10:16:56.415Z\",\"ValueType\":\"DateTimeOffset\"}]},{\"@odata.mediaContentType\":\"application/octet-stream\",\"Id\":\"140a0cf4-0f06-4885-83d8-e1f7c8d1f419\",\"Name\":\"LC08_L1TP_195030_20230703_20230703_02_RT\",\"ContentType\":\"application/octet-stream\",\"ContentLength\":1154795520,\"OriginDate\":\"2023-07-03T10:17:20.302Z\",\"PublicationDate\":\"2023-07-05T10:43:14.011Z\",\"ModificationDate\":\"2023-07-05T10:43:14.011Z\",\"Online\":true,\"EvictionDate\":\"\",\"S3Path\":\"/eodata/Landsat-8/OLI_TIRS/L1TP/2023/07/03/LC08_L1TP_195030_20230703_20230703_02_RT\",\"Checksum\":[{}],\"ContentDate\":{\"Start\":\"2023-07-03T10:17:20.302Z\",\"End\":\"2023-07-03T10:17:20.302Z\"},\"Footprint\":\"geography'SRID=4326;POLYGON ((4.8737 44.22096, 5.01711 42.05443, 7.8907 42.11824, 7.85063 44.28977, 4.8737 44.22096))'\",\"GeoFootprint\":{\"type\":\"Polygon\",\"coordinates\":[[[4.8737,44.22096],[5.01711,42.05443],[7.8907,42.11824],[7.85063,44.28977],[4.8737,44.22096]]]},\"Attributes\":[{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"authority\",\"Value\":\"ESA\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"rowNumber\",\"Value\":30,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.DoubleAttribute\",\"Name\":\"cloudCover\",\"Value\":6.0,\"ValueType\":\"Double\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"pathNumber\",\"Value\":195,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sensorType\",\"Value\":\"OPTICAL\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"composition\",\"Value\":\"LC\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"numberOfBands\",\"Value\":12,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"acquisitionType\",\"Value\":\"NOMINAL\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"operationalMode\",\"Value\":\"DEFAULT\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"processingLevel\",\"Value\":\"LEVEL1TP\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sunAzimuthAngle\",\"Value\":133.80062295,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"platformShortName\",\"Value\":\"LANDSAT-8\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"spatialResolution\",\"Value\":100,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sunElevationAngle\",\"Value\":63.71449917,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"collectionCategory\",\"Value\":\"RT\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"instrumentShortName\",\"Value\":\"OLI_TIRS\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"productType\",\"Value\":\"L1TP\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.DateTimeOffsetAttribute\",\"Name\":\"beginningDateTime\",\"Value\":\"2023-07-03T10:17:20.302Z\",\"ValueType\":\"DateTimeOffset\"},{\"@odata.type\":\"#OData.CSC.DateTimeOffsetAttribute\",\"Name\":\"endingDateTime\",\"Value\":\"2023-07-03T10:17:20.302Z\",\"ValueType\":\"DateTimeOffset\"}]},{\"@odata.mediaContentType\":\"application/octet-stream\",\"Id\":\"11861c22-7ca7-490b-9ead-d5cf085ed106\",\"Name\":\"LC08_L1TP_193028_20230705_20230705_02_RT\",\"ContentType\":\"application/octet-stream\",\"ContentLength\":1347430400,\"OriginDate\":\"2023-07-05T10:04:12.130Z\",\"PublicationDate\":\"2023-07-11T00:14:20.059Z\",\"ModificationDate\":\"2023-07-11T00:14:20.059Z\",\"Online\":true,\"EvictionDate\":\"\",\"S3Path\":\"/eodata/Landsat-8/OLI_TIRS/L1TP/2023/07/05/LC08_L1TP_193028_20230705_20230705_02_RT\",\"Checksum\":[{}],\"ContentDate\":{\"Start\":\"2023-07-05T10:04:12.130Z\",\"End\":\"2023-07-05T10:04:12.130Z\"},\"Footprint\":\"geography'SRID=4326;POLYGON ((9.01318 47.09301, 9.01268 44.97614, 11.95182 44.93798, 12.06652 47.05194, 9.01318 47.09301))'\",\"GeoFootprint\":{\"type\":\"Polygon\",\"coordinates\":[[[9.01318,47.09301],[9.01268,44.97614],[11.95182,44.93798],[12.06652,47.05194],[9.01318,47.09301]]]},\"Attributes\":[{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"authority\",\"Value\":\"ESA\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"rowNumber\",\"Value\":28,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.DoubleAttribute\",\"Name\":\"cloudCover\",\"Value\":25.0,\"ValueType\":\"Double\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"pathNumber\",\"Value\":193,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sensorType\",\"Value\":\"OPTICAL\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"composition\",\"Value\":\"LC\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"numberOfBands\",\"Value\":12,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"acquisitionType\",\"Value\":\"NOMINAL\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"operationalMode\",\"Value\":\"DEFAULT\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"processingLevel\",\"Value\":\"LEVEL1TP\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sunAzimuthAngle\",\"Value\":139.06558545,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"platformShortName\",\"Value\":\"LANDSAT-8\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"spatialResolution\",\"Value\":100,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sunElevationAngle\",\"Value\":61.86329262,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"collectionCategory\",\"Value\":\"RT\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"instrumentShortName\",\"Value\":\"OLI_TIRS\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"productType\",\"Value\":\"L1TP\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.DateTimeOffsetAttribute\",\"Name\":\"beginningDateTime\",\"Value\":\"2023-07-05T10:04:12.130Z\",\"ValueType\":\"DateTimeOffset\"},{\"@odata.type\":\"#OData.CSC.DateTimeOffsetAttribute\",\"Name\":\"endingDateTime\",\"Value\":\"2023-07-05T10:04:12.130Z\",\"ValueType\":\"DateTimeOffset\"}]},{\"@odata.mediaContentType\":\"application/octet-stream\",\"Id\":\"c5f7d19a-f469-4200-b7bd-82ffecb10909\",\"Name\":\"LC08_L1TP_193029_20230705_20230705_02_RT\",\"ContentType\":\"application/octet-stream\",\"ContentLength\":1300039680,\"OriginDate\":\"2023-07-05T10:04:36.017Z\",\"PublicationDate\":\"2023-07-11T00:35:47.820Z\",\"ModificationDate\":\"2023-07-11T00:35:47.820Z\",\"Online\":true,\"EvictionDate\":\"\",\"S3Path\":\"/eodata/Landsat-8/OLI_TIRS/L1TP/2023/07/05/LC08_L1TP_193029_20230705_20230705_02_RT\",\"Checksum\":[{}],\"ContentDate\":{\"Start\":\"2023-07-05T10:04:36.017Z\",\"End\":\"2023-07-05T10:04:36.017Z\"},\"Footprint\":\"geography'SRID=4326;POLYGON ((8.5237 45.66916, 8.54074 43.54643, 11.41411 43.52186, 11.50357 45.64271, 8.5237 45.66916))'\",\"GeoFootprint\":{\"type\":\"Polygon\",\"coordinates\":[[[8.5237,45.66916],[8.54074,43.54643],[11.41411,43.52186],[11.50357,45.64271],[8.5237,45.66916]]]},\"Attributes\":[{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"authority\",\"Value\":\"ESA\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"rowNumber\",\"Value\":29,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.DoubleAttribute\",\"Name\":\"cloudCover\",\"Value\":22.0,\"ValueType\":\"Double\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"pathNumber\",\"Value\":193,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sensorType\",\"Value\":\"OPTICAL\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"composition\",\"Value\":\"LC\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"numberOfBands\",\"Value\":12,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"acquisitionType\",\"Value\":\"NOMINAL\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"operationalMode\",\"Value\":\"DEFAULT\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"processingLevel\",\"Value\":\"LEVEL1TP\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sunAzimuthAngle\",\"Value\":136.53544422,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"platformShortName\",\"Value\":\"LANDSAT-8\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"spatialResolution\",\"Value\":100,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sunElevationAngle\",\"Value\":62.71918202,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"collectionCategory\",\"Value\":\"RT\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"instrumentShortName\",\"Value\":\"OLI_TIRS\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"productType\",\"Value\":\"L1TP\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.DateTimeOffsetAttribute\",\"Name\":\"beginningDateTime\",\"Value\":\"2023-07-05T10:04:36.017Z\",\"ValueType\":\"DateTimeOffset\"},{\"@odata.type\":\"#OData.CSC.DateTimeOffsetAttribute\",\"Name\":\"endingDateTime\",\"Value\":\"2023-07-05T10:04:36.017Z\",\"ValueType\":\"DateTimeOffset\"}]},{\"@odata.mediaContentType\":\"application/octet-stream\",\"Id\":\"cef12a18-84d8-4934-a77e-27c50bcb50b2\",\"Name\":\"LC08_L1TP_193030_20230705_20230705_02_RT\",\"ContentType\":\"application/octet-stream\",\"ContentLength\":1088471040,\"OriginDate\":\"2023-07-05T10:04:59.904Z\",\"PublicationDate\":\"2023-07-11T00:14:05.737Z\",\"ModificationDate\":\"2023-07-11T00:14:05.737Z\",\"Online\":true,\"EvictionDate\":\"\",\"S3Path\":\"/eodata/Landsat-8/OLI_TIRS/L1TP/2023/07/05/LC08_L1TP_193030_20230705_20230705_02_RT\",\"Checksum\":[{}],\"ContentDate\":{\"Start\":\"2023-07-05T10:04:59.904Z\",\"End\":\"2023-07-05T10:04:59.904Z\"},\"Footprint\":\"geography'SRID=4326;POLYGON ((8.05072 44.24029, 8.08309 42.11454, 10.89512 42.10255, 10.96199 44.22738, 8.05072 44.24029))'\",\"GeoFootprint\":{\"type\":\"Polygon\",\"coordinates\":[[[8.05072,44.24029],[8.08309,42.11454],[10.89512,42.10255],[10.96199,44.22738],[8.05072,44.24029]]]},\"Attributes\":[{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"authority\",\"Value\":\"ESA\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"rowNumber\",\"Value\":30,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.DoubleAttribute\",\"Name\":\"cloudCover\",\"Value\":7.0,\"ValueType\":\"Double\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"pathNumber\",\"Value\":193,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sensorType\",\"Value\":\"OPTICAL\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"composition\",\"Value\":\"LC\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"numberOfBands\",\"Value\":12,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"acquisitionType\",\"Value\":\"NOMINAL\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"operationalMode\",\"Value\":\"DEFAULT\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"processingLevel\",\"Value\":\"LEVEL1TP\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sunAzimuthAngle\",\"Value\":133.87859552,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"platformShortName\",\"Value\":\"LANDSAT-8\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"spatialResolution\",\"Value\":100,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"sunElevationAngle\",\"Value\":63.52734423,\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"collectionCategory\",\"Value\":\"RT\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"instrumentShortName\",\"Value\":\"OLI_TIRS\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.StringAttribute\",\"Name\":\"productType\",\"Value\":\"L1TP\",\"ValueType\":\"String\"},{\"@odata.type\":\"#OData.CSC.DateTimeOffsetAttribute\",\"Name\":\"beginningDateTime\",\"Value\":\"2023-07-05T10:04:59.904Z\",\"ValueType\":\"DateTimeOffset\"},{\"@odata.type\":\"#OData.CSC.DateTimeOffsetAttribute\",\"Name\":\"endingDateTime\",\"Value\":\"2023-07-05T10:04:59.904Z\",\"ValueType\":\"DateTimeOffset\"}]}]}";
-		ResponseTranslatorCreoDias2 oRT = new ResponseTranslatorCreoDias2();
-		List<QueryResultViewModel> aoRes = oRT.translateBatch(sJson, true);
-		for (QueryResultViewModel oVM : aoRes) {
-			System.out.println("Product id: " + oVM.getId());
-			System.out.println("Product name: " + oVM.getTitle());
-			System.out.println("Download Link: " + oVM.getLink());
-			System.out.println("Footprint: " + oVM.getFootprint());
-			System.out.println("Provider: "+ oVM.getProvider());
-			System.out.println("Summary: " + oVM.getSummary());
-			System.out.println();
-		}
-		
 	}
 
 }

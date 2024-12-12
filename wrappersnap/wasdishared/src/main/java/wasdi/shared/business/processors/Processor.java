@@ -70,6 +70,16 @@ public class Processor {
 	private Float subscriptionPrice = 0.0f; 
 	
 	/**
+	 * Product id on Stripe
+	 */
+	private String stripeProductId = "";
+	
+	/**
+	 * Stripe on demand payment link
+	 */
+	private String stripePaymentLinkId = "";
+	
+	/**
 	 * Application external link
 	 */
 	private String link = "";
@@ -124,6 +134,11 @@ public class Processor {
 	 * Log of the build operations
 	 */
 	private ArrayList<String> buildLogs = new ArrayList<String>();
+	
+	/**
+	 * Flag to keep track of an ongoing deployment/redeployment
+	 */
+	private boolean isDeploymentOngoing = false;
 	
 	/**
 	 * List of associated categories
@@ -254,6 +269,18 @@ public class Processor {
 	public void setSubscriptionPrice(Float subscriptionPrice) {
 		this.subscriptionPrice = subscriptionPrice;
 	}
+	public String getStripeProductId() {
+		return stripeProductId;
+	}
+	public void setStripeProductId(String stripeProductId) {
+		this.stripeProductId = stripeProductId;
+	}
+	public String getStripePaymentLinkId() {
+		return stripePaymentLinkId;
+	}
+	public void setStripePaymentLinkId(String stripePaymentLinkId) {
+		this.stripePaymentLinkId = stripePaymentLinkId;
+	}
 	public boolean getShowInStore() {
 		return showInStore;
 	}
@@ -284,5 +311,10 @@ public class Processor {
 	public void setBuildLogs(ArrayList<String> buildLogs) {
 		this.buildLogs = buildLogs;
 	}
-	
+	public boolean isDeploymentOngoing() {
+		return isDeploymentOngoing;
+	}
+	public void setDeploymentOngoing(boolean isDeploymentOngoing) {
+		this.isDeploymentOngoing = isDeploymentOngoing;
+	}
 }

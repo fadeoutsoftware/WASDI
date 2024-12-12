@@ -152,6 +152,9 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return getPermissionsByTypeAndUserId(ResourceTypes.PARAMETER.getResourceType(), sUserId);
 	}
 
+	public List<UserResourcePermission> getMissionsharingByUserId(String sUserId) {
+		return getPermissionsByTypeAndUserId(ResourceTypes.MISSION.getResourceType(), sUserId);
+	}
 
 
 	public List<UserResourcePermission> getPermissionsByResourceId(String sResourceId) {
@@ -284,11 +287,11 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 			if (null != oWSDocument) {
 				String sJSON = oWSDocument.toJson();
-				UserResourcePermission oStyleSharing;
+				UserResourcePermission oResourceSharing;
 
 				try {
-					oStyleSharing = s_oMapper.readValue(sJSON, UserResourcePermission.class);
-					return oStyleSharing;
+					oResourceSharing = s_oMapper.readValue(sJSON, UserResourcePermission.class);
+					return oResourceSharing;
 				} catch (IOException e) {
 					WasdiLog.errorLog("UserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId : exception ", e);
 				}
@@ -471,6 +474,29 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 		return 0;
 	}
+	
+	public int deletePermissionsByTypeAndUserId(String sType, String sResourceId) {
+		if (Utils.isNullOrEmpty(sType)) {
+			return 0;
+		}
+
+		if (Utils.isNullOrEmpty(sResourceId)) {
+			return 0;
+		}
+
+		try {
+			DeleteResult oDeleteResult = getCollection(m_sThisCollection)
+					.deleteMany(Filters.and(Filters.eq("resourceType", sType), Filters.eq("userId", sResourceId)));
+
+			if (oDeleteResult != null) {
+				return (int) oDeleteResult.getDeletedCount();
+			}
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("UserResourcePermissionRepository.deletePermissionsByTypeAndResourceId : exception ", oEx);
+		}
+
+		return 0;
+	}
 
 	public int deletePermissionsByNodeCode(String sNodeCode) {
 		return deletePermissionsByTypeAndResourceId(ResourceTypes.NODE.getResourceType(), sNodeCode);
@@ -504,16 +530,18 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return deletePermissionsByTypeAndResourceId(ResourceTypes.PARAMETER.getResourceType(), sProcessorParameterTemplateId);
 	}	
 
-
-
+	/**
+	 * Deletes all the permissions where User Id is the target
+	 * @param sUserId
+	 * @return
+	 */
 	public int deletePermissionsByUserId(String sUserId) {
 		if (Utils.isNullOrEmpty(sUserId)) {
 			return 0;
 		}
 
 		try {
-			DeleteResult oDeleteResult = getCollection(m_sThisCollection)
-					.deleteMany(new Document("userId", sUserId));
+			DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteMany(new Document("userId", sUserId));
 
 			if (oDeleteResult != null) {
 				return (int) oDeleteResult.getDeletedCount();
@@ -524,54 +552,54 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 		return 0;
 	}
+	
 
-	public int deletePermissionsByTypeAndUserId(String sType, String sUserId) {
-		if (Utils.isNullOrEmpty(sType)) {
-			return 0;
-		}
-
-		if (Utils.isNullOrEmpty(sUserId)) {
+	/**
+	 * Deletes all the permissions where User Id is the owner
+	 * @param sOwnerId
+	 * @return
+	 */
+	public int deletePermissionsByOwnerId(String sOwnerId) {
+		if (Utils.isNullOrEmpty(sOwnerId)) {
 			return 0;
 		}
 
 		try {
-			DeleteResult oDeleteResult = getCollection(m_sThisCollection)
-					.deleteMany(Filters.and(Filters.eq("resourceType", sType), Filters.eq("userId", sUserId)));
+			DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteMany(new Document("ownerId", sOwnerId));
 
 			if (oDeleteResult != null) {
 				return (int) oDeleteResult.getDeletedCount();
 			}
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("UserResourcePermissionRepository.deletePermissionsByTypeAndUserId : exception ", oEx);
+			WasdiLog.errorLog("UserResourcePermissionRepository.deletePermissionsByUserId : exception ", oEx);
 		}
 
 		return 0;
 	}
-
+	
 	public int deleteOrganizationPermissionsByUserId(String sUserId) {
-		return deletePermissionsByTypeAndResourceId(ResourceTypes.ORGANIZATION.getResourceType(), sUserId);
+		return deletePermissionsByTypeAndUserId(ResourceTypes.ORGANIZATION.getResourceType(), sUserId);
 	}
 
 	public int deleteSubscriptionPermissionsByUserId(String sUserId) {
-		return deletePermissionsByTypeAndResourceId(ResourceTypes.SUBSCRIPTION.getResourceType(), sUserId);
+		return deletePermissionsByTypeAndUserId(ResourceTypes.SUBSCRIPTION.getResourceType(), sUserId);
 	}
 
 	public int deleteWorkspacePermissionsByUserId(String sUserId) {
-		return deletePermissionsByTypeAndResourceId(ResourceTypes.WORKSPACE.getResourceType(), sUserId);
+		return deletePermissionsByTypeAndUserId(ResourceTypes.WORKSPACE.getResourceType(), sUserId);
 	}
 
 	public int deleteStylePermissionsByUserId(String sUserId) {
-		return deletePermissionsByTypeAndResourceId(ResourceTypes.STYLE.getResourceType(), sUserId);
+		return deletePermissionsByTypeAndUserId(ResourceTypes.STYLE.getResourceType(), sUserId);
 	}
 
 	public int deleteWorkflowPermissionsByUserId(String sUserId) {
-		return deletePermissionsByTypeAndResourceId(ResourceTypes.WORKFLOW.getResourceType(), sUserId);
+		return deletePermissionsByTypeAndUserId(ResourceTypes.WORKFLOW.getResourceType(), sUserId);
 	}
 
 	public int deleteProcessorPermissionsByUserId(String sUserId) {
-		return deletePermissionsByTypeAndResourceId(ResourceTypes.PROCESSOR.getResourceType(), sUserId);
+		return deletePermissionsByTypeAndUserId(ResourceTypes.PROCESSOR.getResourceType(), sUserId);
 	}
-
 
 
 	public int deletePermissionsByUserIdAndResourceId(String sUserId, String sResourceId) {

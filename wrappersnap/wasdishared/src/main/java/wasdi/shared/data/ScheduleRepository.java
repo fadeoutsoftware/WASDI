@@ -3,6 +3,8 @@ package wasdi.shared.data;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
+import com.mongodb.BasicDBObject;
+
 import wasdi.shared.business.Schedule;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -78,4 +80,25 @@ public class ScheduleRepository extends MongoRepository {
 
         return  null;
     }
+    
+    /**
+     * Delete a schedule by User Id
+     * @param sUserId
+     * @return
+     */
+    public int deleteScheduleByUserId(String sUserId) {
+    	
+    	if (Utils.isNullOrEmpty(sUserId)) return 0;
+
+    	try {
+    		BasicDBObject oCriteria = new BasicDBObject();
+    		oCriteria.append("userId", sUserId);
+
+            return deleteMany(oCriteria);    		
+    	}
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("ScheduleRepository.deleteScheduleByUserId: error ", oEx);
+        	return -1;
+        }
+    }    
 }

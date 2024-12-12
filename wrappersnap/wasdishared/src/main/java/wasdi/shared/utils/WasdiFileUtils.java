@@ -9,27 +9,30 @@ package wasdi.shared.utils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
-import com.google.common.base.Preconditions;
-
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -38,13 +41,16 @@ import wasdi.shared.utils.log.WasdiLog;
  */
 public class WasdiFileUtils {
 	
+	/**
+	 * Static list of extensions associtated to a shape file
+	 */
 	static List<String> asShapeFileExtensions;
+	/**
+	 * Static list of extesions considered a valid doc
+	 */
 	static List<String> asDocumentFileExtensions;
 	
-	static{
-		
-		//populate shapefiles extensions as found here:
-		// https://desktop.arcgis.com/en/arcmap/latest/manage-data/shapefiles/shapefile-file-extensions.htm
+	static {
 		asShapeFileExtensions = new ArrayList<>(
 				Arrays.asList(
 						"shp",
@@ -74,7 +80,8 @@ public class WasdiFileUtils {
 						"dot",
 						"dotx",
 						"rtf",
-						"odt"
+						"odt",
+						"csv"
 				)
 		);
 		
@@ -86,48 +93,29 @@ public class WasdiFileUtils {
 	 * @return the cleaned name of the file
 	 */
 	public static String getFileNameWithoutExtensionsAndTrailingDots(String sInputFile) {
-			if(Utils.isNullOrEmpty(sInputFile)) {
-				WasdiLog.debugLog("Utils.GetFileNameExtension: input null or empty");
-				return sInputFile;
-			}
-			String sReturn = sInputFile;
-			
-			//remove trailing dots: filename....
-			while(sReturn.endsWith(".")) {
-				sReturn = sReturn.replaceAll("\\.$", "");
-			}
-			//remove two-letters, e.g., .gz, .7z
-			sReturn = sReturn.replaceAll("\\...$", "");			
-			//remove three-letters, e.g., .zip, .tar, .rar....
-			sReturn = sReturn.replaceAll("\\....", "");
-			
-			//again, remove trailing dots: filename...zip
-			while(sReturn.endsWith(".")) {
-				sReturn = sReturn.replaceAll("\\.$", "");
-			}
-			return sReturn;
+		if(Utils.isNullOrEmpty(sInputFile)) {
+			WasdiLog.debugLog("Utils.GetFileNameExtension: input null or empty");
+			return sInputFile;
 		}
-
-	/**
-	 * Load the JSON content of a file.
-	 * @param sFileFullPath the full path of the file
-	 * @return the JSONObject that contains the payload
-	 */
-	public static JSONObject loadJsonFromFile(String sFileFullPath) {
-		Preconditions.checkNotNull(sFileFullPath);
-
-		JSONObject oJson = null;
-		try(FileReader oReader = new FileReader(sFileFullPath);){
+		
+		String sReturn = sInputFile;
 			
-			JSONTokener oTokener = new JSONTokener(oReader);
-			oJson = new JSONObject(oTokener);
-		} catch (FileNotFoundException oFnf) {
-			WasdiLog.errorLog("WasdiFileUtils.loadJsonFromFile: file " + sFileFullPath + " was not found: " + oFnf);
-		} catch (Exception oE) {
-			WasdiLog.errorLog("WasdiFileUtils.loadJsonFromFile: " + oE);
+		//remove trailing dots: filename....
+		while(sReturn.endsWith(".")) {
+			sReturn = sReturn.replaceAll("\\.$", "");
 		}
-		return oJson;
+		//remove two-letters, e.g., .gz, .7z
+		sReturn = sReturn.replaceAll("\\...$", "");			
+		//remove three-letters, e.g., .zip, .tar, .rar....
+		sReturn = sReturn.replaceAll("\\....", "");
+			
+		//again, remove trailing dots: filename...zip
+		while(sReturn.endsWith(".")) {
+			sReturn = sReturn.replaceAll("\\.$", "");
+		}
+		return sReturn;
 	}
+
 
 	/**
 	 * Utilities method that fix non homogeneous path separators in a 
@@ -251,17 +239,17 @@ public class WasdiFileUtils {
 
 	/**
 	 * Write input-stream to file
-	 * @param fileInputStream the input-stream to be written
+	 * @param oInputStream the input-stream to be written
 	 * @param oFile the file to be written
 	 * @throws FileNotFoundException in case of any issues with the file
 	 * @throws IOException if an I/O error occurs
 	 */
-	public static void writeFile(InputStream fileInputStream, File oFile) throws FileNotFoundException, IOException {
+	public static void writeFile(InputStream oInputStream, File oFile) throws FileNotFoundException, IOException {
 		int iRead = 0;
 		byte[] ayBytes = new byte[1024];
 
 		try (OutputStream oOutStream = new FileOutputStream(oFile)) {
-			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+			while ((iRead = oInputStream.read(ayBytes)) != -1) {
 				oOutStream.write(ayBytes, 0, iRead);
 			}
 			oOutStream.flush();
@@ -318,26 +306,7 @@ public class WasdiFileUtils {
 
 		return writeFile(sContent, oFile);
 	}
-
-	public static boolean writeMapAsJsonFile(Map<String, Object> aoJSONMap, String sFileFullPath) throws FileNotFoundException, IOException {
-
-		if (aoJSONMap == null) {
-			WasdiLog.errorLog("WasdiFileUtils.writeMapAsJsonFile: aoJSONMap is null");
-
-			return false;
-		}
-
-		if (Utils.isNullOrEmpty(sFileFullPath)) {
-			WasdiLog.errorLog("WasdiFileUtils.writeMapAsJsonFile: sFileFullPath is null");
-
-			return false;
-		}
-
-		String sJson = JsonUtils.stringify(aoJSONMap);
-
-		return writeFile(sJson, sFileFullPath);
-	}
-
+	
 	/**
 	 * Move a file to a destination directory.
 	 * @param sSourcePath the path of the file to be moved
@@ -646,6 +615,84 @@ public class WasdiFileUtils {
 		return false;
 	}
 	
+	
+	/**
+	 * Check if a file is a (presumed) Shape File: it checks if it contains a .shp file
+	 * It also checks that the total number of files inside the zip itself is 
+	 * limited, to avoid processor cycle waste. 
+	 * The limit imposed it 
+	 * @param sZipFile Full path of the zip file
+	 * @param iMaxFileInZipFile the maximum number of file allowed to be considered inside the zip file
+	 * @return True if the zip contains a .shp file, False if it's not contained and the value iMaxFileInZipFile is exceeded
+	 */
+	public static boolean isShapeFileZipped(String sZipFile, int iMaxFileInZipFile) {
+		int iFileCounter = 0;
+		Path oZipPath = Paths.get(sZipFile).toAbsolutePath().normalize();
+		if(!oZipPath.toFile().exists()) {
+			return false;
+		}
+		try (ZipFile oZipFile = new ZipFile(oZipPath.toString())){
+		
+			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
+			
+			while(aoEntries.hasMoreElements()) {
+				ZipEntry oZipEntry = aoEntries.nextElement();
+				
+				if (iFileCounter > iMaxFileInZipFile) {
+					WasdiLog.errorLog("WasdiFileUtils.isShapeFileZipped: too many files inside the zip. The limit is " + iMaxFileInZipFile);
+					return false;
+				}
+				
+				if (WasdiFileUtils.isShapeFile(oZipEntry.getName())) {
+					return true;
+				}
+				iFileCounter++;
+			}			
+			
+		} catch (Exception e) {
+			WasdiLog.errorLog("WasdiFileUtils.isShapeFileZipped: error", e);
+		}
+		
+		return false;
+	}
+
+	/**
+	 * Check if a file is a (presumed) Shape File: it checks if it contains a .shp file
+	 * @param sZipFile Full path of the zip file
+	 * @param iMaxFileInZipFile TODO
+	 * @return True if the zip contains a .shp file, False otherwise
+	 */
+	public static String getShpFileNameFromZipFile(String sZipFile, int iMaxFileInZipFile) {
+		Path oZipPath = Paths.get(sZipFile).toAbsolutePath().normalize(); 
+		if(!oZipPath.toFile().exists()) {
+			return "";
+		}
+		
+		int iFileCounter = 0;
+		try(ZipFile oZipFile = new ZipFile(oZipPath.toString())) {
+			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
+			
+			while(aoEntries.hasMoreElements()) {
+				ZipEntry oZipEntry = aoEntries.nextElement();
+				if (iFileCounter > iMaxFileInZipFile) {
+					WasdiLog.errorLog("WasdiFileUtils.isShapeFileZipped: too many files inside the zip. The limit is " + iMaxFileInZipFile);
+					return "";
+				}
+				
+				if (oZipEntry.getName().toLowerCase().endsWith(".shp")) {
+					return oZipEntry.getName();
+				}
+				iFileCounter++;
+			}			
+			
+		} catch (Exception e) {
+			WasdiLog.errorLog("WasdiFileUtils.getShpFileNameFromZipFile: error", e);
+		}
+		
+		return "";
+	}
+
+	
 	/***
 	 * Check if a file is a "classic" image type.
 	 * The images accepted are "jpg", "png", "svg" at the moment.
@@ -694,352 +741,6 @@ public class WasdiFileUtils {
 		return false;
 	}	
 	
-	public static boolean isSentinel5PFile(File oFile) {
-		try {
-			if(null==oFile) {
-				return false;
-			}
-			if (oFile.getName().toLowerCase().startsWith("s5p") && ! (oFile.getName().toLowerCase().endsWith(".tif")|| oFile.getName().toLowerCase().endsWith(".tiff"))) {
-				return true;
-			}
-			else {
-				return false;
-			}
-			
-		} catch (Exception oE) {
-			WasdiLog.debugLog("WasdiFileUtils.isSentinel5PFile( File ): " + oE);
-		}
-		return false;
-	}
-
-	public static boolean isGpmZipFile(File oFile) {
-		try {
-			if (null == oFile) {
-				return false;
-			}
-
-			if ((oFile.getName().toUpperCase().startsWith("3B-") || oFile.getName().toUpperCase().contains("IMERG"))
-					&& oFile.getName().toLowerCase().endsWith(".zip")) {
-				return true;
-			} else {
-				return false;
-			}
-			
-		} catch (Exception oE) {
-			WasdiLog.debugLog("WasdiFileUtils.isGpmZipFile( File ): " + oE);
-		}
-
-		return false;
-	}
-
-	private static boolean isSentinel3ZippedFile(String sName) {
-		try {
-			if(Utils.isNullOrEmpty(sName)) {
-				return false;
-			}
-			if(sName.toLowerCase().startsWith("s3") && sName.toLowerCase().endsWith(".zip")){
-				return true;
-			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("WasdiFileUtils.isSentinel3File( String): " + oE);
-		}
-		return false;
-	}
-	
-	public static boolean isSentinel3ZippedFile(File oFile) {
-		try {
-			if(null==oFile) {
-				return false;
-			}
-			return isSentinel3ZippedFile(oFile.getName());
-		} catch (Exception oE) {
-			WasdiLog.debugLog("WasdiFileUtils.isSentinel3File( File ): " + oE);
-		}
-		return false;
-	}
-
-	private static boolean isSentinel3Name(String sName) {
-		try {
-			if(Utils.isNullOrEmpty(sName)) {
-				return false;
-			}
-			if(sName.toLowerCase().startsWith("s3") && ! (sName.toLowerCase().endsWith(".tif") || sName.toLowerCase().endsWith(".tiff") || sName.toLowerCase().endsWith(".shp"))  ){
-				return true;
-			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("WasdiFileUtils.isSentinel3File( String): " + oE);
-		}
-		return false;
-	}
-	
-	public static boolean isSentinel3Name(File oFile) {
-		try {
-			if(null==oFile) {
-				return false;
-			}
-			return isSentinel3Name(oFile.getName());
-		} catch (Exception oE) {
-			WasdiLog.debugLog("WasdiFileUtils.isSentinel3File( File ): " + oE);
-		}
-		return false;
-	}
-	
-	private static boolean isSentinel3Directory(String sName) {
-		try {
-			if(Utils.isNullOrEmpty(sName)) {
-				return false;
-			}
-			if(sName.toLowerCase().startsWith("s3") && sName.toLowerCase().endsWith(".sen3")){
-				return true;
-			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("WasdiFileUtils.isSentinel3File( String): " + oE);
-		}
-		return false;
-	}
-	
-	public static boolean isSentinel3Directory(File oFile) {
-		try {
-			if(null==oFile) {
-				return false;
-			}
-			return isSentinel3Directory(oFile.getName());
-		} catch (Exception oE) {
-			WasdiLog.debugLog("WasdiFileUtils.isSentinel3File( File ): " + oE);
-		}
-		return false;
-	}
-	
-	/**
-	 * Get the Platform code of the mission starting from the file Name
-	 * @param sFileName File Name to investigate
-	 * @return Code of the Platform as definied in the Platforms class. Null if not recognized
-	 */
-	public static String getPlatformFromSatelliteImageFileName(String sFileName) {
-		try {
-			if (Utils.isNullOrEmpty(sFileName)) return null;
-
-			if (sFileName.toUpperCase().startsWith("S1A_") || sFileName.toUpperCase().startsWith("S1B_")) {
-				return Platforms.SENTINEL1;
-			}
-			else if (sFileName.toUpperCase().startsWith("S2A_") || sFileName.toUpperCase().startsWith("S2B_")) {
-				return Platforms.SENTINEL2;
-			}
-			else if (sFileName.toUpperCase().startsWith("S3A_") || sFileName.toUpperCase().startsWith("S3B_") || sFileName.toUpperCase().startsWith("S3__")) {
-				return Platforms.SENTINEL3;
-			}
-			else if (sFileName.toUpperCase().startsWith("S5P_")) {
-				return Platforms.SENTINEL5P;
-			}
-			else if (sFileName.toUpperCase().startsWith("LC08_")) {
-				return Platforms.LANDSAT8;
-			}
-			else if (sFileName.toUpperCase().startsWith("MER_") || sFileName.toUpperCase().startsWith("ASA_")) {
-				return Platforms.ENVISAT;
-			}
-			else if (sFileName.toUpperCase().startsWith("RIVER-FLD")) {
-				return Platforms.VIIRS;
-			}
-			else if (sFileName.toUpperCase().startsWith("PROBAV_")) {
-				return Platforms.PROBAV;
-			}
-			else if (sFileName.toUpperCase().startsWith("ERA5_")) {
-				return Platforms.ERA5;
-			}
-			else if (sFileName.toUpperCase().startsWith("CAMS_")) {
-				return Platforms.CAMS;
-			}
-			else if (sFileName.toUpperCase().startsWith("PLANET_")) {
-				return Platforms.PLANET;
-			}
-			else if (sFileName.toUpperCase().startsWith("COPERNICUS_DSM_COG_")) {
-				return Platforms.DEM;
-			}
-			else if (sFileName.toUpperCase().startsWith("ESA_WORLDCOVER")) {
-				return Platforms.WORLD_COVER;
-			}
-			else if (sFileName.toUpperCase().startsWith("WASDI_STATIC_")) {
-				return Platforms.STATICS;
-			}
-			else if (sFileName.toUpperCase().startsWith("3B-") || sFileName.toUpperCase().contains("IMERG")) {
-				return Platforms.IMERG;
-			}
-			else if (sFileName.toUpperCase().startsWith("EEHCM")
-					|| sFileName.toUpperCase().startsWith("EEHSEBS")
-					|| sFileName.toUpperCase().startsWith("EEHSTIC")
-					|| sFileName.toUpperCase().startsWith("EEHSW")
-					|| sFileName.toUpperCase().startsWith("EEHTES")
-					|| sFileName.toUpperCase().startsWith("EEHTSEB")
-					|| sFileName.toUpperCase().startsWith("ECOSTRESS")) {
-				return Platforms.ECOSTRESS;
-			}
-			else if (sFileName.toLowerCase().endsWith(".nc")) {
-				return Platforms.CM;
-			}
-			else if (sFileName.toUpperCase().startsWith("SKYWATCH_")) {
-				return Platforms.EARTHCACHE;
-			} 
-			else if (sFileName.toUpperCase().startsWith("MOD11A2")) {
-				return Platforms.TERRA;
-			}
-			else if (sFileName.toUpperCase().startsWith("GHS_BUILT_S_E2018_GLOBE_R2023A_54009_10_V1_0_")) {
-				return Platforms.JRC_GHSL;
-			}
-			
-			return null;
-		}
-		catch (Exception oEx) {
-			WasdiLog.debugLog("WasdiFileUtils.getPlatformFromFileName: exception " + oEx.toString());
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * Get the reference date of a Satellite Image from the file Name
-	 * If not available, not relevant or in case of error returns "now".
-	 * @param sFileName Name of the Satellite Image File
-	 * @return Reference Date 
-	 */
-	public static Date getDateFromSatelliteImageFileName(String sFileName) {
-		
-		try {
-			String sPlatform = getPlatformFromSatelliteImageFileName(sFileName);
-			if (Utils.isNullOrEmpty(sPlatform)) return new Date();
-			
-			if (sPlatform.equals(Platforms.SENTINEL1)) {
-				sFileName = sFileName.replace("__", "_");
-				String [] asS1Parts = sFileName.split("_");
-				String sDate = asS1Parts[4];
-				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
-				return new Date(lTime);
-			}
-			else if (sPlatform.equals(Platforms.SENTINEL2)) {
-				String [] asS2Parts = sFileName.split("_");
-				String sDate = asS2Parts[2];
-				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
-				return new Date(lTime);				
-			}
-			else if (sPlatform.equals(Platforms.SENTINEL3)) {
-				String sDate = sFileName.substring(16,31);
-				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
-				return new Date(lTime);
-			}
-			else if (sPlatform.equals(Platforms.SENTINEL5P)) {
-				String sDate = sFileName.substring(20, 20+15);
-				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
-				return new Date(lTime);
-			}
-			else if (sPlatform.equals(Platforms.ENVISAT)) {
-				String sDate = sFileName.substring(14, 14+8);
-				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd");
-				return new Date(lTime);
-			}
-			else if (sPlatform.equals(Platforms.LANDSAT8)) {
-				String [] asL8Parts = sFileName.split("_");
-				String sDate = asL8Parts[3];
-				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd");
-				return new Date(lTime);				
-			}
-			else if (sPlatform.equals(Platforms.VIIRS)) {
-				String [] asViirsParts = sFileName.split("_");
-				String sDate = asViirsParts[1];
-				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd");
-				return new Date(lTime);				
-			}			
-			
-			// For CMEMS, ERA5 are Not relevant 
-		}
-		catch (Exception oEx) {
-			WasdiLog.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
-		}
-		
-		return new Date();
-	}
-	
-	
-	
-	/**
-	 * Get the Product Type of a Satellite Image from the file Name
-	 * If not available, not relevant or in case of error returns "".
-	 * @param sFileName Name of the Satellite Image File
-	 * @return Product Type, or ""  
-	 */
-	public static String getProductTypeSatelliteImageFileName(String sFileName) {
-		
-		try {
-			String sPlatform = getPlatformFromSatelliteImageFileName(sFileName);
-			if (Utils.isNullOrEmpty(sPlatform)) return "";
-			
-			if (sPlatform.equals(Platforms.SENTINEL1)) {
-				String [] asS1Parts = sFileName.split("_");
-				String sType = asS1Parts[2];
-				return sType.substring(0,3);
-			}
-			else if (sPlatform.equals(Platforms.SENTINEL2)) {
-				String [] asS2Parts = sFileName.split("_");
-				String sType = asS2Parts[1];
-				return sType;				
-			}
-			else if (sPlatform.equals(Platforms.SENTINEL3)) {
-				String sType = sFileName.substring(9,9+6);
-				return sType;
-			}
-			else if (sPlatform.equals(Platforms.SENTINEL5P)) {
-				String sType = sFileName.substring(9, 9+10);
-				return sType;
-			}
-
-			// For Others are Not relevant 
-		}
-		catch (Exception oEx) {
-			WasdiLog.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
-		}
-		
-		return "";
-	}
-		
-	public static void testImageDecoders() {
-		
-		testImageDecode("S1A_IW_GRDH_1SDV_20211227T052748_20211227T052813_041190_04E503_D2FB");
-		testImageDecode("S1B_IW_RAW__0SDV_20211222T171436_20211222T171508_030141_039960_631F");
-		testImageDecode("S1B_IW_SLC__1SDV_20211222T171528_20211222T171556_030141_039960_73C3");
-		testImageDecode("S2A_MSIL1C_20211222T070311_N0301_R063_T40SBA_20211222T080206");
-		testImageDecode("S2A_MSIL2A_20211222T070311_N0301_R063_T39RXN_20211222T091646");
-		testImageDecode("S3B_SY_2_VG1____20211222T000000_20211222T235959_20211228T125214_EUROPE____________LN2_O_NT_002");
-		testImageDecode("S3B_SY_2_VGP____20211222T061412_20211222T065817_20211223T184339_2645_060_305______LN2_O_NT_002");
-		testImageDecode("S3B_OL_2_WRR____20211222T061412_20211222T065817_20211222T084230_2645_060_305______MAR_O_NR_003");
-		testImageDecode("S3B_OL_1_ERR____20211222T061412_20211222T065817_20211222T084221_2645_060_305______MAR_O_NR_002");
-		testImageDecode("S3B_OL_2_LRR____20211222T061412_20211222T065817_20211223T112207_2645_060_305______LN1_O_NT_002");
-		testImageDecode("S3B_OL_2_WRR____20211222T061412_20211222T065817_20211223T114743_2645_060_305______MAR_O_NT_003");
-		testImageDecode("S5P_OFFL_L2__NP_BD6_20211222T090116_20211222T104246_21721_02_010300_20211223T224704");
-		testImageDecode("S5P_OFFL_L1B_RA_BD4_20211222T090116_20211222T104246_21721_02_020000_20211222T122628");
-		testImageDecode("S5P_NRTI_L2__AER_AI_20211222T100245_20211222T100745_21721_02_020301_20211222T103531");
-		testImageDecode("S5P_NRTI_L2__HCHO___20211222T100245_20211222T100745_21721_02_020201_20211222T105201");
-		testImageDecode("S5P_NRTI_L2__O3_____20211222T100245_20211222T100745_21721_02_020201_20211222T105159");
-		testImageDecode("LC08_L1TP_200030_20211223_20211223_01_RT");
-		testImageDecode("LC08_L1GT_196028_20211227_20211227_01_RT");
-		testImageDecode("MER_FRS_1PPEPA20041222_110737_000003212033_00123_14706_0540");		
-		testImageDecode("ASA_IMS_1PNESA20041224_100709_000000152033_00151_14734_0000");
-		testImageDecode("ASA_IMP_1PNESA20041224_100724_000000152033_00151_14734_0000");
-		testImageDecode("RIVER-FLDglobal-composite1_20211222_000000.part057.tif");
-		testImageDecode("RIVER-FLDglobal-composite1_20211222_000000.part071");
-	}
-	
-	public static void testImageDecode(String sImage) {
-		String sResult = "";
-		Date oDate;
-		
-		sResult = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sImage);
-		System.out.println(sResult);
-		
-		sResult = WasdiFileUtils.getProductTypeSatelliteImageFileName(sImage);
-		System.out.println(sResult);
-		
-		oDate = WasdiFileUtils.getDateFromSatelliteImageFileName(sImage);
-		System.out.println(oDate.toString());		
-	}
-	
 	/**
 	 * Load the log4j2 configuration file for the logger, looking for it first in the parameters passed to the JVM. If the parameter
 	 * was not set, then it looks for file in the folder of the current jar being executed
@@ -1058,4 +759,74 @@ public class WasdiFileUtils {
             oContext.setConfigLocation(oLogConfigFile.toURI());
 	    }
 	}
+	
+	/**
+	 * This method removes the last extension from a filename 
+	 * @param sInputFile the name of the input file
+	 * @return
+	 */
+	public static String getFileNameWithoutLastExtension(String sInputFile) {
+		File oFile = new File(sInputFile);
+		String sInputFileNameOnly = oFile.getName();
+		String sReturn = sInputFileNameOnly;
+		
+		if(sInputFileNameOnly.contains(".")) {
+			sReturn = sInputFileNameOnly.substring(0, sInputFileNameOnly.lastIndexOf('.'));
+		}
+
+		return sReturn;
+	}
+
+	/**
+	 * Extracts the extension fro a file name
+	 * @param sInputFile Input File Name
+	 * @return Extension or empty string
+	 */
+	public static String getFileNameExtension(String sInputFile) {
+		String sReturn = "";
+		File oFile = new File(sInputFile);
+		String sInputFileNameOnly = oFile.getName();
+
+		if (sInputFileNameOnly.contains(".")) {
+			// Create a clean layer id: the file name without any extension
+			String[] asLayerIdSplit = sInputFileNameOnly.split("\\.");
+			if (asLayerIdSplit != null && asLayerIdSplit.length > 0) {
+				sReturn = asLayerIdSplit[asLayerIdSplit.length - 1];
+			}			
+		}
+
+		return sReturn;
+	}
+
+	public static void fixUpPermissions(Path destPath) throws IOException {
+		Stream<Path> files = Files.list(destPath);
+		files.forEach(path -> {
+			if (Files.isDirectory(path)) {
+				try {
+					fixUpPermissions(path);
+				} catch (IOException oEx) {
+					WasdiLog.errorLog("Utils.fixUpPermissions: error", oEx);
+
+				}
+			} else {
+				setExecutablePermissions(path);
+			}
+		});
+		files.close();
+	}
+
+	private static void setExecutablePermissions(Path executablePathName) {
+		if (SystemUtils.IS_OS_UNIX) {
+			Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ,
+					PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ,
+					PosixFilePermission.GROUP_EXECUTE, PosixFilePermission.OTHERS_READ,
+					PosixFilePermission.OTHERS_EXECUTE));
+			try {
+				Files.setPosixFilePermissions(executablePathName, permissions);
+			} catch (IOException oEx) {
+				WasdiLog.errorLog("Utils.setExecutablePermissions: error", oEx);
+			}
+		}
+	}
+	
 }

@@ -15,7 +15,10 @@ import wasdi.shared.LauncherOperations;
  *
  */
 public class LauncherOperationsUtils {
-	public boolean canOperationSpawnChildren(String sOperation) {
+	public static boolean canOperationSpawnChildren(String sOperation) {
+		
+		if (Utils.isNullOrEmpty(sOperation)) return false;
+		
 		switch(sOperation.toUpperCase()) {
 		case "RUNPROCESSOR":
 		case "RUNIDL":
@@ -26,7 +29,10 @@ public class LauncherOperationsUtils {
 		}
 	}
 	
-	public boolean doesOperationLaunchApplication(String sOperation) {
+	public static boolean doesOperationLaunchApplication(String sOperation) {
+		
+		if (Utils.isNullOrEmpty(sOperation)) return false;
+		
 		switch(sOperation.toUpperCase()) {
 		case "RUNPROCESSOR":
 		case "RUNIDL":

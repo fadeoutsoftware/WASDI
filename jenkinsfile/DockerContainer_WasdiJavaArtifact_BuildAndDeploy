@@ -83,7 +83,7 @@ pipeline {
   }
 
   tools {
-    jdk "WASDI_JDK_8"
+    jdk "WASDI_JDK_17"
     maven "WASDI_MAVEN"
   }
 
@@ -193,7 +193,7 @@ pipeline {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
-            playbooks/runDockerContainer.yml \
+            playbooks/startOrRestartDockerContainer.yml \
             --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \

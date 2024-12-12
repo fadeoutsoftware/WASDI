@@ -24,10 +24,7 @@ public class ProviderAdapterFactory {
 	static {
 		final Map<String, Supplier<ProviderAdapter>> aoDownloaders = new HashMap<>();
 		aoDownloaders.put("ONDA", ONDAProviderAdapter::new);
-		aoDownloaders.put("SENTINEL", DhUSProviderAdapter::new);
-		aoDownloaders.put("MATERA", DhUSProviderAdapter::new);
 		aoDownloaders.put("PROBAV", PROBAVProviderAdapter::new);
-		aoDownloaders.put("FEDEO", DhUSProviderAdapter::new);
 		aoDownloaders.put("CREODIAS", CREODIASProviderAdapter::new);
 		aoDownloaders.put("CREODIAS2", CreoDias2ProviderAdapter::new);
 		aoDownloaders.put("SOBLOO", SOBLOOProviderAdapter::new);
@@ -35,7 +32,7 @@ public class ProviderAdapterFactory {
 		aoDownloaders.put("LSA", LSAProviderAdapter::new);
 		aoDownloaders.put("VIIRS", VIIRSProviderAdapter::new);
 		aoDownloaders.put("ADS", ADSProviderAdapter::new);
-		aoDownloaders.put("CDS", CDSProviderAdapter::new);
+		aoDownloaders.put("CDS", CDS2ProviderAdapter::new);
 		aoDownloaders.put("PLANET", PLANETProviderAdapter::new);
 		aoDownloaders.put("TERRASCOPE", TerrascopeProviderAdapter::new);
 		aoDownloaders.put("STATICS", STATICSProviderAdapter::new);
@@ -45,6 +42,10 @@ public class ProviderAdapterFactory {
 		aoDownloaders.put("SKYWATCH", SkywatchProviderAdapter::new);
 		aoDownloaders.put("LPDAAC", LpDaacProviderAdapter::new);
 		aoDownloaders.put("JRC", JRCProviderAdapter::new);
+		aoDownloaders.put("DLR", DLRProviderAdapter::new);
+		aoDownloaders.put("SINA", SinaProviderAdapter::new);		
+		aoDownloaders.put("EXT_WEB", ExtWebProviderAdapter::new);
+		aoDownloaders.put("ESA", ESAProviderAdapter::new);
 		s_aoDownloaderSuppliers = Collections.unmodifiableMap(aoDownloaders);
 	}
 

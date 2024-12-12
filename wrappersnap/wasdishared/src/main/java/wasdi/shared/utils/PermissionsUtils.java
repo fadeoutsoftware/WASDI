@@ -8,16 +8,21 @@ package wasdi.shared.utils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import org.apache.commons.io.FileUtils;
 
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ImagesCollections;
+import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.S3Volume;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.Style;
 import wasdi.shared.business.Subscription;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.missions.Mission;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
@@ -26,24 +31,36 @@ import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserType;
 import wasdi.shared.config.PathsConfig;
+import wasdi.shared.data.CommentRepository;
+import wasdi.shared.data.JupyterNotebookRepository;
+import wasdi.shared.data.NodeRepository;
+import wasdi.shared.data.OpenEOJobRepository;
 import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProjectRepository;
+import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.data.S3VolumeRepository;
+import wasdi.shared.data.ScheduleRepository;
+import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.SubscriptionRepository;
+import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.data.missions.MissionsRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.ProcessorAPIClient;
+import wasdi.shared.utils.wasdiAPI.WorkspaceAPIClient;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**
+ * Wrap all the methods to check user rights and permissions
+ * 
  * @author c.nattero
- *
  */
 public class PermissionsUtils {
 	
@@ -692,6 +709,18 @@ public class PermissionsUtils {
 			else if (sCollection.equals(ImagesCollections.ORGANIZATIONS.getFolder())) {
 				return canUserAccessOrganization(sUserId, sFolder);
 			}
+			else if (sCollection.equals(ImagesCollections.STYLES.getFolder())) {
+				String sStyleName = WasdiFileUtils.getFileNameWithoutExtensionsAndTrailingDots(sImage);
+				
+				if (!Utils.isNullOrEmpty(sStyleName)) {
+					StyleRepository oStyleRepository = new StyleRepository();
+					Style oStyle = oStyleRepository.getStyleByName(sStyleName);
+					if (oStyle != null) {
+						return canUserAccessStyle(sUserId, oStyle.getStyleId());
+					}					
+				}				
+			}
+			
 			
 			return false;
 			
@@ -735,6 +764,17 @@ public class PermissionsUtils {
 			}
 			else if (sCollection.equals(ImagesCollections.ORGANIZATIONS.getFolder())) {
 				return canUserWriteOrganization(sUserId, sFolder);
+			}
+			else if (sCollection.equals(ImagesCollections.STYLES.getFolder())) {
+				String sStyleName = WasdiFileUtils.getFileNameWithoutExtensionsAndTrailingDots(sImage);
+				
+				if (!Utils.isNullOrEmpty(sStyleName)) {
+					StyleRepository oStyleRepository = new StyleRepository();
+					Style oStyle = oStyleRepository.getStyleByName(sStyleName);
+					if (oStyle != null) {
+						return canUserWriteStyle(sUserId, oStyle.getStyleId());
+					}					
+				}				
 			}
 			
 			return false;
@@ -808,6 +848,13 @@ public class PermissionsUtils {
 		return false;
 	}	
 	
+	/**
+	 * Check if a User can write a specific resource
+	 * @param sResourceType
+	 * @param sUserId
+	 * @param sWorkspaceId
+	 * @return
+	 */
 	public static boolean canUserWriteResource(String sResourceType, String sUserId, String sWorkspaceId) {
 		
 		try {
@@ -824,6 +871,45 @@ public class PermissionsUtils {
 			WasdiLog.errorLog("PermissionsUtils.canUserWriteResource error: " + oEx);
 			return false;
 		}
+	}
+	
+	/**
+	 * Check if a User can access a Mission (Data Collection) or not
+	 * @param sUserId User 
+	 * @param sMissionIndexValue Code of the mission
+	 * @return
+	 */
+	public static boolean canUserAccessMission(String sUserId, String sMissionIndexValue) {
+		MissionsRepository oMissionsRepository = new MissionsRepository();
+		Mission oMission =  oMissionsRepository.getMissionsByIndexValue(sMissionIndexValue);
+		return canUserAccessMission(sUserId, oMission);
+	}
+	
+	/**
+	 * Check if a User can access a Mission (Data Collection) or not
+	 * @param sUserId
+	 * @param sMissionId
+	 * @return
+	 */
+	public static boolean canUserAccessMission(String sUserId, Mission oMission) {
+		try {
+			
+			if (oMission == null) return false;
+			if (oMission.isIspublic()) return true;
+			if (Utils.isNullOrEmpty(oMission.getUserid()) == false) {
+				if (oMission.getUserid().equals(sUserId)) return true;
+			}
+			
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			UserResourcePermission oPermission = oUserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId(ResourceTypes.MISSION.getResourceType(), sUserId, oMission.getIndexvalue());
+			
+			if (oPermission == null) return false;
+			else return true;
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteResource error: " + oEx);
+			return false;
+		}		
 	}
 	
 	
@@ -1014,6 +1100,136 @@ public class PermissionsUtils {
 		}
 		
 		return null;
+	}
+	
+	public static boolean deleteUser(User oUser, String sSessionId) {
+		try {
+			
+			String sUserId = oUser.getUserId();
+			
+            // Get all the workspaces
+            WorkspaceRepository oWorkspaceRepo = new WorkspaceRepository();
+            List<Workspace> aoWorkspaces = oWorkspaceRepo.getWorkspaceByUser(sUserId);
+            
+            NodeRepository oNodeRepository = new NodeRepository();
+            
+            HashMap<String, Node> aoNodes = new HashMap<>();
+            
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Workspaces ");
+
+            // Clean Workspaces (and product workspace, process workspace, published bands)
+            for (Workspace oWorkspace : aoWorkspaces) {
+            	
+            	if (!aoNodes.containsKey(oWorkspace.getNodeCode())) {
+            		Node oNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
+            		aoNodes.put(oWorkspace.getNodeCode(), oNode);
+            	}
+            	
+            	if (aoNodes.containsKey(oWorkspace.getNodeCode())) {
+            		WorkspaceAPIClient.deleteWorkspace(aoNodes.get(oWorkspace.getNodeCode()), sSessionId, oWorkspace.getWorkspaceId());
+            	}
+            	else {
+            		WasdiLog.warnLog("PermissionsUtils.deleteUser: it looks we cannot find the node " + oWorkspace.getNodeCode());
+            	}
+            }
+            
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Sharings");
+            
+            // Clean all the sharings
+            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+            oUserResourcePermissionRepository.deletePermissionsByUserId(sUserId);
+            oUserResourcePermissionRepository.deletePermissionsByOwnerId(sUserId);
+            
+            // Clean Comments
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Comments");
+            CommentRepository oCommentRepository = new CommentRepository();
+            oCommentRepository.deleteCommentsByUser(sUserId);
+            
+            // Clean Notebooks
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Notebooks");
+            JupyterNotebookRepository oJupyterNotebookRepository = new JupyterNotebookRepository();
+            oJupyterNotebookRepository.deleteJupyterNotebookByUser(sUserId);
+            
+            // Clean open EO Jobs
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting EO Jobs");
+            OpenEOJobRepository oOpenEOJobRepository = new OpenEOJobRepository();
+            oOpenEOJobRepository.deleteOpenEOJobsByUser(sUserId);
+            
+            // Clean organizations
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Organizations");
+            OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+            oOrganizationRepository.deleteByUser(sUserId);
+            
+            // Clean Processor Parameters
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Processor Parameters");
+            ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
+            oProcessorParametersTemplateRepository.deleteByUserId(sUserId);
+            
+            // Clean Processor (and ui)
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Processors");
+            ProcessorRepository oProcessorRepository = new ProcessorRepository();
+            List<Processor> aoProcessors = oProcessorRepository.getProcessorByUser(sUserId);
+            
+            for (Processor oProcessor : aoProcessors) {
+				ProcessorAPIClient.delete(sSessionId, oProcessor.getProcessorId());
+			}
+            
+            // Clean Reviews
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Reviews");
+            ReviewRepository oReviewRepository = new ReviewRepository();
+            oReviewRepository.deleteReviewsByUser(sUserId);
+            
+            // Clean S3 Volumes
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Volumes");
+            S3VolumeRepository oS3VolumeRepository = new S3VolumeRepository();
+            oS3VolumeRepository.deleteByUserId(sUserId);
+            
+            // Clean Scheduling
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Schedulings");
+            ScheduleRepository oScheduleRepository = new ScheduleRepository();
+            oScheduleRepository.deleteScheduleByUserId(sUserId);
+            
+            // Clean Sessions
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Sessions");
+            SessionRepository oSessionRepository = new SessionRepository();
+            oSessionRepository.deleteSessionsByUserId(sUserId);
+            
+            // Clean Snap Workflows
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Workflows");
+            SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+            oSnapWorkflowRepository.deleteSnapWorkflowByUser(sUserId);
+            
+            // Clean the styles
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Styles");
+            StyleRepository oStyleRepository = new StyleRepository();
+            oStyleRepository.deleteStyleByUser(sUserId);
+            
+            // Clean the subscriptions
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Subscriptions");
+            SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+            oSubscriptionRepository.deleteByUser(sUserId);
+            
+            // Clean the user table
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting User");
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting User Db Entry ");
+
+            UserRepository oUserRepository = new UserRepository();
+            oUserRepository.deleteUser(sUserId);
+
+            // Clean the user folder
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting User Folder ");
+
+            String sBasePath = PathsConfig.getWasdiBasePath();
+            sBasePath += sUserId;
+            sBasePath += "/";
+
+            FileUtils.deleteDirectory(new File(sBasePath));
+			return true;
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PermissionsUtils.deleteUser: exception ", oEx);
+			return false;
+		}
 	}
 }
  

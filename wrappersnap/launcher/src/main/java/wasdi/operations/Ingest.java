@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
@@ -16,9 +17,8 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.payloads.IngestPayload;
 import wasdi.shared.utils.EndMessageProvider;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
-import wasdi.shared.utils.gis.ShapeFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
@@ -27,7 +27,7 @@ public class Ingest extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 
-		WasdiLog.debugLog("Ingest.executeOperation");
+		WasdiLog.infoLog("Ingest.executeOperation");
 
 		if (oParam == null) {
 			WasdiLog.errorLog("Parameter is null");
@@ -46,13 +46,20 @@ public class Ingest extends Operation {
             String sFilePath = oParameter.getFilePath();
             
             File oFileToIngestPath = new File(sFilePath);
-
+            
+            // Save the payload
+            IngestPayload oPayload = new IngestPayload();
+            oPayload.setFile(oFileToIngestPath.getName());
+            oPayload.setWorkspace(oParameter.getWorkspace());
+            
+            setPayload(oProcessWorkspace, oPayload);            
+            
+            // The file must existst
             if (!oFileToIngestPath.canRead()) {
                 String sMsg = "Ingest.executeOperation: ERROR: unable to access file to Ingest " + oFileToIngestPath.getAbsolutePath();
                 WasdiLog.errorLog(sMsg);
                 throw new IOException("Unable to access file to Ingest");
             }
-
             
             // get file size
             long lFileSizeByte = oFileToIngestPath.length();
@@ -83,6 +90,7 @@ public class Ingest extends Operation {
 
             WasdiProductReader oReadProduct = null;
             ProductViewModel oImportProductViewModel = null;
+            
             // Try to read the Product view Model
             try {
 				oReadProduct = WasdiProductReaderFactory.getProductReader(oFileToIngestPath);
@@ -92,54 +100,7 @@ public class Ingest extends Operation {
 			}
 
             String sDestinationFileName = oFileToIngestPath.getName();
-
-            // Did we got the View Model ?
-            if (oImportProductViewModel == null) {
-
-                WasdiLog.warnLog("Ingest.executeOperation: Impossible to read the Product View Model");
-
-                // Check if this is a Zipped Shape File
-                if (oFileToIngestPath.getName().toLowerCase().endsWith(".zip")) {
-                    ShapeFileUtils oShapeFileUtils = new ShapeFileUtils(oParameter.getProcessObjId());
-                    if (oShapeFileUtils.isShapeFileZipped(oFileToIngestPath.getPath(), 30)) {
-
-                        // May be.
-                        WasdiLog.infoLog("Ingest.executeOperation: it looks like the File to ingest might be a zipped shape file, let's try to unzip it...");
-
-                        // Unzip
-                        ZipFileUtils oZipExtractor = new ZipFileUtils(oParameter.getProcessObjId());
-                        oZipExtractor.unzip(oFileToIngestPath.getCanonicalPath(), oFileToIngestPath.getParent());
-
-                        // Get the name of shp from the zip file (case safe)
-                        String sShapeFileTest = oShapeFileUtils.getShpFileNameFromZipFile(oFileToIngestPath.getPath(), 30);
-
-                        File oShapeFileIngestPath = null;
-                        if (!Utils.isNullOrEmpty(sShapeFileTest)) {
-                            // Ok, we have our file
-                            oShapeFileIngestPath = new File(oFileToIngestPath.getParent() + "/" + sShapeFileTest);
-							
-							WasdiProductReader oReadShapeProduct = WasdiProductReaderFactory.getProductReader(oShapeFileIngestPath);
-							
-                            // Now get the view model again
-							oImportProductViewModel = oReadShapeProduct.getProductViewModel();
-                            bUnzipAfterCopy = true;
-                            WasdiLog.infoLog("Ingest.executeOperation: Ok, zipped shape file found");
-
-                            m_oProcessWorkspaceLogger.log("Found shape file");
-
-                            sDestinationFileName = sShapeFileTest;
-                        }
-                        if(oShapeFileIngestPath != null && oFileToIngestPath.exists()) {
-	                        deleteZipFile(oFileToIngestPath);
-	                        //point the file to be ingested to the .shp extracted shapefile
-	                        oFileToIngestPath = new File(oShapeFileIngestPath.getAbsolutePath());
-
-	                        bUnzipAfterCopy = oShapeFileIngestPath.getAbsolutePath().toLowerCase().endsWith(".zip");
-                        }
-                    }
-                }
-            }
-
+            
             // If we do not have the view model here, we were not able to open the file
             if (oImportProductViewModel == null) {
 
@@ -147,6 +108,11 @@ public class Ingest extends Operation {
 
                 WasdiLog.errorLog("Ingest.executeOperation: ERROR: unable to get the product view model");
                 throw new IOException("Unable to get the product view model");
+            }
+            
+            if (WasdiFileUtils.isShapeFileZipped(sFilePath, 100)) {
+            	bUnzipAfterCopy = true;
+            	sDestinationFileName = WasdiFileUtils.getShpFileNameFromZipFile(sFilePath, 30);
             }
 
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 50);
@@ -191,7 +157,7 @@ public class Ingest extends Operation {
                 	if (asFiles!=null) {
                 		if (asFiles.size() == 1) {
                 			String sFile = asFiles.get(0);
-                			String sExt = Utils.getFileNameExtension(sFile);
+                			String sExt = WasdiFileUtils.getFileNameExtension(sFile);
                 			if (sExt.toLowerCase().equals("nc")) {
                 				WasdiLog.infoLog("Ingest.executeOperation: this looks a zip file with only on netcdf inside. We set the name with the .zip extension");
                 				oImportProductViewModel.setName(oImportProductViewModel.getFileName());
@@ -207,12 +173,6 @@ public class Ingest extends Operation {
             // add product to db
             addProductToDbAndWorkspaceAndSendToRabbit(oImportProductViewModel, oDstFile.getAbsolutePath(),
                     oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), null, true, true, oParameter.getStyle());
-
-            IngestPayload oPayload = new IngestPayload();
-            oPayload.setFile(oFileToIngestPath.getName());
-            oPayload.setWorkspace(oParameter.getWorkspace());
-            
-            setPayload(oProcessWorkspace, oPayload);
             
             updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
 
@@ -224,7 +184,7 @@ public class Ingest extends Operation {
         catch (Throwable e) {
             WasdiLog.errorLog("Ingest.executeOperation: ERROR: Exception occurrend during file ingestion");
             
-            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
+            String sError = ExceptionUtils.getMessage(e);
             WasdiLog.errorLog("Ingest.executeOperation: " + sError);
             
             m_oProcessWorkspaceLogger.log("Exception ingesting the file");

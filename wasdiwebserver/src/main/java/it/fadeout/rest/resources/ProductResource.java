@@ -442,7 +442,7 @@ public class ProductResource {
                 oGeoPVM.setBbox(aoProductWorkspace.get(iProducts).getBbox());
 
                 File oFile = new File(aoProductWorkspace.get(iProducts).getProductName());
-                String sName = Utils.getFileNameWithoutLastExtension(oFile.getName());
+                String sName = WasdiFileUtils.getFileNameWithoutLastExtension(oFile.getName());
                 oGeoPVM.setProductFriendlyName(sName);
                 oGeoPVM.setName(sName);
 
@@ -980,6 +980,14 @@ public class ProductResource {
                                     return true;
                             }
                         }
+                        
+                        if (sName.endsWith(".prj") && sProductName.endsWith(".asc") && sName.equals(sProductName.replace(".asc", ".prj"))) {
+                        	return true;
+                        }
+                        
+                        if (sProductName.endsWith(".grib") && (sName.equals(sProductName + ".gbx9") || sName.equals(sProductName + ".ncx4"))) {
+                        	return true;
+                        }
 
                         return false;
                     }
@@ -1037,6 +1045,8 @@ public class ProductResource {
                     WasdiLog.errorLog("ProductResource.deleteProduct: Exception deleting layers: " + oEx);
                 }            	
             }
+            
+
 
             // delete the product-workspace related records on db and the Downloaded File Entry
             try {

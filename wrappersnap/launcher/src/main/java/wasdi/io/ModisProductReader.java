@@ -10,7 +10,7 @@ import org.esa.snap.core.datamodel.Product;
 import wasdi.shared.business.modis11a2.ModisItemForReading;
 import wasdi.shared.business.modis11a2.ModisLocation;
 import wasdi.shared.data.modis11a2.ModisRepository;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
@@ -30,8 +30,8 @@ public class ModisProductReader extends WasdiProductReader {
         String sFileName = m_oProductFile != null ? m_oProductFile.getName() : "no_file_name";
         
     	oViewModel.setFileName(sFileName);
-    	oViewModel.setName(Utils.getFileNameWithoutLastExtension(sFileName));
-		oViewModel.setProductFriendlyName(Utils.getFileNameWithoutLastExtension(sFileName));
+    	oViewModel.setName(WasdiFileUtils.getFileNameWithoutLastExtension(sFileName));
+		oViewModel.setProductFriendlyName(WasdiFileUtils.getFileNameWithoutLastExtension(sFileName));
         
         NodeGroupViewModel oNodeGroupViewModel = new NodeGroupViewModel();
     	oNodeGroupViewModel.setNodeName("Bands");

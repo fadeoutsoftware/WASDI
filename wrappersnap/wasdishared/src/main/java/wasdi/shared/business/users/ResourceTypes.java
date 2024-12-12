@@ -8,7 +8,9 @@ public enum ResourceTypes {
 	WORKFLOW("workflow"),
 	PROCESSOR("processor"),
 	PARAMETER("processorparameterstemplate"),
-	NODE("node");
+	NODE("node"),
+	VOLUME("volume"),
+	MISSION("mission");
 
 	private final String resourceType;
 

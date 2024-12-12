@@ -245,8 +245,10 @@ public class SubscriptionResource {
 			WasdiLog.warnLog("SubscriptionResource.getSubscriptionViewModel: invalid subscription id");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid subscriptionId.")).build();
 		}
+		
+		boolean bAdmin = UserApplicationRole.isAdmin(oUser);
 
-		if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
+		if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId) && !bAdmin) {
 			WasdiLog.warnLog("SubscriptionResource.getSubscriptionViewModel: user cannot access subscription info, aborting");
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("The user cannot access the subscription info.")).build();
 		}		
@@ -271,7 +273,9 @@ public class SubscriptionResource {
 			}
 
 			oSubscriptionViewModel = convert(oSubscription, sOrganizationName);
-			oSubscriptionViewModel.setReadOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), sSubscriptionId));
+			
+			if (bAdmin) oSubscriptionViewModel.setReadOnly(false);
+			else oSubscriptionViewModel.setReadOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), sSubscriptionId));
 
 			return Response.ok(oSubscriptionViewModel).build();
 		} 
@@ -303,24 +307,29 @@ public class SubscriptionResource {
 		try {
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 			
-			String sName = oSubscriptionViewModel.getName();
-			
-			while (oSubscriptionRepository.getByNameAndUserId(sName, oUser.getUserId()) != null) {
-				sName = Utils.cloneName(sName);
-				WasdiLog.debugLog("SubscriptionResource.createSubscription: a subscription with the same name already exists. Changing the name to " + sName);
-			}
-			
+			String sName = oSubscriptionViewModel.getName();			
 			Subscription oSubscription = convertViewModelToSubscription(oSubscriptionViewModel);
-			oSubscription.setUserId(oUser.getUserId());
-			oSubscription.setSubscriptionId(Utils.getRandomName());
-			oSubscription.setName(sName);
+
+			String sUserId = oSubscriptionViewModel.getUserId();
 			
 			if (!UserApplicationRole.isAdmin(oUser)) {
+				sUserId = oUser.getUserId();
 				if (oSubscriptionViewModel.isBuySuccess()) {
 					WasdiLog.warnLog("SubscriptionResource.createSubscription: the user is not an admin so CANNOT set buy success true");
 					oSubscription.setBuySuccess(false);					
 				}
 			}
+			
+			if (Utils.isNullOrEmpty(sUserId)) sUserId = oUser.getUserId();
+			
+			while (oSubscriptionRepository.getByNameAndUserId(sName, sUserId) != null) {
+				sName = Utils.cloneName(sName);
+				WasdiLog.debugLog("SubscriptionResource.createSubscription: a subscription with the same name already exists. Changing the name to " + sName);
+			}
+			
+			oSubscription.setSubscriptionId(Utils.getRandomName());
+			oSubscription.setName(sName);			
+			oSubscription.setUserId(sUserId);
 
 			if (oSubscriptionRepository.insertSubscription(oSubscription)) {
 				ProjectEditorViewModel oProjectEditorViewModel = new ProjectEditorViewModel();
@@ -369,7 +378,9 @@ public class SubscriptionResource {
 		}
 		
 		try {
-			if (!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId())) {
+			boolean bAdmin = UserApplicationRole.isAdmin(oUser);
+			
+			if (!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId()) && !bAdmin) {
 				WasdiLog.warnLog("SubscriptionResource.updateSubscription: user cannot write subscription");
 				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_SUBSCRIPTION.name())).build();						
 			}
@@ -393,7 +404,7 @@ public class SubscriptionResource {
 
 			Subscription oSubscription = convertViewModelToSubscription(oSubscriptionViewModel);
 			
-			if (!UserApplicationRole.isAdmin(oUser)) {
+			if (!bAdmin) {
 				if (oSubscriptionViewModel.isBuySuccess() != oExistingSubscription.isBuySuccess()) {
 					WasdiLog.warnLog("SubscriptionResource.updateSubscription: the user is not an admin so CANNOT change buy success true");
 					oSubscription.setBuySuccess(oExistingSubscription.isBuySuccess());					
@@ -451,8 +462,10 @@ public class SubscriptionResource {
 				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No subscription with the name exists.")).build();
 			}
 			
+			boolean bAdmin = UserApplicationRole.isAdmin(oUser);
+			
 			// And the user must be able to access it
-			if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
+			if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId) && !bAdmin) {
 				WasdiLog.warnLog("SubscriptionResource.deleteSubscription: user cannot access subscription");
 				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("Forbidden.")).build();
 			}
@@ -461,7 +474,7 @@ public class SubscriptionResource {
 
 			String sSubscriptionOwner = oSubscription.getUserId();
 
-			if (!sSubscriptionOwner.equals(oUser.getUserId())) {
+			if (!sSubscriptionOwner.equals(oUser.getUserId()) && !bAdmin) {
 				// The current user is not the owner of the subscription
 				UserResourcePermission oPermission = oUserResourcePermissionRepository.getSubscriptionSharingByUserIdAndSubscriptionId(oUser.getUserId(), sSubscriptionId);
 
@@ -476,7 +489,7 @@ public class SubscriptionResource {
 				}
 			}
 			else {
-				WasdiLog.debugLog("This is the owner: lets clean all");
+				WasdiLog.debugLog("This is the owner or an admin: lets clean all");
 				oUserResourcePermissionRepository.deletePermissionsBySubscriptionId(sSubscriptionId);
 				ProjectRepository oProjectRepository = new ProjectRepository();
 				oProjectRepository.deleteBySubscription(sSubscriptionId);
@@ -888,8 +901,8 @@ public class SubscriptionResource {
 
 				if (oSubscription == null) {
 					WasdiLog.debugLog("SubscriptionResource.confirmation: subscription does not exist");
-				} else {
-									
+				} 
+				else {
 					oSubscription.setBuyDate(Utils.nowInMillis());
 					oSubscription.setBuySuccess(true);
 
@@ -934,6 +947,132 @@ public class SubscriptionResource {
 		return sHtmlContent;
 	}
 
+	
+	/**
+	 * Get the list of subscriptions associated to a user.
+	 * @param sSessionId User Session Id
+	 * @return a View Model with the Subscription Name and 
+	 * 	a flag to know if the user is admin or not of the subscription
+	 */
+	@GET
+	@Path("/list")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response getSortedList(@HeaderParam("x-session-token") String sSessionId, 
+			@QueryParam("userfilter") String sUserFilter, 
+			@QueryParam("idfilter") String sIdFilter, 
+			@QueryParam("namefilter") String sNameFilter,
+			@QueryParam("statusfilter") String sStatus,
+			@QueryParam("offset") Integer iOffset,
+			@QueryParam("limit") Integer iLimit,
+			@QueryParam("sortby") String sSorting,
+			@QueryParam("order") String sOrder) {
+
+		WasdiLog.debugLog("SubscriptionResource.getList");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		// Domain Check
+		if (oUser == null) {
+			WasdiLog.warnLog("SubscriptionResource.getListByUser: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+		
+		// Can the user access this section?
+		if (!UserApplicationRole.isAdmin(oUser)) {
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
+		}
+		
+		// cleaning of the input
+		if (iOffset == null) {
+			iOffset = 0;
+			WasdiLog.debugLog("SubscriptionResource.getList: setting offset to 0 as default");
+		}
+
+		if (iLimit == null) {
+			iLimit = 10;
+			WasdiLog.debugLog("SubscriptionResource.getList: setting limit to 10 as default");
+		}
+		
+		if (Utils.isNullOrEmpty(sSorting)) {
+			sSorting = "name";
+			WasdiLog.debugLog("SubscriptionResource.getList: setting sorting to 'name' as default");
+		}
+		
+		if (Utils.isNullOrEmpty(sOrder)) {
+			sOrder = "asc";
+			WasdiLog.debugLog("SubscriptionResource.getList: setting ordering to 'asc' as default");
+		}
+		
+		// validation of the inputs
+		if (! (sSorting.equals("name") 
+				|| sSorting.equals("userId") 
+				|| sSorting.equals("endDate")
+				|| sSorting.equals(""))) {
+			sSorting = "userId"; 
+			WasdiLog.warnLog("SubscriptionResource.getList: setting the sorting to 'userId' because of a not valid option " + sSorting);
+		}
+		
+		int iOrder = 1;
+		
+		if (sOrder.equals("desc") || sOrder.equals("des") || sOrder.equals("0") || sOrder.equals("-1")) {
+			iOrder = -1;
+			WasdiLog.debugLog("SubscriptionResource.getList: setting iOrder to -1 due to order= " + sOrder);
+		}
+
+		
+		List<SubscriptionListViewModel> aoSubscriptionLVM = new ArrayList<>();
+
+		try {
+
+			WasdiLog.debugLog("SubscriptionResource.getList: subscriptions with User filter " + sUserFilter + " sIdFilter " + sIdFilter+ " sNameFilter " + sNameFilter 
+					+ ", sorting " + sSorting + " ordering " + iOrder);
+
+			// Get the list of Subscriptions owned by the user
+			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+			List<Subscription> aoSubscriptions = oSubscriptionRepository.findSubscriptionsByFilters(sNameFilter, sIdFilter, sUserFilter, sSorting, iOrder);
+			
+			Set<String> asOrganizationIds = aoSubscriptions.stream()
+					.map(Subscription::getOrganizationId)
+					.filter(Objects::nonNull)
+					.collect(Collectors.toSet());
+			Map<String, String> aoOrganizationNames = getOrganizationNamesById(asOrganizationIds);
+
+			// For each
+			for (int iSubscriptions = 0; iSubscriptions<aoSubscriptions.size(); iSubscriptions ++) {
+				
+				if (iSubscriptions<iOffset) continue;
+				if (iSubscriptions>=iOffset+iLimit) break;
+				
+				Subscription oSubscription = aoSubscriptions.get(iSubscriptions);
+				
+				// Create View Model
+				SubscriptionListViewModel oSubscriptionViewModel = convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), aoOrganizationNames.get(oSubscription.getOrganizationId()), "owner");
+				
+				if (oSubscriptionViewModel != null) {
+					oSubscriptionViewModel.setReadOnly(false);
+					aoSubscriptionLVM.add(oSubscriptionViewModel);
+				}
+				else {
+					WasdiLog.warnLog("SubscriptionResource.getList: Error converting a Subscription, jumping");
+				}
+			}
+			
+			return Response.ok(aoSubscriptionLVM).build();
+		} 
+		catch (Exception oEx) {
+			WasdiLog.errorLog("SubscriptionResource.getListByUser error: " + oEx);
+			return Response.serverError().build();
+		}
+	}
+	
+	
+	
+	
+	/**
+	 * Utility method to send a rabbit message
+	 * @param sWorkspaceId
+	 * @param oStripePaymentDetail
+	 */
 	private void sendRabbitMessage(String sWorkspaceId, StripePaymentDetail oStripePaymentDetail) {
 		try {
 			// Search for exchange name
@@ -953,6 +1092,12 @@ public class SubscriptionResource {
 		}
 	}
 
+	/**
+	 * Converts a Subscription entity to a View Model
+	 * @param oSubscription
+	 * @param sOrganizationName
+	 * @return
+	 */
 	private static SubscriptionViewModel convert(Subscription oSubscription, String sOrganizationName) {
 		SubscriptionViewModel oSubscriptionViewModel = new SubscriptionViewModel();
 		oSubscriptionViewModel.setSubscriptionId(oSubscription.getSubscriptionId());
@@ -972,6 +1117,14 @@ public class SubscriptionResource {
 		return oSubscriptionViewModel;
 	}
 
+	/**
+	 * Convert a Subscription entity to a view model
+	 * @param oSubscription
+	 * @param sCurrentUserId
+	 * @param sOrganizationName
+	 * @param sReason
+	 * @return
+	 */
 	private static SubscriptionListViewModel convertSubscriptionToViewModel(Subscription oSubscription, String sCurrentUserId, String sOrganizationName, String sReason) {
 		try {
 			SubscriptionListViewModel oSubscriptionListViewModel = new SubscriptionListViewModel();
@@ -994,6 +1147,11 @@ public class SubscriptionResource {
 		}
 	}
 
+	/**
+	 * Converts a Subscription View Model to  an entity
+	 * @param oSubscriptionViewModel
+	 * @return
+	 */
 	private static Subscription convertViewModelToSubscription(SubscriptionViewModel oSubscriptionViewModel) {
 		Subscription oSubscription = new Subscription();
 		oSubscription.setSubscriptionId(oSubscriptionViewModel.getSubscriptionId());
@@ -1010,6 +1168,7 @@ public class SubscriptionResource {
 
 		return oSubscription;
 	}
+	
 	
 	public Collection<String> getIdsOfSubscriptionsAssociatedWithUser(String sUserId) {
 		Set<String> asCompleteSubscriptionIds = new HashSet<>();

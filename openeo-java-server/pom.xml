@@ -19,19 +19,19 @@
     <packaging>war</packaging>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
-        <sVersionJackson>2.9.9</sVersionJackson>
+        <sVersionJackson>2.18.2</sVersionJackson>
         <sVersionJakartaServeletApi>4.0.4</sVersionJakartaServeletApi>
         <sVersionJakartaValidationApi>2.0.2</sVersionJakartaValidationApi>
         <sVersionJakartaXmlBindApi>2.3.3</sVersionJakartaXmlBindApi>
         <sVersionJavaxAnnotationApi>1.3.2</sVersionJavaxAnnotationApi>
         <sVersionJaxbImpl>2.3.3</sVersionJaxbImpl>
         <sVersionJersey2>2.35</sVersionJersey2>
-        <sVersionJersey2SwaggerJaxrs>1.6.5</sVersionJersey2SwaggerJaxrs>
+        <sVersionJersey2SwaggerJaxrs>1.6.14</sVersionJersey2SwaggerJaxrs>
         <sVersionJunit>4.13.2</sVersionJunit>
         <sVersionLogback>1.2.13</sVersionLogback>
         <sVersionMavenCompilerPlugin>3.11.0</sVersionMavenCompilerPlugin>

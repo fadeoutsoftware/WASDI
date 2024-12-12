@@ -17,6 +17,7 @@ import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryTranslationParser;
 import wasdi.shared.queryexecutors.QueryTranslator;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -41,8 +42,8 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 
 		String sResult = null;
 		try {
-			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sAppConfigPath);
-			JSONObject oParseConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
+			JSONObject oAppConf = JsonUtils.loadJsonFromFile(m_sAppConfigPath);
+			JSONObject oParseConf = JsonUtils.loadJsonFromFile(m_sParserConfigPath);
 			
 			//from:
 			//( footprint:"intersects(POLYGON((91.76001774389503 9.461419178814332,91.76001774389503 29.23273110342357,100.90070010891878 29.23273110342357,100.90070010891878 9.461419178814332,91.76001774389503 9.461419178814332)))" ) AND ( beginPosition:[2020-07-24T00:00:00.000Z TO 2020-07-31T23:59:59.999Z] AND endPosition:[2020-07-24T00:00:00.000Z TO 2020-07-31T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:GRD AND relativeorbitnumber:99)
@@ -264,7 +265,7 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 				sResult ="&geometry=POLYGON((" + sQuery.substring(iStart, iEnd) + "))";
 			}
 		} catch (Exception oE) {
-			WasdiLog.log("ERROR", "QueryTranslatorCREODIAS.parseFootprint: could not identify footprint substring limits: " + oE);
+			WasdiLog.errorLog("QueryTranslatorCREODIAS.parseFootprint: could not identify footprint substring limits: ", oE);
 		}
 		return sResult;
 	}

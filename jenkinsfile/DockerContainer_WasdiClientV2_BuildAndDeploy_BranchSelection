@@ -1,0 +1,203 @@
+pipeline {
+  agent any
+
+  environment {
+    sCurrentRevision  = "${env.BUILD_ID}"
+    sEnvironmentLower = env.sAnsibleLimit.split('-')[0].toLowerCase()
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '365'))
+    disableConcurrentBuilds()
+  }
+
+  tools {
+    nodejs "WASDI_NODEJS_V18"
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        echo "env.GIT_BRANCH                    = " + env.GIT_BRANCH
+        echo "env.sAnsibleInventory             = " + env.sAnsibleInventory
+        echo "env.sAnsibleLimit                 = " + env.sAnsibleLimit
+        echo "env.sCurrentRevision              = " + env.sCurrentRevision
+        echo "env.sSourceBranch                 = " + env.sSourceBranch
+        echo "env.sWasdiAnsibleGitRepositoryUrl = " + env.sWasdiAnsibleGitRepositoryUrl
+        echo "env.sWasdiAnsiblePath             = " + env.sWasdiAnsiblePath
+        echo "env.WORKSPACE                     = " + env.WORKSPACE
+
+        sh script: "pwd", label: "Current location"
+
+        sh script: "which node", label: "Tool > node > path"
+        sh script: "node --version", label: "Tool > node > current version"
+
+        sh script: "which npm", label: "Tool > npm > path"
+        sh script: "npm --version", label: "Tool > npm > current version"
+
+        sh script: "which sass", label: "Tool > sass > path"
+        sh script: "sass --version", label: "Tool > sass > current version"
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          sh script: """
+            mkdir --parents `dirname ${sWasdiAnsibleVaultFile}`
+            echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
+          """,
+          label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        dir("${env.sWasdiAnsiblePath}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloudSsh', url: "${env.sWasdiAnsibleGitRepositorySshUrl}"]]])
+        }
+      }
+    }
+
+    stage('CLONE THE GIT REPOSITORY') {
+      steps {
+        sh script: """
+          mkdir client_v2
+          cd client_v2
+          git clone https://github.com/wasdi-cloud/wasdiClient2.git .
+        """,
+        label: "Clone the GIT repository"
+      }
+    }
+
+    stage('CHECKOUT THE CLIENT V2 BRANCH') {
+      when {
+        expression {
+            return sClientV2SourceBranch != 'main';
+        }
+      }
+      steps {
+     
+        sh script: """
+          pwd
+          cd client_v2
+          git fetch
+          git branch -v -a
+          git checkout -b ${sClientV2SourceBranch} origin/${sClientV2SourceBranch}
+        """,
+        label: "Checkout the branch specified"
+      }
+    }
+
+    stage('NPM - INSTALL MODULES') {
+      steps {
+        sh script: """
+          cd client_v2
+          npm install
+        """,
+        label: "Install NodeJS modules from package.json"
+      }
+    }
+
+    stage('ANSIBLE - PREPARE THE CLIENT (RENDER TEMPLATES, DELETE TEMPLATES, ETC)') {
+      steps {
+        sh script: """
+            cd ${env.sWasdiAnsiblePath}
+            ansible-playbook playbooks/prepareWasdiClient_v2.yml \
+              --inventory inventories/${env.sAnsibleInventory}.yml \
+              --limit ${env.sAnsibleLimit} \
+              --diff \
+              --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}/client_v2'
+        """,
+        label: "Prepare the WASDI client"
+      }
+    }
+
+    stage('NG - BUILD') {
+      steps {
+        sh script: """
+          cd client_v2
+          set NG_FORCE_TTY=false
+          ./node_modules/.bin/ng build --configuration production
+        """,
+        label: "Build WASDI client"
+      }
+    }
+
+    stage('BUILD THE CONTAINER(S)') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/buildWasdiDockerContainer.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sEnvironmentLower} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiClientV2Container=true'
+        """,
+        label: "Build the container(s)"
+      }
+    }
+
+    stage('DEPLOY THE CONTAINER(S) AND THEIR RUN ELEMENTS') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deployDockerContainerWasdiClientV2.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Deploy the container(s) and their run elementss"
+      }
+    }
+
+    stage('START OR RESTART THE CONTAINER(S)') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/startOrRestartDockerContainer.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiClientV2Container=true'
+        """,
+        label: "Start or restart the container(s)"
+      }
+    }
+
+    stage('CLEAN THE DOCKER IMAGE(S)') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deleteDockerImage.yml \
+            --inventory inventories/${env.sAnsibleInventory}.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiClientV2Container=true'
+        """,
+        label: "Clean the Docker image(s)"
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
+
+
+
+
+
+

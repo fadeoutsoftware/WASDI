@@ -3,6 +3,7 @@ package wasdi.shared.utils.wasdiAPI;
 import java.io.File;
 
 import wasdi.shared.business.Node;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
@@ -19,6 +20,34 @@ public class ProcessorAPIClient {
 			
 			// Compose the API string
 			sUrl += "processors/nodedelete?processorId="+sProcessorId+"&workspace="+sWorkspaceId+"&processorName="+sProcessorName+"&processorType="+sProcessorType+"&version="+sVersion;
+						
+			WasdiLog.debugLog("ProcessorAPIClient.nodeDelete: calling url: " + sUrl);
+			
+			return HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId)); 
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorAPIClient.nodeDelete: error ", oEx);
+		}
+		
+		return new HttpCallResponse();
+	}
+	
+	/**
+	 * Call the main node delete Processor API 
+	 * @param sSessionId
+	 * @param sProcessorId
+	 * @return
+	 */
+	public static HttpCallResponse delete(String sSessionId, String sProcessorId)  {
+		try {
+			
+			String sUrl = WasdiConfig.Current.baseUrl;
+			
+			// Safe programming
+			if (!sUrl.endsWith("/")) sUrl += "/";
+			
+			// Compose the API string
+			sUrl += "processors/delete?processorId="+sProcessorId;
 						
 			WasdiLog.debugLog("ProcessorAPIClient.nodeDelete: calling url: " + sUrl);
 			
@@ -96,4 +125,5 @@ public class ProcessorAPIClient {
 		
 		return false;
 	}
+	
 }

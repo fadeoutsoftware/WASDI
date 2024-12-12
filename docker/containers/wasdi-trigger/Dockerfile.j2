@@ -101,38 +101,38 @@ RUN apt-get update && \
 USER {{ sWasdiSystemUserName }}
 
 
-# RUN specific to install JRE 8
+# RUN specific to install JDK 11
 RUN mkdir --parents \
-        {{ sWasdiJre8RootDirectoryPath }} \
-        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
-    chown {{ sWasdiJre8RootDirectoryOwner }}:{{ sWasdiJre8RootDirectoryGroup }} \
-        {{ sWasdiJre8RootDirectoryPath }} \
-        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
-    chmod {{ sWasdiJre8RootDirectoryMode }} \
-        {{ sWasdiJre8RootDirectoryPath }} \
-        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
+        {{ sWasdiJdk11RootDirectoryPath }} \
+        {{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }} && \
+    chown {{ sWasdiJdk11RootDirectoryOwner }}:{{ sWasdiJdk11RootDirectoryGroup }} \
+        {{ sWasdiJdk11RootDirectoryPath }} \
+        {{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }} && \
+    chmod {{ sWasdiJdk11RootDirectoryMode }} \
+        {{ sWasdiJdk11RootDirectoryPath }} \
+        {{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }} && \
     wget \
         --no-verbose \
-        --output-document /tmp/{{ sWasdiJre8SourceUrl | basename }} \
+        --output-document /tmp/{{ sWasdiJdk11SourceUrl | basename }} \
         --progress=bar:force:noscroll \
         --show-progress \
-        {{ sWasdiJre8SourceUrl }} && \
+        {{ sWasdiJdk11SourceUrl }} && \
     tar \
-        --directory {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} \
+        --directory {{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }} \
         --extract \
-        --file /tmp/{{ sWasdiJre8SourceUrl | basename }} \
+        --file /tmp/{{ sWasdiJdk11SourceUrl | basename }} \
         --strip-components=1 && \
     ln \
         --symbolic \
-        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} \
-        {{ sWasdiJre8RootDirectoryPath }}/latest && \
-    chown --no-dereference {{ sWasdiJre8RootDirectoryOwner }}:{{ sWasdiJre8RootDirectoryGroup }} \
-        {{ sWasdiJre8RootDirectoryPath }}/latest && \
+        {{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }} \
+        {{ sWasdiJdk11RootDirectoryPath }}/latest && \
+    chown --no-dereference {{ sWasdiJdk11RootDirectoryOwner }}:{{ sWasdiJdk11RootDirectoryGroup }} \
+        {{ sWasdiJdk11RootDirectoryPath }}/latest && \
     rm --force \
-        /tmp/{{ sWasdiJre8SourceUrl | basename }}
+        /tmp/{{ sWasdiJdk11SourceUrl | basename }}
 
-ENV JAVA_HOME="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}"
-ENV PATH="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin:${PATH}"
+ENV JAVA_HOME="{{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }}"
+ENV PATH="{{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }}/bin:${PATH}"
 
 
 # Set the workdir
@@ -145,7 +145,7 @@ COPY --chown={{ sWasdiTriggerRootDirectoryOwner }}:{{ sWasdiTriggerRootDirectory
 
 # Start the container
 ENTRYPOINT [ \
-    "{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin/java", \
+    "{{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }}/bin/java", \
     "-Xmx24g", \
     "-Xms1024m", \
     "-XX:+AggressiveOpts", \

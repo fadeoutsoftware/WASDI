@@ -70,7 +70,7 @@ public class QueryTranslationParser {
 				String sWasdiQueryValue = asWasdiKeyValuePair[1];
 				String sProviderKey = m_oKeysTranslation.optString(sWasdiQueryKey, null);
 				if (null == sProviderKey) {
-					WasdiLog.log("WARNING", "QueryTranslationParser.parse: cannot translate key: " + sWasdiQueryKey + ", skipping");
+					WasdiLog.warnLog("QueryTranslationParser.parse: cannot translate key: " + sWasdiQueryKey + ", skipping");
 					// skip this filter if its key cannot be tranlsated
 					continue;
 				}
@@ -88,20 +88,17 @@ public class QueryTranslationParser {
 
 					String sIndexlabel = oFilter.optString("indexlabel", null);
 					if (null == sIndexlabel) {
-						WasdiLog.log("WARNING", "QueryTranslationParser.parse: indexlabel for key " + sWasdiQueryKey
-								+ " is null, configuration does not look good");
+						WasdiLog.warnLog("QueryTranslationParser.parse: indexlabel for key " + sWasdiQueryKey + " is null, configuration does not look good");
 					}
 
 					String sIndexvalues = oFilter.optString("indexvalues", null);
 					if (null == sIndexvalues) {
-						WasdiLog.log("ERROR", "QueryTranslationParser.parse: indexvalues for key " + sWasdiQueryKey
-								+ " is null, configuration does not look good");
+						WasdiLog.errorLog("QueryTranslationParser.parse: indexvalues for key " + sWasdiQueryKey + " is null, configuration does not look good");
 						continue;
 					}
 					String sRegex = oFilter.optString("regex", null);
 					if (null == sRegex) {
-						WasdiLog.log("ERROR", "QueryTranslationParser.parse( " + sQuery
-								+ " ): regex is null, configuration does not look good");
+						WasdiLog.errorLog("QueryTranslationParser.parse( " + sQuery+ " ): regex is null, configuration does not look good");
 						continue;
 					}
 
@@ -123,14 +120,14 @@ public class QueryTranslationParser {
 						// normal key:value
 						JSONObject oValues = m_oValuesTranslation.optJSONObject(sWasdiQueryKey);
 						if (null == oValues) {
-							WasdiLog.log("ERROR", "QueryTranslationParser.parse( " + sQuery
-									+ " ): could not translate value for key: " + sWasdiQueryKey);
+							WasdiLog.errorLog("QueryTranslationParser.parse( " + sQuery + " ): could not translate value for key: " + sWasdiQueryKey);
 							break;
 						}
 
 						sProviderValue = oValues.optString(sWasdiQueryValue, null);
 
-					} else {
+					} 
+					else {
 						// then it can be:
 						// a number
 						// an interval -> hint contains "TO"
@@ -156,8 +153,8 @@ public class QueryTranslationParser {
 				// todo finalize
 
 			}
-		} catch (Exception e) {
-			WasdiLog.log("ERROR", "QueryTranslationParser( " + sQuery + " ): could not complete translation, aborting");
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("QueryTranslationParser( " + sQuery + " ): could not complete translation, aborting", oEx);
 		}
 
 		return sResult;

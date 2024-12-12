@@ -32,8 +32,8 @@ import com.google.common.io.CharStreams;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.creodias.ResponseTranslatorCREODIAS;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -683,7 +683,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		boolean bOnCloud = isWorkspaceOnSameCloud();
 		
 		if (sPlatformType.equals(Platforms.SENTINEL1)) {
-			String sType = WasdiFileUtils.getProductTypeSatelliteImageFileName(sFileName);
+			String sType = MissionUtils.getProductTypeSatelliteImageFileName(sFileName);
 			
 			if (sType.equals("GRD") || sType.equals("OCN")) {
 				if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
@@ -694,7 +694,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			return DataProviderScores.LTA.getValue();
 		}
 		else if (sPlatformType.equals(Platforms.SENTINEL2)) {
-			String sType = WasdiFileUtils.getProductTypeSatelliteImageFileName(sFileName);
+			String sType = MissionUtils.getProductTypeSatelliteImageFileName(sFileName);
 			
 			if (sType.equals("MSIL1C")) {
 				if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();

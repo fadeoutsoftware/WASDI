@@ -19,8 +19,8 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class SOBLOOProviderAdapter extends ProviderAdapter{
@@ -365,22 +365,28 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		
 		if (sPlatformType.equals(Platforms.SENTINEL1) || sPlatformType.equals(Platforms.SENTINEL2) 
 				|| sPlatformType.equals(Platforms.SENTINEL3)) {
-			Date oImageDate = WasdiFileUtils.getDateFromSatelliteImageFileName(sFileName);
+			Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName);
 			
-			Date oNow = new Date();
-			
-			long lDistance = oNow.getTime() - oImageDate.getTime();
-			
-			if (lDistance> 2*30*24*60*60*1000) {
-				return DataProviderScores.LTA.getValue();
-			}
-			
-			if (isWorkspaceOnSameCloud()) {
-				return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
+			if (oImageDate!=null) {
+				Date oNow = new Date();
+				
+				long lDistance = oNow.getTime() - oImageDate.getTime();
+				
+				if (lDistance> 2*30*24*60*60*1000) {
+					return DataProviderScores.LTA.getValue();
+				}
+				
+				if (isWorkspaceOnSameCloud()) {
+					return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
+				}
+				else {
+					return DataProviderScores.DOWNLOAD.getValue();
+				}				
 			}
 			else {
-				return DataProviderScores.DOWNLOAD.getValue();
+				return DataProviderScores.LTA.getValue();
 			}
+
 		}
 		
 		return 0;

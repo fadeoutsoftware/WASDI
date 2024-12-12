@@ -50,6 +50,8 @@ public class HostConfigParam {
 	public boolean ReadonlyRootfs = false;
 	public boolean AutoRemove = false;
 	
+	public boolean EnableGpu = false;
+	
 	public HashMap<String, String> PortBindings = new HashMap<String, String>();
 	public ArrayList<String> Links = new ArrayList<>();
 	public ArrayList<String> Binds = new ArrayList<>();
@@ -131,7 +133,23 @@ public class HostConfigParam {
 					if (iMounts<Mounts.size()-1) sReturn +=",\n";
 				}
 			}
-			sReturn += "]";			
+			sReturn += "]";
+			
+			if (EnableGpu) {
+				sReturn += ",\n\"DeviceRequests\": [\n";
+				sReturn += "{\n";
+				sReturn += "\"Driver\": \"nvidia\",\n\"Count\": -1,\n";
+				sReturn += "\"Capabilities\": [\n";
+				sReturn += "[";
+				sReturn += "\"gpu\",\n";
+				sReturn += "\"nvidia\",\n";
+				sReturn += "\"compute\"\n";
+				sReturn += "]\n";
+				sReturn += "],\n";
+				sReturn += "\"Options\":{}\n";
+				sReturn += "}\n";
+				sReturn += "]";
+			}
 			
 			
 			if (RestartPolicy.size()>0) {

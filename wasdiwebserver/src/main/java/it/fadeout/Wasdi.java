@@ -36,6 +36,7 @@ import wasdi.shared.business.Workspace;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserSession;
+import wasdi.shared.business.users.UserType;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MetricsEntryRepository;
@@ -51,9 +52,11 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.LauncherOperationsUtils;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.log.WasdiLogLevels;
 import wasdi.shared.utils.wasdiAPI.ProcessingAPIClient;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -130,7 +133,7 @@ public class Wasdi extends ResourceConfig {
 	@PostConstruct
 	public void initWasdi() {
 
-		WasdiLog.debugLog("----------- Welcome to WASDI - Web Advanced Space Developer Interface");
+		WasdiLog.infoLog("----------- Welcome to WASDI - Web Advanced Space Developer Interface");
 
 		String sConfigFilePath = "/etc/wasdi/wasdiConfig.json";
 
@@ -139,8 +142,10 @@ public class Wasdi extends ResourceConfig {
 		}
 		
 		if (!WasdiConfig.readConfig(sConfigFilePath)) {
-			WasdiLog.debugLog("ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
+			WasdiLog.warnLog("Wasdi.initWasdi: ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
 		}
+		
+		WasdiLog.initLogger(WasdiConfig.Current.logLevelServer);
 		
 		// set nfs properties download folder
 		String sUserHome = System.getProperty("user.home");
@@ -148,25 +153,25 @@ public class Wasdi extends ResourceConfig {
 		if (sNfsFolder == null)
 			System.setProperty(Wasdi.s_SNFS_DATA_DOWNLOAD, sUserHome + "/nfs/download");
 
-		WasdiLog.debugLog("-------nfs dir " + System.getProperty(Wasdi.s_SNFS_DATA_DOWNLOAD));
+		WasdiLog.debugLog("------- NFS dir " + System.getProperty(Wasdi.s_SNFS_DATA_DOWNLOAD));
 		
 		// Read MongoDb Configuration
 		try {
 
             MongoRepository.readConfig();
 
-			WasdiLog.debugLog("-------Mongo db User " + MongoRepository.DB_USER);
+			WasdiLog.debugLog("------- Mongo db User " + MongoRepository.DB_USER);
 
 		} catch (Throwable oEx) {
-			WasdiLog.errorLog("Read MongoDb Configuration exception " + oEx.toString());
+			WasdiLog.errorLog("Wasdi.initWasdi: Read MongoDb Configuration exception " + oEx.toString());
 		}
 		
 		// Read the code of this Node
 		try {
-			WasdiLog.debugLog("-------Node Code " + WasdiConfig.Current.nodeCode);
+			WasdiLog.infoLog("------- Node Code " + WasdiConfig.Current.nodeCode);
 
 		} catch (Throwable oEx) {
-			WasdiLog.errorLog("Read the code of this Node exception " + oEx.toString());
+			WasdiLog.errorLog("Wasdi.initWasdi: Read the code of this Node exception " + oEx.toString());
 		}
 		
 		// Read the configuration of KeyCloak		
@@ -181,11 +186,11 @@ public class Wasdi extends ResourceConfig {
 				
 				// Configure also the local connection: by default is the "wasdi" port + 1
 				MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
-				WasdiLog.debugLog("-------Addded Mongo Configuration local for " + WasdiConfig.Current.nodeCode);
+				WasdiLog.debugLog("------- Addded Mongo Configuration local for " + WasdiConfig.Current.nodeCode);
 			}			
 		}
 		catch (Throwable oEx) {
-			WasdiLog.errorLog("Local Database config exception " + oEx.toString());
+			WasdiLog.errorLog("Wasdi.initWasdi: Local Database config exception " + oEx.toString());
 		}
 
 		MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
@@ -194,13 +199,13 @@ public class Wasdi extends ResourceConfig {
 		try {
 			RabbitFactory.readConfig();
 			
-			WasdiLog.debugLog("-------Rabbit Initialized ");
+			WasdiLog.infoLog("------- Rabbit Initialized ");
 		} catch (Throwable oEx) {
-			WasdiLog.errorLog("Configure Rabbit exception " + oEx.toString());
+			WasdiLog.errorLog("Wasdi.initWasdi: Configure Rabbit exception " + oEx.toString());
 		}
 		
 		// Each node must have a special workspace for depoy operations: here it check if exists: if not it will be created
-		WasdiLog.debugLog("-------initializing node local workspace...");
+		WasdiLog.debugLog("------- Initializing node local workspace...");
 		
 		try {
 			// Check if it exists
@@ -210,7 +215,7 @@ public class Wasdi extends ResourceConfig {
 			if (oWorkspace == null) {
 				
 				// Create the working Workspace in this node
-				WasdiLog.debugLog("Local Workpsace Node " + Wasdi.s_sLocalWorkspaceName + " does not exist create it");
+				WasdiLog.debugLog("Wasdi.initWasdi: Local Workpsace Node " + Wasdi.s_sLocalWorkspaceName + " does not exist create it");
 				
 				oWorkspace = new Workspace();
 				// Default values
@@ -224,18 +229,19 @@ public class Wasdi extends ResourceConfig {
 				// Insert in the db
 				oWorkspaceRepository.insertWorkspace(oWorkspace);
 				
-				WasdiLog.debugLog("Workspace " + Wasdi.s_sLocalWorkspaceName + " created");
+				WasdiLog.debugLog("Wasdi.initWasdi: Workspace " + Wasdi.s_sLocalWorkspaceName + " created");
 			}
-			
+						
 		}
 		catch (Throwable oEx) {
-			WasdiLog.errorLog("Local Workspace Configuration Exception " + oEx.toString());
+			WasdiLog.errorLog("Wasdi.initWasdi: Local Workspace Configuration Exception " + oEx.toString());
 		}
 		
-		WasdiLog.debugLog("------- WASDI Init done\n\n");
-		WasdiLog.debugLog("-----------------------------------------------");
-		WasdiLog.debugLog("--------        Welcome to space        -------");
-		WasdiLog.debugLog("-----------------------------------------------\n\n");
+		WasdiLog.infoLog("------- WASDI Init done\n\n");
+		
+		WasdiLog.infoLog("-----------------------------------------------");
+		WasdiLog.infoLog("--------        Welcome to space        -------");
+		WasdiLog.infoLog("-----------------------------------------------\n\n");
 		
 		try {
 			// Can be useful for debug
@@ -254,7 +260,7 @@ public class Wasdi extends ResourceConfig {
 	 */
 	public static void shutDown() {
 		try {
-			WasdiLog.debugLog("-------Shutting Down Wasdi");
+			WasdiLog.debugLog("------- Shutting Down WASDI");
 			
 			// Stop mongo
 			try {
@@ -263,7 +269,7 @@ public class Wasdi extends ResourceConfig {
 				WasdiLog.debugLog("Wasdi.shutDown: could not shut down connection to DB: " + oE);
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("WASDI SHUTDOWN EXCEPTION: " + oE);
+			WasdiLog.debugLog("Wasdi.shutDown: WASDI SHUTDOWN EXCEPTION: " + oE);
 		}
 	}
 	
@@ -762,7 +768,7 @@ public class Wasdi extends ResourceConfig {
 			List<Node> aoNodes = null;
 			
 			// Is this a professional user?
-			if (oUser.isProfessionalUser())  {
+			if (PermissionsUtils.getUserType(oUser).equals(UserType.PROFESSIONAL.name()))  {
 				
 				WasdiLog.debugLog("Wasdi.getNodesSortedByScore: Search dedicated nodes for Professional User");
 				

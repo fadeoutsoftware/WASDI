@@ -13,8 +13,8 @@ import wasdi.shared.data.ecostress.EcoStressRepository;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.TimeEpochUtils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
@@ -49,8 +49,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 				|| sProduct.toUpperCase().startsWith("EEHSTIC")
 				|| sProduct.toUpperCase().startsWith("EEHSW")
 				|| sProduct.toUpperCase().startsWith("EEHTES")
-				|| sProduct.toUpperCase().startsWith("EEHTSEB")
-				|| sProduct.toUpperCase().startsWith("ECOSTRESS")) {
+				|| sProduct.toUpperCase().startsWith("EEHTSEB")) {
 			return sOriginalUrl;
 		}
 		return null;
@@ -73,6 +72,11 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		String sService = oQueryViewModel.productType;
 		int iRelativeOrbit = oQueryViewModel.relativeOrbit;
 		String sDayNightFlag = oQueryViewModel.timeliness;
+		
+		if (sService.equalsIgnoreCase("L1B_GEO") || sService.equalsIgnoreCase("L1B_RAD")) {
+			WasdiLog.debugLog("QueryExecutorCloudferro.executeAndRetrieve. L1B_GEO and L1B_RAD products not supported anymore");
+			return -1;
+		}
 
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 
@@ -130,6 +134,11 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		String sService = oQueryViewModel.productType;
 		int iRelativeOrbit = oQueryViewModel.relativeOrbit;
 		String sDayNightFlag = oQueryViewModel.timeliness;
+		
+		if (sService.equalsIgnoreCase("L1B_GEO") || sService.equalsIgnoreCase("L1B_RAD")) {
+			WasdiLog.debugLog("QueryExecutorCloudferro.executeAndRetrieve. L1B_GEO and L1B_RAD products not supported anymore");
+			return null;
+		}
 
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 
@@ -145,7 +154,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
 		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
 		
-		JSONObject oParseConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
+		JSONObject oParseConf = JsonUtils.loadJsonFromFile(m_sParserConfigPath);
 		
 		if (oParseConf!=null) {
 			if(!oParseConf.has("volumeId")) {

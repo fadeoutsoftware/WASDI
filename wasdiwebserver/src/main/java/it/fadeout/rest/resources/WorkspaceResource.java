@@ -4,8 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.HashMap;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.DELETE;
@@ -112,7 +111,13 @@ public class WorkspaceResource {
 			List<Node> aoNodeList = oNodeRepository.getNodesList();
 			
 			// And create a map based on the node code
-			Map<String, Node> aoNodeMap = aoNodeList.stream().collect(Collectors.toMap(Node::getNodeCode, Function.identity()));
+			Map<String, Node> aoNodeMap = new HashMap<>();
+			for (Node oNode : aoNodeList) {
+				if (aoNodeMap.putIfAbsent(oNode.getNodeCode(), oNode) != null) {
+					WasdiLog.warnLog("WorkspaceResource.getListByUser: duplicated key for node " + oNode.getNodeCode());
+				}
+			}
+			
 
 			// Create repo
 			WorkspaceRepository oWSRepository = new WorkspaceRepository();
@@ -730,6 +735,16 @@ public class WorkspaceResource {
 				// Delete also the sharings, it is deleted by the owner..
                 UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
                 oUserResourcePermissionRepository.deletePermissionsByWorkspaceId(sWorkspaceId);
+                
+                // Delete Process Workspaces
+                
+                // TODO: here is not correct... we should clean 
+                //  -All the processor logs
+                //	-All the parameters
+                // Then we can clean the process workspaces
+                
+                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+                oProcessWorkspaceRepository.deleteProcessWorkspaceByWorkspaceId(oWorkspace.getWorkspaceId());
 
 
 				return Response.ok().build();
@@ -805,7 +820,7 @@ public class WorkspaceResource {
 		}
 
 		// Cannot Autoshare
-		if (oRequesterUser.getUserId().equals(sDestinationUserId)) {
+		if (oRequesterUser.getUserId().equals(sDestinationUserId) && !UserApplicationRole.isAdmin(oRequesterUser)) {
 			WasdiLog.warnLog("WorkspaceResource.shareWorkspace: auto sharing not so smart");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());

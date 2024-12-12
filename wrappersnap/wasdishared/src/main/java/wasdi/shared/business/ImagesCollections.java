@@ -9,7 +9,8 @@ package wasdi.shared.business;
 public enum ImagesCollections {	
 	PROCESSORS("processors"),
 	USERS("users"),
-	ORGANIZATIONS("organizations");
+	ORGANIZATIONS("organizations"),
+	STYLES("styles");
 	
 	private String m_sFolder;
 	

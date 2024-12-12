@@ -35,6 +35,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.IngestFileParameter;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -226,7 +227,7 @@ public class CatalogResources {
 			if(oFile == null) {
 				
 				// Often we do not have the extension for S1 and S2 files. Try to help
-				String sExtension = Utils.getFileNameExtension(sFileName);
+				String sExtension = WasdiFileUtils.getFileNameExtension(sFileName);
 				
 				boolean bRetry = false;
 				
@@ -277,14 +278,24 @@ public class CatalogResources {
 						WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found in any volume");
 					}				
 
-					return Response.serverError().build();					
+					//return Response.serverError().build();					
 				}
 			}
 
-			WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file found!");
 			PrimitiveResult oResult = new PrimitiveResult();
-			oResult.setBoolValue(oFile != null);
-			return Response.ok(oResult).build();			
+			
+			if (oFile!=null) {
+				WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file found!");
+				oResult.setBoolValue(true);
+				return Response.ok(oResult).build();
+			}
+			else {
+				WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found!");
+				oResult.setBoolValue(false);
+				return Response.status(Status.NOT_FOUND).entity(oResult).build();
+			}
+			
+						
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("CatalogResources.checkDownloadEntryAvailabilityByName: exception " + oEx.toString());
@@ -947,7 +958,7 @@ public class CatalogResources {
 	private Response zipShapeFile(File oInitialFile) {
 		
 		// Remove extension
-		final String sNameToFind = Utils.getFileNameWithoutLastExtension(oInitialFile.getName());
+		final String sNameToFind = WasdiFileUtils.getFileNameWithoutLastExtension(oInitialFile.getName());
 		
 		// Get parent folder
 		File oFolder = oInitialFile.getParentFile();
@@ -1010,44 +1021,131 @@ public class CatalogResources {
 	}
 	
 	private Response zipSentinel3(File oInitialFile) {
-		if(null==oInitialFile) {
+		if(oInitialFile == null) {
 			WasdiLog.debugLog("CatalogResource.zipSentinel3: passed a null file, aborting");
 			return Response.serverError().build();
 		}
-		if(!oInitialFile.isDirectory()) {
-			WasdiLog.debugLog("CatalogResource.zipSentinel3: file " + oInitialFile.getAbsolutePath() + " is not a directory, aborting");
+		String sZippedOutputFileName = oInitialFile.getName().toUpperCase().replace(".SEN3", ".zip");
+		return zipProductFolder(oInitialFile, sZippedOutputFileName);
+	}
+	
+	
+	private Response zipSentinel6(File oInitialFile) {
+		if(oInitialFile == null) {
+			WasdiLog.debugLog("CatalogResource.zipSentinel6: passed a null file, aborting");
+			return Response.serverError().build();
+		}
+		String sZippedOutputFileName = oInitialFile.getName().toUpperCase().replace(".SEN6", ".zip");
+		return zipProductFolder(oInitialFile, sZippedOutputFileName);
+	}
+	
+	private Response zipLandsat(File oInitialFile) {
+		if(oInitialFile == null) {
+			WasdiLog.debugLog("CatalogResource.zipLandsat5: passed a null file, aborting");
+			return Response.serverError().build();
+		}
+		String sZippedOutputFileName = oInitialFile.getName() + ".zip";
+		return zipProductFolder(oInitialFile, sZippedOutputFileName);
+	}
+	
+	private Response zipProductFolder(File oFile, String sZippedOutputFileName) {
+		if(oFile == null) {
+			WasdiLog.debugLog("CatalogResource.zipProductFolder: passed a null file, aborting");
+			return Response.serverError().build();
+		}
+		if(!oFile.isDirectory()) {
+			WasdiLog.debugLog("CatalogResource.zipProductFolder: file " + oFile.getAbsolutePath() + " is not a directory, aborting");
 			return Response.serverError().build();
 		}
 		Map<String, File> aoFileEntries = new HashMap<>();
 		
 		//collect all files in the directory
-		try( Stream<java.nio.file.Path> paths = Files.walk(oInitialFile.toPath())){
+		try( Stream<java.nio.file.Path> paths = Files.walk(oFile.toPath())){
 			paths
 			.filter(oPath -> !Files.isDirectory(oPath))
 			.forEach(oPath -> {
-				String sPath = oInitialFile.getName() + File.separator + oPath.toFile().getName();
-				WasdiLog.debugLog("CatalogResource.zipSentinel3: adding file: " + sPath);
+				String sPath = oFile.getName() + File.separator + oPath.toFile().getName();
+				WasdiLog.debugLog("CatalogResource.zipProductFolder: adding file: " + sPath);
 				aoFileEntries.put(sPath, oPath.toFile());
 			});
 		} catch (Exception oE) {
-			WasdiLog.errorLog("CatalogResource.zipSentinel3: " + oE + " while adding files");
+			WasdiLog.errorLog("CatalogResource.zipProductFolder: exception while adding files to zip", oE);
 		}
 
-		
-		return zipOnTheFly(aoFileEntries, oInitialFile.getName().toUpperCase().replace(".SEN3", ".zip"));
+		return zipOnTheFly(aoFileEntries, sZippedOutputFileName);
 	}
-	
+
 	/**
-	 * Zip a file and return the stream 
+	 * Zip a shape file
+	 * @param oInitialFile file .
+	 * @return stream with the zipped shape file
+	 */
+	private Response zipAsciiFile(File oInitialFile) {
+
+		if (!oInitialFile.getName().endsWith(".asc")) {
+			WasdiLog.warnLog("CatalogResources.zipAsciiFile: the file is not a .asc file");
+			return null;
+		}
+
+		WasdiLog.debugLog("CatalogResources.zipAsciiFile: looking for.prj file associated to " + oInitialFile.getAbsolutePath());
+
+		// Remove extension
+		final String sNameToFind = WasdiFileUtils.getFileNameWithoutLastExtension(oInitialFile.getName()) + ".prj";
+
+		WasdiLog.debugLog("CatalogResources.zipAsciiFile: file to look for: " + sNameToFind);
+
+		// Get parent folder
+		File oFolder = oInitialFile.getParentFile();
+
+		File oPrjFile = null;
+		for (File oFile : oFolder.listFiles()) {
+			if (oFile.getName().equals(sNameToFind)) {
+				oPrjFile = oFile;
+				break;
+			}
+		}
+
+		if (oPrjFile == null) {
+			WasdiLog.warnLog("CatalogResources.zipAsciiFile: .prj file not found");
+			return null;
+		}
+
+		WasdiLog.debugLog("CatalogResources.zipAsciiFile: found .prj file " + oPrjFile.getAbsolutePath());
+
+		try {
+			Map<String, File> aoFileEntries = new HashMap<>();
+			aoFileEntries.put(oInitialFile.getName(), oInitialFile);
+			aoFileEntries.put(oPrjFile.getName(), oPrjFile);
+			
+			String sZipFileName = oInitialFile.getName().replace(".asc", ".zip");
+			
+			ZipStreamingOutput oStream = new ZipStreamingOutput(aoFileEntries);
+			ResponseBuilder oResponseBuilder = Response.ok(oStream);
+			
+			oResponseBuilder.header("Content-Disposition", "attachment; filename=\"" + sZipFileName + "\"");
+			oResponseBuilder.header("Access-Control-Expose-Headers", "Content-Disposition");
+
+			WasdiLog.debugLog("CatalogResources.zipAsciiFile: zip file ready");
+			
+			return oResponseBuilder.build();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogResource.zipAsciiFile: error while zipping file ", oEx);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Zip a file and return the stream
 	 * @param oInitialFile File to zip
 	 * @return stream
 	 */
 	private Response prepareAndReturnZip(File oInitialFile) {
 		WasdiLog.debugLog("CatalogResources.prepareAndReturnZip");
-		if(null==oInitialFile) {
+		if (null == oInitialFile) {
 			WasdiLog.debugLog("CatalogResources.prepareAndReturnZip: oFile is null");
 			return null;
-		}		
+		}
 		try {
 			WasdiLog.debugLog("CatalogResources.prepareAndReturnZip: init");
 			String sBasePath = oInitialFile.getAbsolutePath();
@@ -1057,9 +1155,17 @@ public class CatalogResources {
 				return zipBeanDimapFile(oInitialFile);
 			} else if (sBasePath.endsWith(".shp")) {
 				return zipShapeFile(oInitialFile);
-			} else if(WasdiFileUtils.isSentinel3Directory(oInitialFile)) {
+			} else if(MissionUtils.isSentinel3Directory(oInitialFile)) {
 				return zipSentinel3(oInitialFile);
-			} 
+			} else if (MissionUtils.isSentinel6Directory(oInitialFile)) {
+				return zipSentinel6(oInitialFile);
+			} else if (MissionUtils.isLandsat5File(oInitialFile) 
+					|| MissionUtils.isLandsat7File(oInitialFile) ) {
+				return zipLandsat(oInitialFile);
+			}
+			else if (MissionUtils.isAsciiFile(oInitialFile)) {
+				return zipAsciiFile(oInitialFile);
+			}
 		} 
 		catch (Exception oEx) {
 			WasdiLog.errorLog("CatalogResources.prepareAndReturnZip: " + oEx);
@@ -1089,7 +1195,11 @@ public class CatalogResources {
 					//dim files are the output of SNAP operations
 					sName.endsWith(".dim") ||
 					WasdiFileUtils.isShapeFile(oFile) ||
-					WasdiFileUtils.isSentinel3Directory(oFile)
+					MissionUtils.isSentinel3Directory(oFile) ||
+					MissionUtils.isSentinel6Directory(oFile) ||
+					MissionUtils.isLandsat5File(oFile) ||
+					MissionUtils.isLandsat7File(oFile) || 
+					MissionUtils.isAsciiFile(oFile)					
 					);
 		}
 		return bRet;
