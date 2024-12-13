@@ -26,6 +26,7 @@ import org.apache.commons.io.FileUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import wasdi.ProcessWorkspaceLogger;
 import wasdi.processors.DockerProcessorEngine;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
@@ -76,6 +77,7 @@ import wasdi.shared.data.statistics.JobsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.OgcProcessesClient;
 import wasdi.shared.utils.S3BucketUtils;
@@ -650,9 +652,12 @@ public class dbUtils {
     	        	((DockerProcessorEngine)oEngine).setDockerRegistry(getDockerRegisterAddress());
     	        }
     	        
-    	        oEngine.setSendToRabbit(null);
+    	        ProcessWorkspaceLogger oPsLogger = new ProcessWorkspaceLogger(null);
+    	        Send oSendToRabbit = new Send(null);
+    	        
+    	        oEngine.setSendToRabbit(oSendToRabbit);
     	        oEngine.setParameter(oParameter);
-    	        oEngine.setProcessWorkspaceLogger(null);
+    	        oEngine.setProcessWorkspaceLogger(oPsLogger);
     	        oEngine.setProcessWorkspace(oProcessWorkspace);
     	        boolean bRet = oEngine.delete(oParameter);
     	        System.out.println("Engine.delete return " + bRet);
