@@ -17,6 +17,7 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.Project;
 import wasdi.shared.business.S3Volume;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.Style;
@@ -31,6 +32,7 @@ import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserType;
 import wasdi.shared.config.PathsConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.CommentRepository;
 import wasdi.shared.data.JupyterNotebookRepository;
 import wasdi.shared.data.NodeRepository;
@@ -56,6 +58,7 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.wasdiAPI.ProcessorAPIClient;
 import wasdi.shared.utils.wasdiAPI.WorkspaceAPIClient;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.organizations.SubscriptionType;
 
 /**
  * Wrap all the methods to check user rights and permissions
@@ -76,13 +79,41 @@ public class PermissionsUtils {
 	public static boolean userHasValidSubscription(User oUser) {
 		
 		if (oUser == null) return false;
+		
 	
 		try {
-			String sActiveProjectOfUser = oUser.getActiveProjectId();
-			ProjectRepository oProjectRepository = new ProjectRepository();
-			boolean bUserHasAValidSubscription = oProjectRepository.checkValidSubscription(sActiveProjectOfUser);
 			
-			return bUserHasAValidSubscription;
+			String sActiveProjectOfUser = oUser.getActiveProjectId();
+			
+			ProjectRepository oProjectRepository = new ProjectRepository();
+			Project oUserProject = oProjectRepository.getProjectById(sActiveProjectOfUser);
+			String sSubscriptionId = oUserProject.getSubscriptionId();
+			
+			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+			Subscription oUserSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
+			
+			// time-based model for not-free subscriptions
+			if (!oUserSubscription.getType().equals(SubscriptionType.Free.getTypeId())) {				
+				return oProjectRepository.checkValidSubscription(sActiveProjectOfUser);
+				
+			}
+			
+			// storage-based model for free subscriptions
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Double dTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(oUser.getUserId());			
+			
+			if (dTotalStorageUsage < 0) {
+				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. There was an error computing the total storage space for the user");
+				return false;
+			}
+			
+			
+			if (dTotalStorageUsage < WasdiConfig.Current.storageSizeFreeSubscription) {
+				return true;
+			} 
+			else
+				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. The workspaces of the user " + oUser.getUserId() + "exceed the maximum storage size for free subscriptions");			
+			
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("PermissionsUtils.userHasValidSubscription: error: " + oEx);

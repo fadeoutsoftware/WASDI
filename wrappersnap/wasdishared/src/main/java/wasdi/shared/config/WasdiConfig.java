@@ -131,6 +131,10 @@ public class WasdiConfig {
 	 */
 	public boolean addDateTimeToLogs=false;
 	
+	/**
+	 * Set the max storage size in bytes for the free subscriptions
+	 */
+	public Double storageSizeFreeSubscription = 2000000000d;
 	
 	/**
 	 * Set true to NOT filter the internal http calls (keycloak, docker..).

@@ -4,12 +4,14 @@ import static com.mongodb.client.model.Filters.eq;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
@@ -371,6 +373,46 @@ public class WorkspaceRepository extends  MongoRepository {
 		}
 
 		return aoReturnList;
+	}
+	
+	/**
+	 * It returns the total disk storage size (in bytes) occupied by all the workspaces of a user
+	 * @param sUserId the user id
+	 * @return the size (in bytes) of disk storage occupied by all the workspaces of a certain user
+	 */
+	public Double getStorageUsageForUser(String sUserId) {
+		
+		Double dStorageUsage = -1d;
+		
+		if (Utils.isNullOrEmpty(sUserId)) 
+			return dStorageUsage;
+		
+		try {
+			List<Document> aoPipeline = Arrays.asList(
+					new Document("$match", new Document("userId", sUserId)),			// get the workspaces by user
+					new Document("$group", new Document()								// group the retrieved documents by computing the sum of the storage size						
+		                    .append("_id", null)
+		                    .append("totalStorage", new Document("$sum",
+		                        new Document("$ifNull", Arrays.asList("$storageSize", 0)) // handle null or missing values
+		                    ))
+		                )
+		
+				);
+		
+			// execute the aggregation
+			AggregateIterable<Document> oResult = getCollection(m_sThisCollection).aggregate(aoPipeline);
+			
+			// extract the total storage size
+			dStorageUsage = oResult.first() != null 
+					? oResult.first().getDouble("totalStorage") 
+					: 0d;
+			
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("WorkspaceRepository.getStorageUsageForUser. Error: ", oEx);
+		}
+		
+		return dStorageUsage;
+		
 	}
 
 }
