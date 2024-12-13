@@ -406,6 +406,7 @@ public class WorkflowsResource {
      */
     @GET
     @Path("/getbyuser")
+    @Produces({ "application/json", "text/xml" })
     public ArrayList<SnapWorkflowViewModel> getWorkflowsByUser(@HeaderParam("x-session-token") String sSessionId) {
         WasdiLog.debugLog("WorkflowsResource.getWorkflowsByUser");
         
@@ -813,6 +814,7 @@ public class WorkflowsResource {
      */
     @POST
     @Path("/run")
+    @Produces({ "application/json", "text/xml" })
     public PrimitiveResult run(@HeaderParam("x-session-token") String sSessionId,
                                                       @QueryParam("workspace") String sWorkspaceId,
                                                       @QueryParam("parent") String sParentProcessWorkspaceId,
