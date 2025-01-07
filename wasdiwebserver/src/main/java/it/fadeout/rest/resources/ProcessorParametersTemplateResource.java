@@ -66,6 +66,7 @@ public class ProcessorParametersTemplateResource {
 	 */
 	@DELETE
 	@Path("/delete")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response deleteProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("templateId") String sTemplateId) {
 
@@ -134,6 +135,7 @@ public class ProcessorParametersTemplateResource {
 	 */
 	@POST
 	@Path("/update")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response updateProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId, ProcessorParametersTemplateDetailViewModel oDetailViewModel) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.updateProcessorParametersTemplate");
 
@@ -180,6 +182,7 @@ public class ProcessorParametersTemplateResource {
 	 */
 	@POST
 	@Path("/add")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response addProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId, ProcessorParametersTemplateDetailViewModel oDetailViewModel) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate");
 
@@ -246,6 +249,7 @@ public class ProcessorParametersTemplateResource {
 	 */
 	@GET
 	@Path("/get")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getProcessorParameterTemplateById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("templateId") String sTemplateId) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.getProcessorParametersTemplateById");
 
@@ -293,6 +297,7 @@ public class ProcessorParametersTemplateResource {
 	 */
 	@GET
 	@Path("/getlist")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getProcessorParametersTemplatesListByProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.getProcessorParametersTemplatesListByProcessor");
 

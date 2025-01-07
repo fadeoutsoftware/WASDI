@@ -1,5 +1,8 @@
 package wasdi.shared.viewmodels.organizations;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OrganizationEditorViewModel {
 
 	private String organizationId;

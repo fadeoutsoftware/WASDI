@@ -83,7 +83,7 @@ public class AdminDashboardResource {
 
 	@GET
 	@Path("/usersByPartialName")
-	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response findUsersByPartialName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("partialName") String sPartialName) {
 		
 		try {
@@ -133,7 +133,7 @@ public class AdminDashboardResource {
 
 	@GET
 	@Path("/workspacesByPartialName")
-	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response findWorkspacesByPartialName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("partialName") String sPartialName) {
 
@@ -175,7 +175,7 @@ public class AdminDashboardResource {
 	
 	@GET
 	@Path("/resourceByPartialName")
-	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response findResourceByPartialName(@HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("resourceType") String sResourceType,
 			@QueryParam("partialName") String sPartialName,
@@ -429,7 +429,7 @@ public class AdminDashboardResource {
 	
 	@GET
 	@Path("/processorsByPartialName")
-	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response findProcessorsByPartialName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("partialName") String sPartialName) {
 
@@ -470,7 +470,7 @@ public class AdminDashboardResource {
 
 	@GET
 	@Path("/resourcePermissions")
-	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response findResourcePermissions(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("resourceType") String sResourceType,
 			@QueryParam("resourceId") String sResourceId,
@@ -517,7 +517,7 @@ public class AdminDashboardResource {
 
 	@POST
 	@Path("/resourcePermissions")
-	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response addResourcePermission(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("resourceType") String sResourceType,
 			@QueryParam("resourceId") String sResourceId,
@@ -629,7 +629,7 @@ public class AdminDashboardResource {
 
 	@DELETE
 	@Path("/resourcePermissions")
-	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response removeResourcePermission(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("resourceType") String sResourceType,
 			@QueryParam("resourceId") String sResourceId,
@@ -739,7 +739,7 @@ public class AdminDashboardResource {
 	 */
 	@GET
 	@Path("resourcePermissions/types")
-	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getResourceTypes(@HeaderParam("x-session-token") String sSessionId) {
 		WasdiLog.debugLog("SubscriptionResource.getSubscriptionTypes");
 		try {
@@ -762,7 +762,7 @@ public class AdminDashboardResource {
 
 	@PUT
 	@Path("/metrics")
-	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response updateMetricsEntry(@HeaderParam("x-session-token") String sSessionId, MetricsEntry oMetricsEntry) {
 
 		// Validate Session
@@ -796,7 +796,7 @@ public class AdminDashboardResource {
 
 	@GET
 	@Path("/metrics/latest")
-	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getLatestMetricsEntry(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("nodeCode") String sNodeCode) {
 
@@ -831,7 +831,7 @@ public class AdminDashboardResource {
 
 	@GET
 	@Path("/users/list")
-	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getUsersList(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("partialName") String sPartialName,
 			@QueryParam("offset") Integer iOffset, @QueryParam("limit") Integer iLimit,
@@ -915,7 +915,7 @@ public class AdminDashboardResource {
 	
 	@GET
 	@Path("/users/summary")
-	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getUsersSummary(@HeaderParam("x-session-token") String sSessionId) {
 		
 		WasdiLog.debugLog("AdminDashboardResource.getUsersSummary");
@@ -987,7 +987,7 @@ public class AdminDashboardResource {
 	
 	@GET
 	@Path("/users")
-	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getUsersDetails(@HeaderParam("x-session-token") String sSessionId, @QueryParam("userId") String sTargetUser) {
 		
 		WasdiLog.debugLog("AdminDashboardResource.getUsersDetails for " + sTargetUser);
@@ -1031,7 +1031,7 @@ public class AdminDashboardResource {
 	
 	@PUT
 	@Path("/users")
-	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response updateUsersDetails(@HeaderParam("x-session-token") String sSessionId, FullUserViewModel oUserViewModel) {
 		
 		WasdiLog.debugLog("AdminDashboardResource.updateUsersDetails");
@@ -1089,7 +1089,7 @@ public class AdminDashboardResource {
 	
 	@DELETE
 	@Path("/users")
-	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response deleteUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("userId") String sTargetUser) {
 		
 		WasdiLog.debugLog("AdminDashboardResource.deleteUser for " + sTargetUser);

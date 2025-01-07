@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -69,6 +70,7 @@ public class PackageManagerResource {
 	 */
 	@GET
 	@Path("/listPackages")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getListPackages(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) {
 		WasdiLog.debugLog("PackageManagerResource.getListPackages( " + "Name: " + sName + ", " + " )");
 		
@@ -141,6 +143,7 @@ public class PackageManagerResource {
 	 */
 	@GET
 	@Path("/environmentActions")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getEnvironmentActionsList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) {
 		WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList( " + "Name: " + sName + ", " + " )");
 		
@@ -192,6 +195,7 @@ public class PackageManagerResource {
 	 */
 	@GET
 	@Path("/managerVersion")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getManagerVersion(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) {
 		WasdiLog.debugLog("PackageManagerResource.getManagerVersion( " + "Name: " + sName + " )");
 		
@@ -269,6 +273,7 @@ public class PackageManagerResource {
 	 */
 	@GET
 	@Path("/environmentupdate")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response environmentUpdate(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId,
@@ -397,6 +402,7 @@ public class PackageManagerResource {
 	 */
 	@GET
 	@Path("/reset")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response resetActionList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("workspace") String sWorkspaceId) {
 		WasdiLog.debugLog("PackageManagerResource.resetActionList( " + "processorId: " + sProcessorId + ", " + " )");
 		
