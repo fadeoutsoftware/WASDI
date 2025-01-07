@@ -4,7 +4,7 @@
 
     "exchangeFolder": "/data/wasdi/tmp/",
 
-    "apiUrl": "https://cds-beta.climate.copernicus.eu/api",
+    "apiUrl": "https://cds.climate.copernicus.eu/api",
 
     "key": "{{sWasdiDataProviderCdsApiKey}}"
 
