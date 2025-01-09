@@ -93,6 +93,7 @@ public class StyleResource {
 	@POST
 	@Path("/uploadfile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response uploadFile(@FormDataParam("file") InputStream oFileInputStream,
 			@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("description") String sDescription,
@@ -185,6 +186,7 @@ public class StyleResource {
 	@POST
 	@Path("/updatefile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response updateFile(@FormDataParam("file") InputStream oFileInputStream,
 			@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("styleId") String sStyleId,
@@ -387,6 +389,7 @@ public class StyleResource {
 	 */
 	@POST
 	@Path("/updatexml")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response updateXML(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("styleId") String sStyleId,
 			@FormDataParam("styleXml") String sStyleXml) {
@@ -407,6 +410,7 @@ public class StyleResource {
 	@POST
 	@Path("/updateparams")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response updateParams(
 			@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("styleId") String sStyleId,
@@ -457,6 +461,7 @@ public class StyleResource {
 
 	@GET
 	@Path("/getbyuser")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public List<StyleViewModel> getStylesByUser(@HeaderParam("x-session-token") String sSessionId) {
 		WasdiLog.debugLog("StyleResource.getStylesByUser");
 
@@ -564,6 +569,7 @@ public class StyleResource {
 	 */
 	@DELETE
 	@Path("/delete")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response deleteStyle(@HeaderParam("x-session-token") String sSessionId, @QueryParam("styleId") String sStyleId) {
 		
 		WasdiLog.debugLog("StyleResource.deleteStyle( Style: " + sStyleId + " )");
@@ -639,6 +645,7 @@ public class StyleResource {
 
 	@DELETE
 	@Path("/nodedelete")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response nodeDeleteStyle(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("styleId") String sStyleId,
 			@QueryParam("styleName") String sStyleName) {

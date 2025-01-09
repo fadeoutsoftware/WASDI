@@ -449,6 +449,7 @@ public class ProjectResource {
 
 	@DELETE
 	@Path("/delete")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response deleteProject(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("project") String sProjectId) {
 		WasdiLog.debugLog("ProjectResource.deleteProject( Project: " + sProjectId + " )");

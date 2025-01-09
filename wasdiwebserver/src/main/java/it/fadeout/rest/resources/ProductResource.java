@@ -1133,6 +1133,7 @@ public class ProductResource {
     @POST
     @Path("deletelist")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({"application/json", "application/xml", "text/xml" })
     public PrimitiveResult deleteMultipleProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("deletefile") Boolean bDeleteFile,
                                          @QueryParam("workspace") String sWorkspaceId, @QueryParam("deletelayer") Boolean bDeleteLayer,
                                          List<String> asProductList) {

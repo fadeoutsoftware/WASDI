@@ -139,6 +139,7 @@ public class ProcessorsResource  {
 	@POST
 	@Path("/uploadprocessor")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public PrimitiveResult uploadProcessor( @FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
 											@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName,
 											@QueryParam("version") String sVersion,	@QueryParam("description") String sDescription,

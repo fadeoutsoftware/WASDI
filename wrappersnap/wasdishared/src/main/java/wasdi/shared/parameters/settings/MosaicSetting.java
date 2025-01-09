@@ -2,6 +2,9 @@ package wasdi.shared.parameters.settings;
 
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MosaicSetting implements ISetting{
 
 	double pixelSizeX = -1.0;

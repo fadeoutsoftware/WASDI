@@ -12,6 +12,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -59,6 +60,7 @@ public class ProcessorsMediaResource {
 	 */
 	@GET
 	@Path("categories/get")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getCategories(@HeaderParam("x-session-token") String sSessionId) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.getCategories");
@@ -88,6 +90,7 @@ public class ProcessorsMediaResource {
 	 */
 	@DELETE
 	@Path("/reviews/delete")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response deleteReview(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("reviewId") String sReviewId ) {
 		
 		try {
@@ -153,6 +156,7 @@ public class ProcessorsMediaResource {
 	 */
 	@DELETE
 	@Path("/comments/delete")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response deleteComment(@HeaderParam("x-session-token") String sSessionId, @QueryParam("reviewId") String sReviewId, @QueryParam("commentId") String sCommentId ) {
 		
 		try {
@@ -214,6 +218,7 @@ public class ProcessorsMediaResource {
 	 */
 	@POST
 	@Path("/reviews/update")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response updateReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.updateReview");
@@ -258,6 +263,7 @@ public class ProcessorsMediaResource {
 	 */
 	@POST
 	@Path("/comments/update")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response updateComment(@HeaderParam("x-session-token") String sSessionId, CommentDetailViewModel oCommentViewModel) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.updateComment");
@@ -297,6 +303,7 @@ public class ProcessorsMediaResource {
 	 */
 	@POST
 	@Path("/reviews/add")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response addReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {//
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.addReview");
@@ -364,6 +371,7 @@ public class ProcessorsMediaResource {
 	 */
 	@POST
 	@Path("/comments/add")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response addComment(@HeaderParam("x-session-token") String sSessionId, CommentDetailViewModel oCommentViewModel) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.addComment");
@@ -431,6 +439,7 @@ public class ProcessorsMediaResource {
 	 */
 	@GET
 	@Path("/reviews/getlist")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getReviewListByProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorName") String sProcessorName, @QueryParam("page") Integer iPage, @QueryParam("itemsperpage") Integer iItemsPerPage) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.getReviewListByProcessor");
@@ -498,6 +507,7 @@ public class ProcessorsMediaResource {
 	 */
 	@GET
 	@Path("/comments/getlist")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getCommentListByReview(@HeaderParam("x-session-token") String sSessionId, @QueryParam("reviewId") String sReviewId) {
 		WasdiLog.debugLog("ProcessorsMediaResource.getCommentListByReview");
 
@@ -551,6 +561,7 @@ public class ProcessorsMediaResource {
 	 */
 	@GET
 	@Path("/publisher/getlist")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getPublishers(@HeaderParam("x-session-token") String sSessionId) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.getPublishers");

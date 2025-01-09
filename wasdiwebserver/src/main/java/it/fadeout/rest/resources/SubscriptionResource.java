@@ -432,6 +432,7 @@ public class SubscriptionResource {
 	 */
 	@DELETE
 	@Path("/delete")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response deleteSubscription(@HeaderParam("x-session-token") String sSessionId, @QueryParam("subscription") String sSubscriptionId) {
 		
 		WasdiLog.debugLog("SubscriptionResource.deleteSubscription( Subscription: " + sSubscriptionId + " )");
@@ -774,6 +775,7 @@ public class SubscriptionResource {
 	 */
 	@GET
 	@Path("/stripe/paymentUrl")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getStripePaymentUrl(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("subscription") String sSubscriptionId, @QueryParam("workspace") String sWorkspaceId) {
 		WasdiLog.debugLog("SubscriptionResource.getStripePaymentUrl( " + "Subscription: " + sSubscriptionId + ", "
@@ -861,6 +863,7 @@ public class SubscriptionResource {
 	 */
 	@GET
 	@Path("/stripe/confirmation/{CHECKOUT_SESSION_ID}")
+	@Produces({"application/json", "application/xml", "text/xml" })
 	public String confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
 		WasdiLog.debugLog("SubscriptionResource.confirmation( sCheckoutSessionId: " + sCheckoutSessionId + ")");
 
