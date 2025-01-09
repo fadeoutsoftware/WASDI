@@ -112,7 +112,7 @@ public class PermissionsUtils {
 				return true;
 			} 
 			else
-				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. The workspaces of the user " + oUser.getUserId() + "exceed the maximum storage size for free subscriptions");			
+				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + " exceed the maximum storage size for free subscriptions" + dTotalStorageUsage);			
 			
 		}
 		catch (Exception oEx) {
