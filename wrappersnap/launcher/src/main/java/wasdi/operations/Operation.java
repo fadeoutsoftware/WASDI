@@ -15,9 +15,11 @@ import wasdi.shared.business.DownloadedFileCategory;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.payloads.OperationPayload;
 import wasdi.shared.rabbit.Send;
@@ -284,6 +286,8 @@ public abstract class Operation {
             WasdiLog.debugLog("LauncherMain.AddProductToDbAndSendToRabbit: bbox not set. Try to auto get it ");
             sBBox = oReadProduct.getProductBoundingBox();
         }
+        
+        
 
         if (oCheckAlreadyExists == null) {
 
@@ -320,6 +324,21 @@ public abstract class Operation {
             } else {
                 WasdiLog.infoLog("Product Inserted");
             }
+            
+            // update also the count of the size of the workspace
+            try {
+	            Long lFileSize = Long.valueOf(oFile.length())
+	            
+	            WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+	            Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspace);
+	            Long dUpdatedStorageSize = oWorkspace.getStorageSize() + dFileSize;
+	            oWorkspace.setStorageSize(dUpdatedStorageSize);
+	            oWorkspaceRepository.updateWorkspace(oWorkspace);
+            } catch (Exception oEx) {
+            	WasdiLog.errorLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: error in updating the storage size of the workspace", oEx);
+            }
+            
+            
         } else {
 
             // The product is already there. No need to add

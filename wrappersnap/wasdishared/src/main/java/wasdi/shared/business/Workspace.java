@@ -44,7 +44,7 @@ public class Workspace {
 	/**
 	 * Storage size occupied by the workspace and its content on the disk
 	 */
-	private Double storageSize;
+	private Long storageSize;
 	
 	
     public String getNodeCode() {
@@ -111,11 +111,11 @@ public class Workspace {
 		this.isPublic = isPublic;
 	}
 	
-	public Double getStorageSize() {
+	public Long getStorageSize() {
 		return storageSize;
 	}
 
-	public void setStorageSize(Double storageSize) {
+	public void setStorageSize(Long storageSize) {
 		this.storageSize = storageSize;
 	}
 

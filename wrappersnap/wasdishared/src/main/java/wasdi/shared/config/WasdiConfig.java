@@ -134,7 +134,7 @@ public class WasdiConfig {
 	/**
 	 * Set the max storage size in bytes for the free subscriptions
 	 */
-	public Double storageSizeFreeSubscription = 20000000000d;
+	public Long storageSizeFreeSubscription = 20000000000L;
 	
 	/**
 	 * Set true to NOT filter the internal http calls (keycloak, docker..).
