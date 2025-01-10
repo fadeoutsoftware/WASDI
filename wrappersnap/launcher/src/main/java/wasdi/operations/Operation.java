@@ -331,7 +331,7 @@ public abstract class Operation {
 	            
 	            WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 	            Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspace);
-	            Long dUpdatedStorageSize = oWorkspace.getStorageSize() + dFileSize;
+	            Long dUpdatedStorageSize = oWorkspace.getStorageSize() + lFileSize;
 	            oWorkspace.setStorageSize(dUpdatedStorageSize);
 	            oWorkspaceRepository.updateWorkspace(oWorkspace);
             } catch (Exception oEx) {
