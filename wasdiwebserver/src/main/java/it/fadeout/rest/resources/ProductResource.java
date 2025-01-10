@@ -1,5 +1,6 @@
 package it.fadeout.rest.resources;
 
+import java.awt.image.AbstractMultiResolutionImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
@@ -28,12 +29,14 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.business.users.User;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.ReadMetadataParameter;
@@ -996,21 +999,46 @@ public class ProductResource {
                 File[] aoFiles = oFolder.listFiles(oFilter);
 
                 // If we found the files
+                Long lFreedStorageSpace = 0L;
                 if (aoFiles != null) {
                     // Delete all
                     WasdiLog.debugLog("ProductResource.deleteProduct: Number of files to delete " + aoFiles.length);
                     for (File oFile : aoFiles) {
 
                         WasdiLog.debugLog("ProductResource.deleteProduct: deleting file product " + oFile.getAbsolutePath() + "...");
-
+                        
+                        Long lFileSize = oFile.length();
+                        
                         if (!FileUtils.deleteQuietly(oFile)) {
                             WasdiLog.debugLog("    ERROR");
                         } else {
                             WasdiLog.debugLog("    OK");
+                            lFreedStorageSpace += lFileSize;
                         }
                     }
                 } else {
                     WasdiLog.debugLog("ProductResource.deleteProduct: No File to delete ");
+                }
+                
+                // update the size of the workspace
+                if (lFreedStorageSpace > 0L) {
+                	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+                	Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+                	Long lStorageSize = oWorkspace.getStorageSize();
+                	if (lStorageSize != null && lStorageSize > 0L) {
+                		Long lUpdatedStorageSize = lStorageSize - lFreedStorageSpace;
+                		
+                		if (lUpdatedStorageSize < 0L)
+                			lUpdatedStorageSize = 0L;
+                		
+                		oWorkspace.setStorageSize(lUpdatedStorageSize);
+                		if (oWorkspaceRepository.updateWorkspace(oWorkspace)) {
+                			WasdiLog.debugLog("ProductResource.deleteProduct. Workspace size after deleting product(s): " + lUpdatedStorageSize);
+                		} else {
+                			WasdiLog.warnLog("ProductResource.deleteProduct. Storage size of the workspace was not updated after deleting the products");
+                		}
+                			
+                	}
                 }
             }
 
