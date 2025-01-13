@@ -32,12 +32,13 @@ To install GDAL:
  - Identify your GDAL wheel
 
 .. note::
-	A sample is: GDAL-3.9.2-cp312-cp312-win_amd64.whl
-	GDAL-3.9.2: means gdal version 3.9.2
-	cp312-cp312: means build for python 3.12
-	win_amd64: means a 64 bit windows
+	| A sample is: GDAL-3.9.2-cp312-cp312-win_amd64.whl
+	| GDAL-3.9.2: means gdal version 3.9.2
+	| cp312-cp312: means build for python 3.12
+	| win_amd64: means a 64 bit windows
 	
-	You can find the version of gdal you need for your python version.
+	| You can find the version of gdal you need for your python version.
+	| Both Intel and AMD Processors are in the amd64 architecture
 	
 
  - Download GDAL wheel, in this tutorial we will assume GDAL-3.9.2-cp312-cp312-win_amd64.whl
