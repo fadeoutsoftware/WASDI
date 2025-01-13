@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.json.JSONObject;
 
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
@@ -18,8 +18,6 @@ import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
 import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
-
-import org.json.JSONObject;
 
 /**
  * Product reader class for Landsat-5, Landsat-7 products and Landsat-8 L2 products
