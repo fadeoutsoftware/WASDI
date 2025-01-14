@@ -829,4 +829,26 @@ public class WasdiFileUtils {
 		}
 	}
 	
+	
+	/**
+	 * Compute the size of a folder
+	 * @param oFolder
+	 * @return
+	 */
+    public static long getFolderSize(File oFolder) {
+        long lLength = 0;
+
+        File[] aoFiles = oFolder.listFiles();
+        if (aoFiles != null) {
+            for (File oFile : aoFiles) {
+                if (oFile.isFile()) {
+                    lLength += oFile.length();
+                } else if (oFile.isDirectory()) {
+                    lLength += getFolderSize(oFile); // Recursive call for subfolders
+                }
+            }
+        }
+        return lLength;
+    }
+	
 }

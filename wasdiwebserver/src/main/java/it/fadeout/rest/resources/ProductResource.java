@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -1025,6 +1026,16 @@ public class ProductResource {
                 	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
                 	Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
                 	Long lStorageSize = oWorkspace.getStorageSize();
+                	
+                	if (lStorageSize == null) {
+                		WasdiLog.debugLog("ProductResource.deleteProduct. Storage size of the workspace not yet computed");
+                		lStorageSize = Utils.computeWorkspaceStorageSize(sWorkspaceId);
+                		
+                		if (lStorageSize < 0L) {
+                			lStorageSize = 0L;
+                		}
+                	}
+                	
                 	if (lStorageSize != null && lStorageSize > 0L) {
                 		Long lUpdatedStorageSize = lStorageSize - lFreedStorageSpace;
                 		
@@ -1144,6 +1155,7 @@ public class ProductResource {
 
         return oReturn;
     }
+    
 
     /**
      * Deletes a list of product invoking the delete method,

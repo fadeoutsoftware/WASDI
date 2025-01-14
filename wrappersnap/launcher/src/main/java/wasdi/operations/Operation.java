@@ -327,11 +327,23 @@ public abstract class Operation {
             
             // update also the count of the size of the workspace
             try {
-	            Long lFileSize = Long.valueOf(oFile.length())
+	            Long lFileSize = Long.valueOf(oFile.length());
 	            
 	            WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 	            Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspace);
-	            Long dUpdatedStorageSize = oWorkspace.getStorageSize() + lFileSize;
+	            
+	            Long lWorkspaceCurrentStorageSize = oWorkspace.getStorageSize();
+	            if (lWorkspaceCurrentStorageSize == null) {
+	            	WasdiLog.debugLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: ");
+	            	lWorkspaceCurrentStorageSize = Utils.computeWorkspaceStorageSize(sWorkspace);
+	            	
+	            	if (lWorkspaceCurrentStorageSize < 0) {
+	            		WasdiLog.warningLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: there was an error computing the size of the workspace " + sWorkspace);
+	            		lWorkspaceCurrentStorageSize = 0L;
+	            	}
+	            }
+	            
+	            Long dUpdatedStorageSize = lWorkspaceCurrentStorageSize + lFileSize;
 	            oWorkspace.setStorageSize(dUpdatedStorageSize);
 	            oWorkspaceRepository.updateWorkspace(oWorkspace);
             } catch (Exception oEx) {

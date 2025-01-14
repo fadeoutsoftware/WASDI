@@ -1,5 +1,6 @@
 package wasdi.shared.utils;
 
+import java.io.File;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -20,6 +21,10 @@ import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.ProductWorkspace;
+import wasdi.shared.business.Workspace;
+import wasdi.shared.data.ProductWorkspaceRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -521,5 +526,54 @@ public class Utils {
         // return the list 
         return aoOriginalList; 
     }	
+    
+    
+    public static Long computeWorkspaceStorageSize(String sWorkspaceId) {
+    	
+    	try {
+	    	if (Utils.isNullOrEmpty(sWorkspaceId)) {
+	    		return -1L;
+	    	}
+	    	
+	    	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+	    	Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+	    	
+	    	if (oWorkspace == null) {
+	    		WasdiLog.warnLog("ProductResource.computeWorkspaceStorageSize. Workspace not found"); 
+	    		return -1L;
+	    	}
+	    	
+	    	ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+	    	List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
+	    	
+	    	if (aoProductWorkspace == null || aoProductWorkspace.isEmpty()) {
+	    		return 0L;
+	    	}
+	    	
+	    	Long lTotalStorage = 0L;
+	    	
+	    	for (ProductWorkspace oProductWorkspace: aoProductWorkspace) {
+	    		File oProductFile = new File(oProductWorkspace.getProductName());
+	    		
+	    		if (!oProductFile.exists())
+	    			continue;
+	    		
+	    		if (oProductFile.isFile()) {
+	    			lTotalStorage += oProductFile.length();
+	    		} 
+	    		else if (oProductFile.isDirectory()) {
+	    			lTotalStorage += WasdiFileUtils.getFolderSize(oProductFile);
+	    		}
+	    	}
+	    	
+	    	return lTotalStorage;
+	    	
+    	} catch (Exception oEx) {
+    		WasdiLog.errorLog("Utils.computeWorkspaceStorageSize: error computing the size of the workspace");
+    	}
+    	
+    	return  -1L;
+	
+    }
 
 }
