@@ -107,7 +107,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 			WasdiLog.errorLog("ResponseTranslatorLpDaac.translate: no title found for the product. It will be impossible to download it");
 			return null;
 		} else {
-			if (sTitle.startsWith("MOD11A2")) {
+			if (sTitle.startsWith("MOD11A2") || sTitle.startsWith("MCD43D16")) {
 				sTitle += ".hdf";
 			} else if (sTitle.startsWith("VNP21A1D") || sTitle.startsWith("VNP21A1N")) {
 				sTitle += ".h5";
@@ -145,7 +145,12 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		}
 		
 		JSONArray oPolygons = oJsonEntry.optJSONArray("polygons");
-		JSONArray oFirstPolygon =null;
+		JSONArray oFirstPolygon = null;
+		
+		if (oPolygons == null) {
+			WasdiLog.warnLog("ResponseTranslatorLpDaac.translate: no bouding box specified. Returning the whole bouding box");
+			return;
+		}
 		
 		if (oPolygons.length() > 0) {
 			oFirstPolygon = oPolygons.optJSONArray(0);

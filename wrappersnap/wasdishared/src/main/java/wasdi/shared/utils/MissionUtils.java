@@ -285,7 +285,8 @@ public class MissionUtils {
 			} 
 			else if (sFileName.toUpperCase().startsWith("MOD11A2")
 					|| sFileName.toUpperCase().startsWith("MCD43A3")
-					|| sFileName.toUpperCase().startsWith("MCD43A4")) {
+					|| sFileName.toUpperCase().startsWith("MCD43A4")
+					|| sFileName.toUpperCase().startsWith("MCD43D16")) {
 				return Platforms.TERRA;
 			}
 			else if (sFileName.toUpperCase().startsWith("GHS_BUILT_S_E2018_GLOBE_R2023A_54009_10_V1_0_")) {

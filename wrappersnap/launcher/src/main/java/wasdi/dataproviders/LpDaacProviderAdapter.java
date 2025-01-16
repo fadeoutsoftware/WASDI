@@ -103,7 +103,8 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 		if (sFileName.toUpperCase().startsWith("VNP21A1D") 
 				|| sFileName.toUpperCase().startsWith("VNP21A1N")
 				|| sFileName.toUpperCase().startsWith("MCD43A4")
-				|| sFileName.toUpperCase().startsWith("MCD43A3")) {
+				|| sFileName.toUpperCase().startsWith("MCD43A3")
+				|| sFileName.toUpperCase().startsWith("MCD43D16")) {
 			WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile: VIIRS product asked for download");
 			return executeDownloadFromEarthData(sDownloadUrl, sDownloadUser, sDownloadPassword, sSavedFilePath, iMaxRetry);
 		}
