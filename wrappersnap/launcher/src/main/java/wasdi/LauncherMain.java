@@ -1,8 +1,6 @@
 package wasdi;
 
 import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Security;
@@ -23,8 +21,6 @@ import org.esa.snap.lib.openjpeg.utils.OpenJpegExecRetriever;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.esa.snap.runtime.EngineConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -687,11 +683,16 @@ public class LauncherMain  {
      *
      * @return
      */
-    private static Integer getProcessId() {
+	private static Integer getProcessId() {
         Integer iPid = 0;
+        Integer iTest = 0;
         try {
-            RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-            iPid = (int) runtimeMXBean.getPid();
+        	
+            //RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+        	//iTest = (int) runtimeMXBean.getPid();
+        	//WasdiLog.infoLog("Mx " + iTest);
+            iPid = (int) ProcessHandle.current().pid();
+            WasdiLog.infoLog("ProcessHandle " + iTest);
         } catch (Throwable oEx) {
             try {
                 WasdiLog.errorLog("LauncherMain.GetProcessId: Error getting processId: " + oEx.toString());
