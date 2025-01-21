@@ -111,8 +111,10 @@ public class PermissionsUtils {
 			if (dTotalStorageUsage < WasdiConfig.Current.storageSizeFreeSubscription) {
 				return true;
 			} 
-			else
-				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + " exceed the maximum storage size for free subscriptions" + dTotalStorageUsage);			
+			else {
+				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + " exceed the maximum storage size for free subscriptions" + dTotalStorageUsage);
+				return false;
+			}
 			
 		}
 		catch (Exception oEx) {

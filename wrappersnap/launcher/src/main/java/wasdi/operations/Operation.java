@@ -16,6 +16,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
@@ -327,24 +328,21 @@ public abstract class Operation {
             
             // update also the count of the size of the workspace
             try {
-	            Long lFileSize = Long.valueOf(oFile.length());
 	            
 	            WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 	            Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspace);
+	            String sUserId = oWorkspace.getUserId();
+	          
+	            String sWorkspacePath = PathsConfig.getWorkspacePath(sUserId, sWorkspace);
+	            File oWorkspaceDir = new File(sWorkspacePath);
 	            
-	            Long lWorkspaceCurrentStorageSize = oWorkspace.getStorageSize();
-	            if (lWorkspaceCurrentStorageSize == null) {
-	            	WasdiLog.debugLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: ");
-	            	lWorkspaceCurrentStorageSize = Utils.computeWorkspaceStorageSize(sWorkspace);
-	            	
-	            	if (lWorkspaceCurrentStorageSize < 0) {
-	            		WasdiLog.warningLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: there was an error computing the size of the workspace " + sWorkspace);
-	            		lWorkspaceCurrentStorageSize = 0L;
-	            	}
+	            long lWorkspaceSize = 0;
+	            
+	            if (oWorkspaceDir.exists()) {
+	            	lWorkspaceSize = FileUtils.sizeOfDirectory(oWorkspaceDir);
 	            }
 	            
-	            Long dUpdatedStorageSize = lWorkspaceCurrentStorageSize + lFileSize;
-	            oWorkspace.setStorageSize(dUpdatedStorageSize);
+	            oWorkspace.setStorageSize(lWorkspaceSize);
 	            oWorkspaceRepository.updateWorkspace(oWorkspace);
             } catch (Exception oEx) {
             	WasdiLog.errorLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: error in updating the storage size of the workspace", oEx);
