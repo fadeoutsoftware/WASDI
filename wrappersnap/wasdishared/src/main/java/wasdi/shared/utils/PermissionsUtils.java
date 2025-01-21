@@ -108,7 +108,7 @@ public class PermissionsUtils {
 			}
 			
 			
-			if (dTotalStorageUsage < WasdiConfig.Current.storageSizeFreeSubscription) {
+			if (dTotalStorageUsage < WasdiConfig.Current.storageUsageControl.storageSizeFreeSubscription) {
 				return true;
 			} 
 			else {

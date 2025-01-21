@@ -14,6 +14,7 @@ import org.bson.conversions.Bson;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
@@ -203,6 +204,30 @@ public class WorkspaceRepository extends  MongoRepository {
         return aoReturnList;
     }
     
+    /**
+     * Given a user, retrieves the list of their workspaces ordered by update date, from the less recent to the last recent one
+     * @param sUserId the id of the user
+     * @return the  list of workspaces of a user, ordered by last update date in ascending order
+     */
+    public List<Workspace> getWorkspacesSortedByOldestUpdate(String sUserId) {
+    	
+        final ArrayList<Workspace> aoReturnList = new ArrayList<Workspace>();
+
+        try {
+        			
+        	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+        			.find(new Document("nodeCode", sUserId))
+        			.sort(Sorts.ascending("lastEditDate"));
+            
+            fillList(aoReturnList, oWSDocuments, Workspace.class);
+            
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("WorkspaceRepository.getWorkspacesFromOldestUpdate: error: ", oEx);
+        }
+
+        return aoReturnList;
+    }
+    
     
 
     /**
@@ -274,6 +299,7 @@ public class WorkspaceRepository extends  MongoRepository {
     	
     	return null;
     }
+    
     
     /**
      * Delete a workspace by Id
