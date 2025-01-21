@@ -508,7 +508,7 @@ public class LauncherMain  {
             m_oProcessWorkspaceLogger = new ProcessWorkspaceLogger(oBaseParameter.getProcessObjId());
 
             // Create the operation class
-        	Operation oOperation = (Operation) Class.forName(sClassName).newInstance();
+        	Operation oOperation = (Operation) Class.forName(sClassName).getDeclaredConstructor().newInstance();
         	
         	// Set the process workspace logger
         	oOperation.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
