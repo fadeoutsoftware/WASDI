@@ -1000,21 +1000,17 @@ public class ProductResource {
                 File[] aoFiles = oFolder.listFiles(oFilter);
 
                 // If we found the files
-                Long lFreedStorageSpace = 0L;
                 if (aoFiles != null) {
                     // Delete all
                     WasdiLog.debugLog("ProductResource.deleteProduct: Number of files to delete " + aoFiles.length);
                     for (File oFile : aoFiles) {
 
                         WasdiLog.debugLog("ProductResource.deleteProduct: deleting file product " + oFile.getAbsolutePath() + "...");
-                        
-                        Long lFileSize = oFile.length();
-                        
+                                                
                         if (!FileUtils.deleteQuietly(oFile)) {
                             WasdiLog.debugLog("    ERROR");
                         } else {
                             WasdiLog.debugLog("    OK");
-                            lFreedStorageSpace += lFileSize;
                         }
                     }
                 } else {
@@ -1022,35 +1018,27 @@ public class ProductResource {
                 }
                 
                 // update the size of the workspace
-                if (lFreedStorageSpace > 0L) {
-                	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-                	Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
-                	Long lStorageSize = oWorkspace.getStorageSize();
-                	
-                	if (lStorageSize == null) {
-                		WasdiLog.debugLog("ProductResource.deleteProduct. Storage size of the workspace not yet computed");
-                		lStorageSize = Utils.computeWorkspaceStorageSize(sWorkspaceId);
-                		
-                		if (lStorageSize < 0L) {
-                			lStorageSize = 0L;
-                		}
-                	}
-                	
-                	if (lStorageSize != null && lStorageSize > 0L) {
-                		Long lUpdatedStorageSize = lStorageSize - lFreedStorageSpace;
-                		
-                		if (lUpdatedStorageSize < 0L)
-                			lUpdatedStorageSize = 0L;
-                		
-                		oWorkspace.setStorageSize(lUpdatedStorageSize);
-                		if (oWorkspaceRepository.updateWorkspace(oWorkspace)) {
-                			WasdiLog.debugLog("ProductResource.deleteProduct. Workspace size after deleting product(s): " + lUpdatedStorageSize);
-                		} else {
-                			WasdiLog.warnLog("ProductResource.deleteProduct. Storage size of the workspace was not updated after deleting the products");
-                		}
-                			
-                	}
-                }
+            	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+            	Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+            	
+            	String sUserId = oWorkspace.getUserId();
+  	          
+	            String sWorkspacePath = PathsConfig.getWorkspacePath(sUserId, sWorkspaceId);
+	            File oWorkspaceDir = new File(sWorkspacePath);
+	            
+	            long lWorkspaceSize = 0;
+	            
+	            if (oWorkspaceDir.exists()) {
+	            	lWorkspaceSize = FileUtils.sizeOfDirectory(oWorkspaceDir);
+	            }                	
+            		
+        		oWorkspace.setStorageSize(lWorkspaceSize);
+        		if (oWorkspaceRepository.updateWorkspace(oWorkspace)) {
+        			WasdiLog.debugLog("ProductResource.deleteProduct. Workspace size after deleting product(s): " + lWorkspaceSize);
+        		} else {
+        			WasdiLog.warnLog("ProductResource.deleteProduct. Storage size of the workspace was not updated after deleting the products");
+        		}
+            			
             }
 
             if (bDeleteLayer) {
