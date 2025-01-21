@@ -182,6 +182,30 @@ public class WorkspaceRepository extends  MongoRepository {
     }
 
     /**
+     * Get all the workspaces on a certain node
+     * @param sNodeCode the code of the node
+     * @return the list of workspaces on a node
+     */
+    public List<Workspace> getWorkspaceByNode(String sNodeCode) {
+
+        final ArrayList<Workspace> aoReturnList = new ArrayList<Workspace>();
+        
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("nodeCode", sNodeCode));
+            
+            fillList(aoReturnList, oWSDocuments, Workspace.class);
+            
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("WorkspaceRepository.getWorkspaceByNode: error: ", oEx);
+        }
+
+        return aoReturnList;
+    }
+    
+    
+
+    /**
      * Find a workspace by userId and workspace name.
      * @param sUserId the userId
      * @param sName the name of the workspace

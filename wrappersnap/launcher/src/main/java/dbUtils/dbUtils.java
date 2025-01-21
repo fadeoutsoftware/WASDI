@@ -1236,6 +1236,7 @@ public class dbUtils {
             System.out.println("\t3 - Delete Workspace");
             System.out.println("\t4 - Reconstruct Workspace");
             System.out.println("\t5 - Clean Workspaces not existing in node");
+            System.out.println("\t6 - Add Workspace size");
             System.out.println("\tx - back");
             System.out.println("");
 
@@ -1801,7 +1802,10 @@ public class dbUtils {
 	                }
 				}
 
-            }             
+            }  
+            else if (sInputString.equals("6")) {
+            	addStorageToWorkspace();
+            }
         } 
         catch (InterruptedException oEx) {
         	Thread.currentThread().interrupt();
@@ -1811,6 +1815,42 @@ public class dbUtils {
             System.out.println("Workspace Sharing Exception: " + oEx);
         }
     }
+    
+    
+    private static void addStorageToWorkspace() {
+    	
+    	System.out.println("Adding storage size to workspace in node");
+
+    	String sCurrentNode = WasdiConfig.Current.nodeCode;
+    	
+    	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+    	
+    	List<Workspace> aoWorkspacedOnNode = oWorkspaceRepository.getWorkspaceByNode(sCurrentNode);
+    	
+    	System.out.println("Found " + aoWorkspacedOnNode.size() + " on the node");
+    
+    	for (Workspace oWorkspace : aoWorkspacedOnNode) {
+    		String sUserId = oWorkspace.getUserId();
+    		String sWorkspaceId = oWorkspace.getWorkspaceId();
+    		String sWorkspacePath = PathsConfig.getWorkspacePath(sUserId, sWorkspaceId);
+    		
+    		File oWorkspaceDir = new File(sWorkspacePath);
+    		long lWorkspaceDirSize = 0;
+    		
+    		if (oWorkspaceDir.exists()) {
+        		lWorkspaceDirSize = FileUtils.sizeOfDirectory(oWorkspaceDir);
+    		}
+    		
+    		oWorkspace.setStorageSize(lWorkspaceDirSize);
+    		
+    		if (!oWorkspaceRepository.updateWorkspace(oWorkspace)) {
+    			System.out.println("Workspace " + sWorkspaceId + " has not been updated with its storage size");
+    		}
+    	}
+    	
+    	System.out.println("Update of storage size in workspaces ended");
+    }
+    
 
     /*
      *
