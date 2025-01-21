@@ -1,8 +1,6 @@
 package wasdi;
 
 import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Security;
@@ -510,7 +508,7 @@ public class LauncherMain  {
             m_oProcessWorkspaceLogger = new ProcessWorkspaceLogger(oBaseParameter.getProcessObjId());
 
             // Create the operation class
-        	Operation oOperation = (Operation) Class.forName(sClassName).newInstance();
+        	Operation oOperation = (Operation) Class.forName(sClassName).getDeclaredConstructor().newInstance();
         	
         	// Set the process workspace logger
         	oOperation.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
@@ -685,11 +683,16 @@ public class LauncherMain  {
      *
      * @return
      */
-    private static Integer getProcessId() {
+	private static Integer getProcessId() {
         Integer iPid = 0;
+        Integer iTest = 0;
         try {
-            RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-            iPid = (int) runtimeMXBean.getPid();
+        	
+            //RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+        	//iTest = (int) runtimeMXBean.getPid();
+        	//WasdiLog.infoLog("Mx " + iTest);
+            iPid = (int) ProcessHandle.current().pid();
+            WasdiLog.infoLog("ProcessHandle " + iTest);
         } catch (Throwable oEx) {
             try {
                 WasdiLog.errorLog("LauncherMain.GetProcessId: Error getting processId: " + oEx.toString());
