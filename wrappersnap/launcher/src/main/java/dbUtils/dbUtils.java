@@ -50,6 +50,7 @@ import wasdi.shared.business.statistics.Job;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserSession;
+import wasdi.shared.business.users.UserType;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.MongoConfig;
 import wasdi.shared.config.PathsConfig;
@@ -79,7 +80,9 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.OgcProcessesClient;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.StringUtils;
@@ -87,6 +90,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.modis.MODISUtils;
+import wasdi.shared.utils.wasdiAPI.WorkspaceAPIClient;
 import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.products.BandViewModel;
@@ -2651,6 +2655,7 @@ public class dbUtils {
             Options oOptions = new Options();
 
             oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
+            oOptions.addOption("ct", "cleantask", true, "Command to start the WASDI Clean Teask for free extra space");
 
             String sConfigFilePath = "/etc/wasdi/wasdiConfig.json";
 
@@ -2725,77 +2730,80 @@ public class dbUtils {
             // add connection to statistics db
             MongoRepository.addMongoConnection("wasdi-stats", WasdiConfig.Current.mongoStatistics.user, WasdiConfig.Current.mongoStatistics.password, WasdiConfig.Current.mongoStatistics.address, WasdiConfig.Current.mongoStatistics.replicaName, WasdiConfig.Current.mongoStatistics.dbName);
             
-            //testEOEPCALogin();
-
-            boolean bExit = false;
-
-            s_oScanner = new Scanner(System.in);
-
-            while (!bExit) {
-                System.out.println("---- WASDI db Utils ----");
-                System.out.println("Welcome, how can I help you?");
-
-                System.out.println("\t1 - Downloaded Products");
-                System.out.println("\t2 - Product Workspace");
-                System.out.println("\t3 - Processors");
-                System.out.println("\t4 - Metadata");
-                System.out.println("\t5 - Password");
-                System.out.println("\t6 - Users");
-                System.out.println("\t7 - Workflows");
-                System.out.println("\t8 - Workspaces");
-                System.out.println("\t9 - Migrate DB to local");
-                System.out.println("\t10 - Categories");
-                System.out.println("\t11 - ProcessWorkspace");
-                System.out.println("\t12 - Logs");
-                System.out.println("\t13 - EcoStress");
-                System.out.println("\t14 - Subscriptions");
-                System.out.println("\t15 - MOD11A2 data import");
-                System.out.println("\tx - Exit");
-                System.out.println("");
-
-
-                String sInputString = s_oScanner.nextLine();
-
-                if (sInputString.equals("1")) {
-                    downloadedProducts();
-                } else if (sInputString.equals("2")) {
-                    productWorkspace();
-                } else if (sInputString.equals("3")) {
-                    processors();
-                } else if (sInputString.equals("4")) {
-                    metadata();
-                } else if (sInputString.equals("5")) {
-                    password();
-                } else if (sInputString.equals("6")) {
-                    users();
-                } else if (sInputString.equals("7")) {
-                    workflows();
-                } else if (sInputString.equals("8")) {
-                    workspaces();
-                } else if (sInputString.equals("9")) {
-                    migrateToLocal();
-                } else if (sInputString.equals("10")) {
-                    categories();
-                } else if (sInputString.equals("11")) {
-                    processWorkpsaces();
-                } else if (sInputString.equals("12")) {
-                    logs();
-                } else if (sInputString.equals("13")) {
-                    ecoStress();
-                } else if (sInputString.equals("14")) {
-                    subscriptions();
-                } else if (sInputString.equals("15")) {
-                	modis();
-                }
-                else if (sInputString.toLowerCase().equals("x")) {
-                    bExit = true;
-                } else {
-                    System.out.println("Please select a valid option or x to exit");
-                    System.out.println("");
-                    System.out.println("");
-                }
+            
+            if (oLine.hasOption("cleantask"))  {
+            	runWasdiCleanTask();
             }
+            else {
+                boolean bExit = false;
 
+                s_oScanner = new Scanner(System.in);
+
+                while (!bExit) {
+                    System.out.println("---- WASDI db Utils ----");
+                    System.out.println("Welcome, how can I help you?");
+
+                    System.out.println("\t1 - Downloaded Products");
+                    System.out.println("\t2 - Product Workspace");
+                    System.out.println("\t3 - Processors");
+                    System.out.println("\t4 - Metadata");
+                    System.out.println("\t5 - Password");
+                    System.out.println("\t6 - Users");
+                    System.out.println("\t7 - Workflows");
+                    System.out.println("\t8 - Workspaces");
+                    System.out.println("\t9 - Migrate DB to local");
+                    System.out.println("\t10 - Categories");
+                    System.out.println("\t11 - ProcessWorkspace");
+                    System.out.println("\t12 - Logs");
+                    System.out.println("\t13 - EcoStress");
+                    System.out.println("\t14 - Subscriptions");
+                    System.out.println("\t15 - MOD11A2 data import");
+                    System.out.println("\tx - Exit");
+                    System.out.println("");
+
+
+                    String sInputString = s_oScanner.nextLine();
+
+                    if (sInputString.equals("1")) {
+                        downloadedProducts();
+                    } else if (sInputString.equals("2")) {
+                        productWorkspace();
+                    } else if (sInputString.equals("3")) {
+                        processors();
+                    } else if (sInputString.equals("4")) {
+                        metadata();
+                    } else if (sInputString.equals("5")) {
+                        password();
+                    } else if (sInputString.equals("6")) {
+                        users();
+                    } else if (sInputString.equals("7")) {
+                        workflows();
+                    } else if (sInputString.equals("8")) {
+                        workspaces();
+                    } else if (sInputString.equals("9")) {
+                        migrateToLocal();
+                    } else if (sInputString.equals("10")) {
+                        categories();
+                    } else if (sInputString.equals("11")) {
+                        processWorkpsaces();
+                    } else if (sInputString.equals("12")) {
+                        logs();
+                    } else if (sInputString.equals("13")) {
+                        ecoStress();
+                    } else if (sInputString.equals("14")) {
+                        subscriptions();
+                    } else if (sInputString.equals("15")) {
+                    	modis();
+                    }
+                    else if (sInputString.toLowerCase().equals("x")) {
+                        bExit = true;
+                    } else {
+                        System.out.println("Please select a valid option or x to exit");
+                        System.out.println("");
+                        System.out.println("");
+                    }
+                }            	
+            }
 
             System.out.println("bye bye");
 
@@ -2805,5 +2813,89 @@ public class dbUtils {
         	System.out.println("Exception: " + e.toString());
         }
     }
+
+	private static void runWasdiCleanTask() {
+		try {
+			
+			if (WasdiConfig.Current.nodeCode!="wasdi") {
+				WasdiLog.errorLog("Clean Task must run only on the main node");
+				return;
+			}
+			
+			UserRepository oUserRepository = new UserRepository();
+			ArrayList<User> aoUsers = oUserRepository.getAllUsers();
+			ArrayList<User> aoToChekUsers = new ArrayList<>();
+			
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			SessionRepository oSessionRepository = new SessionRepository();
+			NodeRepository oNodeRepository = new NodeRepository();
+			
+			for (User oUser : aoUsers) {
+				String sType = PermissionsUtils.getUserType(oUser.getUserId());
+				if (sType.equals(UserType.NONE.name()) || sType.equals(UserType.FREE.name())) {
+					aoToChekUsers.add(oUser);
+				}
+			}
+			
+			for (User oCandidate : aoToChekUsers) {
+				
+				if (PermissionsUtils.userHasValidSubscription(oCandidate) == false) {
+					
+					Double dTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(oCandidate.getUserId());
+					long lNow = new Date().getTime();
+					long lStorageWarningDate = oCandidate.getStorageWarningSentDate().longValue();
+					
+					if (lStorageWarningDate==0L) {
+						MailUtils.sendEmail("", "", "");
+						
+						oCandidate.setStorageWarningSentDate((double)lNow);
+						oUserRepository.updateUser(oCandidate);
+						continue;
+					}
+					else if (lNow-lStorageWarningDate>10) {
+						UserSession oSession = oSessionRepository.insertUniqueSession(oCandidate.getUserId());
+						
+						if (oSession== null) {
+							WasdiLog.errorLog("");
+							continue;
+						}					
+						
+						List<Workspace> aoWorkspaces = oWorkspaceRepository.getWorkspaceByUser(oCandidate.getUserId());
+										
+						
+						for (Workspace oWorkspace : aoWorkspaces) {
+							
+							Node oNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
+							
+							WorkspaceAPIClient.deleteWorkspace(oNode, oSession.getSessionId(), oWorkspace.getWorkspaceId());
+							
+							dTotalStorageUsage = dTotalStorageUsage - oWorkspace.getStorageSize();
+							
+							if (dTotalStorageUsage<WasdiConfig.Current.storageSizeFreeSubscription) {
+								// Maybe we can also write something...
+								
+								oCandidate.setStorageWarningSentDate(0.0);
+								oUserRepository.updateUser(oCandidate);								
+								break;
+							}
+						}
+						
+					}
+					
+				}
+				else {
+					// Clean the flag
+					if (oCandidate.getStorageWarningSentDate()>0.0) {
+						oCandidate.setStorageWarningSentDate(0.0);
+						oUserRepository.updateUser(oCandidate);
+					}
+				}
+			}
+			
+		} catch (Exception oEx) {
+        	WasdiLog.errorLog("Exception: " + oEx.toString());
+        }
+		
+	}
 	
 }
