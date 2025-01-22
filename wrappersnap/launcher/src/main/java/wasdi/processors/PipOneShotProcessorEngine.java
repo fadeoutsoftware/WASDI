@@ -250,7 +250,7 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
             addEnvironmentVariablesToProcessorType(oProcessorTypeConfig,sEncodedJson,oParameter);
             
             // Create the Docker Utils Object
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry, m_oProcessWorkspaceLogger);
 
             // Check if is started otherwise start it
             String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter, false, WasdiConfig.Current.dockers.removeDockersAfterShellExec, false);

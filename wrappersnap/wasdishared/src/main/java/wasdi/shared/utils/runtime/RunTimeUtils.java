@@ -502,7 +502,7 @@ public class RunTimeUtils {
 	 * @return
 	 */
 	public static boolean isProcessStillAllive(String sPidStr) {
-		return isProcessStillAllive(sPidStr, false);
+		return isProcessStillAllive(sPidStr, true);
 	}
 	
 	/**
