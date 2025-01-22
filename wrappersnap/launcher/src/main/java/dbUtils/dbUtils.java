@@ -92,6 +92,7 @@ import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.modis.MODISUtils;
 import wasdi.shared.utils.wasdiAPI.WorkspaceAPIClient;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.products.BandViewModel;
@@ -2845,57 +2846,56 @@ public class dbUtils {
 				if (PermissionsUtils.userHasValidSubscription(oCandidate) == false) {
 					
 					StorageUsageControl oStorageUsageControl = WasdiConfig.Current.storageUsageControl;
-					
 					Double dTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(sCandidateUserId);
 					long lNow = new Date().getTime();
 					long lStorageWarningDate = oCandidate.getStorageWarningSentDate().longValue();
 					
 					if (lStorageWarningDate == 0L) {
 						
+						String sEmailTitle = oStorageUsageControl.warningEmailConfig.title;
+						String sEmailText = oStorageUsageControl.warningEmailConfig.message;
 						
-						MailUtils.sendEmail(sCandidateUserId, oStorageUsageControl.warningEmailConfig.title, oStorageUsageControl.warningEmailConfig.message); //
+						MailUtils.sendEmail(sCandidateUserId, sEmailTitle, sEmailText); // TODO - DONE
 						
 						oCandidate.setStorageWarningSentDate((double)lNow);
 						oUserRepository.updateUser(oCandidate);
 						continue;
 					}
 					
-					long lDaysFrmWarning = (lNow - lStorageWarningDate) / (1000 * 60 * 60 * 24);
+					long lDaysFromWarning = (lNow - lStorageWarningDate) / (1000 * 60 * 60 * 24);
 					
-					if (lDaysFrmWarning > WasdiConfig.Current.storageUsageControl.deletionDelayFromWarning) { // TODO - DONE
-						UserSession oSession = oSessionRepository.insertUniqueSession(oCandidate.getUserId());
+					if (lDaysFromWarning > WasdiConfig.Current.storageUsageControl.deletionDelayFromWarning) { // TODO - DONE
 						
+						UserSession oSession = oSessionRepository.insertUniqueSession(oCandidate.getUserId());
 						if (oSession== null) {
 							WasdiLog.errorLog("Invalid session. Impossible to proceed with the cleaning task");
 							continue;
 						}					
 						
-						List<Workspace> aoWorkspaces = oWorkspaceRepository.getWorkspacesSortedByOldestUpdate(oCandidate.getUserId()); // TODO - DONE
-										
+						List<Workspace> aoWorkspaces = oWorkspaceRepository.getWorkspacesSortedByOldestUpdate(oCandidate.getUserId()); // TODO - DONE				
 						
 						for (Workspace oWorkspace : aoWorkspaces) {
-							
+							String sWorkspaceID = oWorkspace.getWorkspaceId();
 							Node oNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
-							
-							WorkspaceAPIClient.deleteWorkspace(oNode, oSession.getSessionId(), oWorkspace.getWorkspaceId());
+							HttpCallResponse oResponse = WorkspaceAPIClient.deleteWorkspace(oNode, oSession.getSessionId(), sWorkspaceID);
+							int iResponseCode = oResponse.getResponseCode();
+							if (iResponseCode < 200 || iResponseCode > 299) {
+								WasdiLog.warnLog("Deletion of wokrspace " + sWorkspaceID + "returned error code " + iResponseCode);
+							}
 							
 							dTotalStorageUsage = dTotalStorageUsage - oWorkspace.getStorageSize();
-							
 							if (dTotalStorageUsage < WasdiConfig.Current.storageUsageControl.storageSizeFreeSubscription) {
-								// Maybe we can also write something...
-								
+								WasdiLog.infoLog("Workspaces of user " + sCandidateUserId + " have been cleaned. Total usage storage: " + dTotalStorageUsage);
 								oCandidate.setStorageWarningSentDate(0.0);
 								oUserRepository.updateUser(oCandidate);								
 								break;
 							}
-						}
-						
+						}			
 					}
-					
 				}
 				else {
 					// Clean the flag
-					if (oCandidate.getStorageWarningSentDate() >0.0 ) {
+					if (oCandidate.getStorageWarningSentDate() > 0.0 ) {
 						oCandidate.setStorageWarningSentDate(0.0);
 						oUserRepository.updateUser(oCandidate);
 					}

@@ -216,7 +216,7 @@ public class WorkspaceRepository extends  MongoRepository {
         try {
         			
         	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
-        			.find(new Document("nodeCode", sUserId))
+        			.find(new Document("userId", sUserId))
         			.sort(Sorts.ascending("lastEditDate"));
             
             fillList(aoReturnList, oWSDocuments, Workspace.class);
