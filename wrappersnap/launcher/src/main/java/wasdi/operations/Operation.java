@@ -7,7 +7,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import wasdi.LauncherMain;
-import wasdi.ProcessWorkspaceLogger;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.business.DownloadedFile;
@@ -21,6 +20,7 @@ import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.payloads.OperationPayload;
 import wasdi.shared.rabbit.Send;
+import wasdi.shared.utils.ProcessWorkspaceLogger;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;

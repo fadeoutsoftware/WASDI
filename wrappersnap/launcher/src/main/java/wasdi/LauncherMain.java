@@ -42,6 +42,7 @@ import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.MailUtils;
+import wasdi.shared.utils.ProcessWorkspaceLogger;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;

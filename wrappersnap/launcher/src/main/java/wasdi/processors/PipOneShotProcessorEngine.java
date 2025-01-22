@@ -253,7 +253,7 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
 
             // Check if is started otherwise start it
-            String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter, false, true, false);
+            String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter, false, WasdiConfig.Current.dockers.removeDockersAfterShellExec, false);
             
             // If we do not have a container name here, we are not in the position to continue
             if (Utils.isNullOrEmpty(sContainerName)) {

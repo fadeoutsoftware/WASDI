@@ -502,6 +502,17 @@ public class RunTimeUtils {
 	 * @return
 	 */
 	public static boolean isProcessStillAllive(String sPidStr) {
+		return isProcessStillAllive(sPidStr, false);
+	}
+	
+	/**
+	 * Check if a process is alive starting from PID
+	 * The function tryes to support both Windows and Linux
+	 * 
+	 * @param sPidStr String representing the PID of the process
+	 * @return
+	 */
+	public static boolean isProcessStillAllive(String sPidStr, boolean bContainerId) {
 		
 		if (WasdiConfig.Current.shellExecLocally) {
 		    String sOS = System.getProperty("os.name").toLowerCase();
@@ -523,7 +534,14 @@ public class RunTimeUtils {
 		}
 		else {
 			DockerUtils oDockerUtils = new DockerUtils();
-			ContainerInfo oContainerInfo = oDockerUtils.getContainerInfoByContainerId(sPidStr);
+			ContainerInfo oContainerInfo;
+			
+			if (bContainerId) {
+				oContainerInfo = oDockerUtils.getContainerInfoByContainerId(sPidStr);
+			}
+			else {
+				oContainerInfo = oDockerUtils.getContainerInfoByContainerName(sPidStr);
+			}
 			
 			if (oContainerInfo == null) {
 				WasdiLog.warnLog("RunTimeUtils.isProcessStillAllive: docker info not found for " + sPidStr);
