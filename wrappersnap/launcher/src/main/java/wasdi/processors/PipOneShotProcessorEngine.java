@@ -271,7 +271,7 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
             WasdiLog.debugLog("PipOneShotProcessorEngine.run: process Status after start: " + sStatus);
             
             if (sStatus.equals(ProcessStatus.DONE.name())==false && sStatus.equals(ProcessStatus.ERROR.name())==false && sStatus.equals(ProcessStatus.STOPPED.name())==false) {
-            	sStatus = waitForApplicationToFinish(oProcessor, oProcessWorkspace.getProcessObjId(), sStatus, oProcessWorkspace);
+            	sStatus = waitForApplicationToFinish(oProcessor, oProcessWorkspace.getProcessObjId(), sStatus, oProcessWorkspace, sContainerName);
             }
 
             WasdiLog.debugLog("PipOneShotProcessorEngine.run: process finished with status " + sStatus);

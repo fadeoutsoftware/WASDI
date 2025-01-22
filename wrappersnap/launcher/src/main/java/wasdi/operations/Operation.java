@@ -413,6 +413,15 @@ public abstract class Operation {
             WasdiLog.errorLog("Operation.setPayload: payload exception: " + oPayloadEx.toString());
         }
     }
-    
+
+	/**
+	 * Safe Processor log
+	 * @param sLog
+	 */
+	protected void processWorkspaceLog(String sLog) {
+		if (m_oProcessWorkspaceLogger!=null) {
+			m_oProcessWorkspaceLogger.log(sLog);
+		}
+	}
 
 }

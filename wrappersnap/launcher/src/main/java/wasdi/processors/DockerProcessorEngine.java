@@ -1058,16 +1058,17 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // Wait for the process to finish, while checking timeout
             while (!(sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {
-                oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
-
-                sStatus = oProcessWorkspace.getStatus();
-                
+            	
                 try {
                     Thread.sleep(iThreadSleepMs);
                 } 
                 catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
+                
+                oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
+                sStatus = oProcessWorkspace.getStatus();
+                
                 
                 if (sStatus.equals(ProcessStatus.RUNNING.name())) {
                     // Increase the time only if it is in RUNNING
@@ -1077,6 +1078,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 iCycleCount++;
                 
                 if (iCycleCount == iSometimesCheck) {
+                	
                 	iCycleCount = 0;
                 	
 					// Get the PID
@@ -1088,6 +1090,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 					
 					// If we have the specific container name
 					if (!Utils.isNullOrEmpty(sApplicationContainerName)) {
+						WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToFinish: Checking container by name: " + sApplicationContainerName);
 						// Check it
 						if (!RunTimeUtils.isProcessStillAllive(sApplicationContainerName, false)) {
 							// PID does not exists: recheck and remove
