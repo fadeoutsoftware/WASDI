@@ -10,11 +10,11 @@ WASDI has recently implemented a subscription based usage model. To execute vari
 Managing Subscriptions
 ---------------------------
 
-To review your subscriptions, navigate to the subscription dashboard by selecting your subscription type (in this example, we are using a PRO account) and click “Manage Subscriptions”.
+To review your subscriptions, navigate to the subscription dashboard by clicking on the gear icon in the WASDI side bar and selecting 'billings'.
 
 .. image:: ../_static/user_manual_images/subscriptions/manage_subs_dropdown.png
 
-This action will open the Subscription Management Dialog where all your subscriptions (including expired subscriptions) are shown.
+One this page you will find a list of all your subscriptions - current and expired.
 
 .. image:: ../_static/user_manual_images/subscriptions/subscriptions_dialog.png
 
@@ -38,7 +38,7 @@ If you are not the owner of a subscription, by removing it, you are not deleting
 Purchasing Subscriptions
 ---------------------------
 
-If you do not have a WASDI subscription and would like to purchase one - click the “PURCHASE SUBSCRIPTION” button in the navbar and select “Purchase Subscription” to be redirected to our purchasing page.
+If you do not have a WASDI subscription and would like to purchase one - click the “Subscriptions” button in the account sidebar.
 
 .. image:: ../_static/user_manual_images/subscriptions/purchase_sub_dropdown.png
 
@@ -66,8 +66,6 @@ Active Projects
 
 To switch between projects in WASDI, use the projects tab in the navbar. When selected it will show a dropdown list of all the user’s projects.
 
-.. image:: ../_static/user_manual_images/subscriptions/active_project_dropdown.png
+.. image:: ../_static/user_manual_images/subscriptions/active-project-dropdown.png
 
 To switch between projects, simply select the project you wish to work with. If your selection is successful, that project’s name will appear in your navbar and you will receive a notification that you selection was successful.
-
-.. image:: ../_static/user_manual_images/subscriptions/active_project_set.png

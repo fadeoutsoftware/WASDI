@@ -76,7 +76,7 @@ A good starting point to applications is the :doc:`App store overview </AppStore
    :caption: Wasdi Applications
 
    WasdiApplications/AppStoreTutorial.rst
-   WasdiApplications/eDriftTutorial.rst
+   WasdiApplications/FloodMapping.rst
    WasdiApplications/WheatLocator.rst
 
 
@@ -147,6 +147,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    PythonCookbook/SearchCMImages.rst
    PythonCookbook/SearchEcostressProducts.rst
    PythonCookbook/SearchERA5Images.rst
+   PythonCookbook/CallCDSAPIsFromWASDI.rst
    PythonCookbook/ImportSearchedImages.rst
    PythonCookbook/ImportAndPreprocess.rst
    PythonCookbook/RunSnapWorkflow.rst
@@ -155,6 +156,9 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    PythonCookbook/FindS2Tiles.rst
    PythonCookbook/UseLibAsClient.rst
    PythonCookbook/ChangeHTTPRequestTimeouts.rst
+   PythonCookbook/InstallCustomPackagesInNotebook.rst
+   PythonCookbook/plottingPackages.rst
+   PythonCookbook/InstallGDAL.rst
 
 
 .. toctree::
