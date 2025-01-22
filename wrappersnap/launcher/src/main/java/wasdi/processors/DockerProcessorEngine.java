@@ -1090,11 +1090,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 					
 					// If we have the specific container name
 					if (!Utils.isNullOrEmpty(sApplicationContainerName)) {
-						WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToFinish: Checking container by name: " + sApplicationContainerName);
 						// Check it
 						if (!RunTimeUtils.isProcessStillAllive(sApplicationContainerName, false)) {
 							// PID does not exists: recheck and remove
-							WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has Name " + sApplicationContainerName + ", but looks not existing. I would KILL it");
+							WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has Name " + sApplicationContainerName + ", but looks not existing. We stop here");
+							bForcedError = true;
 						}
 					}
 					else {
@@ -1102,12 +1102,22 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 						if (!Utils.isNullOrEmpty(sPidOrContainerId)) {
 							if (!RunTimeUtils.isProcessStillAllive(sPidOrContainerId)) {
 								// PID does not exists: recheck and remove
-								WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has PID " + sPidOrContainerId + ", but looks not existing. I would KILL it");
+								WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has PID " + sPidOrContainerId + ", but looks not existing. We stop here");
+								bForcedError = true;
 							}
 						}
 						else {
 							WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has null PID. I would KILL it");
+							bForcedError = true;
 						}						
+					}
+					
+					if (bForcedError) {
+                        // Update process and rabbit users
+                        LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+                        // Force cycle to exit
+                        sStatus = ProcessStatus.ERROR.name();
+                        break;						
 					}
 					
                 }
@@ -1122,6 +1132,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                         bForcedError = true;
                         // Force cycle to exit
                         sStatus = ProcessStatus.STOPPED.name();
+                        
+                        break;
                     }
                 }
             }
