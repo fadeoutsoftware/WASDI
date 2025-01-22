@@ -13,6 +13,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -186,6 +187,21 @@ public class UserRepository extends  MongoRepository{
     public ArrayList<User> getAllUsers ()
     {
     	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
+        final ArrayList<User> aoReturnList = new ArrayList<User>();
+        
+        fillList(aoReturnList, oWSDocuments, User.class);
+    	
+    	return aoReturnList;
+    }
+    
+    
+    /**
+     * Get the list of all users
+     * @return
+     */
+    public ArrayList<User> getAdminUsers ()
+    {
+    	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("role", UserApplicationRole.ADMIN.name()));
         final ArrayList<User> aoReturnList = new ArrayList<User>();
         
         fillList(aoReturnList, oWSDocuments, User.class);

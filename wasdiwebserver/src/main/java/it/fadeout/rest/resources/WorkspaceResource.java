@@ -486,8 +486,6 @@ public class WorkspaceResource {
 			}
 
 			// Default values
-			String sUserId = oWorkspaceEditorViewModel.getUserId();
-			String sWorkspaceId = oWorkspaceEditorViewModel.getWorkspaceId();
 			oWorkspace.setCreationDate((double) oWorkspaceEditorViewModel.getCreationDate().getTime());
 			oWorkspace.setLastEditDate((double) oWorkspaceEditorViewModel.getLastEditDate().getTime());
 			oWorkspace.setName(sName);

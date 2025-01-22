@@ -2832,6 +2832,8 @@ public class dbUtils {
 				}
 			}
 			
+			List<String> asUsersExceedingStorage = new ArrayList<String>();
+			
 			for (User oCandidate : aoToChekUsers) {
 				
 				String sCandidateUserId = oCandidate.getUserId();
@@ -2839,14 +2841,15 @@ public class dbUtils {
 				if (PermissionsUtils.userHasValidSubscription(oCandidate) == false) {
 					
 					StorageUsageControl oStorageUsageControl = WasdiConfig.Current.storageUsageControl;
-					Long dTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(sCandidateUserId);
+					Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(sCandidateUserId);
 					long lNow = new Date().getTime();
 					long lStorageWarningDate = oCandidate.getStorageWarningSentDate().longValue();
 					
+					// if we didn't yet sent the warning to the user, then we do it
 					if (lStorageWarningDate == 0L) {
 						
 						String sEmailTitle = oStorageUsageControl.warningEmailConfig.title;
-						String sEmailText = oStorageUsageControl.warningEmailConfig.message;
+						String sEmailText = fillEmailTemplate(oCandidate.getName(), lTotalStorageUsage);
 						
 						MailUtils.sendEmail(sCandidateUserId, sEmailTitle, sEmailText); // TODO - DONE
 						
@@ -2855,9 +2858,16 @@ public class dbUtils {
 						continue;
 					}
 					
+					// if the warning period has passed, then we proceed to the deletion of the workspaces
 					long lDaysFromWarning = (lNow - lStorageWarningDate) / (1000 * 60 * 60 * 24);
 					
-					if (lDaysFromWarning > WasdiConfig.Current.storageUsageControl.deletionDelayFromWarning) { // TODO - DONE
+					if (lDaysFromWarning > oStorageUsageControl.deletionDelayFromWarning) { // TODO - DONE
+						
+						// managing the deletion in testing mode
+						if (oStorageUsageControl.isDeletionInTestMode) {
+							asUsersExceedingStorage.add(oCandidate.getUserId());
+							continue;
+						}
 						
 						UserSession oSession = oSessionRepository.insertUniqueSession(oCandidate.getUserId());
 						if (oSession== null) {
@@ -2875,10 +2885,9 @@ public class dbUtils {
 							if (iResponseCode < 200 || iResponseCode > 299) {
 								WasdiLog.warnLog("Deletion of wokrspace " + sWorkspaceID + "returned error code " + iResponseCode);
 							}
-							
-							dTotalStorageUsage = dTotalStorageUsage - oWorkspace.getStorageSize();
-							if (dTotalStorageUsage < WasdiConfig.Current.storageUsageControl.storageSizeFreeSubscription) {
-								WasdiLog.infoLog("Workspaces of user " + sCandidateUserId + " have been cleaned. Total usage storage: " + dTotalStorageUsage);
+							lTotalStorageUsage = lTotalStorageUsage - oWorkspace.getStorageSize();
+							if (lTotalStorageUsage < WasdiConfig.Current.storageUsageControl.storageSizeFreeSubscription) {
+								WasdiLog.infoLog("Workspaces of user " + sCandidateUserId + " have been cleaned. Total usage storage: " + lTotalStorageUsage);
 								oCandidate.setStorageWarningSentDate(0.0);
 								oUserRepository.updateUser(oCandidate);								
 								break;
@@ -2895,10 +2904,29 @@ public class dbUtils {
 				}
 			}
 			
+			// when we are in testing mode, send mail to admins
+			if (!asUsersExceedingStorage.isEmpty()) {				
+				List<User> aoAdminUsers = oUserRepository.getAdminUsers();
+				String sUsers = String.join("\n", asUsersExceedingStorage);
+
+				for (User oAdmin : aoAdminUsers) {
+					MailUtils.sendEmail(oAdmin.getUserId(), "Deletion test", "Test deletion of workspaces for users:\n" + sUsers);
+				}
+			}
+			
 		} catch (Exception oEx) {
         	WasdiLog.errorLog("Exception: ", oEx);
         }
 		
+	}
+	
+	private static String fillEmailTemplate(String sUserName, long lUserStorageSize) {
+		String sStorageLimit = FileUtils.byteCountToDisplaySize(WasdiConfig.Current.storageUsageControl.storageSizeFreeSubscription);
+		String sUserStorage = FileUtils.byteCountToDisplaySize(lUserStorageSize);
+		String message = WasdiConfig.Current.storageUsageControl.warningEmailConfig.message;
+		return message.replaceAll("<user>", sUserName)
+				.replaceAll("<storage_size>", sUserStorage)
+				.replaceAll("<storage_limit>", sStorageLimit);
 	}
 	
 }
