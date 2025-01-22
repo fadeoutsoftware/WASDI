@@ -33,6 +33,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -829,26 +830,34 @@ public class WasdiFileUtils {
 		}
 	}
 	
-	
-	/**
-	 * Compute the size of a folder
-	 * @param oFolder
-	 * @return
-	 */
-    public static long getFolderSize(File oFolder) {
-        long lLength = 0;
+    
+    /**
+     * Compute the size of the folder representing a workspace on the file system
+     * @return the size of the folder in bytes
+     */
+    public static long getWorkspaceFolderSize(String sUserId, String sWorkspaceId) {
 
-        File[] aoFiles = oFolder.listFiles();
-        if (aoFiles != null) {
-            for (File oFile : aoFiles) {
-                if (oFile.isFile()) {
-                    lLength += oFile.length();
-                } else if (oFile.isDirectory()) {
-                    lLength += getFolderSize(oFile); // Recursive call for subfolders
-                }
-            }
-        }
-        return lLength;
+    	long lWorkspaceSize = 0L;
+    	
+    	if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sWorkspaceId)) {
+    		return lWorkspaceSize;
+    	}
+		
+    	try {
+	    	String sWorkspacePath = PathsConfig.getWorkspacePath(sUserId, sWorkspaceId);
+	        File oWorkspaceDir = new File(sWorkspacePath);
+	        
+	        if (oWorkspaceDir.exists()) {
+	        	lWorkspaceSize = FileUtils.sizeOfDirectory(oWorkspaceDir);
+	        	return lWorkspaceSize;
+	        }
+	        
+    	} catch (Exception oEx) {
+    		WasdiLog.errorLog("WasdiFileUtils.getWorkspaceFolderSize. Error computing workspace size", oEx);
+    	}
+    	
+        return lWorkspaceSize;
+    	
     }
 	
 }

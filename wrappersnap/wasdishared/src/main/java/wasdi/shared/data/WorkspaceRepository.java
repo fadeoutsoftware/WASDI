@@ -430,9 +430,9 @@ public class WorkspaceRepository extends  MongoRepository {
 	 * @param sUserId the user id
 	 * @return the size (in bytes) of disk storage occupied by all the workspaces of a certain user
 	 */
-	public Double getStorageUsageForUser(String sUserId) {
+	public Long getStorageUsageForUser(String sUserId) {
 		
-		Double dStorageUsage = -1d;
+		Long dStorageUsage = -1L;
 		
 		if (Utils.isNullOrEmpty(sUserId)) 
 			return dStorageUsage;
@@ -454,8 +454,8 @@ public class WorkspaceRepository extends  MongoRepository {
 			
 			// extract the total storage size
 			dStorageUsage = oResult.first() != null 
-					? oResult.first().getDouble("totalStorage") 
-					: 0d;
+					? oResult.first().getLong("totalStorage") 
+					: 0L;
 			
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("WorkspaceRepository.getStorageUsageForUser. Error: ", oEx);

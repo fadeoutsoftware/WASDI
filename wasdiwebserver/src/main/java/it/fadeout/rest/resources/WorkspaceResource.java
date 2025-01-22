@@ -281,6 +281,8 @@ public class WorkspaceResource {
 			oWorkspaceEditorViewModel.setNodeCode(oWorkspace.getNodeCode());
 			oWorkspaceEditorViewModel.setPublic(oWorkspace.isPublic());
 			oWorkspaceEditorViewModel.setReadOnly(!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), oWorkspace.getWorkspaceId()));
+			oWorkspaceEditorViewModel.setStorageSize(oWorkspace.getStorageSize() > 0 ? FileUtils.byteCountToDisplaySize(oWorkspace.getStorageSize()) : "0B");
+			
 			
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			oWorkspaceEditorViewModel.setProcessesCount(oProcessWorkspaceRepository.countByWorkspace(sWorkspaceId)); 
@@ -484,11 +486,17 @@ public class WorkspaceResource {
 			}
 
 			// Default values
+			String sUserId = oWorkspaceEditorViewModel.getUserId();
+			String sWorkspaceId = oWorkspaceEditorViewModel.getWorkspaceId();
 			oWorkspace.setCreationDate((double) oWorkspaceEditorViewModel.getCreationDate().getTime());
 			oWorkspace.setLastEditDate((double) oWorkspaceEditorViewModel.getLastEditDate().getTime());
 			oWorkspace.setName(sName);
 			oWorkspace.setUserId(oWorkspaceEditorViewModel.getUserId());
 			oWorkspace.setWorkspaceId(oWorkspaceEditorViewModel.getWorkspaceId());
+			
+			if (oExistingWorkspace != null) {
+				oWorkspace.setStorageSize(oExistingWorkspace.getStorageSize());
+			}
 			
 			if (oWorkspace.isPublic() != oWorkspaceEditorViewModel.isPublic()) {
 				oWorkspace.setPublic(oWorkspaceEditorViewModel.isPublic());

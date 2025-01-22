@@ -1838,15 +1838,8 @@ public class dbUtils {
     	for (Workspace oWorkspace : aoWorkspacedOnNode) {
     		String sUserId = oWorkspace.getUserId();
     		String sWorkspaceId = oWorkspace.getWorkspaceId();
-    		String sWorkspacePath = PathsConfig.getWorkspacePath(sUserId, sWorkspaceId);
     		
-    		File oWorkspaceDir = new File(sWorkspacePath);
-    		long lWorkspaceDirSize = 0;
-    		
-    		if (oWorkspaceDir.exists()) {
-        		lWorkspaceDirSize = FileUtils.sizeOfDirectory(oWorkspaceDir);
-    		}
-    		
+    		long lWorkspaceDirSize = WasdiFileUtils.getWorkspaceFolderSize(sUserId, sWorkspaceId);
     		oWorkspace.setStorageSize(lWorkspaceDirSize);
     		
     		if (!oWorkspaceRepository.updateWorkspace(oWorkspace)) {
@@ -2846,7 +2839,7 @@ public class dbUtils {
 				if (PermissionsUtils.userHasValidSubscription(oCandidate) == false) {
 					
 					StorageUsageControl oStorageUsageControl = WasdiConfig.Current.storageUsageControl;
-					Double dTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(sCandidateUserId);
+					Long dTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(sCandidateUserId);
 					long lNow = new Date().getTime();
 					long lStorageWarningDate = oCandidate.getStorageWarningSentDate().longValue();
 					

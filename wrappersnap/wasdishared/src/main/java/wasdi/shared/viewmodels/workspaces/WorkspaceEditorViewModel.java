@@ -23,8 +23,9 @@ public class WorkspaceEditorViewModel {
     private long processesCount;
     private String cloudProvider;
     private String slaLink;
-    private boolean isPublic=false;
-    private boolean readOnly=false;
+    private String storageSize = "";
+    private boolean isPublic = false;
+    private boolean readOnly = false;
    
     
 	public String getCloudProvider() {
@@ -123,6 +124,14 @@ public class WorkspaceEditorViewModel {
 		this.slaLink = slaLink;
 	}
 	
+	public String getStorageSize() {
+		return storageSize;
+	}
+
+	public void setStorageSize(String storageSize) {
+		this.storageSize = storageSize;
+	}
+
 	public boolean isPublic() {
 		return isPublic;
 	}

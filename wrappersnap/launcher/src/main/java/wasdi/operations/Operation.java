@@ -332,15 +332,8 @@ public abstract class Operation {
 	            WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 	            Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspace);
 	            String sUserId = oWorkspace.getUserId();
-	          
-	            String sWorkspacePath = PathsConfig.getWorkspacePath(sUserId, sWorkspace);
-	            File oWorkspaceDir = new File(sWorkspacePath);
 	            
-	            long lWorkspaceSize = 0;
-	            
-	            if (oWorkspaceDir.exists()) {
-	            	lWorkspaceSize = FileUtils.sizeOfDirectory(oWorkspaceDir);
-	            }
+	            long lWorkspaceSize = WasdiFileUtils.getWorkspaceFolderSize(sUserId, sWorkspace);
 	            
 	            oWorkspace.setStorageSize(lWorkspaceSize);
 	            oWorkspaceRepository.updateWorkspace(oWorkspace);

@@ -100,7 +100,7 @@ public class PermissionsUtils {
 			
 			// storage-based model for free subscriptions
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Double dTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(oUser.getUserId());			
+			Long dTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(oUser.getUserId());			
 			
 			if (dTotalStorageUsage < 0) {
 				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. There was an error computing the total storage space for the user");

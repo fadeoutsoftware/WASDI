@@ -527,53 +527,5 @@ public class Utils {
         return aoOriginalList; 
     }	
     
-    
-    public static Long computeWorkspaceStorageSize(String sWorkspaceId) {
-    	
-    	try {
-	    	if (Utils.isNullOrEmpty(sWorkspaceId)) {
-	    		return -1L;
-	    	}
-	    	
-	    	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-	    	Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
-	    	
-	    	if (oWorkspace == null) {
-	    		WasdiLog.warnLog("ProductResource.computeWorkspaceStorageSize. Workspace not found"); 
-	    		return -1L;
-	    	}
-	    	
-	    	ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-	    	List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
-	    	
-	    	if (aoProductWorkspace == null || aoProductWorkspace.isEmpty()) {
-	    		return 0L;
-	    	}
-	    	
-	    	Long lTotalStorage = 0L;
-	    	
-	    	for (ProductWorkspace oProductWorkspace: aoProductWorkspace) {
-	    		File oProductFile = new File(oProductWorkspace.getProductName());
-	    		
-	    		if (!oProductFile.exists())
-	    			continue;
-	    		
-	    		if (oProductFile.isFile()) {
-	    			lTotalStorage += oProductFile.length();
-	    		} 
-	    		else if (oProductFile.isDirectory()) {
-	    			lTotalStorage += WasdiFileUtils.getFolderSize(oProductFile);
-	    		}
-	    	}
-	    	
-	    	return lTotalStorage;
-	    	
-    	} catch (Exception oEx) {
-    		WasdiLog.errorLog("Utils.computeWorkspaceStorageSize: error computing the size of the workspace");
-    	}
-    	
-    	return  -1L;
-	
-    }
 
 }
