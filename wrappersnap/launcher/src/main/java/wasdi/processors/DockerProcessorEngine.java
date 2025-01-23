@@ -70,6 +70,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	protected String m_sDockerRegistry = "";
 	
 	/**
+	 * Flag to know if we really need to download the processor files locally
+	 */
+	protected boolean m_bDownloadProcessorFiles = true;
+	
+	/**
 	 * Create clean instance
 	 */
 	public DockerProcessorEngine() {
@@ -150,7 +155,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // First Check if processor exists
             Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
             String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
-
+            
             // Create the file
             File oProcessorZipFile = new File(sProcessorFolder + sProcessorId + ".zip");
 
@@ -347,37 +352,52 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 processWorkspaceLog("Application not available on this node: installing it...");
                 
                 m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "APP NOT ON NODE<BR>INSTALLATION STARTED", m_oParameter.getExchange());
-
-                String sProcessorZipFile = downloadProcessor(oProcessor, oParameter.getSessionID());
-
-                WasdiLog.infoLog("DockerProcessorEngine.run: processor zip file downloaded: " + sProcessorZipFile);
                 
-                if (Utils.isNullOrEmpty(sProcessorZipFile)) {
-                    WasdiLog.errorLog("DockerProcessorEngine.run: processor not available on node and not downloaded: exit.. ");
-                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
-                    return false;                	
+                // Check if this processor Type needs or wants local files
+                if (m_bDownloadProcessorFiles) {
+                	
+                    // Now we need or to redeploy or to unzip locally
+                	boolean bResult = true;                	
+                	
+                    String sProcessorZipFile = downloadProcessor(oProcessor, oParameter.getSessionID());
+
+                    WasdiLog.infoLog("DockerProcessorEngine.run: processor zip file downloaded: " + sProcessorZipFile);
+                    
+                    if (Utils.isNullOrEmpty(sProcessorZipFile)) {
+                        WasdiLog.errorLog("DockerProcessorEngine.run: processor not available on node and not downloaded: exit.. ");
+                        LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+                        return false;                	
+                    }
+
+                	if (bBuildLocally) {
+                		bResult = deploy(oParameter, false);
+                		processWorkspaceLog("Local build done, starting application!");
+                	}
+                	else {
+                		File oZipFile = new File(sProcessorZipFile);
+                		bResult = unzipProcessor(PathsConfig.getProcessorFolder(oProcessor), oZipFile.getName(), oParameter.getProcessObjId());
+                	}
+                	
+                	if (!bResult) {
+                        WasdiLog.errorLog("DockerProcessorEngine.run: impossible to deploy locally or unzip. We stop here");
+                        LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+                        return false;                		
+                	}
+                    
                 }
-                
-                // Now we need or to redeploy or to unzip locally
-            	boolean bResult = true;
-            	
-            	if (bBuildLocally) {
-            		bResult = deploy(oParameter, false);
-            		processWorkspaceLog("Local build done, starting application!");
-            	}
-            	else {
-            		File oZipFile = new File(sProcessorZipFile);
-            		bResult = unzipProcessor(PathsConfig.getProcessorFolder(oProcessor), oZipFile.getName(), oParameter.getProcessObjId());
-            		processWorkspaceLog("Pulling Application image from register");
-            	}
-            	
-            	if (!bResult) {
-                    WasdiLog.errorLog("DockerProcessorEngine.run: impossible to deploy locally or unzip. We stop here");
-                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
-                    return false;                		
-            	}
-                
-                m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "INSTALLATION DONE<BR>STARTING APP", m_oParameter.getExchange());                    
+                else {
+                	// Just make the folder we do not need the files locally
+                	WasdiLog.infoLog("DockerProcessorEngine.run: download processor files flag is false, just create the folder ");
+                	String sProcessorPath = PathsConfig.getProcessorFolder(oProcessor);
+                	
+                	try {
+                    	File oProcessorPath = new File(sProcessorPath);
+                    	oProcessorPath.mkdirs();
+                	}
+                	catch (Exception oEx) {
+                		WasdiLog.warnLog("DockerProcessorEngine.run: error creating the processor folder");
+					}
+                }
             }
 
             // Create the Docker Utils Object
@@ -385,6 +405,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             
             // Check if is started otherwise start it
             String sContainerName = startContainerAndGetName(oDockerUtils,oProcessor, oParameter);
+            
+            m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "INSTALLATION DONE<BR>STARTING APP", m_oParameter.getExchange());
             
             // If we do not have a container name here, we are not in the position to continue
             if (Utils.isNullOrEmpty(sContainerName)) {

@@ -664,34 +664,16 @@ public class ProcessWorkspaceResource {
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			
-			// Get all CREATED
-			List<ProcessWorkspace> aoWaitingList = oRepository.getCreatedSummary();
-			oSummaryViewModel.setAllProcessWaiting(aoWaitingList.size());
+			long lUserWaiting = oRepository.getCreatedCountByUser("yoanne.didry@list.lu", true);
+			long lOthersWaiting = oRepository.getCreatedCountByUser("yoanne.didry@list.lu", false);
 			
-			int iUserWaiting = 0 ;
-			// Count the user's ones
-			for (int iProcess=0; iProcess<aoWaitingList.size(); iProcess++) {
-				// Get the process
-				ProcessWorkspace oProcess = aoWaitingList.get(iProcess);
-				if (oProcess.getUserId().equals(oUser.getUserId())) iUserWaiting ++;
-			}
+			long lUserRunning = oRepository.getRunningCountByUser("yoanne.didry@list.lu", true);
+			long lOthersRunning = oRepository.getRunningCountByUser("yoanne.didry@list.lu", false);
 			
-			oSummaryViewModel.setUserProcessWaiting(iUserWaiting);
-			
-			// Get all RUNNING, WAITING, READY
-			List<ProcessWorkspace> aoRunningList = oRepository.getRunningSummary();
-			oSummaryViewModel.setAllProcessRunning(aoRunningList.size());
-			
-			int iUserRunning = 0;
-			
-			// Count the user's ones
-			for (int iProcess=0; iProcess<aoRunningList.size(); iProcess++) {
-				// Get the process
-				ProcessWorkspace oProcess = aoRunningList.get(iProcess);
-				if (oProcess.getUserId().equals(oUser.getUserId())) iUserRunning ++;
-			}
-			
-			oSummaryViewModel.setUserProcessRunning(iUserRunning);
+			oSummaryViewModel.setUserProcessRunning((int) lUserRunning);
+			oSummaryViewModel.setUserProcessWaiting((int) lUserWaiting);
+			oSummaryViewModel.setAllProcessRunning((int)(lUserRunning+lOthersRunning));
+			oSummaryViewModel.setAllProcessWaiting((int)(lUserWaiting+lOthersWaiting));			
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessWorkspaceResource.getSummary error: " + oEx);
@@ -1997,28 +1979,6 @@ public class ProcessWorkspaceResource {
 			aoGeneralStatisticsMap.put(sSbuscriptionId, aoProjectStatisticsMap);
 		}	
 	}
-
-	/**
-	 * Send a HTTP request to one of the WASDI nodes
-	 * @param sNodeBaseAddress base address of the node
-	 * @param sResourcePath path of the endpoint to call
-	 * @param sSessionId id of the session
-	 * @return the HTTP response returned by the node
-	 */
-	private HttpCallResponse sendRequestToNode(String sNodeBaseAddress, String sResourcePath, String sSessionId) {
-		String sUrl = sNodeBaseAddress;
-		
-		if (!sUrl.endsWith("/")) sUrl += "/";
-		sUrl += sResourcePath;
-
-		Map<String, String> asHeaders = new HashMap<String, String>();
-		asHeaders.put("x-session-token", sSessionId);
-
-		WasdiLog.debugLog("ProcessWorkspaceResource.sendRequestToNode: calling url: " + sUrl);
-		return HttpUtils.httpGet(sUrl, asHeaders); 
-	}
-	
-	
 
 
 }
