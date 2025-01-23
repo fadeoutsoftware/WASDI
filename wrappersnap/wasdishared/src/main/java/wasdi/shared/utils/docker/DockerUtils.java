@@ -25,9 +25,11 @@ import wasdi.shared.config.ProcessorTypeConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.PermissionsUtils;
+import wasdi.shared.utils.ProcessWorkspaceLogger;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.TarUtils;
 import wasdi.shared.utils.Utils;
@@ -96,6 +98,11 @@ public class DockerUtils {
     protected String m_sDockerRegistry = "";
     
     /**
+     * Process Workspace Logger, if available
+     */
+    protected ProcessWorkspaceLogger m_oProcessWorkspaceLogger = null;
+    
+    /**
      * Basic Constructor. Set all the members to default value.
      */
     public DockerUtils() {
@@ -161,6 +168,18 @@ public class DockerUtils {
         m_sProcessorFolder = sProcessorFolder;
         m_sDockerRegistry = sDockerRegistry;	
     }
+    
+    public DockerUtils(Processor oProcessor, ProcessorParameter oProcessorParameter, String sProcessorFolder, String sDockerRegistry, ProcessWorkspaceLogger oProcessWorkspaceLogger) {
+    	// Initialize the members
+    	this();
+    	// and override with the ones provided
+        m_oProcessor = oProcessor;
+        m_oProcessorParameter = oProcessorParameter;
+        m_sProcessorFolder = sProcessorFolder;
+        m_sDockerRegistry = sDockerRegistry;	
+    	m_oProcessWorkspaceLogger = oProcessWorkspaceLogger;
+    }
+    
     /**
      * Get the processor entity
      * @return Processor
@@ -287,6 +306,12 @@ public class DockerUtils {
 	 */
 	public void setDockerRegistry(String sDockerRegistry) {
 		this.m_sDockerRegistry = sDockerRegistry;
+	}
+
+	protected void processWorkspaceLog(String sLog) {
+		if (m_oProcessWorkspaceLogger!=null) {
+			m_oProcessWorkspaceLogger.log(sLog);
+		}
 	}
 
     /**
@@ -573,13 +598,20 @@ public class DockerUtils {
         			
         			// No, we need to pull the image
         			WasdiLog.debugLog("DockerUtils.start: also the image is not available: pull it");
+        			
+        			processWorkspaceLog("WASDI is taking the last version of your application, please wait");
+        			
         			boolean bPullResult = pull(sImageName, sToken);
         			
         			if (!bPullResult) {
         				// Impossible to pull, is a big problem
         				WasdiLog.errorLog("DockerUtils.start: Error pulling the image, we cannot proceed");
+        				processWorkspaceLog("There was an error pulling the image, we cannot proceed");
+        				processWorkspaceLog(new EndMessageProvider().getBad());
         				return "";
         			}
+        			
+        			processWorkspaceLog("Application updated!");
         		}
         		
         		// Since we are creating the Container, we need to set up our name
@@ -731,7 +763,7 @@ public class DockerUtils {
                     			
                     			String sVariable = sKey + "=" + sValue;
                     			
-                    			WasdiLog.warnLog("DockerUtils.start: adding env variable: " + sVariable);
+                    			WasdiLog.debugLog("DockerUtils.start: adding env variable: " + sVariable);
                     			
                     			oContainerCreateParams.Env.add(sVariable);
 							}
@@ -820,7 +852,7 @@ public class DockerUtils {
     		}
     		else if (oResponse.getResponseCode() == 304) {
     			// ALready Started (but so why we did not detected this before?!?)
-    			WasdiLog.debugLog("DockerUtils.start: Container " + sContainerName + " wasd already started");
+    			WasdiLog.debugLog("DockerUtils.start: Container " + sContainerName + " was already started");
     			return sContainerName;
     		}
     		else {

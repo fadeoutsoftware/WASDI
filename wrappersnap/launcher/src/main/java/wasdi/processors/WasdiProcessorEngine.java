@@ -3,7 +3,6 @@ package wasdi.processors;
 import java.io.File;
 import java.util.Map;
 
-import wasdi.ProcessWorkspaceLogger;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorTypes;
@@ -12,6 +11,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.ProcessWorkspaceLogger;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;

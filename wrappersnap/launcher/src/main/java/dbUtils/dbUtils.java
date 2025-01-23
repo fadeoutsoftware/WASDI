@@ -26,7 +26,6 @@ import org.apache.commons.io.FileUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import wasdi.ProcessWorkspaceLogger;
 import wasdi.processors.DockerProcessorEngine;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
@@ -84,6 +83,7 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.OgcProcessesClient;
 import wasdi.shared.utils.PermissionsUtils;
+import wasdi.shared.utils.ProcessWorkspaceLogger;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.StringUtils;

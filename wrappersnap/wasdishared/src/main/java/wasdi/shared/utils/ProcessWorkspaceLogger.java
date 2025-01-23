@@ -1,10 +1,9 @@
-package wasdi;
+package wasdi.shared.utils;
 
 import java.util.Date;
 
 import wasdi.shared.business.processors.ProcessorLog;
 import wasdi.shared.data.ProcessorLogRepository;
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class ProcessWorkspaceLogger {

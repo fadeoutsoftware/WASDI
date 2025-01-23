@@ -197,7 +197,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             processWorkspaceLog("Start building Image");
 
             // Create Docker Util and deploy the docker
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, m_sDockerRegistry, m_oProcessWorkspaceLogger);
             m_sDockerImageName = oDockerUtils.build();
             
             if (Utils.isNullOrEmpty(m_sDockerImageName)) {
@@ -1006,6 +1006,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		}
 	}
 	
+	protected String waitForApplicationToFinish(Processor oProcessor, String sProcId, String sStatus, ProcessWorkspace oProcessWorkspace) {
+		return waitForApplicationToFinish(oProcessor, sProcId, sStatus, oProcessWorkspace, null);
+	}
+	
     /**
      * Wait for a processor to finish.
      *
@@ -1016,9 +1020,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
      * @param sProcId Process Workspace Id
      * @param sStatus Status
      * @param oProcessWorkspace Process Workspace Entity
+     * @param sApplicationContainerName Name of the container with the application. May be null
      * @return New Status
      */
-    protected String waitForApplicationToFinish(Processor oProcessor, String sProcId, String sStatus, ProcessWorkspace oProcessWorkspace) {
+    protected String waitForApplicationToFinish(Processor oProcessor, String sProcId, String sStatus, ProcessWorkspace oProcessWorkspace, String sApplicationContainerName) {
     	
     	WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToFinish: wait for the processor to finish");
     	
@@ -1053,16 +1058,17 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // Wait for the process to finish, while checking timeout
             while (!(sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {
-                oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
-
-                sStatus = oProcessWorkspace.getStatus();
-                
+            	
                 try {
                     Thread.sleep(iThreadSleepMs);
                 } 
                 catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
+                
+                oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
+                sStatus = oProcessWorkspace.getStatus();
+                
                 
                 if (sStatus.equals(ProcessStatus.RUNNING.name())) {
                     // Increase the time only if it is in RUNNING
@@ -1072,6 +1078,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 iCycleCount++;
                 
                 if (iCycleCount == iSometimesCheck) {
+                	
                 	iCycleCount = 0;
                 	
 					// Get the PID
@@ -1079,18 +1086,40 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 					if (!WasdiConfig.Current.shellExecLocally) {
 						sPidOrContainerId = oProcessWorkspace.getContainerId();
-					}						
+					}
 					
-					// Check if it is alive
-					if (!Utils.isNullOrEmpty(sPidOrContainerId)) {
-						if (!RunTimeUtils.isProcessStillAllive(sPidOrContainerId)) {
+					// If we have the specific container name
+					if (!Utils.isNullOrEmpty(sApplicationContainerName)) {
+						// Check it
+						if (!RunTimeUtils.isProcessStillAllive(sApplicationContainerName, false)) {
 							// PID does not exists: recheck and remove
-							WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has PID " + sPidOrContainerId + ", but looks not existing. I would KILL it");
+							WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has Name " + sApplicationContainerName + ", but looks not existing. We stop here");
+							bForcedError = true;
 						}
 					}
 					else {
-						WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has null PID. I would KILL it");
-					}                	
+						// Check if it is alive
+						if (!Utils.isNullOrEmpty(sPidOrContainerId)) {
+							if (!RunTimeUtils.isProcessStillAllive(sPidOrContainerId)) {
+								// PID does not exists: recheck and remove
+								WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has PID " + sPidOrContainerId + ", but looks not existing. We stop here");
+								bForcedError = true;
+							}
+						}
+						else {
+							WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has null PID. I would KILL it");
+							bForcedError = true;
+						}						
+					}
+					
+					if (bForcedError) {
+                        // Update process and rabbit users
+                        LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+                        // Force cycle to exit
+                        sStatus = ProcessStatus.ERROR.name();
+                        break;						
+					}
+					
                 }
 
                 if (oProcessor.getTimeoutMs() > 0) {
@@ -1103,6 +1132,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                         bForcedError = true;
                         // Force cycle to exit
                         sStatus = ProcessStatus.STOPPED.name();
+                        
+                        break;
                     }
                 }
             }

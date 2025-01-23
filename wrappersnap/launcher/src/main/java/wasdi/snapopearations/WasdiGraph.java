@@ -18,7 +18,6 @@ import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.XppDomElement;
 
 import wasdi.LauncherMain;
-import wasdi.ProcessWorkspaceLogger;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
 import wasdi.operations.Operation;
@@ -36,6 +35,7 @@ import wasdi.shared.parameters.settings.GraphSetting;
 import wasdi.shared.payloads.ExecuteGraphPayload;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.EndMessageProvider;
+import wasdi.shared.utils.ProcessWorkspaceLogger;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
