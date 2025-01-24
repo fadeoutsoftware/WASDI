@@ -1581,16 +1581,14 @@ public class DockerUtils {
 					if (bFound) {						
 						return convertContainerMapToContainerInfo(oContainerMap);
 					}
-					else {
-						WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerName: container " + sContainerName + " NOT found" );
-					}
 					
 				}
 		    	catch (Exception oEx) {
 		    		WasdiLog.errorLog("DockerUtils.getContainerInfoByContainerName: error parsing a container json entity " + oEx.toString());
 		        }
 			}
-    		
+
+            WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerName: container " + sContainerName + " NOT found" );
     		return null;
     	}
     	catch (Exception oEx) {

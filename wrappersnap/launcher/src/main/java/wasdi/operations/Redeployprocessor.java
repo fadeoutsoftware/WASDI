@@ -3,6 +3,7 @@ package wasdi.operations;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.Processor;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -72,15 +73,18 @@ public class Redeployprocessor extends Operation {
 		finally {
 			// In any case, in the finally, we set the deployment on going flag to false
 			if (oParam!=null) {
-				ProcessorParameter oParameter = (ProcessorParameter) oParam;
-	            oProcessorRepository = new ProcessorRepository();
-	            oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
-	            oProcessor.setDeploymentOngoing(false);
-				if (oProcessorRepository.updateProcessor(oProcessor)) {
-		        	WasdiLog.debugLog("Redeployprocessor.executeOperation: flag for tracking the in-progress deployment set back to false");
-		        } else {
-		        	WasdiLog.warnLog("Redeployprocessor.executeOperation: could not set back to false the flag for tracking the in-progress deployment");
-		        }	            
+				
+				if (WasdiConfig.Current.isMainNode()) {
+					ProcessorParameter oParameter = (ProcessorParameter) oParam;
+		            oProcessorRepository = new ProcessorRepository();
+		            oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
+		            oProcessor.setDeploymentOngoing(false);
+					if (oProcessorRepository.updateProcessor(oProcessor)) {
+			        	WasdiLog.debugLog("Redeployprocessor.executeOperation: flag for tracking the in-progress deployment set back to false");
+			        } else {
+			        	WasdiLog.warnLog("Redeployprocessor.executeOperation: could not set back to false the flag for tracking the in-progress deployment");
+			        }					
+				}
 			}            
 		}
 		
