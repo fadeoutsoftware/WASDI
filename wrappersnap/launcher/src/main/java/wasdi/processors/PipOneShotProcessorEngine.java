@@ -318,7 +318,7 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 			
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor.getName()), m_sDockerRegistry);
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor.getName()), m_sDockerRegistry, m_oProcessWorkspaceLogger);
 			
 	        WasdiLog.debugLog("PipOneShotProcessorEngine.waitForApplicationToStart: wait to let docker start");
 
@@ -531,7 +531,7 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 			}
 	
 	        // Create the Docker Utils Object
-	        DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+	        DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry, m_oProcessWorkspaceLogger);
 	        
 	        ProcessorTypeConfig oProcessorTypeConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig(oProcessor.getType());
 	        

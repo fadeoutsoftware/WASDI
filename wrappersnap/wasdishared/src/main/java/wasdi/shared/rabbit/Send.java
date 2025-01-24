@@ -45,8 +45,8 @@ public class Send {
             m_oConnection = RabbitFactory.getConnectionFactory().newConnection();
             if (m_oConnection!=null) m_oChannel = m_oConnection.createChannel();
             m_sExchangeName = sExchange;
-        } catch (Exception e) {
-            WasdiLog.debugLog("Send.Init: Error connecting to rabbit " + e.toString());
+        } catch (Exception oEx) {
+            WasdiLog.errorLog("Send.Init: Error connecting to rabbit " + oEx.toString());
         }
 	}
 	
@@ -64,10 +64,12 @@ public class Send {
 				m_oConnection.close();
 			}
 			
-		} catch (IOException e) {
-			WasdiLog.debugLog("Send.Free: Error closing connection " + e.toString());
-		} catch (TimeoutException e) {
-			WasdiLog.debugLog("Send.Free: Error closing connection " + e.toString());
+		} catch (IOException oEx) {
+			WasdiLog.errorLog("Send.Free: Error closing connection " + oEx.toString());
+		} catch (TimeoutException oEx) {
+			WasdiLog.errorLog("Send.Free: Error closing connection " + oEx.toString());
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("Send.Free: Error closing connection " + oEx.toString());
 		}
 	}
 	
@@ -89,12 +91,12 @@ public class Send {
             m_oChannel.basicPublish(m_sExchangeName, sRoutingKey, null, sMessageAttribute.getBytes());
             return true;
             
-        } catch (IOException e) {
-        	WasdiLog.debugLog("Send.SendMgs: Error sending message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
+        } catch (IOException oEx) {
+        	WasdiLog.errorLog("Send.SendMgs: Error sending message " + sMessageAttribute + " to " + sRoutingKey + " " + oEx.toString());
             return false;
         }
-        catch (Exception e) {
-        	WasdiLog.debugLog("Send.SendMgs: Error sending message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("Send.SendMgs: Error sending message " + sMessageAttribute + " to " + sRoutingKey + " " + oEx.toString());
             return false;
         }
     }
@@ -152,7 +154,7 @@ public class Send {
             return SendMsg(sExchangeId, sJSON);
         }
         catch (Exception oEx) {
-        	WasdiLog.debugLog("Send.SendRabbitMessage: ERROR " + oEx.toString());
+        	WasdiLog.errorLog("Send.SendRabbitMessage: ERROR " + oEx.toString());
             return  false;
         }
     }

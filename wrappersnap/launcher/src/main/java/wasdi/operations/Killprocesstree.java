@@ -180,6 +180,7 @@ public class Killprocesstree extends Operation {
 				}
 				
 				DockerUtils oDockerUtils = new DockerUtils();
+				oDockerUtils.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				
 				if (!oDockerUtils.stop(sContainerId)) {
 					WasdiLog.warnLog("Killprocesstree.killProcess: dockerutils.stop returned false for process workspace " + oProcessToKill.getProcessObjId() + " ContainerId " + sContainerId);					

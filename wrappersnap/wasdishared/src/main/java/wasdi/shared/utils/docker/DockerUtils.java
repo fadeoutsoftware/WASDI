@@ -307,7 +307,27 @@ public class DockerUtils {
 	public void setDockerRegistry(String sDockerRegistry) {
 		this.m_sDockerRegistry = sDockerRegistry;
 	}
+	
+	/**
+	 * Get the process workspace logger to send messages to wasdi client log view
+	 * @return
+	 */
+	public ProcessWorkspaceLogger getProcessWorkspaceLogger() {
+		return m_oProcessWorkspaceLogger;
+	}
 
+	/**
+	 * Set the process workspace logger to send messages to wasdi client log view
+	 * @param oProcessWorkspaceLogger
+	 */
+	public void setProcessWorkspaceLogger(ProcessWorkspaceLogger oProcessWorkspaceLogger) {
+		this.m_oProcessWorkspaceLogger = oProcessWorkspaceLogger;
+	}
+	
+	/**
+	 * Safe log on the process workspace
+	 * @param sLog
+	 */
 	protected void processWorkspaceLog(String sLog) {
 		if (m_oProcessWorkspaceLogger!=null) {
 			m_oProcessWorkspaceLogger.log(sLog);

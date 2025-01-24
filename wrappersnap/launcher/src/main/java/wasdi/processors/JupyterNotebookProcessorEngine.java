@@ -109,6 +109,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			oDockerUtils.setWasdiSystemUserId(WasdiConfig.Current.systemUserId);
 			oDockerUtils.setProcessorFolder(sProcessorFolder);
 			oDockerUtils.setDockerRegistry(m_sDockerRegistry);
+			oDockerUtils.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 			
 			// Get back the full Docker Register Config entity
 			DockerRegistryConfig oDockerRegistryConfig = WasdiConfig.Current.dockers.getRegisterByAddress(m_sDockerRegistry);
@@ -413,6 +414,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			// docker-compose [--file </path/to/the/docker-compose/file.yml] stop
 			processWorkspaceLog("Stop docker");
 			DockerUtils oDockerUtils = new DockerUtils();
+			oDockerUtils.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 			
 			ContainerInfo oContainerInfo = oDockerUtils.getContainerInfoByContainerName("nb_" + sJupyterNotebookCode);
 			

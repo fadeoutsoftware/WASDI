@@ -401,7 +401,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             // Create the Docker Utils Object
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry, m_oProcessWorkspaceLogger);
             
             // Check if is started otherwise start it
             String sContainerName = startContainerAndGetName(oDockerUtils,oProcessor, oParameter);
@@ -583,6 +583,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
     		Processor oProcessorToKill = oProcessorRepository.getProcessorByName(sProcessorName);
     		
     		DockerUtils oDockerUtils = new DockerUtils(oProcessorToKill, m_oParameter, sProcessorName);
+    		oDockerUtils.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
     		ContainerInfo oContainer = oDockerUtils.getContainerInfoByImageName(sProcessorName, oProcessorToKill.getVersion());
     		
     		if (oContainer == null) {
@@ -727,6 +728,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder);
             // Set also the docker registry
             oDockerUtils.setDockerRegistry(m_sDockerRegistry);
+            // Set the process workspace Logger
+            oDockerUtils.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
             // Give the name of the processor to delete to be sure that it works also if oProcessor is already null
             oDockerUtils.delete(sProcessorName, oParameter.getVersion());
 
@@ -843,13 +846,18 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Copy Docker template files in the processor folder
             File oDockerTemplateFolder = new File(m_sDockerTemplatePath);
             File oProcessorFolder = new File(sProcessorFolder);
-
-            FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
+            
+            if (oDockerTemplateFolder.exists()) {
+            	FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);	
+            }
+            else {
+            	WasdiLog.warnLog("DockerProcessorEngine.redeploy: the docker template folder does not exists!!");
+            }
 
             onAfterCopyTemplate(sProcessorFolder, oProcessor);
             
             // Create utils
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, m_sDockerRegistry, m_oProcessWorkspaceLogger);
 
             if (bDeleteOldImage) {
                 // Delete the image
@@ -921,7 +929,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             WasdiLog.infoLog("DockerProcessorEngine.libraryUpdate: update lib for " + sProcessorName);
             
             // Create the docker utils
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry, m_oProcessWorkspaceLogger);
             // Get or start the container: we will reconstruct the env later
             String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter, false);
             
@@ -1322,7 +1330,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 				String sUpdateCommand = (String) oUpdateCommand;
 				WasdiLog.debugLog("DockerProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
 				
-				DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+				DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry, m_oProcessWorkspaceLogger);
 				String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter);
 				
 				String sUrl = getProcessorUrl(oProcessor, sContainerName);
@@ -1383,7 +1391,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		}
 
         // Create the Docker Utils Object
-        DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+        DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry, m_oProcessWorkspaceLogger);
         
         String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter, false);
         
@@ -1462,7 +1470,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 				ProcessorRepository oProcessorRepository = new ProcessorRepository();
 				Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 	            // Create the Docker Utils Object
-	            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor.getName()), m_sDockerRegistry);
+	            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor.getName()), m_sDockerRegistry, m_oProcessWorkspaceLogger);
 	            
 	            // Check if is started otherwise start it
 	            String sContainerName = startContainerAndGetName(oDockerUtils,oProcessor, oParameter, false);
@@ -1512,6 +1520,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			// Create the docker utils
 			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder);
+			oDockerUtils.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);			
 			
 			// Here we keep track of how many registers we tried
 			int iAvailableRegisters=0;
