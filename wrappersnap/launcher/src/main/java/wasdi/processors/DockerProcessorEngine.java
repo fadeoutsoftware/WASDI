@@ -70,6 +70,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	protected String m_sDockerRegistry = "";
 	
 	/**
+	 * Flag to know if we really need to download the processor files locally
+	 */
+	protected boolean m_bDownloadProcessorFiles = true;
+	
+	/**
 	 * Create clean instance
 	 */
 	public DockerProcessorEngine() {
@@ -150,7 +155,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // First Check if processor exists
             Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
             String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
-
+            
             // Create the file
             File oProcessorZipFile = new File(sProcessorFolder + sProcessorId + ".zip");
 
@@ -197,7 +202,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             processWorkspaceLog("Start building Image");
 
             // Create Docker Util and deploy the docker
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, m_sDockerRegistry, m_oProcessWorkspaceLogger);
             m_sDockerImageName = oDockerUtils.build();
             
             if (Utils.isNullOrEmpty(m_sDockerImageName)) {
@@ -347,44 +352,61 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 processWorkspaceLog("Application not available on this node: installing it...");
                 
                 m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "APP NOT ON NODE<BR>INSTALLATION STARTED", m_oParameter.getExchange());
-
-                String sProcessorZipFile = downloadProcessor(oProcessor, oParameter.getSessionID());
-
-                WasdiLog.infoLog("DockerProcessorEngine.run: processor zip file downloaded: " + sProcessorZipFile);
                 
-                if (Utils.isNullOrEmpty(sProcessorZipFile)) {
-                    WasdiLog.errorLog("DockerProcessorEngine.run: processor not available on node and not downloaded: exit.. ");
-                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
-                    return false;                	
+                // Check if this processor Type needs or wants local files
+                if (m_bDownloadProcessorFiles) {
+                	
+                    // Now we need or to redeploy or to unzip locally
+                	boolean bResult = true;                	
+                	
+                    String sProcessorZipFile = downloadProcessor(oProcessor, oParameter.getSessionID());
+
+                    WasdiLog.infoLog("DockerProcessorEngine.run: processor zip file downloaded: " + sProcessorZipFile);
+                    
+                    if (Utils.isNullOrEmpty(sProcessorZipFile)) {
+                        WasdiLog.errorLog("DockerProcessorEngine.run: processor not available on node and not downloaded: exit.. ");
+                        LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+                        return false;                	
+                    }
+
+                	if (bBuildLocally) {
+                		bResult = deploy(oParameter, false);
+                		processWorkspaceLog("Local build done, starting application!");
+                	}
+                	else {
+                		File oZipFile = new File(sProcessorZipFile);
+                		bResult = unzipProcessor(PathsConfig.getProcessorFolder(oProcessor), oZipFile.getName(), oParameter.getProcessObjId());
+                	}
+                	
+                	if (!bResult) {
+                        WasdiLog.errorLog("DockerProcessorEngine.run: impossible to deploy locally or unzip. We stop here");
+                        LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+                        return false;                		
+                	}
+                    
                 }
-                
-                // Now we need or to redeploy or to unzip locally
-            	boolean bResult = true;
-            	
-            	if (bBuildLocally) {
-            		bResult = deploy(oParameter, false);
-            		processWorkspaceLog("Local build done, starting application!");
-            	}
-            	else {
-            		File oZipFile = new File(sProcessorZipFile);
-            		bResult = unzipProcessor(PathsConfig.getProcessorFolder(oProcessor), oZipFile.getName(), oParameter.getProcessObjId());
-            		processWorkspaceLog("Pulling Application image from register");
-            	}
-            	
-            	if (!bResult) {
-                    WasdiLog.errorLog("DockerProcessorEngine.run: impossible to deploy locally or unzip. We stop here");
-                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
-                    return false;                		
-            	}
-                
-                m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "INSTALLATION DONE<BR>STARTING APP", m_oParameter.getExchange());                    
+                else {
+                	// Just make the folder we do not need the files locally
+                	WasdiLog.infoLog("DockerProcessorEngine.run: download processor files flag is false, just create the folder ");
+                	String sProcessorPath = PathsConfig.getProcessorFolder(oProcessor);
+                	
+                	try {
+                    	File oProcessorPath = new File(sProcessorPath);
+                    	oProcessorPath.mkdirs();
+                	}
+                	catch (Exception oEx) {
+                		WasdiLog.warnLog("DockerProcessorEngine.run: error creating the processor folder");
+					}
+                }
             }
 
             // Create the Docker Utils Object
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry, m_oProcessWorkspaceLogger);
             
             // Check if is started otherwise start it
             String sContainerName = startContainerAndGetName(oDockerUtils,oProcessor, oParameter);
+            
+            m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "INSTALLATION DONE<BR>STARTING APP", m_oParameter.getExchange());
             
             // If we do not have a container name here, we are not in the position to continue
             if (Utils.isNullOrEmpty(sContainerName)) {
@@ -561,6 +583,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
     		Processor oProcessorToKill = oProcessorRepository.getProcessorByName(sProcessorName);
     		
     		DockerUtils oDockerUtils = new DockerUtils(oProcessorToKill, m_oParameter, sProcessorName);
+    		oDockerUtils.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
     		ContainerInfo oContainer = oDockerUtils.getContainerInfoByImageName(sProcessorName, oProcessorToKill.getVersion());
     		
     		if (oContainer == null) {
@@ -705,6 +728,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder);
             // Set also the docker registry
             oDockerUtils.setDockerRegistry(m_sDockerRegistry);
+            // Set the process workspace Logger
+            oDockerUtils.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
             // Give the name of the processor to delete to be sure that it works also if oProcessor is already null
             oDockerUtils.delete(sProcessorName, oParameter.getVersion());
 
@@ -821,13 +846,18 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Copy Docker template files in the processor folder
             File oDockerTemplateFolder = new File(m_sDockerTemplatePath);
             File oProcessorFolder = new File(sProcessorFolder);
-
-            FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
+            
+            if (oDockerTemplateFolder.exists()) {
+            	FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);	
+            }
+            else {
+            	WasdiLog.warnLog("DockerProcessorEngine.redeploy: the docker template folder does not exists!!");
+            }
 
             onAfterCopyTemplate(sProcessorFolder, oProcessor);
             
             // Create utils
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, m_sDockerRegistry, m_oProcessWorkspaceLogger);
 
             if (bDeleteOldImage) {
                 // Delete the image
@@ -899,7 +929,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             WasdiLog.infoLog("DockerProcessorEngine.libraryUpdate: update lib for " + sProcessorName);
             
             // Create the docker utils
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry, m_oProcessWorkspaceLogger);
             // Get or start the container: we will reconstruct the env later
             String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter, false);
             
@@ -1006,6 +1036,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		}
 	}
 	
+	protected String waitForApplicationToFinish(Processor oProcessor, String sProcId, String sStatus, ProcessWorkspace oProcessWorkspace) {
+		return waitForApplicationToFinish(oProcessor, sProcId, sStatus, oProcessWorkspace, null);
+	}
+	
     /**
      * Wait for a processor to finish.
      *
@@ -1016,9 +1050,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
      * @param sProcId Process Workspace Id
      * @param sStatus Status
      * @param oProcessWorkspace Process Workspace Entity
+     * @param sApplicationContainerName Name of the container with the application. May be null
      * @return New Status
      */
-    protected String waitForApplicationToFinish(Processor oProcessor, String sProcId, String sStatus, ProcessWorkspace oProcessWorkspace) {
+    protected String waitForApplicationToFinish(Processor oProcessor, String sProcId, String sStatus, ProcessWorkspace oProcessWorkspace, String sApplicationContainerName) {
     	
     	WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToFinish: wait for the processor to finish");
     	
@@ -1053,16 +1088,17 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // Wait for the process to finish, while checking timeout
             while (!(sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {
-                oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
-
-                sStatus = oProcessWorkspace.getStatus();
-                
+            	
                 try {
                     Thread.sleep(iThreadSleepMs);
                 } 
                 catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
+                
+                oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
+                sStatus = oProcessWorkspace.getStatus();
+                
                 
                 if (sStatus.equals(ProcessStatus.RUNNING.name())) {
                     // Increase the time only if it is in RUNNING
@@ -1072,6 +1108,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 iCycleCount++;
                 
                 if (iCycleCount == iSometimesCheck) {
+                	
                 	iCycleCount = 0;
                 	
 					// Get the PID
@@ -1079,18 +1116,40 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 					if (!WasdiConfig.Current.shellExecLocally) {
 						sPidOrContainerId = oProcessWorkspace.getContainerId();
-					}						
+					}
 					
-					// Check if it is alive
-					if (!Utils.isNullOrEmpty(sPidOrContainerId)) {
-						if (!RunTimeUtils.isProcessStillAllive(sPidOrContainerId)) {
+					// If we have the specific container name
+					if (!Utils.isNullOrEmpty(sApplicationContainerName)) {
+						// Check it
+						if (!RunTimeUtils.isProcessStillAllive(sApplicationContainerName, false)) {
 							// PID does not exists: recheck and remove
-							WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has PID " + sPidOrContainerId + ", but looks not existing. I would KILL it");
+							WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has Name " + sApplicationContainerName + ", but looks not existing. We stop here");
+							bForcedError = true;
 						}
 					}
 					else {
-						WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has null PID. I would KILL it");
-					}                	
+						// Check if it is alive
+						if (!Utils.isNullOrEmpty(sPidOrContainerId)) {
+							if (!RunTimeUtils.isProcessStillAllive(sPidOrContainerId)) {
+								// PID does not exists: recheck and remove
+								WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has PID " + sPidOrContainerId + ", but looks not existing. We stop here");
+								bForcedError = true;
+							}
+						}
+						else {
+							WasdiLog.warnLog("DockerProcessorEngine.waitForApplicationToFinish: Process " + oProcessWorkspace.getProcessObjId() + " has null PID. I would KILL it");
+							bForcedError = true;
+						}						
+					}
+					
+					if (bForcedError) {
+                        // Update process and rabbit users
+                        LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+                        // Force cycle to exit
+                        sStatus = ProcessStatus.ERROR.name();
+                        break;						
+					}
+					
                 }
 
                 if (oProcessor.getTimeoutMs() > 0) {
@@ -1103,6 +1162,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                         bForcedError = true;
                         // Force cycle to exit
                         sStatus = ProcessStatus.STOPPED.name();
+                        
+                        break;
                     }
                 }
             }
@@ -1269,7 +1330,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 				String sUpdateCommand = (String) oUpdateCommand;
 				WasdiLog.debugLog("DockerProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
 				
-				DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+				DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry, m_oProcessWorkspaceLogger);
 				String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter);
 				
 				String sUrl = getProcessorUrl(oProcessor, sContainerName);
@@ -1330,7 +1391,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		}
 
         // Create the Docker Utils Object
-        DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+        DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry, m_oProcessWorkspaceLogger);
         
         String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter, false);
         
@@ -1409,7 +1470,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 				ProcessorRepository oProcessorRepository = new ProcessorRepository();
 				Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 	            // Create the Docker Utils Object
-	            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor.getName()), m_sDockerRegistry);
+	            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor.getName()), m_sDockerRegistry, m_oProcessWorkspaceLogger);
 	            
 	            // Check if is started otherwise start it
 	            String sContainerName = startContainerAndGetName(oDockerUtils,oProcessor, oParameter, false);
@@ -1459,6 +1520,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			// Create the docker utils
 			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder);
+			oDockerUtils.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);			
 			
 			// Here we keep track of how many registers we tried
 			int iAvailableRegisters=0;

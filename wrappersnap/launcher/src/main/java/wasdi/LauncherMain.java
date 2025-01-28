@@ -1,8 +1,6 @@
 package wasdi;
 
 import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Security;
@@ -23,8 +21,6 @@ import org.esa.snap.lib.openjpeg.utils.OpenJpegExecRetriever;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.esa.snap.runtime.EngineConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -46,6 +42,7 @@ import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.MailUtils;
+import wasdi.shared.utils.ProcessWorkspaceLogger;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -512,7 +509,7 @@ public class LauncherMain  {
             m_oProcessWorkspaceLogger = new ProcessWorkspaceLogger(oBaseParameter.getProcessObjId());
 
             // Create the operation class
-        	Operation oOperation = (Operation) Class.forName(sClassName).newInstance();
+        	Operation oOperation = (Operation) Class.forName(sClassName).getDeclaredConstructor().newInstance();
         	
         	// Set the process workspace logger
         	oOperation.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
@@ -687,11 +684,10 @@ public class LauncherMain  {
      *
      * @return
      */
-    private static Integer getProcessId() {
+	private static Integer getProcessId() {
         Integer iPid = 0;
         try {
-            RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-            iPid = (int) runtimeMXBean.getPid();
+            iPid = (int) ProcessHandle.current().pid();
         } catch (Throwable oEx) {
             try {
                 WasdiLog.errorLog("LauncherMain.GetProcessId: Error getting processId: " + oEx.toString());

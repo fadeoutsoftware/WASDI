@@ -18,7 +18,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.lpdaac.ResponseTranslatorLpDaac;
 import wasdi.shared.utils.HttpUtils;

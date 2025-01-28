@@ -19,8 +19,9 @@ Sending Feedback
 To send feedback or report bugs to the WASDI team, select the speech bubble icon in the navigation bar. This will open a dialog box where you will provide a title and message for the team.
 
 Both input fields must be filled out in order to send the message. The message will be sent via email and the email address associated with you WASDI account will be included with the feedback.
+.. image:: ../_static/user_manual_images/other/feedback-click.png
 
-.. image:: ../_static/user_manual_images/other/feedback_dialog.png
+.. image:: ../_static/user_manual_images/other/feedback-dialog.png
 
 If your issue requires immediate assistance, you can click “Houston, we have a problem!” and this will open an invitation to WASDI’s discord server, where we offer live support.
 
@@ -33,15 +34,6 @@ Account Management
 
 To update your account settings, you can open your account management dashboard by selecting the alien icon and then your user profile (User: Name). 
 
-.. image:: ../_static/user_manual_images/other/user_dropdown.png
+.. image:: ../_static/user_manual_images/other/account-area.png
 
-At this current time, it is more efficient to change your password through WASDI’s authentication page, Keycloak.
-
-.. image:: ../_static/user_manual_images/other/account_dialog.png
-
-.. image:: ../_static/user_manual_images/other/keycloak_password.png
-
-You can also manage your organizations from this dashboard. For more information about Subscriptions and Organisations, please see the section on “Managing Subscriptions and Organisations”
-
-.. image:: ../_static/user_manual_images/other/organizations_dialog.png
-
+You can also manage your organizations from this dashboard. For more information about Subscriptions and Organizations, please see the section on “Managing Subscriptions and Organisations”

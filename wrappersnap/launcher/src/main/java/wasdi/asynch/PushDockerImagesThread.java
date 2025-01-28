@@ -44,7 +44,6 @@ public class PushDockerImagesThread extends Thread {
 				// Create the docker utils
 				DockerUtils oDockerUtils = new DockerUtils(m_oProcessor, sProcessorFolder);
 				
-				
 				// For each register: ordered by priority
 				for (int iRegisters=0; iRegisters<m_aoRegisters.size(); iRegisters++) {
 					

@@ -14,43 +14,37 @@ Each WASDI User can work in one or more Workspace. A Workspace ia set of files (
 
 The Workspaces page is where all of your workspaces are displayed. On this page you are able to manage (e.g., create and delete) and view the properties of each workspace.
 
-.. image:: ../_static/user_manual_images/workspaces/workspaces-tab.png
-
+.. image:: ../_static/user_manual_images/workspaces/workspace1.png
 When you select a workspace, that workspace’s properties will be displayed and the globe will navigate to the associated geographic location.
 
-.. image:: ../_static/user_manual_images/workspaces/highlighted-workspace.png
+.. image:: ../_static/user_manual_images/workspaces/workspace2.png
 
-Inside the “Properties” box, you’ll be able to view the products inside the workspace along with that workspace’s products.
+Inside the “Properties” box, you’ll be able to view the products inside the workspace along with the option to copy the workspace's id. This can be helpful when discussing issues with WASDI Staff.
 
-.. image:: ../_static/user_manual_images/workspaces/ws-properties.png
+.. image:: ../_static/user_manual_images/workspaces/workspace3.png
 
 If you click “New Workspace”, you will be automatically re-directed to a new open workspace. You will be able to change the name of this new workspace once inside. When the user logs into for the first time, they will be asked to create a new workspace.
 
-.. image:: ../_static/user_manual_images/workspaces/new-workspace.png
+.. image:: ../_static/user_manual_images/workspaces/workspace5.png
 
 If you are not the owner of a workspace, but you wish to remove a workspace from your account, click the trashcan icon beside that workspace. This will remove your sharing permissions, not delete the workspace.
-
-.. image:: ../_static/user_manual_images/workspaces/delete-ws-example.png
 
 However, if you are the owner, then clicking the trashcan and confirming will permanently delete that workspace.
 
 Just like when executing an application through the marketplace, if you click the “open” button beside a workspace name, you will be directed to that workspace.
 
+.. image:: ../_static/user_manual_images/workspaces/workspace4.png
+
 If you decide to navigate away from the newly opened workspace, it will remain open in the Edit tab. As long as you keep WASDI open, this workspace will remain open until you open a different workspace.
-
-.. image:: ../_static/user_manual_images/workspaces/edit-tab.png
-
 
 Interacting With Products
 ------------------------------------------
 
 Once you have loaded products into your workspace, the products will be housed in the Products Box. The number beside the title “Products” represents how many products there are in your workspace.
 
-.. image:: ../_static/user_manual_images/workspaces/product-tree.png
+.. image:: ../_static/user_manual_images/workspaces/workspace7.png
 
 When you click on the arrow beside a product, you will open the Metadata and Bands nodes. The Bands node also have arrows and when clicked, the Bands will be shown (if there is any).
-
-.. image:: ../_static/user_manual_images/workspaces/open-product.png
 
 Publishing and Interacting with Bands
 ------------------------------------------
@@ -59,55 +53,54 @@ To publish a band, simply open the Bands node for the desired product and then c
 
 You will receive a notification in the bottom right corner that indicates that your band is being published.
 
-.. image:: ../_static/user_manual_images/workspaces/publishing-band.png
+.. image:: ../_static/user_manual_images/workspaces/workspace8.png
 
 Once the publishing is complete, you will see that the band is on the 2D or 3D Map in the style applied to that product - note the workspace opens with your map component in 2D by default.
+.. image:: ../_static/user_manual_images/workspaces/workspace9.png
+
 
 * For more information about Styles, please view the section on styles.
 
 Once a band is published, you can set the opacity of the band by using the slider displayed next to that band’s name in the “Layers” tab.
 
-.. image:: ../_static/user_manual_images/workspaces/published-band.png
-
 To view the legend for a band, click the “Legend” button to reveal the legend.
 
-.. image:: ../_static/user_manual_images/workspaces/band-legend.png
+.. image:: ../_static/user_manual_images/workspaces/workspace10.png
     
 If you move away from a displayed band and wish to refocus on it quickly, click the “Navigate To” Button.
     
-.. image:: ../_static/user_manual_images/workspaces/band-navigate.png
+.. image:: ../_static/user_manual_images/workspaces/workspace12.png
 
 To remove the band from your map, click the “Remove layer from map” Button.
 
-.. image:: ../_static/user_manual_images/workspaces/band-remove.png
+.. image:: ../_static/user_manual_images/workspaces/workspace11.png
+
 
 Reading Metadata
 ------------------------------------------
 
 To read the Metadate of a Product, simply click “Metadata” and WASDI will begin fetching the Metadata.
 
-.. image:: ../_static/user_manual_images/workspaces/band-metadata.png
+.. image:: ../_static/user_manual_images/workspaces/workspace13.png
 
 
 The Editor Toolbar 
 ------------------------------------------
 
-In the top corner of the workspace below the WASDI navbar, you will find the workspace Toolbar. Here you can execute different actions in order to work with your workspace.
-
-.. image:: ../_static/user_manual_images/workspaces/editor-toolbar.png
+In the top centre of the workspace map, you will find the workspace Toolbar. Here you can execute different actions in order to work with your workspace.
 
 Apps
 ------------------------------------------
 
 Clicking “Apps” will open a dialog box containing all WASDI applications. Applications will be displayed with different names, additionally, there may be apps here that are not in the marketplace.
 
-.. image:: ../_static/user_manual_images/workspaces/apps-dialog.png
+.. image:: ../_static/user_manual_images/workspaces/workspace14.png
 
 On the right-hand side of the dialog box, the processor parameters of the first application are displayed by default. When you select an application this will be updated automatically.
 
 * At first the default parameters provided by the developer are displayed, but you can update them by changing any of the values in the JSON file and then executing the processor with those parameters by clicking “RUN”.
 
-.. image:: ../_static/user_manual_images/workspaces/apps-dialog-params.png
+.. image:: ../_static/user_manual_images/workspaces/workspace15.png
 
 If you are not the owner of an application or an application has not been shared with you, you are still able to use that application and create processor parameters for it by clicking the book icon.
 
@@ -120,8 +113,6 @@ Processor Parameters are parameters you’ve created and saved to execute in tha
 You edit and share processor parameters as with any other WASDI elements.
 
 Once you click “Apply” either on the processor Parameters card or in the information box, that parameters template will be automatically applied to the application so when you “Run” that application, the parameters you selected will execute.
-
-.. image:: ../_static/user_manual_images/workspaces/params-form.png
 
 If you are the owner or a processor has been shared with you, your toolbar inside the processor card will be different.
 
@@ -196,8 +187,6 @@ You may also select a Style to apply to this product from the Style dropdown men
 
 You will receive a notification once your product has been uploaded and then it will be added to the list of products in your workspace.
 
-.. image:: ../_static/user_manual_images/workspaces/added-product.png
-
 Open Jupyter
 ------------------------------------------
 
@@ -249,8 +238,6 @@ To search a user to share the workspace with, search for the user’s email addr
 
 * If the email address was correct then the sharing will be executed automatically.
 
-.. image:: ../_static/user_manual_images/workspaces/workspace-shared.png
-
 To remove a user from the workspace, simply click “Remove” and once you confirm that you wish to remove them, their permissions will be removed automatically. Note: you can give permissions back to a removed user at any time.
 
 The Processes Bar
@@ -280,27 +267,14 @@ If you click the “Payload” icon, you will open a dialog where you can view t
 
 .. image:: ../_static/user_manual_images/workspaces/payload-dialog.png
 
-The Workspace Processes List
-------------------------------------------
-
-To open the workspace processes list, click either the “Load More” button at the bottom of the open processes bar or the “Open Processes List” button representing by the list icon.
-
-.. image:: ../_static/user_manual_images/workspaces/open-processes-list.png
-
-.. image:: ../_static/user_manual_images/workspaces/processes-list-dialog.png
-
-In the processes list dialog you can search for specific processes by name or filter your processes based on their status (Any, Created, Running, Waiting, Ready, Done, Error, Stopped), type (Any, Run Processor, Run IDL, Run MatLab, Ingest, Download, Publish Band, Graph, Deploy Processor, Copy to SFTP, FTP Upload, Mosaic, Multi-subset), or the date. To apply the filters, set the filters you wish to use and then click “Apply Filters”. To remove filters you applied, simply click “Reset Filters”.
+You can search for specific processes by name or filter your processes based on their status (Any, Created, Running, Waiting, Ready, Done, Error, Stopped), type (Any, Run Processor, Run IDL, Run MatLab, Ingest, Download, Publish Band, Graph, Deploy Processor, Copy to SFTP, FTP Upload, Mosaic, Multi-subset), or the date. To apply the filters, set the filters you wish to use and then click “Apply Filters”. To remove filters you applied, simply click “Reset Filters”.
 
 .. image:: ../_static/user_manual_images/workspaces/processes-list-filter.png
 
 You can also download a copy of all the processes executed in this workspace by clicking “Download”. You will receive a .csv file.
 
 .. image:: ../_static/user_manual_images/workspaces/apply-processes-filters.png
-
-Similarly to the processes bar, you can open the logs and payload dialog for any process that has them from the processes list.
-
-.. image:: ../_static/user_manual_images/workspaces/processes-payload-logs.png
-
+    
 The Map
 ------------------------------------------
 
