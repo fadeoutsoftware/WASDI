@@ -179,6 +179,11 @@ public abstract class QueryTranslator {
 	 * Token of TERRA platform
 	 */
 	private static final String s_sPLATFORMNAME_METEOCEAN = "platformname:MeteOcean";
+	
+	/**
+	 * Token of WorldCover platform
+	 */
+	private static final String s_sPLATFORMNAME_FCOVER = "platformname:FCOVER";
 
 	/**
 	 * Token of product type
@@ -601,6 +606,8 @@ public abstract class QueryTranslator {
 			parseERS(sQuery, oResult);
 
 			parseMeteOcean(sQuery, oResult);
+			
+			parseFCover(sQuery, oResult);
 						
 			if (Utils.isNullOrEmpty(oResult.platformName)) {
 				WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: platformName not found: try to read the generic one");
@@ -1023,6 +1030,20 @@ public abstract class QueryTranslator {
 			oResult.platformName = Platforms.WORLD_COVER;
 
 			oResult.productType = extractValue(sQuery, "dataset");
+		}
+	}
+	
+	/**
+	 * Fills the Query View Model with FCOVER info
+	 * 
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 */
+	private void parseFCover(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_FCOVER)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_FCOVER);
+
+			oResult.platformName = Platforms.FCOVER;
 		}
 	}
 	

@@ -561,6 +561,20 @@
 			]
 		},
 		{
+			"name": "FCOVER",
+			"indexname": "platformname",
+			"indexvalue": "FCOVER",
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "clms_global_fcover_300m_v1_10daily_netcdf",
+					"indexvalues": "clms_global_fcover_300m_v1_10daily_netcdf",
+					"regex": ".*",
+					"indexvalue": "clms_global_fcover_300m_v1_10daily_netcdf"
+				}
+			]
+		},
+		{
 			"name": "THEMATICS",
 			"indexname": "platformname",
 			"indexvalue": "StaticFiles",
