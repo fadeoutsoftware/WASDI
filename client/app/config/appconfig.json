@@ -567,7 +567,7 @@
 			"filters": [
 				{
 					"indexname": "producttype",
-					"indexlabel": "clms_global_fcover_300m_v1_10daily_netcdf",
+					"indexlabel": "collection",
 					"indexvalues": "clms_global_fcover_300m_v1_10daily_netcdf",
 					"regex": ".*",
 					"indexvalue": "clms_global_fcover_300m_v1_10daily_netcdf"
