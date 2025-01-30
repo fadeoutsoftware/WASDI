@@ -311,6 +311,9 @@ public class MissionUtils {
 			else if (sFileName.toLowerCase().startsWith("meteocean_") && sFileName.toLowerCase().endsWith(".nc")) {
 				return Platforms.METEOCEAN;
 			}
+			else if (sFileName.toLowerCase().startsWith("c_gls_FCOVER300".toLowerCase())) {
+				return Platforms.FCOVER;
+			}
 			else if (sFileName.toLowerCase().endsWith(".nc")) {
 				return Platforms.CM;
 			}

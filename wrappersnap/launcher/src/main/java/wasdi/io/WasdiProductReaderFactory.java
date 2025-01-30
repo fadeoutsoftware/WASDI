@@ -132,6 +132,11 @@ public class WasdiProductReaderFactory {
 			return new MeteOceanProductReader(oFile);
 		}
 		
+		if (oFile.getName().toLowerCase().startsWith("c_gls_FCOVER300".toLowerCase())) {
+			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating FCOVER file reader for " + oFile.getName());
+			return new FCOVERProductReader(oFile);
+		}
+		
 		if (oFile.getName().toLowerCase().endsWith(".nc")) {
 			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating CM NetCDF File Reader for " + oFile.getName());
 			return new CmNcProductReader(oFile);
