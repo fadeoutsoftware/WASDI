@@ -1,6 +1,8 @@
 package wasdi.dataproviders;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +10,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -35,35 +38,40 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 	
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
+		
+		long lSizeInBytes = 0L;
+		
 		//todo fail instead
 		if (Utils.isNullOrEmpty(sFileURL)) {
 			WasdiLog.errorLog("TerrascopeProviderAdapter.GetDownloadFileSize: sFileURL is null or Empty");
-			return 0l;
+			return lSizeInBytes;
 		}
+		
+		try {
+			if (isHttpsProtocol(sFileURL)) {
+	
+				if (sFileURL.contains(s_sSizeParam)) {
+					lSizeInBytes = Long.valueOf(sFileURL.substring(sFileURL.indexOf(s_sSizeParam) + 6, sFileURL.indexOf(",", sFileURL.indexOf(s_sSizeParam))));
+				}
+				else if (MissionUtils.getPlatformFromSatelliteImageFileName(this.getFileName(sFileURL)).equals(Platforms.FCOVER)) {
+					lSizeInBytes = HttpUtils.getDownloadFileSizeViaHttp(sFileURL, Collections.emptyMap()); 
+				}
+				else {
+					//extract appropriate url
+					StringBuilder oUrl = new StringBuilder(getZipperUrl(sFileURL));
+					sFileURL = oUrl.toString();
+	
+					String sOpenidConnectToken = obtainTerrascopeOpenidConnectToken();
+					Map<String, String> asHeaders = HttpUtils.getOpenIdConnectHeaders(sOpenidConnectToken);
+	
+					lSizeInBytes = HttpUtils.getDownloadFileSizeViaHttp(sFileURL, asHeaders);
+				}
 
-		long lSizeInBytes = 0L;
-
-		if (isHttpsProtocol(sFileURL)) {
-			String sResult = "";
-
-			if (sFileURL.contains(s_sSizeParam)) {
-				return Long.valueOf(sFileURL.substring(sFileURL.indexOf(s_sSizeParam) + 6, sFileURL.indexOf(",", sFileURL.indexOf(s_sSizeParam))));
+				WasdiLog.debugLog("TerrascopeProviderAdapter.getDownloadFileSize: file size is: " + lSizeInBytes);
 			}
-
-			try {
-				//extract appropriate url
-				StringBuilder oUrl = new StringBuilder(getZipperUrl(sFileURL));
-				sFileURL = oUrl.toString();
-
-				String sOpenidConnectToken = obtainTerrascopeOpenidConnectToken();
-				Map<String, String> asHeaders = HttpUtils.getOpenIdConnectHeaders(sOpenidConnectToken);
-
-				lSizeInBytes = HttpUtils.getDownloadFileSizeViaHttp(sFileURL, asHeaders);
-
-				WasdiLog.debugLog("TerrascopeProviderAdapter.getDownloadFileSize: file size is: " + sResult);
-			} catch (Exception oE) {
-				WasdiLog.debugLog("TerrascopeProviderAdapter.getDownloadFileSize: could not extract file size due to " + oE);
-			}
+		
+		} catch (Exception oE) {
+			WasdiLog.errorLog("TerrascopeProviderAdapter.getDownloadFileSize: could not extract file size due to ", oE);
 		}
 
 		return lSizeInBytes;
@@ -94,54 +102,46 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 
-		WasdiLog.debugLog("TerrascopeProviderAdapter.executeDownloadFile: try to get " + sFileURL);
+		WasdiLog.infoLog("TerrascopeProviderAdapter.executeDownloadFile: try to get " + sFileURL);
 
 		String sResult = "";
+		
+		try {
 
-//		if (isFileProtocol(m_sDefaultProtocol)) {
-//
-//			String sPathLinux = null;
-//			if (isFileProtocol(sFileURL)) {
-//				sPathLinux = removePrefixFile(sFileURL);
-//			} else if (isHttpsProtocol(sFileURL)) {
-//				sPathLinux = extractFilePathFromHttpsUrl(sFileURL);
-//			} else {
-//				WasdiLog.debugLog("TerrascopeProviderAdapter.executeDownloadFile: unknown protocol " + sFileURL);
-//			}
-//
-//			if (sPathLinux != null) {
-//				File oSourceFile = new File(sPathLinux);
-//
-//				if (oSourceFile != null && oSourceFile.exists()) {
-//					sResult = copyFile("file:" + sPathLinux, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace, iMaxRetry);
-//
-//					return sResult;
-//				}
-//			}
-//		}
-
-		if (isHttpsProtocol(sFileURL)) {
-			if (sFileURL.startsWith(TERRASCOPE_URL_ZIPPER) && sFileURL.contains("compressed_payload")) {
-
-				List<String> aoUrls = extractPayloadFromUrl(sFileURL);
-				if (aoUrls != null) {
-
-					String sPayload = JsonUtils.stringify(aoUrls);
-					sResult = downloadHttpsPost(sFileURL, sPayload, sSaveDirOnServer, iMaxRetry, sResult);
-
-					if (!Utils.isNullOrEmpty(sResult)) {
-						String sDesiredFileName = this.getFileName(sFileURL);
-
-						String sRenamedFile = WasdiFileUtils.renameFile(sResult, sDesiredFileName);
-						ZipFileUtils.fixZipFileInnerSafePath(sRenamedFile);
-
-						return sRenamedFile;
+			if (isHttpsProtocol(sFileURL)) {
+				if (sFileURL.startsWith(TERRASCOPE_URL_ZIPPER) && sFileURL.contains("compressed_payload")) {
+	
+					List<String> aoUrls = extractPayloadFromUrl(sFileURL);
+					if (aoUrls != null) {
+	
+						String sPayload = JsonUtils.stringify(aoUrls);
+						sResult = downloadHttpsPost(sFileURL, sPayload, sSaveDirOnServer, iMaxRetry, sResult);
+	
+						if (!Utils.isNullOrEmpty(sResult)) {
+							String sDesiredFileName = this.getFileName(sFileURL);
+							sResult = WasdiFileUtils.renameFile(sResult, sDesiredFileName);
+							ZipFileUtils.fixZipFileInnerSafePath(sResult);
+						}
 					}
-
+				} 
+				else if (MissionUtils.getPlatformFromSatelliteImageFileName(this.getFileName(sFileURL)).equals(Platforms.FCOVER)) {
+					for (int i = 0; i < iMaxRetry; i++) {
+						sResult = HttpUtils.downloadFile(sFileURL, Collections.emptyMap(), sSaveDirOnServer);
+						
+						if (!Utils.isNullOrEmpty(sResult)) 
+							break;
+						
+						long lWaitingTime = (i + 1) * 1000L; 
+						WasdiLog.infoLog("TerrascopeProviderAdapter.executeDownloadFile. Download attempt failed. Will retry in " + lWaitingTime + " milliseconds");
+						Thread.sleep(lWaitingTime);
+					}
 				}
-			} else {
-				sResult = downloadHttps(sFileURL, sSaveDirOnServer, iMaxRetry, sResult);
+				else {
+					sResult = downloadHttps(sFileURL, sSaveDirOnServer, iMaxRetry, sResult);
+				}
 			}
+		} catch (Exception oE) {
+			WasdiLog.errorLog("TerrascopeProviderAdapter.executeDownloadFile. Error", oE);
 		}
 
 		return sResult;
@@ -280,7 +280,8 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 
 		if (sPlatformType.equals(Platforms.SENTINEL1) 
 				|| sPlatformType.equals(Platforms.DEM)
-				|| sPlatformType.equals(Platforms.WORLD_COVER)) {
+				|| sPlatformType.equals(Platforms.WORLD_COVER)
+				|| sPlatformType.equals(Platforms.FCOVER)) {
 			if (isWorkspaceOnSameCloud()) {
 				return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
 			}
