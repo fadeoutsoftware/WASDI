@@ -260,7 +260,6 @@ if __name__ == '__main__':
         sOutputFile = asArgs[3]
         sWasdiConfigFile = asArgs[4]
 
-        # TODO: at the end, I can probably remove those logs
         logging.debug('__main__: operation ' + sOperation)
         logging.debug('__main__: input file ' + sInputFile)
         logging.debug('__main__: output file: ' + sOutputFile)
