@@ -6,9 +6,15 @@ public class PersonalizedDockerProcessor extends DockerBuildOnceEngine {
 	
 	public PersonalizedDockerProcessor() {
 		super();
+		
+		// Set the folder
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
 		m_sDockerTemplatePath += ProcessorTypes.getTemplateFolder(ProcessorTypes.PERSONALIZED_DOCKER);
 		
+		// Disable download of processor files in local nodes
+		m_bDownloadProcessorFiles = false;
+		
+		// List of pip packages that should be in the template (even if is personalized)
 		m_asDockerTemplatePackages = new String[8];
 		m_asDockerTemplatePackages[0] = "flask";
 		m_asDockerTemplatePackages[1] = "gunicorn";

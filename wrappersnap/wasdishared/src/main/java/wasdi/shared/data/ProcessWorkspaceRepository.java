@@ -1462,6 +1462,44 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     }
 
     /**
+     * Get the count of all running (including Waiting and Ready) process worksapces
+     * @param sUserId
+     * @param bIncluded
+     * @return
+     */
+    public long getRunningCountByUser(String sUserId, boolean bIncluded) {
+
+        try {
+
+        	Bson oUserFilter;
+        	
+        	if (bIncluded) {
+        		oUserFilter = Filters.eq("userId", sUserId);
+        	}
+        	else {
+        		oUserFilter = Filters.ne("userId", sUserId);
+        	}
+        	
+        	Bson oStatusFilter = Filters.or(
+    				Filters.eq("status", ProcessStatus.RUNNING.name()),
+    				Filters.eq("status", ProcessStatus.WAITING.name()),
+    				Filters.eq("status", ProcessStatus.READY.name())
+    				);
+ 
+
+            long lRunning = getCollection(m_sThisCollection).countDocuments(Filters.and(oStatusFilter, oUserFilter));
+            
+            return lRunning;
+            
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getRunningCountByUser: exception ", oEx);
+        }
+
+        return 0L;
+    }
+
+    
+    /**
      * Get the list of all running (including Waiting and Ready) process worksapces
      * @return List of RUNING, WAITING and READY Process Workspaces
      */
@@ -1486,6 +1524,38 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         return aoReturnList;
     }
+
+    /**
+     * Get the count of all created processes that are of or not of a User
+     * @param sUserId User Filter
+     * @param bIncluded True returns the total of this user, False returns the total not of this user
+     * @return Long 
+     */
+    public long getCreatedCountByUser(String sUserId, boolean bIncluded) {
+
+        try {
+        	
+        	Bson oUserFilter;
+        	
+        	if (bIncluded) {
+        		oUserFilter = Filters.eq("userId", sUserId);
+        	}
+        	else {
+        		oUserFilter = Filters.ne("userId", sUserId);
+        	}
+
+            long lCreated = getCollection(m_sThisCollection).countDocuments(
+            		Filters.and(Filters.eq("status", ProcessStatus.CREATED.name()), oUserFilter)
+            		);
+            
+            return lCreated;
+
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getCreatedCountByUser: exception ", oEx);
+        }
+
+        return 0L;
+    }    
     
     /**
      * Get a list of all the CREATED processes

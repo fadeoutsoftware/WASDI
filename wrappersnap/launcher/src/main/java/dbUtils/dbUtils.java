@@ -2724,6 +2724,7 @@ public class dbUtils {
             
             // add connection to statistics db
             MongoRepository.addMongoConnection("wasdi-stats", WasdiConfig.Current.mongoStatistics.user, WasdiConfig.Current.mongoStatistics.password, WasdiConfig.Current.mongoStatistics.address, WasdiConfig.Current.mongoStatistics.replicaName, WasdiConfig.Current.mongoStatistics.dbName);
+
             
             
             if (oLine.hasOption("cleantask"))  {

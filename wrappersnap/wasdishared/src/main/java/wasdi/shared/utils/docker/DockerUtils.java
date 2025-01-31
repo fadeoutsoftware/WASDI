@@ -599,7 +599,7 @@ public class DockerUtils {
         			// No, we need to pull the image
         			WasdiLog.debugLog("DockerUtils.start: also the image is not available: pull it");
         			
-        			processWorkspaceLog("WASDI is taking the last version of your application, please wait");
+        			processWorkspaceLog("WASDI is pulling the last version of your application, please wait");
         			
         			boolean bPullResult = pull(sImageName, sToken);
         			
@@ -1536,7 +1536,7 @@ public class DockerUtils {
 	public ContainerInfo getContainerInfoByContainerName(String sContainerName) {
     	
     	try {
-    		WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerName: Searching for container named: " + sContainerName );
+    		//WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerName: Searching for container named: " + sContainerName );
     		
     		List<Object> aoOutputJsonMap = getContainersInfo(true);
     		
@@ -1558,9 +1558,11 @@ public class DockerUtils {
 						}
 					}
 					
-					if (bFound) {
-						WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerName: found my container " + sContainerName );						
+					if (bFound) {						
 						return convertContainerMapToContainerInfo(oContainerMap);
+					}
+					else {
+						WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerName: container " + sContainerName + " NOT found" );
 					}
 					
 				}
