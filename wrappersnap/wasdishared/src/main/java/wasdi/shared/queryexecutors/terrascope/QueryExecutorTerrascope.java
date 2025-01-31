@@ -97,41 +97,50 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 	 */
 	@Override
 	public int executeCount(String sQuery) {
-		int iCount = 0;
-
-		String sQueryDatesAdjusted = adjustUserProvidedDatesTo2020(sQuery);
-
-		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQueryDatesAdjusted);
+		int iCount = -1;
 		
-		String sPlatformName = oQueryViewModel.platformName;
+		try {
 
-		if (!m_asSupportedPlatforms.contains(sPlatformName)) {
-			return 0;
-		}
-		
-		if (sPlatformName.equals(Platforms.FCOVER)) {
-			return executCountWithPythonDataProvider(sQuery);
-		}
-
-		List<String> aoTerrascopeQuery = ((QueryTranslatorTerrascope) m_oQueryTranslator).translateMultiple(sQueryDatesAdjusted);
-		for (String sTerrascopeQuery : aoTerrascopeQuery) {
-			if (!Utils.isNullOrEmpty(sTerrascopeQuery)) {
-				String encodedUrl = ((QueryTranslatorTerrascope) m_oQueryTranslator).encode(sTerrascopeQuery);
-
-				// Make the call
-				HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(encodedUrl); 
-				String sTerrascopeResults = oHttpCallResponse.getResponseBody();
-
-				WasdiLog.debugLog("QueryExecutorTerrascope: get Results, extract the total count");
-
-				iCount += m_oResponseTranslator.getCountResult(sTerrascopeResults);
+			String sQueryDatesAdjusted = adjustUserProvidedDatesTo2020(sQuery);
+	
+			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQueryDatesAdjusted);
+			
+			String sPlatformName = oQueryViewModel.platformName;
+	
+			if (!m_asSupportedPlatforms.contains(sPlatformName)) {
+				return iCount;
 			}
+			
+			if (sPlatformName.equals(Platforms.FCOVER)) {
+				iCount = executCountWithPythonDataProvider(oQueryViewModel);
+			}
+			else {
+	
+				List<String> aoTerrascopeQuery = ((QueryTranslatorTerrascope) m_oQueryTranslator).translateMultiple(sQueryDatesAdjusted);
+				int iResCount = 0;
+				for (String sTerrascopeQuery : aoTerrascopeQuery) {
+					if (!Utils.isNullOrEmpty(sTerrascopeQuery)) {
+						String encodedUrl = ((QueryTranslatorTerrascope) m_oQueryTranslator).encode(sTerrascopeQuery);
+		
+						// Make the call
+						HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(encodedUrl); 
+						String sTerrascopeResults = oHttpCallResponse.getResponseBody();
+		
+						WasdiLog.debugLog("QueryExecutorTerrascope: get Results, extract the total count");
+		
+						iResCount += m_oResponseTranslator.getCountResult(sTerrascopeResults);
+					}
+				}
+				iCount = iResCount;
+			}
+		} catch (Exception oE) {
+			WasdiLog.errorLog("QueryExecutor.executeCount: error ", oE);
 		}
 
 		return iCount;
 	}
 	
-	protected List<String> getCommandLineArgs(String sCommand, String sQuery) {
+	protected List<String> getCommandLineArgs(String sCommand, QueryViewModel oQueryViewModel) {
 		
 		List<String> asArgs = new ArrayList<>();
 		
@@ -140,7 +149,6 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 		
 		try {
 				
-			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
 			String sQueryViewModel = JsonUtils.stringify(oQueryViewModel);
 			
 			String sInputFile = Utils.getRandomName();
@@ -200,12 +208,12 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 		return asArgs;
 	}
 	
-	private int executCountWithPythonDataProvider(String sQuery) {
+	private int executCountWithPythonDataProvider(QueryViewModel oQueryViewModel) {
 		String sInputFullPath = "";
 		String sOutputFullPath = "";
 		
 		try {
-			List<String> asArgs = getCommandLineArgs("1", sQuery);
+			List<String> asArgs = getCommandLineArgs("1", oQueryViewModel);
 			
 			if (asArgs == null) {
 				WasdiLog.errorLog("QueryExecutorTerrascope.executCountWithPythonDataProvider: no args!!");
@@ -242,8 +250,8 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 			WasdiLog.errorLog("QueryExecutorTerrascope.executCountWithPythonDataProvider: error ", oEx);
 		}		
 		finally {
-//			FileUtils.deleteQuietly(new File(sInputFullPath));
-//			FileUtils.deleteQuietly(new File(sOutputFullPath));
+			FileUtils.deleteQuietly(new File(sInputFullPath));
+			FileUtils.deleteQuietly(new File(sOutputFullPath));
 		}
 		return -1;
 	}
@@ -253,23 +261,35 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 	 */
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-		List<QueryResultViewModel> aoReturnList = new ArrayList<>();
-
-		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
 		
-		String sPlatformName = oQueryViewModel.platformName;
-
-		if (!m_asSupportedPlatforms.contains(sPlatformName)) {
-			return aoReturnList;
-		}
-
+		List<QueryResultViewModel> aoReturnList = new ArrayList<>();
+		
 		try {
-			
-			if (sPlatformName.equals(Platforms.FCOVER)) {
-				return executeAndRetrieveWithPythonDataprovider(oQuery, bFullViewModel);
-			}
-			
+
 			String sQuery = oQuery.getQuery();
+
+			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
+			
+			String sPlatformName = oQueryViewModel.platformName;
+	
+			if (!m_asSupportedPlatforms.contains(sPlatformName)) {
+				return null;
+			}
+				
+			if (sPlatformName.equals(Platforms.FCOVER)) {
+				
+				int iLimit = !Utils.isNullOrEmpty(oQuery.getOffset()) 
+						? Integer.parseInt(oQuery.getLimit()) 
+						: -1;
+				int iOffset = !Utils.isNullOrEmpty(oQuery.getOffset()) 
+						? Integer.parseInt(oQuery.getOffset()) 
+						: -1;
+				
+				oQueryViewModel.limit = iLimit;
+				oQueryViewModel.offset = iOffset;
+
+				return executeAndRetrieveWithPythonDataprovider(oQueryViewModel, bFullViewModel);
+			}
 
 			sQuery = adjustUserProvidedDatesTo2020(sQuery);
 
@@ -293,7 +313,8 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 
 			String sTerrascopeQuery = m_oQueryTranslator.translateAndEncodeParams(sQuery);
 
-			if (Utils.isNullOrEmpty(sTerrascopeQuery)) return aoReturnList;
+			if (Utils.isNullOrEmpty(sTerrascopeQuery)) 
+				return aoReturnList;
 
 			// Make the query
 			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sTerrascopeQuery); 
@@ -302,15 +323,16 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 			WasdiLog.debugLog("QueryExecutorTerrascope.executeAndRetrieve: got result, start conversion");
 
 			return m_oResponseTranslator.translateBatch(sTerrascopeResults, bFullViewModel);
+			
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("QueryExecutorTerrascope.executeAndRetrieve: Exception = " + oEx.toString());
+			WasdiLog.errorLog("QueryExecutorTerrascope.executeAndRetrieve: Exception = ", oEx);
 		}
 
-		return aoReturnList;
+		return null;
 	}
 	
 	
-	private List<QueryResultViewModel> executeAndRetrieveWithPythonDataprovider(PaginatedQuery oQuery, boolean bFullViewModel) {
+	private List<QueryResultViewModel> executeAndRetrieveWithPythonDataprovider(QueryViewModel oQuery, boolean bFullViewModel) {
 		
 		List<QueryResultViewModel> aoReturnList = new ArrayList<>();
 		
@@ -318,7 +340,7 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 		String sOutputFullPath = "";
 		
 		try {
-			List<String> asArgs = getCommandLineArgs("0", oQuery.getQuery());
+			List<String> asArgs = getCommandLineArgs("0", oQuery);
 			
 			if (asArgs == null) {
 				WasdiLog.errorLog("QueryExecutorTerrascope.executeAndRetrieveWithPythonDataprovider: no args!!");
@@ -349,7 +371,6 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 			WasdiLog.debugLog("QueryExecutorTerrascope.executeAndRetrieveWithPythonDataprovider: got output file");
 			
 			String sOutput = WasdiFileUtils.fileToText(sOutputFullPath);
-			//String sOutput = "[{\"footprint\":\"POLYGON ((-70.386436 18.443495, -70.061836 19.952312, -72.427658 20.375757, -72.729576 18.870117, -70.386436 18.443495))\",\"id\":\"1af712e9-062d-45f5-bb77-ca2c80e0b27c\",\"link\":\"https://datahub.creodias.eu/odata/v1/Products(1af712e9-062d-45f5-bb77-ca2c80e0b27c)/$value,S1A_IW_GRDH_1SDV_20240103T103921_20240103T103946_051941_0646A1_0E08.zip,1.695165533E9,/eodata/Sentinel-1/SAR/IW_GRDH_1S/2024/01/03/S1A_IW_GRDH_1SDV_20240103T103921_20240103T103946_051941_0646A1_0E08.SAFE,\",\"preview\":null,\"properties\":{\"date\":\"2024-01-03T12:36:21.266Z\",\"sliceProductFlag\":\"false\",\"instrumentShortName\":\"SAR\",\"origin\":\"ESA\",\"processingDate\":\"2024-01-03T12:25:13.093702+00:00\",\"link\":\"https://datahub.creodias.eu/odata/v1/Products(1af712e9-062d-45f5-bb77-ca2c80e0b27c)/$value,S1A_IW_GRDH_1SDV_20240103T103921_20240103T103946_051941_0646A1_0E08.zip,1.695165533E9,/eodata/Sentinel-1/SAR/IW_GRDH_1S/2024/01/03/S1A_IW_GRDH_1SDV_20240103T103921_20240103T103946_051941_0646A1_0E08.SAFE,\",\"sliceNumber\":\"2\",\"orbitNumber\":\"51941\",\"datatakeID\":\"411297\",\"relativeorbitnumber\":\"69\",\"processingLevel\":\"LEVEL1\",\"beginningDateTime\":\"2024-01-03T10:39:21.648Z\",\"platformShortName\":\"SENTINEL-1\",\"processorName\":\"Sentinel-1 IPF\",\"startTimeFromAscendingNode\":\"2639257.0\",\"segmentStartTime\":\"2024-01-03T10:38:52.947000+00:00\",\"completionTimeFromAscendingNode\":\"2664254.0\",\"productType\":\"IW_GRDH_1S\",\"instrumentshortname\":\"SAR\",\"productClass\":\"S\",\"sensoroperationalmode\":\"IW\",\"relativeOrbitNumber\":\"69\",\"polarisationChannels\":\"VV&VH\",\"productComposition\":\"Slice\",\"processorVersion\":\"003.71\",\"swathIdentifier\":\"IW\",\"endingDateTime\":\"2024-01-03T10:39:46.646Z\",\"platformname\":\"SENTINEL-1A\",\"platformSerialIdentifier\":\"A\",\"operationalMode\":\"IW\",\"processingCenter\":\"Production Service-SERCO\",\"size\":\"1.58 GB\",\"timeliness\":\"Fast-24h\",\"totalSlices\":\"3\",\"instrumentConfigurationID\":\"7\",\"orbitDirection\":\"DESCENDING\",\"cycleNumber\":\"311\"},\"provider\":\"AUTO\",\"summary\":\"Date: 2024-01-03T12:36:21.266Z, Instrument: SAR, Mode: IW, Satellite: SENTINEL-1A, Size: 1.58 GB\",\"title\":\"S1A_IW_GRDH_1SDV_20240103T103921_20240103T103946_051941_0646A1_0E08\",\"volumeName\":null,\"volumePath\":null},{\"footprint\":\"POLYGON ((-70.696312 16.904287, -70.386459 18.443405, -72.729324 18.86998, -73.018723 17.334553, -70.696312 16.904287))\",\"id\":\"eb36bf17-d597-4838-90d8-7a36a4dac086\",\"link\":\"https://datahub.creodias.eu/odata/v1/Products(eb36bf17-d597-4838-90d8-7a36a4dac086)/$value,S1A_IW_GRDH_1SDV_20240103T103946_20240103T104012_051941_0646A1_4AF5.zip,1.724535903E9,/eodata/Sentinel-1/SAR/IW_GRDH_1S/2024/01/03/S1A_IW_GRDH_1SDV_20240103T103946_20240103T104012_051941_0646A1_4AF5.SAFE,\",\"preview\":null,\"properties\":{\"date\":\"2024-01-03T12:36:24.337Z\",\"sliceProductFlag\":\"false\",\"instrumentShortName\":\"SAR\",\"origin\":\"ESA\",\"processingDate\":\"2024-01-03T12:25:15.354965+00:00\",\"link\":\"https://datahub.creodias.eu/odata/v1/Products(eb36bf17-d597-4838-90d8-7a36a4dac086)/$value,S1A_IW_GRDH_1SDV_20240103T103946_20240103T104012_051941_0646A1_4AF5.zip,1.724535903E9,/eodata/Sentinel-1/SAR/IW_GRDH_1S/2024/01/03/S1A_IW_GRDH_1SDV_20240103T103946_20240103T104012_051941_0646A1_4AF5.SAFE,\",\"sliceNumber\":\"3\",\"orbitNumber\":\"51941\",\"datatakeID\":\"411297\",\"relativeorbitnumber\":\"69\",\"processingLevel\":\"LEVEL1\",\"beginningDateTime\":\"2024-01-03T10:39:46.648Z\",\"platformShortName\":\"SENTINEL-1\",\"processorName\":\"Sentinel-1 IPF\",\"startTimeFromAscendingNode\":\"2664256.0\",\"segmentStartTime\":\"2024-01-03T10:38:52.947000+00:00\",\"completionTimeFromAscendingNode\":\"2689691.0\",\"productType\":\"IW_GRDH_1S\",\"instrumentshortname\":\"SAR\",\"productClass\":\"S\",\"sensoroperationalmode\":\"IW\",\"relativeOrbitNumber\":\"69\",\"polarisationChannels\":\"VV&VH\",\"productComposition\":\"Slice\",\"processorVersion\":\"003.71\",\"swathIdentifier\":\"IW\",\"endingDateTime\":\"2024-01-03T10:40:12.083Z\",\"platformname\":\"SENTINEL-1A\",\"platformSerialIdentifier\":\"A\",\"operationalMode\":\"IW\",\"processingCenter\":\"Production Service-SERCO\",\"size\":\"1.61 GB\",\"timeliness\":\"Fast-24h\",\"totalSlices\":\"3\",\"instrumentConfigurationID\":\"7\",\"orbitDirection\":\"DESCENDING\",\"cycleNumber\":\"311\"},\"provider\":\"AUTO\",\"summary\":\"Date: 2024-01-03T12:36:24.337Z, Instrument: SAR, Mode: IW, Satellite: SENTINEL-1A, Size: 1.61 GB\",\"title\":\"S1A_IW_GRDH_1SDV_20240103T103946_20240103T104012_051941_0646A1_4AF5\",\"volumeName\":null,\"volumePath\":null}]";
 			
 			aoReturnList = MongoRepository.s_oMapper.readValue(sOutput, new TypeReference<List<QueryResultViewModel>>(){});
 			
@@ -360,8 +381,8 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 			WasdiLog.errorLog("QueryExecutorTerrascope.executeAndRetrieveWithPythonDataprovider: error ",oEx);
 		}		
 		finally {
-//			FileUtils.deleteQuietly(new File(sInputFullPath));
-//			FileUtils.deleteQuietly(new File(sOutputFullPath));
+			FileUtils.deleteQuietly(new File(sInputFullPath));
+			FileUtils.deleteQuietly(new File(sOutputFullPath));
 		}
 		return aoReturnList;
 	}
