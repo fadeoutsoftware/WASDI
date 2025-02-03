@@ -281,7 +281,9 @@ public class WorkspaceResource {
 			oWorkspaceEditorViewModel.setNodeCode(oWorkspace.getNodeCode());
 			oWorkspaceEditorViewModel.setPublic(oWorkspace.isPublic());
 			oWorkspaceEditorViewModel.setReadOnly(!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), oWorkspace.getWorkspaceId()));
-			oWorkspaceEditorViewModel.setStorageSize(oWorkspace.getStorageSize() > 0 ? FileUtils.byteCountToDisplaySize(oWorkspace.getStorageSize()) : "0B");
+			if (oWorkspace.getStorageSize() != null) {
+				oWorkspaceEditorViewModel.setStorageSize(oWorkspace.getStorageSize() > 0 ? FileUtils.byteCountToDisplaySize(oWorkspace.getStorageSize()) : "0B");
+			}
 			
 			
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
