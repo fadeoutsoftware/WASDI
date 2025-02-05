@@ -2650,7 +2650,8 @@ public class dbUtils {
             Options oOptions = new Options();
 
             oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
-            oOptions.addOption("ct", "cleantask", true, "Command to start the WASDI Clean Teask for free extra space");
+            oOptions.addOption("ct", "cleantask", false, "Command to start the WASDI Clean Teask for free extra space");
+            oOptions.addOption("hello", "hello", false, "Command to just check the hello mode");
 
             String sConfigFilePath = "/etc/wasdi/wasdiConfig.json";
 
@@ -2730,6 +2731,10 @@ public class dbUtils {
             if (oLine.hasOption("cleantask"))  {
             	runWasdiCleanTask();
             }
+            else if (oLine.hasOption("hello")) {
+            	System.out.println("---- WASDI db Utils HELLO MODE!!!----");
+            	System.out.println("Bye bye");
+            }
             else {
                 boolean bExit = false;
 
@@ -2798,12 +2803,12 @@ public class dbUtils {
                         System.out.println("");
                         System.out.println("");
                     }
-                }            	
+                }
+                
+                s_oScanner.close();
             }
 
             System.out.println("bye bye");
-
-            s_oScanner.close();
 
         } catch (Exception e) {
         	System.out.println("Exception: " + e.toString());
