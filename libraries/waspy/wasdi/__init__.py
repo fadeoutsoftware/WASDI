@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.7.1
+Version 0.8.7.2
 
-Last Update: 12/12/2024
+Last Update: 03/02/2025
 
 Tested with: Python 3.7, Python 3.8, Python 3.9, Python 3.10
 
@@ -2950,7 +2950,7 @@ def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvid
             # Get the status
             sImportProcId = asRunningDownloadList[iImports]
 
-            if sImportProcId == "ERROR" or sImportProcId == "WAITING":
+            if sImportProcId == "ERROR":
                 continue
 
             if sImportProcId == "DONE":
@@ -2967,7 +2967,7 @@ def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvid
                 _log("[INFO]  waspy.importAndPreprocess: " + sFile + " imported, starting workflow to get " + sOutputFile)
 
                 # Is already there for any reason?
-                if not fileExistsOnWasdi(sOutputFile):
+                if not fileExistsOnWasdi(sOutputFile) and not sOutputFile in asPreProcessedFiles:
                     # No, start the workflow
                     sProcId = asynchExecuteWorkflow(sFile, sOutputFile, sWorkflow)
                     asRunningProcList.append(sProcId)
@@ -2976,7 +2976,6 @@ def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvid
                 asRunningDownloadList[iImports] = "DONE"
             elif sImportStatus == "ERROR" or sImportStatus == "STOPPED":
                 asRunningDownloadList[iImports] = sImportStatus
-                pass
             else:
                 bWaitingDonwload = True
 
