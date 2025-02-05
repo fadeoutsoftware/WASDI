@@ -2857,20 +2857,27 @@ public class dbUtils {
 						String sEmailTitle = oStorageUsageControl.warningEmailConfig.title;
 						String sEmailText = fillEmailTemplate(oCandidate.getName(), lTotalStorageUsage);
 						
-						MailUtils.sendEmail(sCandidateUserId, sEmailTitle, sEmailText); // TODO - DONE
+						if (!oStorageUsageControl.isDeletionInTestMode) {
+							MailUtils.sendEmail(sCandidateUserId, sEmailTitle, sEmailText);							
+						}
+						else {
+							WasdiLog.warnLog("TEST MODE: think I'm sending an e-mail alert to " + sCandidateUserId);
+						}
 						
 						oCandidate.setStorageWarningSentDate((double)lNow);
-						oUserRepository.updateUser(oCandidate);
+						oUserRepository.updateUser(oCandidate);							
+						
 						continue;
 					}
 					
 					// if the warning period has passed, then we proceed to the deletion of the workspaces
 					long lDaysFromWarning = (lNow - lStorageWarningDate) / (1000 * 60 * 60 * 24);
 					
-					if (lDaysFromWarning > oStorageUsageControl.deletionDelayFromWarning) { // TODO - DONE
+					if (lDaysFromWarning > oStorageUsageControl.deletionDelayFromWarning) {
 						
 						// managing the deletion in testing mode
 						if (oStorageUsageControl.isDeletionInTestMode) {
+							WasdiLog.warnLog("TEST MODE: think I'm deleting  workspaces for user " + oCandidate.getUserId());
 							asUsersExceedingStorage.add(oCandidate.getUserId());
 							continue;
 						}
@@ -2881,7 +2888,7 @@ public class dbUtils {
 							continue;
 						}					
 						
-						List<Workspace> aoWorkspaces = oWorkspaceRepository.getWorkspacesSortedByOldestUpdate(oCandidate.getUserId()); // TODO - DONE				
+						List<Workspace> aoWorkspaces = oWorkspaceRepository.getWorkspacesSortedByOldestUpdate(oCandidate.getUserId());				
 						
 						for (Workspace oWorkspace : aoWorkspaces) {
 							String sWorkspaceID = oWorkspace.getWorkspaceId();
