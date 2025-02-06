@@ -23,6 +23,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -2687,6 +2688,19 @@ public class dbUtils {
                 // no log4j configuration
                 System.err.println("DbUtils - Error loading log configuration.  Reason: " + exp.toString());
             }
+            
+          // Filter the mongodb logs
+    		try {
+    			System.setProperty("DEBUG.MONGO", "false");
+    			ch.qos.logback.classic.Logger oMongoLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.mongodb.driver");
+    			oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);	
+    			
+    			System.out.print("");
+    			//oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+    		}
+    		catch (Exception oEx) {
+    			WasdiLog.errorLog("Disabling mongo driver logging exception " + oEx.toString());
+    		} 
 
             // If this is not the main node
             if (!s_sMyNodeCode.equals("wasdi")) {
