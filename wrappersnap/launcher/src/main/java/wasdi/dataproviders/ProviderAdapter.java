@@ -681,15 +681,18 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp copy stream returned false, not setting return file path" );
 			}
 
-		} else {
+		} 
+		else {
 			WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: No file to download. Server replied HTTP code: " + iResponseCode);
-			//todo retrieve error
+			
+			// Retrieve error
 			InputStream oErrorStream = oHttpConn.getErrorStream();
+			
 			if(null != oErrorStream) {
-				//InputStreamReader oReader = new InputStreamReader(oErrorStream);
 				String sResult = IOUtils.toString(oErrorStream, StandardCharsets.UTF_8.toString());
 				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: error message: " + sResult );
-			} else {
+			} 
+			else {
 				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: provider did not send an error message");
 			}
 			m_iLastError = iResponseCode;
