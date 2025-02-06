@@ -443,7 +443,9 @@ public class WorkspaceRepository extends  MongoRepository {
 					new Document("$group", new Document()								// group the retrieved documents by computing the sum of the storage size						
 		                    .append("_id", null)
 		                    .append("totalStorage", new Document("$sum",
-		                        new Document("$ifNull", Arrays.asList("$storageSize", 0)) // handle null or missing values
+		                    	new Document("$toLong",
+		                    			new Document("$ifNull", Arrays.asList("$storageSize", 0)) // handle null or missing values
+		                        )
 		                    ))
 		                )
 		

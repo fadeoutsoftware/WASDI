@@ -2838,17 +2838,21 @@ public class dbUtils {
 			}
 			
 			UserRepository oUserRepository = new UserRepository();
-			ArrayList<User> aoUsers = oUserRepository.getAllUsers();
+			ArrayList<User> aoUsers = oUserRepository.getAllUsers();	// maybe will need a cursor here
 			ArrayList<User> aoToChekUsers = new ArrayList<>();
 			
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			SessionRepository oSessionRepository = new SessionRepository();
 			NodeRepository oNodeRepository = new NodeRepository();
 			
+			int i = 0;
+			// add an iterator
+			WasdiLog.infoLog("Users with NONE or FREE subscriptions who will be checked for ");
 			for (User oUser : aoUsers) {
 				String sType = PermissionsUtils.getUserType(oUser.getUserId());
 				if (sType.equals(UserType.NONE.name()) || sType.equals(UserType.FREE.name())) {
 					aoToChekUsers.add(oUser);
+					WasdiLog.infoLog(++i + "\t" + sType + "\t" + oUser.getUserId());	// TODO: will need to delete this log
 				}
 			}
 			
@@ -2862,16 +2866,20 @@ public class dbUtils {
 					
 					StorageUsageControl oStorageUsageControl = WasdiConfig.Current.storageUsageControl;
 					Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(sCandidateUserId);
-					long lNow = new Date().getTime();
+					
+					WasdiLog.infoLog(sCandidateUserId + " Total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
+					
+					long lNow = new Date().getTime(); 
 					long lStorageWarningDate = oCandidate.getStorageWarningSentDate().longValue();
 					
-					// if we didn't yet sent the warning to the user, then we do it
-					if (lStorageWarningDate == 0L) {
-						
-						String sEmailTitle = oStorageUsageControl.warningEmailConfig.title;
-						String sEmailText = fillEmailTemplate(oCandidate.getName(), lTotalStorageUsage);
+					
+					// if the user has not a valid subscription REALLY because of the storage (and not of other problems, like no active projects)
+					// AND if we didn't yet send the warning to the user, then we do it
+					if (lTotalStorageUsage > oStorageUsageControl.storageSizeFreeSubscription && lStorageWarningDate == 0L) {
 						
 						if (!oStorageUsageControl.isDeletionInTestMode) {
+							String sEmailTitle = oStorageUsageControl.warningEmailConfig.title;
+							String sEmailText = fillEmailTemplate(oCandidate.getName(), lTotalStorageUsage);
 							MailUtils.sendEmail(sCandidateUserId, sEmailTitle, sEmailText);							
 						}
 						else {
@@ -2884,10 +2892,10 @@ public class dbUtils {
 						continue;
 					}
 					
-					// if the warning period has passed, then we proceed to the deletion of the workspaces
+					// if the warning period has passed and the storage occupied by the user still exceeds the limit, then we proceed to the deletion of the workspaces
 					long lDaysFromWarning = (lNow - lStorageWarningDate) / (1000 * 60 * 60 * 24);
 					
-					if (lDaysFromWarning > oStorageUsageControl.deletionDelayFromWarning) {
+					if (lTotalStorageUsage > oStorageUsageControl.storageSizeFreeSubscription && lDaysFromWarning > oStorageUsageControl.deletionDelayFromWarning) {
 						
 						// managing the deletion in testing mode
 						if (oStorageUsageControl.isDeletionInTestMode) {
@@ -2921,15 +2929,20 @@ public class dbUtils {
 							}
 						}			
 					}
+					
 				}
 				else {
 					// Clean the flag
-					if (oCandidate.getStorageWarningSentDate() > 0.0 ) {
+					Double dStorageWarningDate = oCandidate.getStorageWarningSentDate();
+					if (dStorageWarningDate != null && dStorageWarningDate > 0.0 ) {
+						WasdiLog.warnLog("** User " + oCandidate.getUserId() + " warning will be set back to zero");
 						oCandidate.setStorageWarningSentDate(0.0);
 						oUserRepository.updateUser(oCandidate);
 					}
 				}
 			}
+			
+			//TODO: delete the session
 			
 			// when we are in testing mode, send mail to admins
 			if (!asUsersExceedingStorage.isEmpty()) {				

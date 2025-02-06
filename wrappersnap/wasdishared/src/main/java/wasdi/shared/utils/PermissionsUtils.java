@@ -85,6 +85,11 @@ public class PermissionsUtils {
 			
 			String sActiveProjectOfUser = oUser.getActiveProjectId();
 			
+			if (sActiveProjectOfUser == null) {
+				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + " has not an active project selected");
+				return false;
+			}
+			
 			ProjectRepository oProjectRepository = new ProjectRepository();
 			Project oUserProject = oProjectRepository.getProjectById(sActiveProjectOfUser);
 			String sSubscriptionId = oUserProject.getSubscriptionId();
@@ -118,7 +123,7 @@ public class PermissionsUtils {
 			
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("PermissionsUtils.userHasValidSubscription: error: " + oEx);
+			WasdiLog.errorLog("PermissionsUtils.userHasValidSubscription: error: ", oEx);
 		}
 		
 		return false;
