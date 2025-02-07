@@ -325,28 +325,7 @@ public abstract class Operation {
             } else {
                 WasdiLog.infoLog("Product Inserted");
             }
-            
-            // update also the count of the size of the workspace
-            try {
-	            
-	            WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-	            Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspace);
-	            
-	            WasdiLog.infoLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: storage size before " + oWorkspace.getStorageSize());
-	            String sUserId = oWorkspace.getUserId();
-	            
-	            long lWorkspaceSize = WasdiFileUtils.getWorkspaceFolderSize(sUserId, sWorkspace);
-	            
-	            WasdiLog.infoLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: storage size after " + lWorkspaceSize);
-	            
-	            oWorkspace.setStorageSize(lWorkspaceSize);
-	            
-	            WasdiLog.infoLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: update successful?" + oWorkspaceRepository.updateWorkspace(oWorkspace));
-            } catch (Exception oEx) {
-            	WasdiLog.errorLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: error in updating the storage size of the workspace", oEx);
-            }
-            
-            
+  
         } else {
 
             // The product is already there. No need to add
@@ -361,6 +340,26 @@ public abstract class Operation {
             // TODO: Update metadata?
 
             WasdiLog.debugLog("AddProductToDbAndSendToRabbit: Product Already in the Database. Do not add");
+        }
+        
+        // update also the count of the size of the workspace. Safe operation. Worse
+        try {
+            
+            WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+            Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspace);
+            
+            WasdiLog.infoLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: storage size before " + oWorkspace.getStorageSize());
+            String sUserId = oWorkspace.getUserId();
+            
+            long lWorkspaceSize = WasdiFileUtils.getWorkspaceFolderSize(sUserId, sWorkspace);
+            
+            WasdiLog.infoLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: storage size after " + lWorkspaceSize);
+            
+            oWorkspace.setStorageSize(lWorkspaceSize);
+            
+            WasdiLog.infoLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: update successful?" + oWorkspaceRepository.updateWorkspace(oWorkspace));
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: error in updating the storage size of the workspace", oEx);
         }
 
         // The Add Product to Workspace is safe. No need to check if the product is
