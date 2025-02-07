@@ -23,9 +23,12 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
+import org.bson.Document;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.MongoCursor;
 
 import wasdi.processors.DockerProcessorEngine;
 import wasdi.processors.WasdiProcessorEngine;
@@ -2838,23 +2841,34 @@ public class dbUtils {
 			}
 			
 			UserRepository oUserRepository = new UserRepository();
-			ArrayList<User> aoUsers = oUserRepository.getAllUsers();	// maybe will need a cursor here
+			MongoCursor<Document> oAllUsersIterator = oUserRepository.getIteratorOverAllUsers();
+			ObjectMapper oMapper = new ObjectMapper();
+			oMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
 			ArrayList<User> aoToChekUsers = new ArrayList<>();
+			
+			WasdiLog.infoLog("Users with NONE or FREE subscriptions who will be checked for ");
+
+			int i = 0;
+			while (oAllUsersIterator.hasNext()) {
+				String sJSON = oAllUsersIterator.next().toJson();
+				
+				try {
+					User oUser = oMapper.readValue(sJSON, User.class);	
+					String sType = PermissionsUtils.getUserType(oUser.getUserId());
+					
+					if (sType.equals(UserType.NONE.name()) || sType.equals(UserType.FREE.name())) {
+						aoToChekUsers.add(oUser);
+						WasdiLog.infoLog(++i + "\t" + sType + "\t" + oUser.getUserId());						
+					}
+				} catch (Exception oEx) {
+					WasdiLog.errorLog("Impossible to map entity to user class", oEx);
+				}
+			}
 			
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			SessionRepository oSessionRepository = new SessionRepository();
 			NodeRepository oNodeRepository = new NodeRepository();
-			
-			int i = 0;
-			// add an iterator
-			WasdiLog.infoLog("Users with NONE or FREE subscriptions who will be checked for ");
-			for (User oUser : aoUsers) {
-				String sType = PermissionsUtils.getUserType(oUser.getUserId());
-				if (sType.equals(UserType.NONE.name()) || sType.equals(UserType.FREE.name())) {
-					aoToChekUsers.add(oUser);
-					WasdiLog.infoLog(++i + "\t" + sType + "\t" + oUser.getUserId());	// TODO: will need to delete this log
-				}
-			}
 			
 			List<String> asUsersExceedingStorage = new ArrayList<String>();
 			
@@ -2862,12 +2876,12 @@ public class dbUtils {
 				
 				String sCandidateUserId = oCandidate.getUserId();
 				
-				if (PermissionsUtils.userHasValidSubscription(oCandidate) == false) {
+				if (!PermissionsUtils.userHasValidSubscription(oCandidate)) {
 					
 					StorageUsageControl oStorageUsageControl = WasdiConfig.Current.storageUsageControl;
 					Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(sCandidateUserId);
 					
-					WasdiLog.infoLog(sCandidateUserId + " Total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
+					WasdiLog.infoLog(sCandidateUserId + ", total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
 					
 					long lNow = new Date().getTime(); 
 					long lStorageWarningDate = oCandidate.getStorageWarningSentDate().longValue();
@@ -2892,25 +2906,29 @@ public class dbUtils {
 						continue;
 					}
 					
-					// if the warning period has passed and the storage occupied by the user still exceeds the limit, then we proceed to the deletion of the workspaces
-					long lDaysFromWarning = (lNow - lStorageWarningDate) / (1000 * 60 * 60 * 24);
+					// if the warning period has passed and the storage occupied by the user still exceeds the limit, 
+					// then we proceed to the deletion of the workspaces
+					long lDaysFromWarning =  lStorageWarningDate == 0L 
+									? 0L 
+									: (lNow - lStorageWarningDate) / (1000 * 60 * 60 * 24);
 					
 					if (lTotalStorageUsage > oStorageUsageControl.storageSizeFreeSubscription && lDaysFromWarning > oStorageUsageControl.deletionDelayFromWarning) {
 						
 						// managing the deletion in testing mode
 						if (oStorageUsageControl.isDeletionInTestMode) {
-							WasdiLog.warnLog("TEST MODE: think I'm deleting  workspaces for user " + oCandidate.getUserId());
-							asUsersExceedingStorage.add(oCandidate.getUserId());
+							WasdiLog.warnLog("TEST MODE: think I'm deleting  workspaces for user " + sCandidateUserId);
+							asUsersExceedingStorage.add(sCandidateUserId);
 							continue;
 						}
 						
-						UserSession oSession = oSessionRepository.insertUniqueSession(oCandidate.getUserId());
+						
+						UserSession oSession = oSessionRepository.insertUniqueSession(sCandidateUserId);
 						if (oSession== null) {
 							WasdiLog.errorLog("Invalid session. Impossible to proceed with the cleaning task");
 							continue;
 						}					
 						
-						List<Workspace> aoWorkspaces = oWorkspaceRepository.getWorkspacesSortedByOldestUpdate(oCandidate.getUserId());				
+						List<Workspace> aoWorkspaces = oWorkspaceRepository.getWorkspacesSortedByOldestUpdate(sCandidateUserId);				
 						
 						for (Workspace oWorkspace : aoWorkspaces) {
 							String sWorkspaceID = oWorkspace.getWorkspaceId();
@@ -2919,41 +2937,44 @@ public class dbUtils {
 							int iResponseCode = oResponse.getResponseCode();
 							if (iResponseCode < 200 || iResponseCode > 299) {
 								WasdiLog.warnLog("Deletion of wokrspace " + sWorkspaceID + "returned error code " + iResponseCode);
+								continue;
 							}
 							lTotalStorageUsage = lTotalStorageUsage - oWorkspace.getStorageSize();
-							if (lTotalStorageUsage < WasdiConfig.Current.storageUsageControl.storageSizeFreeSubscription) {
+							if (lTotalStorageUsage < oStorageUsageControl.storageSizeFreeSubscription) {
 								WasdiLog.infoLog("Workspaces of user " + sCandidateUserId + " have been cleaned. Total usage storage: " + lTotalStorageUsage);
 								oCandidate.setStorageWarningSentDate(0.0);
 								oUserRepository.updateUser(oCandidate);								
 								break;
 							}
-						}			
+						}
+						
+						// remove the session once the cleaning for the user ends
+						oSessionRepository.deleteSession(oSession);
+						
 					}
 					
 				}
 				else {
-					// Clean the flag
+					// If the user has a valid and there is still a warning flag attached, clean the flag
 					Double dStorageWarningDate = oCandidate.getStorageWarningSentDate();
 					if (dStorageWarningDate != null && dStorageWarningDate > 0.0 ) {
-						WasdiLog.warnLog("** User " + oCandidate.getUserId() + " warning will be set back to zero");
+						WasdiLog.warnLog("User " + oCandidate.getUserId() + " warning flag will be set back to zero");
 						oCandidate.setStorageWarningSentDate(0.0);
 						oUserRepository.updateUser(oCandidate);
 					}
 				}
 			}
 			
-			//TODO: delete the session
-			
 			// when we are in testing mode, send mail to admins
 			if (!asUsersExceedingStorage.isEmpty()) {				
 				List<User> aoAdminUsers = oUserRepository.getAdminUsers();
 				String sUsers = String.join("\n", asUsersExceedingStorage);
-
+				System.out.println(sUsers);
 				for (User oAdmin : aoAdminUsers) {
 					MailUtils.sendEmail(oAdmin.getUserId(), "Deletion test", "Test deletion of workspaces for users:\n" + sUsers);
 				}
 			}
-			
+		
 		} catch (Exception oEx) {
         	WasdiLog.errorLog("Exception: ", oEx);
         }

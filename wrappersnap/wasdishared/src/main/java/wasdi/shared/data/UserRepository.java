@@ -8,6 +8,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -194,6 +195,23 @@ public class UserRepository extends  MongoRepository{
     	return aoReturnList;
     }
     
+    
+    /**
+     * Get an iterator over the collection of users
+     * @return an iterator for the Usersc collection
+     */
+    public MongoCursor<Document> getIteratorOverAllUsers ()  {
+    	try {
+    		
+    		return getCollection(m_sThisCollection).find().iterator();
+    		
+    	} catch (Exception oEx) {
+    		
+    		WasdiLog.errorLog("UserRepository.getIteratorOVerAllUsers. Impossible to ger cursor", oEx);
+    	
+    	}
+    	return null;
+    }
     
     /**
      * Get the list of all users

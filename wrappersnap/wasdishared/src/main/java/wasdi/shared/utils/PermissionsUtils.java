@@ -117,7 +117,8 @@ public class PermissionsUtils {
 				return true;
 			} 
 			else {
-				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + " exceed the maximum storage size for free subscriptions" + dTotalStorageUsage);
+				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + 
+						" exceed the maximum storage size for free subscriptions: " + Utils.getNormalizedSize(Double.parseDouble(dTotalStorageUsage.toString())));
 				return false;
 			}
 			
