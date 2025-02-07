@@ -331,12 +331,17 @@ public abstract class Operation {
 	            
 	            WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 	            Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspace);
+	            
+	            WasdiLog.infoLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: storage size before " + oWorkspace.getStorageSize());
 	            String sUserId = oWorkspace.getUserId();
 	            
 	            long lWorkspaceSize = WasdiFileUtils.getWorkspaceFolderSize(sUserId, sWorkspace);
 	            
+	            WasdiLog.infoLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: storage size after " + lWorkspaceSize);
+	            
 	            oWorkspace.setStorageSize(lWorkspaceSize);
-	            oWorkspaceRepository.updateWorkspace(oWorkspace);
+	            
+	            WasdiLog.infoLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: update successful?" + oWorkspaceRepository.updateWorkspace(oWorkspace));
             } catch (Exception oEx) {
             	WasdiLog.errorLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: error in updating the storage size of the workspace", oEx);
             }
