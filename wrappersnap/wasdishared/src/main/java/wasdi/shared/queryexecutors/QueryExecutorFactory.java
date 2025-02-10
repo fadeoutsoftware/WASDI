@@ -6,7 +6,7 @@
  */
 package wasdi.shared.queryexecutors;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -14,29 +14,6 @@ import java.util.function.Supplier;
 import wasdi.shared.business.AuthenticationCredentials;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.queryexecutors.ads.QueryExecutorADS;
-import wasdi.shared.queryexecutors.cds.QueryExecutorCDS;
-import wasdi.shared.queryexecutors.cloudferro.QueryExecutorCloudferro;
-import wasdi.shared.queryexecutors.cm2.QueryExecutorCM2;
-import wasdi.shared.queryexecutors.creodias.QueryExecutorCREODIAS;
-import wasdi.shared.queryexecutors.creodias2.QueryExecutorCreoDias2;
-import wasdi.shared.queryexecutors.dlr.QueryExecutorDLR;
-import wasdi.shared.queryexecutors.eodc.QueryExecutorEODC;
-import wasdi.shared.queryexecutors.esa.QueryExecutorESA;
-import wasdi.shared.queryexecutors.extweb.ExtWebQueryExecutor;
-import wasdi.shared.queryexecutors.gpm.QueryExecutorGPM;
-import wasdi.shared.queryexecutors.jrc.QueryExecutorJRC;
-import wasdi.shared.queryexecutors.lpdaac.QueryExecutorLpDaac;
-import wasdi.shared.queryexecutors.lsa.QueryExecutorLSA;
-import wasdi.shared.queryexecutors.onda.QueryExecutorONDA;
-import wasdi.shared.queryexecutors.planet.QueryExecutorPLANET;
-import wasdi.shared.queryexecutors.probav.QueryExecutorPROBAV;
-import wasdi.shared.queryexecutors.sina.QueryExecutorSina;
-import wasdi.shared.queryexecutors.skywatch.QueryExecutorSkywatch;
-import wasdi.shared.queryexecutors.sobloo.QueryExecutorSOBLOO;
-import wasdi.shared.queryexecutors.statics.QueryExecutorSTATICS;
-import wasdi.shared.queryexecutors.terrascope.QueryExecutorTerrascope;
-import wasdi.shared.queryexecutors.viirs.QueryExecutorVIIRS;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -46,37 +23,22 @@ import wasdi.shared.utils.log.WasdiLog;
  */
 public class QueryExecutorFactory {
 
-	private static final Map<String, Supplier<QueryExecutor>> s_aoExecutors;
+	private static final Map<String, QueryExecutor> s_aoExecutors = new HashMap<>();
 
 	static {
 		WasdiLog.debugLog("QueryExecutorFactory");
-		final Map<String, Supplier<QueryExecutor>> aoMap = new HashMap<>();
-
-		aoMap.put("ONDA", QueryExecutorONDA::new);
-		aoMap.put("SOBLOO", QueryExecutorSOBLOO::new);
-		aoMap.put("EODC", QueryExecutorEODC::new);
-		aoMap.put("CREODIAS", QueryExecutorCREODIAS::new);
-		aoMap.put("CREODIAS2", QueryExecutorCreoDias2::new);
-		aoMap.put("LSA", QueryExecutorLSA::new);
-		aoMap.put("VIIRS", QueryExecutorVIIRS::new);
-		aoMap.put("ADS", QueryExecutorADS::new);
-		aoMap.put("CDS", QueryExecutorCDS::new);
-		aoMap.put("PROBAV", QueryExecutorPROBAV::new);
-		aoMap.put("PLANET", QueryExecutorPLANET::new);
-		aoMap.put("TERRASCOPE", QueryExecutorTerrascope::new);
-		aoMap.put("STATICS", QueryExecutorSTATICS::new);
-		aoMap.put("JRC", QueryExecutorJRC::new);
-		aoMap.put("GPM", QueryExecutorGPM::new);
-		aoMap.put("COPERNICUSMARINE", QueryExecutorCM2::new);
-		aoMap.put("CLOUDFERRO", QueryExecutorCloudferro::new);
-		aoMap.put("SKYWATCH", QueryExecutorSkywatch::new);
-		aoMap.put("LPDAAC", QueryExecutorLpDaac::new);
-		aoMap.put("EXT_WEB", ExtWebQueryExecutor::new);
-		aoMap.put("DLR", QueryExecutorDLR::new);		
-		aoMap.put("SINA", QueryExecutorSina::new);
-		aoMap.put("ESA", QueryExecutorESA::new);
 		
-		s_aoExecutors = Collections.unmodifiableMap(aoMap);
+		ArrayList<DataProviderConfig> aoDataProviders = WasdiConfig.Current.dataProviders;
+		
+		for (DataProviderConfig oDPConfig : aoDataProviders) {
+			try {
+				String sName = oDPConfig.name;
+				QueryExecutor oQueryExecutor = (QueryExecutor) Class.forName(oDPConfig.classpath).getDeclaredConstructor().newInstance();
+				s_aoExecutors.put(sName, oQueryExecutor);
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("QueryExecutorFactory.static: exception creating a Query Executor: " + oEx.toString());
+			} 
+		}
 		
 		try {
 			WasdiLog.debugLog("QueryExecutorFactory.static constructor, s_aoExecutors content:");
@@ -101,10 +63,7 @@ public class QueryExecutorFactory {
 		
 		QueryExecutor oExecutor = null;
 		if(null!=sProvider) {
-			Supplier<QueryExecutor> oSupplier = s_aoExecutors.get(sProvider);
-			if(null!=oSupplier) {
-				oExecutor = oSupplier.get();
-			}
+			oExecutor = s_aoExecutors.get(sProvider);
 		} else {
 			WasdiLog.debugLog("QueryExecutorFactory.QueryExecutor: sProvider is null");
 		}

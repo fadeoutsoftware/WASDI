@@ -28,6 +28,10 @@ public class DataProviderConfig {
 	 */
 	public String name;
 	/**
+	 * Full Class Name and Path of the class implementing this Query Executor
+	 */
+	public String classpath;
+	/**
 	 * Description of the Data Provider
 	 */
 	public String description;
