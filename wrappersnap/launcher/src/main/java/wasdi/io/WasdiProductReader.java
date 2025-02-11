@@ -108,8 +108,16 @@ public abstract class WasdiProductReader {
      * Applies any needed adjustment to the file immediatly after the download
      * @return
      */
-    public abstract String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider);
-	
+    public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
+    	return adjustFileAfterDownload(sDownloadedFileFullPath, sFileNameFromProvider, null);
+    }
+
+    /**
+     * Applies any needed adjustment to the file immediatly after the download
+     * @return
+     */
+    public abstract String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider, String sPlatform);
+
     /**
      * Get the file in a format suitable for publish band
      * @return

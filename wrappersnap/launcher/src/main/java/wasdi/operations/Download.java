@@ -465,7 +465,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 	            }
 	            
 	            // Compute the score for this Provider Adapter				
-	            int iScore = oProviderAdapter.getScoreForFile(oParameter.getName());
+	            int iScore = oProviderAdapter.getScoreForFile(oParameter.getName(), oParameter.getPlatform());
 	            
 	            // Score must be > 0, otherwise file is not supported
 	            if (iScore > 0) {
@@ -543,7 +543,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 		QueryExecutor oQueryExecutor = QueryExecutorFactory.getExecutor(oProviderAdapter.getCode());
 		
 		// Must obtain the URI!!
-		String sFileUri = oQueryExecutor.getUriFromProductName(oParameter.getName(), WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode()).defaultProtocol, oParameter.getUrl());
+		String sFileUri = oQueryExecutor.getUriFromProductName(oParameter.getName(), WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode()).defaultProtocol, oParameter.getUrl(), oParameter.getPlatform());
 		
 		if (!Utils.isNullOrEmpty(sFileUri)) {
 			// If we got the URI, this is the best Provider Adapter

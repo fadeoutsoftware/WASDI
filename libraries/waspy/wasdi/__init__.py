@@ -2628,7 +2628,7 @@ def getProductBBOX(sFileName):
     return ""
 
 
-def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None):
+def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None, sPlatformType=None):
     """
     Imports a product from a Provider in WASDI, starting from the File URL.
 
@@ -2643,6 +2643,8 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
     :param sVolumeName: if the file is in a Volume, the name of the volume
 
     :param sVolumePath: if the file is in a Volume, the path of the file in the volume
+
+    :param sPlatformType: the platform (aka Mission) of the file to ingest
     
     :return: execution status as a STRING. Can be DONE, ERROR, STOPPED.
     """
@@ -2650,7 +2652,7 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
     sReturn = "ERROR"
 
     try:
-        sProcessId = asynchImportProductByFileUrl(sFileUrl, sName, sBoundingBox, sProvider, sVolumeName, sVolumePath)
+        sProcessId = asynchImportProductByFileUrl(sFileUrl, sName, sBoundingBox, sProvider, sVolumeName, sVolumePath, sPlatformType)
         sReturn = waitProcess(sProcessId)
     except Exception as oEx:
         wasdiLog("[ERROR] waspy.importProductByFileUrl: there was an error importing a product " + str(oEx))
@@ -2658,7 +2660,7 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
     return sReturn
 
 
-def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None):
+def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None, sPlatformType=None):
     """
     Asynch Import of a product from a Provider in WASDI, starting from file URL
 
@@ -2673,6 +2675,8 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
     :param sVolumeName: if the file is in a Volume, the name of the volume
 
     :param sVolumePath: if the file is in a Volume, the path of the file in the volume
+
+    :param sPlatformType: the platform (aka Mission) of the file to ingest
     
     :return: ProcessId of the Download Operation, "DONE" if the file is imported or "ERROR" if there is any problem
     """
@@ -2695,6 +2699,7 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
     oImageImportViewModel["bbox"] = sBoundingBox
     oImageImportViewModel["volumeName"] = sVolumeName
     oImageImportViewModel["volumePath"] = sVolumePath
+    oImageImportViewModel["platform"] = sPlatformType
 
     if getIsOnServer() is True or getIsOnExternalServer() is True:
         oImageImportViewModel["parent"] = getProcId()
@@ -2757,7 +2762,11 @@ def importProduct(oProduct, sProvider=None):
         if "title" in oProduct:
             sName = oProduct['title']
 
-        return importProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
+        sPlatform = None
+        if "platform" in oProduct:
+            sPlatform = oProduct["platform"]
+
+        return importProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"], sPlatformType=sPlatform)
     except Exception as e:
         wasdiLog("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
@@ -2795,8 +2804,12 @@ def asynchImportProduct(oProduct, sProvider=None):
         if "title" in oProduct:
             sName = oProduct["title"]
 
+        sPlatform = None
+        if "platform" in oProduct:
+            sPlatform = oProduct["platform"]
+
         return asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
-                                            sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
+                                            sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"], sPlatformType=sPlatform)
     except Exception as e:
         wasdiLog("[ERROR] waspy.asynchImportProduct: exception " + str(e))
         return "ERROR"
@@ -2837,9 +2850,13 @@ def importProductList(aoProducts, sProvider=None):
                 if "provider" in oProduct:
                     sActualProvider = oProduct["provider"]
 
+            sPlatform = None
+            if "platform" in oProduct:
+                sPlatform = oProduct["platform"]
+
             # Start the download propagating the Asynch Flag
             sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
-                                                   sProvider=sActualProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
+                                                   sProvider=sActualProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"], sPlatformType=sPlatform)
 
             # Append the process id to the list
             asReturnList.append(sReturn)
@@ -2888,9 +2905,13 @@ def asynchImportProductList(aoProducts, sProvider=None):
             if "title" in oProduct:
                 sName = oProduct["title"]
 
+            sPlatform = None
+            if "platform" in oProduct:
+                sPlatform = oProduct["platform"]
+
             # Start the download propagating the Asynch Flag
             sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
-                                                   sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
+                                                   sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"], sPlatformType=sPlatform)
             # Append the process id to the list
             asReturnList.append(sReturn)
         except Exception as e:

@@ -368,6 +368,7 @@ public class FileBufferResource {
 			String sWorkspaceId = oImageImportViewModel.getWorkspace();
 			String sBoundingBox = oImageImportViewModel.getBbox();
 			String sParentProcessWorkspaceId = oImageImportViewModel.getParent();
+			String sMission = oImageImportViewModel.getPlatform();
 			
 			//check the user can access the workspace
 			if (!PermissionsUtils.canUserWriteWorkspace(sUserId, sWorkspaceId)) {
@@ -376,7 +377,9 @@ public class FileBufferResource {
 				return oResult;
 			}
 			
-			String sMission = MissionUtils.getPlatformFromSatelliteImageFileName(sFileName);
+			if (Utils.isNullOrEmpty(sMission)) {
+				sMission = MissionUtils.getPlatformFromSatelliteImageFileName(sFileName);
+			}
 			
 			WasdiLog.infoLog("FileBufferResource.imageImport: Detected Mission: " + sMission);
 			
@@ -389,6 +392,7 @@ public class FileBufferResource {
 
 			// if the provider is not specified, we fallback on the node default provider
 			DataProvider oProvider = null;
+			
 			if (Utils.isNullOrEmpty(sProvider)) {
 				oProvider = m_oDataProviderCatalog.getDefaultProvider(WasdiConfig.Current.nodeCode);
 				
@@ -481,6 +485,7 @@ public class FileBufferResource {
 			oParameter.setDownloadPassword(oProvider.getOSPassword());
 			oParameter.setProvider(oProvider.getName());
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+			oParameter.setPlatform(sMission);
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
 			

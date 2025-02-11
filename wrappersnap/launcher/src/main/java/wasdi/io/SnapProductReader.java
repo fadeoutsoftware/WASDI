@@ -199,9 +199,14 @@ public class SnapProductReader extends WasdiProductReader {
     }
     
 	@Override
-	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
+	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider, String sPlatform) {
 		
 		String sFileName = sDownloadedFileFullPath;
+		
+		if (Utils.isNullOrEmpty(sPlatform)) {
+			sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(sFileNameFromProvider);
+		}
+		
 		try {
 
 	        if (sFileNameFromProvider.startsWith("S3") && sFileNameFromProvider.toLowerCase().endsWith(".zip")) {
@@ -214,7 +219,7 @@ public class SnapProductReader extends WasdiProductReader {
 	            sFileName = sFolderName + "/" + "xfdumanifest.xml";
 	            WasdiLog.debugLog("SnapProductReader.adjustFileAfterDownload: File Name changed in: " + sFileName);
 	        } 
-	        else if(MissionUtils.getPlatformFromSatelliteImageFileName(sFileNameFromProvider).equals(Platforms.LANDSAT5)
+	        else if(sPlatform.equals(Platforms.LANDSAT5)
 	        		&& sFileNameFromProvider.endsWith(".zip")) {
 	        	WasdiLog.debugLog("SnapProductReader.adjustFileAfterDownload: File is a Landsat-5 product, start unzip");
 	        	String sDownloadFolderPath = new File(sDownloadedFileFullPath).getParentFile().getPath();

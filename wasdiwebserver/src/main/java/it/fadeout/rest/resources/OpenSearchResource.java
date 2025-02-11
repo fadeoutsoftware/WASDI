@@ -190,11 +190,12 @@ public class OpenSearchResource {
 				// Do we have results?
 				if (aoProviderResults != null) {
 					
-					if (sOriginalProvider.equals("AUTO")) {
-						// Set the provider as it was in original
-						for (QueryResultViewModel oResult : aoProviderResults) {
+					for (QueryResultViewModel oResult : aoProviderResults) {
+						oResult.setPlatform(sPlatformType);
+						if (sOriginalProvider.equals("AUTO")) {
+							// Set the provider as it was in original						
 							oResult.setProvider(sOriginalProvider);
-						}								
+						}
 					}
 					
 					WasdiLog.debugLog("OpenSearchResource.search: found " + aoProviderResults.size() + " results for " + sProvider);
@@ -497,6 +498,8 @@ public class OpenSearchResource {
 										// Here add the results checking to avoid duplicates
 										for (QueryResultViewModel oTempResult : aoProviderPageResult) {
 											if (!aoResults.contains(oTempResult)) {
+												// Set the platform type
+												oTempResult.setPlatform(sPlatformType);												
 												aoResults.add(oTempResult);
 												iAddedResults++;
 											}
@@ -519,7 +522,6 @@ public class OpenSearchResource {
 							// Exit from the providers cylcle
 							if (!bSwitchToNextProvider) sProvider = null;				
 						}
-
 
 						if (bSwitchToNextProvider) {
 							

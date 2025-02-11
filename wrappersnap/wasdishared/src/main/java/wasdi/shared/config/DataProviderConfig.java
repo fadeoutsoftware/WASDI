@@ -30,7 +30,13 @@ public class DataProviderConfig {
 	/**
 	 * Full Class Name and Path of the class implementing this Query Executor
 	 */
-	public String classpath;
+	public String queryExecutorClasspath;
+	
+	/**
+	 * Provider Adapter class path
+	 */
+	public String providerAdapterClasspath;
+	
 	/**
 	 * Description of the Data Provider
 	 */

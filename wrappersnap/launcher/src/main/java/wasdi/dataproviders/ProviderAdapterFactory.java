@@ -6,12 +6,14 @@
  */
 package wasdi.dataproviders;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * @author c.nattero
@@ -19,34 +21,21 @@ import wasdi.shared.utils.Utils;
  */
 public class ProviderAdapterFactory {
 
-	private static final Map<String, Supplier<ProviderAdapter>> s_aoDownloaderSuppliers;
+	private static final Map<String, ProviderAdapter> s_aoDownloaderSuppliers = new HashMap<>();
 
 	static {
-		final Map<String, Supplier<ProviderAdapter>> aoDownloaders = new HashMap<>();
-		aoDownloaders.put("ONDA", ONDAProviderAdapter::new);
-		aoDownloaders.put("PROBAV", PROBAVProviderAdapter::new);
-		aoDownloaders.put("CREODIAS", CREODIASProviderAdapter::new);
-		aoDownloaders.put("CREODIAS2", CreoDias2ProviderAdapter::new);
-		aoDownloaders.put("SOBLOO", SOBLOOProviderAdapter::new);
-		aoDownloaders.put("EODC", EODCProviderAdapter::new);
-		aoDownloaders.put("LSA", LSAProviderAdapter::new);
-		aoDownloaders.put("VIIRS", VIIRSProviderAdapter::new);
-		aoDownloaders.put("ADS", ADSProviderAdapter::new);
-		aoDownloaders.put("CDS", CDS2ProviderAdapter::new);
-		aoDownloaders.put("PLANET", PLANETProviderAdapter::new);
-		aoDownloaders.put("TERRASCOPE", TerrascopeProviderAdapter::new);
-		aoDownloaders.put("STATICS", STATICSProviderAdapter::new);
-		aoDownloaders.put("GPM", GPMProviderAdapter::new);
-		aoDownloaders.put("COPERNICUSMARINE", CM2ProviderAdapter::new);
-		aoDownloaders.put("CLOUDFERRO", CloudferroProviderAdapter::new);
-		aoDownloaders.put("SKYWATCH", SkywatchProviderAdapter::new);
-		aoDownloaders.put("LPDAAC", LpDaacProviderAdapter::new);
-		aoDownloaders.put("JRC", JRCProviderAdapter::new);
-		aoDownloaders.put("DLR", DLRProviderAdapter::new);
-		aoDownloaders.put("SINA", SinaProviderAdapter::new);		
-		aoDownloaders.put("EXT_WEB", ExtWebProviderAdapter::new);
-		aoDownloaders.put("ESA", ESAProviderAdapter::new);
-		s_aoDownloaderSuppliers = Collections.unmodifiableMap(aoDownloaders);
+		
+		ArrayList<DataProviderConfig> aoDataProviders = WasdiConfig.Current.dataProviders;
+		
+		for (DataProviderConfig oDPConfig : aoDataProviders) {
+			try {
+				String sName = oDPConfig.name;
+				ProviderAdapter oQueryExecutor = (ProviderAdapter) Class.forName(oDPConfig.providerAdapterClasspath).getDeclaredConstructor().newInstance();
+				s_aoDownloaderSuppliers.put(sName, oQueryExecutor);
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("ProviderAdapterFactory.static: exception creating a Query Executor: " + oEx.toString());
+			} 
+		}
 	}
 
 	/**
@@ -71,8 +60,7 @@ public class ProviderAdapterFactory {
 	public ProviderAdapter supplyProviderAdapter(String sProviderAdapterType) {
 		validateProviderAdapterType(sProviderAdapterType);
 
-		Supplier<ProviderAdapter> oSupplier = s_aoDownloaderSuppliers.get(sProviderAdapterType);
-		ProviderAdapter oResult = oSupplier.get();
+		ProviderAdapter oResult = s_aoDownloaderSuppliers.get(sProviderAdapterType);
 
 		return oResult;
 	}

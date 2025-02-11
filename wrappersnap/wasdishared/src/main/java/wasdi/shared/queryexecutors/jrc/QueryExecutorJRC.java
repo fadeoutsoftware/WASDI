@@ -225,7 +225,7 @@ public class QueryExecutorJRC extends QueryExecutor {
 
         if (Utils.isNullOrEmpty(sOriginalUrl)) {
             WasdiLog.warnLog("QueryExecutorJRC.getUriFromProductName: sOriginalUrl is null, try to recover with the base implementation");
-            return super.getUriFromProductName(sProduct, sProtocol, sOriginalUrl);
+            return super.getUriFromProductName(sProduct, sProtocol, sOriginalUrl, Platforms.JRC_GHSL);
         }
         else {
             String [] asParts = sOriginalUrl.split(";");

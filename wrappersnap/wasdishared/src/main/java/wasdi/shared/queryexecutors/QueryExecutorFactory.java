@@ -9,7 +9,6 @@ package wasdi.shared.queryexecutors;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import wasdi.shared.business.AuthenticationCredentials;
 import wasdi.shared.config.DataProviderConfig;
@@ -33,7 +32,7 @@ public class QueryExecutorFactory {
 		for (DataProviderConfig oDPConfig : aoDataProviders) {
 			try {
 				String sName = oDPConfig.name;
-				QueryExecutor oQueryExecutor = (QueryExecutor) Class.forName(oDPConfig.classpath).getDeclaredConstructor().newInstance();
+				QueryExecutor oQueryExecutor = (QueryExecutor) Class.forName(oDPConfig.queryExecutorClasspath).getDeclaredConstructor().newInstance();
 				s_aoExecutors.put(sName, oQueryExecutor);
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("QueryExecutorFactory.static: exception creating a Query Executor: " + oEx.toString());
@@ -41,7 +40,6 @@ public class QueryExecutorFactory {
 		}
 		
 		try {
-			WasdiLog.debugLog("QueryExecutorFactory.static constructor, s_aoExecutors content:");
 			String sExecutors = "";
 			
 			for (String sKey : s_aoExecutors.keySet()) {
