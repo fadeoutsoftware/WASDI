@@ -46,11 +46,6 @@ public class EsriHDRLightReader extends WasdiProductReader {
 	}
 
 	@Override
-	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
-		return sDownloadedFileFullPath;
-	}
-
-	@Override
 	public File getFileForPublishBand(String sBand, String sLayerId) {
 		return null;
 	}

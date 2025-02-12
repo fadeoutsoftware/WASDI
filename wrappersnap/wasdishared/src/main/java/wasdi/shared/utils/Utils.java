@@ -197,7 +197,7 @@ public class Utils {
 
 		long lTimeInMillis = oDate.getTime();
 
-		return new Double(lTimeInMillis);
+		return Double.valueOf(lTimeInMillis);
 	}
 	
 	public static long getProcessWorkspaceSecondsDuration(ProcessWorkspace oProcessWorkspace) {

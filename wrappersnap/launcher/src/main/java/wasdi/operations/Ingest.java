@@ -172,7 +172,7 @@ public class Ingest extends Operation {
 
             // add product to db
             addProductToDbAndWorkspaceAndSendToRabbit(oImportProductViewModel, oDstFile.getAbsolutePath(),
-                    oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), null, true, true, oParameter.getStyle());
+                    oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), null, true, true, oParameter.getStyle(), oParameter.getPlatform());
             
             updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
 

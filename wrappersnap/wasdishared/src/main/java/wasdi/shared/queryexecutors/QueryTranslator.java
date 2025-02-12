@@ -6,7 +6,6 @@
  */
 package wasdi.shared.queryexecutors;
 
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -482,10 +481,6 @@ public abstract class QueryTranslator {
 					}
 				}
 				
-				//no platform? see if we can infer it from the product name (provided it's not null)
-				if(Utils.isNullOrEmpty(oResult.platformName) && !Utils.isNullOrEmpty(oResult.productName)){
-					reverseEngineerQueryFromProductName(oResult, oResult.productName);
-				}
 			} catch (Exception oE) {
 				WasdiLog.errorLog("QueryTranslator.parseWasdiClientQuery: could not identify footprint substring limits: ", oE);
 			}
@@ -525,82 +520,138 @@ public abstract class QueryTranslator {
 			parseInterval(sQuery, sKeyword, asInterval);
 			oResult.endFromDate = asInterval[0];
 			oResult.endToDate = asInterval[1];
+			
+			boolean bFound = false;
 
 			// Try to get info about S1
-			parseSentinel1(sQuery, oResult);
+			bFound = parseSentinel1(sQuery, oResult);
 
-			// Try to get Info About S2
-			parseSentinel2(sQuery, oResult);
-			
-			// Try get Info about VIIRS
-			parseVIIRS(sQuery, oResult);
-			
-			// Try get Info about ERA5
-			parseERA5(sQuery, oResult);
+			if (!bFound) {
+				// Try to get Info About S2
+				bFound = parseSentinel2(sQuery, oResult);				
+			}
 
-			// Try get Info about CAMS
-			parseCAMS(sQuery, oResult);
+			if (!bFound) {
+				// Try get Info about VIIRS
+				parseVIIRS(sQuery, oResult);				
+			}
 			
-			// Try to get info about Landsat-5 or Landsat-7
-			parseLandsat5And7(sQuery, oResult);
+			if (!bFound) {
+				// Try get Info about ERA5
+				parseERA5(sQuery, oResult);				
+			}
 
-			// Try to get info about Landsat-8
-			parseLandsat(sQuery, oResult);
+			if (!bFound) {
+				// Try get Info about CAMS
+				parseCAMS(sQuery, oResult);				
+			}
 			
-			// Try to get Info about ProbaV
-			parseProbaV(sQuery, oResult);
-			
-			// Try to get Info about Sentinel 3
-			parseSentinel3(sQuery, oResult);
-			
-			// Try to get info about Envisat
-			parseEnvisat(sQuery, oResult);
-			
-			// Try to get info about Copernicus Marine
-			parseCopernicusMarine(sQuery, oResult);
-			
-			// Try to get Info about Sentinel 5P
-			parseSentinel5P(sQuery, oResult);
-			
-			parseSentinel6(sQuery, oResult);
-			
-			parsePlanet(sQuery, oResult);
+			if (!bFound) {
+				// Try to get info about Landsat-5 or Landsat-7
+				parseLandsat5And7(sQuery, oResult);				
+			}
 
-			// Try get Info about DEM
-			parseDEM(sQuery, oResult);
+			if (!bFound) {
+				// Try to get info about Landsat-8
+				parseLandsat(sQuery, oResult);				
+			}
+			
+			if (!bFound) {
+				// Try to get Info about ProbaV
+				parseProbaV(sQuery, oResult);				
+			}
+			
+			if (!bFound) {
+				// Try to get Info about Sentinel 3
+				parseSentinel3(sQuery, oResult);				
+			}
+			
+			if (!bFound) {
+				// Try to get info about Envisat
+				parseEnvisat(sQuery, oResult);				
+			}
+			
+			if (!bFound) {
+				// Try to get info about Copernicus Marine
+				parseCopernicusMarine(sQuery, oResult);				
+			}
+			
+			
+			if (!bFound) {
+				// Try to get Info about Sentinel 5P				
+				bFound = parseSentinel5P(sQuery, oResult);
+			}			
+			
+			if (!bFound) {
+				bFound = parseSentinel6(sQuery, oResult); 
+			}			
+			
+			
+			if (!bFound) {
+				bFound = parsePlanet(sQuery, oResult); 
+			}			
+			
+			if (!bFound) {
+				// Try get Info about DEM				
+				bFound =parseDEM(sQuery, oResult); 
+			}			
 
-			// Try get Info about WorldCover
-			parseWorldCover(sQuery, oResult);
+			if (!bFound) {
+				// Try get Info about WorldCover				
+				bFound = parseWorldCover(sQuery, oResult); 
+			}
 			
-			// Try get Info about Statics: needs the original query to avoid
-			// Conflits with the "AND" literal
-			parseStatics(sOriginalQuery, oResult);
+			if (!bFound) {
+				// Try get Info about Statics: needs the original query to avoid
+				// Conflits with the "AND" literal				
+				bFound = parseStatics(sOriginalQuery, oResult); 
+			}			
 
-			// Try get Info about IMERG
-			parseIMERG(sQuery, oResult);
+			if (!bFound) {
+				// Try get Info about IMERG				
+				bFound = parseIMERG(sQuery, oResult); 
+			}			
 
-			// Try get Info about CM
-			parseCM(sQuery, oResult);
+			if (!bFound) {
+				// Try get Info about CM				
+				bFound = parseCM(sQuery, oResult); 
+			}			
 
-			// Try get Info about ECOSTRESS
-			parseECOSTRESS(sQuery, oResult);
+			if (!bFound) {
+				// Try get Info about ECOSTRESS				
+				bFound = parseECOSTRESS(sQuery, oResult); 
+			}			
 			
-			// Try get Info about Earthcache
-			parseEarthcache(sQuery, oResult);
+			if (!bFound) {
+				// Try get Info about Earthcache				
+				bFound = parseEarthcache(sQuery, oResult); 
+			}			
 			
-			// Try to get info about Terra
-			parseTerra(sQuery, oResult);
+			if (!bFound) {
+				// Try to get info about Terra				
+				bFound = parseTerra(sQuery, oResult); 
+			}		
 			
-			// Try to get the info for semi-static provided files
-			parseStaticTiles(sQuery, oResult);
-			
-			parseWFS(sQuery, oResult);
+			if (!bFound) {
+				// Try to get the info for semi-static provided files				
+				bFound = parseStaticTiles(sQuery, oResult); 
+			}			
+
+			if (!bFound) {
+				bFound = parseWFS(sQuery, oResult); 
+			}			
 						
-			parseBIGBANG(sQuery, oResult);
+			if (!bFound) {
+				bFound = parseBIGBANG(sQuery, oResult); 
+			}			
 			
-			parseERS(sQuery, oResult);
-
-			parseMeteOcean(sQuery, oResult);
+			if (!bFound) {
+				bFound = parseERS(sQuery, oResult); 
+			}			
+			
+			if (!bFound) {
+				bFound = parseMeteOcean(sQuery, oResult); 
+			}
 						
 			if (Utils.isNullOrEmpty(oResult.platformName)) {
 				WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: platformName not found: try to read the generic one");
@@ -619,10 +670,19 @@ public abstract class QueryTranslator {
 				}
 			}
 			
+			if ( Utils.isNullOrEmpty(oResult.platformName) && !Utils.isNullOrEmpty(oResult.productName) ) {
+				WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: platformName still not found: try to get it from the file name");
+				oResult.platformName = MissionUtils.getPlatformFromSatelliteImageFileName(oResult.productName);
+				
+				if (!Utils.isNullOrEmpty(oResult.platformName))  {
+					WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: found platformName: " + oResult.platformName);
+				}
+			}
+			
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
+			WasdiLog.errorLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
-			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: stack " + sStack);
+			WasdiLog.errorLog("QueryTranslator.parseWasdiClientQuery: stack " + sStack);
 		}
 
 		return oResult;
@@ -658,9 +718,10 @@ public abstract class QueryTranslator {
 	 * @param sQuery
 	 * @param oResult
 	 */
-	private void parseSentinel1(String sQuery, QueryViewModel oResult) {
+	private boolean parseSentinel1(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_SENTINEL_1)) {
+				
 				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_SENTINEL_1);
 
 				oResult.platformName = Platforms.SENTINEL1;
@@ -690,8 +751,7 @@ public abstract class QueryTranslator {
 						oResult.productType = sType;
 					}
 				} catch (Exception oE) {
-					WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery
-							+ " ): error while parsing product type: " + oE);
+					WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): error while parsing product type: " + oE);
 				}
 
 				// check for sensor mode
@@ -755,10 +815,14 @@ public abstract class QueryTranslator {
 								+ " ): error while parsing relative orbit: " + oE);
 					}
 				}				
+				
+				return true;
 			}
-		} catch (Exception oE) {
+		} 
+		catch (Exception oE) {
 			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
 		}
+		return false;
 	}
 
 	/**
@@ -767,7 +831,7 @@ public abstract class QueryTranslator {
 	 * @param sQuery
 	 * @param oResult
 	 */
-	private void parseSentinel2(String sQuery, QueryViewModel oResult) {
+	private boolean parseSentinel2(String sQuery, QueryViewModel oResult) {
 
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_SENTINEL_2)) {
@@ -777,10 +841,15 @@ public abstract class QueryTranslator {
 
 				// check for cloud coverage
 				parseCloudCoverage(sQuery, oResult);
+				
+				return true;
 			}
-		} catch (Exception oE) {
+		} 
+		catch (Exception oE) {
 			WasdiLog.debugLog("QueryTranslator.parseSentinel_2( " + sQuery + " ): " + oE);
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -829,7 +898,7 @@ public abstract class QueryTranslator {
 	 * @param sQuery
 	 * @param oResult
 	 */
-	private void parseVIIRS(String sQuery, QueryViewModel oResult) {
+	private boolean parseVIIRS(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_VIIRS)) {
 				// sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_VIIRS);
@@ -846,12 +915,16 @@ public abstract class QueryTranslator {
 						oResult.productType = sProductType;
 					}
 				} catch (Exception oE) {
-					WasdiLog.debugLog("QueryTranslator.parseVIIRS( " + sQuery + " ): error while parsing product type: " + oE);
+					WasdiLog.warnLog("QueryTranslator.parseVIIRS( " + sQuery + " ): error while parsing product type: " + oE);
 				}
+				
+				return true;
 			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
+		} 
+		catch (Exception oE) {
+			WasdiLog.warnLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
 		}
+		return false;
 	}
 
 	/**
@@ -860,7 +933,7 @@ public abstract class QueryTranslator {
 	 * @param sQuery the query
 	 * @param oResult the resulting Query View Model
 	 */
-	private void parseERA5(String sQuery, QueryViewModel oResult) {
+	private boolean parseERA5(String sQuery, QueryViewModel oResult) {
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ERA5)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_ERA5);
 
@@ -873,7 +946,10 @@ public abstract class QueryTranslator {
 			oResult.timeliness = extractValue(sQuery, "format");
 			oResult.startToDate = extractValue(sQuery, "aggregation");
 			oResult.instrument = extractValue(sQuery, "version");
+			return true;
 		}
+		
+		return false;
 	}
 
 	/**
@@ -882,7 +958,7 @@ public abstract class QueryTranslator {
 	 * @param sQuery the query
 	 * @param oResult the resulting Query View Model
 	 */
-	private void parseCAMS(String sQuery, QueryViewModel oResult) {
+	private boolean parseCAMS(String sQuery, QueryViewModel oResult) {
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_CAMS)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_CAMS);
 
@@ -891,9 +967,12 @@ public abstract class QueryTranslator {
 			oResult.productName = extractValue(sQuery, "dataset");
 			oResult.productType = extractValue(sQuery, "type");
 			oResult.sensorMode = extractValue(sQuery, "variables");
-//			oResult.productLevel = extractValue(sQuery, "pressureLevels");
 			oResult.timeliness = extractValue(sQuery, "format");
+			
+			return true;
 		}
+		
+		return false;
 	}
 
 	/**
@@ -902,7 +981,7 @@ public abstract class QueryTranslator {
 	 * @param sQuery the query
 	 * @param oResult the resulting Query View Model
 	 */
-	private void parseEarthcache(String sQuery, QueryViewModel oResult) {
+	private boolean parseEarthcache(String sQuery, QueryViewModel oResult) {
 		if (sQuery.contains(QueryTranslator.S_SPLATFORMNAME_EARTHCACHE)) {
 			sQuery = removePlatformToken(sQuery, S_SPLATFORMNAME_EARTHCACHE);
 
@@ -920,7 +999,11 @@ public abstract class QueryTranslator {
 					WasdiLog.debugLog("QueryTranslator.parseEarthcache( " + sQuery  + " ): error while parsing coverage: " + sCoverage);
 				}
 			}
+			
+			return true;
 		}
+		
+		return false;
 	}
 
 	/**
@@ -929,14 +1012,19 @@ public abstract class QueryTranslator {
 	 * @param sQuery the query
 	 * @param oResult the resulting Query View Model
 	 */
-	private void parseDEM(String sQuery, QueryViewModel oResult) {
+	private boolean parseDEM(String sQuery, QueryViewModel oResult) {
+		
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_DEM)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_DEM);
 
 			oResult.platformName = Platforms.DEM;
 
 			oResult.productType = extractValue(sQuery, "dataset");
+			
+			return true;
 		}
+		
+		return false;
 	}
 
 	/**
@@ -945,7 +1033,7 @@ public abstract class QueryTranslator {
 	 * @param sQuery the query
 	 * @param oResult the resulting Query View Model
 	 */
-	private void parseECOSTRESS(String sQuery, QueryViewModel oResult) {
+	private boolean parseECOSTRESS(String sQuery, QueryViewModel oResult) {
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ECOSTRESS)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_ECOSTRESS);
 
@@ -958,12 +1046,16 @@ public abstract class QueryTranslator {
 				try {
 					oResult.relativeOrbit = Integer.valueOf(sRelativeOrbitNumber);
 				} catch (Exception oE) {
-					WasdiLog.debugLog("QueryTranslator.parseECOSTRESS( " + sQuery  + " ): error while parsing relativeOrbitNumber: " + sRelativeOrbitNumber);
+					WasdiLog.warnLog("QueryTranslator.parseECOSTRESS( " + sQuery  + " ): error while parsing relativeOrbitNumber: " + sRelativeOrbitNumber);
 				}
 			}
 
 			oResult.timeliness = extractValue(sQuery, "dayNightFlag");
+			
+			return true;
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -972,14 +1064,18 @@ public abstract class QueryTranslator {
 	 * @param sQuery the query
 	 * @param oResult the resulting Query View Model
 	 */
-	private void parseTerra(String sQuery, QueryViewModel oResult) {
+	private boolean parseTerra(String sQuery, QueryViewModel oResult) {
 		if (sQuery.contains(QueryTranslator.S_SPLATFORMNAME_TERRA)) {
 			sQuery = removePlatformToken(sQuery, QueryTranslator.S_SPLATFORMNAME_TERRA);
 
 			oResult.platformName = Platforms.TERRA;
 			
 			oResult.productType = extractValue(sQuery, "producttype");
+			
+			return true;
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -988,12 +1084,16 @@ public abstract class QueryTranslator {
 	 * @param sQuery the query
 	 * @param oResult the resulting Query View Model
 	 */
-	private void parseWFS(String sQuery, QueryViewModel oResult) {
+	private boolean parseWFS(String sQuery, QueryViewModel oResult) {
 		if (sQuery.contains(QueryTranslator.S_SPLATFORMNAME_WSF)) {
 			sQuery = removePlatformToken(sQuery, QueryTranslator.S_SPLATFORMNAME_WSF);
 
 			oResult.platformName = Platforms.WSF;
+			
+			return true;
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -1002,12 +1102,16 @@ public abstract class QueryTranslator {
 	 * @param sQuery the query
 	 * @param oResult the resulting Query View Model
 	 */
-	private void parseStaticTiles(String sQuery, QueryViewModel oResult) {
+	private boolean parseStaticTiles(String sQuery, QueryViewModel oResult) {
 		if (sQuery.contains(QueryTranslator.s_SPLATFORMNAME_JRC_GHSL)) {
 			sQuery = removePlatformToken(sQuery, QueryTranslator.s_SPLATFORMNAME_JRC_GHSL);
 
 			oResult.platformName = Platforms.JRC_GHSL;
+			
+			return true;
 		}
+		
+		return false;
 	}
 
 	/**
@@ -1016,14 +1120,17 @@ public abstract class QueryTranslator {
 	 * @param sQuery the query
 	 * @param oResult the resulting Query View Model
 	 */
-	private void parseWorldCover(String sQuery, QueryViewModel oResult) {
+	private boolean parseWorldCover(String sQuery, QueryViewModel oResult) {
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_WORLD_COVER)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_WORLD_COVER);
 
 			oResult.platformName = Platforms.WORLD_COVER;
 
 			oResult.productType = extractValue(sQuery, "dataset");
+			
+			return true;
 		}
+		return false;
 	}
 	
 	/**
@@ -1031,13 +1138,17 @@ public abstract class QueryTranslator {
 	 * @param sQuery
 	 * @param oResult
 	 */
-	private void parseStatics(String sQuery, QueryViewModel oResult) {
+	private boolean parseStatics(String sQuery, QueryViewModel oResult) {
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_STATICS)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_STATICS);
 
 			oResult.platformName = Platforms.STATICS;
 			oResult.productType = extractValue(sQuery, "producttype");
+			
+			return true;
 		}
+		
+		return false;
 	}
 
 	/**
@@ -1046,7 +1157,7 @@ public abstract class QueryTranslator {
 	 * @param sQuery the query
 	 * @param oResult the resulting Query View Model
 	 */
-	private void parseIMERG(String sQuery, QueryViewModel oResult) {
+	private boolean parseIMERG(String sQuery, QueryViewModel oResult) {
 		//WasdiLog.debugLog("QueryTranslator.parseIMERG | sQuery: " + sQuery);
 
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_IMERG)) {
@@ -1057,7 +1168,11 @@ public abstract class QueryTranslator {
 			oResult.productName = extractValue(sQuery, "latency");
 			oResult.productType = extractValue(sQuery, "duration");
 			oResult.productLevel = extractValue(sQuery, "accumulation");
+			
+			return true;
 		}
+		
+		return false;
 	}
 
 	/**
@@ -1066,7 +1181,7 @@ public abstract class QueryTranslator {
 	 * @param sQuery the query
 	 * @param oResult the resulting Query View Model
 	 */
-	private void parseCM(String sQuery, QueryViewModel oResult) {
+	private boolean parseCM(String sQuery, QueryViewModel oResult) {
 
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_CM)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_CM);
@@ -1095,27 +1210,40 @@ public abstract class QueryTranslator {
 					WasdiLog.debugLog("QueryTranslator.parseCM( " + sQuery  + " ): error while parsing endDepth: " + sEndDepth);
 				}
 			}
+			
+			return true;
 		}
+		
+		return false;
 	}
 	
-	private void parseBIGBANG(String sQuery, QueryViewModel oResult) {
+	
+	private boolean parseBIGBANG(String sQuery, QueryViewModel oResult) {
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_BIGBANG)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_BIGBANG);
 			
 			oResult.platformName = Platforms.BIGBANG;
 			oResult.sensorMode = extractValue(sQuery, "dataset");
+			
+			return true;
 		}
+		
+		return false;
 	}
 	
-	private void parseERS(String sQuery, QueryViewModel oResult) {
+	private boolean parseERS(String sQuery, QueryViewModel oResult) {
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ERS)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_ERS);
 			
 			oResult.platformName = Platforms.ERS;
+			
+			return true;
 		}
+		
+		return false;
 	}
 	
-	private void parseMeteOcean(String sQuery, QueryViewModel oResult) {
+	private boolean parseMeteOcean(String sQuery, QueryViewModel oResult) {
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_METEOCEAN)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_METEOCEAN);
 			
@@ -1165,8 +1293,10 @@ public abstract class QueryTranslator {
 				oResult.platformName = null;
 			}
 			
-			
+			return true;
 		}
+		
+		return false;
 	}
 
 	/**
@@ -1217,7 +1347,7 @@ public abstract class QueryTranslator {
 	 * @param sQuery
 	 * @param oResult
 	 */
-	private void parseLandsat5And7(String sQuery, QueryViewModel oResult) {
+	private boolean parseLandsat5And7(String sQuery, QueryViewModel oResult) {
 		try {
 			boolean bIsLandsatProduct = false;
 			
@@ -1246,11 +1376,15 @@ public abstract class QueryTranslator {
 					}
 				} catch (NumberFormatException oEx) {
 					WasdiLog.errorLog("QueryTranslator.parseLandsat5And7: error parsing filters with integer value " + sQuery, oEx);
-				}		
+				}	
+				
+				return true;
 			}
 		} catch (Exception oE) {
 			WasdiLog.errorLog("QueryTranslator.parseLandsat5And7 ( " + sQuery + " ): ", oE);
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -1258,7 +1392,7 @@ public abstract class QueryTranslator {
 	 * @param sQuery
 	 * @param oResult
 	 */
-	private void parseLandsat(String sQuery, QueryViewModel oResult) {
+	private boolean parseLandsat(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_LANDSAT)) {
 				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_LANDSAT);
@@ -1296,18 +1430,22 @@ public abstract class QueryTranslator {
 						oResult.productType = sType;
 					}
 				} catch (Exception oE) {
-					WasdiLog.debugLog("QueryTranslator.parseLandsat( " + sQuery
-							+ " ): error while parsing product type: " + oE);
+					WasdiLog.warnLog("QueryTranslator.parseLandsat( " + sQuery + " ): error while parsing product type: " + oE);
 				}
 				
 				parseCloudCoverage(sQuery, oResult);
+				
+				return true;
 			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("QueryTranslator.parseLandsat( " + sQuery + " ): " + oE);
+		} 
+		catch (Exception oE) {
+			WasdiLog.warnLog("QueryTranslator.parseLandsat( " + sQuery + " ): " + oE);
 		}
+		
+		return false;
 	}
 	
-	private void parseProbaV(String sQuery, QueryViewModel oResult) {
+	private boolean parseProbaV(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_PROBAV)) {
 				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_PROBAV);
@@ -1339,15 +1477,18 @@ public abstract class QueryTranslator {
 						oResult.productType = sType;
 					}
 				} catch (Exception oE) {
-					WasdiLog.debugLog("QueryTranslator.parseProbaV( " + sQuery
-							+ " ): error while parsing product type: " + oE);
+					WasdiLog.warnLog("QueryTranslator.parseProbaV( " + sQuery + " ): error while parsing product type: " + oE);
 				}
 				
 				parseCloudCoverage(sQuery, oResult);
+				
+				return true;
 			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("QueryTranslator.parseProbaV( " + sQuery + " ): " + oE);
+		} 
+		catch (Exception oE) {
+			WasdiLog.warnLog("QueryTranslator.parseProbaV( " + sQuery + " ): " + oE);
 		}
+		return false;
 	}	
 	
 	/**
@@ -1355,7 +1496,7 @@ public abstract class QueryTranslator {
 	 * @param sQuery
 	 * @param oResult
 	 */
-	private void parseSentinel3(String sQuery, QueryViewModel oResult) {
+	private boolean parseSentinel3(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_SENTINEL_3)) {
 				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_SENTINEL_3);
@@ -1427,10 +1568,14 @@ public abstract class QueryTranslator {
 				} catch (Exception oE) {
 					WasdiLog.warnLog("QueryTranslator.parseSentinel3( " + sQuery + "): error while parsing processing level: " + oE);
 				}
+				
+				return true;
 			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): " + oE);
+		} 
+		catch (Exception oE) {
+			WasdiLog.warnLog("QueryTranslator.parseSentinel3( " + sQuery + " ): " + oE);
 		}
+		return false;
 	}
 	
 	/**
@@ -1438,7 +1583,7 @@ public abstract class QueryTranslator {
 	 * @param sQuery
 	 * @param oResult
 	 */
-	private void parseSentinel5P(String sQuery, QueryViewModel oResult) {
+	private boolean parseSentinel5P(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_SENTINEL_5P)) {
 				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_SENTINEL_5P);
@@ -1470,7 +1615,7 @@ public abstract class QueryTranslator {
 						oResult.productLevel = sLevel;
 					}
 				} catch (Exception oE) {
-					WasdiLog.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product level: " + oE);
+					WasdiLog.warnLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product level: " + oE);
 				}
 
 				// check for timeliness
@@ -1494,7 +1639,7 @@ public abstract class QueryTranslator {
 						oResult.timeliness = sTimeliness;
 					}
 				} catch (Exception oE) {
-					WasdiLog.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product type: " + oE);
+					WasdiLog.warnLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product type: " + oE);
 				}
 				
 				
@@ -1527,17 +1672,22 @@ public abstract class QueryTranslator {
 							oResult.absoluteOrbit = iOrbit;
 
 						} catch (Exception oE) {
-							WasdiLog.debugLog("QueryTranslator.parseSentinel5P(" + sQuery + " ): error while parsing absolute orbit: " + oE);
+							WasdiLog.warnLog("QueryTranslator.parseSentinel5P(" + sQuery + " ): error while parsing absolute orbit: " + oE);
 						}
 					}						
 				}
 				catch (Exception oE) {
-					WasdiLog.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing absolute orbit: " + oE);
+					WasdiLog.warnLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing absolute orbit: " + oE);
 				}
+				
+				return true;
 			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): " + oE);
+		} 
+		catch (Exception oE) {
+			WasdiLog.warnLog("QueryTranslator.parseSentinel3( " + sQuery + " ): " + oE);
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -1545,7 +1695,7 @@ public abstract class QueryTranslator {
 	 * @param sQuery
 	 * @param oResult
 	 */
-	private void parseSentinel6(String sQuery, QueryViewModel oResult) {
+	private boolean parseSentinel6(String sQuery, QueryViewModel oResult) {
 		try {
 			
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_SENTINEL_6)) {
@@ -1563,11 +1713,15 @@ public abstract class QueryTranslator {
 						oResult.relativeOrbit = Integer.parseInt(sOrbit);
 				} catch (NumberFormatException oEx) {
 					WasdiLog.errorLog("QueryTranslator.parseSentinel6: error parsing absolute orbit in query " + sQuery, oEx);
-				}			
+				}		
+				
+				return true;
 			}
-		} catch (Exception oE) {
+		} 
+		catch (Exception oE) {
 			WasdiLog.errorLog("QueryTranslator.parseSentinel6. Error parsing query: " + sQuery, oE);
 		}
+		return false;
 	}
 	
 	/**
@@ -1575,7 +1729,7 @@ public abstract class QueryTranslator {
 	 * @param sQuery
 	 * @param oResult
 	 */
-	private void parseEnvisat(String sQuery, QueryViewModel oResult) {
+	private boolean parseEnvisat(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ENVISAT)) {
 				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_ENVISAT);
@@ -1605,13 +1759,17 @@ public abstract class QueryTranslator {
 
 						oResult.productType = sType;
 					}
-				} catch (Exception oE) {
-					WasdiLog.debugLog("QueryTranslator.parseEnvisat( " + sQuery + " ): error while parsing product type: " + oE);
+				} 
+				catch (Exception oE) {
+					WasdiLog.warnLog("QueryTranslator.parseEnvisat( " + sQuery + " ): error while parsing product type: " + oE);
 				}
+				return true;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("QueryTranslator.parseEnvisat( " + sQuery + " ): " + oE);
+			WasdiLog.warnLog("QueryTranslator.parseEnvisat( " + sQuery + " ): " + oE);
 		}
+		
+		return false;
 	}	
 
 	
@@ -1620,16 +1778,21 @@ public abstract class QueryTranslator {
 	 * @param sQuery
 	 * @param oResult
 	 */
-	private void parseCopernicusMarine(String sQuery, QueryViewModel oResult) {
+	private boolean parseCopernicusMarine(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_COPERNICUS_MARINE)) {
 				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_COPERNICUS_MARINE);
 
 				oResult.platformName = Platforms.COPERNICUS_MARINE;
+				
+				return true;
 			}
-		} catch (Exception oE) {
+		} 
+		catch (Exception oE) {
 			WasdiLog.debugLog("QueryTranslator.parseCopernicusMarine( " + sQuery + " ): " + oE);
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -1637,15 +1800,19 @@ public abstract class QueryTranslator {
 	 * @param sQuery
 	 * @param oResult
 	 */
-	private void parsePlanet(String sQuery, QueryViewModel oResult) {
+	private boolean parsePlanet(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_PLANET)) {
-				
 				oResult.platformName = Platforms.PLANET;
+				
+				return true;
 			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("QueryTranslator.parseEnvisat( " + sQuery + " ): " + oE);
+		} 
+		catch (Exception oE) {
+			WasdiLog.warnLog("QueryTranslator.parseEnvisat( " + sQuery + " ): " + oE);
 		}
+		
+		return false;
 	}	
 	
 	/**
@@ -1702,50 +1869,6 @@ public abstract class QueryTranslator {
 			String[] asTimeQuery = sQuery.substring(iStart, iEnd).trim().split(" TO ");
 			asInterval[0] = asTimeQuery[0];
 			asInterval[1] = asTimeQuery[1];
-		}
-	}
-
-	protected void reverseEngineerQueryFromProductName(QueryViewModel oQueryViewModel, String sProductName) {
-		try {
-			if(Utils.isNullOrEmpty(sProductName)) {
-				WasdiLog.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: query is null or empty");
-			}
-			//mission
-			if(sProductName.startsWith("S1")) {
-				oQueryViewModel.platformName = Platforms.SENTINEL1;
-				
-				String[] asTypesA = {"RAW", "GRD", "SLC", "OCN"};
-				if(Arrays.stream(asTypesA).anyMatch((sProductName.substring(7, 10))::equals)){
-					oQueryViewModel.productType=(sProductName.substring(7, 10));
-				} else {
-					WasdiLog.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
-				}
-			} else if (sProductName.startsWith("S2")) {
-				oQueryViewModel.platformName = Platforms.SENTINEL2;
-				String[] asTypesA = {"L1C", "L2A"};
-				if(Arrays.stream(asTypesA).anyMatch((sProductName.substring(7, 10))::equals)){
-					oQueryViewModel.productType="S2MSI" + sProductName.substring(8, 10);
-				} else {
-					WasdiLog.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
-				}
-			} else if(sProductName.startsWith("S3A_") || sProductName.startsWith("S3B_")) {
-				oQueryViewModel.platformName = Platforms.SENTINEL3;
-			} else if(sProductName.startsWith("LC08_")) {
-				oQueryViewModel.platformName = Platforms.LANDSAT8;
-			}  else {
-				
-				String sPlatformName = MissionUtils.getPlatformFromSatelliteImageFileName(sProductName);
-				
-				if (!Utils.isNullOrEmpty(sPlatformName)) {
-					oQueryViewModel.platformName = sPlatformName;
-				}
-				else {
-					WasdiLog.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: platform not recognized (maybe not implemented yet) in product: " + sProductName + ", ignoring");
-				}
-				
-			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: " + oE);
 		}
 	}
 }

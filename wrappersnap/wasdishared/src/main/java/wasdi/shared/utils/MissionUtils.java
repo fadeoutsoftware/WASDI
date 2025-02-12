@@ -328,10 +328,13 @@ public class MissionUtils {
 	 * @param sFileName Name of the Satellite Image File
 	 * @return Reference Date 
 	 */
-	public static Date getDateFromSatelliteImageFileName(String sFileName) {
+	public static Date getDateFromSatelliteImageFileName(String sFileName, String sPlatform) {
 		
 		try {
-			String sPlatform = getPlatformFromSatelliteImageFileName(sFileName);
+			if (Utils.isNullOrEmpty(sPlatform)) {
+				sPlatform = getPlatformFromSatelliteImageFileName(sFileName);	
+			}
+			
 			if (Utils.isNullOrEmpty(sPlatform)) return new Date();
 			
 			if (sPlatform.equals(Platforms.SENTINEL1)) {
@@ -404,10 +407,14 @@ public class MissionUtils {
 	 * @param sFileName Name of the Satellite Image File
 	 * @return Product Type, or ""  
 	 */
-	public static String getProductTypeSatelliteImageFileName(String sFileName) {
+	public static String getProductTypeSatelliteImageFileName(String sFileName, String sPlatform) {
 		
 		try {
-			String sPlatform = getPlatformFromSatelliteImageFileName(sFileName);
+			
+			if (Utils.isNullOrEmpty(sPlatform)) {
+				sPlatform = getPlatformFromSatelliteImageFileName(sFileName);	
+			}
+			
 			if (Utils.isNullOrEmpty(sPlatform)) return "";
 			
 			if (sPlatform.equals(Platforms.SENTINEL1)) {

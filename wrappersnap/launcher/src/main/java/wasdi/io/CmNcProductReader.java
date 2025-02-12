@@ -278,12 +278,6 @@ public class CmNcProductReader extends WasdiProductReader {
 		return new MetadataViewModel("Metadata");
 	}
 
-	@Override
-	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
-		String sFileName = sDownloadedFileFullPath;
-
-		return sFileName;
-	}
 
 	@Override
 	public Product getSnapProduct() {

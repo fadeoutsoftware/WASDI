@@ -87,7 +87,6 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 			String sDateFrom = oQueryViewModel.startFromDate;
 			String sDateTo = oQueryViewModel.endToDate;
 			
-			String sFileName = oQueryViewModel.productName; // TODO
 			String sProductType = oQueryViewModel.productType;
 			
 			// TODO: check where the name of the collection is coming from
@@ -178,7 +177,6 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 			String sDateTo = oQueryViewModel.endToDate;
 			
 			String sProductType = oQueryViewModel.productType;
-			String sFileName = oQueryViewModel.productName; // TODO
 			
 			if (Utils.isNullOrEmpty(sProductType)) {
 				WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product trype not specified");

@@ -2312,7 +2312,7 @@ public class dbUtils {
 			oOgcProcessesClient.setHeaders(asHeaders);
 		}
 		
-		ProcessList oProcList = oOgcProcessesClient.getProcesses();
+		//ProcessList oProcList = oOgcProcessesClient.getProcesses();
 		
 		// Call the deploy function: is a post of the App Deploy Body
 		boolean bApiAnswer = oOgcProcessesClient.deployProcess(sDeployBody);

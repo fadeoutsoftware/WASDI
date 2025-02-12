@@ -135,11 +135,6 @@ public class MeteOceanProductReader extends WasdiProductReader {
 	}
 
 	@Override
-	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
-		return sDownloadedFileFullPath;
-	}
-
-	@Override
 	public File getFileForPublishBand(String sBand, String sLayerId) {
 		try {
 			
@@ -291,7 +286,6 @@ public class MeteOceanProductReader extends WasdiProductReader {
 		String sPath = "C:/Users/valentina.leone/Desktop/WORK/Return/test/hindcast_hs_1979_2005__nseastates_over_p95__seasonalmean.nc";
 		// NetcdfFile oFile = NetcdfFiles.open("C:/Users/valentina.leone/Desktop/WORK/Return/104435/wave_dataset/hindcast_hs_1979_2005__nseastates_over_p95__seasonalmean.nc");
 		MeteOceanProductReader oReader = new MeteOceanProductReader(new File(sPath));
-		ProductViewModel oVM = oReader.getProductViewModel();
 		System.out.println(oReader.getProductBoundingBox());
 		
 		

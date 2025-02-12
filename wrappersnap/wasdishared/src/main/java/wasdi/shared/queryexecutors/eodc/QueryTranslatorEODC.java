@@ -29,7 +29,6 @@ public class QueryTranslatorEODC extends QueryTranslator {
 	private static final String s_sQuerySuffix = "</ogc:And></ogc:Filter></csw:Constraint><ogc:SortBy><ogc:SortProperty><ogc:PropertyName>dc:title</ogc:PropertyName><ogc:SortOrder>ASC</ogc:SortOrder></ogc:SortProperty></ogc:SortBy></csw:Query></csw:GetRecords>";
 	private static final String s_sPLATFORMNAME_SENTINEL_1 = "platformname:Sentinel-1";
 	private static final String s_sRELATIVEORBITNUMBER = "relativeorbitnumber:";
-	private static final String s_sErrorMessage = "ERROR";
 
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.DiasQueryTranslator#translate(java.lang.String)

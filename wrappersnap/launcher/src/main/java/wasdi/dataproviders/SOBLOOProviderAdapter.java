@@ -365,7 +365,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		
 		if (sPlatformType.equals(Platforms.SENTINEL1) || sPlatformType.equals(Platforms.SENTINEL2) 
 				|| sPlatformType.equals(Platforms.SENTINEL3)) {
-			Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName);
+			Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName, sPlatformType);
 			
 			if (oImageDate!=null) {
 				Date oNow = new Date();

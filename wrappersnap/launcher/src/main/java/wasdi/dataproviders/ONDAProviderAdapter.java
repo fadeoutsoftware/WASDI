@@ -602,7 +602,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		if (sPlatformType.equals(Platforms.SENTINEL1) || sPlatformType.equals(Platforms.SENTINEL2) 
 				|| sPlatformType.equals(Platforms.SENTINEL3) || sPlatformType.equals(Platforms.SENTINEL5P) ||
 				sPlatformType.equals(Platforms.LANDSAT8)) {
-			Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName);
+			Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName, sPlatformType);
 			
 			if (oImageDate!=null) {
 				Date oNow = new Date();

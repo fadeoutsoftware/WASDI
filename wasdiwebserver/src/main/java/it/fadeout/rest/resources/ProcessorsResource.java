@@ -182,7 +182,7 @@ public class ProcessorsResource  {
 			
 			// Put the processor as Public by default
 			if (iPublic == null) {
-				iPublic = new Integer(1);
+				iPublic = Integer.valueOf(1);
 			}
 			
 			// Force the name to lower case

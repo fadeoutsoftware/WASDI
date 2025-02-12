@@ -275,14 +275,12 @@ public class SnapProductReader extends WasdiProductReader {
 	}
 	
 	@Override
-	public File getFileForPublishBand(String sBand, String sLayerId) {
+	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
 		
 		m_oProduct = getSnapProduct();
 		
 		String sBaseDir = m_oProductFile.getParentFile().getPath();
 		if (!sBaseDir.endsWith("/")) sBaseDir += "/";
-		
-		String sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(m_oProductFile.getName());
 		
 		if (m_oProductFile.getName().toLowerCase().endsWith(".tif") || m_oProductFile.getName().toLowerCase().endsWith(".tiff")) {
 			
