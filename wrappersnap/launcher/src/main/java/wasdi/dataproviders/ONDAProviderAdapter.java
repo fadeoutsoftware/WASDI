@@ -530,7 +530,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * @see wasdi.filebuffer.DownloadFile#GetFileName(java.lang.String)
 	 */
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		//check whether the file has already been downloaded, else return null
 
 		if (Utils.isNullOrEmpty(sFileURL)) {

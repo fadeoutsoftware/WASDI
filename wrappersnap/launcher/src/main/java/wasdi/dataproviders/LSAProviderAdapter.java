@@ -186,7 +186,7 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		if (Utils.isNullOrEmpty(sFileURL)) return "";
 		
 		String sFileName = "";

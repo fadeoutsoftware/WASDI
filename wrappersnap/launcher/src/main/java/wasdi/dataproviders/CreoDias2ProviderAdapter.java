@@ -556,7 +556,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	 * and it is in position 1.
 	 */
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		
 		String sResult = "";
 		

@@ -177,7 +177,7 @@ public class SinaProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		if (sFileURL.startsWith("https://")) {
 			return sFileURL.replace("https://", "");
 		}

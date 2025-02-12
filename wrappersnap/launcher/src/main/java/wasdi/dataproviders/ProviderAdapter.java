@@ -169,7 +169,11 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      * @param sFileURL URL of the file
      * @return
      */
-    public abstract String getFileName(String sFileURL) throws Exception;
+    public String getFileName(String sFileURL) throws Exception {
+    	return getFileName(sFileURL, "");
+    }
+    
+    public abstract String getFileName(String sFileURL,String sDownloadPath) throws Exception;
     
     /**
      * Get the Data Provider Code

@@ -235,7 +235,7 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		String sResult = "";
 		WasdiLog.debugLog("LpDaacProviderAdapter.getFileName. File url: " + sFileURL);
 		try {			

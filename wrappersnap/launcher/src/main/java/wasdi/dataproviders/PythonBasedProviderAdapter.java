@@ -21,7 +21,7 @@ import wasdi.shared.utils.runtime.ShellExecReturn;
 
 public class PythonBasedProviderAdapter extends ProviderAdapter {
 	
-	private static final Object s_oTempFolderLock = new Object();
+	protected static final Object s_oTempFolderLock = new Object();
 
 	protected String m_sPythonScript = "";
 	protected String m_sExchangeFolder = ""; 
@@ -30,9 +30,7 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 	protected void internalReadConfig() {
 		String sAdapterConfigPath = "";
 		try {
-			sAdapterConfigPath = m_oDataProviderConfig.adapterConfig;
-			JSONObject oAppConf = JsonUtils.loadJsonFromFile(sAdapterConfigPath);
-			m_sPythonScript = oAppConf.getString("pythonScript");
+			m_sPythonScript = m_oDataProviderConfig.pythonScript;
 			m_sExchangeFolder = WasdiConfig.Current.paths.wasdiTempFolder;
 		} catch(Exception oEx) {
 			WasdiLog.errorLog("PythonBasedProviderAdapter.internalReadConfig: exception reading parser config file " + sAdapterConfigPath);
@@ -249,12 +247,17 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		return null;
 	}
 
 	@Override
 	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
+		
+		if (m_asSupportedPlatforms.contains(sPlatformType)) {
+			return DataProviderScores.DOWNLOAD.getValue();
+		}
+
 		return 0;
 	}
 

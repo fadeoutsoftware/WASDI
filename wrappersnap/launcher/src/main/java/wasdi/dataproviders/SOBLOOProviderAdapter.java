@@ -78,7 +78,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	
 	
 	@Override
-	public String getFileName(String sComplexUrl) throws Exception {
+	public String getFileName(String sComplexUrl, String sDownloadPath) throws Exception {
 		Preconditions.checkNotNull(sComplexUrl);
 		Preconditions.checkArgument(!sComplexUrl.isEmpty());
 		

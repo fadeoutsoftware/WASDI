@@ -101,7 +101,7 @@ public class GPMProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		WasdiLog.debugLog("GPMProviderAdapter.getFileName | sFileURL: " + sFileURL);
 
 		if (Utils.isNullOrEmpty(sFileURL)) return "";

@@ -38,6 +38,11 @@ public class DataProviderConfig {
 	public String providerAdapterClasspath;
 	
 	/**
+	 * Python Script for Ext-Python Provider path
+	 */
+	public String pythonScript;	
+	
+	/**
 	 * Description of the Data Provider
 	 */
 	public String description;

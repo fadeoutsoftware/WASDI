@@ -354,7 +354,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		if (Utils.isNullOrEmpty(sFileURL)) return "";
 
 		Map<String, String> aoWasdiPayload = extractWasdiPayloadFromUrl(sFileURL);

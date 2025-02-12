@@ -290,7 +290,8 @@ public class FileBufferResource {
 									@QueryParam("provider") String sProvider,
 									@QueryParam("workspace") String sWorkspaceId,
 									@QueryParam("bbox") String sBoundingBox,
-									@QueryParam("parent") String sParentProcessWorkspaceId)
+									@QueryParam("parent") String sParentProcessWorkspaceId,
+									@QueryParam("platform") String sPlatform)
 			throws IOException
 	{
 		WasdiLog.debugLog("FileBufferResource.download, session: " + sSessionId + " fileName: " + sFileName);
@@ -303,6 +304,7 @@ public class FileBufferResource {
 		oImageImportViewModel.setWorkspace(sWorkspaceId);
 		oImageImportViewModel.setBbox(sBoundingBox);
 		oImageImportViewModel.setParent(sParentProcessWorkspaceId);
+		oImageImportViewModel.setPlatformType(sPlatform);
 
 		return this.imageImport(sSessionId, oImageImportViewModel);
 	}

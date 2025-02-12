@@ -75,7 +75,7 @@ public class STATICSProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		try {
 			String [] asQueryParts = sFileURL.split(";");
 			
