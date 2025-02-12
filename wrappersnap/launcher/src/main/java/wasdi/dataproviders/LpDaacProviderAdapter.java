@@ -258,7 +258,8 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 				return DataProviderScores.DOWNLOAD.getValue();
 			}
 		}
-		if (sPlatformType.equals(Platforms.VIIRS) && (sFileName.startsWith("VNP21A1D") || sFileName.startsWith("VNP21A1N"))) {
+		if (sPlatformType.equals(Platforms.VIIRS) 
+				&& (sFileName.startsWith("VNP21A1D") || sFileName.startsWith("VNP21A1N") || sFileName.startsWith("VNP15A2H"))) {
 			return DataProviderScores.DOWNLOAD.getValue();
 		}
 
