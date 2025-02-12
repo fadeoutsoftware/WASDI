@@ -27,7 +27,6 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	
 	public LSAProviderAdapter() {
 		super();
-		m_sDataProviderCode = "LSA";
 	}
 
 

@@ -19,7 +19,6 @@ public class GPMProviderAdapter extends ProviderAdapter {
 	boolean m_bAuthenticated = false;
 
 	public GPMProviderAdapter() {
-		m_sDataProviderCode = "GPM";
 	}
 
 	@Override

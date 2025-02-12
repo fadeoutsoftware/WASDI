@@ -25,7 +25,6 @@ public class SinaProviderAdapter extends ProviderAdapter {
 	private String m_sBINGBANGDataFilePath = null;
 	
 	public SinaProviderAdapter() {
-		m_sDataProviderCode = "SINA";
 	}
 
 	@Override

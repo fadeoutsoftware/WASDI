@@ -12,7 +12,6 @@ public class EODCProviderAdapter extends ProviderAdapter{
 	
 	public EODCProviderAdapter() {
 		super();
-		m_sDataProviderCode = "EODC";
 	}
 
 	@Override

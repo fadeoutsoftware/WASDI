@@ -43,14 +43,9 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		as_WASDI_NASA_PRODUCT_MAPPING.put("MCD43A3", "C2278860820-LPCLOUD");
 	}
 	
-	public QueryExecutorLpDaac() {
-		m_sProvider = "LPDAAC";
-		
+	public QueryExecutorLpDaac() {		
 		this.m_oQueryTranslator = new QueryTranslatorLpDaac();
 		this.m_oResponseTranslator = new ResponseTranslatorLpDaac();
-		this.m_asSupportedPlatforms.addAll(Arrays.asList(
-				Platforms.TERRA, 
-				Platforms.VIIRS));
 	}
 	
 	@Override

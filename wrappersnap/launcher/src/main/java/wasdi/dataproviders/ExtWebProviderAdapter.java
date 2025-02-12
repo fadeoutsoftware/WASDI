@@ -23,7 +23,6 @@ public class ExtWebProviderAdapter extends ProviderAdapter {
 	private ExtWebConfig m_oExtWebConfig;
 	
 	public ExtWebProviderAdapter() {
-		m_sDataProviderCode = "EXT_WEB";
 	}
 
 	@Override

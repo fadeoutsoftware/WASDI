@@ -19,7 +19,6 @@ import wasdi.shared.queryexecutors.http.QueryExecutorHttpGet;
 public class QueryExecutorSOBLOO extends QueryExecutorHttpGet {
 
 	public QueryExecutorSOBLOO() {
-		m_sProvider="SOBLOO";
 		this.m_oQueryTranslator = new QueryTranslatorSOBLOO();
 		this.m_oResponseTranslator = new ResponseTranslatorSOBLOO();
 		

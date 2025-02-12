@@ -26,19 +26,20 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 
 public class QueryExecutorCM2 extends QueryExecutor {
 	
-	private static DataProviderConfig s_oDataProviderConfig;
 	protected String m_sPythonScript = "";
 	protected String m_sExchangeFolder = "";
 	
 	private static final Object s_oTempFolderLock = new Object();
 	
 	public QueryExecutorCM2() {
-		m_sProvider = "COPERNICUSMARINE";
-		
-		s_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sProvider);
-		WasdiLog.debugLog("QueryExecutorCM2: got data provider config");
-		
-		m_sParserConfigPath = s_oDataProviderConfig.parserConfig;
+
+	}
+	
+	@Override
+	public void init() {
+		super.init();
+				
+		m_sParserConfigPath = m_oDataProviderConfig.parserConfig;
 		WasdiLog.debugLog("QueryExecutorCM2:  parser config path is " + m_sParserConfigPath );
 		
 		m_oQueryTranslator = new ConcreteQueryTranslator();
@@ -53,7 +54,7 @@ public class QueryExecutorCM2 extends QueryExecutor {
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("QueryExecutorCM2: exception reading config files ", oEx);
-		}
+		}		
 	}
 	
 	protected List<String> getCommandLineArgs(String sCommand, String sQuery) {

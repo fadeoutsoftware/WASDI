@@ -31,8 +31,6 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 public class QueryExecutorSkywatch extends QueryExecutor {
 
 	public QueryExecutorSkywatch() {
-		m_sProvider = "SKYWATCH";
-
 		this.m_oQueryTranslator = new QueryTranslatorSkywatch();
 		this.m_oResponseTranslator = new ResponseTranslatorSkywatch();
 	}

@@ -24,11 +24,8 @@ public class QueryExecutorSina extends QueryExecutor {
 	private String m_sFileListUrl = null;
 	
 	public QueryExecutorSina() {
-		this.m_sProvider = "SINA";
-		
 		this.m_oQueryTranslator = new QueryTranslatorSina();
 		this.m_oResponseTranslator = new ResponseTranslatorSina();
-		this.m_asSupportedPlatforms.add(Platforms.BIGBANG);
 	}
 	
 	@Override

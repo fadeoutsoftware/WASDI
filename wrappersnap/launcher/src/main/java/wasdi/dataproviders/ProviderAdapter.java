@@ -109,6 +109,9 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      */
     protected DataProviderConfig m_oDataProviderConfig;
     
+    /**
+     * Multiply the std WASDI read timeout for the query of this specific Data Provider. May be useful for slow providers
+     */
     protected int m_iHttpDownloadReadTimeoutMultiplier = 1;
 
     /**
@@ -173,6 +176,14 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      */
     public String getCode() {
     	return m_sDataProviderCode;
+    }
+    
+    /**
+     * Set the Data Provider Code
+     * @param sCode
+     */
+    public void setCode(String sCode) {
+    	m_sDataProviderCode = sCode;
     }
     
     /**

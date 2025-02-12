@@ -32,7 +32,6 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 	
 	public VIIRSProviderAdapter() {
 		super();
-		m_sDataProviderCode = "VIIRS";	
 	}
 
 

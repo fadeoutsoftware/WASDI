@@ -12,8 +12,6 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import wasdi.shared.config.DataProviderConfig;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.queryexecutors.ConcreteQueryTranslator;
 import wasdi.shared.queryexecutors.PaginatedQuery;
@@ -29,19 +27,18 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 
 public class ExtWebQueryExecutor extends QueryExecutor {
 	
-	private DataProviderConfig m_oDataProviderConfig;
 	private ExtWebConfig m_oExtWebConfig;
 	
 	public ExtWebQueryExecutor() {
-		m_sProvider = "EXT_WEB";
-		
-		m_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sProvider);
-		WasdiLog.debugLog("ExtWebQueryExecutor: got data provider config");
-		
+		m_oQueryTranslator = new ConcreteQueryTranslator();	
+	}
+	
+	@Override
+	public void init() {
+		super.init();
+				
 		m_sParserConfigPath = m_oDataProviderConfig.parserConfig;
 		WasdiLog.debugLog("ExtWebQueryExecutor:  parser config path is " + m_sParserConfigPath );
-		
-		m_oQueryTranslator = new ConcreteQueryTranslator();
 		
 		try {
 			Stream<String> oLinesStream = null;
@@ -53,7 +50,7 @@ public class ExtWebQueryExecutor extends QueryExecutor {
 				m_oExtWebConfig = MongoRepository.s_oMapper.readValue(sJson,ExtWebConfig.class);
 				
 				for (ExtWebDataProviderConfig oDataProviderConfig : m_oExtWebConfig.providers) {
-					if (m_asSupportedPlatforms.contains(oDataProviderConfig.mission)) {
+					if (!m_asSupportedPlatforms.contains(oDataProviderConfig.mission)) {
 						m_asSupportedPlatforms.add(oDataProviderConfig.mission);
 						WasdiLog.infoLog("ExtWebQueryExecutor.ExtWebQueryExecutor: adding support to " + oDataProviderConfig.mission);						
 					}
@@ -173,7 +170,7 @@ public class ExtWebQueryExecutor extends QueryExecutor {
 				
 				// "Sign" the results if it is my provider
 				for (QueryResultViewModel oResultVM : aoResults) {
-					oResultVM.setProvider(m_sProvider);
+					oResultVM.setProvider(m_sDataProviderCode);
 				}
 				
 				return aoResults;

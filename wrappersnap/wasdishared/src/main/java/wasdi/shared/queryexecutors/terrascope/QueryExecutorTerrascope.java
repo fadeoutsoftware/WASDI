@@ -25,15 +25,8 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 	boolean m_bAuthenticated = false;
 
 	public QueryExecutorTerrascope() {
-		m_sProvider="TERRASCOPE";
 		this.m_oQueryTranslator = new QueryTranslatorTerrascope();
 		this.m_oResponseTranslator = new ResponseTranslatorTerrascope();
-
-		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
-//		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
-//		m_asSupportedPlatforms.add(Platforms.PROBAV);
-		m_asSupportedPlatforms.add(Platforms.DEM);
-		m_asSupportedPlatforms.add(Platforms.WORLD_COVER);
 	}
 	
 	/**

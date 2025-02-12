@@ -37,17 +37,11 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 public class QueryExecutorCDS extends QueryExecutor {
 
 	private static ObjectMapper s_oMapper = new ObjectMapper();
-	private static DataProviderConfig s_oDataProviderConfig;
 	public static final String s_sSEA_SURFACE_TEMPERATURE_DATASET = "satellite-sea-surface-temperature";
 
 	public QueryExecutorCDS() {
-		
-		m_sProvider = "CDS";
-		s_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sProvider);
-		
 		this.m_oQueryTranslator = new QueryTranslatorCDS();
 		this.m_oResponseTranslator = new ResponseTranslatorCDS();
-		
 	}
 	
 	/**
@@ -294,7 +288,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 		String sFileNameFootprint = CDSUtils.getFootprintForFileName(oQuery.north, oQuery.west, oQuery.south, oQuery.east, sDataset);
 		String sExtensionWithComma = "." +  sExtension;
 		String sFileName = CDSUtils.getFileName(oQuery.productName, sVariables, sStartDate, sStartDate, sEndDate, sExtensionWithComma, sFileNameFootprint);
-		String sUrl = s_oDataProviderConfig.link + "?payload=" + sPayload;
+		String sUrl = m_oDataProviderConfig.link + "?payload=" + sPayload;
 		String sEncodedUrl = StringUtils.encodeUrl(sUrl);
 
 		QueryResultViewModel oResult = new QueryResultViewModel();
@@ -302,7 +296,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 		oResult.setTitle(sFileName);
 		oResult.setLink(sEncodedUrl);
 		oResult.setSummary(getSummary(sStartDateTime, sEndDateTime, sVariables, sExtension)); 
-		oResult.setProvider(m_sProvider);
+		oResult.setProvider(m_sDataProviderCode);
 		oResult.setFootprint(sFootPrint);
 		oResult.getProperties().put("platformname", Platforms.ERA5);
 		oResult.getProperties().put("dataset", oQuery.productName);

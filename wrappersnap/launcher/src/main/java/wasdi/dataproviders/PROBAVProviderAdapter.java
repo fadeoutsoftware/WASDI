@@ -29,8 +29,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 	HashMap<String, LocalFileDescriptor> m_asCollectionsFolders = new HashMap<>();
 
 	public PROBAVProviderAdapter() {
-		super();		
-		m_sDataProviderCode = "PROBAV";
+		super();
 	}
 
 	@Override

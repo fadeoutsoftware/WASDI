@@ -23,7 +23,6 @@ public class CDS2ProviderAdapter extends PythonBasedProviderAdapter {
 
 	public CDS2ProviderAdapter() {
 		super();
-		m_sDataProviderCode = "CDS";
 	}
 	
 	@Override

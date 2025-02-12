@@ -10,7 +10,6 @@ public class ESAProviderAdapter extends PythonBasedProviderAdapter {
 
 	public ESAProviderAdapter() {
 		super();
-		m_sDataProviderCode = "ESA";
 	}
 	
 	@Override

@@ -14,7 +14,6 @@ public class CM2ProviderAdapter extends PythonBasedProviderAdapter {
 	protected String m_sExchangeFolder = ""; 
 	
 	public CM2ProviderAdapter() {
-		m_sDataProviderCode = "COPERNICUSMARINE";
 	}
 
 	@Override

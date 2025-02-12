@@ -34,7 +34,6 @@ public class CDSProviderAdapter extends ProviderAdapter {
 	 * Basic constructor
 	 */
 	public CDSProviderAdapter() {
-		m_sDataProviderCode = "CDS";
 	}
 
 	@Override

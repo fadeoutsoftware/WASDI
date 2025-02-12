@@ -53,7 +53,6 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	
 	public CreoDias2ProviderAdapter() {
 		super();
-		m_sDataProviderCode = "CREODIAS2";
 	}
 	
 	protected boolean isFileProtocolNew(String sUrl) {

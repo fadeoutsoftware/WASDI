@@ -36,10 +36,8 @@ public class QueryExecutorJRC extends QueryExecutor {
 
 	
 	public QueryExecutorJRC() {
-		m_sProvider = "JRC";
 		m_oQueryTranslator = new QueryTranslatorJRC();
 		m_oResponseTranslator = new ResponseTranslatorJRC();
-		m_asSupportedPlatforms.add(Platforms.JRC_GHSL);
 	}
 	
 	@Override

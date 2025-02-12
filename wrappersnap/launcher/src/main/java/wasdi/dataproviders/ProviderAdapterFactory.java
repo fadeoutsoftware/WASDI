@@ -30,8 +30,9 @@ public class ProviderAdapterFactory {
 		for (DataProviderConfig oDPConfig : aoDataProviders) {
 			try {
 				String sName = oDPConfig.name;
-				ProviderAdapter oQueryExecutor = (ProviderAdapter) Class.forName(oDPConfig.providerAdapterClasspath).getDeclaredConstructor().newInstance();
-				s_aoDownloaderSuppliers.put(sName, oQueryExecutor);
+				ProviderAdapter oProviderAdapter = (ProviderAdapter) Class.forName(oDPConfig.providerAdapterClasspath).getDeclaredConstructor().newInstance();
+				oProviderAdapter.setCode(sName);
+				s_aoDownloaderSuppliers.put(sName, oProviderAdapter);
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("ProviderAdapterFactory.static: exception creating a Query Executor: " + oEx.toString());
 			} 
@@ -42,7 +43,7 @@ public class ProviderAdapterFactory {
 	 * Check that the provided type is not null and that is a valid one. Throws an exception if it is not.
 	 * @param sProviderAdapterType the type of the provider adapter
 	 */
-	public void validateProviderAdapterType(String sProviderAdapterType) {
+	protected void validateProviderAdapterType(String sProviderAdapterType) {
 		if (Utils.isNullOrEmpty(sProviderAdapterType)) {
 			throw new NullPointerException("ProviderAdapterSupplier.validateProviderAdapterType: a null String has been passed");
 		}

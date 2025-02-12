@@ -30,7 +30,6 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 	 * Basic constructor
 	 */
 	public TerrascopeProviderAdapter() {
-		m_sDataProviderCode = "TERRASCOPE";
 	}
 	
 	@Override

@@ -1,14 +1,11 @@
 package wasdi.shared.queryexecutors.esa;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONObject;
 
-import wasdi.shared.config.DataProviderConfig;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.PaginatedQuery;
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
@@ -22,15 +19,15 @@ public class QueryExecutorESA extends QueryExecutor {
 	private String m_ESABaseUrl;
 
 	public QueryExecutorESA() {
-		this.m_sProvider = "ESA";
 		this.m_oQueryTranslator = new QueryTranslatorESA();
-		this.m_oResponseTranslator = new ResponseTranslatorESA();
-		this.m_asSupportedPlatforms.add(Platforms.ERS);
+		this.m_oResponseTranslator = new ResponseTranslatorESA();		
+	}
+	
+	@Override
+	public void init() {
+		super.init();
+		m_ESABaseUrl = m_oDataProviderConfig.link;
 		
-		DataProviderConfig oESADataProvider = WasdiConfig.Current.getDataProviderConfig("ESA");
-		m_ESABaseUrl = oESADataProvider != null 
-				? oESADataProvider.link 
-				: null;
 	}
 	
 	@Override

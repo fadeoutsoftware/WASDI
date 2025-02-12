@@ -58,12 +58,7 @@ public class QueryExecutorGPM extends QueryExecutor {
 
 	private static final String EXTENSION_TIF = ".tif";
 
-	private static DataProviderConfig s_oDataProviderConfig;
-
 	public QueryExecutorGPM() {
-		m_sProvider = "GPM";
-		s_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sProvider);
-
 		this.m_oQueryTranslator = new QueryTranslatorGPM();
 		this.m_oResponseTranslator = new ResponseTranslatorGPM();
 	}
@@ -74,10 +69,11 @@ public class QueryExecutorGPM extends QueryExecutor {
 	 */
 	@Override
 	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
-		if (sProduct.toUpperCase().startsWith("3B-")
-				|| sProduct.toUpperCase().contains("IMERG")) {
+		
+		if (sProduct.toUpperCase().startsWith("3B-") || sProduct.toUpperCase().contains("IMERG")) {
 			return sOriginalUrl;
 		}
+		
 		return null;
 	}
 
@@ -429,7 +425,7 @@ public class QueryExecutorGPM extends QueryExecutor {
 					oViewModel.setId(oQueryResponse.getName());
 					oViewModel.setTitle(sTitle);
 					oViewModel.setLink(sUrl + oQueryResponse.getName());
-					oViewModel.setProvider(m_sProvider);
+					oViewModel.setProvider(m_sDataProviderCode);
 					oViewModel.setSummary("No summary, yet!");
 
 					Map<String, String> aoProperties = oViewModel.getProperties();
@@ -481,7 +477,7 @@ public class QueryExecutorGPM extends QueryExecutor {
 			}
 
 			try {
-				HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, HttpUtils.getBasicAuthorizationHeaders(s_oDataProviderConfig.user, s_oDataProviderConfig.password)); 
+				HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, HttpUtils.getBasicAuthorizationHeaders(m_sUser, m_sPassword)); 
 				sResult = oHttpCallResponse.getResponseBody();
 			} catch (Exception oEx) {
 				WasdiLog.debugLog("QueryExecutorGPM.performRequest: exception in http get call: " + oEx.toString());

@@ -30,7 +30,6 @@ public class ADSProviderAdapter extends ProviderAdapter {
 	 * Basic constructor
 	 */
 	public ADSProviderAdapter() {
-		m_sDataProviderCode = "ADS";
 	}
 
 	@Override

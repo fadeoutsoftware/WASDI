@@ -11,7 +11,6 @@ import wasdi.shared.utils.log.WasdiLog;
 public class JRCProviderAdapter extends ProviderAdapter {
 	
 	public JRCProviderAdapter() {
-		m_sDataProviderCode = "JRC";
 	}
 
 	@Override

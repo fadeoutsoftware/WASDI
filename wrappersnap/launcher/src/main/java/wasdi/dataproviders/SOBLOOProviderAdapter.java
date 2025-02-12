@@ -39,7 +39,6 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 
 	public SOBLOOProviderAdapter() {
 		super();
-		m_sDataProviderCode = "SOBLOO";
 	}
 
 	@Override

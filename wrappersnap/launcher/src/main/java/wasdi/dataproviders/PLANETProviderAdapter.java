@@ -33,7 +33,6 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 	
 	public PLANETProviderAdapter() {
 		super();
-		m_sDataProviderCode = "PLANET";
 	}
 	
 	@Override

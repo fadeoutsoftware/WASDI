@@ -23,7 +23,6 @@ public class SkywatchProviderAdapter extends ProviderAdapter {
 	 * Basic constructor
 	 */
 	public SkywatchProviderAdapter() {
-		m_sDataProviderCode = "SKYWATCH";
 	}
 
 	@Override

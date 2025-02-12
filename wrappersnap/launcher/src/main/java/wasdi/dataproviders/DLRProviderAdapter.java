@@ -12,7 +12,6 @@ import wasdi.shared.utils.log.WasdiLog;
 public class DLRProviderAdapter extends ProviderAdapter {
 
 	public DLRProviderAdapter() {
-		m_sDataProviderCode = "DLR";
 	}
 
 	@Override

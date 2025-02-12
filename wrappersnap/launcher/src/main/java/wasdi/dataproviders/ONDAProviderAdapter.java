@@ -51,7 +51,6 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * 
 	 */
 	public ONDAProviderAdapter() {
-		m_sDataProviderCode = "ONDA";
 	}
 
 	/* (non-Javadoc)

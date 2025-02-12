@@ -34,7 +34,6 @@ public class QueryExecutorEODC extends QueryExecutor {
 	public QueryExecutorEODC() {
 		m_oQueryTranslator = new QueryTranslatorEODC();
 		m_oResponseTranslator = new ResponseTranslatorEODC();
-				
 	}
 
 

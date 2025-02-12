@@ -9,7 +9,6 @@ public class STATICSProviderAdapter extends ProviderAdapter {
 	
 	public STATICSProviderAdapter() {
 		super();
-		m_sDataProviderCode = "STATICS";
 	}
 	
 	@Override

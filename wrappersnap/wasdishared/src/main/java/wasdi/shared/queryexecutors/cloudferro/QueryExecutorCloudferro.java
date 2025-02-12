@@ -30,12 +30,8 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 	boolean m_bAuthenticated = false;
 
 	public QueryExecutorCloudferro() {
-		m_sProvider = "CLOUDFERRO";
-
 		this.m_oQueryTranslator = new QueryTranslatorCloudferro();
 		this.m_oResponseTranslator = new ResponseTranslatorCloudferro();
-
-		m_asSupportedPlatforms.add(Platforms.ECOSTRESS);
 	}
 
 	/**

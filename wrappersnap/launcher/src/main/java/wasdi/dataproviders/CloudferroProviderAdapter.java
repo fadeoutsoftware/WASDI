@@ -18,7 +18,6 @@ public class CloudferroProviderAdapter extends ProviderAdapter {
 	 * Basic constructor
 	 */
 	public CloudferroProviderAdapter() {
-		m_sDataProviderCode = "CLOUDFERRO";
 	}
 
 	@Override

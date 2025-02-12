@@ -22,7 +22,6 @@ public class QueryExecutorSTATICS extends QueryExecutor {
 	String m_sDefaultCrs = "EPSG:4326";
 	
 	public QueryExecutorSTATICS() {
-		m_sProvider="STATICS";
 		this.m_oQueryTranslator = new QueryTranslatorSTATICS();
 		this.m_oResponseTranslator = new ResponseTranslatorSTATICS();		
 	}
@@ -31,7 +30,7 @@ public class QueryExecutorSTATICS extends QueryExecutor {
 	public void init() {
 		super.init();
 		
-		DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sProvider);
+		DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);
 		if (oDataProviderConfig != null) {
 			m_sApiURl = oDataProviderConfig.urlDomain;
 		}
@@ -119,7 +118,7 @@ public class QueryExecutorSTATICS extends QueryExecutor {
 				// .Id -> Provider unique id
 				oQueryResultViewModel.setId(sUniqueId);
 				// .Provider -> Provider used to get this info.
-				oQueryResultViewModel.setProvider(m_sProvider);
+				oQueryResultViewModel.setProvider(m_sDataProviderCode);
 				
 				String sWktFootPrint = BoundingBoxUtils.getWKTPolygon(oQueryVM.south, oQueryVM.east, oQueryVM.north, oQueryVM.west);
 				// .Footprint -> Bounding box in WKT

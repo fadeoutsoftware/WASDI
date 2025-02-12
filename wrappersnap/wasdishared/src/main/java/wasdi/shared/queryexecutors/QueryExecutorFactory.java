@@ -33,6 +33,7 @@ public class QueryExecutorFactory {
 			try {
 				String sName = oDPConfig.name;
 				QueryExecutor oQueryExecutor = (QueryExecutor) Class.forName(oDPConfig.queryExecutorClasspath).getDeclaredConstructor().newInstance();
+				oQueryExecutor.setCode(sName);
 				s_aoExecutors.put(sName, oQueryExecutor);
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("QueryExecutorFactory.static: exception creating a Query Executor: " + oEx.toString());
@@ -92,43 +93,6 @@ public class QueryExecutorFactory {
 		return oExecutor;
 	}
 	
-	
-	/**
-	 * Get the Query Executor for a specific provider
-	 * @param sProvider Provider code
-	 * @return QueryExecutor of the specific provider
-	 */
-	public static  QueryExecutor getExecutor(String sProvider) {
-		WasdiLog.debugLog("QueryExecutorFactory.getExecutor, provider: " + sProvider);
-		QueryExecutor oExecutor = null;
-		try {
-			if(null!=sProvider) {
-				AuthenticationCredentials oCredentials = getCredentials(sProvider);
-				
-				DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(sProvider);
-	
-				String sParserConfigPath = oDataProviderConfig.parserConfig;
-				String sAppConfigPath = WasdiConfig.Current.paths.missionsConfigFilePath;
-				
-				oExecutor = getExecutor(
-						sProvider,
-						oCredentials,
-						sParserConfigPath, sAppConfigPath);
-				
-				oExecutor.getSupportedPlatforms().clear();
-				
-				for (String sSupportedPlatform : oDataProviderConfig.supportedPlatforms) {
-					oExecutor.getSupportedPlatforms().add(sSupportedPlatform);
-				}
-				
-				oExecutor.init();
-			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("QueryExecutorFactory.getExecutor( " + sProvider + " ): " + oE);
-		}
-		return oExecutor;
-
-	}
 
 	/**
 	 * Get Auth Credentials for a specific provider
@@ -147,6 +111,48 @@ public class QueryExecutorFactory {
 			WasdiLog.debugLog("QueryExecutorFactory.getCredentials( " + sProvider + " ): " + oE);
 		}
 		return oCredentials;
-	}	
+	}		
+	
+	/**
+	 * Get the Query Executor for a specific provider
+	 * @param sProvider Provider code
+	 * @return QueryExecutor of the specific provider
+	 */
+	public static  QueryExecutor getExecutor(String sProvider) {
+		WasdiLog.debugLog("QueryExecutorFactory.getExecutor, provider: " + sProvider);
+		QueryExecutor oExecutor = null;
+		try {
+			if(null!=sProvider) {
+				
+				// Read the credentials from the Config
+				AuthenticationCredentials oCredentials = getCredentials(sProvider);
+				
+				// Get the config of this Data Provider
+				DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(sProvider);
+	
+				// Set the path of the parser and missions config files
+				String sParserConfigPath = oDataProviderConfig.parserConfig;
+				String sAppConfigPath = WasdiConfig.Current.paths.missionsConfigFilePath;
+				
+				oExecutor = getExecutor(
+						sProvider,
+						oCredentials,
+						sParserConfigPath, sAppConfigPath);
+				
+				// Set the supported platforms
+				oExecutor.getSupportedPlatforms().clear();
+				
+				for (String sSupportedPlatform : oDataProviderConfig.supportedPlatforms) {
+					oExecutor.getSupportedPlatforms().add(sSupportedPlatform);
+				}
+				
+				// Init the executor
+				oExecutor.init();
+			}
+		} catch (Exception oE) {
+			WasdiLog.debugLog("QueryExecutorFactory.getExecutor( " + sProvider + " ): " + oE);
+		}
+		return oExecutor;
 
+	}
 }
