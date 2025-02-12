@@ -97,7 +97,6 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.modis.MODISUtils;
 import wasdi.shared.utils.wasdiAPI.WorkspaceAPIClient;
 import wasdi.shared.viewmodels.HttpCallResponse;
-import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
