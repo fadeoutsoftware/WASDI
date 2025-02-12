@@ -296,8 +296,7 @@ public class SnapProductReader extends WasdiProductReader {
 			
 			if (sPlatform.equals(Platforms.VIIRS) 
 					&& (m_oProductFile.getName().startsWith("VNP21A1D") 
-							|| m_oProductFile.getName().startsWith("VNP21A1N")
-							|| m_oProductFile.getName().startsWith("VNP15A2H"))) {
+							|| m_oProductFile.getName().startsWith("VNP21A1N"))) {
 				WasdiLog.debugLog("SnapProductReader.getFileForPublishBand: publishing bands for this VIIRS products is not yet supported");
 				return null;
 			}
