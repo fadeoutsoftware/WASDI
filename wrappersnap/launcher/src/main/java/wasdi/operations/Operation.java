@@ -14,9 +14,12 @@ import wasdi.shared.business.DownloadedFileCategory;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
+import wasdi.shared.business.Workspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.payloads.OperationPayload;
 import wasdi.shared.rabbit.Send;
@@ -307,6 +310,8 @@ public abstract class Operation {
             WasdiLog.debugLog("LauncherMain.AddProductToDbAndSendToRabbit: bbox not set. Try to auto get it ");
             sBBox = oReadProduct.getProductBoundingBox();
         }
+        
+        
 
         if (oCheckAlreadyExists == null) {
 
@@ -344,6 +349,7 @@ public abstract class Operation {
             } else {
                 WasdiLog.infoLog("Product Inserted");
             }
+  
         } else {
 
             // The product is already there. No need to add
@@ -360,6 +366,22 @@ public abstract class Operation {
             oDownloadedRepo.updateDownloadedFile(oCheckAlreadyExists);
 
             WasdiLog.debugLog("AddProductToDbAndSendToRabbit: Product Already in the Database. Do not add");
+        }
+        
+        // update also the count of the size of the workspace. Safe operation. Worse
+        try {
+            
+            WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+            Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspace);
+            
+            String sUserId = oWorkspace.getUserId();
+            
+            long lWorkspaceSize = WasdiFileUtils.getWorkspaceFolderSize(sUserId, sWorkspace);
+                        
+            oWorkspace.setStorageSize(lWorkspaceSize);
+            
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: error in updating the storage size of the workspace", oEx);
         }
 
         // The Add Product to Workspace is safe. No need to check if the product is

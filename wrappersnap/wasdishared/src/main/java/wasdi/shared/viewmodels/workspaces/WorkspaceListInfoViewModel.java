@@ -17,8 +17,9 @@ public class WorkspaceListInfoViewModel {
     private boolean activeNode;
     private String nodeCode;
     private Date creationDate;
-    private boolean isPublic=false;
-    private boolean readOnly=false;
+    private String storageSize = "";
+    private boolean isPublic = false;
+    private boolean readOnly = false;
 
     public Date getCreationDate() {
 		return creationDate;
@@ -26,6 +27,14 @@ public class WorkspaceListInfoViewModel {
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
+	}
+
+	public String getStorageSize() {
+		return storageSize;
+	}
+
+	public void setStorageSize(String storageSize) {
+		this.storageSize = storageSize;
 	}
 
 	public String getWorkspaceId() {
