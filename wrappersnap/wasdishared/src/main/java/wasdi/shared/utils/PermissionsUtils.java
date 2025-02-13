@@ -376,6 +376,10 @@ public class PermissionsUtils {
 			if (oSubscriptionRepository.isOwnedByUser(sUserId, sSubscriptionId)) {
 				return true;
 			}
+			
+			if (UserApplicationRole.isAdmin(sUserId)) {
+				return true;
+			}
 
 			return canUserWriteResource(ResourceTypes.SUBSCRIPTION.getResourceType(), sUserId, sSubscriptionId);
 			

@@ -47,6 +47,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ClientMessageCodes;
 import wasdi.shared.viewmodels.ErrorResponse;
+import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.organizations.ProjectEditorViewModel;
 import wasdi.shared.viewmodels.organizations.StripePaymentDetail;
@@ -217,6 +218,46 @@ public class SubscriptionResource {
 			return Response.serverError().build();
 		}
 	}
+	
+	@GET
+	@Path("/count")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response getSubscriptionsCount(@HeaderParam("x-session-token") String sSessionId) {
+		
+		WasdiLog.debugLog("SubscriptionResource.getSubscriptionsCount");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.warnLog("SubscriptionResource.getSubscriptionsCount: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+		
+		boolean bAdmin = UserApplicationRole.isAdmin(oUser);
+
+		if (!bAdmin) {
+			WasdiLog.warnLog("SubscriptionResource.getSubscriptionsCount: user not admin, aborting");
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("The user cannot access the subscription count.")).build();
+		}		
+
+		try {
+			// Create repo
+			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+			// Get requested subscription
+			long lCount = oSubscriptionRepository.getSubscriptionsCount();
+			
+			Long oCount = Long.valueOf(lCount);
+			
+			PrimitiveResult oPrimitiveResult = new PrimitiveResult();
+			oPrimitiveResult.setIntValue(oCount.intValue()); 
+
+			return Response.ok(oPrimitiveResult).build();
+		} 
+		catch (Exception oEx) {
+			WasdiLog.errorLog( "SubscriptionResource.getSubscriptionsCount: " + oEx);
+			return Response.serverError().build();
+		}		
+	}
 
 	/**
 	 * Get an subscription by its Id.
@@ -227,8 +268,7 @@ public class SubscriptionResource {
 	@GET
 	@Path("/byId")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getSubscriptionViewModel(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("subscription") String sSubscriptionId) {
+	public Response getSubscriptionViewModel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("subscription") String sSubscriptionId) {
 		WasdiLog.debugLog("SubscriptionResource.getSubscriptionViewModel( Subscription: " + sSubscriptionId + ")");
 
 		SubscriptionViewModel oSubscriptionViewModel = new SubscriptionViewModel();

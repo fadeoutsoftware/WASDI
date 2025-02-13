@@ -574,7 +574,7 @@ public class ImagesResource {
 			
 			//Check the logo and extension
 			if(oImage.exists() == false){
-				WasdiLog.warnLog("ImagesResource.existsImage: unable to find image in " + sAbsolutePath);
+				WasdiLog.debugLog("ImagesResource.existsImage: unable to find image in " + sAbsolutePath);
 				return Response.status(Status.NOT_FOUND).build();
 			}
 			

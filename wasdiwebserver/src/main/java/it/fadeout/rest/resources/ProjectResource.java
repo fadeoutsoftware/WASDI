@@ -279,7 +279,7 @@ public class ProjectResource {
 		try {
 			
 			if (!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oProjectEditorViewModel.getSubscriptionId())) {
-				WasdiLog.warnLog("ProjectResource.createProject: invalid session");
+				WasdiLog.warnLog("ProjectResource.createProject: user cannot write the subscription");
 				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_CANNOT_ACCESS.name())).build();				
 			}
 			
