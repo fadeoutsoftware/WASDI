@@ -356,9 +356,12 @@ public class SubscriptionResource {
 				sUserId = oUser.getUserId();
 				if (oSubscriptionViewModel.isBuySuccess()) {
 					WasdiLog.warnLog("SubscriptionResource.createSubscription: the user is not an admin so CANNOT set buy success true");
-					oSubscription.setBuySuccess(false);					
+					oSubscription.setBuySuccess(false);		
 				}
 			}
+			
+			UserRepository oUserRepo = new UserRepository();
+			User oTargetUser = oUserRepo.getUser(sUserId);
 			
 			if (Utils.isNullOrEmpty(sUserId)) sUserId = oUser.getUserId();
 			
@@ -376,7 +379,7 @@ public class SubscriptionResource {
 				oProjectEditorViewModel.setName(sName);
 				oProjectEditorViewModel.setDescription("Project automatically created for the " + oSubscription.getName() + " subscription");
 				oProjectEditorViewModel.setSubscriptionId(oSubscription.getSubscriptionId());
-				oProjectEditorViewModel.setActiveProject(oUser.getActiveProjectId() == null);
+				oProjectEditorViewModel.setActiveProject(oTargetUser.getActiveProjectId() == null);
 
 				new ProjectResource().createProject(sSessionId, oProjectEditorViewModel);
 
