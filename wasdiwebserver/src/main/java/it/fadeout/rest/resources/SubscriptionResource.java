@@ -1189,6 +1189,12 @@ public class SubscriptionResource {
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("SubscriptionResource.convert exception: ", oEx);
+			if (oSubscription!=null) {
+				String sSubId = oSubscription.getSubscriptionId();
+				if (Utils.isNullOrEmpty(sSubId)) sSubId = "Subscritption Id == NULL";
+				
+				WasdiLog.errorLog("SubscriptionResource.convert Subscription Id: " + sSubId);
+			}
 			return null;
 		}
 	}
