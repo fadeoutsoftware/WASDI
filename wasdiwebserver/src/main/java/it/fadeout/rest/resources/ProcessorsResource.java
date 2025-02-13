@@ -38,6 +38,7 @@ import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
@@ -942,7 +943,7 @@ public class ProcessorsResource  {
 			}
 			
 			
-			// check if the app has an on-demand price and if the person is not the owner of tje app: 
+			// check if the app has an on-demand price and if the person is not the owner of the app: 
 			// in that case, update the apps payments table to track the run date/time
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			Float fOnDemandPrice = oProcessorToRun.getOndemandPrice();
@@ -1008,6 +1009,77 @@ public class ProcessorsResource  {
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			oProcessorParameter.setNotifyOwnerByMail(bNotify);
 			
+			
+			// ---- MY CODE STARTS HERE ----
+			
+			// first of all, we execute the processor only if it has a price per square km 
+			Float fPricePerSquareKilometer = oProcessorToRun.getPricePerSquareKm(); 
+			if (fPricePerSquareKilometer != null && fPricePerSquareKilometer > 0f) {
+				WasdiLog.debugLog("ProcessorsResource.internalRun. Computing bounding box price for running processor " + oProcessorToRun.getProcessorId());
+				
+				// we need to get the name of the parameter associated with the bounding box
+				String sAreaParameterName = oProcessorToRun.getAreaParameterName();
+				
+				if (!Utils.isNullOrEmpty(sAreaParameterName)) {
+					WasdiLog.debugLog("ProcessorsResource.internalRun. Name of the area parameter " + sAreaParameterName);
+					
+					String sDecodedParams = URLDecoder.decode(sEncodedJson, StandardCharsets.UTF_8);
+					JSONObject oJson = new JSONObject(sDecodedParams);
+					
+					double dSouth = Double.NaN;
+					double dEast = Double.NaN;
+					double dNorth = Double.NaN;
+					double dWest = Double.NaN;
+					
+					
+					// so far we support only two types of bouding boxes:
+					// 1) list of coordinates - in this case we need a convention to express the order of coordinated
+					try {
+						JSONArray oJsonArray = oJson.getJSONArray(sAreaParameterName);
+						
+						
+						
+					} catch (JSONException oE) {
+						WasdiLog.warnLog("ProcessorsResource.internalRun. The bouding box is not represented as a JSON array");
+					}
+					
+					// 2) dictionary of 
+					try {
+						JSONObject oJsonObject = oJson.getJSONObject(sAreaParameterName);
+						if (oJsonObject.keySet().contains("southWest") && oJsonObject.keySet().contains("northEast")) {
+							dSouth = oJson.getJSONObject("southWest").getDouble("lat");
+							dWest = oJson.getJSONObject("southWest").getDouble("lng");
+							dNorth = oJson.getJSONObject("northEast").getDouble("lat");
+							dEast = oJson.getJSONObject("northEast").getDouble("lng");
+						}
+						
+					} catch (JSONException oE) {
+						WasdiLog.warnLog("ProcessorsResource.internalRun. The bouding box is not represented as a standard JSON dictionary");
+					}
+					
+					if (!Double.isNaN(dWest) && !Double.isNaN(dNorth) && !Double.isNaN(dSouth) && !Double.isNaN(dEast)) {
+						
+					}
+					else {
+						WasdiLog.warnLog("ProcessorsResource.internalRun. Some of the coordinates of the bounding box are not specified. Impassible to compute the price of the run");
+					}
+					
+					
+				} 
+				else {
+					WasdiLog.debugLog("ProcessorsResource.internalRun. Name of the area parameter not found ");
+				}
+				
+				
+				
+				
+			}
+			
+			// ---- MY CODE ENDS HERE ----
+			
+			
+			
+			/*
 			PrimitiveResult oResult = Wasdi.runProcess(sUserId, sSessionId, oProcessorParameter.getLauncherOperation(), sName, oProcessorParameter, sParentProcessWorkspaceId);
 			
 			try{
@@ -1029,6 +1101,7 @@ public class ProcessorsResource  {
 				oRunningProcessorViewModel.setStatus(ProcessStatus.ERROR.toString());
 				return oRunningProcessorViewModel;
 			}
+			*/
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessorsResource.internalRun error: " + oEx );
