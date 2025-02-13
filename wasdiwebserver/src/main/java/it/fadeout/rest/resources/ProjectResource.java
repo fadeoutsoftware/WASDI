@@ -21,6 +21,7 @@ import it.fadeout.Wasdi;
 import wasdi.shared.business.Project;
 import wasdi.shared.business.Subscription;
 import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
@@ -297,7 +298,7 @@ public class ProjectResource {
 
 			if (oProjectRepository.insertProject(oProject)) {
 				if (oProjectEditorViewModel.isActiveProject()) {
-					this.changeActiveProject(sSessionId, oProject.getProjectId());
+					this.changeActiveProject(sSessionId, oProject.getProjectId(), oProjectEditorViewModel.getTargetUser());
 				}
 
 				return Response.ok(new SuccessResponse(oProject.getProjectId())).build();
@@ -357,12 +358,26 @@ public class ProjectResource {
 			}
 
 			Project oProject = convert(oProjectEditorViewModel);
+			
+			SubscriptionRepository oSubRepo = new SubscriptionRepository();
+			Subscription oSubscription = oSubRepo.getSubscriptionById(oProject.getSubscriptionId());
+			
+			if (oSubscription == null) {
+				WasdiLog.warnLog("ProjectResource.updateProject: related subscription does not exist");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No parent subscirption exists.")).build();				
+			}
+			
+			if (!oSubscription.getUserId().equals(oUser.getUserId())) {
+				// The request come from a user that is not the owner: but the owner is the target of the change project!
+				oProjectEditorViewModel.setTargetUser(oSubscription.getUserId());
+			}
 
 			if (oProjectRepository.updateProject(oProject)) {
 
 				if (oProjectEditorViewModel.isActiveProject()) {
-					this.changeActiveProject(sSessionId, oProject.getProjectId());
-				} else if (oProject.getProjectId().equals(oUser.getActiveProjectId())) {
+					this.changeActiveProject(sSessionId, oProject.getProjectId(), oProjectEditorViewModel.getTargetUser());
+				} 
+				else if (oProject.getProjectId().equals(oUser.getActiveProjectId())) {
 					UserRepository oUserRepository = new UserRepository();
 
 					oUser.setActiveProjectId(null);
@@ -395,7 +410,7 @@ public class ProjectResource {
 	@PUT
 	@Path("/active")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response changeActiveProject(@HeaderParam("x-session-token") String sSessionId, @QueryParam("project") String sProjectId) {
+	public Response changeActiveProject(@HeaderParam("x-session-token") String sSessionId, @QueryParam("project") String sProjectId, @QueryParam("target") String sTargetUserId) {
 		WasdiLog.debugLog("ProjectResource.changeActiveProject( ProjectId: " + sProjectId + ")");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -407,6 +422,20 @@ public class ProjectResource {
 		
 		try {
 			String sSubscriptionId = null;
+			UserRepository oUserRepository = new UserRepository();
+			
+			if (Utils.isNullOrEmpty(sTargetUserId)) sTargetUserId = oUser.getUserId();
+			
+			if (!oUser.getUserId().equals(sTargetUserId)) {
+				if (!UserApplicationRole.isAdmin(oUser.getUserId())) {
+					WasdiLog.warnLog("ProjectResource.changeActiveProject: requested a change for a target user by a not-admin user. We stop here");
+					return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();					
+				}
+				
+				oUser = oUserRepository.getUser(sTargetUserId);
+				WasdiLog.debugLog("ProjectResource.changeActiveProject: changed the user to the target user");
+			}
+			
 
 			if (sProjectId != null) {
 				ProjectRepository oProjectRepository = new ProjectRepository();
@@ -424,10 +453,7 @@ public class ProjectResource {
 					WasdiLog.warnLog("ProjectResource.changeActiveProject: user cannot access the subscription");
 					return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_CANNOT_ACCESS.name())).build();				
 				}
-				
 			}
-
-			UserRepository oUserRepository = new UserRepository();
 
 			oUser.setActiveSubscriptionId(sSubscriptionId);
 			oUser.setActiveProjectId(sProjectId);
