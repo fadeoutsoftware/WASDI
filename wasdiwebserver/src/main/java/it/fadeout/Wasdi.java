@@ -34,6 +34,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserSession;
 import wasdi.shared.business.users.UserType;
@@ -802,8 +803,15 @@ public class Wasdi extends ResourceConfig {
 			
 			// If we do not have the list, take the list of shared nodes. This works for free and standard users
 			// This is also a fallback option for Professional users: what if also the professional does not has any node?
-			if (aoNodes == null) {
-				aoNodes = oNodeRepository.getSharedActiveNodesList();
+			if (aoNodes == null || UserApplicationRole.isAdmin(oUser.getUserId())) {
+				
+				if (aoNodes==null) {
+					aoNodes = oNodeRepository.getSharedActiveNodesList();	
+				}
+				else {
+					aoNodes.addAll(oNodeRepository.getSharedActiveNodesList());
+				}
+				
 				
 				// By config we can decide to use also the main node as computing node, or not
 				if (WasdiConfig.Current.loadBalancer.includeMainClusterAsNode) {
@@ -983,10 +991,43 @@ public class Wasdi extends ResourceConfig {
 				NodeScoreByProcessWorkspaceViewModel oViewModel = new NodeScoreByProcessWorkspaceViewModel();
 				oViewModel.setNodeCode(sDefaultNode);
 				aoOrderedNodeList.add(oViewModel);
-			}			
+			}
+			else {
+				
+				try {
+					// Review the list to "downgrade" low performance nodes
+					ArrayList<NodeScoreByProcessWorkspaceViewModel> aoLowPerformanceNodes = new ArrayList<>();
+					
+					// For all the candidates
+					for (NodeScoreByProcessWorkspaceViewModel oNodeCandiate : aoOrderedNodeList) {
+						
+						// Read also the absolute RAM available
+						Long lGb = oNodeCandiate.getMemoryAbsoluteAvailable()/1073741824L;
+						
+						// If it is less of the "performance required" value
+						if (lGb.intValue() < WasdiConfig.Current.nodeScoreConfig.minTotalMemoryGBytes) {
+							// Set it as low performance
+							aoLowPerformanceNodes.add(oNodeCandiate);
+						}
+					}
+					
+					// Remove the low performance nodes from the ordered list
+					for (NodeScoreByProcessWorkspaceViewModel oNode : aoLowPerformanceNodes) {
+						aoOrderedNodeList.remove(oNode);
+					}
+					
+					// Ad re-add so they will go at the bottom of the options
+					for (NodeScoreByProcessWorkspaceViewModel oNode : aoLowPerformanceNodes) {
+						aoOrderedNodeList.add(oNode);
+					}					
+				}
+				catch (Exception oInnerEx) {
+					WasdiLog.errorLog("Wasdi.getNodesSortedByScore: exception removing low performance nodes ", oInnerEx);
+				}
+			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("Wasdi.getNodesSortedByScore: exception " + oEx.toString());
+			WasdiLog.errorLog("Wasdi.getNodesSortedByScore: exception " + oEx.toString());
 		}
 		
 		return aoOrderedNodeList;
