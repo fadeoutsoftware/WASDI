@@ -776,6 +776,7 @@ public class ProcessorsResource  {
 			oAppDetailViewModel.setLink(oProcessor.getLink());
 			oAppDetailViewModel.setOndemandPrice(oProcessor.getOndemandPrice());
 			oAppDetailViewModel.setSubscriptionPrice(oProcessor.getSubscriptionPrice());
+			oAppDetailViewModel.setSquareKilometerPrice(oProcessor.getPricePerSquareKm());
 			oAppDetailViewModel.setUpdateDate(oProcessor.getUpdateDate());
 			oAppDetailViewModel.setPublishDate(oProcessor.getUploadDate());
 			oAppDetailViewModel.setCategories(oProcessor.getCategories());
@@ -2142,14 +2143,30 @@ public class ProcessorsResource  {
 			Float fOldOnDemandPrice = oProcessorToUpdate.getOndemandPrice();
 			Float fNewOnDemandPrice = oUpdatedProcessorVM.getOndemandPrice();
 			
+			Float fOldSquareKmPrice = oProcessorToUpdate.getPricePerSquareKm();
+			Float fNewSquareKmPrice = oUpdatedProcessorVM.getSquareKilometerPrice();
+			
+			if (fNewOnDemandPrice != null && fNewSquareKmPrice != null && fNewOnDemandPrice > 0 && fNewSquareKmPrice > 0) {
+				WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: processor has both on deman price and square kilometer price. Just one of them should be set");
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+					
 			if (fNewOnDemandPrice < 0) {
 				WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the ondemand price is a negative value. Information on Stripe won't be updated");
 				return Response.status(Status.BAD_REQUEST).build();
 			} 
-			else if (fOldOnDemandPrice != fNewOnDemandPrice) {
+			
+			if (fNewSquareKmPrice < 0) {
+				WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the square kilometer price is a negative value. Information on Stripe won't be updated");
+				return Response.status(Status.BAD_REQUEST).build();
+			} 
+			
+			
+			// manage prices
+			if ( (fOldOnDemandPrice != fNewOnDemandPrice) || (fOldSquareKmPrice != fNewSquareKmPrice) ) {
 				StripeService oStripeService = new StripeService();
 				
-				if (fOldOnDemandPrice > 0 && fNewOnDemandPrice == 0) {
+				if ( (fOldOnDemandPrice > 0 && fNewOnDemandPrice == 0) || (fOldSquareKmPrice > 0 && fNewSquareKmPrice == 0)  ) {
 					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the app has been set for free. Archiving the Stripe price for the app");
 					String sStripeProductId = oProcessorToUpdate.getStripeProductId();
 					String sPaymentLinkId = oProcessorToUpdate.getStripePaymentLinkId();
@@ -2180,10 +2197,10 @@ public class ProcessorsResource  {
 					oProcessorToUpdate.setStripeProductId(null);
 					
 				}
-				else if (fOldOnDemandPrice <= 0 && fNewOnDemandPrice > 0) {
+				else if ( (fOldOnDemandPrice <= 0 && fNewOnDemandPrice > 0) || (fOldSquareKmPrice <= 0 && fNewSquareKmPrice > 0)) {
 					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: the app has been set for sale. Adding the Stripe product");
 					
-					Map<String, String> oStripeProducInformationMap = oStripeService.createProductAppWithOnDemandPrice(oUpdatedProcessorVM.getProcessorName(), sProcessorId, fNewOnDemandPrice);
+					Map<String, String> oStripeProducInformationMap = oStripeService.createProductAppWithPrice(oUpdatedProcessorVM.getProcessorName(), sProcessorId, fNewOnDemandPrice, fNewSquareKmPrice);
 				
 					if (oStripeProducInformationMap == null ) {
 						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: no information about the created Stripe product");

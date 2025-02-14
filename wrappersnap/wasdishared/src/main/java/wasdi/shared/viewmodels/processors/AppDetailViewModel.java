@@ -21,6 +21,7 @@ public class AppDetailViewModel {
 	private String link;
 	private String email;
 	private Float ondemandPrice;
+	private Float squareKilometerPrice = 0f;
 	private Float subscriptionPrice;
 	private Double updateDate;
 	private Double publishDate;
@@ -105,6 +106,12 @@ public class AppDetailViewModel {
 	}
 	public void setOndemandPrice(Float ondemandPrice) {
 		this.ondemandPrice = ondemandPrice;
+	}
+	public Float getSquareKilometerPrice() {
+		return squareKilometerPrice;
+	}
+	public void setSquareKilometerPrice(Float squareKilometerPrice) {
+		this.squareKilometerPrice = squareKilometerPrice;
 	}
 	public Float getSubscriptionPrice() {
 		return subscriptionPrice;
