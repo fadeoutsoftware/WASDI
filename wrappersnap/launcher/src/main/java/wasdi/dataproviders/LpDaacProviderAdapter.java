@@ -101,6 +101,7 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 		
 		if (sFileName.toUpperCase().startsWith("VNP21A1D") 
 				|| sFileName.toUpperCase().startsWith("VNP21A1N")
+				|| sFileName.toUpperCase().startsWith("VNP15A2H")
 				|| sFileName.toUpperCase().startsWith("MCD43A4")
 				|| sFileName.toUpperCase().startsWith("MCD43A3")) {
 			WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile: VIIRS product asked for download");
@@ -258,7 +259,8 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 				return DataProviderScores.DOWNLOAD.getValue();
 			}
 		}
-		if (sPlatformType.equals(Platforms.VIIRS) && (sFileName.startsWith("VNP21A1D") || sFileName.startsWith("VNP21A1N"))) {
+		if (sPlatformType.equals(Platforms.VIIRS) 
+				&& (sFileName.startsWith("VNP21A1D") || sFileName.startsWith("VNP21A1N") || sFileName.startsWith("VNP15A2H"))) {
 			return DataProviderScores.DOWNLOAD.getValue();
 		}
 
