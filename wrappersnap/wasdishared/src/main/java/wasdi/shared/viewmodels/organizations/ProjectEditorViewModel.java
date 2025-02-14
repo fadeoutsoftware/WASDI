@@ -6,6 +6,7 @@ public class ProjectEditorViewModel {
 	private String subscriptionId;
 	private String name;
 	private String description;
+	private String targetUser;
 	private boolean activeProject;
 	public String getProjectId() {
 		return projectId;
@@ -36,6 +37,12 @@ public class ProjectEditorViewModel {
 	}
 	public void setActiveProject(boolean activeProject) {
 		this.activeProject = activeProject;
+	}
+	public String getTargetUser() {
+		return targetUser;
+	}
+	public void setTargetUser(String targetUser) {
+		this.targetUser = targetUser;
 	}
 
 }
