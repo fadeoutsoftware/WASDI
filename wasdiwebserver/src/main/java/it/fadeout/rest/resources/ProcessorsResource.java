@@ -1026,14 +1026,13 @@ public class ProcessorsResource  {
 					String sDecodedParams = URLDecoder.decode(sEncodedJson, StandardCharsets.UTF_8);
 					JSONObject oJson = new JSONObject(sDecodedParams);
 					
-					double dSouth = Double.NaN;
-					double dEast = Double.NaN;
-					double dNorth = Double.NaN;
-					double dWest = Double.NaN;
-					
+					double dSouth = Double.NaN;	// min lat
+					double dEast = Double.NaN; 	// max long
+					double dNorth = Double.NaN; // max lat
+					double dWest = Double.NaN;	// min long
 					
 					// so far we support only two types of bouding boxes:
-					// 1) list of coordinates - in this case we need a convention to express the order of coordinated
+					// 1) list of coordinates - in this case we need a convention to express the order of coordinates
 					try {
 						JSONArray oJsonArray = oJson.getJSONArray(sAreaParameterName);
 						
@@ -1043,7 +1042,7 @@ public class ProcessorsResource  {
 						WasdiLog.warnLog("ProcessorsResource.internalRun. The bouding box is not represented as a JSON array");
 					}
 					
-					// 2) dictionary of 
+					// 2) dictionary with sub-dictionaries southWest and northEast 
 					try {
 						JSONObject oJsonObject = oJson.getJSONObject(sAreaParameterName);
 						if (oJsonObject.keySet().contains("southWest") && oJsonObject.keySet().contains("northEast")) {
@@ -1057,7 +1056,19 @@ public class ProcessorsResource  {
 						WasdiLog.warnLog("ProcessorsResource.internalRun. The bouding box is not represented as a standard JSON dictionary");
 					}
 					
-					if (!Double.isNaN(dWest) && !Double.isNaN(dNorth) && !Double.isNaN(dSouth) && !Double.isNaN(dEast)) {
+					if (! (Double.isNaN(dWest) || Double.isNaN(dNorth) || Double.isNaN(dSouth) || Double.isNaN(dEast)) ) {
+						double dDiffLat = dNorth - dSouth;
+						double dDiffLong = dEast - dWest;
+						
+						// one degree of latitude: approx 111.32 km
+						// one degree of longitude: 111.32 X cos(lat) km
+						
+						// average latitude of the bounding box
+						double dAvgLat = (dSouth + dNorth) / 2;
+						double dWidth = dDiffLong * 111.32 * Math.cos(dAvgLat);
+						double dHeight = dDiffLat * 111.32;
+						double dAreaInSquareKilometers = dWidth * dHeight;
+						
 						
 					}
 					else {
