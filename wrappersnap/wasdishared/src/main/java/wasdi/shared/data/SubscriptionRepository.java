@@ -355,6 +355,24 @@ public class SubscriptionRepository extends MongoRepository {
 		return aoReturnList;
 	}
 	
+	
+	/**
+	 * Get the list of subscriptions.
+	 * @return the list of subscriptions
+	 */
+	public long  getSubscriptionsCount() {
+
+		try {
+			long lCount = getCollection(m_sThisCollection).countDocuments();
+
+			return lCount;
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("SubscriptionRepository.getSubscriptionsCount : error " + oEx.toString());
+		}
+
+		return -1L;
+	}
+	
 	/**
 	 * Get the sorted list of subscriptions.
 	 * @return the sorted list of subscriptions

@@ -261,6 +261,11 @@ public class WasdiConfig {
 	public OpenEO openEO = new OpenEO();
 	
 	/**
+	 * Configuration for the node score algorithm
+	 */
+	public NodeScoreConfig nodeScoreConfig = new NodeScoreConfig();
+	
+	/**
 	 * Get the Catalogue Config for the specified Platform Type
 	 * @param sPlatformType Platform of interest
 	 * @return Catalogue configuration for the specified platform
