@@ -1,10 +1,13 @@
 package wasdi.shared.data;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.CreditPackage;
+import wasdi.shared.business.Subscription;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class CreditsPagackageRepository extends MongoRepository {
@@ -81,5 +84,29 @@ public class CreditsPagackageRepository extends MongoRepository {
 			return false;
 		}
 		
+		/**
+		 * Update an credits package.
+		 * 
+		 * @param oCreditPackage the credit package to be updated
+		 * @return true if the operation succeeded, false otherwise
+		 */
+		public boolean updateCreditPackage(CreditPackage oCreditPackage) {
+
+			try {
+				String sJSON = s_oMapper.writeValueAsString(oCreditPackage);
+
+				Bson oFilter = new Document("creditPackageId", oCreditPackage.getCreditPackageId());
+				Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
+
+				UpdateResult oResult = getCollection(m_sThisCollection).updateOne(oFilter, oUpdateOperationDocument);
+
+				if (oResult.getModifiedCount() == 1)
+					return true;
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("SubscriptionRepository.updateSubscription: error ", oEx);
+			}
+
+			return false;
+		}
 		
 }
