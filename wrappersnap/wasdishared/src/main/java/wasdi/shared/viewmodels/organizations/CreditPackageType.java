@@ -7,19 +7,21 @@ import java.util.stream.Collectors;
 
 public enum CreditPackageType {
 	
-	Fifty("Fifty", "Fifty credits", "Fifty credits"),
-	OneHndred("OneHundred", "One hundred credits", "One hundred credits");
+	Fifty("Fifty", "Fifty credits", "Fifty credits", 50),
+	OneHundred("OneHundred", "One hundred credits", "One hundred credits", 100);
 	
 	private String typeId;
 	private String typeName;
 	private String typeDescription;
+	private float credits;
 
 	private static final Map<String, CreditPackageType> ENUM_MAP;
 	
-	private CreditPackageType(String sId, String sName, String sDescription) {
+	private CreditPackageType(String sId, String sName, String sDescription, float fCredits) {
 		this.typeId = sId;
 		this.typeName = sName;
 		this.typeDescription = sDescription;
+		this.credits = fCredits;
 	}
 
 	static {
@@ -53,6 +55,14 @@ public enum CreditPackageType {
 
 	public void setTypeDescription(String typeDescription) {
 		this.typeDescription = typeDescription;
+	}
+
+	public float getCredits() {
+		return credits;
+	}
+
+	public void setCredits(float credits) {
+		this.credits = credits;
 	}
 
 	public static Map<String, CreditPackageType> getEnumMap() {
