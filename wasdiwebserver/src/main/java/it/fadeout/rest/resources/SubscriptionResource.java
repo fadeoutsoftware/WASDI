@@ -380,6 +380,7 @@ public class SubscriptionResource {
 				oProjectEditorViewModel.setDescription("Project automatically created for the " + oSubscription.getName() + " subscription");
 				oProjectEditorViewModel.setSubscriptionId(oSubscription.getSubscriptionId());
 				oProjectEditorViewModel.setActiveProject(oTargetUser.getActiveProjectId() == null);
+				oProjectEditorViewModel.setTargetUser(sUserId);
 
 				new ProjectResource().createProject(sSessionId, oProjectEditorViewModel);
 

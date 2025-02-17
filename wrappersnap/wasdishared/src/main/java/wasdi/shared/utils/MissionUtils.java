@@ -244,7 +244,8 @@ public class MissionUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("RIVER-FLD") 
 					|| sFileName.toUpperCase().startsWith("VNP21A1D.")
-					|| sFileName.toUpperCase().startsWith("VNP21A1N.")) {
+					|| sFileName.toUpperCase().startsWith("VNP21A1N.")
+					|| sFileName.toUpperCase().startsWith("VNP15A2H.")) {
 				return Platforms.VIIRS;
 			}
 			else if (sFileName.toUpperCase().startsWith("PROBAV_")) {
