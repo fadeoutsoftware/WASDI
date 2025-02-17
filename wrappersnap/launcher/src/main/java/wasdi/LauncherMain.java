@@ -202,11 +202,21 @@ public class LauncherMain  {
         // Filter the apache logs
   		try {
   			ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("httpclient");
+  			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);  			  			
+  		}
+  		catch (Exception oEx) {
+  			WasdiLog.errorLog("Disabling httpclient logging exception " + oEx.toString());
+  		}   		
+
+        // Filter the apache logs
+  		try {  			
+  			ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.hc.client5.http");
   			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);  			
   		}
   		catch (Exception oEx) {
-  			WasdiLog.errorLog("Disabling mongo driver logging exception " + oEx.toString());
+  			WasdiLog.errorLog("Disabling org.apache.hc.client5.http logging exception " + oEx.toString());
   		}   		
+
   		
         try {
 
