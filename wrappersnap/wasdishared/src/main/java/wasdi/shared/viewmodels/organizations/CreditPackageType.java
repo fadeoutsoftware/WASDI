@@ -13,11 +13,11 @@ public enum CreditPackageType {
 	private String typeId;
 	private String typeName;
 	private String typeDescription;
-	private float credits;
+	private double credits;
 
 	private static final Map<String, CreditPackageType> ENUM_MAP;
 	
-	private CreditPackageType(String sId, String sName, String sDescription, float fCredits) {
+	private CreditPackageType(String sId, String sName, String sDescription, double fCredits) {
 		this.typeId = sId;
 		this.typeName = sName;
 		this.typeDescription = sDescription;
@@ -57,11 +57,11 @@ public enum CreditPackageType {
 		this.typeDescription = typeDescription;
 	}
 
-	public float getCredits() {
+	public double getCredits() {
 		return credits;
 	}
 
-	public void setCredits(float credits) {
+	public void setCredits(double credits) {
 		this.credits = credits;
 	}
 

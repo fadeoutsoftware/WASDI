@@ -1,6 +1,6 @@
 package wasdi.shared.business;
 
-public class CreditPackage {
+public class CreditsPackage {
 	
 	private String creditPackageId;
 	private String name;
@@ -9,15 +9,15 @@ public class CreditPackage {
 	private Double buyDate;
 	private String userId;
 	private boolean buySuccess;
-	private float creditsRemaining;
+	private Double creditsRemaining;
 	private Double lastUpdate;
 	
 	
 	
 	
-	public CreditPackage(String creditPackageId, String name, String description, String type, 
+	public CreditsPackage(String creditPackageId, String name, String description, String type, 
 			Double buyDate, String userId,
-			boolean buySuccess, float creditsRemaining, double lastUpdate) {
+			boolean buySuccess, Double creditsRemaining, double lastUpdate) {
 		super();
 		this.creditPackageId = creditPackageId;
 		this.name = name;
@@ -86,11 +86,11 @@ public class CreditPackage {
 		this.buySuccess = buySuccess;
 	}
 	
-	public float getCreditsRemaining() {
+	public Double getCreditsRemaining() {
 		return creditsRemaining;
 	}
 	
-	public void setCreditsRemaining(float creditsRemaining) {
+	public void setCreditsRemaining(Double creditsRemaining) {
 		this.creditsRemaining = creditsRemaining;
 	}
 	

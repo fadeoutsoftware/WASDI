@@ -1,13 +1,22 @@
 package wasdi.shared.data;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.UpdateResult;
 
-import wasdi.shared.business.CreditPackage;
+import wasdi.shared.business.CreditsPackage;
 import wasdi.shared.business.Subscription;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class CreditsPagackageRepository extends MongoRepository {
@@ -22,7 +31,7 @@ public class CreditsPagackageRepository extends MongoRepository {
 		 * @param sCreditPackageId the id of the credit package
 		 * @return the credit package if found, null otherwise
 		 */
-		public CreditPackage getCreditPackageById(String sCreditPackageId) {
+		public CreditsPackage getCreditPackageById(String sCreditPackageId) {
 			try {
 				Document oWSDocument = getCollection(m_sThisCollection)
 						.find(new Document("creditPackageId", sCreditPackageId))
@@ -31,7 +40,7 @@ public class CreditsPagackageRepository extends MongoRepository {
 				if (oWSDocument != null) {
 					String sJSON = oWSDocument.toJson();
 
-					return s_oMapper.readValue(sJSON, CreditPackage.class);
+					return s_oMapper.readValue(sJSON, CreditsPackage.class);
 				}
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("CreditsPagackageRepository.getCreditPackageById: error ", oEx);
@@ -46,7 +55,7 @@ public class CreditsPagackageRepository extends MongoRepository {
 		 * @param sUserId the id of the user
 		 * @return the credit package if found, null otherwise
 		 */
-		public CreditPackage getCreditPackageByNameAndUserId(String sCreditPackageName, String sUserId) {
+		public CreditsPackage getCreditPackageByNameAndUserId(String sCreditPackageName, String sUserId) {
 			try {
 				Document oWSDocument = getCollection(m_sThisCollection)
 						.find(Filters.and(Filters.eq("userId", sUserId), Filters.eq("name", sCreditPackageName)))
@@ -55,7 +64,7 @@ public class CreditsPagackageRepository extends MongoRepository {
 				if (oWSDocument != null) {
 					String sJSON = oWSDocument.toJson();
 
-					return s_oMapper.readValue(sJSON, CreditPackage.class);
+					return s_oMapper.readValue(sJSON, CreditsPackage.class);
 				}
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("CreditsPagackageRepository.getCreditPackageByNameAndUserId: error ", oEx);
@@ -65,12 +74,64 @@ public class CreditsPagackageRepository extends MongoRepository {
 		}
 		
 		/**
+		 * Get the total credits remaining for a user
+		 * @param sUserId the user id 
+		 * @return the total number of credits available for a user
+		 */
+		public Double getTotalCreditsByUser(String sUserId) {
+		
+			if (Utils.isNullOrEmpty(sUserId)) {
+				WasdiLog.warnLog("CreditsPackageRepository.getTotalCreditsByUser: user id is null or empty");
+				return null;
+			}
+			
+			try {
+				AggregateIterable<Document> oResult = getCollection(m_sThisCollection).aggregate(Arrays.asList(
+							Aggregates.match(Filters.eq("userId", sUserId)),
+							Aggregates.group(null, Accumulators.sum("credits", "ScreditsRemaining"))
+						));
+				
+				return oResult.first().getDouble("credits");
+				
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("CreditsPagackageRepository.getTotalCreditsByUser: error", oEx);
+			}
+			
+			return null;
+			
+		}
+		
+		/**
+		 * List the credits packages of a user
+		 * @param sUserId the user id 
+		 * @return the total number of credits available for a user
+		 */
+		public List<CreditsPackage> listByUser(String sUserId) {
+		
+			if (Utils.isNullOrEmpty(sUserId)) {
+				WasdiLog.warnLog("CreditsPackageRepository.listByUser: user id is null or empty");
+				return null;
+			}			
+			
+			try {
+				List<CreditsPackage> aoReturnList = new ArrayList<>();
+				FindIterable<Document> aoRetrievedDocs =  getCollection(m_sRepoDb).find(Filters.eq("userId", sUserId));
+				fillList(aoReturnList, aoRetrievedDocs, CreditsPackage.class);
+				return aoReturnList;
+				
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("CreditsPagackageRepository.listByUser: error", oEx);
+			}
+			return null;	
+		}
+		
+		/**
 		 * Insert a new credit package.
 		 * 
 		 * @param oCreditPackage the credit package to be inserted
 		 * @return true if the operation succeeded, false otherwise
 		 */
-		public boolean insertCreditPackage(CreditPackage oCreditPackage) {
+		public boolean insertCreditPackage(CreditsPackage oCreditPackage) {
 
 			try {
 				String sJSON = s_oMapper.writeValueAsString(oCreditPackage);
@@ -90,7 +151,7 @@ public class CreditsPagackageRepository extends MongoRepository {
 		 * @param oCreditPackage the credit package to be updated
 		 * @return true if the operation succeeded, false otherwise
 		 */
-		public boolean updateCreditPackage(CreditPackage oCreditPackage) {
+		public boolean updateCreditPackage(CreditsPackage oCreditPackage) {
 
 			try {
 				String sJSON = s_oMapper.writeValueAsString(oCreditPackage);

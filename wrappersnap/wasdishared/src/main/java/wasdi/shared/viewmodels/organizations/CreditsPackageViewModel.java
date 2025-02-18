@@ -9,8 +9,9 @@ public class CreditsPackageViewModel {
 	private Double buyDate;
 	private String userId;
 	private boolean buySuccess;
-	private float creditsRemaining;
-	private float lastUpdate;
+	private double creditsRemaining;
+	private double lastUpdate;
+	
 	
 	public String getCreditPackageId() {
 		return creditPackageId;
@@ -68,19 +69,19 @@ public class CreditsPackageViewModel {
 		this.buySuccess = buySuccess;
 	}
 	
-	public float getCreditsRemaining() {
+	public double getCreditsRemaining() {
 		return creditsRemaining;
 	}
 	
-	public void setCreditsRemaining(float creditsRemaining) {
+	public void setCreditsRemaining(double creditsRemaining) {
 		this.creditsRemaining = creditsRemaining;
 	}
 	
-	public float getLastUpdate() {
+	public double getLastUpdate() {
 		return lastUpdate;
 	}
 	
-	public void setLastUpdate(float lastUpdate) {
+	public void setLastUpdate(double lastUpdate) {
 		this.lastUpdate = lastUpdate;
 	}
 

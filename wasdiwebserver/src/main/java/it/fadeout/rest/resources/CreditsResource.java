@@ -1,5 +1,6 @@
 package it.fadeout.rest.resources;
 
+import java.security.cert.PKIXCertPathBuilderResult;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -17,18 +18,12 @@ import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
 import it.fadeout.services.StripeService;
-import wasdi.shared.business.CreditPackage;
-import wasdi.shared.business.Project;
-import wasdi.shared.business.Subscription;
+import wasdi.shared.business.CreditsPackage;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.config.StripeProductConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.CreditsPagackageRepository;
-import wasdi.shared.data.ProjectRepository;
-import wasdi.shared.data.SubscriptionRepository;
-import wasdi.shared.data.UserRepository;
-import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ClientMessageCodes;
@@ -37,7 +32,6 @@ import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.organizations.CreditPackageType;
 import wasdi.shared.viewmodels.organizations.CreditsPackageViewModel;
 import wasdi.shared.viewmodels.organizations.StripePaymentDetail;
-import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.organizations.SubscriptionTypeViewModel;
 
 @Path("/credits")
@@ -63,15 +57,72 @@ public class CreditsResource {
 		}		
 	}
 	
-	private static List<SubscriptionTypeViewModel> convert(List<CreditPackageType> aoSubscriptionTypes) {
-		return aoSubscriptionTypes.stream()
-				.map(CreditsResource::convert)
-				.collect(Collectors.toList());
-	}
+	
+	/**
+	 * Get the total amount of credits remaining for a user
+	 * @param sSessionId the session token
+	 * @return the number of credits remaining for the user
+	 */
+	@GET
+	@Path("/totalbyuser")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response getTotalCreditsByUser(@HeaderParam("x-session-token") String sSessionId) {
+		WasdiLog.debugLog("CreditsResource.getTotalCreditsByUser");
+		
+		try {
+			
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
-	private static SubscriptionTypeViewModel convert(CreditPackageType oSubscriptionType) {
-		return new SubscriptionTypeViewModel(oSubscriptionType.name(), oSubscriptionType.getTypeName(), oSubscriptionType.getTypeDescription());
+			if (oUser == null) {
+				WasdiLog.warnLog("CreditsResource.getTotalCreditsByUser: invalid session");
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+			}
+			
+			CreditsPagackageRepository oCreditsRepository = new CreditsPagackageRepository();
+			Double dTotalCredis = oCreditsRepository.getTotalCreditsByUser(oUser.getUserId());
+			
+			return Response.ok(dTotalCredis).build();
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("CreditsResource.getCreditsPackages: error ", oEx);
+			return Response.serverError().build();			
+		}		
 	}
+	
+	
+	/**
+	 * List all the credits packages that have been purchased by the user
+	 * @param sSessionId the session token
+	 * @return a list of credits packages view models, representing all the credits packages purchased by the user
+	 */
+	@GET
+	@Path("/listbyuser")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response getCreditsListByUser(@HeaderParam("x-session-token") String sSessionId) {
+		WasdiLog.debugLog("CreditsResource.getCreditsListByUser");
+		
+		try {	
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oUser == null) {
+				WasdiLog.warnLog("CreditsResource.getCreditsListByUser: invalid session");
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+			}
+			
+			CreditsPagackageRepository oCreditsRepository = new CreditsPagackageRepository();
+			List<CreditsPackage> aoCreditsPackages = oCreditsRepository.listByUser(oUser.getUserId());
+			List<CreditsPackageViewModel> aoViewModel = aoCreditsPackages.stream()
+					.map(oCreditsPackage -> getViewModel(oCreditsPackage))
+					.collect(Collectors.toList());
+			return Response.ok(aoViewModel).build();
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("CreditsResource.getCreditsPackages: error ", oEx);
+			return Response.serverError().build();			
+		}		
+	}	
+	
+	
 	
 	/**
 	 * Create a new credit package for a user.
@@ -120,7 +171,7 @@ public class CreditsResource {
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
-			float fCredits = oPackageType.getCredits();
+			double dCredits = oPackageType.getCredits();
 
 			boolean bIsBuySuccess = oCreditsPackageViewModel.isBuySuccess();
 			if (!UserApplicationRole.isAdmin(oUser) && bIsBuySuccess) {
@@ -128,7 +179,7 @@ public class CreditsResource {
 					bIsBuySuccess = false;					
 			}
 						
-			CreditPackage oCreditPackage = new CreditPackage(sCreditPackageId, sName, sDescription, sType, 0d, sUserId, bIsBuySuccess, fCredits, 0d);
+			CreditsPackage oCreditPackage = new CreditsPackage(sCreditPackageId, sName, sDescription, sType, 0d, sUserId, bIsBuySuccess, dCredits, 0d);
 
 			if (oCreditsPackageRepository.insertCreditPackage(oCreditPackage)) {
 				return Response.ok(new SuccessResponse(oCreditPackage.getCreditPackageId())).build();
@@ -154,7 +205,7 @@ public class CreditsResource {
 	@Path("/stripe/paymentUrl")
 	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getStripePaymentUrl(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("subscription") String sCreditPackageId) {
+			@QueryParam("creditPackageId") String sCreditPackageId) {
 		WasdiLog.debugLog("CreditsResource.getStripePaymentUrl( " + "Credits package id: " + sCreditPackageId + ")");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -173,7 +224,7 @@ public class CreditsResource {
 			
 			CreditsPagackageRepository oCreditsPackageRepository = new CreditsPagackageRepository();
 			
-			CreditPackage oCreditPackage = oCreditsPackageRepository.getCreditPackageById(sCreditPackageId);
+			CreditsPackage oCreditPackage = oCreditsPackageRepository.getCreditPackageById(sCreditPackageId);
 			
 			if (oCreditPackage == null) {
 				WasdiLog.warnLog("CreditsResource.getStripePaymentUrl: credits package does not exist");
@@ -206,7 +257,7 @@ public class CreditsResource {
 			String sBaseUrl = aoProductConfigMap.get(oCreditPackageType.getTypeId());
 
 			if (Utils.isNullOrEmpty(sBaseUrl)) {
-				WasdiLog.debugLog("CreditsResource.getStripePaymentUrl: the config does not contain a valid configuration for the subscription");
+				WasdiLog.debugLog("CreditsResource.getStripePaymentUrl: the config does not contain a valid configuration for the credit package");
 				return Response.serverError().build();
 			} 
 			else {
@@ -258,7 +309,7 @@ public class CreditsResource {
 
 				CreditsPagackageRepository oCreditsPackageRepository = new CreditsPagackageRepository();
 
-				CreditPackage oCreditsPackage = oCreditsPackageRepository.getCreditPackageById(sCreditsPackagegeId);
+				CreditsPackage oCreditsPackage = oCreditsPackageRepository.getCreditPackageById(sCreditsPackagegeId);
 
 				if (oCreditsPackage == null) {
 					WasdiLog.debugLog("CreditsResource.confirmation: credits package does not exist");
@@ -289,7 +340,35 @@ public class CreditsResource {
 		
 		return sHtmlContent;
 	}
+	
+	private static List<SubscriptionTypeViewModel> convert(List<CreditPackageType> aoSubscriptionTypes) {
+		return aoSubscriptionTypes.stream()
+				.map(CreditsResource::convert)
+				.collect(Collectors.toList());
+	}
 
+	private static SubscriptionTypeViewModel convert(CreditPackageType oSubscriptionType) {
+		return new SubscriptionTypeViewModel(oSubscriptionType.name(), oSubscriptionType.getTypeName(), oSubscriptionType.getTypeDescription());
+	}
+	
+	private static CreditsPackageViewModel getViewModel(CreditsPackage oCreditPackage) {
+		CreditsPackageViewModel oViewModel = new CreditsPackageViewModel();
+		try {
+			oViewModel.setCreditPackageId(oCreditPackage.getCreditPackageId());
+			oViewModel.setName(oCreditPackage.getName());
+			oViewModel.setDescription(oCreditPackage.getDescription());
+			oViewModel.setType(oCreditPackage.getType());
+			oViewModel.setBuyDate(oCreditPackage.getBuyDate());
+			oViewModel.setUserId(oCreditPackage.getUserId());
+			oViewModel.setBuySuccess(oCreditPackage.isBuySuccess());
+			oViewModel.setCreditsRemaining(oCreditPackage.getCreditsRemaining());
+			oViewModel.setLastUpdate(oCreditPackage.getLastUpdate());
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("CreditsResource.getViewModel. Error ", oEx);
+		}
+		
+		return oViewModel;
+	}
 	
 
 }
