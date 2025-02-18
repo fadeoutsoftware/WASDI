@@ -711,7 +711,7 @@ public class CatalogResources {
 			String sUserId = oUser.getUserId();
 			
 			// Get the workspace path and the full path
-			String sWorkspacePath = PathsConfig.getWorkspacePath(sUserId, sWorkspaceId);
+			String sWorkspacePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sUserId), sWorkspaceId);
 			String sFullFilePath = sWorkspacePath + sFileName;
 			
 			// Check if we have the file in the db

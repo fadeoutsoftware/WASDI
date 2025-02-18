@@ -541,8 +541,7 @@ public class ProductResource {
     @POST
     @Path("/update")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public Response updateProductViewModel(@HeaderParam("x-session-token") String sSessionId,
-                                           @QueryParam("workspace") String sWorkspaceId, ProductViewModel oProductViewModel) {
+    public Response updateProductViewModel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, ProductViewModel oProductViewModel) {
 
         WasdiLog.debugLog("ProductResource.updateProductViewModel( WS: " + sWorkspaceId + ", ... )");
 
@@ -1179,5 +1178,4 @@ public class ProductResource {
         	return oPrimitiveResult;
         }
     }
-
 }

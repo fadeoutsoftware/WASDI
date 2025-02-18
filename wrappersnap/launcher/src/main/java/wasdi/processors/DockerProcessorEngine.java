@@ -345,11 +345,14 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
                 return false;                    
             }
+            
+            boolean bToInstall = false;
 
             // Check if the processor is available on the node
             if (!isProcessorOnNode(oParameter)) {
                 WasdiLog.infoLog("DockerProcessorEngine.run: processor not available on node download it");
                 processWorkspaceLog("Application not available on this node: installing it...");
+                bToInstall = true;
                 
                 m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "APP NOT ON NODE<BR>INSTALLATION STARTED", m_oParameter.getExchange());
                 
@@ -406,7 +409,13 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Check if is started otherwise start it
             String sContainerName = startContainerAndGetName(oDockerUtils,oProcessor, oParameter);
             
-            m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "INSTALLATION DONE<BR>STARTING APP", m_oParameter.getExchange());
+            String sMessage = "";
+            
+            if (bToInstall) sMessage = "INSTALLATION DONE<BR>";
+            
+            sMessage += "STARTING APP";
+            
+            m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), sMessage, m_oParameter.getExchange());
             
             // If we do not have a container name here, we are not in the position to continue
             if (Utils.isNullOrEmpty(sContainerName)) {
