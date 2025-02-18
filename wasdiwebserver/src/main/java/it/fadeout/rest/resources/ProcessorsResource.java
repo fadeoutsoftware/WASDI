@@ -1009,89 +1009,7 @@ public class ProcessorsResource  {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			oProcessorParameter.setNotifyOwnerByMail(bNotify);
-			
-			
-			// ---- MY CODE STARTS HERE ----
-			
-			// first of all, we execute the processor only if it has a price per square km 
-			Float fPricePerSquareKilometer = oProcessorToRun.getPricePerSquareKm(); 
-			if (fPricePerSquareKilometer != null && fPricePerSquareKilometer > 0f) {
-				WasdiLog.debugLog("ProcessorsResource.internalRun. Computing bounding box price for running processor " + oProcessorToRun.getProcessorId());
-				
-				// we need to get the name of the parameter associated with the bounding box
-				String sAreaParameterName = oProcessorToRun.getAreaParameterName();
-				
-				if (!Utils.isNullOrEmpty(sAreaParameterName)) {
-					WasdiLog.debugLog("ProcessorsResource.internalRun. Name of the area parameter " + sAreaParameterName);
-					
-					String sDecodedParams = URLDecoder.decode(sEncodedJson, StandardCharsets.UTF_8);
-					JSONObject oJson = new JSONObject(sDecodedParams);
-					
-					double dSouth = Double.NaN;	// min lat
-					double dEast = Double.NaN; 	// max long
-					double dNorth = Double.NaN; // max lat
-					double dWest = Double.NaN;	// min long
-					
-					// so far we support only two types of bouding boxes:
-					// 1) list of coordinates - in this case we need a convention to express the order of coordinates
-					try {
-						JSONArray oJsonArray = oJson.getJSONArray(sAreaParameterName);
-						
-						
-						
-					} catch (JSONException oE) {
-						WasdiLog.warnLog("ProcessorsResource.internalRun. The bouding box is not represented as a JSON array");
-					}
-					
-					// 2) dictionary with sub-dictionaries southWest and northEast 
-					try {
-						JSONObject oJsonObject = oJson.getJSONObject(sAreaParameterName);
-						if (oJsonObject.keySet().contains("southWest") && oJsonObject.keySet().contains("northEast")) {
-							dSouth = oJson.getJSONObject("southWest").getDouble("lat");
-							dWest = oJson.getJSONObject("southWest").getDouble("lng");
-							dNorth = oJson.getJSONObject("northEast").getDouble("lat");
-							dEast = oJson.getJSONObject("northEast").getDouble("lng");
-						}
-						
-					} catch (JSONException oE) {
-						WasdiLog.warnLog("ProcessorsResource.internalRun. The bouding box is not represented as a standard JSON dictionary");
-					}
-					
-					if (! (Double.isNaN(dWest) || Double.isNaN(dNorth) || Double.isNaN(dSouth) || Double.isNaN(dEast)) ) {
-						double dDiffLat = dNorth - dSouth;
-						double dDiffLong = dEast - dWest;
-						
-						// one degree of latitude: approx 111.32 km
-						// one degree of longitude: 111.32 X cos(lat) km
-						
-						// average latitude of the bounding box
-						double dAvgLat = (dSouth + dNorth) / 2;
-						double dWidth = dDiffLong * 111.32 * Math.cos(dAvgLat);
-						double dHeight = dDiffLat * 111.32;
-						double dAreaInSquareKilometers = dWidth * dHeight;
-						
-						
-					}
-					else {
-						WasdiLog.warnLog("ProcessorsResource.internalRun. Some of the coordinates of the bounding box are not specified. Impassible to compute the price of the run");
-					}
-					
-					
-				} 
-				else {
-					WasdiLog.debugLog("ProcessorsResource.internalRun. Name of the area parameter not found ");
-				}
-				
-				
-				
-				
-			}
-			
-			// ---- MY CODE ENDS HERE ----
-			
-			
-			
-			/*
+
 			PrimitiveResult oResult = Wasdi.runProcess(sUserId, sSessionId, oProcessorParameter.getLauncherOperation(), sName, oProcessorParameter, sParentProcessWorkspaceId);
 			
 			try{
@@ -1113,7 +1031,6 @@ public class ProcessorsResource  {
 				oRunningProcessorViewModel.setStatus(ProcessStatus.ERROR.toString());
 				return oRunningProcessorViewModel;
 			}
-			*/
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessorsResource.internalRun error: " + oEx );
@@ -1122,6 +1039,153 @@ public class ProcessorsResource  {
 		}
 		
 		return oRunningProcessorViewModel;
+	}
+	
+	
+	@POST
+	@Path("/getcredits")
+	@Produces({ "application/json", "text/xml" })
+	public Response getCreditsForRun(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, String sEncodedJson) throws Exception {
+		WasdiLog.debugLog("ProcessorsResource.getCreditsForRun( Processor id: " + sProcessorId + " )");
+		
+				
+		try {
+			if (Utils.isNullOrEmpty(sEncodedJson)) {
+				WasdiLog.warnLog("ProcessorsResource.getCreditsForRun: no parameters specified for the processors. Computing the bouding box won't be possible");
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+			
+			if (sEncodedJson.contains("+")) {
+				// The + char is not encoded but then in the launcher, when is decode, become a space. Replace the char with the correct representation
+				sEncodedJson = sEncodedJson.replaceAll("\\+", "%2B");
+				WasdiLog.debugLog("ProcessorsResource.internalRun: replaced + with %2B in encoded JSON " + sEncodedJson);
+			}
+			
+			// Check User 
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oUser==null) {
+				WasdiLog.warnLog("ProcessorsResource.getCreditsForRun: invalid session");
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+			}
+			
+			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+				WasdiLog.warnLog("ProcessorsResource.getCreditsForRun: user " + oUser.getUserId() + " does not have a valid subscription");
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+			}
+
+			String sUserId = oUser.getUserId();
+		
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sProcessorId);
+			
+			if (oProcessorToRun == null) { 
+				WasdiLog.warnLog("ProcessorsResource.getCreditsForRun: unable to find processor " + sProcessorId);
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("")).build();
+			}
+			
+			if (oProcessorToRun.getPricePerSquareKm() == null || oProcessorToRun.getPricePerSquareKm() == 0) {
+				WasdiLog.debugLog("ProcessorsResource.getCreditsForRun: the app is not sold using credits.");
+				return Response.ok(0).build();
+			}
+			
+			if (Utils.isNullOrEmpty(oProcessorToRun.getAreaParameterName())) {
+				WasdiLog.debugLog("ProcessorsResource.getCreditsForRun: the app has no area parameter name. Number of credits needed cannot be computed");
+				return Response.serverError().build();
+			}
+			
+			if (!PermissionsUtils.canUserAccessProcessor(sUserId, oProcessorToRun)) {
+				WasdiLog.warnLog("ProcessorsResource.getCreditsForRun: the user cannot access th processor ");
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+			
+			// if the user is the owner of the app, then he won't pay any credit
+			if (oProcessorToRun.getUserId().equals(sUserId)) {
+				WasdiLog.debugLog("ProcessorsResource.getCreditsForRun: the user is the owner of the app. No credits will be used");
+				return Response.ok(0).build();
+			}
+			
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			if (oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, sProcessorId)) {
+				WasdiLog.debugLog("ProcessorsResource.getCreditsForRun: the app has been shared with the user. No credits will be used");
+				return Response.ok(0).build();
+			}
+			
+			// if we reached this point, it means that the app is set for purchase based on square kilometers and the user has to pay it
+			// then, we need to compute the price of the selection
+			
+			WasdiLog.debugLog("ProcessorsResource.getCreditsForRun. Computing bounding box price for running processor " + sProcessorId);
+			
+			Float fPricePerSquareKilometer = oProcessorToRun.getPricePerSquareKm(); 
+			String sAreaParameterName = oProcessorToRun.getAreaParameterName();
+				
+			WasdiLog.debugLog("ProcessorsResource.internalRun. Name of the area parameter " + sAreaParameterName);
+					
+			String sDecodedParams = URLDecoder.decode(sEncodedJson, StandardCharsets.UTF_8);
+			
+			JSONObject oJson = new JSONObject(sDecodedParams);
+					
+			double dSouth = Double.NaN;	// min lat
+			double dEast = Double.NaN; 	// max long
+			double dNorth = Double.NaN; // max lat
+			double dWest = Double.NaN;	// min long
+					
+			// so far we support only two types of bouding boxes:
+			// 1) list of coordinates - in this case we need a convention to express the order of coordinates
+			try {
+				JSONArray oJsonArray = oJson.getJSONArray(sAreaParameterName);
+				
+				// TODO
+				
+			} catch (JSONException oE) {
+				WasdiLog.errorLog("ProcessorsResource.getCreditsForRun. Error while processing the list representing the bbox", oE);
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+					
+			// 2) dictionary with sub-dictionaries southWest and northEast 
+			try {
+				JSONObject oJsonObject = oJson.getJSONObject(sAreaParameterName);
+				if (oJsonObject.keySet().contains("southWest") && oJsonObject.keySet().contains("northEast")) {
+					dSouth = oJson.getJSONObject("southWest").getDouble("lat");
+					dWest = oJson.getJSONObject("southWest").getDouble("lng");
+					dNorth = oJson.getJSONObject("northEast").getDouble("lat");
+					dEast = oJson.getJSONObject("northEast").getDouble("lng");
+				}
+				
+			} catch (JSONException oE) {
+				WasdiLog.errorLog("ProcessorsResource.getCreditsForRun. Error while processing the dictionary representing the bbox", oE);
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+					
+			if (Double.isNaN(dWest) || Double.isNaN(dNorth) || Double.isNaN(dSouth) || Double.isNaN(dEast)) {
+				WasdiLog.warnLog("ProcessorsResource.getCreditsForRun. Impossible to process the bouding box");
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+				
+				
+			double dDiffLat = dNorth - dSouth;
+			double dDiffLong = dEast - dWest;
+			
+			// one degree of latitude: approx 111.32 km
+			// one degree of longitude: 111.32 X cos(lat) km
+			
+			// average latitude of the bounding box
+			double dAvgLat = (dSouth + dNorth) / 2;
+			double dWidth = dDiffLong * 111.32 * Math.cos(dAvgLat);
+			double dHeight = dDiffLat * 111.32;
+			double dAreaInSquareKilometers = dWidth * dHeight;	
+			
+			WasdiLog.debugLog("ProcessorResource.getCreditsForRun. Square kilometers of the bouding box: " + dAreaInSquareKilometers);
+			
+			double dNumberOfCredits = fPricePerSquareKilometer * dAreaInSquareKilometers;
+			
+			return Response.ok(dNumberOfCredits).build();		
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorResource.getCreditsForRun. Error: ", oEx );
+			return Response.serverError().build();
+		}
+
 	}
 	
 		
@@ -2197,7 +2261,8 @@ public class ProcessorsResource  {
 					oProcessorToUpdate.setStripeProductId(null);
 					
 				}
-				else if ( (fOldOnDemandPrice <= 0 && fNewOnDemandPrice > 0) || (fOldSquareKmPrice <= 0 && fNewSquareKmPrice > 0)) {
+				
+				if ( (fOldOnDemandPrice <= 0 && fNewOnDemandPrice > 0) || (fOldSquareKmPrice <= 0 && fNewSquareKmPrice > 0)) {
 					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: the app has been set for sale. Adding the Stripe product");
 					
 					Map<String, String> oStripeProducInformationMap = oStripeService.createProductAppWithPrice(oUpdatedProcessorVM.getProcessorName(), sProcessorId, fNewOnDemandPrice, fNewSquareKmPrice);
@@ -2229,7 +2294,9 @@ public class ProcessorsResource  {
 					oProcessorToUpdate.setStripePaymentLinkId(sStripePaymentLinkId);
 					
 				}
-				else if (fOldOnDemandPrice > 0 && fNewOnDemandPrice > 0 && fOldOnDemandPrice != fNewOnDemandPrice) {
+				
+				if ( (fOldOnDemandPrice > 0 && fNewOnDemandPrice > 0 && fOldOnDemandPrice != fNewOnDemandPrice) 
+						|| (fOldSquareKmPrice > 0 && fNewSquareKmPrice > 0 && fOldSquareKmPrice != fNewSquareKmPrice)) {
 					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the price of the app changed. Updating the correspoding Stripe product");
 					String sStripeProductId = oProcessorToUpdate.getStripeProductId();
 					
@@ -2238,7 +2305,7 @@ public class ProcessorsResource  {
 						return Response.status(Status.NOT_FOUND).build();
 					}
 					
-					List<String> asStripeOnDemandPriceId = oStripeService.getActiveOnDemandPricesId(sStripeProductId);
+					List<String> asStripeOnDemandPriceId = oStripeService.getActivePricesId(sStripeProductId);
 					
 					if (asStripeOnDemandPriceId.size() != 1) {
 						// we support only one active price at time

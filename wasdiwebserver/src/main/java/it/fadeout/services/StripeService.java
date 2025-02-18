@@ -218,7 +218,7 @@ public class StripeService {
 		}
 
 		// first we deactivate all the active on demand prices associated to the product
-		List<String> asPrices = getActiveOnDemandPricesId(sProductId);
+		List<String> asPrices = getActivePricesId(sProductId);
 
 		if (asPrices != null && asPrices.size() > 0) {
 
@@ -278,7 +278,7 @@ public class StripeService {
 	 * @param sProductId the Stripe product id
 	 * @return a list of active price ids for the product. It returns null in case of error
 	 */
-	public List<String> getActiveOnDemandPricesId(String sProductId) {
+	public List<String> getActivePricesId(String sProductId) {
 
 		if (Utils.isNullOrEmpty(sProductId)) {
 			WasdiLog.warnLog("StripeService.getActiveOnDemandPriceId: product id is null or empty. ");
@@ -445,7 +445,7 @@ public class StripeService {
 			return null;
 		}
 		
-		List<String> asOnDemandPrices = getActiveOnDemandPricesId(sProductId);
+		List<String> asOnDemandPrices = getActivePricesId(sProductId);
 		
 		if (asOnDemandPrices == null || asOnDemandPrices.size() == 0) {
 			WasdiLog.warnLog("StripeService.deactivateOnDemandPrice: no active prices found for product " + sProductId);
@@ -527,7 +527,7 @@ public class StripeService {
 			return null;
 		}
 		
-		List<String> asOnDemandPrices = getActiveOnDemandPricesId(sProductId);
+		List<String> asOnDemandPrices = getActivePricesId(sProductId);
 		
 		if (asOnDemandPrices == null || asOnDemandPrices.size() == 0) {
 			WasdiLog.warnLog("StripeService.updateOnDemandPrice: no active prices found for product " + sProductId);
