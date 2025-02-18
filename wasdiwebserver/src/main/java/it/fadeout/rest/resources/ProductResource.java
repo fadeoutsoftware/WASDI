@@ -560,6 +560,7 @@ public class ProductResource {
             }            
 
             if (oProductViewModel == null) {
+            	WasdiLog.warnLog("ProductResource.updateProductViewModel: invalid Product View Model");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
             }
 
