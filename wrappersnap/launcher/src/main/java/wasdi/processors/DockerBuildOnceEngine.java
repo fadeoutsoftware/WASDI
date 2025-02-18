@@ -12,6 +12,11 @@ import wasdi.shared.utils.log.WasdiLog;
 
 public class DockerBuildOnceEngine extends PipProcessorEngine {
 	
+	public DockerBuildOnceEngine() {
+		super();
+		// Disable download of processor files in local nodes
+		m_bDownloadProcessorFiles = false;
+	}
 	
 	/**
 	 * Deploy the processor in WASDI.
@@ -91,7 +96,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
 		// Create utils
-        DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry);
+        DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry, m_oProcessWorkspaceLogger);
         
         if (oDockerUtils.isContainerStarted(oProcessor.getName(), oProcessor.getVersion())) {
         	WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: There is the previous version running, stop it");
@@ -171,7 +176,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 		
-		DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, m_sDockerTemplatePath, m_sDockerRegistry);
+		DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, m_sDockerTemplatePath, m_sDockerRegistry, m_oProcessWorkspaceLogger);
 		
 		if (!oDockerUtils.isContainerStarted(oProcessor)) {
 			
@@ -201,7 +206,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 			
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry);
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry, m_oProcessWorkspaceLogger);
 			
 	        WasdiLog.debugLog("DockerBuildOnceEngine.waitForApplicationToStart: wait to let docker start");
 

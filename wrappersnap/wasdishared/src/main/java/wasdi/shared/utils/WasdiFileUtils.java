@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
@@ -627,6 +628,11 @@ public class WasdiFileUtils {
 	 */
 	public static boolean isShapeFileZipped(String sZipFile, int iMaxFileInZipFile) {
 		int iFileCounter = 0;
+		
+		if (Utils.isNullOrEmpty(sZipFile)) return false;
+		
+		if (!sZipFile.toLowerCase().endsWith(".zip")) return false;
+		
 		Path oZipPath = Paths.get(sZipFile).toAbsolutePath().normalize();
 		if(!oZipPath.toFile().exists()) {
 			return false;
@@ -639,7 +645,7 @@ public class WasdiFileUtils {
 				ZipEntry oZipEntry = aoEntries.nextElement();
 				
 				if (iFileCounter > iMaxFileInZipFile) {
-					WasdiLog.errorLog("WasdiFileUtils.isShapeFileZipped: too many files inside the zip. The limit is " + iMaxFileInZipFile);
+					WasdiLog.warnLog("WasdiFileUtils.isShapeFileZipped: too many files inside the zip. The limit is " + iMaxFileInZipFile);
 					return false;
 				}
 				
@@ -649,8 +655,12 @@ public class WasdiFileUtils {
 				iFileCounter++;
 			}			
 			
-		} catch (Exception e) {
-			WasdiLog.errorLog("WasdiFileUtils.isShapeFileZipped: error", e);
+		}
+		catch (ZipException oZipException) {
+			WasdiLog.debugLog("WasdiFileUtils.isShapeFileZipped: Zip Error, this is not a zip file likely " + oZipException.toString());
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("WasdiFileUtils.isShapeFileZipped: error", oEx);
 		}
 		
 		return false;

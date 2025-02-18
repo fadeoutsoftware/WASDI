@@ -160,13 +160,13 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	private String downloadHttps(String sFileURL, String sSaveDirOnServer, int iMaxRetry, String sResult) {
 		for (int iAttemp = 0; iAttemp < iMaxRetry; iAttemp ++) {
 
-			WasdiLog.debugLog("LSAProviderAdapter.executeDownloadFile: attemp #" + iAttemp);
+			WasdiLog.debugLog("LSAProviderAdapter.downloadHttps: attemp #" + iAttemp);
 			
 			try {
 				sResult = downloadViaHttp(sFileURL, "", "", sSaveDirOnServer);
 			}
 			catch (Exception oEx) {
-				WasdiLog.debugLog("LSAProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
+				WasdiLog.debugLog("LSAProviderAdapter.downloadHttps: exception in download via http call: " + oEx.toString());
 			}
 			
 			if (!Utils.isNullOrEmpty(sResult)) {
@@ -179,7 +179,7 @@ public class LSAProviderAdapter extends ProviderAdapter {
 			}
 			catch (InterruptedException oEx) {
 				Thread.currentThread().interrupt();
-				WasdiLog.debugLog("LSAProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
+				WasdiLog.debugLog("LSAProviderAdapter.downloadHttps: exception in sleep for retry: " + oEx.toString());
 			}
 		}
 		

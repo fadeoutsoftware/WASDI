@@ -686,14 +686,8 @@ public class LauncherMain  {
      */
 	private static Integer getProcessId() {
         Integer iPid = 0;
-        Integer iTest = 0;
         try {
-        	
-            //RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-        	//iTest = (int) runtimeMXBean.getPid();
-        	//WasdiLog.infoLog("Mx " + iTest);
             iPid = (int) ProcessHandle.current().pid();
-            WasdiLog.infoLog("ProcessHandle " + iTest);
         } catch (Throwable oEx) {
             try {
                 WasdiLog.errorLog("LauncherMain.GetProcessId: Error getting processId: " + oEx.toString());
