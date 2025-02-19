@@ -451,7 +451,7 @@ public class DockerUtils {
         	sBuildOutput = cleanDockerLogsString(sBuildOutput);
         	
         	String sBuildDate = Utils.getFormatDate(new Date());
-        	sBuildOutput = sBuildDate + "|START_BUILD_LOG|"+sBuildOutput;
+        	sBuildOutput = sBuildDate + " - v." + m_oProcessor.getVersion() + "|START_BUILD_LOG|"+sBuildOutput;
         	
         	// Save the build output
         	m_oProcessor.getBuildLogs().add(sBuildOutput);
