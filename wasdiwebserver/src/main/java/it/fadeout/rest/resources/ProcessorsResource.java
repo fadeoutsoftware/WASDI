@@ -2079,7 +2079,9 @@ public class ProcessorsResource  {
 						if (WasdiConfig.Current.isMainNode()) {
 							WasdiLog.warnLog("ProcessorResource.libraryUpdate: error triggering the operation, clean deployment flag");
 							cleanBuildFlag(sSessionId, sProcessorId);					
-						}						
+						}
+						
+						return Response.serverError().build();
 					}
 				}
 				else {
