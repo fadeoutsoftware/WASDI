@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -448,6 +449,9 @@ public class DockerUtils {
         	
         	String sBuildOutput = oResponse.getResponseBody();
         	sBuildOutput = cleanDockerLogsString(sBuildOutput);
+        	
+        	String sBuildDate = Utils.getFormatDate(new Date());
+        	sBuildOutput = sBuildDate + "|START_BUILD_LOG|"+sBuildOutput;
         	
         	// Save the build output
         	m_oProcessor.getBuildLogs().add(sBuildOutput);

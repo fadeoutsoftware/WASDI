@@ -1663,6 +1663,11 @@ public class ProcessorsResource  {
 				WasdiLog.warnLog("ProcessorsResource.libraryUpdate: user cannot write the processor");
 				return Response.status(Status.FORBIDDEN).build();				
 			}
+			
+//			if (oProcessorToForceUpdate.isDeploymentOngoing()) {
+//				WasdiLog.warnLog("ProcessorsResource.libraryUpdate: the processor is already under a build");
+//				return Response.status(Status.CONFLICT).build();				
+//			}
 
 			if (WasdiConfig.Current.isMainNode()) {
 				// In the main node: start a thread to update all the computing nodes
@@ -1811,6 +1816,65 @@ public class ProcessorsResource  {
 			return Response.serverError().build();
 		}
 	}	
+	
+	
+	
+	/**
+	 * Force the clean of a processor deploy flag
+	 * 
+	 * @param oUpdatedProcessorVM Updated Processor View Mode
+	 * @param sSessionId Session Id
+	 * @param sProcessorId Processor Id
+	 * @return std http response
+	 */
+	@GET
+	@Path("/cleadbuildflag")
+	@Produces({ "application/json", "text/xml" })
+	public Response cleanBuildFlag(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
+		
+		WasdiLog.debugLog("ProcessorResources.cleanBuildFlag( Processor: " + sProcessorId + " )");
+		
+		try {
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			
+			// Check the user
+			if (oUser==null) {
+				WasdiLog.warnLog("ProcessorResources.cleanBuildFlag: invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			// Check if the processor exists
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToUpdate = oProcessorRepository.getProcessor(sProcessorId);
+			
+			if (oProcessorToUpdate == null) {
+				WasdiLog.warnLog("ProcessorsResource.cleanBuildFlag: unable to find processor");
+				return Response.serverError().build();
+			}
+			
+			// Check if the user can write the processor
+			if (!PermissionsUtils.canUserWriteProcessor(oUser.getUserId(), oProcessorToUpdate)) {
+				WasdiLog.warnLog("ProcessorsResource.cleanBuildFlag: user cannot write the processor");
+				return Response.status(Status.FORBIDDEN).build();				
+			}
+			
+			// Update the processor data
+			oProcessorToUpdate.setDeploymentOngoing(false);
+						
+			WasdiLog.debugLog("ProcessorsResource.cleanBuildFlag:  setting deployment ongoing flag to false");
+			
+			oProcessorRepository.updateProcessor(oProcessorToUpdate);
+			
+			WasdiLog.debugLog("ProcessorsResource.cleanBuildFlag: Updated Processor " + sProcessorId);
+			
+			return Response.ok().build();
+		}
+		catch (Throwable oEx) {
+			WasdiLog.errorLog("ProcessorResource.cleanBuildFlag  error: " + oEx);
+			return Response.serverError().build();
+		}
+	}	
+	
 	
 	/**
 	 * Updates the files of a processor
