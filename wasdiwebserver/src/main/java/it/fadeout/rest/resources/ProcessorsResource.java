@@ -1604,11 +1604,13 @@ public class ProcessorsResource  {
 				
 				// if the launch of the redeployment was successful, then we set the flag to track the ongoing deployment
 				// set flag for ongoing deployment
-				oProcessorToReDeploy.setDeploymentOngoing(true);
-				if (oProcessorRepository.updateProcessor(oProcessorToReDeploy)) {
-					WasdiLog.debugLog("ProcessorResource.redeployProcessor. Flag set to true for ongoing deployment");
-				} else {
-					WasdiLog.warnLog("ProcessorResource.redeployProcessor. Could not set back to false the flag for ongoing deployment");
+				if (WasdiConfig.Current.isMainNode()) {
+					oProcessorToReDeploy.setDeploymentOngoing(true);
+					if (oProcessorRepository.updateProcessor(oProcessorToReDeploy)) {
+						WasdiLog.debugLog("ProcessorResource.redeployProcessor. Flag set to true for ongoing deployment");
+					} else {
+						WasdiLog.warnLog("ProcessorResource.redeployProcessor. Could not set back to false the flag for ongoing deployment");
+					}
 				}
 				
 				return Response.ok().build();
@@ -1716,11 +1718,13 @@ public class ProcessorsResource  {
 			if (oRes.getBoolValue()) {
 				// if the launch of the library update was successful, then we set the flag to track the ongoing deployment
 				// set flag for ongoing deployment
-				oProcessorToForceUpdate.setDeploymentOngoing(true);
-				if (oProcessorRepository.updateProcessor(oProcessorToForceUpdate)) {
-					WasdiLog.debugLog("ProcessorResource.libraryUpdate. Flag set to true for ongoing deployment");
-				} else {
-					WasdiLog.warnLog("ProcessorResource.libraryUpdate. Could not set back to false the flag for ongoing deployment");
+				if (WasdiConfig.Current.isMainNode()) {
+					oProcessorToForceUpdate.setDeploymentOngoing(true);
+					if (oProcessorRepository.updateProcessor(oProcessorToForceUpdate)) {
+						WasdiLog.debugLog("ProcessorResource.libraryUpdate. Flag set to true for ongoing deployment");
+					} else {
+						WasdiLog.warnLog("ProcessorResource.libraryUpdate. Could not set back to false the flag for ongoing deployment");
+					}					
 				}
 				
 				return Response.ok().build();
@@ -2054,11 +2058,13 @@ public class ProcessorsResource  {
 					if (oRes.getBoolValue()) {
 						// if the launch of the library update was successful, then we set the flag to track the ongoing deployment
 						// set flag for ongoing deployment
-						oProcessorToUpdate.setDeploymentOngoing(true);
-						if (oProcessorRepository.updateProcessor(oProcessorToUpdate)) {
-							WasdiLog.debugLog("ProcessorResource.updateProcessorFiles. Flag set to true for ongoing deployment");
-						} else {
-							WasdiLog.warnLog("ProcessorResource.updateProcessorFiles. Could not set back to false the flag for ongoing deployment");
+						if (WasdiConfig.Current.isMainNode()) {
+							oProcessorToUpdate.setDeploymentOngoing(true);
+							if (oProcessorRepository.updateProcessor(oProcessorToUpdate)) {
+								WasdiLog.debugLog("ProcessorResource.updateProcessorFiles. Flag set to true for ongoing deployment");
+							} else {
+								WasdiLog.warnLog("ProcessorResource.updateProcessorFiles. Could not set back to false the flag for ongoing deployment");
+							}							
 						}
 					}
 					
