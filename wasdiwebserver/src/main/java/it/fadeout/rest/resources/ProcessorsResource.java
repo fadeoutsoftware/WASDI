@@ -1598,24 +1598,30 @@ public class ProcessorsResource  {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
+			// set flag for ongoing deployment
+			if (WasdiConfig.Current.isMainNode()) {
+				oProcessorToReDeploy = oProcessorRepository.getProcessor(sProcessorId);
+				oProcessorToReDeploy.setDeploymentOngoing(true);
+				if (oProcessorRepository.updateProcessor(oProcessorToReDeploy)) {
+					WasdiLog.debugLog("ProcessorResource.redeployProcessor. Flag set to true for ongoing deployment");
+				} else {
+					WasdiLog.warnLog("ProcessorResource.redeployProcessor. Could not set true the flag for ongoing deployment");
+				}
+			}
+
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.REDEPLOYPROCESSOR.name(),oProcessorToReDeploy.getName(),oProcessorParameter);			
 			
 			if (oRes.getBoolValue()) {
 				
 				// if the launch of the redeployment was successful, then we set the flag to track the ongoing deployment
-				// set flag for ongoing deployment
-				if (WasdiConfig.Current.isMainNode()) {
-					oProcessorToReDeploy.setDeploymentOngoing(true);
-					if (oProcessorRepository.updateProcessor(oProcessorToReDeploy)) {
-						WasdiLog.debugLog("ProcessorResource.redeployProcessor. Flag set to true for ongoing deployment");
-					} else {
-						WasdiLog.warnLog("ProcessorResource.redeployProcessor. Could not set back to false the flag for ongoing deployment");
-					}
-				}
-				
 				return Response.ok().build();
 			}
 			else {
+				if (WasdiConfig.Current.isMainNode()) {
+					WasdiLog.warnLog("ProcessorResource.redeployProcessor: error triggering the operation, clean deployment flag");
+					cleanBuildFlag(sSessionId, sProcessorId);					
+				}
+				
 				return Response.serverError().build();
 			}
 		}
@@ -1666,11 +1672,6 @@ public class ProcessorsResource  {
 				return Response.status(Status.FORBIDDEN).build();				
 			}
 			
-//			if (oProcessorToForceUpdate.isDeploymentOngoing()) {
-//				WasdiLog.warnLog("ProcessorsResource.libraryUpdate: the processor is already under a build");
-//				return Response.status(Status.CONFLICT).build();				
-//			}
-
 			if (WasdiConfig.Current.isMainNode()) {
 				// In the main node: start a thread to update all the computing nodes
 				try {
@@ -1712,24 +1713,29 @@ public class ProcessorsResource  {
 			oProcessorParameter.setProcessorType(oProcessorToForceUpdate.getType());
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+
+			// set flag for ongoing deployment
+			if (WasdiConfig.Current.isMainNode()) {
+				oProcessorToForceUpdate.setDeploymentOngoing(true);
+				if (oProcessorRepository.updateProcessor(oProcessorToForceUpdate)) {
+					WasdiLog.debugLog("ProcessorResource.libraryUpdate. Flag set to true for ongoing deployment");
+				} else {
+					WasdiLog.warnLog("ProcessorResource.libraryUpdate. Could not set back to false the flag for ongoing deployment");
+				}					
+			}
 			
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.LIBRARYUPDATE.name(),oProcessorToForceUpdate.getName(),oProcessorParameter);
 			
 			if (oRes.getBoolValue()) {
 				// if the launch of the library update was successful, then we set the flag to track the ongoing deployment
-				// set flag for ongoing deployment
-				if (WasdiConfig.Current.isMainNode()) {
-					oProcessorToForceUpdate.setDeploymentOngoing(true);
-					if (oProcessorRepository.updateProcessor(oProcessorToForceUpdate)) {
-						WasdiLog.debugLog("ProcessorResource.libraryUpdate. Flag set to true for ongoing deployment");
-					} else {
-						WasdiLog.warnLog("ProcessorResource.libraryUpdate. Could not set back to false the flag for ongoing deployment");
-					}					
-				}
-				
 				return Response.ok().build();
 			}
 			else {
+				if (WasdiConfig.Current.isMainNode()) {
+					WasdiLog.warnLog("ProcessorResource.libraryUpdate: error triggering the operation, clean deployment flag");
+					cleanBuildFlag(sSessionId, sProcessorId);					
+				}
+				
 				return Response.serverError().build();
 			}
 		}
@@ -2051,24 +2057,30 @@ public class ProcessorsResource  {
 					oProcessorParameter.setProcessObjId(Utils.getRandomName());
 					oProcessorParameter.setProcessorID(oProcessorToUpdate.getProcessorId());
 					oProcessorParameter.setProcessorType(oProcessorToUpdate.getType());
-					
+
+					// set flag for ongoing deployment
+					if (WasdiConfig.Current.isMainNode()) {
+						oProcessorToUpdate.setDeploymentOngoing(true);
+						if (oProcessorRepository.updateProcessor(oProcessorToUpdate)) {
+							WasdiLog.debugLog("ProcessorResource.updateProcessorFiles. Flag set to true for ongoing deployment");
+						} else {
+							WasdiLog.warnLog("ProcessorResource.updateProcessorFiles. Could not set to true the flag for ongoing deployment");
+						}							
+					}
+
 					// Trigger the library update in this node
 					PrimitiveResult oRes = Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.LIBRARYUPDATE.name(), oProcessorToUpdate.getName(), oProcessorParameter);
 					
 					if (oRes.getBoolValue()) {
-						// if the launch of the library update was successful, then we set the flag to track the ongoing deployment
-						// set flag for ongoing deployment
-						if (WasdiConfig.Current.isMainNode()) {
-							oProcessorToUpdate.setDeploymentOngoing(true);
-							if (oProcessorRepository.updateProcessor(oProcessorToUpdate)) {
-								WasdiLog.debugLog("ProcessorResource.updateProcessorFiles. Flag set to true for ongoing deployment");
-							} else {
-								WasdiLog.warnLog("ProcessorResource.updateProcessorFiles. Could not set back to false the flag for ongoing deployment");
-							}							
-						}
+						WasdiLog.debugLog("ProcessorResource.updateProcessorFiles: started the lib update operation");
 					}
-					
-					WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: LIBRARYUPDATE process scheduled");
+					else {
+						WasdiLog.warnLog("ProcessorsResource.updateProcessorFiles: error scheduling LIBRARYUPDATE process");
+						if (WasdiConfig.Current.isMainNode()) {
+							WasdiLog.warnLog("ProcessorResource.libraryUpdate: error triggering the operation, clean deployment flag");
+							cleanBuildFlag(sSessionId, sProcessorId);					
+						}						
+					}
 				}
 				else {
 					WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: IMPOSSIBLE TO FIND NODE SPECIFIC WORKSPACE!!!!");

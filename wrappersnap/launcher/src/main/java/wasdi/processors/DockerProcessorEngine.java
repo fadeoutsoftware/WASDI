@@ -884,8 +884,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
             WasdiLog.infoLog("DockerProcessorEngine.redeploy: docker " + sProcessorName + " updated");
+            
             return true;
-        } catch (Exception oEx) {
+        } 
+        catch (Exception oEx) {
             WasdiLog.errorLog("DockerProcessorEngine.redeploy Exception", oEx);
             try {
                 if (oProcessWorkspace != null) {
