@@ -927,6 +927,8 @@ public class DockerUtils {
         	// Get the version of the Docker
             int iVersion = StringUtils.getAsInteger(sVersion);
             
+            List<Object> aoOutputJsonMap = getContainersInfo(true);
+            
             // If it is a WASDI Valid one
         	while (iVersion>0)  {
         		
@@ -941,7 +943,7 @@ public class DockerUtils {
                 }
                 
                 // Check if we have a container
-                String sId = getContainerIdFromWasdiAppName(sProcessorName, sVersion);
+                String sId = getContainerIdFromWasdiAppName(sProcessorName, sVersion, aoOutputJsonMap);
                 
                 if (!Utils.isNullOrEmpty(sId)) {
                 	// Clean the container
@@ -1134,17 +1136,37 @@ public class DockerUtils {
     		HashMap<String, String> asHeaders = new HashMap<>();
     		
     		// The content is taken from the sample on line
-    		//asHeaders.put("Content-Type", "application/tar");
-    		asHeaders.put("X-Registry-Auth", sToken);    		
+    		asHeaders.put("X-Registry-Auth", sToken);
     		
-    		// Is a post!
-    		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "", asHeaders);
+    		// P.Campanella 2025-02-19: since we experience sometimes bad answers from the registry, add the retry here
+    		int iAttemp = 0;
+    		int iResponseCode = -1;
     		
-    		if (oResponse.getResponseCode() == 200) {
+    		while (iAttemp<WasdiConfig.Current.dockers.numberOfAttemptsToPingTheServer) {
+        		// Is a post!
+        		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "", asHeaders);
+        		iResponseCode = oResponse.getResponseCode();
+        		
+        		if (iResponseCode==200) break;
+        		
+        		iAttemp= iAttemp+1;
+        		
+        		WasdiLog.debugLog("DockerUtils.push: the registry returned " + iResponseCode + " make another try (n. " + iAttemp + ") after a sleep");
+        		
+    			try {
+    				Thread.sleep(WasdiConfig.Current.dockers.millisBetweenAttmpts);
+    			}
+    			catch (InterruptedException oEx) {
+					Thread.currentThread().interrupt();
+					WasdiLog.errorLog("DockerUtils.push: Current thread was interrupted", oEx);
+				}        		
+    		}
+    		
+    		if (iResponseCode == 200) {
     			return true;
     		}
     		else {
-    			WasdiLog.errorLog("DockerUtils.push: Error pushing image " + sImage + " got answer http " + oResponse.getResponseCode());
+    			WasdiLog.errorLog("DockerUtils.push: Error pushing image " + sImage + " got answer http " + iResponseCode);
     			return false;
     		}
     	} 
@@ -1202,12 +1224,27 @@ public class DockerUtils {
      * @param sVersion
      * @return
      */
-    @SuppressWarnings("unchecked")
 	protected String getContainerIdFromWasdiAppName(String sProcessorName, String sVersion) {
     	try {
-    		
     		List<Object> aoOutputJsonMap = getContainersInfo(true);
-            
+    		return getContainerIdFromWasdiAppName(sProcessorName, sVersion, aoOutputJsonMap);            
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.getContainerIdFromWasdiAppName: " + oEx.toString());
+		}
+    	return "";
+    }
+	
+    /**
+     * Gets the container id starting from processor name and version
+     * @param sProcessorName Name of the processor
+     * @param sVersion Version as string
+     * @param aoOutputJsonMap List of the containers info objects
+     * @return
+     */    
+    @SuppressWarnings("unchecked")
+    protected String getContainerIdFromWasdiAppName(String sProcessorName, String sVersion, List<Object> aoOutputJsonMap) {
+    	try {
             String sMyImage = "wasdi/" + sProcessorName + ":" + sVersion;
             String sId = "";
             
@@ -1231,7 +1268,7 @@ public class DockerUtils {
     	catch (Exception oEx) {
     		WasdiLog.errorLog("DockerUtils.getContainerIdFromWasdiAppName: " + oEx.toString());
 		}
-    	return "";
+    	return "";    	
     }
     
     /**
