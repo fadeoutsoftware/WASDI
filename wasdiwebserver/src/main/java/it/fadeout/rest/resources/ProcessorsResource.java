@@ -53,6 +53,7 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.AppPayment;
 import wasdi.shared.business.Counter;
+import wasdi.shared.business.CreditsPackage;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.Review;
@@ -72,6 +73,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppPaymentRepository;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CounterRepository;
+import wasdi.shared.data.CreditsPagackageRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -943,14 +945,34 @@ public class ProcessorsResource  {
 				return oRunningProcessorViewModel;				
 			}
 			
+			if (Utils.isNullOrEmpty(sEncodedJson)) {
+				sEncodedJson = "%7B%7D";
+			}
+			
+			if (sEncodedJson.contains("+")) {
+				// The + char is not encoded but then in the launcher, when is decode, become a space. Replace the char with the correct representation
+				sEncodedJson = sEncodedJson.replaceAll("\\+", "%2B");
+				WasdiLog.debugLog("ProcessorsResource.internalRun: replaced + with %2B in encoded JSON " + sEncodedJson);
+			}
+			
 			
 			// check if the app has an on-demand price and if the person is not the owner of the app: 
 			// in that case, update the apps payments table to track the run date/time
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			Float fOnDemandPrice = oProcessorToRun.getOndemandPrice();
+			
+			Float fPricePerSquareKm = oProcessorToRun.getPricePerSquareKm();
+			String sAreaParameter = oProcessorToRun.getAreaParameterName();
+			
+			if (fOnDemandPrice != null && fOnDemandPrice > 0 && fPricePerSquareKm != null && fPricePerSquareKm > 0) {
+				WasdiLog.warnLog("ProcessorsResource.internalRun: the app has both a on demand price and a square kilometers price. Impossible to apply a pricing model");
+				oRunningProcessorViewModel.setStatus("ERROR");
+				return oRunningProcessorViewModel;	
+			}
+			
 			if (fOnDemandPrice != null 
 					&& fOnDemandPrice > 0 
-					&& !oUser.getUserId().equals(oProcessorToRun.getUserId())
+					&& !sUserId.equals(oProcessorToRun.getUserId())
 					&& !oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, oProcessorToRun.getProcessorId())) {
 				
 				WasdiLog.debugLog("ProcessorsResource.internalRun: the app has an ondemand price");
@@ -983,15 +1005,70 @@ public class ProcessorsResource  {
 				}
 			}
 			
-			
-			if (Utils.isNullOrEmpty(sEncodedJson)) {
-				sEncodedJson = "%7B%7D";
-			}
-			
-			if (sEncodedJson.contains("+")) {
-				// The + char is not encoded but then in the launcher, when is decode, become a space. Replace the char with the correct representation
-				sEncodedJson = sEncodedJson.replaceAll("\\+", "%2B");
-				WasdiLog.debugLog("ProcessorsResource.internalRun: replaced + with %2B in encoded JSON " + sEncodedJson);
+			// check if the app has a price per square kilometer and if the person is not the owner of the app or the app has not been shared 
+			// in that case, update the credits package table to track the use of the credits
+			if (fPricePerSquareKm != null 
+					&& fPricePerSquareKm > 0 
+					&& !oUser.getUserId().equals(oProcessorToRun.getUserId())
+					&& !oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, oProcessorToRun.getProcessorId())) {
+				
+				Double dCreditsForRun = computeNumberOfCredits(sEncodedJson, sAreaParameter, fPricePerSquareKm);
+				
+				if (dCreditsForRun == null) {
+					WasdiLog.warnLog("ProcessorsResource.internalRun: error computing credtis needed for the run. Credits details not updated");
+					oRunningProcessorViewModel.setStatus("ERROR");
+					return oRunningProcessorViewModel;	
+				}
+				
+				// take all the available credits packages of the user
+				CreditsPagackageRepository oCreditsRepository = new CreditsPagackageRepository();
+				List<CreditsPackage> aoCreditsPackages = oCreditsRepository.listByUser(sUserId, true);
+				
+				if (aoCreditsPackages == null) {
+					WasdiLog.warnLog("ProcessorsResource.internalRun. Some error might have occurred retrieveng credits packages for " + sUserId);
+					oRunningProcessorViewModel.setStatus("ERROR");
+					return oRunningProcessorViewModel;	
+				}
+				
+				if (aoCreditsPackages.isEmpty()) {
+					WasdiLog.warnLog("ProcessorsResource.internalRun. No credits packages found for user " + sUserId);
+					oRunningProcessorViewModel.setStatus("ERROR");
+					return oRunningProcessorViewModel;	
+				}
+				
+				int iCountPackages = 0;
+				Double dCreditsDeducted = 0d;
+				List<CreditsPackage> aoCreditsToUpdate = new ArrayList<>();
+				
+				while ( (dCreditsForRun < dCreditsForRun) && iCountPackages < aoCreditsPackages.size()) {
+					CreditsPackage oCreditsPackage = aoCreditsPackages.get(iCountPackages);
+					Double dCreditsRemaining = oCreditsPackage.getCreditsRemaining() ;
+					
+					// if there are enough credits, then just take them all from that package
+					if (dCreditsForRun <= dCreditsRemaining) {
+						dCreditsDeducted += dCreditsForRun; 
+						oCreditsPackage.setCreditsRemaining(dCreditsRemaining - dCreditsDeducted);
+						aoCreditsToUpdate.add(oCreditsPackage);
+						break;
+					}
+					
+					// if the credits are not enough, we get all the available credits, and we will try to get the remaining credits from other purchased packages
+					if (dCreditsForRun > dCreditsRemaining) {
+						dCreditsDeducted += dCreditsRemaining;
+						oCreditsPackage.setCreditsRemaining(0d);
+						aoCreditsToUpdate.add(oCreditsPackage);
+					}
+					
+					iCountPackages++;
+				}
+				
+				if (dCreditsDeducted == dCreditsForRun) {
+					for (int i = 0; i < aoCreditsToUpdate.size(); i++) {
+						if (!oCreditsRepository.updateCreditPackage(aoCreditsToUpdate.get(i))) {
+							WasdiLog.warnLog("ProcessorResource.internalRun. Credit package " + aoCreditsToUpdate.get(i).getCreditPackageId() + "was not updated");
+						}
+					}
+				}
 			}
 
 			// Schedule the process to run the processor
@@ -1120,11 +1197,33 @@ public class ProcessorsResource  {
 			String sAreaParameterName = oProcessorToRun.getAreaParameterName();
 				
 			WasdiLog.debugLog("ProcessorsResource.internalRun. Name of the area parameter " + sAreaParameterName);
-					
-			String sDecodedParams = URLDecoder.decode(sEncodedJson, StandardCharsets.UTF_8);
 			
-			JSONObject oJson = new JSONObject(sDecodedParams);
-					
+			Double dNumberOfCredits = computeNumberOfCredits(sEncodedJson, sAreaParameterName, fPricePerSquareKilometer);
+			
+			if (dNumberOfCredits == null) {
+				WasdiLog.errorLog("ProcessorResource.internalRun. Something went wrong computing the credits from the bbox");
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+			
+			return Response.ok(dNumberOfCredits).build();		
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorResource.getCreditsForRun. Error: ", oEx );
+			return Response.serverError().build();
+		}
+
+	}
+	
+	private Double computeNumberOfCredits(String sJsonParameters, String sAreaParameterName, Float fPricePerSquareKilometer) {
+		
+		if (Utils.isNullOrEmpty(sJsonParameters) || Utils.isNullOrEmpty(sAreaParameterName) || fPricePerSquareKilometer == null || fPricePerSquareKilometer == 0f) {
+			WasdiLog.warnLog("ProcessorsResource.computeNumberOfCredits. Not enough information for computing the credits for the bbox");
+			return null;
+		}
+		
+		try {
+			JSONObject oJson = new JSONObject(sJsonParameters);
+			
 			double dSouth = Double.NaN;	// min lat
 			double dEast = Double.NaN; 	// max long
 			double dNorth = Double.NaN; // max lat
@@ -1138,8 +1237,8 @@ public class ProcessorsResource  {
 				// TODO
 				
 			} catch (JSONException oE) {
-				WasdiLog.errorLog("ProcessorsResource.getCreditsForRun. Error while processing the list representing the bbox", oE);
-				return Response.status(Status.BAD_REQUEST).build();
+				WasdiLog.errorLog("ProcessorsResource.computeNumberOfCredits. Error while processing the list representing the bbox", oE);
+				return null;
 			}
 					
 			// 2) dictionary with sub-dictionaries southWest and northEast 
@@ -1153,13 +1252,13 @@ public class ProcessorsResource  {
 				}
 				
 			} catch (JSONException oE) {
-				WasdiLog.errorLog("ProcessorsResource.getCreditsForRun. Error while processing the dictionary representing the bbox", oE);
-				return Response.status(Status.BAD_REQUEST).build();
+				WasdiLog.errorLog("ProcessorsResource.computeNumberOfCredits. Error while processing the dictionary representing the bbox", oE);
+				return null;
 			}
-					
+			
 			if (Double.isNaN(dWest) || Double.isNaN(dNorth) || Double.isNaN(dSouth) || Double.isNaN(dEast)) {
-				WasdiLog.warnLog("ProcessorsResource.getCreditsForRun. Impossible to process the bouding box");
-				return Response.status(Status.BAD_REQUEST).build();
+				WasdiLog.warnLog("ProcessorsResource.computeNumberOfCredits. Impossible to process the bouding box");
+				return null;
 			}
 				
 				
@@ -1175,18 +1274,18 @@ public class ProcessorsResource  {
 			double dHeight = dDiffLat * 111.32;
 			double dAreaInSquareKilometers = dWidth * dHeight;	
 			
-			WasdiLog.debugLog("ProcessorResource.getCreditsForRun. Square kilometers of the bouding box: " + dAreaInSquareKilometers);
+			WasdiLog.debugLog("ProcessorResource.computeNumberOfCredits. Square kilometers of the bouding box: " + dAreaInSquareKilometers);
 			
-			double dNumberOfCredits = fPricePerSquareKilometer * dAreaInSquareKilometers;
+			return fPricePerSquareKilometer * dAreaInSquareKilometers;
 			
-			return Response.ok(dNumberOfCredits).build();		
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorResource.getCreditsForRun. Error: ", oEx );
-			return Response.serverError().build();
-		}
-
+		} catch (Exception oE) {
+			WasdiLog.errorLog("ProcessorsResource.computeNumberOfCredits. Error while processing the processor's parameters", oE);
+			return null;
+		}	
+		
 	}
+	
+	
 	
 		
 	/**

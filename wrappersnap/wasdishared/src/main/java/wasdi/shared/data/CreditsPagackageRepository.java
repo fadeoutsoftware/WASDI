@@ -12,10 +12,10 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.CreditsPackage;
-import wasdi.shared.business.Subscription;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -104,9 +104,10 @@ public class CreditsPagackageRepository extends MongoRepository {
 		/**
 		 * List the credits packages of a user
 		 * @param sUserId the user id 
+		 * @param bAscendingOrder if true the results will be returned in ascending order according to the purchase date, otherwise in descending order
 		 * @return the total number of credits available for a user
 		 */
-		public List<CreditsPackage> listByUser(String sUserId) {
+		public List<CreditsPackage> listByUser(String sUserId, boolean bAscendingOrder) {
 		
 			if (Utils.isNullOrEmpty(sUserId)) {
 				WasdiLog.warnLog("CreditsPackageRepository.listByUser: user id is null or empty");
@@ -114,8 +115,11 @@ public class CreditsPagackageRepository extends MongoRepository {
 			}			
 			
 			try {
+				Bson oSortingOder = bAscendingOrder ? Sorts.ascending("buyDate") : Sorts.descending("buyDate");
 				List<CreditsPackage> aoReturnList = new ArrayList<>();
-				FindIterable<Document> aoRetrievedDocs =  getCollection(m_sRepoDb).find(Filters.eq("userId", sUserId));
+				FindIterable<Document> aoRetrievedDocs =  getCollection(m_sRepoDb)
+						.find(Filters.eq("userId", sUserId))
+						.sort(oSortingOder);
 				fillList(aoReturnList, aoRetrievedDocs, CreditsPackage.class);
 				return aoReturnList;
 				

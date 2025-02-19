@@ -98,7 +98,7 @@ public class CreditsResource {
 	@GET
 	@Path("/listbyuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getCreditsListByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getCreditsListByUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("ascendingOrder") boolean bBuyDateAscendingOrder) {
 		WasdiLog.debugLog("CreditsResource.getCreditsListByUser");
 		
 		try {	
@@ -110,7 +110,7 @@ public class CreditsResource {
 			}
 			
 			CreditsPagackageRepository oCreditsRepository = new CreditsPagackageRepository();
-			List<CreditsPackage> aoCreditsPackages = oCreditsRepository.listByUser(oUser.getUserId());
+			List<CreditsPackage> aoCreditsPackages = oCreditsRepository.listByUser(oUser.getUserId(), bBuyDateAscendingOrder);
 			List<CreditsPackageViewModel> aoViewModel = aoCreditsPackages.stream()
 					.map(oCreditsPackage -> getViewModel(oCreditsPackage))
 					.collect(Collectors.toList());
