@@ -959,8 +959,10 @@ public class DockerUtils {
                 	WasdiLog.debugLog("DockerUtils.delete: no container found for " + sProcessorName + " version "  + sVersion);
                 }
                 
+                List<Object> aoImagesAvailable = getImagesList();
+                
                 // Check the image
-                if (isImageAvailable(sProcessorName,sVersion)) {
+                if (isImageAvailable(sProcessorName,sVersion, m_sDockerRegistry, aoImagesAvailable)) {
 
                 	// Remove the image
                     WasdiLog.debugLog("DockerUtils.delete: Removing image for " + sProcessorName + " version "  + sVersion + " Docker Image: " + sDockerName);
@@ -1014,7 +1016,7 @@ public class DockerUtils {
                         			
                         			// Do we have a backup?
                         			WasdiLog.debugLog("DockerUtils.delete: delete " + sProcessorName + " version "  + sVersion + " in registry " + oRegistryConfig.address);
-                        			if (isImageAvailable(sProcessorName, sVersion, oRegistryConfig.address)) {
+                        			if (isImageAvailable(sProcessorName, sVersion, oRegistryConfig.address, aoImagesAvailable)) {
                         				
                         				// Yes! Clean also it!!
                             			sDockerName = oRegistryConfig.address + "/" + sBaseDockerName;
@@ -1783,7 +1785,6 @@ public class DockerUtils {
      * @param sRegistry optional Docker registry
      * @return true if the image is available
      */
-    @SuppressWarnings("unchecked")
 	public boolean isImageAvailable(String sProcessorName, String sVersion, String sRegistry) {
     	
     	try {
@@ -1809,7 +1810,27 @@ public class DockerUtils {
                 WasdiLog.errorLog("DockerUtils.isImageAvailable: exception converting API result " + oEx);
                 return false;
             }
-            
+    
+            return isImageAvailable(sProcessorName, sVersion, sRegistry, aoOutputJsonMap);
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.isImageAvailable: " + oEx.toString());
+            return false;
+        }
+    }    
+    
+    /**
+     * Check if an image is available on the local registry
+     * @param sProcessorName Processor Name
+     * @param sVersion Processor Version
+     * @param sRegistry optional Docker registry
+     * @param aoOutputJsonMap list of images as returned by registry api
+     * @return true if the image is available
+     */
+    @SuppressWarnings("unchecked")
+	public boolean isImageAvailable(String sProcessorName, String sVersion, String sRegistry, List<Object> aoOutputJsonMap) {
+    	
+    	try {
             // Define the name of our image
             String sMyImage = "";
             
@@ -1845,7 +1866,48 @@ public class DockerUtils {
     		WasdiLog.errorLog("DockerUtils.isImageAvailable: " + oEx.toString());
             return false;
         }
-    }    
+    }
+    
+    /**
+     * Get a list of images available in docker
+     * @return
+     */
+	public List<Object> getImagesList() {
+		List<Object> aoReturn = new ArrayList<>();
+    	try {
+    		
+    		
+    		// Get the internal API address
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		
+    		// End point to get the list of images
+    		sUrl += "images/json";
+    		
+    		// Get the list
+    		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
+    		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
+    			return aoReturn;
+    		}
+    		
+    		// Here we put the results
+    		List<Object> aoOutputJsonMap = null;
+
+            try {
+                aoOutputJsonMap = JsonUtils.s_oMapper.readValue(oResponse.getResponseBody(), new TypeReference<List<Object>>(){});
+            } catch (Exception oEx) {
+                WasdiLog.errorLog("DockerUtils.getImagesList: exception converting API result " + oEx);
+                return aoReturn;
+            }
+    
+            return aoOutputJsonMap;
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.getImagesList: " + oEx.toString());
+            return aoReturn;
+        }
+		
+	}    
     
     /**
      * Remove an image from a Registry
