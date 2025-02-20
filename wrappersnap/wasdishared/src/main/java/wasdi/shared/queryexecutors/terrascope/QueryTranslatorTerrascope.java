@@ -39,6 +39,7 @@ public class QueryTranslatorTerrascope extends QueryTranslator {
 		collectionNames.put("DEM", "urn:eop:VITO:COP_DEM_GLO_30M_COG,urn:eop:VITO:COP_DEM_GLO_90M_COG");
 
 		collectionNames.put("WorldCover:10m_2020_V1", "urn:eop:VITO:ESA_WorldCover_10m_2020_V1");
+		collectionNames.put("WorldCover:10m_2021_V2", "urn:eop:VITO:ESA_WorldCover_10m_2021_V2");
 		collectionNames.put("WorldCover:S1VVVHratio_10m_2020_V1", "urn:eop:VITO:ESA_WorldCover_S1VVVHratio_10m_2020_V1");
 		collectionNames.put("WorldCover:S2RGBNIR_10m_2020_V1", "urn:eop:VITO:ESA_WorldCover_S2RGBNIR_10m_2020_V1");
 		collectionNames.put("WorldCover", "urn:eop:VITO:ESA_WorldCover_10m_2020_V1,urn:eop:VITO:ESA_WorldCover_S1VVVHratio_10m_2020_V1,urn:eop:VITO:ESA_WorldCover_S2RGBNIR_10m_2020_V1");
