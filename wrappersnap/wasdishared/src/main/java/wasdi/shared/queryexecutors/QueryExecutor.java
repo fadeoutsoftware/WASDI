@@ -136,26 +136,6 @@ public abstract class QueryExecutor {
 		return executeAndRetrieve(oQuery, true);
 	}
 	
-	
-	/**
-	 * Get the URI to a product from the product name and the required protocol.
-	 * Protocol can be "https" or "file" (more may happen with new Data Provideres).
-	 * 
-	 * The method must query the data provider with the extact name of the product
-	 * get the result and return the appropriate link to the file.
-	 * 
-	 * At the moment is expected or an https link that can be used to download or
-	 * a local file path to make a copy
-	 * 
-	 * @param sProduct Exact Name of the product that must be found
-	 * @param sProtocol Protocol of interest that determinate the return string (ie http link or local path)
-	 * @param sOriginalUrl Original Url available in the DownloadParameter
-	 * @return URI to the file, usually an http/https link or a local file path
-	 */
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
-		return getUriFromProductName(sProduct, sProtocol, sOriginalUrl, null);
-	}
-	
 	/**
 	 * Get the URI to a product from the product name and the required protocol.
 	 * Protocol can be "https" or "file" (more may happen with new Data Provideres).

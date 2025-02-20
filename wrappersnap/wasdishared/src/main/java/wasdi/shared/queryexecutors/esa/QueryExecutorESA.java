@@ -31,7 +31,7 @@ public class QueryExecutorESA extends QueryExecutor {
 	}
 	
 	@Override
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		if (sProduct.toUpperCase().startsWith("SAR_IMP_1P")
 				|| sProduct.toUpperCase().startsWith("SAR_IMS_1P")
 				|| sProduct.toUpperCase().startsWith("SAR_IMM_1P" )) {

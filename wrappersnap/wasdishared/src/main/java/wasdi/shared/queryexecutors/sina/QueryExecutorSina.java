@@ -41,7 +41,7 @@ public class QueryExecutorSina extends QueryExecutor {
 	
 	
 	@Override
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		return sOriginalUrl;
 	}
 

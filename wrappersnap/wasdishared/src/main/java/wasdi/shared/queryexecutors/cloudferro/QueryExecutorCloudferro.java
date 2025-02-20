@@ -38,7 +38,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 	 * For Cloudferro, we need just the original link..
 	 */
 	@Override
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		if (sProduct.toUpperCase().startsWith("EEHCM")
 				|| sProduct.toUpperCase().startsWith("EEHSEBS")
 				|| sProduct.toUpperCase().startsWith("EEHSTIC")

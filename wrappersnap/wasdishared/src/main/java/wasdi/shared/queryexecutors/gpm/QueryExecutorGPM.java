@@ -66,7 +66,7 @@ public class QueryExecutorGPM extends QueryExecutor {
 	 * For Terrascope, we need just the original link..
 	 */
 	@Override
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		
 		if (sProduct.toUpperCase().startsWith("3B-") || sProduct.toUpperCase().contains("IMERG")) {
 			return sOriginalUrl;

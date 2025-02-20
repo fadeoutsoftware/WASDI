@@ -219,7 +219,7 @@ public class QueryExecutorJRC extends QueryExecutor {
 	}
 	
 	@Override
-    public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+    public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 
         if (Utils.isNullOrEmpty(sOriginalUrl)) {
             WasdiLog.warnLog("QueryExecutorJRC.getUriFromProductName: sOriginalUrl is null, try to recover with the base implementation");

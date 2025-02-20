@@ -48,7 +48,7 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 	}
 	
 	@Override
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		if (sProduct.toUpperCase().startsWith("MOD11A2")
 				|| sProduct.toUpperCase().startsWith("VNP21A1D")
 				|| sProduct.toUpperCase().startsWith("VNP21A1N")

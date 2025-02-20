@@ -47,7 +47,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 	 * For CDS, we need just the original link..
 	 */
 	@Override
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		if (sProduct.startsWith(Platforms.ERA5)) {
 			return sOriginalUrl;
 		}
