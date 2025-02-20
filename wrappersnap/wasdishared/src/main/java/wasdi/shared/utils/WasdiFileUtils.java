@@ -536,7 +536,7 @@ public class WasdiFileUtils {
 
 		String[] asTokens = sFileName.split("\\.(?=[^\\.]+$)");
 		if (asTokens.length != 2) {
-			WasdiLog.errorLog("WasdiFileUtils.isHelpFile: " + sFileName + " is not a help file-name");
+			WasdiLog.debugLog("WasdiFileUtils.isHelpFile: " + sFileName + " is not a help file-name");
 			return false;
 		}
 

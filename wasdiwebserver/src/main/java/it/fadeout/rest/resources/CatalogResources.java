@@ -234,7 +234,7 @@ public class CatalogResources {
 				if (Utils.isNullOrEmpty(sExtension)) {
 					// We are without extension, is it a S1 or S2 ?
 					if (sFileName.startsWith("S1") || sFileName.startsWith("S2")) {
-						WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file starts with S1 or S2, try to add .zip" );
+						WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file starts with S1 or S2, try to add .zip" );
 						// Yes! Retry with extension
 						sFileName += ".zip";
 						bRetry = true;
@@ -285,12 +285,12 @@ public class CatalogResources {
 			PrimitiveResult oResult = new PrimitiveResult();
 			
 			if (oFile!=null) {
-				WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file found!");
+				WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file found!");
 				oResult.setBoolValue(true);
 				return Response.ok(oResult).build();
 			}
 			else {
-				WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found!");
+				WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found!");
 				oResult.setBoolValue(false);
 				return Response.status(Status.NOT_FOUND).entity(oResult).build();
 			}
@@ -723,7 +723,7 @@ public class CatalogResources {
 			String sUserId = oUser.getUserId();
 			
 			// Get the workspace path and the full path
-			String sWorkspacePath = PathsConfig.getWorkspacePath(sUserId, sWorkspaceId);
+			String sWorkspacePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 			String sFullFilePath = sWorkspacePath + sFileName;
 			
 			// Check if we have the file in the db
