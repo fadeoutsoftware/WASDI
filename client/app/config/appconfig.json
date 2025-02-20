@@ -554,7 +554,7 @@
 				{
 					"indexname": "dataset",
 					"indexlabel": "Dataset",
-					"indexvalues": "10m_2020_V1",
+					"indexvalues": "10m_2020_V1|10m_2021_V2",
 					"regex": ".*",
 					"indexvalue": "10m_2020_V1"
 				}
