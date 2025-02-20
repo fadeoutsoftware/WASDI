@@ -174,7 +174,7 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 			String sProductType = oQueryViewModel.productType;
 			
 			if (Utils.isNullOrEmpty(sProductType)) {
-				WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product trype not specified");
+				WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product type not specified");
 				return null;
 			}
 			
