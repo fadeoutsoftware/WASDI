@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;

@@ -11,7 +11,6 @@ import wasdi.shared.business.ecostress.EcoStressItemForReading;
 import wasdi.shared.data.S3VolumeRepository;
 import wasdi.shared.data.ecostress.EcoStressRepository;
 import wasdi.shared.queryexecutors.PaginatedQuery;
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.TimeEpochUtils;

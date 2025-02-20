@@ -1,15 +1,13 @@
 package wasdi.shared.queryexecutors.sina;
 
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.time.YearMonth;
-
 import wasdi.shared.queryexecutors.PaginatedQuery;
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;

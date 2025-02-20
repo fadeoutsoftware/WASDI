@@ -9,7 +9,6 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.queryexecutors.ConcreteQueryTranslator;

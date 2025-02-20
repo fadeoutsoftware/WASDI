@@ -10,7 +10,6 @@ import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
 
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -19,11 +18,7 @@ import wasdi.shared.utils.runtime.RunTimeUtils;
 import wasdi.shared.utils.runtime.ShellExecReturn;
 
 public class ExtPythonProviderAdapter extends PythonBasedProviderAdapter {
-	private static final String s_sDatasetId = "datasetId";
-	
-	protected String m_sPythonScript = "";
-	protected String m_sExchangeFolder = ""; 
-	
+		
 	public ExtPythonProviderAdapter() {
 	}
 

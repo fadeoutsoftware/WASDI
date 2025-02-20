@@ -1,6 +1,5 @@
 package wasdi.shared.utils;
 
-import java.io.File;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,10 +20,6 @@ import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.ProductWorkspace;
-import wasdi.shared.business.Workspace;
-import wasdi.shared.data.ProductWorkspaceRepository;
-import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
