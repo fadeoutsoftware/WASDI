@@ -24,7 +24,7 @@ Shapefiles play an important role in geospatial processing within WASDI. Some of
 - **Defining Areas of Interest (AOI):** Users can upload shapefiles to specify a geographic region for satellite image processing, reducing unnecessary computations outside the area of interest.
 - **Masking and Filtering Data:** Shapefiles allow masking of certain areas, such as water bodies or urban areas, to focus processing on relevant regions.
 - **Customizing Processing Workflows:** Many processing workflows, such as flood detection, can use shapefiles to refine results.
-- Here is an example of a Shapefile being used in the workflow of the **SAR Archive Generator**:
+- Here is an example of a Shapefile being used in the workflow of the SAR Archive Generator:
     - The Shapefile Mask parameter (JSON: "SHAPEFILEMASK") allows uploading a shapefile (containing only one polygon) to exclude Sentinel-1 images outside the shapefile boundary.
     - The Area of Interest (AOI) must be rectangular, and the mask will exclude images outside the polygon.
     - This helps reduce unnecessary image processing while keeping relevant images for analysis.
@@ -44,7 +44,7 @@ To add a shapefile in WASDI, follow these steps:
      - ``.shx`` (index of feature geometry)
      - ``.dbf`` (attribute information)
      - ``.prj`` (coordinate system and projection information in well-known text, or WKT, format)
-     - (Optional) ``.cpg`` (character encoding information)
+     - ``.cpg`` (character encoding information) (Optional)
    - Ensure all required files are present in a single directory.
 
 2. **Compress the Shapefile into a .zip File:**
