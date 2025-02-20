@@ -159,6 +159,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    PythonCookbook/InstallCustomPackagesInNotebook.rst
    PythonCookbook/plottingPackages.rst
    PythonCookbook/InstallGDAL.rst
+   PythonCookbook/importingShapefile.rst
 
 
 .. toctree::
