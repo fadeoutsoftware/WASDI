@@ -1,6 +1,5 @@
 package it.fadeout.rest.resources;
 
-import java.security.cert.PKIXCertPathBuilderResult;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +34,7 @@ import wasdi.shared.viewmodels.organizations.StripePaymentDetail;
 import wasdi.shared.viewmodels.organizations.SubscriptionTypeViewModel;
 
 @Path("/credits")
-public class CreditsResource {
+public class CreditsPackageResource {
 	
 	/**
 	 * Get the types of available credits that a user can buy
@@ -343,7 +342,7 @@ public class CreditsResource {
 	
 	private static List<SubscriptionTypeViewModel> convert(List<CreditPackageType> aoSubscriptionTypes) {
 		return aoSubscriptionTypes.stream()
-				.map(CreditsResource::convert)
+				.map(CreditsPackageResource::convert)
 				.collect(Collectors.toList());
 	}
 
