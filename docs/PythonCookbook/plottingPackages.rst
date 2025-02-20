@@ -6,8 +6,8 @@ Prerequisites
 ------------------------------------------
 
 To run this code you need:
- - A valid WASDI Account
- - A workspace
+ - a valid WASDI Account
+ - a workspace
  - a Jupyter Notebook running in that workspace
  
 If this is not clear, you probably need to take a look to the `Jupyter Notebook Tutorial <../ProgrammingTutorials/JupyterNotebookTutorial.html>`_ before.
