@@ -158,8 +158,8 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    PythonCookbook/ChangeHTTPRequestTimeouts.rst
    PythonCookbook/InstallCustomPackagesInNotebook.rst
    PythonCookbook/plottingPackages.rst
-   PythonCookbook/InstallGDAL.rst
    PythonCookbook/importingShapefile.rst
+   PythonCookbook/InstallGDAL.rst
 
 
 .. toctree::
