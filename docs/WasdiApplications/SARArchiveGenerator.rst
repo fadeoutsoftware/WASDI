@@ -3,8 +3,7 @@ SAR Archive Generator 3.3.7
 
 .. contents:: Table of Contents
     :depth: 3
-    :hidden:
-    :titlesonly:
+    :local:
 
 
 1 Description
