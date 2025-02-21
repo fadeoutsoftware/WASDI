@@ -78,6 +78,8 @@ A good starting point to applications is the :doc:`App store overview </AppStore
    WasdiApplications/AppStoreTutorial.rst
    WasdiApplications/FloodMapping.rst
    WasdiApplications/WheatLocator.rst
+   WasdiApplications/SARArchiveGenerator.rst
+
 
 
 Add your App to WASDI
