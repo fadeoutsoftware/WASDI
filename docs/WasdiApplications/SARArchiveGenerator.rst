@@ -60,15 +60,15 @@ You can use QGIS for instance to prepare your (polygon) shapefile. If you need g
 
 With your shapefile ready and saved on your local device, ensure that it is in .zip format before uploading it to your workspace on WASDI. This single .zip file must contain at least the following four files:
 
-- ``NameOfTheShapefile.**shp**`` (feature geometry)
-- ``NameOfTheShapefile.**shx**`` (index of feature geometry)
-- ``NameOfTheShapefile.**dbf**`` (attribute information)
-- ``NameOfTheShapefile.**prj**`` (coordinate system and projection information in well-known text, or WKT, format).
-- ``NameOfTheShapefile.**cpg**`` (Optional) 
+- ``NameOfTheShapefile.shp`` (feature geometry)
+- ``NameOfTheShapefile.shx`` (index of feature geometry)
+- ``NameOfTheShapefile.dbf`` (attribute information)
+- ``NameOfTheShapefile.prj`` (coordinate system and projection information in well-known text, or WKT, format).
+- ``NameOfTheShapefile.cpg`` (Optional) 
 
 To create the .zip file on Windows, select the files listed above, right-click, and choose "Send to" > "Compressed (zipped) folder."
 
-Ensure the .zip file is named to match the names of the files it contains (e.g. NameOfTheShapefile.**zip**). For example, if your files are named *Valencia_AOI*.shp, *Valencia_AOI*.shx, *Valencia_AOI*.dbf, and *Valencia_AOI*.prj, the .zip file must be named *Valencia_AOI*.zip.
+Ensure the .zip file is named to match the names of the files it contains (e.g. NameOfTheShapefile.zip). For example, if your files are named *Valencia_AOI*.shp, *Valencia_AOI*.shx, *Valencia_AOI*.dbf, and *Valencia_AOI*.prj, the .zip file must be named *Valencia_AOI*.zip.
 
 **Note**: DO NOT compress a folder containing the files; the individual files should be placed directly in the .zip file.
 
