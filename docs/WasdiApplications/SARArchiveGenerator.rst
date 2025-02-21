@@ -3,7 +3,7 @@
 
 
 1 Description
-===================================================
+-----------------------------------------
 
 SAR Flood Archive Generator 3.3.7 (processor name: sar_archive_generator) is an automated application designed to process the Sentinel-1 archive for a specified Area of Interest (AoI), generating daily flood maps in **open areas** (a synonym often used for open areas is "bare soil"). The application generates maps for every day for which a Sentinel-1 GRD image is available over the AoI. Flood detection is performed by analyzing intensity values. The output is an archive of maps that, according to the input parameters, can be either in binary format (flooded or not-flooded) or as a 3-state classification (flooded, not-flooded, permanent water). As **best practice**, we recommend making binary (2-state) flood maps and, in a post-processing step, superimpose over them permanent water to make 3-state flood maps.
 
@@ -13,7 +13,7 @@ The Flood Archive leverages the patented HASARD technology, developed by LIST, w
 Important: Flood Archive Generator is the older version of SAR Flood Archive Generator 3.3.7.
 
 2 Application Parameters
-===================================================
+-----------------------------------------
 
 2.1 Basic Parameters
 -----------------------------
@@ -120,7 +120,7 @@ The following parameters are specific to the HASARD Processor (autofloodchain2).
 
 
 3 Process Workflow
-===================================================
+-----------------------------------------
 
 1. **Initial Orbit Search**: Upon launching the SAR Archive Generator 3.3.7 app, WASDI first identifies the Sentinel-1 satellite orbits that pass over the selected AoI. For example, the following orbit values cover the region of Luxembourg: 161, 15, 37, 88, and 139.
 2. **Data Import**: For each day within the specified time frame, orbit by orbit, WASDI will search for and import any `Sentinel-1 Ground Range Detected (GRD) <https://sentiwiki.copernicus.eu/web/s1-processing#S1-Processing-Ground-Range-Detected/>`_ images that intersect the AoI. This ensures comprehensive coverage of the area within the designated period.
@@ -132,7 +132,7 @@ The following parameters are specific to the HASARD Processor (autofloodchain2).
 
 
 4 Application's Products
-===================================================
+-----------------------------------------
 
 - **Satellite image**: Sentinel-1 GRD image imported by WASDI.
 
@@ -164,7 +164,7 @@ The following parameters are specific to the HASARD Processor (autofloodchain2).
 
 
 5 Application Output: Mosaic Flood Maps
-===================================================
+-----------------------------------------
 
 The application generates a daily map of flooded area for each day for which a Sentinel-1 GRD Image is found over the area of interest, starting from the start date until the end date. The output flood maps will have names like:
 
@@ -206,7 +206,7 @@ Below is an example of a mosaic flood map where permanent water bodies, such as 
 
 
 6 Optimizing Resource Usage
-===================================================
+-----------------------------------------
 
 This section covers how to optimize computational resource usage when running a flood archive by adjusting the bounding box (bbox) size and Tile/Grid Dimension settings. The following instructions are conducted prior to running the application.
 
@@ -285,7 +285,7 @@ When starting with a shapefile of the AoI, you can use QGIS to get the coordinat
 
 
 7 References
-===================================================
+-----------------------------------------
 
 More information about the technology and the scientific methodology applied can be found below:
 
