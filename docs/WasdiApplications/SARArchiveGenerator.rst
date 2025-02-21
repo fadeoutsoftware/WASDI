@@ -49,7 +49,7 @@ However, if both ‘Apply Map Conversion’ and ‘Apply Permanent Water Map’ 
 
 **Shape File Mask (JSON: “SHAPEFILEMASK”)**: This parameter allows you to upload a shapefile (containing only 1 polygon), so that all Sentinel-1 images within the AoI (which must be a **rectangular** area) but outside of the borders of the shapefile are not included in the computation. In other words, it helps exclude Sentinel-1 images that do not intersect with the shapefile but would otherwise be included when using only the AoI, as defined by a rectangular bbox, thereby reducing unnecessary image processing.
 
-.. image:: example_AOI_shp.png
+.. image:: ../_static/SARArchiveGenerator/example_AOI_shp.png
    :alt: Example of image (in dark orange) within a rectangular AoI (blue shade) but outside the borders of the country of interest (Pakistan in this specific example).
 
 The shapefile will only be used to exclude images. It will not be used to crop the daily flood maps to the border of the shapefile. If you want to crop the daily flood maps to that border of the shapefile, please post-process the maps with the app **cutonshape**.
@@ -198,7 +198,7 @@ If the flag APPLYMAPCONVERSION is set to **true**, the output maps are:
 
 Below is an example of a mosaic flood map where permanent water bodies, such as the ocean in the south and lakes within the country, are clearly distinguished in dark blue, while the flooded areas are shown in light blue.
 
-.. image:: image-20240820-151333.png
+.. image:: ../_static/SARArchiveGenerator/example_SAR-flood-map.png
    :alt: Flood Map west of the city of Necochea, Argentina - 17/11/2016
 
 **Other complementary outputs** connected to the Flood Archive app include:
@@ -245,10 +245,10 @@ To optimize resource usage, it is recommended to set the Grid Dimension to match
 
 4. After inputting/adjusting all the other parameters (Basic, Advanced, Hazard, etc.), return to JSON Parameters and adjust the bbox latitude and longitude coordinates to ensure they align precisely with either 1x1 or 2x2 degrees. Use one decimal place for precision to simplify adjustments, and aim to keep the AoI centered within the bbox by increasing each coordinate evenly. See below for an example of a 1x1 degree adjustment of a bbox:
 
-.. image:: image-20241025-125521.png
+.. image:: ../_static/SARArchiveGenerator/example_JSON-params_non-adjusted-bbox.png
    :alt: JSON Parameters - Non-adjusted bbox coordinates
 
-.. image:: image-20241025-124625.png
+.. image:: ../_static/SARArchiveGenerator/example_JSON-params_adjusted-bbox.png
    :alt: JSON Parameters - Adjusted bbox coordinates
 
 **Be sure to save this setup immediately after finishing**, by selecting "Save as Parameters Template" or by copying it to a text editor. This is important because if you leave the JSON Parameters tab, the bbox coordinates will revert to those of the manually drawn bbox in the Basic Parameters, and the adjustment will need to be repeated.
@@ -270,7 +270,7 @@ When starting with a shapefile of the AoI, you can use QGIS to get the coordinat
 
    - If the coordinates appear as very large numbers (e.g., 155838567, -4513529) instead of the standard latitude and longitude decimal format, please refer to `this post <https://groups.google.com/g/australian-qgis-user-group/c/6xrPCvuHlVk?pli=1>`_ for instructions on how to change their format first.
 
-.. image:: image-20241025-134630.png
+.. image:: ../_static/SARArchiveGenerator/example_shapefile-bbox-from-QGIS.png
    :alt: QGIS map with AoI and bbox coordinates
 
 4. After pasting the corners coordinates into a text editor (see point #1 in the image below), adjust them to expand the coverage by rounding to 1x1 degrees (or 2x2 for larger areas) while keeping the AoI roughly centered (point #2).
@@ -283,7 +283,7 @@ When starting with a shapefile of the AoI, you can use QGIS to get the coordinat
 
 7. Once all the steps are complete, you can click on **Run App** to initiate the flood archive.
 
-.. image:: image-20241025-164959.png
+.. image:: ../_static/SARArchiveGenerator/example_steps-converting-coordinates.png
    :alt: Adjusted bbox coordinates in JSON Parameters
 
 
