@@ -2,12 +2,6 @@
 ===================================================
 
 
-.. contents:: Table of Contents
-   :depth: 3
-   :titlesonly:
-   :local:
-
-
 1 Description
 ===================================================
 
@@ -118,7 +112,7 @@ The following parameters are specific to the HASARD Processor (autofloodchain2).
 2.5 GIS Parameters
 -----------------------------
 
-- **Grid Dimension (JSON: "GRIDSTEP")**: It is used to specify the dimension of the tiles in the following format - "Lat,Lon" (in degrees). The bbox will be split into tiles of this grid dimension. Please see the section **Overview of the Tiling Process** for more details.
+- **Grid Dimension (JSON: "GRIDSTEP")**: It is used to specify the dimension of the tiles in the following format - "Lat,Lon" (in degrees). The bbox will be split into tiles of this grid dimension. Please see the section `Overview of the Tiling Process <https://wasdi.readthedocs.io/en/latest/WasdiApplications/SARArchiveGenerator.html#overview-of-the-tiling-process-in-wasdi>`_ for more details.
 - **No Data Value (JSON: "NODATAVALUE")**: The default value is -9999.
 - **Input Ignore Value (JSON: "INPUTIGNOREVALUE")**: The default value is 0.
 - **Mosaic No Data Value (JSON: "MOSAICNODATAVALUE")**: The default value is 255.
@@ -132,7 +126,7 @@ The following parameters are specific to the HASARD Processor (autofloodchain2).
 2. **Data Import**: For each day within the specified time frame, orbit by orbit, WASDI will search for and import any `Sentinel-1 Ground Range Detected (GRD) <https://sentiwiki.copernicus.eu/web/s1-processing#S1-Processing-Ground-Range-Detected/>`_ images that intersect the AoI. This ensures comprehensive coverage of the area within the designated period.
 3. **Tile Delimitation**: WASDI then defines its own tiling scheme over the AoI. This process subdivides the AoI into smaller sections, referred to as tiles, each overlaid with the relevant satellite imagery. This tiling process is important for organizing, storing, and analyzing large volumes of geospatial data efficiently.
 4. **Flood Detection**: Once the Sentinel-1 images have been imported, the app subsequently calls the Automatic HASARD application (specifically, an application named autofloodchain2) to compute the flood map in each tile. This application compares satellite tiles from the same location and orbit, captured on different dates, by analyzing each pixel to detect signs of flooding. If the two tiles show discrepancies, a flood tile is generated.
-5. **Permanent Water (Optional)**: WASDI will import and overlay a permanent water layer indicating the permanent water bodies on the flood maps if the user selects the 'Apply Map Conversion' and 'Apply Permanent Water Map' options in the Advanced settings of the App Interface. (see the **Advanced Parameters** section for more details). As best practice, we recommend making binary (2-state) flood maps and, in a post-processing step, superimpose over them permanent water to make 3-state flood maps.
+5. **Permanent Water (Optional)**: WASDI will import and overlay a permanent water layer indicating the permanent water bodies on the flood maps if the user selects the 'Apply Map Conversion' and 'Apply Permanent Water Map' options in the Advanced settings of the App Interface. (see the `Advanced Parameters <https://wasdi.readthedocs.io/en/latest/WasdiApplications/SARArchiveGenerator.html#advanced-parameters>`_ section for more details). As best practice, we recommend making binary (2-state) flood maps and, in a post-processing step, superimpose over them permanent water to make 3-state flood maps.
 6. **Flood Map Creation**: The flood tiles from various orbits are stitched (mosaicked) together into a comprehensive mosaic flood map, to cover the entire AoI.
 7. **Workspace Cleanup**: Concurrently to the steps above, WASDI will clean the workspace by removing the flood tiles that are no longer needed, to ensure that only the essential products are retained.
 
@@ -278,7 +272,7 @@ When starting with a shapefile of the AoI, you can use QGIS to get the coordinat
 
 4. After pasting the corners coordinates into a text editor (see point #1 in the image below), adjust them to expand the coverage by rounding to 1x1 degrees (or 2x2 for larger areas) while keeping the AoI roughly centered (point #2).
 
-5. Go to the section **Starting with a Bounding Box** of this documentation. Follow Step 3 to adjust Grid Dimension (Lat,Lon) in the GIS Parameters, and input/adjust all the other parameters (Basic, Advanced, Hazard, etc.) as needed.
+5. Go to the section `Starting with a Bounding Box <https://wasdi.readthedocs.io/en/latest/WasdiApplications/SARArchiveGenerator.html#advanced-parameters>`_ of this documentation. Follow Step 3 to adjust Grid Dimension (Lat,Lon) in the GIS Parameters, and input/adjust all the other parameters (Basic, Advanced, Hazard, etc.) as needed.
 
    - We also recommend manually drawing a random bbox to generate its JSON format, which will be reflected in the JSON Parameters.
 
