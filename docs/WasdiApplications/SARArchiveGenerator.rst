@@ -68,7 +68,7 @@ With your shapefile ready and saved on your local device, ensure that it is in .
 
 To create the .zip file on Windows, select the files listed above, right-click, and choose "Send to" > "Compressed (zipped) folder."
 
-Ensure the .zip file is named to match the names of the files it contains (e.g. NameOfTheShapefile**.zip**). For example, if your files are named *Valencia_AOI*.shp, *Valencia_AOI*.shx, *Valencia_AOI*.dbf, and *Valencia_AOI*.prj, the .zip file must be named *Valencia_AOI*.zip.
+Ensure the .zip file is named to match the names of the files it contains (e.g. NameOfTheShapefile.zip). For example, if your files are named *Valencia_AOI*.shp, *Valencia_AOI*.shx, *Valencia_AOI*.dbf, and *Valencia_AOI*.prj, the .zip file must be named *Valencia_AOI*.zip.
 
 **Note**: DO NOT compress a folder containing the files; the individual files should be placed directly in the .zip file.
 
@@ -203,7 +203,7 @@ Below is an example of a mosaic flood map where permanent water bodies, such as 
 
 **Other complementary outputs** connected to the Flood Archive app include:
 
-- **Flood Frequency Map**: See the `Flood Frequency Map Generator <https://wasdi.readthedocs.io/en/latest/WasdiApplications/FFMTutorial.html>`_ tutorial for more details.
+- **Flood Frequency Map**: See the Flood Frequency Map Generator tutorial for more details (coming soon!).
 
 - **Urban Flood Maps**: Produced by the **Urban Flood** application.
 
