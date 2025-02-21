@@ -1,9 +1,9 @@
-SAR Archive Generator 3.3.7
-===================================================
+**SAR Flood Archive Generator 3.3.7**
+-----------------------------------
+
 
 .. contents:: Table of Contents
     :depth: 3
-    :local:
 
 
 1 Description
