@@ -1,14 +1,16 @@
-SAR Archive Generator 3.3.7 (sar_archive_generator)
+SAR Archive Generator 3.3.7
 ===================================================
 
 .. contents:: Table of Contents
     :depth: 3
+    :hidden:
+    :titlesonly:
 
 
 1 Description
 ===================================================
 
-SAR Flood Archive Generator 3.3.7 is an automated application designed to process the Sentinel-1 archive for a specified Area of Interest (AoI), generating daily flood maps in **open areas** (a synonym often used for open areas is "bare soil"). The application generates maps for every day for which a Sentinel-1 GRD image is available over the AoI. Flood detection is performed by analyzing intensity values. The output is an archive of maps that, according to the input parameters, can be either in binary format (flooded or not-flooded) or as a 3-state classification (flooded, not-flooded, permanent water). As **best practice**, we recommend making binary (2-state) flood maps and, in a post-processing step, superimpose over them permanent water to make 3-state flood maps.
+SAR Flood Archive Generator 3.3.7 (processor name: sar_archive_generator) is an automated application designed to process the Sentinel-1 archive for a specified Area of Interest (AoI), generating daily flood maps in **open areas** (a synonym often used for open areas is "bare soil"). The application generates maps for every day for which a Sentinel-1 GRD image is available over the AoI. Flood detection is performed by analyzing intensity values. The output is an archive of maps that, according to the input parameters, can be either in binary format (flooded or not-flooded) or as a 3-state classification (flooded, not-flooded, permanent water). As **best practice**, we recommend making binary (2-state) flood maps and, in a post-processing step, superimpose over them permanent water to make 3-state flood maps.
 
 The Flood Archive leverages the patented HASARD technology, developed by LIST, with WASDI SARL holding a royalty license and exclusive commercial rights.
  Link to the app `“here” <https://www.wasdi.net/#/sar_archive_generator/appui/>`_
