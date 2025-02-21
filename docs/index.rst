@@ -71,7 +71,7 @@ All the WASDI Applications are available for end users' with a simple and intuit
 A good starting point to applications is the :doc:`App store overview </AppStoreTutorial>`
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :hidden:
    :caption: Wasdi Applications
 
