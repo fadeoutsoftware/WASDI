@@ -49,8 +49,9 @@ However, if both ‘Apply Map Conversion’ and ‘Apply Permanent Water Map’ 
 
 **Shape File Mask (JSON: “SHAPEFILEMASK”)**: This parameter allows you to upload a shapefile (containing only 1 polygon), so that all Sentinel-1 images within the AoI (which must be a **rectangular** area) but outside of the borders of the shapefile are not included in the computation. In other words, it helps exclude Sentinel-1 images that do not intersect with the shapefile but would otherwise be included when using only the AoI, as defined by a rectangular bbox, thereby reducing unnecessary image processing.
 
-.. image:: ../_static/SARArchiveGenerator/example_AOI_shp.png
+.. figure:: ../_static/SARArchiveGenerator/example_AOI_shp.png
    :alt: Example of image (in dark orange) within a rectangular AoI (blue shade) but outside the borders of the country of interest (Pakistan in this specific example).
+Example of image (in dark orange) within a rectangular AoI (blue shade) but outside the borders of the country of interest (Pakistan in this specific example).
 
 The shapefile will only be used to exclude images. It will not be used to crop the daily flood maps to the border of the shapefile. If you want to crop the daily flood maps to that border of the shapefile, please post-process the maps with the app **cutonshape**.
 
@@ -139,7 +140,7 @@ The following parameters are specific to the HASARD Processor (autofloodchain2).
 
 - **Satellite image**: Sentinel-1 GRD image imported by WASDI.
 
-  - `**Name format** <https://sentinels.copernicus.eu/web/sentinel/search?p_p_id=com_liferay_portal_search_web_search_results_portlet_SearchResultsPortlet_INSTANCE_XIxtnlMxlnwC&p_p_lifecycle=0&p_p_state=maximized&p_p_mode=view&_com_liferay_portal_search_web_search_results_portlet_SearchResultsPortlet_INSTANCE_XIxtnlMxlnwC_mvcPath=%2Fview_content.jsp&_com_liferay_portal_search_web_search_results_portlet_SearchResultsPortlet_INSTANCE_XIxtnlMxlnwC_redirect=%2Fweb%2Fsentinel%2Fsearch%3Fq%3Dlogging%2520into%2520someone%2527s%2520snapchat%2520without%2520them%2520knowing%252C%25E3%2580%25902024%2520TelegramChannel%253AKunghac%25E3%2580%2591%2520%2520snapchat%2520hack%2520deleted%2520messages%252Csnapon%2520tools%2520hacked%252Cmy%2520snap%2520got%2520hacked%252Csnapchat%2520hack%2520token%2520id%252Creddit%2520snapchat%2520hack%252Choop%2520snapchat%2520hack%252Csnaphack%25203%252E01%252Csnapchat%2520score%2520hack%2520no%2520human%2520verification%252Csomeone%2520hacked%2520my%2520snapchat%2520account%252Cwww%2520snapchatdb%252C....eeb8%26category%3D4208307%26tag%3Dyear-2020%26delta%3D4%26start%3D114&_com_liferay_portal_search_web_search_results_portlet_SearchResultsPortlet_INSTANCE_XIxtnlMxlnwC_assetEntryId=2013756&_com_liferay_portal_search_web_search_results_portlet_SearchResultsPortlet_INSTANCE_XIxtnlMxlnwC_type=content&p_l_back_url=%2Fweb%2Fsentinel%2Fsearch%3Fq%3Dlogging%2520into%2520someone%2527s%2520snapchat%2520without%2520them%2520knowing%252C%25E3%2580%25902024%2520TelegramChannel%253AKunghac%25E3%2580%2591%2520%2520snapchat%2520hack%2520deleted%2520messages%252Csnapon%2520tools%2520hacked%252Cmy%2520snap%2520got%2520hacked%252Csnapchat%2520hack%2520token%2520id%252Creddit%2520snapchat%2520hack%252Choop%2520snapchat%2520hack%252Csnaphack%25203%252E01%252Csnapchat%2520score%2520hack%2520no%2520human%2520verification%252Csomeone%2520hacked%2520my%2520snapchat%2520account%252Cwww%2520snapchatdb%252C....eeb8%26category%3D4208307%26tag%3Dyear-2020%26delta%3D4%26start%3D114/>`__: e.g. ``S1B_IW_GRDH_1SDV_20161129T090701_20161129T090727_003171_005658_7EB6_preproc``
+  - `Name format <https://sentinels.copernicus.eu/web/sentinel/search?p_p_id=com_liferay_portal_search_web_search_results_portlet_SearchResultsPortlet_INSTANCE_XIxtnlMxlnwC&p_p_lifecycle=0&p_p_state=maximized&p_p_mode=view&_com_liferay_portal_search_web_search_results_portlet_SearchResultsPortlet_INSTANCE_XIxtnlMxlnwC_mvcPath=%2Fview_content.jsp&_com_liferay_portal_search_web_search_results_portlet_SearchResultsPortlet_INSTANCE_XIxtnlMxlnwC_redirect=%2Fweb%2Fsentinel%2Fsearch%3Fq%3Dlogging%2520into%2520someone%2527s%2520snapchat%2520without%2520them%2520knowing%252C%25E3%2580%25902024%2520TelegramChannel%253AKunghac%25E3%2580%2591%2520%2520snapchat%2520hack%2520deleted%2520messages%252Csnapon%2520tools%2520hacked%252Cmy%2520snap%2520got%2520hacked%252Csnapchat%2520hack%2520token%2520id%252Creddit%2520snapchat%2520hack%252Choop%2520snapchat%2520hack%252Csnaphack%25203%252E01%252Csnapchat%2520score%2520hack%2520no%2520human%2520verification%252Csomeone%2520hacked%2520my%2520snapchat%2520account%252Cwww%2520snapchatdb%252C....eeb8%26category%3D4208307%26tag%3Dyear-2020%26delta%3D4%26start%3D114&_com_liferay_portal_search_web_search_results_portlet_SearchResultsPortlet_INSTANCE_XIxtnlMxlnwC_assetEntryId=2013756&_com_liferay_portal_search_web_search_results_portlet_SearchResultsPortlet_INSTANCE_XIxtnlMxlnwC_type=content&p_l_back_url=%2Fweb%2Fsentinel%2Fsearch%3Fq%3Dlogging%2520into%2520someone%2527s%2520snapchat%2520without%2520them%2520knowing%252C%25E3%2580%25902024%2520TelegramChannel%253AKunghac%25E3%2580%2591%2520%2520snapchat%2520hack%2520deleted%2520messages%252Csnapon%2520tools%2520hacked%252Cmy%2520snap%2520got%2520hacked%252Csnapchat%2520hack%2520token%2520id%252Creddit%2520snapchat%2520hack%252Choop%2520snapchat%2520hack%252Csnaphack%25203%252E01%252Csnapchat%2520score%2520hack%2520no%2520human%2520verification%252Csomeone%2520hacked%2520my%2520snapchat%2520account%252Cwww%2520snapchatdb%252C....eeb8%26category%3D4208307%26tag%3Dyear-2020%26delta%3D4%26start%3D114/>`__: e.g. ``S1B_IW_GRDH_1SDV_20161129T090701_20161129T090727_003171_005658_7EB6_preproc``
 
 - **Tile**: Subset of the AoI + One satellite image.
 
@@ -198,8 +199,9 @@ If the flag APPLYMAPCONVERSION is set to **true**, the output maps are:
 
 Below is an example of a mosaic flood map where permanent water bodies, such as the ocean in the south and lakes within the country, are clearly distinguished in dark blue, while the flooded areas are shown in light blue.
 
-.. image:: ../_static/SARArchiveGenerator/example_SAR-flood-map.png
+.. figure:: ../_static/SARArchiveGenerator/example_SAR-flood-map.png
    :alt: Flood Map west of the city of Necochea, Argentina - 17/11/2016
+Flood Map west of the city of Necochea, Argentina - 17/11/2016
 
 **Other complementary outputs** connected to the Flood Archive app include:
 
@@ -245,11 +247,13 @@ To optimize resource usage, it is recommended to set the Grid Dimension to match
 
 4. After inputting/adjusting all the other parameters (Basic, Advanced, Hazard, etc.), return to JSON Parameters and adjust the bbox latitude and longitude coordinates to ensure they align precisely with either 1x1 or 2x2 degrees. Use one decimal place for precision to simplify adjustments, and aim to keep the AoI centered within the bbox by increasing each coordinate evenly. See below for an example of a 1x1 degree adjustment of a bbox:
 
-.. image:: ../_static/SARArchiveGenerator/example_JSON-params_non-adjusted-bbox.png
+.. figure:: ../_static/SARArchiveGenerator/example_JSON-params_non-adjusted-bbox.png
    :alt: JSON Parameters - Non-adjusted bbox coordinates
+JSON Parameters - Non-adjusted bbox coordinates
 
-.. image:: ../_static/SARArchiveGenerator/example_JSON-params_adjusted-bbox.png
+.. figure:: ../_static/SARArchiveGenerator/example_JSON-params_adjusted-bbox.png
    :alt: JSON Parameters - Adjusted bbox coordinates
+JSON Parameters - Adjusted bbox coordinates
 
 **Be sure to save this setup immediately after finishing**, by selecting "Save as Parameters Template" or by copying it to a text editor. This is important because if you leave the JSON Parameters tab, the bbox coordinates will revert to those of the manually drawn bbox in the Basic Parameters, and the adjustment will need to be repeated.
 
@@ -270,8 +274,9 @@ When starting with a shapefile of the AoI, you can use QGIS to get the coordinat
 
    - If the coordinates appear as very large numbers (e.g., 155838567, -4513529) instead of the standard latitude and longitude decimal format, please refer to `this post <https://groups.google.com/g/australian-qgis-user-group/c/6xrPCvuHlVk?pli=1>`_ for instructions on how to change their format first.
 
-.. image:: ../_static/SARArchiveGenerator/example_shapefile-bbox-from-QGIS.png
+.. figure:: ../_static/SARArchiveGenerator/example_shapefile-bbox-from-QGIS.png
    :alt: QGIS map with AoI and bbox coordinates
+QGIS map with AoI and bbox coordinates
 
 4. After pasting the corners coordinates into a text editor (see point #1 in the image below), adjust them to expand the coverage by rounding to 1x1 degrees (or 2x2 for larger areas) while keeping the AoI roughly centered (point #2).
 
@@ -283,8 +288,9 @@ When starting with a shapefile of the AoI, you can use QGIS to get the coordinat
 
 7. Once all the steps are complete, you can click on **Run App** to initiate the flood archive.
 
-.. image:: ../_static/SARArchiveGenerator/example_steps-converting-coordinates.png
+.. figure:: ../_static/SARArchiveGenerator/example_steps-converting-coordinates.png
    :alt: Adjusted bbox coordinates in JSON Parameters
+Adjusted bbox coordinates in JSON Parameters
 
 
 7 References
