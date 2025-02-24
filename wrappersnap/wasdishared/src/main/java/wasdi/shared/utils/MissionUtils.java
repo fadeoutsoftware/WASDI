@@ -218,7 +218,7 @@ public class MissionUtils {
 			if (sFileName.toUpperCase().startsWith("S1A_") || sFileName.toUpperCase().startsWith("S1B_") || sFileName.toUpperCase().startsWith("S1C_")) {
 				return Platforms.SENTINEL1;
 			}
-			else if (sFileName.toUpperCase().startsWith("S2A_") || sFileName.toUpperCase().startsWith("S2B_") || sFileName.toUpperCase().startsWith("S2B_")) {
+			else if (sFileName.toUpperCase().startsWith("S2A_") || sFileName.toUpperCase().startsWith("S2B_") || sFileName.toUpperCase().startsWith("S2C_")) {
 				return Platforms.SENTINEL2;
 			}
 			else if (sFileName.toUpperCase().startsWith("S3A_") || sFileName.toUpperCase().startsWith("S3B_") || sFileName.toUpperCase().startsWith("S3__")) {
