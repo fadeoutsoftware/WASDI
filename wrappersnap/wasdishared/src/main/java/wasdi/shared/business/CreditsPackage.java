@@ -12,7 +12,9 @@ public class CreditsPackage {
 	private Double creditsRemaining;
 	private Double lastUpdate;
 	
-	
+	public CreditsPackage() {
+		super();
+	}
 	
 	
 	public CreditsPackage(String creditPackageId, String name, String description, String type, 
