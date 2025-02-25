@@ -117,8 +117,8 @@ public class CreditsPagackageRepository extends MongoRepository {
 			try {
 				Bson oSortingOder = bAscendingOrder ? Sorts.ascending("buyDate") : Sorts.descending("buyDate");
 				List<CreditsPackage> aoReturnList = new ArrayList<>();
-				FindIterable<Document> aoRetrievedDocs =  getCollection(m_sRepoDb)
-						.find(Filters.eq("userId", sUserId))
+				FindIterable<Document> aoRetrievedDocs =  getCollection(m_sThisCollection)
+						.find(new Document("userId", sUserId))
 						.sort(oSortingOder);
 				fillList(aoReturnList, aoRetrievedDocs, CreditsPackage.class);
 				return aoReturnList;
