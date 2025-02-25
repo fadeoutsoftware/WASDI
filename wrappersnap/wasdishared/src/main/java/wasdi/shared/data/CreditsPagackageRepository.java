@@ -88,7 +88,7 @@ public class CreditsPagackageRepository extends MongoRepository {
 			try {
 				AggregateIterable<Document> oResult = getCollection(m_sThisCollection).aggregate(Arrays.asList(
 							Aggregates.match(Filters.eq("userId", sUserId)),
-							Aggregates.group(null, Accumulators.sum("credits", "ScreditsRemaining"))
+							Aggregates.group(null, Accumulators.sum("credits", "$creditsRemaining"))
 						));
 				
 				return oResult.first().getDouble("credits");
