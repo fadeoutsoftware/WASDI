@@ -1,31 +1,19 @@
 **Flood Frequency Map Generator**
-=====================================================
+==================================
 
-Table of Contents
-=================
 
-1. `Description <#description>`_
-2. `Process Workflow <#process-workflow>`_
-3. `Output <#output>`_
-4. `How to use it <#how-to-use-it>`_
-   4.1 `Basic Parameters <#basic-parameters>`_
-   4.2 `Advanced Parameters (WASDI Help Section) <#advanced-parameters-wasdi-help-section>`_
-       4.2.1 `Flood Frequency Map Generator <#flood-frequency-map-generator>`_
-       4.2.2 `Basic parameters <#basic-parameters-2>`_
-       4.2.3 `Advanced parameters <#advanced-parameters>`_
-       4.2.4 `GIS parameters <#gis-parameters>`_
-       4.2.5 `Diagnostics <#diagnostics>`_
-5. `References <#references>`_
+.. contents:: Table of Contents
+   :depth: 3
 
-Description
-===========
+1 Description
+---------------
 
 The Flood Frequency Map Generator application (processor name: floodfrequencylauncher) offers detailed insights into the frequency of flooding within a specified Area of Interest (AoI) and timeframe through a visual map. Specifically, the application analyzes daily flood maps from a Flood Archive and calculates the number of times a pixel has been observed flooded (in the time period of the archive) and the number of times a pixel has been observed, whether flooded or not (in the time period of the archive). The flood frequency can then be computed by the user as the ratio between the number of times a pixel has been observed flooded and the number of times a pixel has been observed.
 
 Counting the number of times a pixel has been observed is fundamental due to the revisit time of the satellites over different areas of the globe. In other words, the orbits of the satellites and the way they overlap may provide a much higher revisit time over a certain area and a lower revisit time over an area just next to the first one.
 
-Process Workflow
-================
+2 Process Workflow
+-------------------
 
 1. **Flood Maps Recognition**: Once the user sets the application inputs and specifies the workspace where the Flood Archive was initially generated (a required prior step), the Flood Frequency Map Generator app will analyze the naming structure and dates of the files in the workspace to identify mosaic flood maps that fall within the user-specified date range.
 2. **Map Cropping and Stacking the Maps**: The application will then crop each identified mosaic flood map to align with the boundaries of the selected Area of Interest (AoI). The cropped mosaic flood maps are subsequently stacked with pixel alignment to create a Pixel-Aligned Image Cube (refer to the workflow diagram below).
@@ -36,8 +24,8 @@ Process Workflow
 Workflow from image files to a pixel-aligned image cube. Source: Kopp et al., 2019.
 
 
-Output
-======
+3 Output
+-------------
 
 The application automatically generates two outputs, both as raster files:
 
@@ -67,14 +55,8 @@ Example of output of Flood Frequency Map.
 Example of CountMapFlood and CountMapData outputs in a WASDI workspace.
 
 
-How to use it
-================
-
-Basic Parameters
-----------------------
-
-Advanced Parameters (WASDI Help Section)
----------------------------------------------
+4 How to use it
+-----------------
 
 **Flood Frequency Map Generator**
 
@@ -118,8 +100,8 @@ The parameters are:
         "coldSubProcIds": "[]"
     }
 
-Basic parameters
-----------------
+4.1 Basic parameters
+----------------------
 
 - **prefix**: Input file prefix, e.g. ``TAN_``.
 - **Area bounding box (mandatory)** representing the area of interest:
@@ -142,8 +124,8 @@ Basic parameters
   - **Start date** (**startDate**): The first day to be included in the analysis. It is a JSON string representing a date in the form ``"%Y-%m-%d"``, e.g., ``"2020-02-10"``.
   - **End date** (**endDate**): The last day to be included in the analysis. It is a JSON string representing a date in the form ``"%Y-%m-%d"``, e.g., ``"2020-02-10"``.
 
-Advanced parameters
--------------------
+4.2 Advanced parameters
+-------------------------
 
 - **Input workspace:**
   - By name: **inWs**
@@ -161,8 +143,8 @@ Advanced parameters
 - **overwrite**: Flag to overwrite existing output files with the same name (``false`` by default).
 - **addFiles**: Add file to WASDI, ``true`` by default.
 
-GIS parameters
---------------
+4.3 GIS parameters
+-------------------
 
 - **EPSG** code, ``4326`` by default.
 - When the map is too big to fit in memory, the computation is split into square subgrids, each of size **gridstep**. The default value is ``5``, and smaller values are ignored.
@@ -170,16 +152,11 @@ GIS parameters
 - If the output TIFF must contain the no data frequency map too, set **noData** to ``true`` (it is ``false`` by default).
 - **dataType**: ``uint16`` by default, set a different one to suit your needs.
 
-Diagnostics
------------
+4.4 Diagnostics
+-----------------
 
 - Set **verbose** to ``true`` to activate verbose logs (it is ``false`` by default).
 - Set **dryRun** to ``true`` to simulate execution (it is ``false`` by default).
 - Set **coldIds** to ``true`` to perform post-mortem analysis (it is ``false`` by default).
 - Add subprocess IDs in the list **coldSubProcIds** for post-mortem analysis.
-
-References
-==========
-
-More information about the technology and the scientific methodology applied can be found below:
 
