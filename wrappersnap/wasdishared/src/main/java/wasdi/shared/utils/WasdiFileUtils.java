@@ -83,7 +83,10 @@ public class WasdiFileUtils {
 						"dotx",
 						"rtf",
 						"odt",
-						"csv"
+						"csv",
+						"htm",
+						"html",
+						"md"
 				)
 		);
 		

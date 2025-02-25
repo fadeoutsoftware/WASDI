@@ -78,6 +78,8 @@ A good starting point to applications is the :doc:`App store overview </AppStore
    WasdiApplications/AppStoreTutorial.rst
    WasdiApplications/FloodMapping.rst
    WasdiApplications/WheatLocator.rst
+   WasdiApplications/SARArchiveGenerator.rst
+
 
 
 Add your App to WASDI
@@ -158,6 +160,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    PythonCookbook/ChangeHTTPRequestTimeouts.rst
    PythonCookbook/InstallCustomPackagesInNotebook.rst
    PythonCookbook/plottingPackages.rst
+   PythonCookbook/importingShapefile.rst
    PythonCookbook/InstallGDAL.rst
 
 
