@@ -11,6 +11,7 @@ public class CreditsPackage {
 	private boolean buySuccess;
 	private Double creditsRemaining;
 	private Double lastUpdate;
+	private String stripePaymentIntentId;
 	
 	public CreditsPackage() {
 		super();
@@ -19,7 +20,7 @@ public class CreditsPackage {
 	
 	public CreditsPackage(String creditPackageId, String name, String description, String type, 
 			Double buyDate, String userId,
-			boolean buySuccess, Double creditsRemaining, double lastUpdate) {
+			boolean buySuccess, Double creditsRemaining, double lastUpdate, String stripePaymentIntentId) {
 		super();
 		this.creditPackageId = creditPackageId;
 		this.name = name;
@@ -30,6 +31,7 @@ public class CreditsPackage {
 		this.buySuccess = buySuccess;
 		this.creditsRemaining = creditsRemaining;
 		this.lastUpdate = lastUpdate;
+		this.setStripePaymentIntentId(stripePaymentIntentId);
 	}
 
 	public String getCreditPackageId() {
@@ -102,6 +104,16 @@ public class CreditsPackage {
 	
 	public void setLastUpdate(Double lastUpdate) {
 		this.lastUpdate = lastUpdate;
+	}
+
+
+	public String getStripePaymentIntentId() {
+		return stripePaymentIntentId;
+	}
+
+
+	public void setStripePaymentIntentId(String stripePaymentIntentId) {
+		this.stripePaymentIntentId = stripePaymentIntentId;
 	}
 	
 }

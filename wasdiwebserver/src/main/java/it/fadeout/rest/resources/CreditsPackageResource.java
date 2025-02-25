@@ -178,7 +178,7 @@ public class CreditsPackageResource {
 					bIsBuySuccess = false;					
 			}
 						
-			CreditsPackage oCreditPackage = new CreditsPackage(sCreditPackageId, sName, sDescription, sType, 0d, sUserId, bIsBuySuccess, dCredits, 0d);
+			CreditsPackage oCreditPackage = new CreditsPackage(sCreditPackageId, sName, sDescription, sType, 0d, sUserId, bIsBuySuccess, dCredits, 0d, null);
 
 			if (oCreditsPackageRepository.insertCreditPackage(oCreditPackage)) {
 				return Response.ok(new SuccessResponse(oCreditPackage.getCreditPackageId())).build();
@@ -294,10 +294,16 @@ public class CreditsPackageResource {
 		try {
 			StripeService oStripeService = new StripeService();
 			StripePaymentDetail oStripePaymentDetail = oStripeService.retrieveStripePaymentDetail(sCheckoutSessionId);
-
+			
+			if (oStripePaymentDetail == null) {
+				WasdiLog.warnLog("CreditsResource.confirmation: Stripe returned an invalid result, aborting");
+				return null;
+			}
+			
 			String sCreditsPackagegeId = oStripePaymentDetail.getClientReferenceId();
+			String sPaymentIntentId = oStripePaymentDetail.getPaymentIntentId();
 
-			if (oStripePaymentDetail == null || Utils.isNullOrEmpty(sCreditsPackagegeId)) {
+			if (Utils.isNullOrEmpty(sCreditsPackagegeId) || Utils.isNullOrEmpty(sPaymentIntentId)) {
 				WasdiLog.warnLog("CreditsResource.confirmation: Stripe returned an invalid result, aborting");
 				return null;
 			}
@@ -318,6 +324,7 @@ public class CreditsPackageResource {
 					oCreditsPackage.setBuyDate(dNow);
 					oCreditsPackage.setLastUpdate(dNow);
 					oCreditsPackage.setBuySuccess(true);
+					oCreditsPackage.setStripePaymentIntentId(sPaymentIntentId);
 
 					if (!oCreditsPackageRepository.updateCreditPackage(oCreditsPackage)) {
 						WasdiLog.errorLog("CreditsResource.confirmation: there was an error updating the credits package");
