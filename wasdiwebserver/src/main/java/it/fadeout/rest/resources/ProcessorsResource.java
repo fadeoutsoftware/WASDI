@@ -1044,7 +1044,7 @@ public class ProcessorsResource  {
 				Double dCreditsDeducted = 0d;
 				List<CreditsPackage> aoCreditsToUpdate = new ArrayList<>();
 				
-				while ( (dCreditsForRun < dCreditsForRun) && iCountPackages < aoCreditsPackages.size()) {
+				while ( (dCreditsDeducted < dCreditsForRun) && iCountPackages < aoCreditsPackages.size()) {
 					CreditsPackage oCreditsPackage = aoCreditsPackages.get(iCountPackages);
 					Double dCreditsRemaining = oCreditsPackage.getCreditsRemaining() ;
 					
@@ -1066,7 +1066,7 @@ public class ProcessorsResource  {
 					iCountPackages++;
 				}
 				
-				if (dCreditsDeducted == dCreditsForRun) {
+				if (dCreditsDeducted.doubleValue() == dCreditsForRun.doubleValue()) {
 					for (int i = 0; i < aoCreditsToUpdate.size(); i++) {
 						if (!oCreditsRepository.updateCreditPackage(aoCreditsToUpdate.get(i))) {
 							WasdiLog.warnLog("ProcessorResource.internalRun. Credit package " + aoCreditsToUpdate.get(i).getCreditPackageId() + "was not updated");
@@ -1209,9 +1209,7 @@ public class ProcessorsResource  {
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
-			double dRoundedValue = new BigDecimal(dNumberOfCredits).setScale(2, RoundingMode.HALF_UP).doubleValue();
-			
-			return Response.ok(dRoundedValue).build();		
+			return Response.ok(dNumberOfCredits).build();		
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessorResource.getCreditsForRun. Error: ", oEx );
@@ -1268,7 +1266,11 @@ public class ProcessorsResource  {
 			
 			WasdiLog.debugLog("ProcessorResource.computeNumberOfCredits. Square kilometers of the bouding box: " + dAreaInSquareKilometers);
 			
-			return fPricePerSquareKilometer * dAreaInSquareKilometers;
+			double dCredits = fPricePerSquareKilometer * dAreaInSquareKilometers;
+			
+			double dCreditsRoundedValue = new BigDecimal(dCredits).setScale(2, RoundingMode.HALF_UP).doubleValue();
+			
+			return dCreditsRoundedValue;
 			
 		} catch (Exception oE) {
 			WasdiLog.errorLog("ProcessorsResource.computeNumberOfCredits. Error while processing the processor's parameters", oE);
