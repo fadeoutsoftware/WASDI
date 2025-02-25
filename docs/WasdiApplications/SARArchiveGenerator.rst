@@ -205,7 +205,7 @@ Flood Map west of the city of Necochea, Argentina - 17/11/2016
 
 **Other complementary outputs** connected to the Flood Archive app include:
 
-- **Flood Frequency Map**: See the Flood Frequency Map Generator tutorial for more details (coming soon!).
+- **Flood Frequency Map**: See the `Flood Frequency Map Generator <https://wasdi.readthedocs.io/en/latest/WasdiApplications/FloodFrequencyMapGenerator.html>`_ tutorial for more details.
 
 - **Urban Flood Maps**: Produced by the **Urban Flood** application.
 
