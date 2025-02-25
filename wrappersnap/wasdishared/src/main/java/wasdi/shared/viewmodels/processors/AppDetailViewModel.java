@@ -22,6 +22,7 @@ public class AppDetailViewModel {
 	private String email;
 	private Float ondemandPrice;
 	private Float squareKilometerPrice = 0f;
+	private String areaParameterName;
 	private Float subscriptionPrice;
 	private Double updateDate;
 	private Double publishDate;
@@ -112,6 +113,12 @@ public class AppDetailViewModel {
 	}
 	public void setSquareKilometerPrice(Float squareKilometerPrice) {
 		this.squareKilometerPrice = squareKilometerPrice;
+	}
+	public String getAreaParameterName() {
+		return areaParameterName;
+	}
+	public void setAreaParameterName(String areaParameterName) {
+		this.areaParameterName = areaParameterName;
 	}
 	public Float getSubscriptionPrice() {
 		return subscriptionPrice;
