@@ -253,8 +253,8 @@ def getFileName(sInputFilePath, sOutputFilePath):
         sys.exit(1)
         
     sUrl = aoInputQuery.get("url","")
-    # TODO: Extract the file name from the Url
-    sFileName = ""
+    # Extract the file name from the Url
+    sFileName = sUrl + ".grb2"
     
     oRes = {
         'fileName': sFileName
