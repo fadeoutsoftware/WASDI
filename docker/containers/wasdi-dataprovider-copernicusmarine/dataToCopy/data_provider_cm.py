@@ -1,10 +1,10 @@
+import urllib.parse
 import copernicusmarine
 import sys
 import json
 import os
 import re
 import logging
-import time
 from datetime import datetime
 
 s_sDataProviderName = 'COPERNICUSMARINE'
@@ -158,7 +158,11 @@ def searchOnCopernicusMarine(oJsonQuery):
 
     aoCatalogue = None
     try:
-        aoCatalogue = copernicusmarine.describe(contains=asCMMetadataFilters, include_datasets=True)
+        aoCatalogue = copernicusmarine.describe(
+            contains=asCMMetadataFilters,
+            product_id=sProductId,
+            dataset_id=sDatasetId,
+            disable_progress_bar=True)
     except Exception as oEx:
         logging.error(f"searchOnCopernicusMarine: exception  retrieving the metadata from the provider: {oEx}")
         sys.exit(1)
@@ -167,12 +171,12 @@ def searchOnCopernicusMarine(oJsonQuery):
         logging.warning(f"searchOnCopernicusMarine: no catalogue found")
         sys.exit(1)
 
-    if 'products' not in aoCatalogue and len(aoCatalogue['products'] == 0):
+    if aoCatalogue.products is None or len(aoCatalogue.products) == 0:
         logging.warning(f"searchOnCopernicusMarine: the catalogue doesn't contain products")
         sys.exit(1)
 
-    logging.warning(f"searchOnCopernicusMarine: found {len(aoCatalogue['products'])} products")
-    oResult = findFirstMatchingResults(oJsonQuery, aoCatalogue['products'])
+    logging.warning(f"searchOnCopernicusMarine: found {len(aoCatalogue.products)} products")
+    oResult = findFirstMatchingResults(oJsonQuery, aoCatalogue.products)
     logging.debug(f"searchOnCopernicusMarine: first matching result {oResult}")
     return oResult
 
@@ -192,23 +196,23 @@ def findFirstMatchingResults(oWasdiJsonQuery, aoCatalogue):
         if sWasdiProductId.endswith("-TDS"):
             sWasdiProductId = sWasdiProductId[0:len(sWasdiProductId) - 4]
 
-        sCMProductId = aoProductMap.get('product_id', '')
+        sCMProductId = aoProductMap.product_id
         if sCMProductId != sWasdiProductId:
             continue
 
         # check the datasets
-        aoDatasetsLists = aoProductMap.get('datasets', [])
+        aoDatasetsLists = aoProductMap.datasets
 
         for aoDatasetMap in aoDatasetsLists:
             sWasdiDatasetId = oWasdiJsonQuery['productName']
-            sCMDatasetId = aoDatasetMap.get('dataset_id', '')
+            sCMDatasetId = aoDatasetMap.dataset_id
 
             if sWasdiDatasetId != sCMDatasetId:
                 continue
 
             logging.debug(
                 f'findFirstMatchingResults: found dataset {sWasdiDatasetId}')
-            aoVersionsList = aoDatasetMap.get('versions', [])
+            aoVersionsList = aoDatasetMap.versions
             for oVersion in aoVersionsList:
                 # TODO: should I return some default value if the coordinates or the depth is not specified?
                 oMatchingServiceMap = getServiceMatchingVariables(oVersion, oWasdiJsonQuery)
@@ -230,15 +234,11 @@ def getServiceMatchingVariables(oVersion, oWasdiJsonQuery):
     """
     oFirstMatchingService = None
 
-    for oPart in oVersion['parts']:
-        for oServiceMap in oPart['services']:
+    for oPart in oVersion.parts:
+        for oServiceMap in oPart.services:
+            sServiceTypeName = oServiceMap.service_name
 
-            oServiceTypeMap = oServiceMap.get('service_type', None)
-            sServiceTypeName = None
-            if oServiceTypeMap is not None:
-                sServiceTypeName = oServiceTypeMap.get('service_name', None)
-
-            aoCMVariablesList = oServiceMap.get('variables', None)
+            aoCMVariablesList = oServiceMap.variables
 
             if aoCMVariablesList is None:
                 logging.debug(f"getServiceMatchingVariables: service '{sServiceTypeName}' has no variables")
@@ -293,7 +293,7 @@ def checkVariables(aoCMVariablesList, oWasdiJsonQuery):
     bIsVariableInCM = [False] * len(asWasdiVariables)
 
     for oVariableMap in aoCMVariablesList:
-        sVariableShortName = oVariableMap['short_name']
+        sVariableShortName = oVariableMap.short_name
         try:
             # if the index is not in the asWasdiVariables, the method .index() will throw an exception
             iIndex = asWasdiVariables.index(sVariableShortName)
@@ -331,12 +331,9 @@ def isWasdiQueryCompliantWithCMCoordinate(oVariableMap, sNorth, sWest, sSouth, s
     :param sEndDate: end date specified in the WASDI query
     :return: True if the filters selected in wasdi query are consistent with the coordinates of the variable
     """
-    if 'coordinates' not in oVariableMap:
-        logging.warning('no coordinates')
-        return False
 
-    for oCoordinateMap in oVariableMap['coordinates']:
-        sCoordinateName = oCoordinateMap.get('coordinates_id', None)
+    for oCoordinateMap in oVariableMap.coordinates:
+        sCoordinateName = oCoordinateMap.coordinate_id
 
         if sCoordinateName == 'latitude':
             if not isGeoReferenceValid(oCoordinateMap, sSouth, sNorth):
@@ -353,7 +350,7 @@ def isWasdiQueryCompliantWithCMCoordinate(oVariableMap, sNorth, sWest, sSouth, s
                 logging.debug(f"checkCoordinates: longitude included in CM values")
 
         if sCoordinateName == 'depth':
-            afDepthValues = oCoordinateMap.get('values', [])
+            afDepthValues = oCoordinateMap.values
             # if a depth was specified, then we need to put it to its negative value, as it is specified in CM
             if sMinDepth is not None and float(-sMinDepth) not in afDepthValues:
                 logging.warning(f"checkCoordinates: min depth not available in CM")
@@ -383,9 +380,7 @@ def isTimeRangeValid(oTimeMap, sStartDate, sEndDate):
     :param sEndDate: ending date time as specified in WASDI
     :return: True if the date-time range specified in WASDI is consistent with the date-time range of the CM dataset
     """
-    if 'minimum_value' not in oTimeMap or 'maximum_value' not in oTimeMap:
-        logging.debug(f"isTimeRangeValid: temporal coordinates miss the min or the max value")
-        return False
+
     try:
         sWasdiDateFormat = '%Y-%m-%dT%H:%M:%S.%fZ'
         oWasdiStartDate = datetime.strptime(sStartDate, sWasdiDateFormat)
@@ -395,8 +390,8 @@ def isTimeRangeValid(oTimeMap, sStartDate, sEndDate):
             logging.warning(f"isTimeRangeValid: invalid time interval. start date {sStartDate} comes after {sEndDate}")
 
         sCMDateFormat = '%Y-%m-%dT%H:%M:%SZ'
-        oCMEndDate = datetime.strptime(oTimeMap['maximum_value'], sCMDateFormat)
-        oCMStartDate = datetime.strptime(oTimeMap['minimum_value'], sCMDateFormat)
+        oCMEndDate = datetime.strptime(oTimeMap.maximum_value, sCMDateFormat)
+        oCMStartDate = datetime.strptime(oTimeMap.minimum_value, sCMDateFormat)
 
         return oWasdiStartDate >= oCMStartDate \
             and oWasdiStartDate <= oCMEndDate \
@@ -417,15 +412,12 @@ def isGeoReferenceValid(oGeoReferenceMap, sWasdiMinGeoRef, sWasdiMaxGeoRef):
     :param sWasdiMaxGeoRef: maximum latitude or longitude as specified in WASDI
     :return: True if the spatial range specified in WASDI is consistent with the spatial range of the CM dataset
     """
-    if 'minimum_value' not in oGeoReferenceMap or 'maximum_value' not in oGeoReferenceMap:
-        logging.debug(f"isGeoReferenceValid: coordinates miss the min or the max value")
-        return False
 
     fWasdiMax = float(sWasdiMaxGeoRef)
     fWasdiMin = float(sWasdiMinGeoRef)
 
-    fMax = oGeoReferenceMap['maximum_value']
-    fMin = oGeoReferenceMap['minimum_value']
+    fMax = oGeoReferenceMap.maximum_value
+    fMin = oGeoReferenceMap.minimum_value
 
     if fWasdiMax <= fMax and fWasdiMax >= fMin and fWasdiMin <= fMax and fWasdiMin >= fMin:
         logging.debug(f"isGeoReferenceValid: latitude values available")
@@ -622,6 +614,83 @@ def executeDownloadFromCopernicusMarine(aoInputParameters, sUsername, sPassword)
     return sDownloadedFilePath
 
 
+def getFileName(sInputFilePath, sOutputFilePath):
+    if not os.path.isfile(sInputFilePath):
+        logging.warning('getFileName: input file not found')
+
+    aoInputQuery = None
+    try:
+        with open(sInputFilePath) as oJsonFile:
+            aoInputQuery = json.load(oJsonFile)
+    except Exception as oEx:
+        logging.error(f'getFileName: error reading the input file: {sInputFilePath}, {oEx}')
+        return sys.exit(-1)
+
+    if aoInputQuery is None:
+        logging.warning(f'getFileName: input file: {sInputFilePath} is None')
+        sys.exit(1)
+
+    sUrl = aoInputQuery.get("url", "")
+
+    sFileName = "dataset.nc"
+
+    try:
+        aoPayloadMap = fromWasdiPayloadToMap(sUrl)
+
+        if aoPayloadMap is None:
+            logging.warning(f'getFileName: error trying to decode url {sUrl}')
+            sys.exit(1)
+
+        sDatasetId = aoPayloadMap.get("datasetId", "")
+
+        if sDatasetId is not None and sDatasetId != "":
+            sFileName = sDatasetId + "_" + str(datetime.now().timestamp()) + ".nc"
+
+    except Exception as oEx:
+        logging.warning(f'getFileName: exception retrieving file name from url {sUrl}, {oEx}')
+        sys.exit(1)
+
+    oRes = {
+        'fileName': sFileName
+    }
+
+    try:
+        with open(sOutputFilePath, 'w') as oFile:
+            json.dump(oRes, oFile)
+    except Exception as oEx:
+        logging.warning(f'getFileName: error trying to write the output file {sOutputFilePath}, {oEx}')
+        sys.exit(1)
+
+
+def fromWasdiPayloadToMap(sUrl):
+    sDecodedUrl = decodeUrl(sUrl)
+
+    if sDecodedUrl is None or sDecodedUrl == '':
+        logging.warning(f"fromWasdiPayloadToStringMap. Decoded url is null or empty {sUrl}")
+        return None
+
+    asTokens = sDecodedUrl.split("payload=")
+    if len(asTokens) == 2:
+        sPayload = asTokens[1]
+        logging.debug(f"fromWasdiPayloadToStringMap. json string: {sPayload}")
+        try:
+            return json.loads(sPayload)
+        except json.JSONDecodeError:
+            logging.warning(f"fromWasdiPayloadToStringMap. Failed to parse JSON: {sPayload}")
+            return None
+
+    logging.warning(f"fromWasdiPayloadToStringMap. Payload not found in url {sUrl}")
+
+    return None
+
+
+def decodeUrl(sEncodedURL):
+    try:
+        return urllib.parse.unquote(sEncodedURL, encoding="utf-8")
+    except Exception as oEx:
+        logging.warning(f'decodeUrl: impossible to decode url {sEncodedURL}, {oEx}')
+        return None
+
 
 if __name__ == '__main__':
     logging.basicConfig(encoding='utf-8', format='[%(levelname)s] %(message)s', level=logging.DEBUG)
@@ -662,6 +731,9 @@ if __name__ == '__main__':
     elif sOperation == "2":
         logging.debug('__main__: chosen operation is DOWNLOAD')
         executeDownloadFile(sInputFile, sOutputFile, sWasdiConfigFile)
+    elif sOperation == "3":
+        logging.debug('__main__: chosen operation is GET FILE NAME')
+        getFileName(sInputFile, sOutputFile)
     else:
         logging.debug('__main__: unknown operation. Script will exit')
         sys.exit(1)
