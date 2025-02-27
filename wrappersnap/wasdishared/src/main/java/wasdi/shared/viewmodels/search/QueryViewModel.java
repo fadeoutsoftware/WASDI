@@ -1,5 +1,8 @@
 package wasdi.shared.viewmodels.search;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Represent a query to the data providers
  * 
@@ -105,5 +108,10 @@ public class QueryViewModel {
 	 * Instrument
 	 */
 	public String instrument;
+	
+	/**
+	 * Generic map with the different filters not parsed
+	 */
+	public Map<String, String> filters = new HashMap<>();
 
 }

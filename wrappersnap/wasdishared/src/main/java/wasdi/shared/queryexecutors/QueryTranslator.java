@@ -679,6 +679,9 @@ public abstract class QueryTranslator {
 				}
 			}
 			
+			fillFilters(sOriginalQuery, oResult);
+			
+			
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
@@ -687,6 +690,36 @@ public abstract class QueryTranslator {
 
 		return oResult;
 	}
+	
+	private void fillFilters(String sQuery, QueryViewModel oQueryViewModel) {
+		
+		try {
+			
+			if (Utils.isNullOrEmpty(sQuery)) return;
+			
+			sQuery = sQuery.replace("(", "");
+			sQuery = sQuery.replace(")", "");
+			
+			String [] asQueryParts = sQuery.split("AND");
+			
+			for (String sFilter : asQueryParts) {
+				try {
+					 sFilter =  sFilter.strip();
+					 String [] asNameValue = sFilter.split(":");
+					 oQueryViewModel.filters.put(asNameValue[0].strip(), asNameValue[1].strip());
+				}
+				catch (Exception oEx) {
+					WasdiLog.errorLog("QueryTranslator.fillFilters: inner exception " + oEx.toString());
+				}						
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("QueryTranslator.fillFilters: exception " + oEx.toString());
+		}		
+		
+	}
+	
+	
 
 	/**
 	 * Remove the platform token from the query.
