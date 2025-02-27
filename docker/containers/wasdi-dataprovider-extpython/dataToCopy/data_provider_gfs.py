@@ -10,6 +10,7 @@ from botocore import UNSIGNED
 from botocore.config import Config
 
 s_sDataProviderName = 'GFS_NRT'
+s_sPlatform = 'GFS'
 
 s_sEndPointUrl = "https://noaa-gfs-bdp-pds.s3.amazonaws.com"
 s_sBucketName = "noaa-gfs-bdp-pds"
@@ -158,8 +159,8 @@ def executeAndRetrieve(sInputFilePath, sOutputFilePath):
                 oResult["id"] = "gfs." + sDate + "_" + "gfs.t"+sModel+"z.pgrb2.0p25."+sTime
                 oResult["link"] = sDate +"_" + sModel + "_" + sTime + "_" + sVariable
                 oResult["summary"] = "GFS Model date: " + sDate + " ran at: " + sModel + " forecast time: " + sTime + " Variable: " + sVariable
-                oResult["provider"] = "GFS_NRT"
-                oResult["platform"] = "GFS"
+                oResult["provider"] = s_sDataProviderName
+                oResult["platform"] = s_sPlatform
 
                 aoReturnList.append(oResult)
 
