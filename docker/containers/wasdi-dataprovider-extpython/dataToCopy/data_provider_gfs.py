@@ -4,6 +4,8 @@ import os
 import requests
 import logging
 from datetime import datetime, timedelta
+import data_provider_utils
+from dataToCopy.data_provider_utils import DataProviderUtils
 
 s_sDataProviderName = 'GFS_NRT'
 s_sPlatform = 'GFS'
@@ -11,54 +13,6 @@ s_sPlatform = 'GFS'
 s_sEndPointUrl = "https://noaa-gfs-bdp-pds.s3.amazonaws.com"
 s_sBucketName = "noaa-gfs-bdp-pds"
 s_sBaseUrl = "https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl?"
-
-
-def _downloadFile(sUrl, sPath):
-    """
-    Download a file
-
-    :param sUrl):
-    :return: None
-    """
-    oResponse = None
-
-    try:
-        oResponse = requests.get(sUrl, stream=True)
-    except Exception as oEx:
-        logging.error("[ERROR] waspy._downloadFile: there was an error contacting the API " + str(oEx))
-
-    if oResponse is None:
-        return
-
-    if oResponse.status_code == 200:
-        logging.debug('[INFO] waspy.downloadFile: got ok result, downloading')
-        sAttachmentName = None
-
-        if os.path.exists(os.path.dirname(sPath)) == False:
-            try:
-                os.makedirs(os.path.dirname(sPath))
-            except:  # Guard against race condition
-                print('[ERROR] waspy.downloadFile: cannot create File Path, aborting' +
-                      '  ******************************************************************************')
-                return
-
-        logging.debug('[INFO] waspy.downloadFile: downloading local file ' + sPath)
-
-        with open(sPath, 'wb') as oFile:
-            for oChunk in oResponse:
-                # _log('.')
-                oFile.write(oChunk)
-        logging.debug('[INFO] waspy.downloadFile: download done, new file locally available ' + sPath)
-
-    else:
-        print('[ERROR] waspy.downloadFile: download error, server code: ' + str(oResponse.status_code) +
-              '  ******************************************************************************')
-
-    return
-
-
-def stringIsNullOrEmpty(sString):
-    return sString is None or sString == ""
 
 
 def getValidDates(sStartDate, sEndDate):
@@ -90,23 +44,18 @@ def executeCount(sInputFilePath, sOutputFilePath):
     if not os.path.isfile(sInputFilePath):
         logging.warning('executeCount: input file not found')
 
-    try:
-        with open(sInputFilePath) as oJsonFile:
-            aoInputQuery = json.load(oJsonFile)
-    except Exception as oEx:
-        logging.error(f'executeCount: error reading the input file: {sInputFilePath}, {oEx}')
-        sys.exit(1)
+    oQueryViewModel = DataProviderUtils.getQueryViewModel(sInputFilePath)
 
-    if aoInputQuery is None:
+    if oQueryViewModel is None:
         logging.warning(f'executeCount: input file {sInputFilePath} is None')
         sys.exit(1)
 
-    sStartDate = aoInputQuery["startFromDate"]
-    sEndDate = aoInputQuery["endToDate"]
-    sVariable = aoInputQuery["productType"]
-    sLevel = aoInputQuery["productLevel"]
-    sModelRun = aoInputQuery["filters"]["modelRun"]
-    sForecastTime = aoInputQuery["filters"]["forecastTime"]
+    sStartDate = oQueryViewModel.startFromDate
+    sEndDate = oQueryViewModel.endToDate
+    sVariable = oQueryViewModel.productType
+    sLevel = oQueryViewModel.productLevel
+    sModelRun = oQueryViewModel.filters["modelRun"]
+    sForecastTime = oQueryViewModel.filters["forecastTime"]
 
     aoValidDates = getValidDates(sStartDate, sEndDate)
 
@@ -120,14 +69,8 @@ def executeCount(sInputFilePath, sOutputFilePath):
 
     iValidDates = len(aoValidDates)
 
-    #oS3Client = boto3.client('s3', config=Config(signature_version=UNSIGNED))
-    #oPaginator = oS3Client.get_paginator('list_objects')
-    #oResult = oPaginator.paginate(Bucket=s_sBucketName, Prefix="gfs.", Delimiter='/')
-    #for oPrefix in oResult.search('CommonPrefixes'):
-    #    print(oPrefix.get('Prefix'))
-
     aoReturnObject = {}
-    # TODO: Make the query and return the total count
+    # We compute the number of total results
     iResultCount = iValidDates * iForecastTimeMultiplier * iRunMultiplier
 
     aoReturnObject["count"] = iResultCount
@@ -140,27 +83,19 @@ def executeCount(sInputFilePath, sOutputFilePath):
         sys.exit(1)
 
 def executeAndRetrieve(sInputFilePath, sOutputFilePath):
-    if not os.path.isfile(sInputFilePath):
-        logging.warning('executeAndRetrieve: input file not found')
 
-    aoInputQuery = None
-    try:
-        with open(sInputFilePath) as oJsonFile:
-            aoInputQuery = json.load(oJsonFile)
-    except Exception as oEx:
-        logging.error(f'executeAndRetrieve: error reading the input file: {sInputFilePath}, {oEx}')
-        return sys.exit(-1)
+    oQueryViewModel = DataProviderUtils.getQueryViewModel(sInputFilePath)
 
-    if aoInputQuery is None:
-        logging.warning(f'executeAndRetrieve: input file: {sInputFilePath} is None')
+    if oQueryViewModel is None:
+        logging.warning(f'executeCount: input file {sInputFilePath} is None')
         sys.exit(1)
 
-    sStartDate = aoInputQuery["startFromDate"]
-    sEndDate = aoInputQuery["endToDate"]
-    sVariable = aoInputQuery["productType"]
-    sLevel = aoInputQuery["productLevel"]
-    sModelRun = aoInputQuery["filters"]["modelRun"]
-    sForecastTime = aoInputQuery["filters"]["forecastTime"]
+    sStartDate = oQueryViewModel.startFromDate
+    sEndDate = oQueryViewModel.endToDate
+    sVariable = oQueryViewModel.productType
+    sLevel = oQueryViewModel.productLevel
+    sModelRun = oQueryViewModel.filters["modelRun"]
+    sForecastTime = oQueryViewModel.filters["forecastTime"]
 
     aoValidDates = getValidDates(sStartDate, sEndDate)
     aoModelRuns = []
@@ -212,56 +147,34 @@ def executeAndRetrieve(sInputFilePath, sOutputFilePath):
         logging.warning(f'executeAndRetrieve: error trying to write the output file {sOutputFilePath}, {oEx}')
         sys.exit(1)
 
+def getPreviousRun(sRun):
+    if sRun == "18":
+        return "12"
+    elif sRun == "12":
+        return "06"
+    elif sRun == "06":
+        return "00"
+
+    return ""
 
 def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
-    if not os.path.isfile(sInputFilePath):
-        logging.warning('executeDownloadFile: input file not found')
 
-    aoInputParameters = None
-    try:
-        with open(sInputFilePath) as oJsonFile:
-            aoInputParameters = json.load(oJsonFile)
-    except Exception as oEx:
-        logging.error(f'executeDownloadFile: error reading the input file: {sInputFilePath}, {oEx}')
-        return sys.exit(-1)
+    oDownloadFileViewModel = DataProviderUtils.getDownloadFileViewModel(sInputFilePath)
 
-    if aoInputParameters is None:
-        logging.warning(f'executeDownloadFile: there was an error reading the input file: {sWasdiConfigFilePath}')
+    if oDownloadFileViewModel is None:
+        logging.warning(f"executeDownloadFile: Impossible to read the Download File View Model")
         sys.exit(1)
 
-    if stringIsNullOrEmpty(sWasdiConfigFilePath):
-        logging.warning(f'executeDownloadFile: data provider configuration is None or empty string: {sWasdiConfigFilePath}')
-        sys.exit(1)
-
-    aoDataProviderConfig = None
-    try:
-        with open(sWasdiConfigFilePath) as oWasdiConfigJsonFile:
-            aoDataProviderConfig = json.load(oWasdiConfigJsonFile)
-    except Exception as oEx:
-        logging.warning(f'executeDownloadFile: error reading the wasdiConfig file: {sWasdiConfigFilePath}, {oEx}')
-        sys.exit(1)
-
-    if aoDataProviderConfig is None:
-        logging.warning(f'executeDownloadFile:  wasdiConfig file is None: {sWasdiConfigFilePath}')
-        
-    sTargetFolder = aoInputParameters.get("downloadDirectory", "")
-    sTargetFileName = aoInputParameters.get("downloadFileName", "")
-    iMaxRetry = aoInputParameters.get("maxRetry", 1)
-
-    # find the configuration for the data provider
-    oDataProviderConfig = None
-
-    aoWasdiDataProviders = aoDataProviderConfig.get('dataProviders', [])
-    for oProvider in aoWasdiDataProviders:
-        if oProvider.get('name', "") == s_sDataProviderName:
-            oDataProviderConfig = oProvider
-            break
+    oDataProviderConfig = DataProviderUtils.getDataProviderConfig(sWasdiConfigFilePath, s_sDataProviderName)
 
     if oDataProviderConfig is None:
         logging.warning(f"executeDownloadFile: no configuration found for {s_sDataProviderName}. Impossible to continue")
         sys.exit(1)
 
-    sUrl = aoInputParameters.get("url","")
+    sTargetFolder = oDownloadFileViewModel.downloadDirectory
+    sTargetFileName = oDownloadFileViewModel.downloadFileName
+    iMaxRetry = oDownloadFileViewModel.maxRetry
+    sUrl = oDownloadFileViewModel.url
 
     asUrlParts = sUrl.split("_")
 
@@ -301,7 +214,18 @@ def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
 
     sDownloadedFilePath = sTargetFolder + sTargetFileName
 
-    _downloadFile(sUrl, sDownloadedFilePath)
+    bDownloaded = DataProviderUtils.downloadFile(sUrl, sDownloadedFilePath)
+
+    if not bDownloaded:
+        # Maybe we can search a previous run for today?
+        if bTestLastForToday:
+            sRun = getPreviousRun(sRun)
+            if not DataProviderUtils.stringIsNullOrEmpty(sRun):
+                bDownloaded = DataProviderUtils.downloadFile(sUrl, sDownloadedFilePath)
+
+
+    if not bDownloaded:
+        sDownloadedFilePath = ""
 
     oRes = {
         'outputFile': sDownloadedFilePath
@@ -317,22 +241,14 @@ def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
 
 
 def getFileName(sInputFilePath, sOutputFilePath):
-    if not os.path.isfile(sInputFilePath):
-        logging.warning('getFileName: input file not found')
 
-    aoInputQuery = None
-    try:
-        with open(sInputFilePath) as oJsonFile:
-            aoInputQuery = json.load(oJsonFile)
-    except Exception as oEx:
-        logging.error(f'getFileName: error reading the input file: {sInputFilePath}, {oEx}')
-        return sys.exit(-1)
+    oFileNameViewModel = DataProviderUtils.getFileNameViewModel(sInputFilePath)
 
-    if aoInputQuery is None:
-        logging.warning(f'getFileName: input file: {sInputFilePath} is None')
+    if oFileNameViewModel is None:
+        logging.warning(f'getFileName: error trying to read the view model')
         sys.exit(1)
-        
-    sUrl = aoInputQuery.get("url","")
+
+    sUrl = oFileNameViewModel.url
     # Extract the file name from the Url
     sFileName = sUrl + ".grb2"
     

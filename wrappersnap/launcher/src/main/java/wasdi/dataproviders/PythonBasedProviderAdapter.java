@@ -199,6 +199,8 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 	
 	protected Map<String, Object> fromWasdiPayloadToObjectMap(String sUrl) {
 		String sDecodedUrl = decodeUrl(sUrl);
+		
+		HashMap<String, Object> aoReturnMap = new HashMap<>();
 
 		String sPayload = null;
 		if (!Utils.isNullOrEmpty(sDecodedUrl)) {
@@ -206,12 +208,11 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 			if (asTokens.length == 2) {
 				sPayload = asTokens[1];
 				WasdiLog.debugLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap json string: " + sPayload);
-				return JsonUtils.jsonToMapOfObjects(sPayload);
+				aoReturnMap.put("payload", JsonUtils.jsonToMapOfObjects(sPayload));
 			}
 			WasdiLog.debugLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap. Payload not found in url " + sUrl);
 		}
-		
-		HashMap<String, Object> aoReturnMap = new HashMap<>();
+	
 		aoReturnMap.put("url", sUrl);
 		
 		WasdiLog.warnLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap. Decoded url is null or empty " + sUrl);

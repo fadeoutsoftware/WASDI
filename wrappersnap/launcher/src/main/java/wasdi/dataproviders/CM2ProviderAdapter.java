@@ -3,6 +3,7 @@ package wasdi.dataproviders;
 import java.util.*;
 
 import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -20,6 +21,28 @@ public class CM2ProviderAdapter extends PythonBasedProviderAdapter {
 	public long getDownloadFileSize(String sFileURL) throws Exception {
 		WasdiLog.debugLog("CM2ProviderAdapter.getDownloadFileSize: download file size not available in Copernicus Marine");
 		return 0;
+	}
+	
+	@Override
+	protected Map<String, Object> fromWasdiPayloadToObjectMap(String sUrl) {
+		String sDecodedUrl = decodeUrl(sUrl);
+
+		String sPayload = null;
+		if (!Utils.isNullOrEmpty(sDecodedUrl)) {
+			String[] asTokens = sDecodedUrl.split("payload=");
+			if (asTokens.length == 2) {
+				sPayload = asTokens[1];
+				WasdiLog.debugLog("CM2ProviderAdapter.fromtWasdiPayloadToObjectMap json string: " + sPayload);
+				return JsonUtils.jsonToMapOfObjects(sPayload);
+			}
+			WasdiLog.debugLog("CM2ProviderAdapter.fromtWasdiPayloadToObjectMap. Payload not found in url " + sUrl);
+		}
+		
+		HashMap<String, Object> aoReturnMap = new HashMap<>();
+		aoReturnMap.put("url", sUrl);
+		
+		WasdiLog.warnLog("CM2ProviderAdapter.fromtWasdiPayloadToObjectMap. Decoded url is null or empty " + sUrl);
+		return aoReturnMap;
 	}
 
 	@Override

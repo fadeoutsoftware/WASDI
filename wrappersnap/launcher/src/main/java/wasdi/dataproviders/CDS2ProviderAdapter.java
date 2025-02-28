@@ -32,6 +32,28 @@ public class CDS2ProviderAdapter extends PythonBasedProviderAdapter {
 	}
 	
 	@Override
+	protected Map<String, Object> fromWasdiPayloadToObjectMap(String sUrl) {
+		String sDecodedUrl = decodeUrl(sUrl);
+
+		String sPayload = null;
+		if (!Utils.isNullOrEmpty(sDecodedUrl)) {
+			String[] asTokens = sDecodedUrl.split("payload=");
+			if (asTokens.length == 2) {
+				sPayload = asTokens[1];
+				WasdiLog.debugLog("CDS2ProviderAdapter.fromtWasdiPayloadToObjectMap json string: " + sPayload);
+				return JsonUtils.jsonToMapOfObjects(sPayload);
+			}
+			WasdiLog.debugLog("CDS2ProviderAdapter.fromtWasdiPayloadToObjectMap. Payload not found in url " + sUrl);
+		}
+		
+		HashMap<String, Object> aoReturnMap = new HashMap<>();
+		aoReturnMap.put("url", sUrl);
+		
+		WasdiLog.warnLog("CDS2ProviderAdapter.fromtWasdiPayloadToObjectMap. Decoded url is null or empty " + sUrl);
+		return aoReturnMap;
+	}
+	
+	@Override
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		
