@@ -198,10 +198,9 @@ In the .wasdi folder, WASDI will create a subfolder for each user and for each w
 
 Each workspace folder will be named as the workspaceId. The Workspace Id is a guid. You can find the workspace Id from the web application in two ways:
 
-.. image:: ../_static/libs_concepts_images/workspaceid.jpg
+.. image:: ../_static/libs_concepts_images/1_workspaceid_new.jpg
 
-It is in the address bar, when you are in the Editor section.
-You can click on the info button and read from the property window the Workspace Id.
+It is both in the address bar and the top-left corner of the screen when you are in the Editor section.
 
 The folder structure will be something similar:
 
