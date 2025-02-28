@@ -3,9 +3,9 @@ import logging
 import os
 import json
 
-from dataToCopy.DownloadFileViewModel import DownloadFileViewModel
-from dataToCopy.FileNameViewModel import FileNameViewModel
-from dataToCopy.QueryViewModel import QueryViewModel
+from DownloadFileViewModel import DownloadFileViewModel
+from FileNameViewModel import FileNameViewModel
+from QueryViewModel import QueryViewModel
 
 
 class DataProviderUtils:
