@@ -12,7 +12,9 @@ The Home page of WASDI is reachable at the address:
 
 https://www.wasdi.net/
 
-.. image:: ../_static/wasdi_tutorial_images/Devmanimage11.png
+
+.. ../_static/wasdi_tutorial_images/Devmanimage11.png
+.. image:: ../_static/wasdi_tutorial_images/1_login.png
 
 
 WASDI Login
