@@ -1,11 +1,9 @@
 import sys
 import json
 import os
-import requests
 import logging
 from datetime import datetime, timedelta
-import data_provider_utils
-from dataToCopy.data_provider_utils import DataProviderUtils
+from data_provider_utils import DataProviderUtils
 
 s_sDataProviderName = 'GFS_NRT'
 s_sPlatform = 'GFS'
