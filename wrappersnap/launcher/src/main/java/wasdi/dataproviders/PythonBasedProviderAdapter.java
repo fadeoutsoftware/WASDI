@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -207,11 +208,14 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 				WasdiLog.debugLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap json string: " + sPayload);
 				return JsonUtils.jsonToMapOfObjects(sPayload);
 			}
-			WasdiLog.warnLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap. Payload not found in url " + sUrl);
+			WasdiLog.debugLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap. Payload not found in url " + sUrl);
 		}
 		
+		HashMap<String, Object> aoReturnMap = new HashMap<>();
+		aoReturnMap.put("url", sUrl);
+		
 		WasdiLog.warnLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap. Decoded url is null or empty " + sUrl);
-		return null;
+		return aoReturnMap;
 	}
 	
 	protected Map<String, String> fromWasdiPayloadToStringMap(String sUrl) {

@@ -1,13 +1,9 @@
 import sys
 import json
 import os
-import re
+import requests
 import logging
-import time
 from datetime import datetime, timedelta
-import boto3
-from botocore import UNSIGNED
-from botocore.config import Config
 
 s_sDataProviderName = 'GFS_NRT'
 s_sPlatform = 'GFS'
@@ -15,6 +11,51 @@ s_sPlatform = 'GFS'
 s_sEndPointUrl = "https://noaa-gfs-bdp-pds.s3.amazonaws.com"
 s_sBucketName = "noaa-gfs-bdp-pds"
 s_sBaseUrl = "https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl?"
+
+
+def _downloadFile(sUrl, sPath):
+    """
+    Download a file
+
+    :param sUrl):
+    :return: None
+    """
+    oResponse = None
+
+    try:
+        oResponse = requests.get(sUrl, stream=True)
+    except Exception as oEx:
+        logging.error("[ERROR] waspy._downloadFile: there was an error contacting the API " + str(oEx))
+
+    if oResponse is None:
+        return
+
+    if oResponse.status_code == 200:
+        logging.debug('[INFO] waspy.downloadFile: got ok result, downloading')
+        sAttachmentName = None
+
+        if os.path.exists(os.path.dirname(sPath)) == False:
+            try:
+                os.makedirs(os.path.dirname(sPath))
+            except:  # Guard against race condition
+                print('[ERROR] waspy.downloadFile: cannot create File Path, aborting' +
+                      '  ******************************************************************************')
+                return
+
+        logging.debug('[INFO] waspy.downloadFile: downloading local file ' + sPath)
+
+        with open(sPath, 'wb') as oFile:
+            for oChunk in oResponse:
+                # _log('.')
+                oFile.write(oChunk)
+        logging.debug('[INFO] waspy.downloadFile: download done, new file locally available ' + sPath)
+
+    else:
+        print('[ERROR] waspy.downloadFile: download error, server code: ' + str(oResponse.status_code) +
+              '  ******************************************************************************')
+
+    return
+
 
 def stringIsNullOrEmpty(sString):
     return sString is None or sString == ""
@@ -155,10 +196,10 @@ def executeAndRetrieve(sInputFilePath, sOutputFilePath):
             for sTime in aoForecastTime:
                 oResult = {}
                 sDate = oDate.strftime("%Y-%m-%d")
-                oResult["title"] = "GFS_"+sDate+"_t" + sModel + "_" + sTime + "_" + sVariable
-                oResult["id"] = "gfs." + sDate + "_" + "gfs.t"+sModel+"z.pgrb2.0p25."+sTime
-                oResult["link"] = sDate +"_" + sModel + "_" + sTime + "_" + sVariable
-                oResult["summary"] = "GFS Model date: " + sDate + " ran at: " + sModel + " forecast time: " + sTime + " Variable: " + sVariable
+                oResult["title"] = "GFS_"+sDate+"_t" + sModel + "_" + sTime + "_" + sVariable + "_" + sLevel
+                oResult["id"] = "gfs." + sDate + "_" + "gfs.t"+sModel+"z.pgrb2.0p25."+sTime + "_" + sLevel
+                oResult["link"] = sDate +"_" + sModel + "_" + sTime + "_" + sVariable + "_" + sLevel
+                oResult["summary"] = "GFS Model date: " + sDate + " ran at: " + sModel + " forecast time: " + sTime + " Variable: " + sVariable + " Level: " + sLevel
                 oResult["provider"] = s_sDataProviderName
                 oResult["platform"] = s_sPlatform
 
@@ -220,8 +261,47 @@ def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
         logging.warning(f"executeDownloadFile: no configuration found for {s_sDataProviderName}. Impossible to continue")
         sys.exit(1)
 
-    # TODO: Download the file in sTargetFolder + sTargetFileName
+    sUrl = aoInputParameters.get("url","")
+
+    asUrlParts = sUrl.split("_")
+
+    sDate = asUrlParts[0]
+    sRun = asUrlParts[1]
+    sForecastTime = asUrlParts[2]
+    sVariable = asUrlParts[3]
+    sLevel = asUrlParts[4]
+
+    sUrl = s_sBaseUrl
+    oNow = datetime.today()
+    oDate = datetime.strptime(sDate,"%Y-%m-%d")
+
+    bTestLastForToday = False
+
+    if sRun == "LAST":
+        sRun = "18"
+        if oNow.date()==oDate.date():
+            bTestLastForToday = True
+            iHour = oNow.hour
+            if iHour<6:
+                sRun = "00"
+            elif iHour<12:
+                sRun = "06"
+            elif iHour<18:
+                sRun = "12"
+            else:
+                sRun = "18"
+
+    sUrl += "dir=/gfs." + sDate.replace("-","") + "/" + sRun + "/atmos"
+    sUrl += "&"
+    sUrl += "file=gfs.t"+sRun + "z.pgrb2.0p25."+ sForecastTime
+    sUrl += "&"
+    sUrl += "var_"+ sVariable + "=on"
+    sUrl += "&"
+    sUrl += "lev_" + sLevel + "=on"
+
     sDownloadedFilePath = sTargetFolder + sTargetFileName
+
+    _downloadFile(sUrl, sDownloadedFilePath)
 
     oRes = {
         'outputFile': sDownloadedFilePath
