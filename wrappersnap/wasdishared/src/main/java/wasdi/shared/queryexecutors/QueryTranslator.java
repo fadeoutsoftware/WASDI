@@ -505,6 +505,27 @@ public abstract class QueryTranslator {
 			}catch (Exception oE) {
 				WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: product type: " + oE);
 			}
+			
+			try {
+				//productLevel
+				if(sQuery.contains("productlevel")) {
+					int iStart = sQuery.indexOf(":", sQuery.indexOf("productlevel")) + 1;
+				
+					int iEnd = sQuery.length();
+					int iTemp = sQuery.indexOf(" ", iStart);
+					if(iTemp > 0 && iTemp < iEnd) {
+						iEnd = iTemp;
+					}
+					iTemp = sQuery.indexOf(")", iStart);
+					if(iTemp > 0 && iTemp < iEnd) {
+						iEnd = iTemp;
+					}
+					oResult.productLevel = sQuery.substring(iStart, iEnd);
+				}
+				
+			}catch (Exception oE) {
+				WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: product type: " + oE);
+			}			
 
 			// Try to get time filters
 			String[] asInterval = { null, null };
