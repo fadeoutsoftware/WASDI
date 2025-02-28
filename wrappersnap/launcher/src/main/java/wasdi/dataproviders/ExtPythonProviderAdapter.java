@@ -24,7 +24,7 @@ public class ExtPythonProviderAdapter extends PythonBasedProviderAdapter {
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
-		WasdiLog.debugLog("ExtPythonProviderAdapter.getDownloadFileSize: download file size not available in Copernicus Marine");
+		WasdiLog.debugLog("ExtPythonProviderAdapter.getDownloadFileSize: download file size not available");
 		return 0;
 	}
 	

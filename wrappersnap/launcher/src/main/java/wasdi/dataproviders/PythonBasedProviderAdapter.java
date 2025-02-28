@@ -162,7 +162,7 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 			
 			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
 			
-			WasdiLog.infoLog("PythonBasedProviderAdapter.executeDownloadFile: python output = " + oShellExecReturn.getOperationLogs());;
+			WasdiLog.infoLog("PythonBasedProviderAdapter.executeDownloadFile: python output = " + oShellExecReturn.getOperationLogs());
 			
 			File oOutputFile = new File(sOutputFullPath);
 			
