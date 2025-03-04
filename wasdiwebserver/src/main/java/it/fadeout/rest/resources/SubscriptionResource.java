@@ -138,6 +138,7 @@ public class SubscriptionResource {
 				SubscriptionListViewModel oSubscriptionViewModel = convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), aoOrganizationNamesOfOwnedSubscriptions.get(oSubscription.getOrganizationId()), "owner");
 				
 				if (oSubscriptionViewModel != null) {
+					oSubscriptionViewModel.setOrganizationId(oSubscription.getOrganizationId());
 					oSubscriptionViewModel.setReadOnly(false);
 					aoSubscriptionLVM.add(oSubscriptionViewModel);
 				}
@@ -1096,6 +1097,7 @@ public class SubscriptionResource {
 				SubscriptionListViewModel oSubscriptionViewModel = convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), aoOrganizationNames.get(oSubscription.getOrganizationId()), "owner");
 				
 				if (oSubscriptionViewModel != null) {
+					oSubscriptionViewModel.setOrganizationId(oSubscription.getOrganizationId());
 					oSubscriptionViewModel.setReadOnly(false);
 					aoSubscriptionLVM.add(oSubscriptionViewModel);
 				}

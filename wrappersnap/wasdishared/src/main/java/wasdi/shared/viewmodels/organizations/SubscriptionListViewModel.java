@@ -10,6 +10,7 @@ public class SubscriptionListViewModel {
 	private String startDate;
 	private String endDate;
 	private String organizationName;
+	private String organizationId;
 	private String reason;
 	private boolean buySuccess;
 	private Long runningTime;
@@ -86,6 +87,12 @@ public class SubscriptionListViewModel {
 	}
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
+	}
+	public String getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(String organizationId) {
+		this.organizationId = organizationId;
 	}
 
 }
