@@ -3,6 +3,12 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+
+## [0.8.7.4] - 2025-03-04
+### Added
+- addFileToWasdi: log if the file does not exists
+
+
 ## [0.8.7.3] - 2025-02-18
 ### Added
 - setProductStyle: set the default style of a product

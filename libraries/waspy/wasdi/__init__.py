@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.7.3
+Version 0.8.7.4
 
-Last Update: 18/02/2025
+Last Update: 04/03/2025
 
 Tested with: Python 3.7 - Python 3.13 
 
@@ -4070,13 +4070,16 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None, sStyle=""):
         if getIsOnServer() is False:
             if getUploadActive() is True:
                 if fileExistsOnWasdi(sFileName) is False:
-                    _log('[INFO] waspy._internalAddFileToWASDI: remote file is missing, uploading')
-                    try:
-                        _uploadFile(sFileName)
-                        _log('[INFO] waspy._internalAddFileToWASDI: file uploaded, keep on working!')
-                    except:
-                        wasdiLog('[ERROR] waspy._internalAddFileToWASDI: could not proceed with upload' +
-                                 '  ******************************************************************************')
+                    if os.path.exists(getPath(sFileName)) is True:
+                        _log('[INFO] waspy._internalAddFileToWASDI: remote file is missing, uploading')
+                        try:
+                            _uploadFile(sFileName)
+                            _log('[INFO] waspy._internalAddFileToWASDI: file uploaded, keep on working!')
+                        except:
+                            wasdiLog('[ERROR] waspy._internalAddFileToWASDI: could not proceed with upload' +
+                                    '  ******************************************************************************')
+                    else:
+                        wasdiLog('[WARNING] waspy._internalAddFileToWASDI: the file ' + sFileName + ' does not exists neither locally and in the cloud')    
         else:
             try:
                 # We are on the server: do I have the file?
@@ -4090,6 +4093,8 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None, sStyle=""):
                         except:
                             wasdiLog('[ERROR] waspy._internalAddFileToWASDI: could not proceed with upload' +
                                      '  ******************************************************************************')
+                else:
+                    wasdiLog('[WARNING] waspy._internalAddFileToWASDI: the file ' + sFileName + ' does not exists')
             except:
                 wasdiLog('[ERROR] waspy._internalAddFileToWASDI: could not send the file the workspace node')
 
