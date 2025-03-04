@@ -236,14 +236,6 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 								}
 								else {
 									WasdiLog.debugLog("ONDAProviderAdapter.ExecuteDownloadFile: file not readable: " + sResult + " try again");
-									try {
-										String sDestination = oProductFile.getPath();
-										sDestination += ".attemp"+ (iMaxRetry-iAttempts+1);
-										FileUtils.copyFile(oProductFile, new File(sDestination));										
-									}
-									catch (Exception oEx) {
-										WasdiLog.debugLog("ONDAProviderAdapter.ExecuteDownloadFile: Exception making copy of attempt file " + oEx.toString());
-									}
 								}								
 							}
 							catch (Exception oReadEx) {

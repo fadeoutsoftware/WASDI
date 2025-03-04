@@ -1127,14 +1127,6 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 							}
 							else {
 								WasdiLog.debugLog("ProviderAdapter.localFileCopy: file not readable: " + oDestionationFile.getPath() + " try again");
-								try {
-									String sDestination = oDestionationFile.getPath();
-									sDestination += ".attemp"+ (iMaxRetry-iAttempts+1);
-									FileUtils.copyFile(oDestionationFile, new File(sDestination));										
-								}
-								catch (Exception oEx) {
-									WasdiLog.debugLog("ProviderAdapter.localFileCopy: Exception making copy of attempt file " + oEx.toString());
-								}
 							}								
 						}
 						catch (Exception oReadEx) {
