@@ -125,13 +125,6 @@ ${kcSanitize(msg("emailVerificationBodyHtml",link, linkExpiration, realmName, li
 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse">
 <tbody><tr>
 <td align="left" valign="middle" style="padding-top:5px;padding-right:10px;padding-bottom:5px;padding-left:9px">
-<table align="left" border="0" cellpadding="0" cellspacing="0" width="" style="border-collapse:collapse">
-<tbody><tr>
-<td align="center" valign="middle" width="24">
-<a href="http://www.twitter.com/" target="_blank" data-saferedirecturl="https://www.google.com/url?hl=it&amp;q=http://www.twitter.com/&amp;source=gmail&amp;ust=1609927874483000&amp;usg=AFQjCNHbj-aWZGK_si1xCUiwfPH0jgHXgA"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/color-twitter-48.png" alt="Twitter" style="display:block;border:0;height:auto;outline:none;text-decoration:none" height="24" width="24"></a>
-</td>
-</tr>
-</tbody></table>
 </td>
 </tr>
 </tbody></table>
