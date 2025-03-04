@@ -1,43 +1,39 @@
 package wasdi.shared.queryexecutors.dlr;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 
 /**
  * Data provider for the German Space Agency - Deutsches Zentrum für Luft- und Raumfahrt (DLR)
  */
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
-import wasdi.shared.viewmodels.search.QueryViewModel;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
+import wasdi.shared.viewmodels.search.QueryViewModel;
 
 public class QueryExecutorDLR extends QueryExecutor {
 	
 	private final String s_sSearchURL = "https://download.geoservice.dlr.de/WSF2019/grid.geojson";
 
 	public QueryExecutorDLR() {
-		this.m_sProvider = "DLR";
 		this.m_oQueryTranslator = new QueryTranslatorDLR();
 		this.m_oResponseTranslator = new ResponseTranslatorDLR();
-		this.m_asSupportedPlatforms.add(Platforms.WSF);
 	}
 	
 	@Override
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		return sOriginalUrl;
 	}
 

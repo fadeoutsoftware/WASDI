@@ -8,8 +8,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import wasdi.shared.config.DataProviderConfig;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
@@ -36,16 +34,10 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 public class QueryExecutorADS extends QueryExecutor {
 
 	private static ObjectMapper s_oMapper = new ObjectMapper();
-	private static DataProviderConfig s_oDataProviderConfig;
 
 	public QueryExecutorADS() {
-		
-		m_sProvider = "ADS";
-		s_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sProvider);
-		
 		this.m_oQueryTranslator = new QueryTranslatorADS();
 		this.m_oResponseTranslator = new ResponseTranslatorADS();
-		
 	}
 	
 	/**
@@ -53,7 +45,7 @@ public class QueryExecutorADS extends QueryExecutor {
 	 * For ADS, we need just the original link..
 	 */
 	@Override
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		if (sProduct.startsWith(Platforms.CAMS)) {
 			return sOriginalUrl;
 		}
@@ -118,12 +110,12 @@ public class QueryExecutorADS extends QueryExecutor {
 
 			String sPayload = prepareLinkJsonPayload(sDataset, sType, sVariables, /*sPresureLevels,*/ sDate, sBoundingBox, sFormat);
 
-			String sUrl = s_oDataProviderConfig.link + "?payload=" + sPayload;
+			String sUrl = m_oDataProviderConfig.link + "?payload=" + sPayload;
 			String sUrlEncoded = StringUtils.encodeUrl(sUrl);
 
 			oResult.setLink(sUrlEncoded);
 			oResult.setSummary("Date: "  + sDate +  ", Mode: " + oADSQuery.sensorMode +  ", Instrument: " + oADSQuery.timeliness);
-			oResult.setProvider(m_sProvider);
+			oResult.setProvider(m_sDataProviderCode);
 			oResult.setFootprint(extractFootprint(oQuery.getQuery()));
 			oResult.getProperties().put("platformname", Platforms.CAMS);
 			oResult.getProperties().put("dataset", oADSQuery.productName);

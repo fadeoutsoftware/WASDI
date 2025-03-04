@@ -11,7 +11,6 @@ import wasdi.shared.utils.log.WasdiLog;
 public class JRCProviderAdapter extends ProviderAdapter {
 	
 	public JRCProviderAdapter() {
-		m_sDataProviderCode = "JRC";
 	}
 
 	@Override
@@ -57,7 +56,7 @@ public class JRCProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		String sFileName = "";
 		try {
 			sFileName = sFileURL.split(ResponseTranslatorJRC.s_sLinkSeparator)[ResponseTranslatorJRC.s_iFileNameIndex];

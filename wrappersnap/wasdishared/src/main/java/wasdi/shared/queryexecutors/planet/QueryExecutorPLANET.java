@@ -24,7 +24,6 @@ public class QueryExecutorPLANET extends QueryExecutor {
 	String m_sBaseUrl = "https://api.planet.com/data/v1/";
 	
 	public QueryExecutorPLANET() {
-		m_sProvider="PLANET";
 		this.m_oQueryTranslator = new QueryTranslatorPLANET();
 		this.m_oResponseTranslator = new ResponseTranslatorPLANET();
 		
@@ -34,7 +33,7 @@ public class QueryExecutorPLANET extends QueryExecutor {
 	public void init() {
 		super.init();
 		
-		DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sProvider);
+		DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);
 		
 		if (oDataProviderConfig != null) {
 			m_sUser = oDataProviderConfig.user;

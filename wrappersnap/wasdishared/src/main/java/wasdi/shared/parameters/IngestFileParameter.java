@@ -20,6 +20,11 @@ public class IngestFileParameter extends BaseParameter{
      * Relative Path
      */
     private String relativePath;
+    
+    /**
+     * Platform aka Mission
+     */
+    private String platform;
 
 	public String getFilePath() {
 		return filePath;
@@ -43,6 +48,14 @@ public class IngestFileParameter extends BaseParameter{
 
 	public void setStyle(String style) {
 		this.style = style;
+	}
+
+	public String getPlatform() {
+		return platform;
+	}
+
+	public void setPlatform(String platform) {
+		this.platform = platform;
 	}    
     
 }

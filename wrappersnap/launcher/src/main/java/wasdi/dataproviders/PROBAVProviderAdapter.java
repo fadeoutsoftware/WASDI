@@ -29,8 +29,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 	HashMap<String, LocalFileDescriptor> m_asCollectionsFolders = new HashMap<>();
 
 	public PROBAVProviderAdapter() {
-		super();		
-		m_sDataProviderCode = "PROBAV";
+		super();
 	}
 
 	@Override
@@ -329,7 +328,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		
 		try {
 			// Domain check

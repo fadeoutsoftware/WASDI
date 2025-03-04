@@ -21,6 +21,7 @@ import org.esa.snap.lib.openjpeg.utils.OpenJpegExecRetriever;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.esa.snap.runtime.EngineConfig;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -187,35 +188,36 @@ public class LauncherMain  {
         	WasdiLog.debugLog("Launcher Main - WASDI Configured to log on console");
         	WasdiLog.initLogger(WasdiConfig.Current.logLevelLauncher);
         }
-        
-//        // Filter the mongodb logs
-//		try {
-//			Object oTest = LoggerFactory.getLogger("httpclient");
-//			
-//			Logger oMongoLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.mongodb.driver.cluster");
-//			oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);	
-//			
-//			oMongoLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.mongodb.driver");
-//			oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);
-//		}
-//		catch (Exception oEx) {
-//			WasdiLog.errorLog("Disabling mongo driver logging exception " + oEx.toString());
-//		}        
-//		
-//        // Filter the apache logs
-//		try {
-//			Object oTest = LoggerFactory.getLogger("httpclient");
-//			
-//			ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("httpclient");
-//			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);	
-//			
-//			oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache");
-//			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);
-//		}
-//		catch (Exception oEx) {
-//			WasdiLog.errorLog("Disabling apache logging exception " + oEx.toString());
-//		}        		
 
+        // Filter the mongodb logs
+  		try {
+  			System.setProperty("DEBUG.MONGO", "false");
+  			ch.qos.logback.classic.Logger oMongoLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.mongodb.driver");
+  			oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);  			
+  		}
+  		catch (Exception oEx) {
+  			WasdiLog.errorLog("Disabling mongo driver logging exception " + oEx.toString());
+  		} 
+  		
+        // Filter the apache logs
+  		try {
+  			ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("httpclient");
+  			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);  			  			
+  		}
+  		catch (Exception oEx) {
+  			WasdiLog.errorLog("Disabling httpclient logging exception " + oEx.toString());
+  		}   		
+
+        // Filter the apache logs
+  		try {  			
+  			ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.hc.client5.http");
+  			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);  			
+  		}
+  		catch (Exception oEx) {
+  			WasdiLog.errorLog("Disabling org.apache.hc.client5.http logging exception " + oEx.toString());
+  		}   		
+
+  		
         try {
 
             // Set Rabbit Factory Params

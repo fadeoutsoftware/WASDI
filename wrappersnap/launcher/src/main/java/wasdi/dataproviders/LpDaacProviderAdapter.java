@@ -32,7 +32,6 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 	private static final String s_sUrlCreateToken = "https://urs.earthdata.nasa.gov/api/users/token";
 	
 	public LpDaacProviderAdapter() {
-		m_sDataProviderCode = "LPDAAC";
 	}
 
 	@Override
@@ -237,7 +236,7 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		String sResult = "";
 		WasdiLog.debugLog("LpDaacProviderAdapter.getFileName. File url: " + sFileURL);
 		try {			

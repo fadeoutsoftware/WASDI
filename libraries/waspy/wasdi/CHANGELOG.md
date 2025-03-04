@@ -3,6 +3,10 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.8.7.3] - 2025-02-18
+### Added
+- setProductStyle: set the default style of a product
+
 ## [0.8.7.2] - 2025-02-03
 ### Fixed
 - Import and Preprocess: avoid multiple graphs

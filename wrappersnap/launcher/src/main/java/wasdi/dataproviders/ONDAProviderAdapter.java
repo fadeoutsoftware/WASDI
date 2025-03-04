@@ -51,7 +51,6 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * 
 	 */
 	public ONDAProviderAdapter() {
-		m_sDataProviderCode = "ONDA";
 	}
 
 	/* (non-Javadoc)
@@ -531,7 +530,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * @see wasdi.filebuffer.DownloadFile#GetFileName(java.lang.String)
 	 */
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		//check whether the file has already been downloaded, else return null
 
 		if (Utils.isNullOrEmpty(sFileURL)) {
@@ -602,7 +601,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		if (sPlatformType.equals(Platforms.SENTINEL1) || sPlatformType.equals(Platforms.SENTINEL2) 
 				|| sPlatformType.equals(Platforms.SENTINEL3) || sPlatformType.equals(Platforms.SENTINEL5P) ||
 				sPlatformType.equals(Platforms.LANDSAT8)) {
-			Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName);
+			Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName, sPlatformType);
 			
 			if (oImageDate!=null) {
 				Date oNow = new Date();

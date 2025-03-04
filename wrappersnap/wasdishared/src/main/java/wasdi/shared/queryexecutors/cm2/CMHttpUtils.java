@@ -1,4 +1,4 @@
-package wasdi.shared.queryexecutors.cm;
+package wasdi.shared.queryexecutors.cm2;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;

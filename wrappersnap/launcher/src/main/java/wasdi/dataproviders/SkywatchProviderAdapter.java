@@ -23,7 +23,6 @@ public class SkywatchProviderAdapter extends ProviderAdapter {
 	 * Basic constructor
 	 */
 	public SkywatchProviderAdapter() {
-		m_sDataProviderCode = "SKYWATCH";
 	}
 
 	@Override
@@ -140,7 +139,7 @@ public class SkywatchProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		if (Utils.isNullOrEmpty(sFileURL)) return "";
 
 		Map<String, String> aoWasdiPayload = extractWasdiPayloadFromUrl(sFileURL);

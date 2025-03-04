@@ -108,13 +108,33 @@ public abstract class WasdiProductReader {
      * Applies any needed adjustment to the file immediatly after the download
      * @return
      */
-    public abstract String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider);
-	
+    public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
+    	return adjustFileAfterDownload(sDownloadedFileFullPath, sFileNameFromProvider, null);
+    }
+
+    /**
+     * Applies any needed adjustment to the file immediatly after the download
+     * @return
+     */
+    public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider, String sPlatform) {
+    	return sDownloadedFileFullPath;
+    }
+
     /**
      * Get the file in a format suitable for publish band
      * @return
      */
-    public abstract File getFileForPublishBand(String sBand, String sLayerId);
+    public File getFileForPublishBand(String sBand, String sLayerId)  {
+    	return getFileForPublishBand(sBand, sLayerId, "");    	
+    }
+    
+    /**
+     * Get the file in a format suitable for publish band
+     * @return
+     */
+    public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform)  {
+    	return m_oProductFile;    	
+    }
     
     /**
      * Get the EPSG of the file

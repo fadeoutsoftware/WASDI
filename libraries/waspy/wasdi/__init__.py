@@ -34,11 +34,11 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.7.2
+Version 0.8.7.3
 
-Last Update: 03/02/2025
+Last Update: 18/02/2025
 
-Tested with: Python 3.7, Python 3.8, Python 3.9, Python 3.10
+Tested with: Python 3.7 - Python 3.13 
 
 Created on 11 Jun 2018
 
@@ -299,11 +299,11 @@ def setParametersFilePath(sParamPath):
     :param: sParamPath Local Path of the parameters file
     """
     if sParamPath is None:
-        print('[ERROR] waspy.setParametersFilePath: passed None as path, won\'t change' +
+        _log('[ERROR] waspy.setParametersFilePath: passed None as path, won\'t change' +
               '  ******************************************************************************')
         return
     if len(sParamPath) < 1:
-        print('[ERROR] waspy.setParametersFilePath: string passed has zero length, won\'t change' +
+        _log('[ERROR] waspy.setParametersFilePath: string passed has zero length, won\'t change' +
               '  ******************************************************************************')
         return
 
@@ -464,7 +464,7 @@ def setUploadActive(bUploadActive):
     """
 
     if bUploadActive is None:
-        print('[ERROR] waspy.setUploadActive: passed None, won\'t change' +
+        _log('[ERROR] waspy.setUploadActive: passed None, won\'t change' +
               '  ******************************************************************************')
         return
 
@@ -2104,7 +2104,7 @@ def _downloadFile(sFileName):
             try:
                 os.makedirs(os.path.dirname(sSavePath))
             except:  # Guard against race condition
-                print('[ERROR] waspy.downloadFile: cannot create File Path, aborting' +
+                _log('[ERROR] waspy.downloadFile: cannot create File Path, aborting' +
                       '  ******************************************************************************')
                 return
 
@@ -2123,7 +2123,7 @@ def _downloadFile(sFileName):
             _unzip(sAttachmentName, sPath)
 
     else:
-        print('[ERROR] waspy.downloadFile: download error, server code: ' + str(oResponse.status_code) +
+        _log('[ERROR] waspy.downloadFile: download error, server code: ' + str(oResponse.status_code) +
               '  ******************************************************************************')
 
     return
@@ -2176,7 +2176,7 @@ def deleteProduct(sProduct):
     global m_sActiveWorkspace
 
     if sProduct is None:
-        print('[ERROR] waspy.deleteProduct: product passed is None' +
+        _log('[ERROR] waspy.deleteProduct: product passed is None' +
               '  ******************************************************************************')
         return False
 
@@ -2250,7 +2250,7 @@ def searchEOImages(sPlatform, sDateFrom=None, sDateTo=None,
     aoReturnList = []
 
     if sPlatform is None:
-        print('[ERROR] waspy.searchEOImages: platform cannot be None' +
+        _log('[ERROR] waspy.searchEOImages: platform cannot be None' +
               '  ******************************************************************************')
         return aoReturnList
 
@@ -2405,7 +2405,7 @@ def searchEOImages(sPlatform, sDateFrom=None, sDateTo=None,
         if isinstance(iOrbitNumber, int):
             sQuery += " AND relativeorbitnumber:" + str(iOrbitNumber)
         else:
-            print('[WARNING] waspy.searchEOImages: iOrbitNumber is' + str(iOrbitNumber),
+            _log('[WARNING] waspy.searchEOImages: iOrbitNumber is' + str(iOrbitNumber),
                   ', but it should be an integer')
             try:
                 iTmp = int(iOrbitNumber)
@@ -2628,7 +2628,7 @@ def getProductBBOX(sFileName):
     return ""
 
 
-def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None):
+def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None, sPlatformType=None):
     """
     Imports a product from a Provider in WASDI, starting from the File URL.
 
@@ -2643,6 +2643,8 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
     :param sVolumeName: if the file is in a Volume, the name of the volume
 
     :param sVolumePath: if the file is in a Volume, the path of the file in the volume
+
+    :param sPlatformType: the platform (aka Mission) of the file to ingest
     
     :return: execution status as a STRING. Can be DONE, ERROR, STOPPED.
     """
@@ -2650,7 +2652,7 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
     sReturn = "ERROR"
 
     try:
-        sProcessId = asynchImportProductByFileUrl(sFileUrl, sName, sBoundingBox, sProvider, sVolumeName, sVolumePath)
+        sProcessId = asynchImportProductByFileUrl(sFileUrl, sName, sBoundingBox, sProvider, sVolumeName, sVolumePath, sPlatformType)
         sReturn = waitProcess(sProcessId)
     except Exception as oEx:
         wasdiLog("[ERROR] waspy.importProductByFileUrl: there was an error importing a product " + str(oEx))
@@ -2658,7 +2660,7 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
     return sReturn
 
 
-def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None):
+def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None, sPlatformType=None):
     """
     Asynch Import of a product from a Provider in WASDI, starting from file URL
 
@@ -2673,6 +2675,8 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
     :param sVolumeName: if the file is in a Volume, the name of the volume
 
     :param sVolumePath: if the file is in a Volume, the path of the file in the volume
+
+    :param sPlatformType: the platform (aka Mission) of the file to ingest
     
     :return: ProcessId of the Download Operation, "DONE" if the file is imported or "ERROR" if there is any problem
     """
@@ -2695,6 +2699,7 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
     oImageImportViewModel["bbox"] = sBoundingBox
     oImageImportViewModel["volumeName"] = sVolumeName
     oImageImportViewModel["volumePath"] = sVolumePath
+    oImageImportViewModel["platform"] = sPlatformType
 
     if getIsOnServer() is True or getIsOnExternalServer() is True:
         oImageImportViewModel["parent"] = getProcId()
@@ -2757,7 +2762,11 @@ def importProduct(oProduct, sProvider=None):
         if "title" in oProduct:
             sName = oProduct['title']
 
-        return importProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
+        sPlatform = None
+        if "platform" in oProduct:
+            sPlatform = oProduct["platform"]
+
+        return importProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"], sPlatformType=sPlatform)
     except Exception as e:
         wasdiLog("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
@@ -2795,8 +2804,12 @@ def asynchImportProduct(oProduct, sProvider=None):
         if "title" in oProduct:
             sName = oProduct["title"]
 
+        sPlatform = None
+        if "platform" in oProduct:
+            sPlatform = oProduct["platform"]
+
         return asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
-                                            sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
+                                            sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"], sPlatformType=sPlatform)
     except Exception as e:
         wasdiLog("[ERROR] waspy.asynchImportProduct: exception " + str(e))
         return "ERROR"
@@ -2837,9 +2850,13 @@ def importProductList(aoProducts, sProvider=None):
                 if "provider" in oProduct:
                     sActualProvider = oProduct["provider"]
 
+            sPlatform = None
+            if "platform" in oProduct:
+                sPlatform = oProduct["platform"]
+
             # Start the download propagating the Asynch Flag
             sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
-                                                   sProvider=sActualProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
+                                                   sProvider=sActualProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"], sPlatformType=sPlatform)
 
             # Append the process id to the list
             asReturnList.append(sReturn)
@@ -2888,9 +2905,13 @@ def asynchImportProductList(aoProducts, sProvider=None):
             if "title" in oProduct:
                 sName = oProduct["title"]
 
+            sPlatform = None
+            if "platform" in oProduct:
+                sPlatform = oProduct["platform"]
+
             # Start the download propagating the Asynch Flag
             sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
-                                                   sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
+                                                   sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"], sPlatformType=sPlatform)
             # Append the process id to the list
             asReturnList.append(sReturn)
         except Exception as e:
@@ -3936,11 +3957,11 @@ def _unzip(sAttachmentName, sPath):
     """
     _log('[INFO] waspy._unzip( ' + sAttachmentName + ', ' + sPath + ' )')
     if sPath is None:
-        print('[ERROR] waspy._unzip: path is None' +
+        _log('[ERROR] waspy._unzip: path is None' +
               '  ******************************************************************************')
         return
     if sAttachmentName is None:
-        print('[ERROR] waspy._unzip: attachment to unzip is None' +
+        _log('[ERROR] waspy._unzip: attachment to unzip is None' +
               '  ******************************************************************************')
         return
 
@@ -3950,7 +3971,7 @@ def _unzip(sAttachmentName, sPath):
         zip_ref.extractall(sPath)
         zip_ref.close()
     except:
-        print('[ERROR] waspy._unzip: failed unzipping' +
+        _log('[ERROR] waspy._unzip: failed unzipping' +
               '  ******************************************************************************')
 
     return
@@ -3984,7 +4005,7 @@ def _normPath(sPath):
     """
 
     if sPath is None:
-        print('[ERROR] waspy._normPath: passed path is None' +
+        _log('[ERROR] waspy._normPath: passed path is None' +
               '  ******************************************************************************')
         return None
 
@@ -4016,10 +4037,10 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None, sStyle=""):
         return ''
 
     if bAsynch is None:
-        print('[WARNING] waspy._internalAddFileToWASDI: asynch flag is None, assuming False')
+        _log('[WARNING] waspy._internalAddFileToWASDI: asynch flag is None, assuming False')
         bAsynch = False
     if not isinstance(bAsynch, bool):
-        print('[WARNING] waspy._internalAddFileToWASDI: asynch flag is not a boolean, trying casting')
+        _log('[WARNING] waspy._internalAddFileToWASDI: asynch flag is not a boolean, trying casting')
         try:
             bAsynch = bool(bAsynch)
         except:
@@ -4162,7 +4183,7 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
                  '  ******************************************************************************')
         return ''
     # elif len(asOutputFileNames) <= 0:
-    #     print('[ERROR] waspy._internalExecuteWorkflow: no output file names, aborting')
+    #     _log('[ERROR] waspy._internalExecuteWorkflow: no output file names, aborting')
     #     return ''
 
     if sWorkflowName is None:
@@ -4760,6 +4781,60 @@ def getMD5Checksum(sFileName):
 
     return oMd5Hash.hexdigest()
 
+
+def setProductStyle(sFileName, sStyle):
+    """
+        Set the default style of a product
+
+        :param sFileName: name of the file to update (NO FULL PATH!)
+        :param sStyle: name of the style that must be uploaded in WASDI
+        :return: Array of strings containing the names of the bands
+        """
+
+    sUrl = getBaseUrl()
+    sUrl += "/product/byname?name="
+    sUrl += sFileName
+    sUrl += "&workspace="
+    sUrl += getActiveWorkspaceId()
+
+    asHeaders = _getStandardHeaders()
+
+    oResponse = None
+
+    try:
+        oResponse = requests.get(sUrl, headers=asHeaders, timeout=getRequestsTimeout())
+    except Exception as oEx:
+        wasdiLog("[ERROR] waspy.setProductStyle: there was an error contacting the API " + str(oEx))
+
+    try:
+        if oResponse is None:
+            wasdiLog('[ERROR] waspy.setProductStyle: cannot set the product style')
+            return []
+
+        if oResponse.ok is not True:
+            wasdiLog('[ERROR] waspy.setProductStyle: cannot get the product view model, server returned: ' + str(oResponse.status_code) + '  ')
+        else:
+            oJsonResponse = oResponse.json()
+
+            sPayload = '{"style":"' + sStyle + '","fileName":"' + oJsonResponse["fileName"] + '" }'
+
+            sUrl = getBaseUrl()
+            sUrl += "/product/update?&workspace="
+            sUrl += getActiveWorkspaceId()
+
+            oResponse = requests.post(sUrl, data=sPayload, headers=asHeaders, timeout=getRequestsTimeout())
+
+            if oResponse is None:
+                wasdiLog('[ERROR] waspy.setProductStyle: cannot update the style')
+                return []
+
+            if oResponse.ok is not True:
+                wasdiLog('[ERROR] waspy.setProductStyle: cannot update the style, server returned: ' + str(oResponse.status_code) + '  ')
+
+    except:
+        return
+
+    return
 
 class ChartType(Enum):
     line = "line"

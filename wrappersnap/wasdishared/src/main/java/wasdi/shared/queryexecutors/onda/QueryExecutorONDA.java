@@ -33,7 +33,6 @@ public class QueryExecutorONDA extends QueryExecutorOpenSearch {
 	private static final List<String> s_asUnsupportedProductTypes = Arrays.asList("SL_2_AOD___", "SL_2_FRP___");
 	
 	public QueryExecutorONDA() {
-		m_sProvider="ONDA";
 		this.m_oQueryTranslator = new QueryTranslatorONDA();
 		this.m_oResponseTranslator = new ResponseTranslatorONDA();
 	}

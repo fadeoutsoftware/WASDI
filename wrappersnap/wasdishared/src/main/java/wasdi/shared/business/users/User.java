@@ -105,6 +105,11 @@ public class User {
 	 * User type: is it free, standard or professional?!?
 	 */
 	private String type = UserType.FREE.name();
+	
+	/**
+	 * If the user exceed the space will receive a warning. In case, here we have the timstamp of the moment we sent this advice 
+	 */
+	private Double storageWarningSentDate = 0.0;
 
 	static {
     	s_oInvalid = new User();
@@ -301,5 +306,13 @@ public class User {
 		
 		return sUserName;
 		
+	}
+
+	public Double getStorageWarningSentDate() {
+		return storageWarningSentDate;
+	}
+
+	public void setStorageWarningSentDate(Double storageWarningSentDate) {
+		this.storageWarningSentDate = storageWarningSentDate;
 	}
 }

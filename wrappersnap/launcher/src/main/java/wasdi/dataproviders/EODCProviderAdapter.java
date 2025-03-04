@@ -12,7 +12,6 @@ public class EODCProviderAdapter extends ProviderAdapter{
 	
 	public EODCProviderAdapter() {
 		super();
-		m_sDataProviderCode = "EODC";
 	}
 
 	@Override
@@ -60,7 +59,7 @@ public class EODCProviderAdapter extends ProviderAdapter{
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		
 		//extract file name
 
@@ -94,21 +93,21 @@ public class EODCProviderAdapter extends ProviderAdapter{
 		if (isWorkspaceOnSameCloud()) {
 			if (sPlatformType.equals(Platforms.SENTINEL1)) {
 				
-				String sProductType = MissionUtils.getProductTypeSatelliteImageFileName(sFileName);
+				String sProductType = MissionUtils.getProductTypeSatelliteImageFileName(sFileName, sPlatformType);
 				
 				if (sProductType.equals("GRD")) {
 					return DataProviderScores.FILE_ACCESS.getValue();
 				}
 			}
 			else if (sPlatformType.equals(Platforms.SENTINEL2)) {
-				String sProductType = MissionUtils.getProductTypeSatelliteImageFileName(sFileName);
+				String sProductType = MissionUtils.getProductTypeSatelliteImageFileName(sFileName, sPlatformType);
 				
 				if (sProductType.equals("MSIL1C")) {
 					return DataProviderScores.FILE_ACCESS.getValue();
 				}				
 			}
 			else if (sPlatformType.equals(Platforms.SENTINEL3)) {
-				String sProductType = MissionUtils.getProductTypeSatelliteImageFileName(sFileName);
+				String sProductType = MissionUtils.getProductTypeSatelliteImageFileName(sFileName, sPlatformType);
 				
 				if (sProductType.equals("EFR___") || sProductType.equals("ERR___")) {
 					return DataProviderScores.FILE_ACCESS.getValue();

@@ -62,7 +62,7 @@ public abstract class QueryExecutorHttpGet extends QueryExecutor {
 			
 			// Check if the platform is supported
 			if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
-				WasdiLog.debugLog("QueryExecutorHttpGet.executeCount: platform " + oQueryViewModel.platformName + " not supported by " + m_sProvider + ". Return -1.");
+				WasdiLog.debugLog("QueryExecutorHttpGet.executeCount: platform " + oQueryViewModel.platformName + " not supported by " + m_sDataProviderCode + ". Return -1.");
 				return 0;
 			}		
 			
@@ -116,7 +116,7 @@ public abstract class QueryExecutorHttpGet extends QueryExecutor {
 			
 			// Check if the platform is supported
 			if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
-				WasdiLog.debugLog("QueryExecutorHttpGet.executeAndRetrieve: platform " + oQueryViewModel.platformName + " not supported by " + m_sProvider + ". Return empty list.");
+				WasdiLog.debugLog("QueryExecutorHttpGet.executeAndRetrieve: platform " + oQueryViewModel.platformName + " not supported by " + m_sDataProviderCode + ". Return empty list.");
 				return new ArrayList<QueryResultViewModel>();
 			}		
 			

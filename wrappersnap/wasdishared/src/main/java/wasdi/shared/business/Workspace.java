@@ -37,9 +37,15 @@ public class Workspace {
 	private String projectId;
 	
 	/**
-	 * Flat to know if it is public or not
+	 * Flag to know if it is public or not
 	 */
 	private boolean isPublic = false;
+	
+	/**
+	 * Storage size occupied by the workspace and its content on the disk
+	 */
+	private Long storageSize;
+	
 	
     public String getNodeCode() {
 		return nodeCode;
@@ -105,6 +111,14 @@ public class Workspace {
 		this.isPublic = isPublic;
 	}
 	
+	public Long getStorageSize() {
+		return storageSize;
+	}
+
+	public void setStorageSize(Long storageSize) {
+		this.storageSize = storageSize;
+	}
+
 	@Override
 	public String toString() {
 		return "Workspace [workspaceId=" + workspaceId + ", name=" + name + ", userId=" + userId + ", creationDate="

@@ -6,7 +6,6 @@ import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -19,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import wasdi.shared.config.MongoConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.queryexecutors.PaginatedQuery;
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
@@ -44,18 +42,13 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		as_WASDI_NASA_PRODUCT_MAPPING.put("VNP15A2H", "C2545314545-LPCLOUD");
 	}
 	
-	public QueryExecutorLpDaac() {
-		m_sProvider = "LPDAAC";
-		
+	public QueryExecutorLpDaac() {		
 		this.m_oQueryTranslator = new QueryTranslatorLpDaac();
 		this.m_oResponseTranslator = new ResponseTranslatorLpDaac();
-		this.m_asSupportedPlatforms.addAll(Arrays.asList(
-				Platforms.TERRA, 
-				Platforms.VIIRS));
 	}
 	
 	@Override
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		if (sProduct.toUpperCase().startsWith("MOD11A2")
 				|| sProduct.toUpperCase().startsWith("VNP21A1D")
 				|| sProduct.toUpperCase().startsWith("VNP21A1N")
@@ -89,7 +82,6 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 			String sDateFrom = oQueryViewModel.startFromDate;
 			String sDateTo = oQueryViewModel.endToDate;
 			
-			String sFileName = oQueryViewModel.productName; // TODO
 			String sProductType = oQueryViewModel.productType;
 			
 			// TODO: check where the name of the collection is coming from
@@ -180,10 +172,9 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 			String sDateTo = oQueryViewModel.endToDate;
 			
 			String sProductType = oQueryViewModel.productType;
-			String sFileName = oQueryViewModel.productName; // TODO
 			
 			if (Utils.isNullOrEmpty(sProductType)) {
-				WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product trype not specified");
+				WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product type not specified");
 				return null;
 			}
 			

@@ -43,10 +43,6 @@ public class DocumentFormatsProductReader extends WasdiProductReader {
 		return new MetadataViewModel();
 	}
 
-	@Override
-	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
-		return sDownloadedFileFullPath;
-	}
 
 	@Override
 	public File getFileForPublishBand(String sBand, String sLayerId) {

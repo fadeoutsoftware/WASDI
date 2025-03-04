@@ -1,19 +1,17 @@
 package wasdi.shared.queryexecutors.creodias2;
 
-import java.util.List;
-import java.util.Map;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.google.common.base.Preconditions;
 
-import java.util.LinkedList;
-
 import wasdi.shared.queryexecutors.ResponseTranslator;
-import wasdi.shared.queryexecutors.creodias.ResponseTranslatorCREODIAS;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -60,6 +58,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	public static final int IPOSITIONOF_SIZEINBYTES = 2;
 	public static final int IPOSITIONOF_PRODUCTIDENTIFIER = 3;
 	
+	//public static final String SLINK = "link";
 		
 	
 	@Override
@@ -250,7 +249,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 			} 
 			oLink.append(sPathIdentifier).append(SLINK_SEPARATOR_CREODIAS2); //3: path identifier
 
-			oResult.getProperties().put(ResponseTranslatorCREODIAS.SLINK, oLink.toString());
+			oResult.getProperties().put(SLINK_PROPERTY_CREODIAS, oLink.toString());
 			oResult.setLink(oLink.toString());
 		} catch (Exception oE) {
 			WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: could not extract download link: " + oE);

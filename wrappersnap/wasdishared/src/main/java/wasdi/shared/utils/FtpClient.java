@@ -119,7 +119,7 @@ public class FtpClient {
     		sPathName = sPathName.substring(1);
     	}*/
 
-    	Boolean bRes = new Boolean(true);
+    	Boolean bRes = Boolean.valueOf(true);
     	String wd = new String(pwd());
     	if(!wd.equals(sPathName)) {
     		bRes = cd(sPathName);

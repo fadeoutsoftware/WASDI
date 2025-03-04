@@ -131,6 +131,10 @@ public class WasdiConfig {
 	 */
 	public boolean addDateTimeToLogs=false;
 	
+	/**
+	 * Configuration of the parameters checking invalid subscriptions in WASDI and deleting the workspaces accordingly
+	 */
+	public StorageUsageControl storageUsageControl;
 	
 	/**
 	 * Set true to NOT filter the internal http calls (keycloak, docker..).

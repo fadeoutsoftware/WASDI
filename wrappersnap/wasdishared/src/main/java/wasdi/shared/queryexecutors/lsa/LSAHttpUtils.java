@@ -58,7 +58,7 @@ public class LSAHttpUtils {
     		String sLoginData = "username=" + StringUtils.encodeUrl(sUser) + "&password=" + StringUtils.encodeUrl(sPassword);
     		
     		// Log in
-    		String sLoginResult = LSAHttpUtils.httpPostResults(sActionLink, sLoginData, oCookieManager);
+    		LSAHttpUtils.httpPostResults(sActionLink, sLoginData, oCookieManager);
     	}
     	catch (Exception oEx) {
 			WasdiLog.debugLog("LSAProviderAdapter.authenticate: Exception " + oEx.toString());
