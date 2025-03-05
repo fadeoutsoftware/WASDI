@@ -1,14 +1,16 @@
 .. _AddProcessor:
 
 Add a New Processor Type to WASDI
-==============================
+=================================
 
 Introduction
 ---------------------------
 Each processor type is an option to deploy a new application in WASDI. Each new app must delcare the processor type.
 
 Processor Types are mainly composed by:
+
 * A Docker templalte folder: this is the folder where can be found the basic Dockerfile and other needed files to create a container with the user code
+
 * A Processor Engine: each processor type has an associated Processor Engine. The processor engine has the main goal to implement these operations:
 	* deploy: create an instance of the processor
 	* redeploy + libraryUpdate: force the engine to generate an update of the app
@@ -38,7 +40,7 @@ Each processor type has also an associted folder that must be returned in the ge
 Create a new class in
 
 Launcher -> Processors
-derived from WasdiProcessorEngine or a subclass. 
+derived from **WasdiProcessorEngine** or a subclass. 
 
 Example: 
 
@@ -85,7 +87,7 @@ To access the configuration you can use:
 Add your processor in the Launcher class wasdi.procesors.WasdiProcessorEngine.getProcessorEngine method.
 
 Using your own Processor Type
----------------------------
+-----------------------------
 
 The processor Type shall be declared also on the client to allow users use it.
 
