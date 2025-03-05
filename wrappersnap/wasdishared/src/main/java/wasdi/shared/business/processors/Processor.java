@@ -70,6 +70,16 @@ public class Processor {
 	private Float subscriptionPrice = 0.0f; 
 	
 	/**
+	 * Price per square kilometre
+	 */
+	private Float pricePerSquareKm = 0.0f;
+	
+	/**
+	 * 
+	 */
+	private String areaParameterName = "";
+	
+	/**
 	 * Product id on Stripe
 	 */
 	private String stripeProductId = "";
@@ -268,6 +278,18 @@ public class Processor {
 	}
 	public void setSubscriptionPrice(Float subscriptionPrice) {
 		this.subscriptionPrice = subscriptionPrice;
+	}
+	public Float getPricePerSquareKm() {
+		return pricePerSquareKm;
+	}
+	public void setPricePerSquareKm(Float pricePerSquareKm) {
+		this.pricePerSquareKm = pricePerSquareKm;
+	}
+	public String getAreaParameterName() {
+		return areaParameterName;
+	}
+	public void setAreaParameterName(String areaParameterName) {
+		this.areaParameterName = areaParameterName;
 	}
 	public String getStripeProductId() {
 		return stripeProductId;

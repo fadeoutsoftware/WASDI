@@ -89,6 +89,14 @@ public class StripeService {
 
 		return oStripePaymentDetail;
 	}
+	
+	public Map<String, String> createProductAppWithOnDemandPrice(String sName, String sProcessorId, Float fOnDemandPrice, Float fSquareKilometerPrice) {
+		return createProductAppWithPrice(sName, sProcessorId, fOnDemandPrice, null);
+	}
+	
+	public Map<String, String> createProductAppWithSquareKmPrice(String sName, String sProcessorId, Float fOnDemandPrice, Float fSquareKilometerPrice) {
+		return createProductAppWithPrice(sName, sProcessorId, null, fSquareKilometerPrice);
+	}
 
 	/**
 	 * Create a product on Stripe representing an app being sold in the Wasdi marketplace. 
@@ -98,21 +106,26 @@ public class StripeService {
 	 * @param fPrice price of the app
 	 * @return a map with two fields "productId" and "priceId", representing the corresponding information on Stripe. It returns null in case of error.
 	 */
-	public Map<String, String> createProductAppWithOnDemandPrice(String sName, String sProcessorId, Float fPrice) {
+	public Map<String, String> createProductAppWithPrice(String sName, String sProcessorId, Float fOnDemandPrice, Float fSquareKilometerPrice) {
 
-		if (Utils.isNullOrEmpty(sName)) {
+		if (Utils.isNullOrEmpty(sName) || Utils.isNullOrEmpty(sProcessorId)) {
 			WasdiLog.warnLog(
-					"StripeService.createProductAppWithOnDemandPrice: can't create product on Stripe. Produc name is null or empty");
+					"StripeService.createProductAppWithPrice: can't create product on Stripe. Produc name or processor id are null or empty");
 			return null;
 		}
 		
-		if (Utils.isNullOrEmpty(sProcessorId)) {
-			WasdiLog.warnLog("StripeService.createAppWithOnDemandPrice: processor id is null or empty");
+		if ( (fOnDemandPrice == null && fSquareKilometerPrice == null) 
+				|| (fOnDemandPrice <= 0 && fSquareKilometerPrice <= 0) 
+				|| (fOnDemandPrice > 0 && fSquareKilometerPrice > 0)) {
+			WasdiLog.warnLog("StripeService.createProductAppWithPrice. Invalid prices");
 			return null;
 		}
+		
+		String sPriceType = fOnDemandPrice != null && fOnDemandPrice > 0 ? "ondemand" : "squarekilometer";
+		float fPrice = fOnDemandPrice != null && fOnDemandPrice > 0 ? fOnDemandPrice : fSquareKilometerPrice;
 
-		WasdiLog.debugLog("StripeService.createProductAppWithOnDemandPrice: creating product on stripe of app name: "
-				+ sName + ", with price: " + fPrice);
+		WasdiLog.debugLog("StripeService.createProductAppWithPrice: creating product on stripe of app name: "
+				+ sName + ", with price type: " + sPriceType);
 
 		String sUrl = s_sSTRIPE_BASE_URL;
 		if (!sUrl.endsWith("/"))
@@ -130,7 +143,7 @@ public class StripeService {
 			
 			// metadata
 			asParameters.add("metadata[productType]=processor");
-			asParameters.add("metadata[priceType]=ondemand");
+			asParameters.add("metadata[priceType]=" + sPriceType);
 			asParameters.add("metadata[processorId]=" + URLEncoder.encode(sProcessorId, StandardCharsets.UTF_8.toString()));
 		} catch (UnsupportedEncodingException oEx) {
 			WasdiLog.errorLog(
@@ -145,8 +158,6 @@ public class StripeService {
 		// headers
 		Map<String, String> asHeaders = getStripeAuthHeader();
 
-		
-
 		HttpCallResponse oHttpResponse = HttpUtils.httpPost(sUrl, "", asHeaders);
 		int iResponseCode = oHttpResponse.getResponseCode();
 
@@ -157,23 +168,23 @@ public class StripeService {
 
 				if (Utils.isNullOrEmpty(sProductId)) {
 					WasdiLog.warnLog(
-							"StripeService.createProductAppWithOnDemandPrice: product id not found in the Stripe response. An error might have occured");
+							"StripeService.createProductAppWithPrice: product id not found in the Stripe response. An error might have occured");
 					return null;
 				}
 
-				WasdiLog.debugLog("StripeService.createProductAppWithOnDemandPrice: product created on Stripe with id: "
+				WasdiLog.debugLog("StripeService.createProductAppWithPrice: product created on Stripe with id: "
 						+ sProductId);
 
-				String sPriceId = createProductOnDemandPrice(sProductId, fPrice);
+				String sPriceId = createProductPrice(sProductId, fPrice);
 
 				if (Utils.isNullOrEmpty(sPriceId)) {
 					WasdiLog.warnLog(
-							"StripeService.createAppProduct: error creating the price for product " + sProductId);
+							"StripeService.createProductAppWithPrice: error creating the price for product " + sProductId);
 					// TODO: at this point, I probably need to remove the product from Stripe
 					return null;
 				}
 
-				WasdiLog.debugLog("StripeService.createProductAppWithOnDemandPrice: created price " + sPriceId
+				WasdiLog.debugLog("StripeService.createProductAppWithPrice: created price " + sPriceId
 						+ " for product " + sProductId);
 				
 				Map<String, String> oResult = new HashMap<>();
@@ -182,13 +193,13 @@ public class StripeService {
 				return oResult;
 			} catch (Exception oEx) {
 				WasdiLog.errorLog(
-						"StripeService.createProductAppWithOnDemandPrice: there was an error reading the json response ",
+						"StripeService.createProductAppWithPrice: there was an error reading the json response ",
 						oEx);
 				return null;
 			}
 		} else {
 			WasdiLog.errorLog(
-					"StripeService.createProductAppWithOnDemandPrice: Can't create product on Stripe. Error while sending the request to Stripe.");
+					"StripeService.createProductAppWithPrice: Can't create product on Stripe. Error while sending the request to Stripe.");
 			return null;
 		}
 	}
@@ -207,7 +218,7 @@ public class StripeService {
 		}
 
 		// first we deactivate all the active on demand prices associated to the product
-		List<String> asPrices = getActiveOnDemandPricesId(sProductId);
+		List<String> asPrices = getActivePricesId(sProductId);
 
 		if (asPrices != null && asPrices.size() > 0) {
 
@@ -267,7 +278,7 @@ public class StripeService {
 	 * @param sProductId the Stripe product id
 	 * @return a list of active price ids for the product. It returns null in case of error
 	 */
-	public List<String> getActiveOnDemandPricesId(String sProductId) {
+	public List<String> getActivePricesId(String sProductId) {
 
 		if (Utils.isNullOrEmpty(sProductId)) {
 			WasdiLog.warnLog("StripeService.getActiveOnDemandPriceId: product id is null or empty. ");
@@ -345,7 +356,7 @@ public class StripeService {
 	 * @param fPrice the price value
 	 * @return the id of the created Stripe price
 	 */
-	public String createProductOnDemandPrice(String sProductId, Float fPrice) {
+	public String createProductPrice(String sProductId, Float fPrice) {
 
 		if (Utils.isNullOrEmpty(sProductId)) {
 			WasdiLog.errorLog(
@@ -434,7 +445,7 @@ public class StripeService {
 			return null;
 		}
 		
-		List<String> asOnDemandPrices = getActiveOnDemandPricesId(sProductId);
+		List<String> asOnDemandPrices = getActivePricesId(sProductId);
 		
 		if (asOnDemandPrices == null || asOnDemandPrices.size() == 0) {
 			WasdiLog.warnLog("StripeService.deactivateOnDemandPrice: no active prices found for product " + sProductId);
@@ -516,7 +527,7 @@ public class StripeService {
 			return null;
 		}
 		
-		List<String> asOnDemandPrices = getActiveOnDemandPricesId(sProductId);
+		List<String> asOnDemandPrices = getActivePricesId(sProductId);
 		
 		if (asOnDemandPrices == null || asOnDemandPrices.size() == 0) {
 			WasdiLog.warnLog("StripeService.updateOnDemandPrice: no active prices found for product " + sProductId);
@@ -566,7 +577,7 @@ public class StripeService {
 
 		WasdiLog.debugLog("StripeService.updateAppPrice: old price with id " + sPriceId + " has been deactivated for the product " + sProductId);
 
-		String sNewPriceId = createProductOnDemandPrice(sProductId, fNewPrice);
+		String sNewPriceId = createProductPrice(sProductId, fNewPrice);
 
 		if (Utils.isNullOrEmpty(sNewPriceId)) {
 			WasdiLog.warnLog("StripeService.updateAppPrice: new price id is null or empty");
