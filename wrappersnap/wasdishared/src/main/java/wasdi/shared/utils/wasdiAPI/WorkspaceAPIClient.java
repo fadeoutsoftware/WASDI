@@ -23,7 +23,7 @@ public class WorkspaceAPIClient {
 			return HttpUtils.httpDelete(sUrl, HttpUtils.getStandardHeaders(sSessionId)); 
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("StyleAPIClient.nodeDelete: error ", oEx);
+			WasdiLog.errorLog("WorkspaceAPIClient.deleteWorkspace: error ", oEx);
 		}
 		
 		return new HttpCallResponse();

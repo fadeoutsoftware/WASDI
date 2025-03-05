@@ -92,33 +92,44 @@ public class PermissionsUtils {
 			
 			ProjectRepository oProjectRepository = new ProjectRepository();
 			Project oUserProject = oProjectRepository.getProjectById(sActiveProjectOfUser);
+			
+			if (oUserProject == null) {
+				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + " has " + sActiveProjectOfUser + " active project selected but cannot be found in the db");
+				return false;				
+			}
+			
 			String sSubscriptionId = oUserProject.getSubscriptionId();
 			
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 			Subscription oUserSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
 			
+			if (oUserSubscription == null) {
+				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + " has " + sSubscriptionId + " subscription that cannot be found in the db");
+				return false;				
+			}
+			
 			// time-based model for not-free subscriptions
-			if (!oUserSubscription.getType().equals(SubscriptionType.Free.getTypeId())) {				
+			if (!oUserSubscription.getType().equals(SubscriptionType.Free.getTypeId())) {			
 				return oProjectRepository.checkValidSubscription(sActiveProjectOfUser);
 				
 			}
 			
 			// storage-based model for free subscriptions
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Long dTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(oUser.getUserId());			
+			Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(oUser.getUserId());			
 			
-			if (dTotalStorageUsage < 0) {
+			if (lTotalStorageUsage < 0L) {
 				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. There was an error computing the total storage space for the user");
 				return false;
 			}
 			
 			
-			if (dTotalStorageUsage < WasdiConfig.Current.storageUsageControl.storageSizeFreeSubscription) {
+			if (lTotalStorageUsage < WasdiConfig.Current.storageUsageControl.storageSizeFreeSubscription) {
 				return true;
 			} 
 			else {
 				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + 
-						" exceed the maximum storage size for free subscriptions: " + Utils.getNormalizedSize(Double.parseDouble(dTotalStorageUsage.toString())));
+						" exceed the maximum storage size for free subscriptions: " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
 				return false;
 			}
 			

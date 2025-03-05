@@ -432,10 +432,10 @@ public class WorkspaceRepository extends  MongoRepository {
 	 */
 	public Long getStorageUsageForUser(String sUserId) {
 		
-		Long dStorageUsage = -1L;
+		Long lStorageUsage = -1L;
 		
 		if (Utils.isNullOrEmpty(sUserId)) 
-			return dStorageUsage;
+			return lStorageUsage;
 		
 		try {
 			List<Document> aoPipeline = Arrays.asList(
@@ -455,7 +455,7 @@ public class WorkspaceRepository extends  MongoRepository {
 			AggregateIterable<Document> oResult = getCollection(m_sThisCollection).aggregate(aoPipeline);
 			
 			// extract the total storage size
-			dStorageUsage = oResult.first() != null 
+			lStorageUsage = oResult.first() != null 
 					? oResult.first().getLong("totalStorage") 
 					: 0L;
 			
@@ -463,7 +463,7 @@ public class WorkspaceRepository extends  MongoRepository {
 			WasdiLog.errorLog("WorkspaceRepository.getStorageUsageForUser. Error: ", oEx);
 		}
 		
-		return dStorageUsage;
+		return lStorageUsage;
 		
 	}
 

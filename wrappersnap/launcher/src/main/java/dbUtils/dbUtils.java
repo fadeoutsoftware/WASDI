@@ -2883,7 +2883,7 @@ public class dbUtils {
 					StorageUsageControl oStorageUsageControl = WasdiConfig.Current.storageUsageControl;
 					Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(sCandidateUserId);
 					
-					WasdiLog.infoLog("dbUtils.runWasdiCleanTask: " + sCandidateUserId + ", total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
+					WasdiLog.debugLog("dbUtils.runWasdiCleanTask: " + sCandidateUserId + ", total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
 					
 					long lNow = new Date().getTime(); 
 					long lStorageWarningDate = oCandidate.getStorageWarningSentDate().longValue();
@@ -2894,6 +2894,7 @@ public class dbUtils {
 					if (lTotalStorageUsage > oStorageUsageControl.storageSizeFreeSubscription && lStorageWarningDate == 0L) {
 						
 						if (!oStorageUsageControl.isDeletionInTestMode) {
+							WasdiLog.warnLog("dbUtils.runWasdiCleanTask: sending email to" + sCandidateUserId);
 							String sEmailTitle = oStorageUsageControl.warningEmailConfig.title;
 							String sEmailText = fillEmailTemplate(oCandidate.getName(), lTotalStorageUsage);
 							MailUtils.sendEmail(sCandidateUserId, sEmailTitle, sEmailText);							
@@ -2906,6 +2907,9 @@ public class dbUtils {
 						oUserRepository.updateUser(oCandidate);							
 						
 						continue;
+					}
+					else {
+						WasdiLog.infoLog("dbUtils.runWasdiCleanTask: The user " + sCandidateUserId + " already received the notification, waiting for reaction");
 					}
 					
 					// if the warning period has passed and the storage occupied by the user still exceeds the limit, 
@@ -2922,6 +2926,9 @@ public class dbUtils {
 							asUsersExceedingStorage.add(sCandidateUserId);
 							continue;
 						}
+						else {
+							WasdiLog.warnLog("dbUtils.runWasdiCleanTask: deleting  workspaces for user " + sCandidateUserId);
+						}
 						
 						
 						UserSession oSession = oSessionRepository.insertUniqueSession(sCandidateUserId);
@@ -2933,15 +2940,21 @@ public class dbUtils {
 						List<Workspace> aoWorkspaces = oWorkspaceRepository.getWorkspacesSortedByOldestUpdate(sCandidateUserId);				
 						
 						for (Workspace oWorkspace : aoWorkspaces) {
+							
 							String sWorkspaceID = oWorkspace.getWorkspaceId();
+							
 							Node oNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
 							HttpCallResponse oResponse = WorkspaceAPIClient.deleteWorkspace(oNode, oSession.getSessionId(), sWorkspaceID);
+							
 							int iResponseCode = oResponse.getResponseCode();
+							
 							if (iResponseCode < 200 || iResponseCode > 299) {
 								WasdiLog.warnLog("dbUtils.runWasdiCleanTask: Deletion of wokrspace " + sWorkspaceID + "returned error code " + iResponseCode);
 								continue;
 							}
+							
 							lTotalStorageUsage = lTotalStorageUsage - oWorkspace.getStorageSize();
+							
 							if (lTotalStorageUsage < oStorageUsageControl.storageSizeFreeSubscription) {
 								WasdiLog.infoLog("dbUtils.runWasdiCleanTask: Workspaces of user " + sCandidateUserId + " have been cleaned. Total usage storage: " + lTotalStorageUsage);
 								oCandidate.setStorageWarningSentDate(0.0);
