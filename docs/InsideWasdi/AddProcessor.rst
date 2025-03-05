@@ -10,7 +10,6 @@ Each processor type is an option to deploy a new application in WASDI. Each new 
 Processor Types are mainly composed by:
 
 * A Docker templalte folder: this is the folder where can be found the basic Dockerfile and other needed files to create a container with the user code
-
 * A Processor Engine: each processor type has an associated Processor Engine. The processor engine has the main goal to implement these operations:
 	* deploy: create an instance of the processor
 	* redeploy + libraryUpdate: force the engine to generate an update of the app
@@ -21,9 +20,15 @@ Processor Types are mainly composed by:
 * A dedicatated Configuration: all the processor have a common configuration in WasdiConfig->dockers->ProcessorTypes
 	
 Usually the source code and/or executables of the user are uploaded in WASDI and saved in a folder with the name of the new processor.
+
+
 The docker template folder of the processor type is copied in the new processor folder.
+
+
 The processor engine may manipulate the files (ie adding or editing some details) and then start the build of the Application.
-Usually all the processor types are derived from the DockerProcessorEngine or the DockerBuildOnceProcessorEngine that are designed the create a container for each app and push in the WASDI Docker registry.
+
+
+Usually all the processor types are derived from the **DockerProcessorEngine** or the **DockerBuildOnceProcessorEngine** that are designed the create a container for each app and push in the WASDI Docker registry.
 
 Add your New Processor Type
 ---------------------------
@@ -35,11 +40,16 @@ Declare the new Processor Type in
 	wasdi.shared->business->processors->ProcessorTypes.java
 
 The processor type name is used in the db to store the type of application.
-Each processor type has also an associted folder that must be returned in the getTemplateFolder method of ProcessorTypes. The folder name can be the same of the type name, or can be different.
+Each processor type has also an associted folder that must be returned in the getTemplateFolder method of ProcessorTypes. 
 
-Create a new class in
+The folder name can be the same of the type name, or can be different.
 
-Launcher -> Processors
+Create a new class in the Launcher Project in the namespace
+
+.. code-block:: java
+
+	wasdi.processors
+
 derived from **WasdiProcessorEngine** or a subclass. 
 
 Example: 
@@ -48,7 +58,11 @@ Example:
 
 	public class MeluxinaPipProcessorEngine extends DockerBuildOnceEngine {...}
 
-The class must have a constructor that initializes the base class member variable m_sDockerTemplatePath.
+The class must have a constructor that initializes the base class member variable 
+
+.. code-block:: java
+
+	m_sDockerTemplatePath
 
 .. code-block:: java
 
@@ -84,16 +98,20 @@ To access the configuration you can use:
 
 	ProcessorTypeConfig oConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig(ProcessorTypes.PYTHON_PIP_MELUXINA);
 
-Add your processor in the Launcher class wasdi.procesors.WasdiProcessorEngine.getProcessorEngine method.
+Add your processor in the Launcher class method:
+
+.. code-block:: java
+
+	wasdi.procesors.WasdiProcessorEngine.getProcessorEngine
 
 Using your own Processor Type
 -----------------------------
 
 The processor Type shall be declared also on the client to allow users use it.
 
-It is declared in the client:
+It is declared in the client file:
 
-	**app->components->edit->edit-toolbar->toolbar-dialogs->new-app-dialog->processor-tab-content->processor-tab-content.component.ts**
+**app->components->edit->edit-toolbar->toolbar-dialogs->new-app-dialog->processor-tab-content->processor-tab-content.component.ts**
 
 Varialbe m_aoProcessorTypes
 
