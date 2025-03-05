@@ -2,7 +2,7 @@ package wasdi.processors;
 
 import wasdi.shared.business.processors.ProcessorTypes;
 
-public class Python312Ubuntu24ProcessorEngine extends DockerBuildOnceEngine {
+public class Python312Ubuntu24ProcessorEngine extends PipOneShotProcessorEngine {
 	
 	public Python312Ubuntu24ProcessorEngine() {
 		super();
