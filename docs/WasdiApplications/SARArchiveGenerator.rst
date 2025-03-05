@@ -1,4 +1,4 @@
-**SAR Flood Archive Generator 3.3.7**
+SAR Flood Archive Generator 3.3.7
 ===================================================
 
 
