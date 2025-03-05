@@ -652,8 +652,21 @@ def init(sConfigFilePath=None):
         if m_sUser is not None:
             print('[INFO] waspy.init: user read in the env WASDI_USER variable')
 
-    if m_sUser is None and m_sPassword is None:
+    #Default on local pc
+    sHome = os.path.expanduser("~")
+    sCredentialsConfigFile = sHome + "/.wasdi/credentials.json"
 
+    # Check if there is the credentials config file in the user home
+    if m_sUser is None and m_sPassword is None:
+        if not getIsOnServer() and os.path.exists(sCredentialsConfigFile):
+            with open(sCredentialsConfigFile,"r") as oInFile:
+                oReadConfig = json.load(oInFile)
+                if oReadConfig is not None:
+                    if "USER" in oReadConfig and "PASSWORD" in oReadConfig:
+                        m_sUser = oReadConfig["USER"]
+                        m_sPassword = oReadConfig["PASSWORD"]
+
+    if m_sUser is None and m_sPassword is None:
         m_sUser = input('[INFO] waspy.init: Please Insert WASDI User:')
 
         m_sPassword = getpass.getpass(prompt='[INFO] waspy.init: Please Insert WASDI Password:', stream=None)
@@ -663,6 +676,18 @@ def init(sConfigFilePath=None):
 
         if sWorkspaceId is None and sWorkspaceName is None:
             sWorkspaceName = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
+
+        if not getIsOnServer():
+            sAnswer = input('[WARNING] do you want to store your WASDI credentials? Will be saved not-encrypted in your user home folder [yes/no]')
+            
+            if sAnswer == "yes":
+                oWriteConfig = {}
+                oWriteConfig["USER"] = m_sUser
+                oWriteConfig["PASSWORD"] = m_sPassword
+                sJsonContent = json.dumps(oWriteConfig)
+                with open(sCredentialsConfigFile,"w") as oOutFile:
+                    oOutFile.write(sJsonContent)
+
 
     if m_sUser is None:
         print('[ERROR] waspy.init: must initialize user first, but None given' +
@@ -675,8 +700,6 @@ def init(sConfigFilePath=None):
             #Default on server
             m_sBasePath = '/data/wasdi/'
         else:
-            #Default on local pc
-            sHome = os.path.expanduser("~")
             # the empty string at the end adds a separator
             m_sBasePath = os.path.join(sHome, ".wasdi", "")
 
