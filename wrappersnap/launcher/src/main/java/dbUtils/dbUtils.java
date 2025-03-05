@@ -2831,11 +2831,14 @@ public class dbUtils {
         }
     }
 
+    /**
+     * Executes the WASDI clean task based on limits of space usage for users
+     */
 	private static void runWasdiCleanTask() {
 		try {
 			
 			if (!WasdiConfig.Current.nodeCode.equals("wasdi")) {
-				WasdiLog.errorLog("Clean Task must run only on the main node");
+				WasdiLog.errorLog("dbUtils.runWasdiCleanTask: Clean Task must run only on the main node");
 				return;
 			}
 			
@@ -2846,7 +2849,7 @@ public class dbUtils {
 
 			ArrayList<User> aoToChekUsers = new ArrayList<>();
 			
-			WasdiLog.infoLog("Users with NONE or FREE subscriptions who will be checked for ");
+			WasdiLog.debugLog("dbUtils.runWasdiCleanTask: Users with NONE or FREE subscriptions who will be checked for ");
 
 			int i = 0;
 			while (oAllUsersIterator.hasNext()) {
@@ -2858,10 +2861,10 @@ public class dbUtils {
 					
 					if (sType.equals(UserType.NONE.name()) || sType.equals(UserType.FREE.name())) {
 						aoToChekUsers.add(oUser);
-						WasdiLog.infoLog(++i + "\t" + sType + "\t" + oUser.getUserId());						
+						WasdiLog.debugLog(++i + "\t" + sType + "\t" + oUser.getUserId());						
 					}
 				} catch (Exception oEx) {
-					WasdiLog.errorLog("Impossible to map entity to user class", oEx);
+					WasdiLog.errorLog("dbUtils.runWasdiCleanTask: Impossible to map entity to user class", oEx);
 				}
 			}
 			
@@ -2880,7 +2883,7 @@ public class dbUtils {
 					StorageUsageControl oStorageUsageControl = WasdiConfig.Current.storageUsageControl;
 					Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(sCandidateUserId);
 					
-					WasdiLog.infoLog(sCandidateUserId + ", total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
+					WasdiLog.infoLog("dbUtils.runWasdiCleanTask: " + sCandidateUserId + ", total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
 					
 					long lNow = new Date().getTime(); 
 					long lStorageWarningDate = oCandidate.getStorageWarningSentDate().longValue();
@@ -2896,7 +2899,7 @@ public class dbUtils {
 							MailUtils.sendEmail(sCandidateUserId, sEmailTitle, sEmailText);							
 						}
 						else {
-							WasdiLog.warnLog("TEST MODE: think I'm sending an e-mail alert to " + sCandidateUserId);
+							WasdiLog.warnLog("dbUtils.runWasdiCleanTask: TEST MODE: think I'm sending an e-mail alert to " + sCandidateUserId);
 						}
 						
 						oCandidate.setStorageWarningSentDate((double)lNow);
@@ -2915,7 +2918,7 @@ public class dbUtils {
 						
 						// managing the deletion in testing mode
 						if (oStorageUsageControl.isDeletionInTestMode) {
-							WasdiLog.warnLog("TEST MODE: think I'm deleting  workspaces for user " + sCandidateUserId);
+							WasdiLog.warnLog("dbUtils.runWasdiCleanTask: TEST MODE: think I'm deleting  workspaces for user " + sCandidateUserId);
 							asUsersExceedingStorage.add(sCandidateUserId);
 							continue;
 						}
@@ -2923,7 +2926,7 @@ public class dbUtils {
 						
 						UserSession oSession = oSessionRepository.insertUniqueSession(sCandidateUserId);
 						if (oSession== null) {
-							WasdiLog.errorLog("Invalid session. Impossible to proceed with the cleaning task");
+							WasdiLog.errorLog("dbUtils.runWasdiCleanTask: Invalid session. Impossible to proceed with the cleaning task");
 							continue;
 						}					
 						
@@ -2935,12 +2938,12 @@ public class dbUtils {
 							HttpCallResponse oResponse = WorkspaceAPIClient.deleteWorkspace(oNode, oSession.getSessionId(), sWorkspaceID);
 							int iResponseCode = oResponse.getResponseCode();
 							if (iResponseCode < 200 || iResponseCode > 299) {
-								WasdiLog.warnLog("Deletion of wokrspace " + sWorkspaceID + "returned error code " + iResponseCode);
+								WasdiLog.warnLog("dbUtils.runWasdiCleanTask: Deletion of wokrspace " + sWorkspaceID + "returned error code " + iResponseCode);
 								continue;
 							}
 							lTotalStorageUsage = lTotalStorageUsage - oWorkspace.getStorageSize();
 							if (lTotalStorageUsage < oStorageUsageControl.storageSizeFreeSubscription) {
-								WasdiLog.infoLog("Workspaces of user " + sCandidateUserId + " have been cleaned. Total usage storage: " + lTotalStorageUsage);
+								WasdiLog.infoLog("dbUtils.runWasdiCleanTask: Workspaces of user " + sCandidateUserId + " have been cleaned. Total usage storage: " + lTotalStorageUsage);
 								oCandidate.setStorageWarningSentDate(0.0);
 								oUserRepository.updateUser(oCandidate);								
 								break;
@@ -2957,7 +2960,7 @@ public class dbUtils {
 					// If the user has a valid and there is still a warning flag attached, clean the flag
 					Double dStorageWarningDate = oCandidate.getStorageWarningSentDate();
 					if (dStorageWarningDate != null && dStorageWarningDate > 0.0 ) {
-						WasdiLog.warnLog("User " + oCandidate.getUserId() + " warning flag will be set back to zero");
+						WasdiLog.warnLog("dbUtils.runWasdiCleanTask: User " + oCandidate.getUserId() + " warning flag will be set back to zero");
 						oCandidate.setStorageWarningSentDate(0.0);
 						oUserRepository.updateUser(oCandidate);
 					}

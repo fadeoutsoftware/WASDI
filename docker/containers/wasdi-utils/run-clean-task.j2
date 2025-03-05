@@ -1,0 +1,44 @@
+#!/bin/bash
+
+sInstanceTime="$(date '+%Y-%m-%d - %H:%M:%S')"
+
+echo "#### BEGIN ${sInstanceTime} ####"
+
+if [[ -z "${USER}" ]]
+then
+    echo "[DEBUG] The variable '\${USER}' is empty: we fill it manually with the command 'whoami'"
+    USER="$(whoami)"
+fi
+
+if [[ -z "${USER}" ]]
+then
+    echo "[ERROR] The variable '\${USER}' is still empty: we exit here"
+    echo "#### END ${sInstanceTime} ####"
+    exit 1
+fi
+
+if [[ "${USER}" != "{{ sWasdiSystemUserName }}" ]]
+then
+    echo "[ERROR] You are '${USER}' when should be '{{ sWasdiSystemUserName }}'"
+    echo "#### END ${sInstanceTime} ####"
+    exit 1
+fi
+
+echo "\${USER} = ${USER}"
+echo "\${@} = ${@}"
+
+docker \
+    run \
+    --mount type=bind,source={{ sWasdiConfigurationRootDirectoryPath }},destination={{ sWasdiConfigurationRootDirectoryPath }},readonly \
+    --mount type=bind,source={{ sWasdiDataRootDirectoryPath }},destination={{ sWasdiDataRootDirectoryPath }} \
+    --mount type=bind,source={{ sWasdiDataImagesRootDirectoryPath }},destination={{ sWasdiDataImagesRootDirectoryPath }} \
+    --mount type=bind,source={{ sWasdiDataProcessorsRootDirectoryPath }},destination={{ sWasdiDataProcessorsRootDirectoryPath }} \
+    --mount type=bind,source={{ sWasdiDataStylesRootDirectoryPath }},destination={{ sWasdiDataStylesRootDirectoryPath }} \
+    --mount type=bind,source={{ sWasdiDataWorkflowsRootDirectoryPath }},destination={{ sWasdiDataWorkflowsRootDirectoryPath }} \
+    --mount type=bind,source={{ sWasdiDockerSocketFilePath }},destination={{ sWasdiDockerSocketFilePath }} \
+    --network {{ sWasdiDockerNetworkName }} \
+    --rm \
+    {{ sWasdiUtilsServiceName }}:latest \
+    "/opt/wasdi/jdk11/11.0.23+9/bin/java" "-Xmx24g" "-Xms1024m" "-XX:+AggressiveOpts" "-Xverify:none" "-jar" "/opt/wasdi/wasdi-utils/dbUtils.jar" "--config" "/etc/wasdi/wasdiConfig.json" "--cleantask"
+
+echo "#### END ${sInstanceTime} ####"
