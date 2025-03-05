@@ -12,7 +12,7 @@ Introduction
 
 A Data Provider is an external service that can be used to query and import Data in WASDI. The main business entities involved in this operation are:
 
-* Platform: this is the type of data. Usually identified as a Satellite Mission. Platorms are for example Sentinel1, Sentinel2, ENVISat etc. Each Platform, in general, can be found in more data providers.
+* Platform: this is the type of data. Usually identified as a Satellite Mission. Platorms are for example Sentinel1, Sentinel2, ENVISat etc. Each Platform, in general, can be found in one or more data providers.
 * Query Executors / catalogue: the Query executor is the WASDI hierarchy used to query the Data Provider Catalogue
 * Provider Adapters: Objects used by the launcher to download/import files from an external service.
 

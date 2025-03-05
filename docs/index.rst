@@ -12,7 +12,7 @@ WASDI : Web Advanced Space Developer Interface
   
 
    
-WASDI implements a unique, simple and intuitive interface to foster the exploitation of the asset concerning EO data and satellite products, for satisfying requirements of users’ communities and, in particular:
+WASDI implements a unique, simple and intuitive interface to foster the exploitation of EO data and satellite products, for satisfying requirements of users’ communities and, in particular:
 
  - experts/researchers in the field of Earth Sciences
  - managers of services and public administrations (i.e. civil protection decision makers)
@@ -26,7 +26,7 @@ Getting Started with WASDI
 ---------------------------
 WASDI web platform is the best starting point for your journey on Earth Observations (EO) resources !
 
-This :doc:`basic tutorial </WasdiTutorial>`  will help to acquire the main concepts and use WASDI for your EO research.
+This :doc:`basic tutorial </WasdiTutorial>`  will help to acquire the main concepts and use WASDI for your research.
 
 If you're acquired the basic concepts of WASDI and you're interested in how processors can be launched,  take a look at
 :doc:`this tutorial </SynchAsynch>`. This will highlights Synchronous and Asynchronous WASDI programming.
@@ -172,6 +172,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
 
    InsideWasdi/AddDataProvider.rst
    InsideWasdi/AddAppUIControl.rst
+   InsideWasdi/AddProcessor.rst
 
 
 Terms and Conditions
