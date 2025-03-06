@@ -53,8 +53,13 @@ public class UserRepository extends  MongoRepository{
      * @return
      */
     public User getUser(String sUserId) {
+    	
+    	if (Utils.isNullOrEmpty(sUserId)) return null;
 
         try {
+        	// We force always lower case users
+        	sUserId = sUserId.toLowerCase();
+        	
             Document oUserDocument = getCollection(m_sThisCollection).find(new Document("userId", sUserId)).first();
             if(oUserDocument == null)
             {
@@ -100,35 +105,7 @@ public class UserRepository extends  MongoRepository{
 
         return  null;
     }
-    
-    /**
-     * Verify login of a google user
-     * @param sGoogleIdToken
-     * @param sEmail
-     * @param sAuthProvider
-     * @return
-     */
-    public User googleLogin(String sGoogleIdToken, String sEmail, String sAuthProvider) {
-        try {
-            User oUser = getUser(sEmail);
-
-            if (oUser != null){
-            	if ( oUser.getUserId() != null && oUser.getAuthServiceProvider() != null && null != oUser.getGoogleIdToken() ) {
-            		if(oUser.getGoogleIdToken().equals(sGoogleIdToken)) {
-            			if ( oUser.getAuthServiceProvider().equals(sAuthProvider)   ) {
-            				return oUser;
-            			}
-            		}
-            	}
-            }
-            return null;
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("UserRepository.googleLogin : error ", oEx);
-        }
-
-        return  null;
-    }
-    
+        
     /**
      * Delete a user
      * @param sUserId
