@@ -46,4 +46,9 @@ public class KeycloackConfig {
 	 * Realm
 	 */
 	public String realm;
+	
+	/**
+	 * Number of hours before a session expires. Used in the local db and not in keycloak at the moment
+	 */
+	public int sessionExpireHours = 24;
 }

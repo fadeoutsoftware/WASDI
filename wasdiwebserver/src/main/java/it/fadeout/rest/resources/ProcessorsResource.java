@@ -916,12 +916,14 @@ public class ProcessorsResource  {
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.internalRun: invalid session");
 				oRunningProcessorViewModel.setStatus("ERROR");
+				oRunningProcessorViewModel.setMessage("Invalid User or Session. Check your login.");
 				return oRunningProcessorViewModel;
 			}
 			
 			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
 				WasdiLog.warnLog("ProcessorsResource.internalRun: user " + oUser.getUserId() + " does not have a valid subscription");
 				oRunningProcessorViewModel.setStatus("ERROR");
+				oRunningProcessorViewModel.setMessage("Invalid Subscription.");
 				return oRunningProcessorViewModel;
 			}
 			
@@ -930,6 +932,7 @@ public class ProcessorsResource  {
 			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {				
 				WasdiLog.warnLog("ProcessorsResource.internalRun: user cannot access the workspace");
 				oRunningProcessorViewModel.setStatus("ERROR");
+				oRunningProcessorViewModel.setMessage("Workspace cannot be accessed or does not exists.");
 				return oRunningProcessorViewModel;
 			}
 		
@@ -940,11 +943,13 @@ public class ProcessorsResource  {
 			if (oProcessorToRun == null) { 
 				WasdiLog.warnLog("ProcessorsResource.internalRun: unable to find processor " + sName);
 				oRunningProcessorViewModel.setStatus("ERROR");
+				oRunningProcessorViewModel.setMessage("Processors not found " + sName);
 				return oRunningProcessorViewModel;
 			}
 			
 			if (!PermissionsUtils.canUserAccessProcessor(sUserId, oProcessorToRun)) {
 				WasdiLog.warnLog("ProcessorsResource.internalRun: the user cannot access th processor ");
+				oRunningProcessorViewModel.setMessage("Processor cannot be accessed.");
 				oRunningProcessorViewModel.setStatus("ERROR");
 				return oRunningProcessorViewModel;				
 			}
@@ -962,51 +967,57 @@ public class ProcessorsResource  {
 			
 			// check if the app has an on-demand price and if the person is not the owner of the app: 
 			// in that case, update the apps payments table to track the run date/time
-			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			Float fOnDemandPrice = oProcessorToRun.getOndemandPrice();
 			
 			Float fPricePerSquareKm = oProcessorToRun.getPricePerSquareKm();
 			String sAreaParameter = oProcessorToRun.getAreaParameterName();
 			
 			if (fOnDemandPrice != null && fOnDemandPrice > 0 && fPricePerSquareKm != null && fPricePerSquareKm > 0) {
-				WasdiLog.warnLog("ProcessorsResource.internalRun: the app has both a on demand price and a square kilometers price. Impossible to apply a pricing model");
-				oRunningProcessorViewModel.setStatus("ERROR");
-				return oRunningProcessorViewModel;	
+				WasdiLog.warnLog("ProcessorsResource.internalRun: the app has both a on demand price and a square kilometers price. We will force the km one");
+				fOnDemandPrice = 0.0f;
 			}
 			
 			if (fOnDemandPrice != null 
 					&& fOnDemandPrice > 0 
 					&& !sUserId.equals(oProcessorToRun.getUserId())
-					&& !oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, oProcessorToRun.getProcessorId())) {
+					&& !PermissionsUtils.canUserWriteProcessor(sUserId, oProcessorToRun)) {
 				
 				WasdiLog.debugLog("ProcessorsResource.internalRun: the app has an ondemand price");
+				
+				// Get the payments done for this app
 				AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
 				List<AppPayment> oAppPayments = oAppPaymentRepository.getAppPaymentByProcessorAndUser(oProcessorToRun.getProcessorId(), sUserId);
 				
+				boolean bHasRunBeenPayed = false;
+				
 				if (oAppPayments != null) {
-					boolean bHasRunBeenPayed = false;
+					
 					for (AppPayment oPayment : oAppPayments) {
+						
+						// Do we have a valid payment, not used yet?
 						if (oPayment.isBuySuccess() && Utils.isNullOrEmpty(oPayment.getRunDate())) {
+							
 							WasdiLog.debugLog("ProcessorsResource.internalRun: found a payment for the on-demand run. Payment id: " + oPayment.getAppPaymentId());
 							oPayment.setRunDate(Utils.nowInMillis());
+							
 							if (oAppPaymentRepository.updateAppPayment(oPayment)) {
 								WasdiLog.debugLog("ProcessorsResource.internalRun: payment correctly updated with run timestamp");
 								bHasRunBeenPayed = true;
 								break;
-							} else {
-								WasdiLog.warnLog("ProcessorsResource.internalRun: error registering the payed run. Payment details not updated");
-								oRunningProcessorViewModel.setStatus("ERROR");
-								return oRunningProcessorViewModel;	
+							} 
+							else {
+								WasdiLog.warnLog("ProcessorsResource.internalRun: error registering the payed run. Payment details not updated for " + oPayment.getAppPaymentId());
 							}
 						}
-					}
-					
-					if (!bHasRunBeenPayed) {
-						WasdiLog.warnLog("ProcessorsResource.internalRun: no valid payment found for the app");
-						oRunningProcessorViewModel.setStatus("ERROR");
-						return oRunningProcessorViewModel;	
-					}
+					}					
 				}
+				
+				if (!bHasRunBeenPayed) {
+					WasdiLog.warnLog("ProcessorsResource.internalRun: no valid payment found for the app");
+					oRunningProcessorViewModel.setStatus("ERROR");
+					oRunningProcessorViewModel.setMessage("The app has a price and has not be paid");
+					return oRunningProcessorViewModel;	
+				}				
 			}
 			
 			// check if the app has a price per square kilometer and if the person is not the owner of the app or the app has not been shared 
@@ -1014,13 +1025,14 @@ public class ProcessorsResource  {
 			if (fPricePerSquareKm != null 
 					&& fPricePerSquareKm > 0 
 					&& !oUser.getUserId().equals(oProcessorToRun.getUserId())
-					&& !oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, oProcessorToRun.getProcessorId())) {
+					&& !PermissionsUtils.canUserWriteProcessor(sUserId, oProcessorToRun)) {
 				
 				Double dCreditsForRun = computeNumberOfCredits(sEncodedJson, sAreaParameter, fPricePerSquareKm);
 				
 				if (dCreditsForRun == null) {
 					WasdiLog.warnLog("ProcessorsResource.internalRun: error computing credtis needed for the run. Credits details not updated");
 					oRunningProcessorViewModel.setStatus("ERROR");
+					oRunningProcessorViewModel.setMessage("The app has a price but there is a problem computing it");
 					return oRunningProcessorViewModel;	
 				}
 				
@@ -1031,12 +1043,14 @@ public class ProcessorsResource  {
 				if (aoCreditsPackages == null) {
 					WasdiLog.warnLog("ProcessorsResource.internalRun. Some error might have occurred retrieveng credits packages for " + sUserId);
 					oRunningProcessorViewModel.setStatus("ERROR");
+					oRunningProcessorViewModel.setMessage("The app has a credit price but no credits found for user");
 					return oRunningProcessorViewModel;	
 				}
 				
 				if (aoCreditsPackages.isEmpty()) {
 					WasdiLog.warnLog("ProcessorsResource.internalRun. No credits packages found for user " + sUserId);
 					oRunningProcessorViewModel.setStatus("ERROR");
+					oRunningProcessorViewModel.setMessage("The app has a credit price but no credits found for user");
 					return oRunningProcessorViewModel;	
 				}
 				
@@ -1046,7 +1060,7 @@ public class ProcessorsResource  {
 				
 				while ( (dCreditsDeducted < dCreditsForRun) && iCountPackages < aoCreditsPackages.size()) {
 					CreditsPackage oCreditsPackage = aoCreditsPackages.get(iCountPackages);
-					Double dCreditsRemaining = oCreditsPackage.getCreditsRemaining() ;
+					Double dCreditsRemaining = oCreditsPackage.getCreditsRemaining();
 					
 					// if there are enough credits, then just take them all from that package
 					if (dCreditsForRun <= dCreditsRemaining) {
@@ -1066,12 +1080,18 @@ public class ProcessorsResource  {
 					iCountPackages++;
 				}
 				
-				if (dCreditsDeducted.doubleValue() == dCreditsForRun.doubleValue()) {
+				if (dCreditsDeducted.doubleValue() >= dCreditsForRun.doubleValue()) {
 					for (int i = 0; i < aoCreditsToUpdate.size(); i++) {
 						if (!oCreditsRepository.updateCreditPackage(aoCreditsToUpdate.get(i))) {
-							WasdiLog.warnLog("ProcessorResource.internalRun. Credit package " + aoCreditsToUpdate.get(i).getCreditPackageId() + "was not updated");
+							WasdiLog.warnLog("ProcessorResource.internalRun. Credit package " + aoCreditsToUpdate.get(i).getCreditPackageId() + " was not updated");
 						}
 					}
+				}
+				else {
+					WasdiLog.warnLog("ProcessorsResource.internalRun. Not enough credits packages found for user " + sUserId);
+					oRunningProcessorViewModel.setStatus("ERROR");
+					oRunningProcessorViewModel.setMessage("Not enough credits");
+					return oRunningProcessorViewModel;						
 				}
 			}
 
@@ -1221,7 +1241,7 @@ public class ProcessorsResource  {
 	private Double computeNumberOfCredits(String sJsonParameters, String sAreaParameterName, Float fPricePerSquareKilometer) {
 		
 		if (Utils.isNullOrEmpty(sJsonParameters) || Utils.isNullOrEmpty(sAreaParameterName) || fPricePerSquareKilometer == null || fPricePerSquareKilometer == 0f) {
-			WasdiLog.warnLog("ProcessorsResource.computeNumberOfCredits. Not enough information for computing the credits for the bbox");
+			WasdiLog.warnLog("ProcessorsResource.computeNumberOfCredits. Not enough information to compute the credits for the bbox");
 			return null;
 		}
 		
@@ -1235,6 +1255,7 @@ public class ProcessorsResource  {
 									
 			try {
 				JSONObject oJsonObject = oJson.getJSONObject(sAreaParameterName);
+				
 				if (oJsonObject.keySet().contains("southWest") && oJsonObject.keySet().contains("northEast")) {
 					dSouth = oJsonObject.getJSONObject("southWest").getDouble("lat");
 					dWest = oJsonObject.getJSONObject("southWest").getDouble("lng");

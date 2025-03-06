@@ -75,7 +75,7 @@ public class Processor {
 	private Float pricePerSquareKm = 0.0f;
 	
 	/**
-	 * 
+	 * Name of the parameter that represents the area (optional)
 	 */
 	private String areaParameterName = "";
 	
