@@ -3101,6 +3101,9 @@ def executeProcessor(sProcessorName, aoProcessParams):
                 if "processingIdentifier" in aoJson:
                     sProcessID = aoJson['processingIdentifier']
                     return sProcessID
+                elif "message" is aoJson:
+                    sMessage = aoJson['message']
+                    wasdiLog('[ERROR] waspy.executeProcessor: cannot run the processor: ' + sMessage)
                 else:
                     wasdiLog('[ERROR] waspy.executeProcessor: cannot extract processing identifier from response, aborting')
             else:

@@ -7,7 +7,8 @@ WASDI python programming library CHANGELOG.md, according to the
 ## [0.8.7.4] - 2025-03-04
 ### Added
 - addFileToWasdi: log if the file does not exists
-
+- crendentials.json: is now possible to store only user and password in a Json in the <user home>/.wasdi folder.
+- executeProcessor: log the error message if the app is not started
 
 ## [0.8.7.3] - 2025-02-18
 ### Added
