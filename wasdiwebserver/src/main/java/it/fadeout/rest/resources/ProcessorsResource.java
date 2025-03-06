@@ -2443,8 +2443,7 @@ public class ProcessorsResource  {
 		Float fNewSquareKmPrice = oUpdatedProcessorVM.getSquareKilometerPrice();
 		
 		if (fNewOnDemandPrice != null && fNewSquareKmPrice != null && fNewOnDemandPrice.floatValue() > 0 && fNewSquareKmPrice.floatValue() > 0) {
-			WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: processor has both on deman price and square kilometer price. Just one of them should be set");
-			return Status.BAD_REQUEST;
+			WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: processor " + oProcessorToUpdate.getProcessorId() + "  has both on deman price and square kilometer price. Just one of them should be set");
 		}
 				
 		if (fNewOnDemandPrice < 0) {
@@ -2457,8 +2456,8 @@ public class ProcessorsResource  {
 			return Status.BAD_REQUEST;
 		} 
 		
-		if (fNewSquareKmPrice != null && fNewOnDemandPrice.floatValue() > 0 && Utils.isNullOrEmpty(oUpdatedProcessorVM.getAreaParameterName())) {
-			WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: Price per kilometer is not associated with a name for the area parameter");
+		if (fNewSquareKmPrice != null && fOldSquareKmPrice.floatValue() > 0 && Utils.isNullOrEmpty(oUpdatedProcessorVM.getAreaParameterName())) {
+			WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: Price per kilometer is not associated with a name for the area parameter " + fNewOnDemandPrice.floatValue());
 			return Status.BAD_REQUEST;
 		}
 		
@@ -2575,6 +2574,8 @@ public class ProcessorsResource  {
 				WasdiLog.debugLog(
 						"ProcessorsResource.updatePaymentDetails: price updated for Stripe product " + sStripeProductId + ". New on demand price id: " + sStripeNewOnDemandPriceId);
 			}
+			
+			oProcessorToUpdate.setOndemandPrice(fNewOnDemandPrice);
 		}
 		
 		if ( (fOldSquareKmPrice.floatValue() != fNewSquareKmPrice.floatValue()) ) {
