@@ -1032,7 +1032,7 @@ public class ProcessorsResource  {
 				if (dCreditsForRun == null) {
 					WasdiLog.warnLog("ProcessorsResource.internalRun: error computing credtis needed for the run. Credits details not updated");
 					oRunningProcessorViewModel.setStatus("ERROR");
-					oRunningProcessorViewModel.setMessage("The app has a price but there is a problem computing it");
+					oRunningProcessorViewModel.setMessage("The app declares a price per square km but there is a problem computing it");
 					return oRunningProcessorViewModel;	
 				}
 				
@@ -1246,6 +1246,8 @@ public class ProcessorsResource  {
 		}
 		
 		try {
+			sJsonParameters  = java.net.URLDecoder.decode(sJsonParameters, java.nio.charset.StandardCharsets.UTF_8.name());
+			
 			JSONObject oJson = new JSONObject(sJsonParameters);
 			
 			double dSouth = Double.NaN;	// min lat
@@ -1263,8 +1265,22 @@ public class ProcessorsResource  {
 					dEast = oJsonObject.getJSONObject("northEast").getDouble("lng");
 				}
 				
-			} catch (JSONException oE) {
-				WasdiLog.errorLog("ProcessorsResource.computeNumberOfCredits. Error while processing the dictionary representing the bbox", oE);
+			} 
+			catch (JSONException oE) {
+				WasdiLog.debugLog("ProcessorsResource.computeNumberOfCredits: the bbox is not an object, try string ");
+				try {
+					String sAoi = oJson.getString("AOI");
+					String [] asCoords = sAoi.split(",");
+					
+					dNorth = Double.parseDouble(asCoords[0]);
+					dWest = Double.parseDouble(asCoords[1]);
+					dSouth = Double.parseDouble(asCoords[2]);
+					dEast = Double.parseDouble(asCoords[3]);
+					
+				}
+				catch (Exception oE2) {
+					WasdiLog.errorLog("ProcessorsResource.computeNumberOfCredits. Error while processing the dictionary representing the bbox", oE);	
+				}
 			}
 			
 			if (Double.isNaN(dWest) || Double.isNaN(dNorth) || Double.isNaN(dSouth) || Double.isNaN(dEast)) {
@@ -2577,6 +2593,8 @@ public class ProcessorsResource  {
 			
 			oProcessorToUpdate.setOndemandPrice(fNewOnDemandPrice);
 		}
+		
+		oProcessorToUpdate.setAreaParameterName(oUpdatedProcessorVM.getAreaParameterName());
 		
 		if ( (fOldSquareKmPrice.floatValue() != fNewSquareKmPrice.floatValue()) ) {
 			
