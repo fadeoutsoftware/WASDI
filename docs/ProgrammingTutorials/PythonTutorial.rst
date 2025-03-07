@@ -473,11 +473,11 @@ Next, wasdi.importProductList allows to import a batch of images from the specif
 
 WASDI will take control of the process and handle the task by queuing the requests in the background. The entire operation runs in the cloud. It will take a while, and during that time you will not be able to control the debugger. However, if you get back to your browser (did you remember to leave it open on the workspace editor?) you will be able to check the status of the operation.
 
-.. image:: ../_static/python_tutorial_images/downloading0.png
+.. image:: ../_static/python_tutorial_images/download_in_progress.png
 
 If you click on the list icon in the bottom right corner of the screen, you can also view details for each operation in progress:
 
-.. image:: ../_static/python_tutorial_images/downloading1.png
+.. image:: ../_static/python_tutorial_images/download_in_progress_details.png
 
 Step 4: create an 8-bit RGB GeoTIFF out of a Sentinel-2 image
 -------------------------------------------------------------
