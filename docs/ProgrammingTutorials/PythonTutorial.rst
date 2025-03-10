@@ -534,7 +534,7 @@ Here in the following you can find the lines to add to the run method. Beware, t
    
    # Take the first S2 image
    for sImg in asAvailableImages:
-	   if sImg.startswith("S2):
+	   if sImg.startswith("S2"):
 		   sImageToProcess = sImg
 		   break
 		   
@@ -676,7 +676,7 @@ To retrieve that payload you can use wasdi.getProcessorPayloadAsJson and pass th
 
 Once the processor is done, we can go to the web UI and open the final result:
 
-.. image:: ../_static/python_tutorial_images/showBands.png
+.. image:: ../_static/python_tutorial_images/resultRGB.png
 
 To wrap up, you can download the complete code from here: 
 `myProcessor.py <https://github.com/fadeoutsoftware/WASDI/blob/develop/libraries/waspy/examples/tutorials/advancedPythonTutorial/myProcessor.py>`_
