@@ -741,13 +741,14 @@ Note: in a more realistic situation, your processor would probably consist of se
 
 .. image:: ../_static/python_tutorial_images/createZip1.png
 
-Now go to the WASDI web UI, make sure you are in editing mode (i.e., you have a workspace open). Clic the Processor menu, clic New WASDI app.
+Now go to the WASDI web UI, make sure you are in editing mode (i.e., you have a workspace open). Click the "APPS" menu, then click on "New App".
 
-.. image:: ../_static/python_tutorial_images/deploy0.png
+.. image:: ../_static/python_tutorial_images/new_client_new_app.png
+.. image:: ../_static/python_tutorial_images/new_client_new_app_button.png
 
 A dialog opens:
 
-.. image:: ../_static/python_tutorial_images/deploy1.png
+.. image:: ../_static/python_tutorial_images/new_client_new_app_dialog.png
 
 In the dialog:
 
@@ -758,21 +759,19 @@ In the dialog:
 * paste the content of your parameters.json into the JSON sample
 * make sure you uncheck the Make Application Public box (yes, it's definitely a nice processor, but we are going to have plenty of copies of it... ;-) )
 
-.. image:: ../_static/python_tutorial_images/deploy3.png
+Drag and drop your newly created zip file into the area for download
 
-drag and drop your newly created zip file into the area for download
+.. image:: ../_static/python_tutorial_images/new_client_file_uploaded.png
 
-.. image:: ../_static/python_tutorial_images/deploy4.png
-
-Are you done? Click Apply!
+Are you done? Click "Publish App"!
 
 The processor is uploaded to WASDI and automatically deployed. Give it a moment and then click on WASDI Apps. Start writing the name of the processor to search for it.
 
-.. image:: ../_static/python_tutorial_images/searchForYourProcessor0.png
+.. image:: ../_static/python_tutorial_images/new_client_search_app.png
 
 Select it, and your JSON demo will be displayed. From here you can run it!
 
-.. image:: ../_static/python_tutorial_images/searchForYourProcessor1.png
+.. image:: ../_static/python_tutorial_images/new_client_search_app_json.png
 
 Turn the processor into an app on the marketplace
 ----------------------------------------------------
