@@ -778,9 +778,8 @@ Turn the processor into an app on the marketplace
 Well, well, you did great! Now it's time to let others use your processor (in a not too distant future, you will even be able to monetize your processor by selling its usage): enter the WASDI app store!
 
 Go back to the apps, search for advancedpythontutorial, select it, and clic on the pencil icon to edit its properties.
-.. image:: ../_static/python_tutorial_images/editYourApp.png
+.. image:: ../_static/python_tutorial_images/new_client_editYourApp.png
 
-Edit your app
 You will see that the dialog has some more other than the one we took care of. Now, we are going to see all of them in details:
 
 * Processor
@@ -791,36 +790,45 @@ You will see that the dialog has some more other than the one we took care of. N
 
 Processor tab
 -------------
-We already discussed its usage, but there are still some tweaks we can do here. If you ever needed to edito,one or more of the files involved, simply make a zip containing just the files you need to modify, drag and drop it as usual, and click apply. Of course, you can always change any other propriety you wish, from here. Moreover, there are three cases in which you wish to click the Force refresh button:
+We already discussed its usage, but there are still some tweaks we can do here. If you ever needed to edit one or more of the files involved, simply make a zip containing just the files you need to modify, drag and drop it as usual, and click apply. Of course, you can always change any other propriety you wish, from here. Moreover, there are three cases in which you wish to click the Force refresh button:
 
-.. image:: ../_static/python_tutorial_images/forceRefresh.png
+.. image:: ../_static/python_tutorial_images/new_client_forceRefresh.png
 
 * you added new pip packages. If you wish to use other packages, you need to write them down, one per line, in a text file called pip.txt. Add the file to the zip and deploy it
 * you need additional system packages installed. If you need to install additional packages using apt (your code runs on a Ubuntu distro), add a text file called packages.txt and list the packages you need, one per line. As in the previous case: add the file to the zip and deploy it
 * you updated the wasdi lib
 
+Package Manager
+-------
+
+.. image:: ../_static/python_tutorial_images/new_client_package_manager.png
+
+Here you can see the information about the packages installed to run your application. You can search for packages, delete packages or add new ones.
+
+Details
+-------
+
+.. image:: ../_static/python_tutorial_images/new_client_details.png
+
+Here it's where you can give more details about your application, in case you want to show it in the marketplace. You can choose a more friendly name, add a link and an email address for the users to reach out to support, write a longer and nicer description and select some categories.
+You can also add a logo and additional images.
+
 Store
 -----
 
-.. image:: ../_static/python_tutorial_images/appStore.png
+.. image:: ../_static/python_tutorial_images/new_client_store.png
 
-Here it's where you can choose to show your application on the marketplace. You can give it a more friendly name, add a link and an email address for the users to reach out to support, add prices for the on demand and subscription-based usage modes, write a longer and nicer description, flag some categories, and, above all, flag the box to show your application on the app store!
+Here it's where you can choose to show your application on the marketplace. You can also add prices for the on demand and subscription-based usage modes.
 
-Media
+Collaborators
 -----
-.. image:: ../_static/python_tutorial_images/media.png
-
-Here you can add a logo and an image for your application
-
-Share
------
-.. image:: ../_static/python_tutorial_images/shareApp.png
+.. image:: ../_static/python_tutorial_images/new_client_collaborators.png
 
 You can add a user to your application. Think of a colleague: you both will be able to contribute to the same processor.
 
-UI
+User Iterface
 --
-.. image:: ../_static/python_tutorial_images/UI0.png
+.. image:: ../_static/python_tutorial_images/new_client_user_interface.png
 
 This is where magic happens again: the WASDI interface generator! Using a JSON you can describe a web user interface, which will generated automatically for you. You can fiddle around and you will learn how to use, but let's make the UI for our processor together.
 
@@ -890,24 +898,20 @@ The app store
 -----------------
 Now go to the app store, and try to use your app from there. To find it, you can filter using your user, or search using the name.
 
-.. image:: ../_static/python_tutorial_images/appStoreMarketplace.png
+.. image:: ../_static/python_tutorial_images/new_client_app_store.png
 
-Once you opened the app presentation page,
+You can open the app presentation page
 
-.. image:: ../_static/python_tutorial_images/appInTheAppStore0.png
+.. image:: ../_static/python_tutorial_images/new_client_app_presentation_page.png
 
-The app in the store
-open the application to test it for real.
+and then open the application to test it for real. There you can see the interface you just described. Use it, and to see if it works as expected
 
-.. image:: ../_static/python_tutorial_images/appInTheAppStore1.png
+.. image:: ../_static/python_tutorial_images/new_client_application_ui.png
 
-There you can see the interface you just described. Use it, and to see if it works as expected
 
-.. image:: ../_static/python_tutorial_images/appUI.png
+Before running the processor, you can also check the JSON that will be generated automatically with the parameters your processor need:
 
-before running the processor, you can also check the JSON that will be generated automatically with the parameters your processor need:
-
-.. image:: ../_static/python_tutorial_images/inputJson.png
+.. image:: ../_static/python_tutorial_images/new_client_input_json.png
 
 Feel free to play with your processor and tweak it.
 
@@ -920,12 +924,12 @@ Are you done? Here you are two sad facts:
 
 We cannot change the second, but we can solve the first by deleting the processor: got to the editor (i.e., open a workspace), search for your app in the WASDI apps menu, clic on the x symbol to delete the app
 
-.. image:: ../_static/python_tutorial_images/deleteProcessor.png
+.. image:: ../_static/python_tutorial_images/new_client_delete_processor.png
 
 That's how you delete a processor
 Clic OK to confirm that you want to delete it
 
-.. image:: ../_static/python_tutorial_images/confirmProcessorDeletion.png
+.. image:: ../_static/python_tutorial_images/new_client_delete_confirmation.png
 
 
 Confirm processor deletion
