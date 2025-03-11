@@ -779,7 +779,7 @@ Well, well, you did great! Now it's time to let others use your processor (in a 
 
 Go back to the apps, search for advancedpythontutorial, select it, and clic on the pencil icon to edit its properties.
 
-.. image:: ../_static/python_tutorial_images/new_client_editYourApp.png
+.. image:: ../_static/python_tutorial_images/new_client_edit_app.png
 
 You will see that the dialog has some more other than the one we took care of. Now, we are going to see all of them in details:
 
@@ -827,8 +827,9 @@ Collaborators
 
 You can add a user to your application. Think of a colleague: you both will be able to contribute to the same processor.
 
-User Iterface
---
+User Interface
+-------------
+
 .. image:: ../_static/python_tutorial_images/new_client_user_interface.png
 
 This is where magic happens again: the WASDI interface generator! Using a JSON you can describe a web user interface, which will generated automatically for you. You can fiddle around and you will learn how to use, but let's make the UI for our processor together.
