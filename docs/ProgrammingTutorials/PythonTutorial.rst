@@ -778,6 +778,7 @@ Turn the processor into an app on the marketplace
 Well, well, you did great! Now it's time to let others use your processor (in a not too distant future, you will even be able to monetize your processor by selling its usage): enter the WASDI app store!
 
 Go back to the apps, search for advancedpythontutorial, select it, and clic on the pencil icon to edit its properties.
+
 .. image:: ../_static/python_tutorial_images/new_client_editYourApp.png
 
 You will see that the dialog has some more other than the one we took care of. Now, we are going to see all of them in details:
@@ -799,7 +800,7 @@ We already discussed its usage, but there are still some tweaks we can do here. 
 * you updated the wasdi lib
 
 Package Manager
--------
+---------------
 
 .. image:: ../_static/python_tutorial_images/new_client_package_manager.png
 
@@ -821,7 +822,7 @@ Store
 Here it's where you can choose to show your application on the marketplace. You can also add prices for the on demand and subscription-based usage modes.
 
 Collaborators
------
+-------------
 .. image:: ../_static/python_tutorial_images/new_client_collaborators.png
 
 You can add a user to your application. Think of a colleague: you both will be able to contribute to the same processor.
