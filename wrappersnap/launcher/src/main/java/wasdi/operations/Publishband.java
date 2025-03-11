@@ -220,8 +220,10 @@ public class Publishband extends Operation {
 					
 					// Does it match?
 					if (oChild.getName().startsWith(sBaseFileNameFilter))  {
-						asFilesToCopy.add(oChild.getPath());
-						WasdiLog.debugLog("Publishband.executeOperation: found other file to copy " + oChild.getName());
+						if (!oChild.getName().toLowerCase().endsWith(".zip")) {
+							asFilesToCopy.add(oChild.getPath());
+							WasdiLog.debugLog("Publishband.executeOperation: found other file to copy " + oChild.getName());							
+						}
 					}
 				}
 			}
