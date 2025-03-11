@@ -263,12 +263,7 @@ public class WasdiConfig {
 	 * Configuration of the openEO Backend WASDI Server Implementation
 	 */
 	public OpenEO openEO = new OpenEO();
-	
-	/**
-	 * Configuration for the node score algorithm
-	 */
-	public NodeScoreConfig nodeScoreConfig = new NodeScoreConfig();
-	
+		
 	/**
 	 * Get the Catalogue Config for the specified Platform Type
 	 * @param sPlatformType Platform of interest

@@ -1030,7 +1030,7 @@ public class Wasdi extends ResourceConfig {
 						Long lGb = oNodeCandiate.getMemoryAbsoluteAvailable()/1073741824L;
 						
 						// If it is less of the "performance required" value
-						if (lGb.intValue() < WasdiConfig.Current.nodeScoreConfig.minTotalMemoryGBytes) {
+						if (lGb.intValue() < WasdiConfig.Current.loadBalancer.minTotalMemoryGBytes) {
 							// Set it as low performance
 							aoLowPerformanceNodes.add(oNodeCandiate);
 						}
