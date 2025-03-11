@@ -120,10 +120,12 @@ public class AuthResource {
 				WasdiLog.warnLog("AuthResource.login: login info null, user not authenticated");
 				return UserViewModel.getInvalid();
 			}
+			
 			if(Utils.isNullOrEmpty(oLoginInfo.getUserId())){
 				WasdiLog.warnLog("AuthResource.login: userId null or empty, user not authenticated");
 				return UserViewModel.getInvalid();	
 			}
+			
 			if(Utils.isNullOrEmpty(oLoginInfo.getUserPassword())){
 				WasdiLog.warnLog("AuthResource.login: password null or empty, user not authenticated");
 				return UserViewModel.getInvalid();	
@@ -180,6 +182,7 @@ public class AuthResource {
 				}
 				else {
 					WasdiLog.debugLog("AuthResource.login: user found in keycloak and mail verified: we can register the new user!!");
+					
 					RegistrationInfoViewModel oRegistrationInfoViewModel = new RegistrationInfoViewModel();
 					oRegistrationInfoViewModel.setUserId(sLowerCaseUserId);
 					PrimitiveResult oRegistrationResult = this.userRegistration(oRegistrationInfoViewModel);
@@ -216,7 +219,7 @@ public class AuthResource {
 			}
 
 			// First try to Authenticate using keycloak
-			String sAuthResult = m_oKeycloakService.login(sLowerCaseUserId, oLoginInfo.getUserPassword());  // not sure
+			String sAuthResult = m_oKeycloakService.login(sLowerCaseUserId, oLoginInfo.getUserPassword());
 			
 			boolean bLoginSuccess = false;
 			

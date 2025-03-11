@@ -282,37 +282,47 @@ public class Wasdi extends ResourceConfig {
 	public static User getUserFromSession(String sSessionId) {
 		
 		User oUser = null;
+		SessionRepository oSessionRepository = new SessionRepository();
+		UserRepository oUserRepo = new UserRepository();
 		
 		try {			
 			// Check The Session with Keycloak
 			String sUserId = null;
 			
 			try  {
-				//introspect
+				// Try to Introspect the token
 				String sPayload = "token=" + sSessionId;
+				
+				// Add headers
 				Map<String,String> asHeaders = new HashMap<>();
 				asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+				
+				// Post to keycloak server
 				HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(Wasdi.s_sKeyCloakIntrospectionUrl, sPayload, asHeaders, s_sClientId + ":" + s_sClientSecret); 
 				String sResponse = oHttpCallResponse.getResponseBody();
+				
+				// Try to read the result
 				JSONObject oJSON = null;
+				
 				if(!Utils.isNullOrEmpty(sResponse)) {
 					oJSON = new JSONObject(sResponse);
+					
+					if(oJSON != null) {
+						sUserId = oJSON.optString("preferred_username", null);
+					}					
 				}
-				if(null!=oJSON) {
-					sUserId = oJSON.optString("preferred_username", null);		// TODO: should I force the lower case here? If we are going to set all the user with lower case in our DB, then I guess so
-				}
+				
 			}
 			catch (Exception oKeyEx) {
 				WasdiLog.errorLog("Wasdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
 			}
 
 			if(!Utils.isNullOrEmpty(sUserId)) {
-				sUserId = sUserId.toLowerCase();  // force the user id to be lowercase
-				UserRepository oUserRepo = new UserRepository();
+				// Get the user from the repo
 				oUser = oUserRepo.getUser(sUserId);
 				
 				if( oUser == null ) {
-					
+					// Probably we need to add the user to the db!
 					WasdiLog.warnLog("Wasdi.getUserFromSession: the session is valid but the user does not exists, add it");
 					
 					AuthResource oAuthResource = new AuthResource();
@@ -323,7 +333,8 @@ public class Wasdi extends ResourceConfig {
 
 					if (oRegistrationResult==null) {
 						WasdiLog.warnLog("Wasdi.getUserFromSession: we had a problem registering the user, return invalid");
-					} else {
+					} 
+					else {
 					
 						if (oRegistrationResult.getBoolValue()==null) {
 							WasdiLog.warnLog("Wasdi.getUserFromSession: we had a problem registering the user, return invalid");
@@ -334,32 +345,44 @@ public class Wasdi extends ResourceConfig {
 						}
 					}
 					
+					// Re-read the user: if it has been registered, oUser will be valid, if not still null
 					oUser = oUserRepo.getUser(sUserId);
 				}
 			} 
 			else {
-				//check session against DB
 				
-				SessionRepository oSessionRepository = new SessionRepository();
+				// Session not found in keyclock: check session against DB
 				UserSession oUserSession = oSessionRepository.getSession(sSessionId);
 				
-				if(null==oUserSession) {
+				// We really do not have this session
+				if(oUserSession == null) {
 					return null;
-				} else {
-					sUserId = oUserSession.getUserId();
+				} 
+								
+				// Ok but the session itself, is expired or not?
+				if (oSessionRepository.isNotExpiredSession(oUserSession)==false) {
+					// Is expired. It has been deleted, and we return false
+					return null;
 				}
 				
+				// Ok we should have a user so
+				sUserId = oUserSession.getUserId();				
+				
+				// Check if the user id is not null
 				if(!Utils.isNullOrEmpty(sUserId)){
-					sUserId = sUserId.toLowerCase();
-					UserRepository oUserRepository = new UserRepository();
-					oUser = oUserRepository.getUser(sUserId);
-				} 
-				else {
-					return null;
+					
+					// Try to read the user
+					oUser = oUserRepo.getUser(sUserId);
+					
+					if (oUser!=null) {
+						// If it is not null, we can touch the session
+						oSessionRepository.touchSession(oUserSession);
+					}
+					
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.errorLog("Wasdi.getUserFromSession: something bad happened: " + oE);
+			WasdiLog.errorLog("Wasdi.getUserFromSession: something bad happened: ", oE);
 		}
 
 		return oUser;
@@ -371,10 +394,12 @@ public class Wasdi extends ResourceConfig {
 	 * @param oUser
 	 */
 	public static void clearUserExpiredSessions(User oUser) {
+		
 		SessionRepository oSessionRepository = new SessionRepository();
 		List<UserSession> aoEspiredSessions = oSessionRepository.getAllExpiredSessions(oUser.getUserId());
+		
 		for (UserSession oUserSession : aoEspiredSessions) {
-			//delete data base session
+			//delete data base sessions
 			if (!oSessionRepository.deleteSession(oUserSession)) {
 
 				WasdiLog.debugLog("AuthService.Login: Error deleting session.");
@@ -1005,7 +1030,7 @@ public class Wasdi extends ResourceConfig {
 						Long lGb = oNodeCandiate.getMemoryAbsoluteAvailable()/1073741824L;
 						
 						// If it is less of the "performance required" value
-						if (lGb.intValue() < WasdiConfig.Current.nodeScoreConfig.minTotalMemoryGBytes) {
+						if (lGb.intValue() < WasdiConfig.Current.loadBalancer.minTotalMemoryGBytes) {
 							// Set it as low performance
 							aoLowPerformanceNodes.add(oNodeCandiate);
 						}

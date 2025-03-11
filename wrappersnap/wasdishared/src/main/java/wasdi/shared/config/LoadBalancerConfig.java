@@ -24,5 +24,10 @@ public class LoadBalancerConfig {
 	 * It means that if a node has metrics older than this parameters in seconds, it is considered down
 	 */
 	public int metricsMaxAgeSeconds = 600;
+	
+	/**
+	 * Min RAM required for a Node: under this limit, it is considered a low performance mode and so penalized in the final ranking
+	 */
+	public int minTotalMemoryGBytes = 30;
 
 }

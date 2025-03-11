@@ -47,7 +47,6 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.rabbit.Send;
-import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
@@ -1528,7 +1527,7 @@ public class ProcessWorkspaceResource {
 								JSONObject oViewModel = oResults.getJSONObject(iViewModel);
 								String sSubscriptionId = oViewModel.optString("subscriptionId");
 								String sProjectId = oViewModel.optString("projectId");
-								String sUserIdFromNode = oViewModel.optString("userId");
+								
 								Long lComputingTime = oViewModel.optLong("computingTime");
 								
 								WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject: subscription: " + sSubscriptionId + ", project: " + sProjectId + ", user: " + sUserId);

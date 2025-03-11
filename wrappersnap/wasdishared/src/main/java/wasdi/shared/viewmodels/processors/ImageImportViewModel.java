@@ -43,6 +43,11 @@ public class ImageImportViewModel {
 	 */
 	protected String volumePath;	
 	
+	/**
+	 * Platform type of the product to import
+	 */
+	protected String platform;
+	
 	
 	public String getFileUrl() {
 		return fileUrl;
@@ -91,6 +96,12 @@ public class ImageImportViewModel {
 	}
 	public void setVolumePath(String volumePath) {
 		this.volumePath = volumePath;
+	}
+	public String getPlatform() {
+		return platform;
+	}
+	public void setPlatformType(String platform) {
+		this.platform = platform;
 	}
 
 }

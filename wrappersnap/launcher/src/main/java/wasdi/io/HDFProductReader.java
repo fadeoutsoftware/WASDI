@@ -2,13 +2,10 @@ package wasdi.io;
 
 import java.io.File;
 
-import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.shared.viewmodels.products.BandViewModel;
-import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class HDFProductReader extends SnapProductReader {
 

@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.7.3
+Version 0.8.7.4
 
-Last Update: 18/02/2025
+Last Update: 04/03/2025
 
 Tested with: Python 3.7 - Python 3.13 
 
@@ -652,8 +652,21 @@ def init(sConfigFilePath=None):
         if m_sUser is not None:
             print('[INFO] waspy.init: user read in the env WASDI_USER variable')
 
-    if m_sUser is None and m_sPassword is None:
+    #Default on local pc
+    sHome = os.path.expanduser("~")
+    sCredentialsConfigFile = sHome + "/.wasdi/credentials.json"
 
+    # Check if there is the credentials config file in the user home
+    if m_sUser is None and m_sPassword is None:
+        if not getIsOnServer() and os.path.exists(sCredentialsConfigFile):
+            with open(sCredentialsConfigFile,"r") as oInFile:
+                oReadConfig = json.load(oInFile)
+                if oReadConfig is not None:
+                    if "USER" in oReadConfig and "PASSWORD" in oReadConfig:
+                        m_sUser = oReadConfig["USER"]
+                        m_sPassword = oReadConfig["PASSWORD"]
+
+    if m_sUser is None and m_sPassword is None:
         m_sUser = input('[INFO] waspy.init: Please Insert WASDI User:')
 
         m_sPassword = getpass.getpass(prompt='[INFO] waspy.init: Please Insert WASDI Password:', stream=None)
@@ -663,6 +676,18 @@ def init(sConfigFilePath=None):
 
         if sWorkspaceId is None and sWorkspaceName is None:
             sWorkspaceName = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
+
+        if not getIsOnServer():
+            sAnswer = input('[WARNING] do you want to store your WASDI credentials? Will be saved not-encrypted in your user home folder [yes/no]')
+            
+            if sAnswer == "yes":
+                oWriteConfig = {}
+                oWriteConfig["USER"] = m_sUser
+                oWriteConfig["PASSWORD"] = m_sPassword
+                sJsonContent = json.dumps(oWriteConfig)
+                with open(sCredentialsConfigFile,"w") as oOutFile:
+                    oOutFile.write(sJsonContent)
+
 
     if m_sUser is None:
         print('[ERROR] waspy.init: must initialize user first, but None given' +
@@ -675,8 +700,6 @@ def init(sConfigFilePath=None):
             #Default on server
             m_sBasePath = '/data/wasdi/'
         else:
-            #Default on local pc
-            sHome = os.path.expanduser("~")
             # the empty string at the end adds a separator
             m_sBasePath = os.path.join(sHome, ".wasdi", "")
 
@@ -2628,7 +2651,7 @@ def getProductBBOX(sFileName):
     return ""
 
 
-def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None):
+def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None, sPlatformType=None):
     """
     Imports a product from a Provider in WASDI, starting from the File URL.
 
@@ -2643,6 +2666,8 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
     :param sVolumeName: if the file is in a Volume, the name of the volume
 
     :param sVolumePath: if the file is in a Volume, the path of the file in the volume
+
+    :param sPlatformType: the platform (aka Mission) of the file to ingest
     
     :return: execution status as a STRING. Can be DONE, ERROR, STOPPED.
     """
@@ -2650,7 +2675,7 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
     sReturn = "ERROR"
 
     try:
-        sProcessId = asynchImportProductByFileUrl(sFileUrl, sName, sBoundingBox, sProvider, sVolumeName, sVolumePath)
+        sProcessId = asynchImportProductByFileUrl(sFileUrl, sName, sBoundingBox, sProvider, sVolumeName, sVolumePath, sPlatformType)
         sReturn = waitProcess(sProcessId)
     except Exception as oEx:
         wasdiLog("[ERROR] waspy.importProductByFileUrl: there was an error importing a product " + str(oEx))
@@ -2658,7 +2683,7 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
     return sReturn
 
 
-def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None):
+def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None, sVolumeName=None, sVolumePath=None, sPlatformType=None):
     """
     Asynch Import of a product from a Provider in WASDI, starting from file URL
 
@@ -2673,6 +2698,8 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
     :param sVolumeName: if the file is in a Volume, the name of the volume
 
     :param sVolumePath: if the file is in a Volume, the path of the file in the volume
+
+    :param sPlatformType: the platform (aka Mission) of the file to ingest
     
     :return: ProcessId of the Download Operation, "DONE" if the file is imported or "ERROR" if there is any problem
     """
@@ -2695,6 +2722,7 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
     oImageImportViewModel["bbox"] = sBoundingBox
     oImageImportViewModel["volumeName"] = sVolumeName
     oImageImportViewModel["volumePath"] = sVolumePath
+    oImageImportViewModel["platform"] = sPlatformType
 
     if getIsOnServer() is True or getIsOnExternalServer() is True:
         oImageImportViewModel["parent"] = getProcId()
@@ -2757,7 +2785,11 @@ def importProduct(oProduct, sProvider=None):
         if "title" in oProduct:
             sName = oProduct['title']
 
-        return importProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
+        sPlatform = None
+        if "platform" in oProduct:
+            sPlatform = oProduct["platform"]
+
+        return importProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"], sPlatformType=sPlatform)
     except Exception as e:
         wasdiLog("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
@@ -2795,8 +2827,12 @@ def asynchImportProduct(oProduct, sProvider=None):
         if "title" in oProduct:
             sName = oProduct["title"]
 
+        sPlatform = None
+        if "platform" in oProduct:
+            sPlatform = oProduct["platform"]
+
         return asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
-                                            sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
+                                            sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"], sPlatformType=sPlatform)
     except Exception as e:
         wasdiLog("[ERROR] waspy.asynchImportProduct: exception " + str(e))
         return "ERROR"
@@ -2837,9 +2873,13 @@ def importProductList(aoProducts, sProvider=None):
                 if "provider" in oProduct:
                     sActualProvider = oProduct["provider"]
 
+            sPlatform = None
+            if "platform" in oProduct:
+                sPlatform = oProduct["platform"]
+
             # Start the download propagating the Asynch Flag
             sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
-                                                   sProvider=sActualProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
+                                                   sProvider=sActualProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"], sPlatformType=sPlatform)
 
             # Append the process id to the list
             asReturnList.append(sReturn)
@@ -2888,9 +2928,13 @@ def asynchImportProductList(aoProducts, sProvider=None):
             if "title" in oProduct:
                 sName = oProduct["title"]
 
+            sPlatform = None
+            if "platform" in oProduct:
+                sPlatform = oProduct["platform"]
+
             # Start the download propagating the Asynch Flag
             sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
-                                                   sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"])
+                                                   sProvider=sProvider, sVolumeName=oProduct["volumeName"], sVolumePath=oProduct["volumePath"], sPlatformType=sPlatform)
             # Append the process id to the list
             asReturnList.append(sReturn)
         except Exception as e:
@@ -3057,6 +3101,9 @@ def executeProcessor(sProcessorName, aoProcessParams):
                 if "processingIdentifier" in aoJson:
                     sProcessID = aoJson['processingIdentifier']
                     return sProcessID
+                elif "message" is aoJson:
+                    sMessage = aoJson['message']
+                    wasdiLog('[ERROR] waspy.executeProcessor: cannot run the processor: ' + sMessage)
                 else:
                     wasdiLog('[ERROR] waspy.executeProcessor: cannot extract processing identifier from response, aborting')
             else:
@@ -4049,13 +4096,16 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None, sStyle=""):
         if getIsOnServer() is False:
             if getUploadActive() is True:
                 if fileExistsOnWasdi(sFileName) is False:
-                    _log('[INFO] waspy._internalAddFileToWASDI: remote file is missing, uploading')
-                    try:
-                        _uploadFile(sFileName)
-                        _log('[INFO] waspy._internalAddFileToWASDI: file uploaded, keep on working!')
-                    except:
-                        wasdiLog('[ERROR] waspy._internalAddFileToWASDI: could not proceed with upload' +
-                                 '  ******************************************************************************')
+                    if os.path.exists(getPath(sFileName)) is True:
+                        _log('[INFO] waspy._internalAddFileToWASDI: remote file is missing, uploading')
+                        try:
+                            _uploadFile(sFileName)
+                            _log('[INFO] waspy._internalAddFileToWASDI: file uploaded, keep on working!')
+                        except:
+                            wasdiLog('[ERROR] waspy._internalAddFileToWASDI: could not proceed with upload' +
+                                    '  ******************************************************************************')
+                    else:
+                        wasdiLog('[WARNING] waspy._internalAddFileToWASDI: the file ' + sFileName + ' does not exists neither locally and in the cloud')    
         else:
             try:
                 # We are on the server: do I have the file?
@@ -4069,6 +4119,8 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None, sStyle=""):
                         except:
                             wasdiLog('[ERROR] waspy._internalAddFileToWASDI: could not proceed with upload' +
                                      '  ******************************************************************************')
+                else:
+                    wasdiLog('[WARNING] waspy._internalAddFileToWASDI: the file ' + sFileName + ' does not exists')
             except:
                 wasdiLog('[ERROR] waspy._internalAddFileToWASDI: could not send the file the workspace node')
 

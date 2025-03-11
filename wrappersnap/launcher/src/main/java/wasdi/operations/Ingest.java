@@ -17,6 +17,7 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.payloads.IngestPayload;
 import wasdi.shared.utils.EndMessageProvider;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -113,6 +114,7 @@ public class Ingest extends Operation {
             if (WasdiFileUtils.isShapeFileZipped(sFilePath, 100)) {
             	bUnzipAfterCopy = true;
             	sDestinationFileName = WasdiFileUtils.getShpFileNameFromZipFile(sFilePath, 30);
+            	WasdiFileUtils.deleteFile(sFilePath);
             }
 
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 50);
@@ -172,7 +174,7 @@ public class Ingest extends Operation {
 
             // add product to db
             addProductToDbAndWorkspaceAndSendToRabbit(oImportProductViewModel, oDstFile.getAbsolutePath(),
-                    oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), null, true, true, oParameter.getStyle());
+                    oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), null, true, true, oParameter.getStyle(), oParameter.getPlatform());
             
             updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
 

@@ -101,6 +101,16 @@ public class Mosaic extends Operation {
 				}
 			}
 			
+			
+			// Set the output name of the mosaic
+            oProcessWorkspace.setProductName(oParameter.getDestinationProductName());
+            
+            // update the process
+            m_oProcessWorkspaceRepository.updateProcess(oProcessWorkspace);
+            
+            // Send Rabbit notification
+            m_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace);
+			
 			m_oProcessWorkspaceLogger.log("Running Mosaic");
         	
             // Run the gdal mosaic

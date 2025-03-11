@@ -17,8 +17,6 @@ public class QueryTranslatorPLANET extends QueryTranslator {
 	@Override
 	public String getCountUrl(String sQuery) {
 		
-		QueryViewModel oQuery = parseWasdiClientQuery(sQuery);
-		
 		return null;
 	}
 

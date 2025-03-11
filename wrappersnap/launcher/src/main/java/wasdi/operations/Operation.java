@@ -14,9 +14,11 @@ import wasdi.shared.business.DownloadedFileCategory;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.payloads.OperationPayload;
 import wasdi.shared.rabbit.Send;
@@ -238,7 +240,7 @@ public abstract class Operation {
                                                            Boolean bSendToRabbit) throws Exception {
         addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFullPathFileName, sWorkspace, sExchange, sOperation, sBBox, bAsynchMetadata, bSendToRabbit, "");
     }
-
+    
     /**
      * Converts a product in a ViewModel, add it to the workspace and send it to the
      * rabbit queue. The method is Safe: it controls if the products already exists and
@@ -257,6 +259,29 @@ public abstract class Operation {
     protected void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oProductViewModel, String sFullPathFileName,
                                                            String sWorkspace, String sExchange, String sOperation, String sBBox, Boolean bAsynchMetadata,
                                                            Boolean bSendToRabbit, String sStyle) throws Exception {
+    	addProductToDbAndWorkspaceAndSendToRabbit(oProductViewModel, sFullPathFileName, sWorkspace, sExchange, sOperation, sBBox, bAsynchMetadata, bSendToRabbit, sStyle, "");
+    }
+
+    /**
+     * Converts a product in a ViewModel, add it to the workspace and send it to the
+     * rabbit queue. The method is Safe: it controls if the products already exists and
+     * if it is already added to the workspace
+     *
+     * @param oProductViewModel View Model... if null, read it from the product in sFileName
+     * @param sFullPathFileName File Name
+     * @param sWorkspace        Workspace
+     * @param sExchange         Queue Id
+     * @param sOperation        Operation Done
+     * @param sBBox             Bounding Box
+     * @param bAsynchMetadata   Flag to know if save metadata in asynch or synch way
+     * @param bSendToRabbit     Flag to know it we need to send update on rabbit or not
+     * @param sStyle			Style to associate to the product
+     * @param sPlatform			Platform associated to the product
+     * @throws Exception
+     */
+    protected void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oProductViewModel, String sFullPathFileName,
+                                                           String sWorkspace, String sExchange, String sOperation, String sBBox, Boolean bAsynchMetadata,
+                                                           Boolean bSendToRabbit, String sStyle, String sPlatform) throws Exception {
         WasdiLog.debugLog("LauncherMain.AddProductToDbAndSendToRabbit: File Name = " + sFullPathFileName);
 
         // Check if the file is really to Add
@@ -284,6 +309,8 @@ public abstract class Operation {
             WasdiLog.debugLog("LauncherMain.AddProductToDbAndSendToRabbit: bbox not set. Try to auto get it ");
             sBBox = oReadProduct.getProductBoundingBox();
         }
+        
+        
 
         if (oCheckAlreadyExists == null) {
 
@@ -309,6 +336,7 @@ public abstract class Operation {
             oDownloadedProduct.setRefDate(new Date());
             oDownloadedProduct.setDefaultStyle(sStyle);
             oDownloadedProduct.setCategory(DownloadedFileCategory.COMPUTED.name());
+            oDownloadedProduct.setPlatform(sPlatform);
 
             if (oProductViewModel != null) {
                 oDownloadedProduct.setDescription(oProductViewModel.getDescription());
@@ -320,6 +348,7 @@ public abstract class Operation {
             } else {
                 WasdiLog.infoLog("Product Inserted");
             }
+  
         } else {
 
             // The product is already there. No need to add
@@ -329,11 +358,29 @@ public abstract class Operation {
 
             // Update the Product View Model
             oCheckAlreadyExists.setProductViewModel(oProductViewModel);
+            if (Utils.isNullOrEmpty(oCheckAlreadyExists.getPlatform()) && !Utils.isNullOrEmpty(sPlatform)) {
+            	oCheckAlreadyExists.setPlatform(sPlatform);
+            }
+            
             oDownloadedRepo.updateDownloadedFile(oCheckAlreadyExists);
 
-            // TODO: Update metadata?
-
             WasdiLog.debugLog("AddProductToDbAndSendToRabbit: Product Already in the Database. Do not add");
+        }
+        
+        // update also the count of the size of the workspace. Safe operation. Worse
+        try {
+            
+            WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+            Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspace);
+            
+            String sUserId = oWorkspace.getUserId();
+            
+            long lWorkspaceSize = WasdiFileUtils.getWorkspaceFolderSize(sUserId, sWorkspace);
+                        
+            oWorkspace.setStorageSize(lWorkspaceSize);
+            
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: error in updating the storage size of the workspace", oEx);
         }
 
         // The Add Product to Workspace is safe. No need to check if the product is

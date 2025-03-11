@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -38,6 +40,7 @@ import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
@@ -52,6 +55,7 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.AppPayment;
 import wasdi.shared.business.Counter;
+import wasdi.shared.business.CreditsPackage;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.Review;
@@ -71,6 +75,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppPaymentRepository;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CounterRepository;
+import wasdi.shared.data.CreditsPagackageRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -182,7 +187,7 @@ public class ProcessorsResource  {
 			
 			// Put the processor as Public by default
 			if (iPublic == null) {
-				iPublic = new Integer(1);
+				iPublic = Integer.valueOf(1);
 			}
 			
 			// Force the name to lower case
@@ -774,7 +779,10 @@ public class ProcessorsResource  {
 			oAppDetailViewModel.setEmail(oProcessor.getEmail());
 			oAppDetailViewModel.setLink(oProcessor.getLink());
 			oAppDetailViewModel.setOndemandPrice(oProcessor.getOndemandPrice());
+			oAppDetailViewModel.setSquareKilometerPrice(oProcessor.getPricePerSquareKm());
 			oAppDetailViewModel.setSubscriptionPrice(oProcessor.getSubscriptionPrice());
+			oAppDetailViewModel.setSquareKilometerPrice(oProcessor.getPricePerSquareKm());
+			oAppDetailViewModel.setAreaParameterName(oProcessor.getAreaParameterName());
 			oAppDetailViewModel.setUpdateDate(oProcessor.getUpdateDate());
 			oAppDetailViewModel.setPublishDate(oProcessor.getUploadDate());
 			oAppDetailViewModel.setCategories(oProcessor.getCategories());
@@ -908,12 +916,14 @@ public class ProcessorsResource  {
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.internalRun: invalid session");
 				oRunningProcessorViewModel.setStatus("ERROR");
+				oRunningProcessorViewModel.setMessage("Invalid User or Session. Check your login.");
 				return oRunningProcessorViewModel;
 			}
 			
 			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
 				WasdiLog.warnLog("ProcessorsResource.internalRun: user " + oUser.getUserId() + " does not have a valid subscription");
 				oRunningProcessorViewModel.setStatus("ERROR");
+				oRunningProcessorViewModel.setMessage("Invalid Subscription.");
 				return oRunningProcessorViewModel;
 			}
 			
@@ -922,6 +932,7 @@ public class ProcessorsResource  {
 			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {				
 				WasdiLog.warnLog("ProcessorsResource.internalRun: user cannot access the workspace");
 				oRunningProcessorViewModel.setStatus("ERROR");
+				oRunningProcessorViewModel.setMessage("Workspace cannot be accessed or does not exists.");
 				return oRunningProcessorViewModel;
 			}
 		
@@ -932,55 +943,16 @@ public class ProcessorsResource  {
 			if (oProcessorToRun == null) { 
 				WasdiLog.warnLog("ProcessorsResource.internalRun: unable to find processor " + sName);
 				oRunningProcessorViewModel.setStatus("ERROR");
+				oRunningProcessorViewModel.setMessage("Processors not found " + sName);
 				return oRunningProcessorViewModel;
 			}
 			
 			if (!PermissionsUtils.canUserAccessProcessor(sUserId, oProcessorToRun)) {
 				WasdiLog.warnLog("ProcessorsResource.internalRun: the user cannot access th processor ");
+				oRunningProcessorViewModel.setMessage("Processor cannot be accessed.");
 				oRunningProcessorViewModel.setStatus("ERROR");
 				return oRunningProcessorViewModel;				
 			}
-			
-			
-			// check if the app has an on-demand price and if the person is not the owner of tje app: 
-			// in that case, update the apps payments table to track the run date/time
-			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-			Float fOnDemandPrice = oProcessorToRun.getOndemandPrice();
-			if (fOnDemandPrice != null 
-					&& fOnDemandPrice > 0 
-					&& !oUser.getUserId().equals(oProcessorToRun.getUserId())
-					&& !oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, oProcessorToRun.getProcessorId())) {
-				
-				WasdiLog.debugLog("ProcessorsResource.internalRun: the app has an ondemand price");
-				AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
-				List<AppPayment> oAppPayments = oAppPaymentRepository.getAppPaymentByProcessorAndUser(oProcessorToRun.getProcessorId(), sUserId);
-				
-				if (oAppPayments != null) {
-					boolean bHasRunBeenPayed = false;
-					for (AppPayment oPayment : oAppPayments) {
-						if (oPayment.isBuySuccess() && Utils.isNullOrEmpty(oPayment.getRunDate())) {
-							WasdiLog.debugLog("ProcessorsResource.internalRun: found a payment for the on-demand run. Payment id: " + oPayment.getAppPaymentId());
-							oPayment.setRunDate(Utils.nowInMillis());
-							if (oAppPaymentRepository.updateAppPayment(oPayment)) {
-								WasdiLog.debugLog("ProcessorsResource.internalRun: payment correctly updated with run timestamp");
-								bHasRunBeenPayed = true;
-								break;
-							} else {
-								WasdiLog.warnLog("ProcessorsResource.internalRun: error registering the payed run. Payment details not updated");
-								oRunningProcessorViewModel.setStatus("ERROR");
-								return oRunningProcessorViewModel;	
-							}
-						}
-					}
-					
-					if (!bHasRunBeenPayed) {
-						WasdiLog.warnLog("ProcessorsResource.internalRun: no valid payment found for the app");
-						oRunningProcessorViewModel.setStatus("ERROR");
-						return oRunningProcessorViewModel;	
-					}
-				}
-			}
-			
 			
 			if (Utils.isNullOrEmpty(sEncodedJson)) {
 				sEncodedJson = "%7B%7D";
@@ -990,6 +962,137 @@ public class ProcessorsResource  {
 				// The + char is not encoded but then in the launcher, when is decode, become a space. Replace the char with the correct representation
 				sEncodedJson = sEncodedJson.replaceAll("\\+", "%2B");
 				WasdiLog.debugLog("ProcessorsResource.internalRun: replaced + with %2B in encoded JSON " + sEncodedJson);
+			}
+			
+			
+			// check if the app has an on-demand price and if the person is not the owner of the app: 
+			// in that case, update the apps payments table to track the run date/time
+			Float fOnDemandPrice = oProcessorToRun.getOndemandPrice();
+			
+			Float fPricePerSquareKm = oProcessorToRun.getPricePerSquareKm();
+			String sAreaParameter = oProcessorToRun.getAreaParameterName();
+			
+			if (fOnDemandPrice != null && fOnDemandPrice > 0 && fPricePerSquareKm != null && fPricePerSquareKm > 0) {
+				WasdiLog.warnLog("ProcessorsResource.internalRun: the app has both a on demand price and a square kilometers price. We will force the km one");
+				fOnDemandPrice = 0.0f;
+			}
+			
+			if (fOnDemandPrice != null 
+					&& fOnDemandPrice > 0 
+					&& !sUserId.equals(oProcessorToRun.getUserId())
+					&& !PermissionsUtils.canUserWriteProcessor(sUserId, oProcessorToRun)) {
+				
+				WasdiLog.debugLog("ProcessorsResource.internalRun: the app has an ondemand price");
+				
+				// Get the payments done for this app
+				AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();
+				List<AppPayment> oAppPayments = oAppPaymentRepository.getAppPaymentByProcessorAndUser(oProcessorToRun.getProcessorId(), sUserId);
+				
+				boolean bHasRunBeenPayed = false;
+				
+				if (oAppPayments != null) {
+					
+					for (AppPayment oPayment : oAppPayments) {
+						
+						// Do we have a valid payment, not used yet?
+						if (oPayment.isBuySuccess() && Utils.isNullOrEmpty(oPayment.getRunDate())) {
+							
+							WasdiLog.debugLog("ProcessorsResource.internalRun: found a payment for the on-demand run. Payment id: " + oPayment.getAppPaymentId());
+							oPayment.setRunDate(Utils.nowInMillis());
+							
+							if (oAppPaymentRepository.updateAppPayment(oPayment)) {
+								WasdiLog.debugLog("ProcessorsResource.internalRun: payment correctly updated with run timestamp");
+								bHasRunBeenPayed = true;
+								break;
+							} 
+							else {
+								WasdiLog.warnLog("ProcessorsResource.internalRun: error registering the payed run. Payment details not updated for " + oPayment.getAppPaymentId());
+							}
+						}
+					}					
+				}
+				
+				if (!bHasRunBeenPayed) {
+					WasdiLog.warnLog("ProcessorsResource.internalRun: no valid payment found for the app");
+					oRunningProcessorViewModel.setStatus("ERROR");
+					oRunningProcessorViewModel.setMessage("The app has a price and has not be paid");
+					return oRunningProcessorViewModel;	
+				}				
+			}
+			
+			// check if the app has a price per square kilometer and if the person is not the owner of the app or the app has not been shared 
+			// in that case, update the credits package table to track the use of the credits
+			if (fPricePerSquareKm != null 
+					&& fPricePerSquareKm > 0 
+					&& !oUser.getUserId().equals(oProcessorToRun.getUserId())
+					&& !PermissionsUtils.canUserWriteProcessor(sUserId, oProcessorToRun)) {
+				
+				Double dCreditsForRun = computeNumberOfCredits(sEncodedJson, sAreaParameter, fPricePerSquareKm);
+				
+				if (dCreditsForRun == null) {
+					WasdiLog.warnLog("ProcessorsResource.internalRun: error computing credtis needed for the run. Credits details not updated");
+					oRunningProcessorViewModel.setStatus("ERROR");
+					oRunningProcessorViewModel.setMessage("The app declares a price per square km but there is a problem computing it");
+					return oRunningProcessorViewModel;	
+				}
+				
+				// take all the available credits packages of the user
+				CreditsPagackageRepository oCreditsRepository = new CreditsPagackageRepository();
+				List<CreditsPackage> aoCreditsPackages = oCreditsRepository.listByUser(sUserId, true);
+				
+				if (aoCreditsPackages == null) {
+					WasdiLog.warnLog("ProcessorsResource.internalRun. Some error might have occurred retrieveng credits packages for " + sUserId);
+					oRunningProcessorViewModel.setStatus("ERROR");
+					oRunningProcessorViewModel.setMessage("The app has a credit price but no credits found for user");
+					return oRunningProcessorViewModel;	
+				}
+				
+				if (aoCreditsPackages.isEmpty()) {
+					WasdiLog.warnLog("ProcessorsResource.internalRun. No credits packages found for user " + sUserId);
+					oRunningProcessorViewModel.setStatus("ERROR");
+					oRunningProcessorViewModel.setMessage("The app has a credit price but no credits found for user");
+					return oRunningProcessorViewModel;	
+				}
+				
+				int iCountPackages = 0;
+				Double dCreditsDeducted = 0d;
+				List<CreditsPackage> aoCreditsToUpdate = new ArrayList<>();
+				
+				while ( (dCreditsDeducted < dCreditsForRun) && iCountPackages < aoCreditsPackages.size()) {
+					CreditsPackage oCreditsPackage = aoCreditsPackages.get(iCountPackages);
+					Double dCreditsRemaining = oCreditsPackage.getCreditsRemaining();
+					
+					// if there are enough credits, then just take them all from that package
+					if (dCreditsForRun <= dCreditsRemaining) {
+						dCreditsDeducted += dCreditsForRun; 
+						oCreditsPackage.setCreditsRemaining(dCreditsRemaining - dCreditsDeducted);
+						aoCreditsToUpdate.add(oCreditsPackage);
+						break;
+					}
+					
+					// if the credits are not enough, we get all the available credits, and we will try to get the remaining credits from other purchased packages
+					if (dCreditsForRun > dCreditsRemaining) {
+						dCreditsDeducted += dCreditsRemaining;
+						oCreditsPackage.setCreditsRemaining(0d);
+						aoCreditsToUpdate.add(oCreditsPackage);
+					}
+					
+					iCountPackages++;
+				}
+				
+				if (dCreditsDeducted.doubleValue() >= dCreditsForRun.doubleValue()) {
+					for (int i = 0; i < aoCreditsToUpdate.size(); i++) {
+						if (!oCreditsRepository.updateCreditPackage(aoCreditsToUpdate.get(i))) {
+							WasdiLog.warnLog("ProcessorResource.internalRun. Credit package " + aoCreditsToUpdate.get(i).getCreditPackageId() + " was not updated");
+						}
+					}
+				}
+				else {
+					WasdiLog.warnLog("ProcessorsResource.internalRun. Not enough credits packages found for user " + sUserId);
+					oRunningProcessorViewModel.setStatus("ERROR");
+					oRunningProcessorViewModel.setMessage("Not enough credits");
+					return oRunningProcessorViewModel;						
+				}
 			}
 
 			// Schedule the process to run the processor
@@ -1007,7 +1110,7 @@ public class ProcessorsResource  {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			oProcessorParameter.setNotifyOwnerByMail(bNotify);
-			
+
 			PrimitiveResult oResult = Wasdi.runProcess(sUserId, sSessionId, oProcessorParameter.getLauncherOperation(), sName, oProcessorParameter, sParentProcessWorkspaceId);
 			
 			try{
@@ -1038,6 +1141,182 @@ public class ProcessorsResource  {
 		
 		return oRunningProcessorViewModel;
 	}
+	
+	
+	@POST
+	@Path("/getcredits")
+	@Produces({ "application/json", "text/xml" })
+	public Response getCreditsForRun(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, String sEncodedJson) throws Exception {
+		WasdiLog.debugLog("ProcessorsResource.getCreditsForRun( Processor id: " + sProcessorId + " )");
+		
+				
+		try {
+			if (Utils.isNullOrEmpty(sEncodedJson)) {
+				WasdiLog.warnLog("ProcessorsResource.getCreditsForRun: no parameters specified for the processors. Computing the bouding box won't be possible");
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+			
+			if (sEncodedJson.contains("+")) {
+				// The + char is not encoded but then in the launcher, when is decode, become a space. Replace the char with the correct representation
+				sEncodedJson = sEncodedJson.replaceAll("\\+", "%2B");
+				WasdiLog.debugLog("ProcessorsResource.internalRun: replaced + with %2B in encoded JSON " + sEncodedJson);
+			}
+			
+			// Check User 
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oUser==null) {
+				WasdiLog.warnLog("ProcessorsResource.getCreditsForRun: invalid session");
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+			}
+			
+			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+				WasdiLog.warnLog("ProcessorsResource.getCreditsForRun: user " + oUser.getUserId() + " does not have a valid subscription");
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+			}
+
+			String sUserId = oUser.getUserId();
+		
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToRun = oProcessorRepository.getProcessor(sProcessorId);
+			
+			if (oProcessorToRun == null) { 
+				WasdiLog.warnLog("ProcessorsResource.getCreditsForRun: unable to find processor " + sProcessorId);
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("")).build();
+			}
+			
+			if (oProcessorToRun.getPricePerSquareKm() == null || oProcessorToRun.getPricePerSquareKm() == 0) {
+				WasdiLog.debugLog("ProcessorsResource.getCreditsForRun: the app is not sold using credits.");
+				return Response.ok(0).build();
+			}
+			
+			if (Utils.isNullOrEmpty(oProcessorToRun.getAreaParameterName())) {
+				WasdiLog.debugLog("ProcessorsResource.getCreditsForRun: the app has no area parameter name. Number of credits needed cannot be computed");
+				return Response.serverError().build();
+			}
+			
+			if (!PermissionsUtils.canUserAccessProcessor(sUserId, oProcessorToRun)) {
+				WasdiLog.warnLog("ProcessorsResource.getCreditsForRun: the user cannot access th processor ");
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+			
+			// if the user is the owner of the app, then he won't pay any credit
+			if (oProcessorToRun.getUserId().equals(sUserId)) {
+				WasdiLog.debugLog("ProcessorsResource.getCreditsForRun: the user is the owner of the app. No credits will be used");
+				return Response.ok(0).build();
+			}
+			
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			if (oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, sProcessorId)) {
+				WasdiLog.debugLog("ProcessorsResource.getCreditsForRun: the app has been shared with the user. No credits will be used");
+				return Response.ok(0).build();
+			}
+			
+			// if we reached this point, it means that the app is set for purchase based on square kilometers and the user has to pay it
+			// then, we need to compute the price of the selection
+			
+			WasdiLog.debugLog("ProcessorsResource.getCreditsForRun. Computing bounding box price for running processor " + sProcessorId);
+			
+			Float fPricePerSquareKilometer = oProcessorToRun.getPricePerSquareKm(); 
+			String sAreaParameterName = oProcessorToRun.getAreaParameterName();
+				
+			WasdiLog.debugLog("ProcessorsResource.internalRun. Name of the area parameter " + sAreaParameterName);
+			
+			Double dNumberOfCredits = computeNumberOfCredits(sEncodedJson, sAreaParameterName, fPricePerSquareKilometer);
+			
+			if (dNumberOfCredits == null) {
+				WasdiLog.errorLog("ProcessorResource.internalRun. Something went wrong computing the credits from the bbox");
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+			
+			return Response.ok(dNumberOfCredits).build();		
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorResource.getCreditsForRun. Error: ", oEx );
+			return Response.serverError().build();
+		}
+
+	}
+	
+	private Double computeNumberOfCredits(String sJsonParameters, String sAreaParameterName, Float fPricePerSquareKilometer) {
+		
+		if (Utils.isNullOrEmpty(sJsonParameters) || Utils.isNullOrEmpty(sAreaParameterName) || fPricePerSquareKilometer == null || fPricePerSquareKilometer == 0f) {
+			WasdiLog.warnLog("ProcessorsResource.computeNumberOfCredits. Not enough information to compute the credits for the bbox");
+			return null;
+		}
+		
+		try {
+			sJsonParameters  = java.net.URLDecoder.decode(sJsonParameters, java.nio.charset.StandardCharsets.UTF_8.name());
+			
+			JSONObject oJson = new JSONObject(sJsonParameters);
+			
+			double dSouth = Double.NaN;	// min lat
+			double dEast = Double.NaN; 	// max long
+			double dNorth = Double.NaN; // max lat
+			double dWest = Double.NaN;	// min long
+									
+			try {
+				JSONObject oJsonObject = oJson.getJSONObject(sAreaParameterName);
+				
+				if (oJsonObject.keySet().contains("southWest") && oJsonObject.keySet().contains("northEast")) {
+					dSouth = oJsonObject.getJSONObject("southWest").getDouble("lat");
+					dWest = oJsonObject.getJSONObject("southWest").getDouble("lng");
+					dNorth = oJsonObject.getJSONObject("northEast").getDouble("lat");
+					dEast = oJsonObject.getJSONObject("northEast").getDouble("lng");
+				}
+				
+			} 
+			catch (JSONException oE) {
+				WasdiLog.debugLog("ProcessorsResource.computeNumberOfCredits: the bbox is not an object, try string ");
+				try {
+					String sAoi = oJson.getString("AOI");
+					String [] asCoords = sAoi.split(",");
+					
+					dNorth = Double.parseDouble(asCoords[0]);
+					dWest = Double.parseDouble(asCoords[1]);
+					dSouth = Double.parseDouble(asCoords[2]);
+					dEast = Double.parseDouble(asCoords[3]);
+					
+				}
+				catch (Exception oE2) {
+					WasdiLog.errorLog("ProcessorsResource.computeNumberOfCredits. Error while processing the dictionary representing the bbox", oE);	
+				}
+			}
+			
+			if (Double.isNaN(dWest) || Double.isNaN(dNorth) || Double.isNaN(dSouth) || Double.isNaN(dEast)) {
+				WasdiLog.warnLog("ProcessorsResource.computeNumberOfCredits. Impossible to process the bouding box");
+				return null;
+			}
+				
+				
+			double dDiffLat = dNorth - dSouth;
+			double dDiffLong = dEast - dWest;
+			
+			// one degree of latitude: approx 111.32 km
+			// one degree of longitude: 111.32 X cos(lat) km
+			
+			// average latitude of the bounding box
+			double dAvgLat = (dSouth + dNorth) / 2;
+			double dWidth = dDiffLong * 111.32 * Math.cos(dAvgLat);
+			double dHeight = dDiffLat * 111.32;
+			double dAreaInSquareKilometers = dWidth * dHeight;	
+			
+			WasdiLog.debugLog("ProcessorResource.computeNumberOfCredits. Square kilometers of the bouding box: " + dAreaInSquareKilometers);
+			
+			double dCredits = fPricePerSquareKilometer * dAreaInSquareKilometers;
+			
+			double dCreditsRoundedValue = new BigDecimal(dCredits).setScale(2, RoundingMode.HALF_UP).doubleValue();
+			
+			return dCreditsRoundedValue;
+			
+		} catch (Exception oE) {
+			WasdiLog.errorLog("ProcessorsResource.computeNumberOfCredits. Error while processing the processor's parameters", oE);
+			return null;
+		}	
+		
+	}
+	
+	
 	
 		
 	/**
@@ -2138,134 +2417,16 @@ public class ProcessorsResource  {
 				return Response.status(Status.FORBIDDEN).build();				
 			}
 			
-			// MANAGE STRIPE PRODUCT
-			Float fOldOnDemandPrice = oProcessorToUpdate.getOndemandPrice();
-			Float fNewOnDemandPrice = oUpdatedProcessorVM.getOndemandPrice();
+			Status oUpdatePaymentStatus = updatePaymentDetails(oProcessorToUpdate, oUpdatedProcessorVM);
 			
-			if (fNewOnDemandPrice < 0) {
-				WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the ondemand price is a negative value. Information on Stripe won't be updated");
-				return Response.status(Status.BAD_REQUEST).build();
-			} 
-			else if (fOldOnDemandPrice != fNewOnDemandPrice) {
-				StripeService oStripeService = new StripeService();
-				
-				if (fOldOnDemandPrice > 0 && fNewOnDemandPrice == 0) {
-					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the app has been set for free. Archiving the Stripe price for the app");
-					String sStripeProductId = oProcessorToUpdate.getStripeProductId();
-					String sPaymentLinkId = oProcessorToUpdate.getStripePaymentLinkId();
-					
-					if (Utils.isNullOrEmpty(sStripeProductId) || Utils.isNullOrEmpty(sPaymentLinkId)) {
-						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id or payment link id are null or empty.");
-						return Response.status(Status.NOT_FOUND).build();
-					}
-					
-					// deactivate the product and price, a new product will be created if the app will be set again for purchase
-					String sStripeDeactivatedProductId = oStripeService.deactivateProduct(sStripeProductId);
-					if (Utils.isNullOrEmpty(sStripeDeactivatedProductId) ) {
-						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the id of the archived product is null. Something might have gone wrong on Stripe");
-						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-					}
-					
-					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: deactivated product: " + sStripeDeactivatedProductId);
-					
-					// deactivate payment link
-					String sStripeDeactivatedPaymentLinkId = oStripeService.deactivatePaymentLink(sPaymentLinkId);
-					if (Utils.isNullOrEmpty(sStripeDeactivatedPaymentLinkId) ) {
-						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the id of the archived payment link is null. Something might have gone wrong on Stripe");
-						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-					}
-					
-					// we remove the reference to the product id and the payment link id in the db
-					oProcessorToUpdate.setStripePaymentLinkId(null);
-					oProcessorToUpdate.setStripeProductId(null);
-					
-				}
-				else if (fOldOnDemandPrice <= 0 && fNewOnDemandPrice > 0) {
-					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: the app has been set for sale. Adding the Stripe product");
-					
-					Map<String, String> oStripeProducInformationMap = oStripeService.createProductAppWithOnDemandPrice(oUpdatedProcessorVM.getProcessorName(), sProcessorId, fNewOnDemandPrice);
-				
-					if (oStripeProducInformationMap == null ) {
-						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: no information about the created Stripe product");
-						return Response.status(Status.NOT_FOUND).build();
-					}
-					
-					String sStripeProductId = oStripeProducInformationMap.getOrDefault("productId", null);
-					String sStripePriceId = oStripeProducInformationMap.getOrDefault("priceId", null);
-					
-					if (Utils.isNullOrEmpty(sStripeProductId) || Utils.isNullOrEmpty(sStripePriceId)) {
-						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id and price id are null or empty");
-						return Response.status(Status.NOT_FOUND).build();
-					}
-					
-					WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: product created on Stripe with id: " + sStripeProductId);
-					
-					oProcessorToUpdate.setStripeProductId(sStripeProductId);
-					
-					String sStripePaymentLinkId = oStripeService.createPaymentLink(sStripePriceId, sProcessorId);
-					
-					if (Utils.isNullOrEmpty(sStripePaymentLinkId)) {
-						WasdiLog.debugLog("ProcessorsResource.updateProcessorDetails: Stripe payment link id is null or empty.");
-						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-					}
-					
-					oProcessorToUpdate.setStripePaymentLinkId(sStripePaymentLinkId);
-					
-				}
-				else if (fOldOnDemandPrice > 0 && fNewOnDemandPrice > 0 && fOldOnDemandPrice != fNewOnDemandPrice) {
-					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: the price of the app changed. Updating the correspoding Stripe product");
-					String sStripeProductId = oProcessorToUpdate.getStripeProductId();
-					
-					if (Utils.isNullOrEmpty(sStripeProductId)) {
-						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: Stripe product id not found in the db. Price won't be updated");
-						return Response.status(Status.NOT_FOUND).build();
-					}
-					
-					List<String> asStripeOnDemandPriceId = oStripeService.getActiveOnDemandPricesId(sStripeProductId);
-					
-					if (asStripeOnDemandPriceId.size() != 1) {
-						// we support only one active price at time
-						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: none or more than one on demand prices found.");
-						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-					}
-					
-					// deactivate the current on demand price and get the new price id
-					String sStripeNewOnDemandPriceId = oStripeService.updateOnDemandPrice(sStripeProductId, fNewOnDemandPrice);
-					
-					String sStripePaymentLinkId = oProcessorToUpdate.getStripePaymentLinkId();
-					String sResponsePaymentLinkId = oStripeService.deactivatePaymentLink(sStripePaymentLinkId);
-					
-					if (Utils.isNullOrEmpty(sResponsePaymentLinkId) || !sResponsePaymentLinkId.equals(sStripePaymentLinkId)) {
-						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: payment link on Stripe has not been deactivated");
-						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-					}
-					
-					// generate a new on demand price
-					String sNewPaymentLinkId = oStripeService.createPaymentLink(sStripeNewOnDemandPriceId, sProcessorId);
-					
-					if (Utils.isNullOrEmpty(sNewPaymentLinkId)) {
-						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: payment link on Stripe has not been generated for price id " + sStripeNewOnDemandPriceId);
-						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-					}
-					
-					oProcessorToUpdate.setStripePaymentLinkId(sNewPaymentLinkId);	
-					
-					if (Utils.isNullOrEmpty(sStripeNewOnDemandPriceId)) {
-						WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: updated price id in Stripe is null or empty. Something might have gone wrong on Stripe");
-						return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-					}
-					
-					WasdiLog.debugLog(
-							"ProcessorsResource.updateProcessorDetails: price updated for Stripe product " + sStripeProductId + ". New on demand price id: " + sStripeNewOnDemandPriceId);
-				}
-				
+			if (!oUpdatePaymentStatus.name().equals(Status.OK.name())) {
+				return Response.status(oUpdatePaymentStatus).build();
 			}
 						
 			oProcessorToUpdate.setCategories(oUpdatedProcessorVM.getCategories());
 			oProcessorToUpdate.setEmail(oUpdatedProcessorVM.getEmail());
 			oProcessorToUpdate.setFriendlyName(oUpdatedProcessorVM.getFriendlyName());
 			oProcessorToUpdate.setLink(oUpdatedProcessorVM.getLink());
-			oProcessorToUpdate.setOndemandPrice(oUpdatedProcessorVM.getOndemandPrice());
 			oProcessorToUpdate.setSubscriptionPrice(oUpdatedProcessorVM.getSubscriptionPrice());			
 			Date oDate = new Date();
 			oProcessorToUpdate.setUpdateDate((double)oDate.getTime());
@@ -2280,6 +2441,176 @@ public class ProcessorsResource  {
 			WasdiLog.errorLog("ProcessorResource.updateProcessorDetails error: " + oEx.toString());
 			return Response.serverError().build();
 		}
+	}
+	
+	private Status updatePaymentDetails(Processor oProcessorToUpdate, AppDetailViewModel oUpdatedProcessorVM) {
+		
+		if (oProcessorToUpdate == null || oUpdatedProcessorVM == null) {
+			WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: processor or view model are null");
+			return Status.BAD_REQUEST;
+		}
+		
+		String sProcessorId = oProcessorToUpdate.getProcessorId();
+		
+		Float fOldOnDemandPrice = oProcessorToUpdate.getOndemandPrice();
+		Float fNewOnDemandPrice = oUpdatedProcessorVM.getOndemandPrice();
+		
+		Float fOldSquareKmPrice = oProcessorToUpdate.getPricePerSquareKm();
+		Float fNewSquareKmPrice = oUpdatedProcessorVM.getSquareKilometerPrice();
+		
+		if (fNewOnDemandPrice != null && fNewSquareKmPrice != null && fNewOnDemandPrice.floatValue() > 0 && fNewSquareKmPrice.floatValue() > 0) {
+			WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: processor " + oProcessorToUpdate.getProcessorId() + "  has both on deman price and square kilometer price. Just one of them should be set");
+		}
+				
+		if (fNewOnDemandPrice < 0) {
+			WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: the ondemand price is a negative value. Information on Stripe won't be updated");
+			return Status.BAD_REQUEST;
+		} 
+		
+		if (fNewSquareKmPrice < 0) {
+			WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: the square kilometer price is a negative value. Information on Stripe won't be updated");
+			return Status.BAD_REQUEST;
+		} 
+		
+		if (fNewSquareKmPrice != null && fOldSquareKmPrice.floatValue() > 0 && Utils.isNullOrEmpty(oUpdatedProcessorVM.getAreaParameterName())) {
+			WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: Price per kilometer is not associated with a name for the area parameter " + fNewOnDemandPrice.floatValue());
+			return Status.BAD_REQUEST;
+		}
+		
+		// manage prices
+		if ( (fOldOnDemandPrice.floatValue() != fNewOnDemandPrice.floatValue())) {
+			StripeService oStripeService = new StripeService();
+			
+			if ( (fOldOnDemandPrice > 0 && fNewOnDemandPrice == 0)) {
+				WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: on demand price removed. Archiving the Stripe price for the app");
+				String sStripeProductId = oProcessorToUpdate.getStripeProductId();
+				String sPaymentLinkId = oProcessorToUpdate.getStripePaymentLinkId();
+				
+				if (Utils.isNullOrEmpty(sStripeProductId) || Utils.isNullOrEmpty(sPaymentLinkId)) {
+					WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: Stripe product id or payment link id are null or empty.");
+					return Status.NOT_FOUND;
+				}
+				
+				// deactivate the product and price, a new product will be created if the app will be set again for purchase
+				String sStripeDeactivatedProductId = oStripeService.deactivateProduct(sStripeProductId);
+				if (Utils.isNullOrEmpty(sStripeDeactivatedProductId) ) {
+					WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: the id of the archived product is null. Something might have gone wrong on Stripe");
+					return Status.INTERNAL_SERVER_ERROR;
+				}
+				
+				WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: deactivated product: " + sStripeDeactivatedProductId);
+				
+				// deactivate payment link
+				String sStripeDeactivatedPaymentLinkId = oStripeService.deactivatePaymentLink(sPaymentLinkId);
+				if (Utils.isNullOrEmpty(sStripeDeactivatedPaymentLinkId) ) {
+					WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: the id of the archived payment link is null. Something might have gone wrong on Stripe");
+					return Status.INTERNAL_SERVER_ERROR;
+				}
+				
+				// we remove the reference to the product id and the payment link id in the db
+				oProcessorToUpdate.setStripePaymentLinkId(null);
+				oProcessorToUpdate.setStripeProductId(null);
+				
+			}
+			else if ( (fOldOnDemandPrice <= 0 && fNewOnDemandPrice > 0) ) {
+				WasdiLog.debugLog("ProcessorsResource.updatePaymentDetails: the app has been set for sale with on demand price. Adding the Stripe product");
+				
+				Map<String, String> oStripeProducInformationMap = oStripeService.createProductAppWithPrice(oUpdatedProcessorVM.getProcessorName(), sProcessorId, fNewOnDemandPrice, fNewSquareKmPrice);
+			
+				if (oStripeProducInformationMap == null ) {
+					WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: no information about the created Stripe product");
+					return Status.NOT_FOUND;
+				}
+				
+				String sStripeProductId = oStripeProducInformationMap.getOrDefault("productId", null);
+				String sStripePriceId = oStripeProducInformationMap.getOrDefault("priceId", null);
+				
+				if (Utils.isNullOrEmpty(sStripeProductId) || Utils.isNullOrEmpty(sStripePriceId)) {
+					WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: Stripe product id and price id are null or empty");
+					return Status.NOT_FOUND;
+				}
+				
+				WasdiLog.debugLog("ProcessorsResource.updatePaymentDetails: product created on Stripe with id: " + sStripeProductId);
+				
+				oProcessorToUpdate.setStripeProductId(sStripeProductId);
+				
+				String sStripePaymentLinkId = oStripeService.createPaymentLink(sStripePriceId, sProcessorId);
+				
+				if (Utils.isNullOrEmpty(sStripePaymentLinkId)) {
+					WasdiLog.debugLog("ProcessorsResource.updatePaymentDetails: Stripe payment link id is null or empty.");
+					return Status.INTERNAL_SERVER_ERROR;
+				}
+				
+				oProcessorToUpdate.setStripePaymentLinkId(sStripePaymentLinkId);
+				
+			}
+			else if ( (fOldOnDemandPrice > 0 && fNewOnDemandPrice > 0 && fOldOnDemandPrice != fNewOnDemandPrice) ) {
+				WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: the on demand price of the app changed. Updating the correspoding Stripe product");
+				String sStripeProductId = oProcessorToUpdate.getStripeProductId();
+				
+				if (Utils.isNullOrEmpty(sStripeProductId)) {
+					WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: Stripe product id not found in the db. Price won't be updated");
+					return Status.NOT_FOUND;
+				}
+				
+				List<String> asStripeOnDemandPriceId = oStripeService.getActivePricesId(sStripeProductId);
+				
+				if (asStripeOnDemandPriceId.size() != 1) {
+					// we support only one active price at time
+					WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: none or more than one on demand prices found.");
+					return Status.INTERNAL_SERVER_ERROR;
+				}
+				
+				// deactivate the current on demand price and get the new price id
+				String sStripeNewOnDemandPriceId = oStripeService.updateOnDemandPrice(sStripeProductId, fNewOnDemandPrice);
+				
+				String sStripePaymentLinkId = oProcessorToUpdate.getStripePaymentLinkId();
+				String sResponsePaymentLinkId = oStripeService.deactivatePaymentLink(sStripePaymentLinkId);
+				
+				if (Utils.isNullOrEmpty(sResponsePaymentLinkId) || !sResponsePaymentLinkId.equals(sStripePaymentLinkId)) {
+					WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: payment link on Stripe has not been deactivated");
+					return Status.INTERNAL_SERVER_ERROR;
+				}
+				
+				// generate a new on demand price
+				String sNewPaymentLinkId = oStripeService.createPaymentLink(sStripeNewOnDemandPriceId, sProcessorId);
+				
+				if (Utils.isNullOrEmpty(sNewPaymentLinkId)) {
+					WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: payment link on Stripe has not been generated for price id " + sStripeNewOnDemandPriceId);
+					return Status.INTERNAL_SERVER_ERROR;
+				}
+				
+				oProcessorToUpdate.setStripePaymentLinkId(sNewPaymentLinkId);	
+				
+				if (Utils.isNullOrEmpty(sStripeNewOnDemandPriceId)) {
+					WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: updated price id in Stripe is null or empty. Something might have gone wrong on Stripe");
+					return Status.INTERNAL_SERVER_ERROR;
+				}
+				
+				WasdiLog.debugLog(
+						"ProcessorsResource.updatePaymentDetails: price updated for Stripe product " + sStripeProductId + ". New on demand price id: " + sStripeNewOnDemandPriceId);
+			}
+			
+			oProcessorToUpdate.setOndemandPrice(fNewOnDemandPrice);
+		}
+		
+		oProcessorToUpdate.setAreaParameterName(oUpdatedProcessorVM.getAreaParameterName());
+		
+		if ( (fOldSquareKmPrice.floatValue() != fNewSquareKmPrice.floatValue()) ) {
+			
+			// if the old price was 0 and now is > 0 => then a new price has been added and we need to store the necessary information
+			if ( (fOldSquareKmPrice == 0 && fNewSquareKmPrice > 0) 
+					|| (fOldSquareKmPrice > 0 && fNewSquareKmPrice > 0 && fOldSquareKmPrice != fNewSquareKmPrice) ) {
+				oProcessorToUpdate.setPricePerSquareKm(fNewSquareKmPrice);
+				oProcessorToUpdate.setAreaParameterName(oUpdatedProcessorVM.getAreaParameterName());
+			} // otherwise, if the old price was > 0 and the new price is == 0, then the price per square kilometer has been deleted. We clean the price
+			else if (fOldSquareKmPrice > 0 && fNewSquareKmPrice == 0) {
+				oProcessorToUpdate.setPricePerSquareKm(0f);
+				oProcessorToUpdate.setAreaParameterName(null);
+			}
+		}
+		
+		return Status.OK;
 	}
 	
 	/**

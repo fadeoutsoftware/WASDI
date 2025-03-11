@@ -28,6 +28,21 @@ public class DataProviderConfig {
 	 */
 	public String name;
 	/**
+	 * Full Class Name and Path of the class implementing this Query Executor
+	 */
+	public String queryExecutorClasspath;
+	
+	/**
+	 * Provider Adapter class path
+	 */
+	public String providerAdapterClasspath;
+	
+	/**
+	 * Python Script for Ext-Python Provider path
+	 */
+	public String pythonScript;	
+	
+	/**
 	 * Description of the Data Provider
 	 */
 	public String description;

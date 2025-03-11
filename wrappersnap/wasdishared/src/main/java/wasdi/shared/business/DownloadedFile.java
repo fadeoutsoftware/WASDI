@@ -48,6 +48,11 @@ public class DownloadedFile {
 	 */
     private String description;
     
+    /**
+     * Platform (aka Mission)
+     */
+    private String platform;
+    
 	/**
      * Product View Model
      * NOTE: Usually do not use View Models in entities. But this is more an entity that not a view model...
@@ -124,5 +129,13 @@ public class DownloadedFile {
     public void setDescription(String description) {
         this.description = description;
     }
+
+	public String getPlatform() {
+		return platform;
+	}
+
+	public void setPlatform(String platform) {
+		this.platform = platform;
+	}
 
 }

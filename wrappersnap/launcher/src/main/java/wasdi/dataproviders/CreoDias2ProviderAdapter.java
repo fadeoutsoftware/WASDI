@@ -53,7 +53,6 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	
 	public CreoDias2ProviderAdapter() {
 		super();
-		m_sDataProviderCode = "CREODIAS2";
 	}
 	
 	protected boolean isFileProtocolNew(String sUrl) {
@@ -557,7 +556,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	 * and it is in position 1.
 	 */
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		
 		String sResult = "";
 		
@@ -602,14 +601,14 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		boolean bOnCloud = isWorkspaceOnSameCloud();
 		
 		if (sPlatformType.equals(Platforms.SENTINEL1)) {
-			String sType = MissionUtils.getProductTypeSatelliteImageFileName(sFileName);
+			String sType = MissionUtils.getProductTypeSatelliteImageFileName(sFileName, sPlatformType);
 			
 			if (sType.equals("SLC") || sType.equals("GRD") || sType.equals("GRD-COG") || sType.equals("RTC")) {
 				if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
 				else return DataProviderScores.DOWNLOAD.getValue();
 			}
 			else if (sType.equals("RAW")) {
-				Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName);
+				Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName, sPlatformType);
 				
 				if (oImageDate!=null) {
 					Date oNow = new Date();

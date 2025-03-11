@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import wasdi.shared.business.AuthenticationCredentials;
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
@@ -37,7 +39,7 @@ public abstract class QueryExecutor {
 	/**
 	 * Name of the data provider. Must be initialized in the constructor of derived classes
 	 */
-	protected String m_sProvider;
+	protected String m_sDataProviderCode;
 	
 	/**
 	 * User that must be used to authenticate to the data provider, if needed
@@ -82,11 +84,19 @@ public abstract class QueryExecutor {
 	protected boolean m_bUseBasicAuthInHttpQuery = true;
 	
 	/**
+	 * Data Provider Config
+	 */
+	protected DataProviderConfig m_oDataProviderConfig = null;
+	
+	/**
 	 * Initialization function.
 	 * It is called by the Factory immediatly after the creation of the object.
 	 * Can be overridden to custom Providers initializations.
 	 */
 	public void init() {
+		
+		
+		
 		return;
 	}
 
@@ -138,15 +148,19 @@ public abstract class QueryExecutor {
 	 * 
 	 * @param sProduct Exact Name of the product that must be found
 	 * @param sProtocol Protocol of interest that determinate the return string (ie http link or local path)
+	 * @param sOriginalUrl Original Url available in the DownloadParameter
+	 * @param sPlatform declared Platform. If it is null, will try to autodetect it
 	 * @return URI to the file, usually an http/https link or a local file path
 	 */
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		try {
 			String sClientQuery = "";
 			
 			sClientQuery = sProduct + " AND ( beginPosition:[1893-09-07T00:00:00.000Z TO 2893-09-07T00:00:00.000Z] AND endPosition:[1893-09-07T23:59:59.999Z TO 2893-09-07T23:59:59.999Z] ) ";
 			
-			String sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(sProduct);
+			if (Utils.isNullOrEmpty(sPlatform)) {
+				sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(sProduct);	
+			}
 			
 			if (!Utils.isNullOrEmpty(sPlatform)) {
 				sClientQuery = sClientQuery + "AND (platformname:" + sPlatform + " )";
@@ -275,6 +289,16 @@ public abstract class QueryExecutor {
 		HttpUtils.logOperationSpeed(sUrl, "standardHttpPOSTQuery", lStart, lEnd, sResult);
 
 		return sResult;
+	}
+
+	public String getCode() {
+		return m_sDataProviderCode;
+	}
+
+	public void setCode(String sCode) {
+		
+		this.m_sDataProviderCode = sCode;
+		m_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);		
 	}
 
 }

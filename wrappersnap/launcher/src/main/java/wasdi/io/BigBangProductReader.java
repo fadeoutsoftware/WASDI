@@ -59,11 +59,6 @@ public class BigBangProductReader extends WasdiProductReader {
 	}
 
 	@Override
-	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
-		return sDownloadedFileFullPath;
-	}
-
-	@Override
 	public File getFileForPublishBand(String sBand, String sLayerId) {
     	WasdiLog.debugLog("BigBangProductReader.getFileForPublishBand: no bands for BigBang products");
 		return null;

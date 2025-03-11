@@ -658,7 +658,12 @@ public class DockerUtils {
             		CreateParams oContainerCreateParams = new CreateParams();
             		
                     String sProcessorType = m_oProcessor.getType();
-                    ProcessorTypeConfig oProcessorTypeConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig(sProcessorType);            		
+                    ProcessorTypeConfig oProcessorTypeConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig(sProcessorType);
+                    
+                    if (oProcessorTypeConfig==null) {
+                    	WasdiLog.errorLog("DockerUtils.start: impossible to find the configuration for " + sProcessorType + " we need to stop here.");
+                    	return "";
+                    }
             		
             		// Set the user
             		oContainerCreateParams.User = m_sWasdiSystemUserName+":"+m_sWasdiSystemGroupName;

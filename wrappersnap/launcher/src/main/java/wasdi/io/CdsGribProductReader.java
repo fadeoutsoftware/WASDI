@@ -312,13 +312,6 @@ public class CdsGribProductReader extends WasdiProductReader {
 	}
 
 	@Override
-	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
-		String sFileName = sDownloadedFileFullPath;
-
-		return sFileName;
-	}
-
-	@Override
 	public File getFileForPublishBand(String sBand, String sLayerId) {
 		return null;
 	}

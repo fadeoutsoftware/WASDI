@@ -271,13 +271,6 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 	}
 
 	@Override
-	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
-		String sFileName = sDownloadedFileFullPath;
-
-		return sFileName;
-	}
-
-	@Override
 	public Product getSnapProduct() {
 		Product oProduct = super.getSnapProduct();
 

@@ -109,6 +109,9 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      */
     protected DataProviderConfig m_oDataProviderConfig;
     
+    /**
+     * Multiply the std WASDI read timeout for the query of this specific Data Provider. May be useful for slow providers
+     */
     protected int m_iHttpDownloadReadTimeoutMultiplier = 1;
 
     /**
@@ -166,13 +169,25 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      * @param sFileURL URL of the file
      * @return
      */
-    public abstract String getFileName(String sFileURL) throws Exception;
+    public String getFileName(String sFileURL) throws Exception {
+    	return getFileName(sFileURL, "");
+    }
+    
+    public abstract String getFileName(String sFileURL,String sDownloadPath) throws Exception;
     
     /**
      * Get the Data Provider Code
      */
     public String getCode() {
     	return m_sDataProviderCode;
+    }
+    
+    /**
+     * Set the Data Provider Code
+     * @param sCode
+     */
+    public void setCode(String sCode) {
+    	m_sDataProviderCode = sCode;
     }
     
     /**
@@ -185,11 +200,32 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      * @return Provider score. -1 if not supported
      */
     public int getScoreForFile(String sFileName) {
+    	return getScoreForFile(sFileName, null);
+    }
+    
+    /**
+     * Get the score of this Data Provider for the specified file. 
+     * The score is -1 if the file is not supported.
+     * High score means the fast availalbilty of the file
+     * Low score means slow availability of the file 
+     * 
+     * @param sFileName File to investigate
+     * @param sPlatform PlatformType
+     * @return Provider score. -1 if not supported
+     */
+    public int getScoreForFile(String sFileName, String sPlatform) {
     	
     	try {
     		
-    		String sPlatformType = MissionUtils.getPlatformFromSatelliteImageFileName(sFileName);
+    		// Try to assume we have the platform
+    		String sPlatformType = sPlatform;
     		
+    		// If not, try to autodetect it
+    		if (Utils.isNullOrEmpty(sPlatformType)) {
+    			sPlatformType = MissionUtils.getPlatformFromSatelliteImageFileName(sFileName);
+    		}
+    		
+    		// If it is still null, we cannot proceed
     		if (Utils.isNullOrEmpty(sPlatformType)) {
     			WasdiLog.debugLog("ProviderAdapter.getScoreForFile: platform not recognized. DataProvider: " + m_sDataProviderCode + " File: " + sFileName);
     			return -1;
@@ -206,7 +242,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		}
     	
     	return -1;
-    }
+    }    
     
     /**
      * Internal abstract method to determine the score of this Data Provider for a input file
@@ -1091,14 +1127,6 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 							}
 							else {
 								WasdiLog.debugLog("ProviderAdapter.localFileCopy: file not readable: " + oDestionationFile.getPath() + " try again");
-								try {
-									String sDestination = oDestionationFile.getPath();
-									sDestination += ".attemp"+ (iMaxRetry-iAttempts+1);
-									FileUtils.copyFile(oDestionationFile, new File(sDestination));										
-								}
-								catch (Exception oEx) {
-									WasdiLog.debugLog("ProviderAdapter.localFileCopy: Exception making copy of attempt file " + oEx.toString());
-								}
 							}								
 						}
 						catch (Exception oReadEx) {

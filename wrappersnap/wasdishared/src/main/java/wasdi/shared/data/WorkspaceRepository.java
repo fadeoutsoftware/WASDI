@@ -4,14 +4,17 @@ import static com.mongodb.client.model.Filters.eq;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
@@ -180,6 +183,54 @@ public class WorkspaceRepository extends  MongoRepository {
     }
 
     /**
+     * Get all the workspaces on a certain node
+     * @param sNodeCode the code of the node
+     * @return the list of workspaces on a node
+     */
+    public List<Workspace> getWorkspaceByNode(String sNodeCode) {
+
+        final ArrayList<Workspace> aoReturnList = new ArrayList<Workspace>();
+        
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("nodeCode", sNodeCode));
+            
+            fillList(aoReturnList, oWSDocuments, Workspace.class);
+            
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("WorkspaceRepository.getWorkspaceByNode: error: ", oEx);
+        }
+
+        return aoReturnList;
+    }
+    
+    /**
+     * Given a user, retrieves the list of their workspaces ordered by update date, from the less recent to the last recent one
+     * @param sUserId the id of the user
+     * @return the  list of workspaces of a user, ordered by last update date in ascending order
+     */
+    public List<Workspace> getWorkspacesSortedByOldestUpdate(String sUserId) {
+    	
+        final ArrayList<Workspace> aoReturnList = new ArrayList<Workspace>();
+
+        try {
+        			
+        	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+        			.find(new Document("userId", sUserId))
+        			.sort(Sorts.ascending("lastEditDate"));
+            
+            fillList(aoReturnList, oWSDocuments, Workspace.class);
+            
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("WorkspaceRepository.getWorkspacesFromOldestUpdate: error: ", oEx);
+        }
+
+        return aoReturnList;
+    }
+    
+    
+
+    /**
      * Find a workspace by userId and workspace name.
      * @param sUserId the userId
      * @param sName the name of the workspace
@@ -248,6 +299,7 @@ public class WorkspaceRepository extends  MongoRepository {
     	
     	return null;
     }
+    
     
     /**
      * Delete a workspace by Id
@@ -371,6 +423,48 @@ public class WorkspaceRepository extends  MongoRepository {
 		}
 
 		return aoReturnList;
+	}
+	
+	/**
+	 * It returns the total disk storage size (in bytes) occupied by all the workspaces of a user
+	 * @param sUserId the user id
+	 * @return the size (in bytes) of disk storage occupied by all the workspaces of a certain user
+	 */
+	public Long getStorageUsageForUser(String sUserId) {
+		
+		Long lStorageUsage = -1L;
+		
+		if (Utils.isNullOrEmpty(sUserId)) 
+			return lStorageUsage;
+		
+		try {
+			List<Document> aoPipeline = Arrays.asList(
+					new Document("$match", new Document("userId", sUserId)),			// get the workspaces by user
+					new Document("$group", new Document()								// group the retrieved documents by computing the sum of the storage size						
+		                    .append("_id", null)
+		                    .append("totalStorage", new Document("$sum",
+		                    	new Document("$toLong",
+		                    			new Document("$ifNull", Arrays.asList("$storageSize", 0)) // handle null or missing values
+		                        )
+		                    ))
+		                )
+		
+				);
+		
+			// execute the aggregation
+			AggregateIterable<Document> oResult = getCollection(m_sThisCollection).aggregate(aoPipeline);
+			
+			// extract the total storage size
+			lStorageUsage = oResult.first() != null 
+					? oResult.first().getLong("totalStorage") 
+					: 0L;
+			
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("WorkspaceRepository.getStorageUsageForUser. Error: ", oEx);
+		}
+		
+		return lStorageUsage;
+		
 	}
 
 }

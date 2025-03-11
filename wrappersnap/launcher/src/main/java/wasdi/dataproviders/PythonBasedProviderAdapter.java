@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ import wasdi.shared.utils.runtime.ShellExecReturn;
 
 public class PythonBasedProviderAdapter extends ProviderAdapter {
 	
-	private static final Object s_oTempFolderLock = new Object();
+	protected static final Object s_oTempFolderLock = new Object();
 
 	protected String m_sPythonScript = "";
 	protected String m_sExchangeFolder = ""; 
@@ -30,9 +31,7 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 	protected void internalReadConfig() {
 		String sAdapterConfigPath = "";
 		try {
-			sAdapterConfigPath = m_oDataProviderConfig.adapterConfig;
-			JSONObject oAppConf = JsonUtils.loadJsonFromFile(sAdapterConfigPath);
-			m_sPythonScript = oAppConf.getString("pythonScript");
+			m_sPythonScript = m_oDataProviderConfig.pythonScript;
 			m_sExchangeFolder = WasdiConfig.Current.paths.wasdiTempFolder;
 		} catch(Exception oEx) {
 			WasdiLog.errorLog("PythonBasedProviderAdapter.internalReadConfig: exception reading parser config file " + sAdapterConfigPath);
@@ -163,7 +162,7 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 			
 			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
 			
-			WasdiLog.infoLog("PythonBasedProviderAdapter.executeDownloadFile: python output = " + oShellExecReturn.getOperationLogs());;
+			WasdiLog.infoLog("PythonBasedProviderAdapter.executeDownloadFile: python output = " + oShellExecReturn.getOperationLogs());
 			
 			File oOutputFile = new File(sOutputFullPath);
 			
@@ -200,6 +199,8 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 	
 	protected Map<String, Object> fromWasdiPayloadToObjectMap(String sUrl) {
 		String sDecodedUrl = decodeUrl(sUrl);
+		
+		HashMap<String, Object> aoReturnMap = new HashMap<>();
 
 		String sPayload = null;
 		if (!Utils.isNullOrEmpty(sDecodedUrl)) {
@@ -207,13 +208,15 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 			if (asTokens.length == 2) {
 				sPayload = asTokens[1];
 				WasdiLog.debugLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap json string: " + sPayload);
-				return JsonUtils.jsonToMapOfObjects(sPayload);
+				aoReturnMap.put("payload", JsonUtils.jsonToMapOfObjects(sPayload));
 			}
-			WasdiLog.warnLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap. Payload not found in url " + sUrl);
+			WasdiLog.debugLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap. Payload not found in url " + sUrl);
 		}
+	
+		aoReturnMap.put("url", sUrl);
 		
 		WasdiLog.warnLog("PythonBasedProviderAdapter.fromtWasdiPayloadToObjectMap. Decoded url is null or empty " + sUrl);
-		return null;
+		return aoReturnMap;
 	}
 	
 	protected Map<String, String> fromWasdiPayloadToStringMap(String sUrl) {
@@ -249,12 +252,17 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		return null;
 	}
 
 	@Override
 	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
+		
+		if (m_asSupportedPlatforms.contains(sPlatformType)) {
+			return DataProviderScores.DOWNLOAD.getValue();
+		}
+
 		return 0;
 	}
 

@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
@@ -25,15 +24,8 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 	boolean m_bAuthenticated = false;
 
 	public QueryExecutorTerrascope() {
-		m_sProvider="TERRASCOPE";
 		this.m_oQueryTranslator = new QueryTranslatorTerrascope();
 		this.m_oResponseTranslator = new ResponseTranslatorTerrascope();
-
-		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
-//		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
-//		m_asSupportedPlatforms.add(Platforms.PROBAV);
-		m_asSupportedPlatforms.add(Platforms.DEM);
-		m_asSupportedPlatforms.add(Platforms.WORLD_COVER);
 	}
 	
 	/**
@@ -41,7 +33,7 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 	 * For Terrascope, we need just the original link..
 	 */
 	@Override
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		if (sProduct.toUpperCase().startsWith("COPERNICUS_DSM_COG_")
 				|| sProduct.toUpperCase().startsWith("ESA_WORLDCOVER")) {
 			return sOriginalUrl;

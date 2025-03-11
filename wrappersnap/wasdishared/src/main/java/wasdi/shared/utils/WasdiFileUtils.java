@@ -34,6 +34,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -841,5 +842,35 @@ public class WasdiFileUtils {
 			}
 		}
 	}
+	
+    
+    /**
+     * Compute the size of the folder representing a workspace on the file system
+     * @return the size of the folder in bytes
+     */
+    public static long getWorkspaceFolderSize(String sUserId, String sWorkspaceId) {
+
+    	long lWorkspaceSize = 0L;
+    	
+    	if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sWorkspaceId)) {
+    		return lWorkspaceSize;
+    	}
+		
+    	try {
+	    	String sWorkspacePath = PathsConfig.getWorkspacePath(sUserId, sWorkspaceId);
+	        File oWorkspaceDir = new File(sWorkspacePath);
+	        
+	        if (oWorkspaceDir.exists()) {
+	        	lWorkspaceSize = FileUtils.sizeOfDirectory(oWorkspaceDir);
+	        	return lWorkspaceSize;
+	        }
+	        
+    	} catch (Exception oEx) {
+    		WasdiLog.errorLog("WasdiFileUtils.getWorkspaceFolderSize. Error computing workspace size", oEx);
+    	}
+    	
+        return lWorkspaceSize;
+    	
+    }
 	
 }

@@ -28,12 +28,14 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.business.users.User;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.ReadMetadataParameter;
@@ -701,7 +703,7 @@ public class ProductResource {
     @POST
     @Path("/uploadfile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("style") String sStyle) throws Exception {
+    public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("style") String sStyle, @QueryParam("platform") String sPlatformType) throws Exception {
         WasdiLog.debugLog("ProductResource.uploadfile( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " )");
 
         // before any operation check that this is not an injection attempt from the user
@@ -768,6 +770,7 @@ public class ProductResource {
             oParameter.setStyle(sStyle);
             oParameter.setProcessObjId(sProcessObjId);
             oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+            oParameter.setPlatform(sPlatformType);
 
             PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oOutputFilePath.getName(), oParameter);
 
@@ -1002,7 +1005,7 @@ public class ProductResource {
                     for (File oFile : aoFiles) {
 
                         WasdiLog.debugLog("ProductResource.deleteProduct: deleting file product " + oFile.getAbsolutePath() + "...");
-
+                                                
                         if (!FileUtils.deleteQuietly(oFile)) {
                             WasdiLog.debugLog("    ERROR");
                         } else {
@@ -1012,6 +1015,29 @@ public class ProductResource {
                 } else {
                     WasdiLog.debugLog("ProductResource.deleteProduct: No File to delete ");
                 }
+                
+                // update the size of the workspace
+            	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+            	Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+            	
+            	String sUserId = oWorkspace.getUserId();
+  	          
+	            String sWorkspacePath = PathsConfig.getWorkspacePath(sUserId, sWorkspaceId);
+	            File oWorkspaceDir = new File(sWorkspacePath);
+	            
+	            long lWorkspaceSize = 0;
+	            
+	            if (oWorkspaceDir.exists()) {
+	            	lWorkspaceSize = FileUtils.sizeOfDirectory(oWorkspaceDir);
+	            }                	
+            		
+        		oWorkspace.setStorageSize(lWorkspaceSize);
+        		if (oWorkspaceRepository.updateWorkspace(oWorkspace)) {
+        			WasdiLog.debugLog("ProductResource.deleteProduct. Workspace size after deleting product(s): " + lWorkspaceSize);
+        		} else {
+        			WasdiLog.warnLog("ProductResource.deleteProduct. Storage size of the workspace was not updated after deleting the products");
+        		}
+            			
             }
 
             if (bDeleteLayer) {
@@ -1116,6 +1142,7 @@ public class ProductResource {
 
         return oReturn;
     }
+    
 
     /**
      * Deletes a list of product invoking the delete method,
