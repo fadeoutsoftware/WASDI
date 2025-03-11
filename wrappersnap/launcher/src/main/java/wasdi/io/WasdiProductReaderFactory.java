@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import wasdi.shared.queryexecutors.jrc.ResponseTranslatorJRC;
 import wasdi.shared.utils.MissionUtils;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -30,8 +31,13 @@ public class WasdiProductReaderFactory {
             ZipFileUtils oZipExtractor = new ZipFileUtils();
             
             try {
-				oZipExtractor.unzip(oFile.getCanonicalPath(), oFile.getParent());
+				String sReturnPath = oZipExtractor.unzip(oFile.getCanonicalPath(), oFile.getParent());
 	            WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Unzip done");
+	            
+	            if (!Utils.isNullOrEmpty(sReturnPath)) {
+		            // Delete the original zip file
+		            WasdiFileUtils.deleteFile(oFile.getCanonicalPath());	            	
+	            }
 	            
 	            WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating Shape File Reader for " + oFile.getName());
 	            return new ShapeProductReader(oFile);

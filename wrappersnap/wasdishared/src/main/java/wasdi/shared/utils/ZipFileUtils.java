@@ -138,13 +138,14 @@ public class ZipFileUtils {
 				Enumeration<? extends ZipArchiveEntry> aoZipArchiveEntries = oZipFile.getEntries();
 				while(aoZipArchiveEntries.hasMoreElements()) {
 					extractOneEntry(sTempRelativeDirectory, sTempAbsolutePath, oZipFile, aoZipArchiveEntries);
-	
 				}
 			}
-		} catch (Exception oE) {
+		} 
+		catch (Exception oE) {
 			WasdiLog.errorLog(m_sLoggerPrefix + ".unzip: " + oE);
 			throw oE;
-		} finally {
+		} 
+		finally {
 			// make sure temporary directory gets deleted
 			WasdiLog.infoLog(m_sLoggerPrefix + "Copy and clean tmp dir.");
 			if (!cleanTempDir(sTempAbsolutePath, sTempRelativeDirectory)) {
