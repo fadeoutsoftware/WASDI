@@ -31,13 +31,8 @@ public class WasdiProductReaderFactory {
             ZipFileUtils oZipExtractor = new ZipFileUtils();
             
             try {
-				String sReturnPath = oZipExtractor.unzip(oFile.getCanonicalPath(), oFile.getParent());
+				oZipExtractor.unzip(oFile.getCanonicalPath(), oFile.getParent());
 	            WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Unzip done");
-	            
-	            if (!Utils.isNullOrEmpty(sReturnPath)) {
-		            // Delete the original zip file
-		            WasdiFileUtils.deleteFile(oFile.getCanonicalPath());	            	
-	            }
 	            
 	            WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating Shape File Reader for " + oFile.getName());
 	            return new ShapeProductReader(oFile);
