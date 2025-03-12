@@ -589,8 +589,9 @@ def executeDownloadFromCopernicusMarine(aoInputParameters, sUsername, sPassword)
         logging.warning(f"executeDownloadFromCopernicusMarine: exception while converting time filter to CM format {oEx}")
 
     sDownloadedFilePath = ""
+    oResponse = None
     try:
-        sDownloadedFilePath = copernicusmarine.subset(
+        oResponse = copernicusmarine.subset(
             dataset_id=sDatasetId,
             variables=asVariables,
             start_datetime=sCMStartDateTime,
@@ -610,7 +611,8 @@ def executeDownloadFromCopernicusMarine(aoInputParameters, sUsername, sPassword)
     except Exception as oEx:
         logging.error(f"executeDownloadFromCopernicusMarine: exception from CM toolbox call {oEx}")
 
-    sDownloadedFilePath = os.path.normpath(sDownloadedFilePath)
+    if oResponse is not None:
+        sDownloadedFilePath = oResponse.output_directory.as_posix() + "/" + oResponse.filename
     return sDownloadedFilePath
 
 
