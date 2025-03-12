@@ -603,6 +603,7 @@
         ],
 {% endif %}
         "removeDockersAfterShellExec": {{ aoWasdiConfiguration['dockers']['removeDockersAfterShellExec'] | lower }},
+        "removeParameterFilesForPythonsShellExec": true,
 {% if aoWasdiConfiguration['dockers']['shellExecCommands'] | length == 0 %}
         "shellExecCommands": {}
 {% else %}

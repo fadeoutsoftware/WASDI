@@ -165,11 +165,18 @@ public class ExtPythonProviderAdapter extends PythonBasedProviderAdapter {
 		} 
 		catch(Exception oEx) {
 			WasdiLog.errorLog("PythonBasedProviderAdapter.getFileName: error ", oEx);
-		} finally {
-			if (!Utils.isNullOrEmpty(sInputFullPath))
-				FileUtils.deleteQuietly(new File(sInputFullPath));
-			if (!Utils.isNullOrEmpty(sOutputFullPath))
-				FileUtils.deleteQuietly(new File(sOutputFullPath));
+		} 
+		finally {
+			
+			if (WasdiConfig.Current.dockers.removeParameterFilesForPythonsShellExec) {
+				if (!Utils.isNullOrEmpty(sInputFullPath))
+					FileUtils.deleteQuietly(new File(sInputFullPath));
+				if (!Utils.isNullOrEmpty(sOutputFullPath))
+					FileUtils.deleteQuietly(new File(sOutputFullPath));
+			}
+			else {
+				WasdiLog.infoLog("PythonBasedProviderAdapter.getFileName: removeParameterFilesForPythonsShellExec is  FALSE, we keep the parameter files");
+			}						
 		}
 		
 		return sResultFileName;
