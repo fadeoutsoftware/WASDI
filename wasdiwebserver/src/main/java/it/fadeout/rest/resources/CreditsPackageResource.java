@@ -151,9 +151,7 @@ public class CreditsPackageResource {
 				sCreditPackageId = Utils.getRandomName();
 			}
 			
-			String sUserId = oCreditsPackageViewModel.getUserId();
-			if (Utils.isNullOrEmpty(sUserId)) 
-				sUserId = oUser.getUserId();
+			String sUserId = oUser.getUserId();
 				
 			String sName = oCreditsPackageViewModel.getName();	
 			while (oCreditsPackageRepository.getCreditPackageByNameAndUserId(sName, sUserId) != null) {
