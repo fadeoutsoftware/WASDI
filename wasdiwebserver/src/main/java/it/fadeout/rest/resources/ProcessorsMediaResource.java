@@ -624,6 +624,9 @@ public class ProcessorsMediaResource {
 				User oAppPublisher = oUserRepository.getUser(oProcessor.getUserId());
 				if (oAppPublisher != null) {
 					oPublisherFilter.setNickName(oAppPublisher.getPublicNickName());
+					if (Utils.isNullOrEmpty(oPublisherFilter.getNickName())) {
+						oPublisherFilter.setNickName(oAppPublisher.getName());
+					}
 				}
 				else {
 					oPublisherFilter.setNickName(oProcessor.getUserId());
