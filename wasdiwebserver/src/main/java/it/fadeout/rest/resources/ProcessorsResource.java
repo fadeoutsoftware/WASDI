@@ -749,6 +749,7 @@ public class ProcessorsResource  {
 			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 			
 			ReviewRepository oReviewRepository = new ReviewRepository();
+			UserRepository oUserRepository = new UserRepository();
 			
 			oAppDetailViewModel.setIsMine(false);
 			
@@ -847,6 +848,20 @@ public class ProcessorsResource  {
 			
 			// Set the score to the View Model
 			oAppDetailViewModel.setScore(fScore);
+			
+			User oAppPublisher = oUserRepository.getUser(oProcessor.getUserId());
+			
+			if (oAppPublisher != null) {
+				if (Utils.isNullOrEmpty(oAppPublisher.getPublicNickName())) {
+					oAppDetailViewModel.setPublisherNickName(oAppPublisher.getName());
+				}
+				else {
+					oAppDetailViewModel.setPublisherNickName(oAppPublisher.getPublicNickName());
+				}
+			}
+			else {
+				oAppDetailViewModel.setPublisherNickName(oAppDetailViewModel.getPublisher());
+			}
 			
 			return Response.ok(oAppDetailViewModel).build();
 		}

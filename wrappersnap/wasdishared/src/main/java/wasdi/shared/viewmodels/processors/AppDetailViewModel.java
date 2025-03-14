@@ -16,6 +16,7 @@ public class AppDetailViewModel {
 	private String processorDescription;
 	private String imgLink;
 	private String publisher;
+	private String publisherNickName;
 	private Float score;
 	private String friendlyName;
 	private String link;
@@ -215,6 +216,12 @@ public class AppDetailViewModel {
 	}
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
+	}
+	public String getPublisherNickName() {
+		return publisherNickName;
+	}
+	public void setPublisherNickName(String publisherNickName) {
+		this.publisherNickName = publisherNickName;
 	}
 	
 }
