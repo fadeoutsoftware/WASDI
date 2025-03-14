@@ -542,6 +542,7 @@ public class ProcessorsResource  {
 			
 			List<Processor> aoDeployed = oProcessorRepository.getDeployedProcessors(sOrderBy, iDirection);
 			ReviewRepository oReviewRepository = new ReviewRepository();
+			UserRepository oUserRepository = new UserRepository();
 			
 			int iAvailableApps = 0;
 			
@@ -680,6 +681,20 @@ public class ProcessorsResource  {
 				// Set the score to the View Model
 				oAppListViewModel.setScore(fScore);
 				oAppListViewModel.setVotes(iVotes);
+				
+				oAppListViewModel.setPublisherNickName(oAppListViewModel.getPublisher());
+				
+				User oAppOwner = oUserRepository.getUser(oProcessor.getUserId());
+				
+				if (oAppOwner != null) {
+					if (Utils.isNullOrEmpty(oAppOwner.getPublicNickName())) {
+						oAppListViewModel.setPublisherNickName(oAppOwner.getName());
+					}
+					else {
+						oAppListViewModel.setPublisherNickName(oAppOwner.getName());
+					}
+				}
+				
 
 				aoRet.add(oAppListViewModel);
 			}

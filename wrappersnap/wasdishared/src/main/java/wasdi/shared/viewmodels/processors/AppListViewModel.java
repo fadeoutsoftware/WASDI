@@ -14,6 +14,7 @@ public class AppListViewModel {
 	private String processorDescription;
 	private String imgLink;
 	private String publisher;
+	private String publisherNickName;
 	private Float score;
 	private Integer votes;
 	private String friendlyName;
@@ -134,6 +135,14 @@ public class AppListViewModel {
 	
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
+	}
+
+	public String getPublisherNickName() {
+		return publisherNickName;
+	}
+
+	public void setPublisherNickName(String publisherNickName) {
+		this.publisherNickName = publisherNickName;
 	}
 
 }
