@@ -646,12 +646,12 @@ public class OpportunitySearchResource {
 					oSatelliteResource.setSatelliteSensors(aoSensorViewModels);
 					aaoReturnValue.add(oSatelliteResource);
 				} catch (Exception oE) {
-					WasdiLog.errorLog("OpportunitySearchResource.getSatellitesResources Exception: " + oE);
+					WasdiLog.errorLog("OpportunitySearchResource.getSatellitesResources Exception: ", oE);
 					return aaoReturnValue;
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.errorLog("OpportunitySearchResource.getSatellitesResources: " + oE);
+			WasdiLog.errorLog("OpportunitySearchResource.getSatellitesResources: ", oE);
 		}
 		return aaoReturnValue;
 
