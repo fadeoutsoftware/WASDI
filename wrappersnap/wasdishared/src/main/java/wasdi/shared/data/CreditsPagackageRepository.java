@@ -97,7 +97,7 @@ public class CreditsPagackageRepository extends MongoRepository {
 				WasdiLog.errorLog("CreditsPagackageRepository.getTotalCreditsByUser: error", oEx);
 			}
 			
-			return null;
+			return 0.0;
 			
 		}
 		
