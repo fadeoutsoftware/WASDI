@@ -665,7 +665,7 @@ public class ProcessorsResource  {
 				oAppListViewModel.setPublisher(oProcessor.getUserId());
 				oAppListViewModel.setBuyed(false);
 				oAppListViewModel.setPrice(oProcessor.getOndemandPrice());
-
+				oAppListViewModel.setSquareKilometerPrice(oProcessor.getPricePerSquareKm());
 				oAppListViewModel.setImgLink(ImageResourceUtils.getProcessorLogoPlaceholderPath(oProcessor));
 				oAppListViewModel.setLogo(oProcessor.getLogo());
 				
