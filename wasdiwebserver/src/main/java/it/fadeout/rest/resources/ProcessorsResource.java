@@ -366,6 +366,7 @@ public class ProcessorsResource  {
 						
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			UserRepository oUserRepository = new UserRepository();
 			List<Processor> aoDeployed = oProcessorRepository.getDeployedProcessors();
 			
 			for (int i=0; i<aoDeployed.size(); i++) {
@@ -402,6 +403,19 @@ public class ProcessorsResource  {
 				oDeployedProcessorViewModel.setImgLink(ImageResourceUtils.getProcessorLogoPlaceholderPath(oProcessor));
 				oDeployedProcessorViewModel.setLogo(oProcessor.getLogo());
 				oDeployedProcessorViewModel.setDeploymentOngoing(oProcessor.isDeploymentOngoing());
+				
+				oDeployedProcessorViewModel.setPublisherNickName(oDeployedProcessorViewModel.getPublisher());
+				
+				User oAppOwner = oUserRepository.getUser(oProcessor.getUserId());
+				
+				if (oAppOwner != null) {
+					if (Utils.isNullOrEmpty(oAppOwner.getPublicNickName())) {
+						oDeployedProcessorViewModel.setPublisherNickName(oAppOwner.getName());
+					}
+					else {
+						oDeployedProcessorViewModel.setPublisherNickName(oAppOwner.getPublicNickName());
+					}
+				}				
 				
 				aoRet.add(oDeployedProcessorViewModel);
 			}
@@ -445,6 +459,7 @@ public class ProcessorsResource  {
 						
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			UserRepository oUserRepository = new UserRepository();
 			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 
 			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
@@ -483,6 +498,21 @@ public class ProcessorsResource  {
 			
 			oDeployedProcessorViewModel.setMinuteTimeout(iTimeoutMinutes);
 			oDeployedProcessorViewModel.setDeploymentOngoing(oProcessor.isDeploymentOngoing());
+			
+			User oAppPublisher = oUserRepository.getUser(oProcessor.getUserId());
+			
+			if (oAppPublisher != null) {
+				if (Utils.isNullOrEmpty(oAppPublisher.getPublicNickName())) {
+					oDeployedProcessorViewModel.setPublisherNickName(oAppPublisher.getName());
+				}
+				else {
+					oDeployedProcessorViewModel.setPublisherNickName(oAppPublisher.getPublicNickName());
+				}
+			}
+			else {
+				oDeployedProcessorViewModel.setPublisherNickName(oDeployedProcessorViewModel.getPublisher());
+			}
+			
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessorsResource.getSingleDeployedProcessor error: " + oEx);

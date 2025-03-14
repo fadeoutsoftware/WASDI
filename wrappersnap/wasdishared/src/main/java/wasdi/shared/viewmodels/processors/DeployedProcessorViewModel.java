@@ -17,6 +17,7 @@ public class DeployedProcessorViewModel {
 	private String imgLink;
 	private String logo;
 	private String publisher;
+	private String publisherNickName;
 	private String paramsSample = "";
 	private int isPublic = 0;
 	private int minuteTimeout = 180;
@@ -108,5 +109,11 @@ public class DeployedProcessorViewModel {
 	}
 	public void setDeploymentOngoing(boolean isDeploymentOngoing) {
 		this.isDeploymentOngoing = isDeploymentOngoing;
+	}
+	public String getPublisherNickName() {
+		return publisherNickName;
+	}
+	public void setPublisherNickName(String publisherNickName) {
+		this.publisherNickName = publisherNickName;
 	}
 }
