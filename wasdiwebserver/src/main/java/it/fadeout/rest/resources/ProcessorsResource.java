@@ -691,10 +691,9 @@ public class ProcessorsResource  {
 						oAppListViewModel.setPublisherNickName(oAppOwner.getName());
 					}
 					else {
-						oAppListViewModel.setPublisherNickName(oAppOwner.getName());
+						oAppListViewModel.setPublisherNickName(oAppOwner.getPublicNickName());
 					}
 				}
-				
 
 				aoRet.add(oAppListViewModel);
 			}
