@@ -110,6 +110,11 @@ public class User {
 	 * If the user exceed the space will receive a warning. In case, here we have the timstamp of the moment we sent this advice 
 	 */
 	private Double storageWarningSentDate = 0.0;
+	
+	/**
+	 * Public Nick Name the user decide to expose
+	 */
+	private String publicNickName;
 
 	static {
     	s_oInvalid = new User();
@@ -314,5 +319,13 @@ public class User {
 
 	public void setStorageWarningSentDate(Double storageWarningSentDate) {
 		this.storageWarningSentDate = storageWarningSentDate;
+	}
+
+	public String getPublicNickName() {
+		return publicNickName;
+	}
+
+	public void setPublicNickName(String publicNickName) {
+		this.publicNickName = publicNickName;
 	}
 }

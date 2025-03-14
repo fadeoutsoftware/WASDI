@@ -250,18 +250,16 @@ public class UserRepository extends  MongoRepository{
 		Bson oFilterLikeUserId = Filters.eq("userId", oRegex);
 		Bson oFilterLikeName = Filters.eq("name", oRegex);
 		Bson oFilterLikeSurname = Filters.eq("surname", oRegex);
+		Bson oFilterLikeNickName = Filters.eq("publicNickName", oRegex);
 
-		Bson oFilter = Filters.or(oFilterLikeUserId, oFilterLikeName, oFilterLikeSurname);
+		Bson oFilter = Filters.or(oFilterLikeUserId, oFilterLikeName, oFilterLikeSurname, oFilterLikeNickName);
 
 		try {
-			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
-					.find(oFilter)
-					.sort(new Document(sOrderBy, iOrder));
-			
-			
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter).sort(new Document(sOrderBy, iOrder));
 
 			fillList(aoReturnList, oWSDocuments, User.class);
-		} catch (Exception oEx) {
+		} 
+		catch (Exception oEx) {
 			WasdiLog.errorLog("UserRepository.getAllUsers : error ", oEx);
 		}
 

@@ -896,6 +896,12 @@ public class AdminDashboardResource {
 					oUserListViewModel.setType(PermissionsUtils.getUserType(oActualUser.getUserId()));
 					oUserListViewModel.setName(oActualUser.getName());
 					oUserListViewModel.setSurname(oActualUser.getSurname());
+
+					oUserListViewModel.setPublicNickName(oActualUser.getPublicNickName());
+					if (Utils.isNullOrEmpty(oUserListViewModel.getPublicNickName())) {
+						String sPublicNick = oUserListViewModel.getName();
+						oUserListViewModel.setPublicNickName(sPublicNick);
+					}
 					
 					aoUserVMs.add(oUserListViewModel);					
 				}
@@ -1073,6 +1079,7 @@ public class AdminDashboardResource {
 			oTargetUser.setRegistrationDate(oUserViewModel.getRegistrationDate());
 			oTargetUser.setRole(oUserViewModel.getRole());
 			oTargetUser.setSurname(oUserViewModel.getSurname());
+			oTargetUser.setPublicNickName(oUserViewModel.getPublicNickName());
 			
 			if (!oUserRepository.updateUser(oTargetUser)) {
 				WasdiLog.errorLog("AdminDashboardResource.updateUsersDetails: the update user returned false!");
@@ -1146,6 +1153,12 @@ public class AdminDashboardResource {
 		oUserVM.setSurname(oUser.getSurname());
 		oUserVM.setUserId(oUser.getUserId());
 		oUserVM.setType(PermissionsUtils.getUserType(oUser));
+		
+		oUserVM.setPublicNickName(oUser.getPublicNickName());
+		if (Utils.isNullOrEmpty(oUserVM.getPublicNickName())) {
+			String sPublicNick = oUserVM.getName();
+			oUserVM.setPublicNickName(sPublicNick);
+		}		
 		
 
 		if (oUser.getRole() != null) {

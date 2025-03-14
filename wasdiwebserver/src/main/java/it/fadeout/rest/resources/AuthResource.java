@@ -259,6 +259,11 @@ public class AuthResource {
 				oUserVM.setAuthProvider(oUser.getAuthServiceProvider());
 				oUserVM.setSessionId(oSession.getSessionId());
 				oUserVM.setType(PermissionsUtils.getUserType(oUser));
+				oUserVM.setPublicNickName(oUser.getPublicNickName());
+				if (Utils.isNullOrEmpty(oUserVM.getPublicNickName())) {
+					String sPublicNick = oUserVM.getName();
+					oUserVM.setPublicNickName(sPublicNick);
+				}				
 
 				if (oUser.getRole() != null) {
 					oUserVM.setRole(oUser.getRole());
@@ -329,6 +334,12 @@ public class AuthResource {
 			oUserVM.setSurname(oUser.getSurname());
 			oUserVM.setUserId(oUser.getUserId());
 			oUserVM.setType(PermissionsUtils.getUserType(oUser));
+			oUserVM.setPublicNickName(oUser.getPublicNickName());
+			
+			if (Utils.isNullOrEmpty(oUserVM.getPublicNickName())) {
+				String sPublicNick = oUserVM.getName();
+				oUserVM.setPublicNickName(sPublicNick);
+			}			
 			return oUserVM;
 		} catch (Exception oE) {
 			WasdiLog.errorLog("AuthResource.checkSession: " + oE);
@@ -848,33 +859,39 @@ public class AuthResource {
 
 		try {
 			//note: session validity is automatically checked		
-			User oUserId = Wasdi.getUserFromSession(sSessionId);
-			if(null == oUserId) {
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if(null == oUser) {
 				//Maybe the user didn't exist, or failed for some other reasons
 				WasdiLog.debugLog("AuthResource.editUserDetails: invalid session");
 				return UserViewModel.getInvalid();
 			}
 
 			//update
-			oUserId.setName(oInputUserVM.getName());
-			oUserId.setSurname(oInputUserVM.getSurname());
-			oUserId.setLink(oInputUserVM.getLink());
-			oUserId.setDescription(oInputUserVM.getDescription());
+			oUser.setName(oInputUserVM.getName());
+			oUser.setSurname(oInputUserVM.getSurname());
+			oUser.setLink(oInputUserVM.getLink());
+			oUser.setDescription(oInputUserVM.getDescription());
 
 			if (oInputUserVM.getRole() != null) {
-				oUserId.setRole(oInputUserVM.getRole());
+				oUser.setRole(oInputUserVM.getRole());
 			}
 
 			UserRepository oUR = new UserRepository();
-			oUR.updateUser(oUserId);
+			oUR.updateUser(oUser);
 
 			//respond
 			UserViewModel oOutputUserVM = new UserViewModel();
-			oOutputUserVM.setUserId(oUserId.getUserId());
-			oOutputUserVM.setName(oUserId.getName());
-			oOutputUserVM.setSurname(oUserId.getSurname());
+			oOutputUserVM.setUserId(oUser.getUserId());
+			oOutputUserVM.setName(oUser.getName());
+			oOutputUserVM.setSurname(oUser.getSurname());
 			oOutputUserVM.setSessionId(sSessionId);
-			oOutputUserVM.setType(PermissionsUtils.getUserType(oUserId));
+			oOutputUserVM.setType(PermissionsUtils.getUserType(oUser));
+			
+			oOutputUserVM.setPublicNickName(oUser.getPublicNickName());
+			if (Utils.isNullOrEmpty(oOutputUserVM.getPublicNickName())) {
+				String sPublicNick = oOutputUserVM.getName();
+				oOutputUserVM.setPublicNickName(sPublicNick);
+			}			
 			return oOutputUserVM;
 
 		} catch(Exception oEx) {

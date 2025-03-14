@@ -20,6 +20,7 @@ public class UserViewModel {
 	private String link;
 	private String description;
 	private String sessionId;
+	private String publicNickName;
 	
 	private String type;
 
@@ -162,5 +163,13 @@ public class UserViewModel {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public String getPublicNickName() {
+		return publicNickName;
+	}
+
+	public void setPublicNickName(String publicNickName) {
+		this.publicNickName = publicNickName;
 	}
 }
