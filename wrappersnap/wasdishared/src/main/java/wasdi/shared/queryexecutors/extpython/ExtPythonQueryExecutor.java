@@ -171,8 +171,14 @@ public class ExtPythonQueryExecutor extends QueryExecutor {
 			WasdiLog.errorLog("ExtPythonQueryExecutor.executeCount: error ",oEx);
 		}		
 		finally {
-			FileUtils.deleteQuietly(new File(sInputFullPath));
-			FileUtils.deleteQuietly(new File(sOutputFullPath));
+			if (WasdiConfig.Current.dockers.removeParameterFilesForPythonsShellExec) {
+				FileUtils.deleteQuietly(new File(sInputFullPath));
+				FileUtils.deleteQuietly(new File(sOutputFullPath));				
+			}
+			else {
+				WasdiLog.infoLog("ExtPythonQueryExecutor.executeCount: removeParameterFilesForPythonsShellExec is  FALSE, we keep the parameter files");
+			}
+			
 		}
 		return -1;
 	}
@@ -228,8 +234,14 @@ public class ExtPythonQueryExecutor extends QueryExecutor {
 			WasdiLog.errorLog("ExtPythonQueryExecutor.executeAndRetrieve: error ",oEx);
 		}		
 		finally {
-			FileUtils.deleteQuietly(new File(sInputFullPath));
-			FileUtils.deleteQuietly(new File(sOutputFullPath));
+			if (WasdiConfig.Current.dockers.removeParameterFilesForPythonsShellExec) {
+				FileUtils.deleteQuietly(new File(sInputFullPath));
+				FileUtils.deleteQuietly(new File(sOutputFullPath));
+			}
+			else {
+				WasdiLog.infoLog("ExtPythonQueryExecutor.executeAndRetrieve: removeParameterFilesForPythonsShellExec is  FALSE, we keep the parameter files");
+			}
+			
 		}
 		return aoReturnList;
 	}

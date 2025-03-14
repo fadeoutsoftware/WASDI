@@ -111,6 +111,14 @@ public class DockersConfig {
 	public boolean removeDockersAfterShellExec = true;
 	
 	/**
+	 * All the dockers that makes a shell exec of a python script exchanges input and output files.
+	 * When this flag is true these are automatically deleted after the operation is done.
+	 * Keep true in production
+	 * Can be set to false to save some of these files if needed for debug
+	 */
+	public boolean removeParameterFilesForPythonsShellExec = true;
+	
+	/**
 	 * Docker Network mode. Note: can be overridden by the single shell Exec Items
 	 */
 	public String dockerNetworkMode ="net-wasdi";

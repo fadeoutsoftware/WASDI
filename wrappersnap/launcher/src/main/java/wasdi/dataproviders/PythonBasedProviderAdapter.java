@@ -183,13 +183,22 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 				WasdiLog.errorLog("PythonBasedProviderAdapter.executeDownloadFile: path to the downloaded file is null or empty");
 			}
 			
-		} catch(Exception oEx) {
+		} 
+		catch(Exception oEx) {
 			WasdiLog.errorLog("PythonBasedProviderAdapter.executeDonwloadFile: error ", oEx);
-		} finally {
-			if (!Utils.isNullOrEmpty(sInputFullPath))
-				FileUtils.deleteQuietly(new File(sInputFullPath));
-			if (!Utils.isNullOrEmpty(sOutputFullPath))
-				FileUtils.deleteQuietly(new File(sOutputFullPath));
+		} 
+		finally {
+			
+			if (WasdiConfig.Current.dockers.removeParameterFilesForPythonsShellExec) {
+				if (!Utils.isNullOrEmpty(sInputFullPath))
+					FileUtils.deleteQuietly(new File(sInputFullPath));
+				if (!Utils.isNullOrEmpty(sOutputFullPath))
+					FileUtils.deleteQuietly(new File(sOutputFullPath));
+			}
+			else {
+				WasdiLog.infoLog("PythonBasedProviderAdapter.executeDonwloadFile: removeParameterFilesForPythonsShellExec is  FALSE, we keep the parameter files");
+			}
+			
 		}
 		
 		return sResultDownloadedFilePath;

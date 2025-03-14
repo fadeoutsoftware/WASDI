@@ -132,13 +132,20 @@ public class CDS2ProviderAdapter extends PythonBasedProviderAdapter {
 				WasdiLog.errorLog("CDS2ProviderAdapter.executeDownloadFile: path to the downloaded file is null or empty");
 			}
 			
-		} catch(Exception oEx) {
+		} 
+		catch(Exception oEx) {
 			WasdiLog.errorLog("CDS2ProviderAdapter.executeDonwloadFile: error ", oEx);
-		} finally {
-			if (!Utils.isNullOrEmpty(sInputFullPath))
-				FileUtils.deleteQuietly(new File(sInputFullPath));
-			if (!Utils.isNullOrEmpty(sOutputFullPath))
-				FileUtils.deleteQuietly(new File(sOutputFullPath));
+		} 
+		finally {
+			if (WasdiConfig.Current.dockers.removeParameterFilesForPythonsShellExec) {
+				if (!Utils.isNullOrEmpty(sInputFullPath))
+					FileUtils.deleteQuietly(new File(sInputFullPath));
+				if (!Utils.isNullOrEmpty(sOutputFullPath))
+					FileUtils.deleteQuietly(new File(sOutputFullPath));
+			}
+			else {
+				WasdiLog.infoLog("CDS2ProviderAdapter.executeDonwloadFile: removeParameterFilesForPythonsShellExec is  FALSE, we keep the parameter files");
+			}
 		}
 		
 		return sResultDownloadedFilePath;

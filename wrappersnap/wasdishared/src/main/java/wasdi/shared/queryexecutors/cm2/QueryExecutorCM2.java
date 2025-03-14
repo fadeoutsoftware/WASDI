@@ -171,12 +171,18 @@ public class QueryExecutorCM2 extends QueryExecutor {
 			return iCount;
 			//return 2;
 			
-		} catch (Exception oEx) {
+		} 
+		catch (Exception oEx) {
 			WasdiLog.errorLog("QueryExecutorCM2.executeCount: error ",oEx);
 		}		
 		finally {
-			FileUtils.deleteQuietly(new File(sInputFullPath));
-			FileUtils.deleteQuietly(new File(sOutputFullPath));
+			if (WasdiConfig.Current.dockers.removeParameterFilesForPythonsShellExec) {
+				FileUtils.deleteQuietly(new File(sInputFullPath));
+				FileUtils.deleteQuietly(new File(sOutputFullPath));				
+			}
+			else {
+				WasdiLog.infoLog("QueryExecutorCM2.executeCount: removeParameterFilesForPythonsShellExec is  FALSE, we keep the parameter files");
+			}
 		}
 		return -1;
 	}
@@ -232,8 +238,14 @@ public class QueryExecutorCM2 extends QueryExecutor {
 			WasdiLog.errorLog("QueryExecutorCM2.executeAndRetrieve: error ",oEx);
 		}		
 		finally {
-			FileUtils.deleteQuietly(new File(sInputFullPath));
-			FileUtils.deleteQuietly(new File(sOutputFullPath));
+			if (WasdiConfig.Current.dockers.removeParameterFilesForPythonsShellExec) {
+				FileUtils.deleteQuietly(new File(sInputFullPath));
+				FileUtils.deleteQuietly(new File(sOutputFullPath));
+			}
+			else {
+				WasdiLog.infoLog("QueryExecutorCM2.executeAndRetrieve: removeParameterFilesForPythonsShellExec is  FALSE, we keep the parameter files");
+			}
+			
 		}
 		return aoReturnList;
 	}

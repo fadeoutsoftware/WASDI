@@ -1185,7 +1185,7 @@ public class ProcessorsResource  {
 				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("")).build();
 			}
 			
-			if (oProcessorToRun.getPricePerSquareKm() == null || oProcessorToRun.getPricePerSquareKm() == 0) {
+			if (oProcessorToRun.getPricePerSquareKm() == null || oProcessorToRun.getPricePerSquareKm() <= 0.0f) {
 				WasdiLog.debugLog("ProcessorsResource.getCreditsForRun: the app is not sold using credits.");
 				return Response.ok(0).build();
 			}
@@ -1303,7 +1303,7 @@ public class ProcessorsResource  {
 			
 			WasdiLog.debugLog("ProcessorResource.computeNumberOfCredits. Square kilometers of the bouding box: " + dAreaInSquareKilometers);
 			
-			double dCredits = fPricePerSquareKilometer * dAreaInSquareKilometers;
+			double dCredits = fPricePerSquareKilometer * Math.abs(dAreaInSquareKilometers);
 			
 			double dCreditsRoundedValue = new BigDecimal(dCredits).setScale(2, RoundingMode.HALF_UP).doubleValue();
 			
