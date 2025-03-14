@@ -875,6 +875,8 @@ public class AuthResource {
 			if (oInputUserVM.getRole() != null) {
 				oUser.setRole(oInputUserVM.getRole());
 			}
+			
+			oUser.setPublicNickName(oInputUserVM.getPublicNickName());
 
 			UserRepository oUR = new UserRepository();
 			oUR.updateUser(oUser);
