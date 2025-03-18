@@ -444,12 +444,12 @@ public class SubscriptionResource {
 					oSubscription.setBuySuccess(false);		
 				}
 			}
+				
+			if (Utils.isNullOrEmpty(sUserId)) sUserId = oUser.getUserId();
 			
 			UserRepository oUserRepo = new UserRepository();
 			User oTargetUser = oUserRepo.getUser(sUserId);
-			
-			if (Utils.isNullOrEmpty(sUserId)) sUserId = oUser.getUserId();
-			
+
 			while (oSubscriptionRepository.getByNameAndUserId(sName, sUserId) != null) {
 				sName = Utils.cloneName(sName);
 				WasdiLog.debugLog("SubscriptionResource.createSubscription: a subscription with the same name already exists. Changing the name to " + sName);
