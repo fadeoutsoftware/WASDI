@@ -993,12 +993,12 @@ public class SubscriptionResource {
 	@GET
 	@Path("/stripe/confirmation/{CHECKOUT_SESSION_ID}")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public String confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
+	public Response confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
 		WasdiLog.debugLog("SubscriptionResource.confirmation( sCheckoutSessionId: " + sCheckoutSessionId + ")");
 
 		if (Utils.isNullOrEmpty(sCheckoutSessionId)) {
 			WasdiLog.warnLog("SubscriptionResource.confirmation: Stripe returned a null CHECKOUT_SESSION_ID, aborting");
-			return null;
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
 		try {
@@ -1009,7 +1009,7 @@ public class SubscriptionResource {
 
 			if (oStripePaymentDetail == null || Utils.isNullOrEmpty(sClientReferenceId)) {
 				WasdiLog.warnLog("SubscriptionResource.confirmation: Stripe returned an invalid result, aborting");
-				return null;
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
 
 			String sSubscriptionId = null;
@@ -1064,19 +1064,12 @@ public class SubscriptionResource {
 			}		
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("SubscriptionResource.confirmation error " + oEx);
+			WasdiLog.errorLog("SubscriptionResource.confirmation error ", oEx);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
-
-
-		String sHtmlContent = "<script type=\"text/javascript\">\r\n" + 
-				"setTimeout(\r\n" + 
-				"function ( )\r\n" + 
-				"{\r\n" + 
-				"  self.close();\r\n" + 
-				"}, 1000 );\r\n" + 
-				"</script>";
 		
-		return sHtmlContent;
+		return Response.ok().build();
+
 	}
 
 	
