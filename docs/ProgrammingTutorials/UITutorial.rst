@@ -18,26 +18,22 @@ Here we introduce how to create a User Interface (UI) for an app that has alread
 The UI represents a user-friendly way to enter the parameters that otherwise should be defined in the params.json file.
 
 Indeed, the UI maps all parameters of the params.json file to an interface where the user can enter the parameter values,
-using different pieces of the interface itself that describe what parameter is expected and guide the user in the selection.
+using different pieces of the interface itself that describes what parameter is expected and guides the user in the selection.
 
-The marketplace displays all visible apps:
+The marketplace displays all visible apps.
+Selecting for example, the app named (S2) Snapshot Water:
 
-.. image:: ../_static/ui_images/1.png
-    :scale: 50%
-
-Selecting for example, the app named Automatic Permanent Water (S2):
-
-.. image:: ../_static/ui_images/2.png
+.. image:: ../_static/ui_images/1_2_new.png
     :scale: 50%
 
 After clicking on it to select this app:
 
-.. image:: ../_static/ui_images/3.png
+.. image:: ../_static/ui_images/3_new.png
     :scale: 50%
 
 And after opening the app itself, we are presented with the following:
 
-.. image:: ../_static/ui_images/4.png
+.. image:: ../_static/ui_images/4_new.png
     :scale: 50%
 
 
@@ -46,8 +42,7 @@ Each of the elements listed to the left represent a tab.
 In this case there are 6 tabs: 
 
 * Basic
-* Mosaic
-* Options
+* Mosaic options
 * Water thresholds
 * Help
 * History
@@ -56,16 +51,16 @@ In this case there are 6 tabs:
 The last 3 tabs, i.e. *Help*, *History* and *JSON* are always created by default by WASDI, for each application shown in the Marketplace.
 
 
-The figure above shows the controls of the tab named Basic (highlighted in green): in the figure we can see the first 2 controls of this tab, i.e. Date and Bounding Box. 
+The figure above shows the controls of the tab named Basic (highlighted in dark blue): in the figure we can see the first 2 controls of this tab, i.e. Date and Bounding Box. 
 
 *A control is a portion of UI to enter a certain parameter*. The parameters are the same as defined by the app developer in the params.json file. 
 
 In our case, the first parameter is a date and its corresponding control is a calendar, while the second parameter is a bounding box and its corresponding control is a map with options to define the bounding box itself.
 
 
-After clicking on a different tab, for instance Mosaic options, the controls of this specific tab are displayed. In the figure below we can see the 4 controls of this tab, i.e. Minimum percentage covered in the composite, Maximum number of iterations to fill the mosaic, Option to make a mosaic of all water maps, Option to delete intermediate files. In this case, the parameter corresponding to the slider is a range of integers (for the first 2 controls in this tab), while the parameter corresponding to the on/off button is a Boolean variable (for the last 2 controls in this tab).
+After clicking on a different tab, for instance Mosaic options, the controls of this specific tab are displayed. In the figure below we can see the 4 controls of this tab, i.e. Minimum percentage covered in the composite, Maximum number of iterations to fill the mosaic, Option to make a mosaic of all water maps, Option to delete intermediate files. In this case, the parameter corresponding to the slider is a range of integers (for the first 2 controls in this tab), while the parameter corresponding to the checkbox is a Boolean variable (for the last 2 controls in this tab).
 
-.. image:: ../_static/ui_images/5.png
+.. image:: ../_static/ui_images/5_new.png
     :scale: 50%
 
 In general, the following controls are available for different types of parameters:
@@ -89,31 +84,26 @@ For each type of control, there may be additional options like a min and max val
 
 To build the UI, WASDI needs a JSON that describes the number of tabs, their names as they should appear in the UI, the order of the tabs, the controls to be included in each tab, the order of the controls in the tab and the type of control to be attributed to each parameter. 
 
-To build the UI, the developer accesses the application edit window:
+To build the UI, the developer accesses the application edit window and goes to the UI section:
 
-.. image:: ../_static/ui_images/6.png
-    :scale: 50%
-
-and goes to the UI section:
-
-.. image:: ../_static/ui_images/7.png
+.. image:: ../_static/ui_images/7_new.png
     :scale: 50%
 
 The UI editor is a text editor where the developer can edit the JSON describing the UI. The first time you open the UI text editor, it will look like this:
 
-.. image:: ../_static/ui_images/8.png
+.. image:: ../_static/ui_images/8_new.png
     :scale: 50%
 
 *tabs* indicates that what will be added between the squared brackets is going to become one or more tabs. 
 
 To add one tab, first set the cursor between the squared brackets and then click on Tab:
 
-.. image:: ../_static/ui_images/9.png
+.. image:: ../_static/ui_images/9_new.png
     :scale: 50%
 
 After clicking on Tab, this is what will appear on the right of the screen (the different brackets might be slightly differently indented):
 
-.. image:: ../_static/ui_images/10.png
+.. image:: ../_static/ui_images/10_new.png
     :scale: 50%
 
 This means that we are planning to create, in the UI, a single tab named, for the moment, “Tab Name”. 
@@ -122,17 +112,17 @@ This tab is going to have a certain number of controls that will need to be adde
 
 Otherwise, if you like to make more than one tab in the UI, set the cursor after the comma and click again on Tab. Let’s assume we want to make 2 tabs in the UI, each of them with their controls. Then we will have something like this:
 
-.. image:: ../_static/ui_images/11.png
+.. image:: ../_static/ui_images/11_new.png
     :scale: 50%
 
 In this case we have one tab named “Tab Name 1”, comprised between curly brackets, and a second tab named “Tab Name 2”, comprised between curly brackets. A comma separates the pairs of curly brackets defining each tab. For the second tab, I took care of removing the comma that the system automatically adds any time one click on Tab, like you can see here below:
 
-.. image:: ../_static/ui_images/12.png
+.. image:: ../_static/ui_images/12_new.png
     :scale: 50%
 
 Now we see how to build a certain tab, i.e. the portion highlighted in the blue square in the figure below.
 
-.. image:: ../_static/ui_images/13.png
+.. image:: ../_static/ui_images/13_new.png
     :scale: 50%
 
 Here, "name" is the Tab Name. In the specific case “Tab Name 1” can be replaced by any strings, for example "Basic", "Advanced", "GIS", ...  This is the name that will be displayed in the UI. Careful: the order in which you put the tabs here is the same order in which they will be displayed in the UI.
@@ -152,7 +142,7 @@ Once the name of a tab has been chosen, we need to add its controls, between the
 
 All these buttons are listed on the left of the screen.
 
-.. image:: ../_static/ui_images/14.png
+.. image:: ../_static/ui_images/14_new.png
     :scale: 50%
 
 
@@ -202,7 +192,7 @@ Textbox
 
 To add to “Tab Name 1” a control in the form of a text box, first set the cursor between the square brackets after “controls” and then click on the button Textbox (to the left of the screen).
 
-.. image:: ../_static/ui_images/15.png
+.. image:: ../_static/ui_images/15_new.png
     :scale: 50%
 
 .. note::
@@ -231,7 +221,7 @@ The property "required" is used to define is the parameter is mandatory or not. 
 
 This is an example of how a Textbox control appears in the UI:
 
-.. image:: ../_static/ui_images/16.png
+.. image:: ../_static/ui_images/16_new.png
     :scale: 100%
 
 In this case, here is how the properties of this control were set:
@@ -249,7 +239,7 @@ Numeric field
 
 To add to “Tab Name 1” a control in the form of a float number, first set the cursor between the square brackets after “controls” and then click on the button Numeric field (to the left of the screen).
 
-.. image:: ../_static/ui_images/NumericField.png
+.. image:: ../_static/ui_images/17_new.png
     :scale: 50%
 
 .. note::
@@ -283,7 +273,7 @@ Again, careful with the trailing comma! If you add one more control to this spec
 
 This is an example of how a Numeric field control appears in the UI:
 
-.. image:: ../_static/ui_images/NumericFieldApp.png
+.. image:: ../_static/ui_images/18_new.png
     :scale: 100%
 
 In this case, here is how the properties of this control were set:
@@ -301,7 +291,7 @@ Dropdown
 
 To add to “Tab Name 1” a control in the form of a drop down menu with several options to choose from, first set the cursor between the square brackets after “controls” and then click on the button Dropdown (to the left of the screen).
 
-.. image:: ../_static/ui_images/DropDown.png
+.. image:: ../_static/ui_images/19_new.png
     :scale: 50%
 
 .. note::
@@ -354,7 +344,7 @@ Select Area
 
 To add to “Tab Name 1” a control in the form of a bounding box, that the user can either draw on the displayed map or that can be inputted as the 4 values of North, South, East, West within a pop up window in the UI, first set the cursor between the square brackets after “controls” and then click on the button Select Area (to the left of the screen).
 
-.. image:: ../_static/ui_images/SelectArea.png
+.. image:: ../_static/ui_images/21_new.png
     :scale: 50%
 
 .. note::
@@ -434,7 +424,7 @@ Number Slider
 ----------------------
 To add to “Tab Name 1” a control in the form of an integer number within a range of values, first set the cursor between the square brackets after “controls” and then click on the button Number Slider (to the left of the screen).
 
-.. image:: ../_static/ui_images/Slider.png
+.. image:: ../_static/ui_images/22_new.png
     :scale: 50%
 
 .. note::
@@ -489,7 +479,7 @@ Date
 ----------------
 To add to “Tab Name 1” a control in the form of a date, first set the cursor between the square brackets after “controls” and then click on the button Date (to the left of the screen).
 
-.. image:: ../_static/ui_images/Date.png
+.. image:: ../_static/ui_images/23_new.png
     :scale: 50%
 
 .. note::
@@ -533,7 +523,7 @@ Bool
 
 To add to “Tab Name 1” a control in the form of a Boolean variable, first set the cursor between the square brackets after “controls” and then click on the button Bool (to the left of the screen).
 
-.. image:: ../_static/ui_images/Boolean.png
+.. image:: ../_static/ui_images/24_new.png
     :scale: 50%
 
 .. note::
@@ -580,7 +570,7 @@ Products Combo Box
 
 To add to “Tab Name 1” a control in the form of Product Combo Box to allow selecting a product from an existing workspace, first set the cursor between the square brackets after “controls” and then click on the button Product Combo Box (to the left of the screen).
 
-.. image:: ../_static/ui_images/ProductsCombo.png
+.. image:: ../_static/ui_images/25_new.png
     :scale: 50%
 
 .. note::
@@ -630,7 +620,7 @@ Search EO Image
 
 To add to “Tab Name 1” a control in the form of …, first set the cursor between the square brackets after “controls” and then click on the button Search EO Image (to the left of the screen).
 
-.. image:: ../_static/ui_images/SearchEo.png
+.. image:: ../_static/ui_images/26_new.png
     :scale: 50%
 
 .. note::
@@ -659,7 +649,7 @@ Hidden Field
 -----------------
 To add to “Tab Name 1” a control in the form of an **Hidden filed**, first set the cursor between the square brackets after “controls” and then click on the button Hidden Field (to the left of the screen).
 
-.. image:: ../_static/ui_images/Hidden.png
+.. image:: ../_static/ui_images/27_new.png
     :scale: 50%
 
 .. note::
@@ -682,6 +672,9 @@ The property "default" allows to set the actual value for this UI control.
 List Box
 -----------------
 To add to “Tab Name 1” a control in the form of an **List Box**, first set the cursor between the square brackets after “controls” and then click on the button List Box (to the left of the screen).
+
+.. image:: ../_static/ui_images/28_new.png
+    :scale: 50%
 
 .. note::
 	Careful: in case you have only one control in this specific tab, or this is the last control of the tab, make sure to remove the trailing  comma!
@@ -712,7 +705,7 @@ One additional option concerns the button “Render As Strings”. You can add t
 .. note::
 	Render As String applies to ALL The UI and not to single controls. 
 
-.. image:: ../_static/ui_images/Render.png
+.. image:: ../_static/ui_images/29_new.png
     :scale: 50%
 
 The idea behind this button is that, without “Render As Strings” WASDI cannot generate primitive parameters. In other words, without “Render As Strings” a calendar will return a date, a map will return a bbox object, a slider will return a number. But with “Render As Strings”, WASDI will automatically convert all the parameters to strings.
