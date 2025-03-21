@@ -273,7 +273,7 @@ Again, careful with the trailing comma! If you add one more control to this spec
 
 This is an example of how a Numeric field control appears in the UI:
 
-.. image:: ../_static/ui_images/18_new.png
+.. image:: ../_static/ui_images/numeric_field.png
     :scale: 100%
 
 In this case, here is how the properties of this control were set:
@@ -323,7 +323,7 @@ For the property "values", within the squared brakets [], add a list of strings,
 
 This is an example of how a Dropdown menu control appears in the UI:
 
-.. image:: ../_static/ui_images/DropDownApp.png
+.. image:: ../_static/ui_images/dropdown_menu.png
     :scale: 50%
 
 In this case, here is how the properties of this control were set:
@@ -386,7 +386,7 @@ If maximum ratio is set to a reasonable value it can help users to avoid such er
 
 This is an example of how a Select Area control appears in the UI:
 
-.. image:: ../_static/ui_images/SelectAreaApp.png
+.. image:: ../_static/ui_images/select_area.png
     :scale: 100%
 
 In this case, here is how the properties of this control were set:
@@ -406,17 +406,17 @@ In this case, here is how the properties of this control were set:
 
 The option highlighted in the figure below is used to manually draw a rectangle:
 
-.. image:: ../_static/ui_images/SelectAreaAppBB.png
+.. image:: ../_static/ui_images/select_area_manually.png
     :scale: 100%
 
-If the area selected surpass the limits, a dedicated error message is shown and its not possible, for the user, to launch the application.
+If the area selected surpass the limits, the rectangle drown on the map will be displayed in red.
 
-.. image:: ../_static/ui_images/SelectAreaAppBBError.png
+.. image:: ../_static/ui_images/bbox_too_large.png
     :scale: 100%
 
 The other option, highlighted in the figure below, allow the user to manually enter the values of the bounding box:
 
-.. image:: ../_static/ui_images/SelectAreaManual.png
+.. image:: ../_static/ui_images/bbox_input_coordinates.png
     :scale: 50%
 
 
@@ -459,7 +459,7 @@ The property "required" is used to define is the parameter is mandatory or not. 
 
 This is an example of how a Number Slider control appears in the UI:
 
-.. image:: ../_static/ui_images/SliderApp.png
+.. image:: ../_static/ui_images/slider_menu.png
     :scale: 100%
 
 In this case, here is how the properties of this control were set:
@@ -505,7 +505,7 @@ The property "required" is used to define is the parameter is mandatory or not. 
 
 This is an example of how a Date control appears in the UI:
 
-.. image:: ../_static/ui_images/DateApp.png
+.. image:: ../_static/ui_images/date_picker.png
     :scale: 100%
 
 
@@ -552,7 +552,7 @@ The property "required" is used to define is the parameter is mandatory or not. 
 
 This is an example of how a Bool control appears in the UI:
 
-.. image:: ../_static/ui_images/BooleanApp.png
+.. image:: ../_static/ui_images/checkbox.png
     :scale: 50%
 
 In this case, here is how the properties of this control were set:
@@ -599,7 +599,7 @@ The property " showExtension " is determine whether the extension of the output 
 
 This is an example of how a Product Combo Box control appears in the UI:
 
-.. image:: ../_static/ui_images/ProductsComboApp.png
+.. image:: ../_static/ui_images/product_combo_box.png
     :scale: 100%
 
 
@@ -765,7 +765,7 @@ In this case we set 2 Tabs, one named “Input” and the other one named "Provi
 
 The first tab “Input” contains 4 controls (within the squared brakets []), the second tab “Provider selection” contains 1 control (within the squared brakets []). The order in which the tabs appear here is the same order in which they will appear in the UI, as you can see below.
 
-.. image:: ../_static/ui_images/40.png
+.. image:: ../_static/ui_images/40_new.png
     :scale: 100%
 
 The first tab “Input” is composed of a "date" control, a “slider” control, a "bbox" control and one more “slider” control. 
@@ -778,13 +778,8 @@ The “bbox” control refers to the parameter named BBOX in the file params.jso
 
 The second “slider” control refers to the parameter named BBOX in the file params.json. 
 
-The order in which the controls appear here is the same order in which they will appear in the UI, within the “Input” tab, as you can see below.
-
-.. image:: ../_static/ui_images/41.png
-    :scale: 100%
-
 The second tab is composed of 1 "dropdown" control. This “dropdown” control refers to the parameter named PROVIDER in the file params.json.
 
-.. image:: ../_static/ui_images/42.png
+.. image:: ../_static/ui_images/41_new.png
     :scale: 100%
 
