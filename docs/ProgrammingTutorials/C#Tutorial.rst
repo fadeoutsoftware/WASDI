@@ -26,7 +26,7 @@ Setup on Wasdi web-app side
 
 Open the Wasdi web-application in a browser by typing https://www.wasdi.net/.
 
-.. image:: ../_static/c#_tutorial_images/01_home_page.png
+.. image:: ../_static/c#_tutorial_images/01_home_page.PNG
    :scale: 36%
    :align: center
    :alt: the Home page
@@ -36,7 +36,7 @@ Open the Wasdi web-application in a browser by typing https://www.wasdi.net/.
 On the main page, the marketplace is shown.
 Go to the Workspaces page by pressing the **Workspaces** button.
 
-.. image:: ../_static/c#_tutorial_images/03_workspaces_button.png
+.. image:: ../_static/c#_tutorial_images/03_workspaces_button.PNG
    :scale: 50%
    :align: center
    :alt: the Workspaces button
@@ -45,7 +45,7 @@ Go to the Workspaces page by pressing the **Workspaces** button.
 
 Create a new workspace by pressing the **New Workspace** button.
 
-.. image:: ../_static/c#_tutorial_images/04_new_workspace_button.png
+.. image:: ../_static/c#_tutorial_images/04_new_workspace_button.PNG
    :scale: 50%
    :align: center
    :alt: the New Workspace button
@@ -57,7 +57,7 @@ On the pop-up window, specify the name of the new workspace and press **Create w
 .. note::
 	Although it is not mandatory, it is strongly recommended to use the indicated name. This would allow the code to be copy/pasted without adjustments.
 
-.. image:: ../_static/c#_tutorial_images/05_insert_workspace_name.png
+.. image:: ../_static/c#_tutorial_images/05_insert_workspace_name.PNG
    :scale: 50%
    :align: center
    :alt: the Workspaces Name pop-up window
@@ -66,7 +66,7 @@ On the pop-up window, specify the name of the new workspace and press **Create w
 
 The newly created workspace is shown on the main page.
 
-.. image:: ../_static/c#_tutorial_images/06_newly_created_workspace.png
+.. image:: ../_static/c#_tutorial_images/06_newly_created_workspace.PNG
    :scale: 36%
    :align: center
    :alt: the newly created Workspace page

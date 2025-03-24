@@ -23,7 +23,7 @@ Logging In
 +++++++++++++++++++++++++++
 
 .. image:: ../_static/site_map_images/03_login_card.png
-   :scale: 70%
+   :scale: 36%
    :align: center
    :alt: the Home page
 
