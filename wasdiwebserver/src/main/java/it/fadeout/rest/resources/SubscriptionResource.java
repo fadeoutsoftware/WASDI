@@ -391,7 +391,7 @@ public class SubscriptionResource {
 
 			String sOrganizationName = null;
 
-			if (oSubscription.getOrganizationId() != null) {
+			if (!Utils.isNullOrEmpty(oSubscription.getOrganizationId())) {
 				OrganizationRepository oOrganizationRepository = new OrganizationRepository();
 				Organization oOrganization = oOrganizationRepository.getById(oSubscription.getOrganizationId());
 				sOrganizationName = oOrganization.getName();
