@@ -281,12 +281,12 @@ public class CreditsPackageResource {
 	@GET
 	@Path("/stripe/confirmation/{CHECKOUT_SESSION_ID}")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public String confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
+	public Response confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
 		WasdiLog.debugLog("CreditsResource.confirmation( sCheckoutSessionId: " + sCheckoutSessionId + ")");
 
 		if (Utils.isNullOrEmpty(sCheckoutSessionId)) {
 			WasdiLog.warnLog("CreditsResource.confirmation: Stripe returned a null CHECKOUT_SESSION_ID, aborting");
-			return null;
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
 		try {
@@ -295,7 +295,7 @@ public class CreditsPackageResource {
 			
 			if (oStripePaymentDetail == null) {
 				WasdiLog.warnLog("CreditsResource.confirmation: Stripe returned an invalid result, aborting");
-				return null;
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
 			
 			String sCreditsPackagegeId = oStripePaymentDetail.getClientReferenceId();
@@ -303,7 +303,7 @@ public class CreditsPackageResource {
 
 			if (Utils.isNullOrEmpty(sCreditsPackagegeId) || Utils.isNullOrEmpty(sPaymentIntentId)) {
 				WasdiLog.warnLog("CreditsResource.confirmation: Stripe returned an invalid result, aborting");
-				return null;
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
 
 			WasdiLog.debugLog("CreditsResource.confirmation( sCreditPackageId: " + sCreditsPackagegeId + ")");
@@ -331,18 +331,11 @@ public class CreditsPackageResource {
 			}	
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("SubscriptionResource.confirmation error ", oEx);
+			WasdiLog.errorLog("CreditsResource.confirmation error ", oEx);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
-
-		String sHtmlContent = "<script type=\"text/javascript\">\r\n" + 
-				"setTimeout(\r\n" + 
-				"function ( )\r\n" + 
-				"{\r\n" + 
-				"  self.close();\r\n" + 
-				"}, 1000 );\r\n" + 
-				"</script>";
 		
-		return sHtmlContent;
+		return Response.ok().build();
 	}
 	
 	private static List<SubscriptionTypeViewModel> convert(List<CreditPackageType> aoSubscriptionTypes) {
