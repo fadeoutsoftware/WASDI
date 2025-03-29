@@ -2883,7 +2883,7 @@ public class dbUtils {
 					StorageUsageControl oStorageUsageControl = WasdiConfig.Current.storageUsageControl;
 					Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(sCandidateUserId);
 					
-					WasdiLog.debugLog("dbUtils.runWasdiCleanTask: " + sCandidateUserId + ", total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
+					WasdiLog.infoLog("dbUtils.runWasdiCleanTask: " + sCandidateUserId + ", total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
 					
 					long lNow = new Date().getTime(); 
 					long lStorageWarningDate = oCandidate.getStorageWarningSentDate().longValue();
@@ -2908,8 +2908,10 @@ public class dbUtils {
 						
 						continue;
 					}
-					else {
+					else if (lTotalStorageUsage > oStorageUsageControl.storageSizeFreeSubscription) {
 						WasdiLog.infoLog("dbUtils.runWasdiCleanTask: The user " + sCandidateUserId + " already received the notification, waiting for reaction");
+					} else {
+						WasdiLog.infoLog("dbUtils.runWasdiCleanTask: The user " + sCandidateUserId + " is not exceeding the storage space");
 					}
 					
 					// if the warning period has passed and the storage occupied by the user still exceeds the limit, 
@@ -2984,7 +2986,7 @@ public class dbUtils {
 			if (!asUsersExceedingStorage.isEmpty()) {				
 				List<User> aoAdminUsers = oUserRepository.getAdminUsers();
 				String sUsers = String.join("\n", asUsersExceedingStorage);
-				System.out.println(sUsers);
+				WasdiLog.infoLog("dbUtils.runWasdiCleanTask: Test deletion of workspaces for users: " + sUsers);
 				for (User oAdmin : aoAdminUsers) {
 					MailUtils.sendEmail(oAdmin.getUserId(), "Deletion test", "Test deletion of workspaces for users:\n" + sUsers);
 				}
