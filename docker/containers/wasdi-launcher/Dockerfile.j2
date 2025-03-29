@@ -18,3 +18,5 @@ COPY --chown={{ sWasdiLauncherRootDirectoryOwner }}:{{ sWasdiLauncherRootDirecto
 # Copy launcher artifact
 COPY --chown={{ sWasdiLauncherRootDirectoryOwner }}:{{ sWasdiLauncherRootDirectoryGroup }} ./dataToCopy/{{ sWasdiLauncherBuildTargetFileName }} {{ sWasdiLauncherRootDirectoryPath }}/{{ sWasdiLauncherBuildTargetFileName }}
 
+
+ENV PATH="{{ sWasdiLauncherRootDirectoryPath }}/:{{ sWasdiLauncherRootDirectoryPath }}/linux-x86-64/:${PATH}"
