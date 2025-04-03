@@ -69,12 +69,21 @@ def authenticateAccess(sDownloadLink, sUsername, sPassword):
         logging.error(f"[ERROR] authenticateAccess: {oEx}")
     return None
 
-def parseProductToCheckForRetryTime(sDownloadedFilePath):
+def parseProductToCheckForRetryTime(sFilePath):
+    """
+    Checks the file passed as an input to determine whether its content is an XML.
+    If it is the case, it parses the content to look for the information contained in the tags
+    <ResponseCode> and <RetryAfter>, returning it in a tuple.
+    If not, it returns None
+    :param sFilePath: path of the file to check
+    :return: a tuple containing in the first position the response code and in the second position the seconds
+    to wait before retry, if the content of the file is an XML. None otherwise.
+    """
     sResponseCode = None
     iRetryTime = None
 
     try:
-        oTree = ET.parse(sDownloadedFilePath)
+        oTree = ET.parse(sFilePath)
         oRoot = oTree.getroot()
 
         # Extract the namespace
@@ -99,7 +108,7 @@ def parseProductToCheckForRetryTime(sDownloadedFilePath):
             logging.info(f"[INFO] parseProductToCheckForRetryTime: tag RetryAfter not found")
 
     except (ET.ParseError, FileNotFoundError, IOError):
-        print("[ERROR] parseProductToCheckForRetryTime: not an XML file")
+        print("[WARNING] parseProductToCheckForRetryTime: not an XML file. But that's ok")
         return None
 
     return (sResponseCode, iRetryTime)
@@ -200,9 +209,9 @@ def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
                 # the data provider might return a file with the same name of the product, but xml content inside.
                 # The xml contains information about the waiting time before retrying the download.
                 # Consequently, we need to make sure that the downloaded file is actually the ERS product
-                oRetryTime = parseProductToCheckForRetryTime(sDownloadFilePath)
+                oXMLInformation = parseProductToCheckForRetryTime(sDownloadFilePath)
 
-                if oRetryTime is None:
+                if oXMLInformation is None:
                     # the file looks like the final ERS product, we can exit the loop
                     logging.info(f"[INFO] executeDownloadFile: the downloaded file should be the actual product")
                     break
@@ -211,8 +220,8 @@ def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
                 # to set the download in sleep
                 logging.info(f"[INFO] executeDownloadFile: the content of the downloaded file seems an XML file")
 
-                sDownloadStatus = oRetryTime[0]
-                iRetryTime = oRetryTime[1]
+                sDownloadStatus = oXMLInformation[0]
+                iRetryTime = oXMLInformation[1]
 
                 logging.info(f"[INFO] executeDownloadFile: download status received {sDownloadStatus}, "
                              f"with retry time {iRetryTime}.")
@@ -230,7 +239,7 @@ def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
             except requests.exceptions.RequestException as oEx:
                 logging.error(f"[ERROR] executeDownloadFile: "
                               f"failed to download the file {sDownloadFileName}. Error: {oEx}")
-                time.sleep(2)
+                time.sleep(10)
 
         oRes = {
             'outputFile': sDownloadedProductPath
