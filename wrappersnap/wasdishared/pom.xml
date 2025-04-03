@@ -22,7 +22,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionAmqpClient>5.23.0</sVersionAmqpClient>
+        <sVersionAmqpClient>5.25.0</sVersionAmqpClient>
         <sVersionAssertjCore>3.26.3</sVersionAssertjCore>
         <sVersionAwsJavaSdkS3>1.12.779</sVersionAwsJavaSdkS3>
         <sVersionCommonsCompress>1.27.1</sVersionCommonsCompress>
@@ -31,10 +31,10 @@
         <sVersionCommonsValidator>1.9.0</sVersionCommonsValidator>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionGeoserverManager>1.7.0</sVersionGeoserverManager>
-        <sVersionGson>2.11.0</sVersionGson>
-        <sVersionGuava>33.3.1-jre</sVersionGuava>
-        <sVersionJackson>2.18.2</sVersionJackson>
-        <sVersionJson>20240303</sVersionJson>
+        <!--sVersionGson>2.12.1</sVersionGson-->
+        <sVersionGuava>33.4.6-jre</sVersionGuava>
+        <sVersionJackson>2.18.3</sVersionJackson>
+        <sVersionJson>20250107</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionJunitJupiter>5.7.0</sVersionJunitJupiter>
         <sVersionLog4j>2.24.2</sVersionLog4j>
@@ -152,11 +152,11 @@
             <version>${sVersionJson}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-        <dependency>
+        <!--dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>${sVersionGson}</version>
-        </dependency>
+        <dependency-->
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
         <dependency>
             <groupId>org.apache.commons</groupId>

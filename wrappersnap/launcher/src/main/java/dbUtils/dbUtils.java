@@ -3,6 +3,7 @@ package dbUtils;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
@@ -1246,6 +1247,7 @@ public class dbUtils {
             System.out.println("\t4 - Reconstruct Workspace");
             System.out.println("\t5 - Clean Workspaces not existing in node");
             System.out.println("\t6 - Add Workspace size");
+            System.out.println("\t7 - Delete folders associated to not-existing workspaces");
             System.out.println("\tx - back");
             System.out.println("");
 
@@ -1624,7 +1626,6 @@ public class dbUtils {
 
                 }
             }
-            
             else if (sInputString.equals("5")) {
             	
                 System.out.println("Please write DELETE for a real delete");
@@ -1815,6 +1816,77 @@ public class dbUtils {
             else if (sInputString.equals("6")) {
             	addStorageToWorkspace();
             }
+            else if (sInputString.equals("7")) {
+            	
+                System.out.println("Please write DELETE for a real delete");
+                String sCommand = s_oScanner.nextLine();
+                
+                boolean bDelete = false;
+                
+                if (sCommand.equals("DELETE")) {
+                	
+                	System.out.println("This is a REAL Delete, are you sure [1/0]?");
+
+                    String sConfirm = s_oScanner.nextLine();
+                	
+                    if (sConfirm.equals("1")) {
+                    	bDelete = true;
+                    }
+                    else {
+                    	System.out.println("Ok just a list");
+                    }
+                }
+                else {
+                	System.out.println("Ok just a list");
+                }
+
+                System.out.println("Searching folders associated to not longer existing workspaces on node");
+                
+                UserRepository oUserRepository = new UserRepository();
+                ArrayList<User> aoAllUsers = oUserRepository.getAllUsers();
+                
+                
+                WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+                
+                for (User oUser : aoAllUsers) {
+					String sUserPath = PathsConfig.getWasdiBasePath()+oUser.getUserId()+"/";
+					
+					File oUserFolder = new File(sUserPath);
+					
+					if (!oUserFolder.exists()) {
+						System.out.println("There are no workspaces of " + oUser.getUserId() + " in this Node");
+						continue;
+					}
+					
+					String[] asWorkspaceFolders = oUserFolder.list(new FilenameFilter() {
+						  @Override
+						  public boolean accept(File oCurrentFile, String sFileName) {
+						    return new File(oCurrentFile, sFileName).isDirectory();
+						  }
+						});
+					
+					if (asWorkspaceFolders != null) {
+						for (int iWs = 0; iWs < asWorkspaceFolders.length; iWs++) {
+							String sWorkspace = asWorkspaceFolders[iWs];
+							Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspace);
+							
+							if (oWorkspace == null) {
+								System.out.println("Found folder " + sUserPath + sWorkspace + " that does not have a corresponding Workspace entry");
+								
+								if (bDelete) {
+									File oWsFolder = new File (sUserPath+sWorkspace);
+									FileUtils.deleteQuietly(oWsFolder);
+								}
+								else {
+									System.out.println("********** as if I deleted " + sUserPath+sWorkspace);
+								}
+							}
+						}
+					}
+				}
+                
+                
+            }              
         } 
         catch (InterruptedException oEx) {
         	Thread.currentThread().interrupt();

@@ -182,6 +182,7 @@ Select new workspace. Open it and rename it **"OctaveTutorial"**.
 .. image:: ../_static/octave_tutorial_images/octave_tutorial_7.png
 
 Open the file config.properties and add the following line:
+
 .. code-block:: JSON
 
    WORKSPACE=OctaveTutorial
@@ -227,11 +228,12 @@ Click on apply and the application will be deployed with the new code base.
 
 .. image:: ../_static/octave_tutorial_images/octave_tutorial_10.png   
 
-Open apps windows and launch the application:
+Open apps windows and launch the application again.
 
 .. image:: ../_static/octave_tutorial_images/octave_tutorial_12.png
 
 The logs will show the new download operation:
+
 .. image:: ../_static/octave_tutorial_images/octave_tutorial_11.png
 
 At the end of the process the sentinel-2 image will be again present in our workspace ! 

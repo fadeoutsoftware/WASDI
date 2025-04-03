@@ -60,17 +60,24 @@ public class Send {
 				m_oChannel.close();
 			}
 			
+		} catch (IOException oEx) {
+			WasdiLog.errorLog("Send.Free: Error closing channel " + oEx.toString());
+		} catch (TimeoutException oEx) {
+			WasdiLog.errorLog("Send.Free: Error closing channel " + oEx.toString());
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("Send.Free: Error closing channel " + oEx.toString());
+		}
+		
+		try {
 			if (m_oConnection!=null) {
 				m_oConnection.close();
 			}
 			
 		} catch (IOException oEx) {
 			WasdiLog.errorLog("Send.Free: Error closing connection " + oEx.toString());
-		} catch (TimeoutException oEx) {
-			WasdiLog.errorLog("Send.Free: Error closing connection " + oEx.toString());
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("Send.Free: Error closing connection " + oEx.toString());
-		}
+		}		
 	}
 	
     /**

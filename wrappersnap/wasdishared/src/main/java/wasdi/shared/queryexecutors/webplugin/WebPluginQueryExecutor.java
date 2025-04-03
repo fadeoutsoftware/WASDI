@@ -1,10 +1,8 @@
 package wasdi.shared.queryexecutors.webplugin;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -12,8 +10,6 @@ import wasdi.shared.data.MongoRepository;
 import wasdi.shared.queryexecutors.ConcreteQueryTranslator;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
-import wasdi.shared.queryexecutors.extweb.config.ExtWebConfig;
-import wasdi.shared.queryexecutors.extweb.config.ExtWebDataProviderConfig;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.log.WasdiLog;
