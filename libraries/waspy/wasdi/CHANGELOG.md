@@ -4,6 +4,16 @@ WASDI python programming library CHANGELOG.md, according to the
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
 
+## [0.8.7.5] - 2025-04-07
+### Added
+- executeAndWaitProcessor: synch execution of a processor
+### Fixed
+- executeProcessor: log the retry
+- executeProcessor: log error message from server if the app cannot be started
+- executeWorkflow: added 3 retry
+- multiSubset: added 3 retry
+
+
 ## [0.8.7.4] - 2025-03-04
 ### Added
 - addFileToWasdi: log if the file does not exists

@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.7.4
+Version 0.8.7.5
 
-Last Update: 04/03/2025
+Last Update: 07/04/2025
 
 Tested with: Python 3.7 - Python 3.13 
 
@@ -3083,7 +3083,7 @@ def executeProcessor(sProcessorName, aoProcessParams):
 
     for iAttempt in range(iMaxRetry):
 
-        _log("[INFO] waspy.executeProcessor: execute Processor Attempt # " + str(iAttempt + 1))
+        wasdiLog("[INFO] waspy.executeProcessor: execute Processor Attempt # " + str(iAttempt + 1))
 
         oResult = None
 
@@ -3101,7 +3101,7 @@ def executeProcessor(sProcessorName, aoProcessParams):
                 if "processingIdentifier" in aoJson:
                     sProcessID = aoJson['processingIdentifier']
                     return sProcessID
-                elif "message" is aoJson:
+                elif "message" in aoJson:
                     sMessage = aoJson['message']
                     wasdiLog('[ERROR] waspy.executeProcessor: cannot run the processor: ' + sMessage)
                 else:
@@ -3117,6 +3117,28 @@ def executeProcessor(sProcessorName, aoProcessParams):
     # If we exit from the cycle, we do not have any result for our client...
     return ''
 
+
+def executeAndWaitProcessor(sProcessorName, aoProcessParams):
+    """
+    Executes a WASDI Processor waiting for it to finish. The method try up to three time if there is any problem.
+
+    :param sProcessorName: WASDI processor name
+
+    :param aoParams: a dictionary of parameters for the processor
+    :return: the final status of the process if every thing is ok, '' if there was any problem
+    """
+
+    sStatus = ""
+    try:
+        sProcId = wasdi.executeProcessor(sProcessorName, aoProcessParams)
+
+        if sProcId != "":
+            sStatus = wasdi.waitProcess(sProcId)
+        
+    except Exception as oEx:
+        wasdi.wasdi("[ERROR]: waspy.executeAndWaitProcessor: exception " + str(oEx))
+    
+    return sStatus
 
 def _uploadFile(sFileName):
     """
@@ -3327,29 +3349,36 @@ def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigT
     sSubsetSetting = json.dumps(aoBody)
     asHeaders = _getStandardHeaders()
 
-    oResponse = None
+    # Try up to three time
+    iMaxRetry = 3
 
-    try:
-        oResponse = requests.post(sUrl, headers=asHeaders, data=sSubsetSetting, timeout=getRequestsTimeout())
-    except Exception as oEx:
-        wasdiLog("[ERROR] waspy.multiSubset: there was an error contacting the API " + str(oEx))
+    for iAttempt in range(iMaxRetry):
 
-    if oResponse is None:
-        wasdiLog('[ERROR] waspy.multiSubset: cannot contact server' +
-                 '  ******************************************************************************')
-        return ''
+        wasdiLog("[INFO] waspy.multiSubset: execute Multi Subset Attempt # " + str(iAttempt + 1))
 
-    if oResponse.ok is not True:
-        wasdiLog('[ERROR] waspy.multiSubset: failed, server returned ' + str(oResponse.status_code) +
-                 '  ******************************************************************************')
-        return ''
-    else:
-        oJson = oResponse.json()
-        if oJson is not None:
-            if 'stringValue' in oJson:
-                sProcessId = oJson['stringValue']
-                return waitProcess(sProcessId)
+        oResponse = None
 
+        try:
+            oResponse = requests.post(sUrl, headers=asHeaders, data=sSubsetSetting, timeout=getRequestsTimeout())
+        except Exception as oEx:
+            wasdiLog("[ERROR] waspy.multiSubset: there was an error contacting the API " + str(oEx))
+
+        if oResponse is None:
+            wasdiLog('[ERROR] waspy.multiSubset: cannot contact server')
+        else:
+            if oResponse.ok is not True:
+                wasdiLog('[ERROR] waspy.multiSubset: failed, server returned ' + str(oResponse.status_code))
+            else:
+                oJson = oResponse.json()
+                if oJson is not None:
+                    if 'stringValue' in oJson:
+                        sProcessId = oJson['stringValue']
+                        return waitProcess(sProcessId)
+
+        wasdiLog("[ERROR]: waspy.multiSubset: Error triggering the Multi Subset.")
+        time.sleep(getPollingSleepSeconds())        
+
+    wasdiLog("[ERROR]: waspy.multiSubset: Multi Subset not triggered, too many errors")
     return ''
 
 
@@ -4278,35 +4307,42 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
         aoDictPayload))
     asHeaders = _getStandardHeaders()
 
-    oResponse = None
+    # Try up to three time
+    iMaxRetry = 3
 
-    try:
-        oResponse = requests.post(sUrl, headers=asHeaders, data=json.dumps(aoDictPayload), timeout=getRequestsTimeout())
-    except Exception as oEx:
-        wasdiLog("[ERROR] waspy._internalExecuteWorkflow: there was an error contacting the API " + str(oEx))
+    for iAttempt in range(iMaxRetry):
 
-    if oResponse is None:
-        wasdiLog('[ERROR] waspy._internalExecuteWorkflow: communication with the server failed, aborting' +
-                 '  ******************************************************************************')
-        return ''
+        wasdiLog("[INFO] waspy._internalExecuteWorkflow: execute Workflow Attempt # " + str(iAttempt + 1))
+        
+        oResponse = None
 
-    if oResponse.ok is True:
-        _log('[INFO] waspy._internalExecuteWorkflow: server replied OK')
-        asJson = oResponse.json()
-        if "stringValue" in asJson:
-            sProcessId = asJson["stringValue"]
-            if bAsynch is True:
-                return sProcessId
-            else:
-                return waitProcess(sProcessId)
+        try:
+            oResponse = requests.post(sUrl, headers=asHeaders, data=json.dumps(aoDictPayload), timeout=getRequestsTimeout())
+        except Exception as oEx:
+            wasdiLog("[ERROR] waspy._internalExecuteWorkflow: there was an error contacting the API " + str(oEx))
+
+        if oResponse is None:
+            wasdiLog('[ERROR] waspy._internalExecuteWorkflow: communication with the server failed')
         else:
-            wasdiLog('[ERROR] waspy._internalExecuteWorkflow: cannot find process ID in response, aborting' +
-                     '  ******************************************************************************')
-            return ''
-    else:
-        wasdiLog('[ERROR] waspy._internalExecuteWorkflow: server returned status ' + str(oResponse.status_code) +
-                 '  ******************************************************************************')
-        wasdiLog(oResponse.content)
+            if oResponse.ok is True:
+                _log('[INFO] waspy._internalExecuteWorkflow: server replied OK')
+                asJson = oResponse.json()
+                if "stringValue" in asJson:
+                    sProcessId = asJson["stringValue"]
+                    if bAsynch is True:
+                        return sProcessId
+                    else:
+                        return waitProcess(sProcessId)
+                else:
+                    wasdiLog('[ERROR] waspy._internalExecuteWorkflow: cannot find process ID in response')
+            else:
+                wasdiLog('[ERROR] waspy._internalExecuteWorkflow: server returned status ' + str(oResponse.status_code))
+                wasdiLog(oResponse.content)
+        
+        wasdiLog("[ERROR]: waspy._internalExecuteWorkflow: Error triggering the workflow.")
+        time.sleep(getPollingSleepSeconds())        
+
+    wasdiLog("[ERROR]: waspy._internalExecuteWorkflow: workflow not triggered, too many errors")
     return ''
 
 
