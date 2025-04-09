@@ -4,15 +4,15 @@ WASDI python programming library CHANGELOG.md, according to the
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
 
-## [0.8.7.5] - 2025-04-07
+## [0.8.7.5] - 2025-04-09
 ### Added
 - executeAndWaitProcessor: synch execution of a processor
+- log of all API errors
 ### Fixed
 - executeProcessor: log the retry
 - executeProcessor: log error message from server if the app cannot be started
 - executeWorkflow: added 3 retry
 - multiSubset: added 3 retry
-
 
 ## [0.8.7.4] - 2025-03-04
 ### Added

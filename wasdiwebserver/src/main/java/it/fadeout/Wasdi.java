@@ -593,8 +593,12 @@ public class Wasdi extends ResourceConfig {
 				}
 				if (bRet) {
 					oParameter.setSessionID(oSession.getSessionId());
-				} else {
-					throw new IllegalArgumentException("could not insert session " + oSession.getSessionId() + " in DB, aborting");
+				} 
+				else if(bNew) {
+					throw new Exception("could not insert session " + oSession.getSessionId() + " in DB, aborting");
+				}
+				else {
+					WasdiLog.warnLog("Error trying to touch the session");
 				}
 
 				// Insert the parameter in mongo
@@ -618,7 +622,7 @@ public class Wasdi extends ResourceConfig {
 					//TODO - enforce the presence of a valid subscription and of an active project
 					if (Utils.isNullOrEmpty(oUser.getActiveProjectId())
 							|| Utils.isNullOrEmpty(oUser.getActiveSubscriptionId())) {
-						WasdiLog.debugLog("Wasdi.runProcess: Process Scheduled for Launcher. The user does not have a valid subscription and an active project");
+						WasdiLog.warnLog("Wasdi.runProcess: Process Scheduled for Launcher. The user does not have a valid subscription and an active project");
 					}
 
 					oProcess.setProjectId(oUser.getActiveProjectId());
@@ -629,14 +633,16 @@ public class Wasdi extends ResourceConfig {
 					oProcess.setNodeCode(sWsNodeCode);
 					oRepository.insertProcessWorkspace(oProcess);
 					WasdiLog.debugLog("Wasdi.runProcess: Process Scheduled for Launcher");
-				} catch (Exception oEx) {
-					WasdiLog.debugLog("Wasdi.runProcess: " + oEx);
+				} 
+				catch (Exception oEx) {
+					WasdiLog.errorLog("Wasdi.runProcess: " + oEx);
 					oResult.setBoolValue(false);
 					oResult.setIntValue(500);
 					return oResult;
 				}				
 			}
-		} catch (Exception oE) {
+		} 
+		catch (Exception oE) {
 			WasdiLog.errorLog("Wasdi.runProcess: " + oE);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
