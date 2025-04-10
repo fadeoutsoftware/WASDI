@@ -4,6 +4,10 @@ WASDI python programming library CHANGELOG.md, according to the
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
 
+## [0.8.7.6] - 2025-04-10
+### Fixed
+- fileExistsOnWasdi: better log of the 404: is not an error in this case
+
 ## [0.8.7.5] - 2025-04-09
 ### Added
 - executeAndWaitProcessor: synch execution of a processor

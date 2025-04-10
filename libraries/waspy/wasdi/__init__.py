@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.7.5
+Version 0.8.7.6
 
-Last Update: 09/04/2025
+Last Update: 10/04/2025
 
 Tested with: Python 3.7 - Python 3.13 
 
@@ -2618,6 +2618,9 @@ def fileExistsOnWasdi(sFileName):
     if oResult is None:
         wasdiLog('[ERROR] waspy.fileExistsOnWasdi: failed contacting the server' +
                  '  ******************************************************************************')
+        return False
+    
+    if oResult.status_code == 404:
         return False
 
     if oResult.status_code <200 or oResult.status_code >299:
