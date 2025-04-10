@@ -13,9 +13,9 @@ WORKDIR {{ sWasdiLauncherRootDirectoryPath }}
 
 
 # Copy JNI libs
-#COPY --chown={{ sWasdiLauncherRootDirectoryOwner }}:{{ sWasdiLauncherRootDirectoryGroup }} ./dataToCopy/linux-x86-64/* {{ sWasdiLauncherRootDirectoryPath }}/linux-x86-64/
+COPY --chown={{ sWasdiLauncherRootDirectoryOwner }}:{{ sWasdiLauncherRootDirectoryGroup }} ./dataToCopy/linux-x86-64/* {{ sWasdiLauncherRootDirectoryPath }}/linux-x86-64/
 
 # Copy launcher artifact
 COPY --chown={{ sWasdiLauncherRootDirectoryOwner }}:{{ sWasdiLauncherRootDirectoryGroup }} ./dataToCopy/{{ sWasdiLauncherBuildTargetFileName }} {{ sWasdiLauncherRootDirectoryPath }}/{{ sWasdiLauncherBuildTargetFileName }}
 
-#ENV PATH="{{ sWasdiLauncherRootDirectoryPath }}/:{{ sWasdiLauncherRootDirectoryPath }}/linux-x86-64/:${PATH}"
+ENV PATH="{{ sWasdiLauncherRootDirectoryPath }}/:{{ sWasdiLauncherRootDirectoryPath }}/linux-x86-64/:${PATH}"
