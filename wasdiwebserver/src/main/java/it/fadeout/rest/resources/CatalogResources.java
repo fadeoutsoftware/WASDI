@@ -242,7 +242,7 @@ public class CatalogResources {
 				}
 				
 				if (bRetry) {
-					WasdiLog.warnLog("CatalogResources.checkDownloadEntryAvailabilityByName: retry adding extension new file name = " + sFileName);
+					WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: retry adding extension new file name = " + sFileName);
 					oFile = this.getEntryFile(sFileName,sWorkspaceId);
 				}
 				

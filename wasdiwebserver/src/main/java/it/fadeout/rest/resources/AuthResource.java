@@ -144,7 +144,7 @@ public class AuthResource {
 				WasdiLog.debugLog("AuthResource.login: user not found: " + sLowerCaseUserId + ", check if this is the first access");
 				
 				// Try to retrieve info about this user 
-				String sUserInfo = m_oKeycloakService.getUserData(m_oKeycloakService.getToken(), sLowerCaseUserId); // TODO - not sure if this will still work: for the user with multiple accounts yes, but what about the other two?
+				String sUserInfo = m_oKeycloakService.getUserData(m_oKeycloakService.getToken(), sLowerCaseUserId);
 				
 				if (Utils.isNullOrEmpty(sUserInfo)) {
 					// No, something did not work well

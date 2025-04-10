@@ -376,7 +376,7 @@ public class Wasdi extends ResourceConfig {
 					
 					if (oUser!=null) {
 						// If it is not null, we can touch the session
-						oSessionRepository.touchSession(oUserSession);
+						safeTouchSession(oUserSession);
 					}
 					
 				}
@@ -406,6 +406,23 @@ public class Wasdi extends ResourceConfig {
 			}
 		}
 	}	
+	
+	/**
+	 * Safe Touch Session: it really makes the touch only if the session is at least one minute old.
+	 * 
+	 * @param oSession Session to touch
+	 * @return True if was more recent than one minute, or if was touched. False in case of error in the update of the session in the db
+	 */
+	public static boolean safeTouchSession(UserSession oSession) {
+		double dNow = Utils.nowInMillis();
+		double dSessionAge = dNow - oSession.getLastTouch();
+		if (dSessionAge>60*1000) {
+			SessionRepository oSessionRepository = new SessionRepository();
+			return oSessionRepository.touchSession(oSession);
+		}
+		
+		return true;		
+	}
 
 	/**
 	 * Get The owner of a workspace starting from the workspace id
@@ -501,7 +518,8 @@ public class Wasdi extends ResourceConfig {
 
 		//filter out invalid sessions
 		User oUser = getUserFromSession(sSessionId);
-		if(null == oUser) {
+		
+		if(oUser == null) {
 			WasdiLog.debugLog("Wasdi.runProcess( " + sUserId + ", " + sSessionId + ", " + sOperationType + ", " + sProductName + ", ... ): session not valid, aborting");
 			oResult.setIntValue(401);
 			oResult.setBoolValue(false);
@@ -529,6 +547,7 @@ public class Wasdi extends ResourceConfig {
 					
 			// Is the workspace here?
 			String sWsNodeCode = oWorkspace.getNodeCode();
+			
 			if (!sWsNodeCode.equals(sMyNodeCode)) {
 				
 				// No: forward the call on the owner node
@@ -567,40 +586,28 @@ public class Wasdi extends ResourceConfig {
 			else {
 				// The Workspace is here. Just add the Parameter and the ProcessWorkspace to the database 
 				
-				//create a WASDI session here
-				
-				//maybe store original keycloak session id in WASDI DB, to keep more params, e.g., the user
-				UserSession oSession = new UserSession();
-				oSession.setUserId(sUserId);
-
-				Boolean bNew = false;
-				//store the keycloak access token instead, so we can retrieve the user and perform a further check
-				// NO!!! LIBS does not have the ability to refresh the token!!
-				if (Utils.isNullOrEmpty(sParentId)) {
-					sSessionId = UUID.randomUUID().toString();
-					bNew = true;
-				}
-				oSession.setSessionId(sSessionId);
-				oSession.setLoginDate(Utils.nowInMillis());
-				oSession.setLastTouch(Utils.nowInMillis());
-				
 				SessionRepository oSessionRepo = new SessionRepository();
-				Boolean bRet = false;
-				if(bNew) {
-					bRet = oSessionRepo.insertSession(oSession);
-				} else {
-					bRet = oSessionRepo.touchSession(oSession);
+				
+				if (Utils.isNullOrEmpty(sParentId)) {
+					
+					//Create a WASDI session here
+					UserSession oSession = new UserSession();
+					oSession.setUserId(sUserId);
+					
+					sSessionId = UUID.randomUUID().toString();
+					oSession.setSessionId(sSessionId);
+					oSession.setLoginDate(Utils.nowInMillis());
+					oSession.setLastTouch(Utils.nowInMillis());
+					
+					if (!oSessionRepo.insertSession(oSession)) {
+						WasdiLog.warnLog("could not insert session " + oSession.getSessionId() + " in DB, try with the old one");						
+					}
+					else {
+						// Assign this new session to the parameter
+						oParameter.setSessionID(sSessionId);
+					}
 				}
-				if (bRet) {
-					oParameter.setSessionID(oSession.getSessionId());
-				} 
-				else if(bNew) {
-					throw new Exception("could not insert session " + oSession.getSessionId() + " in DB, aborting");
-				}
-				else {
-					WasdiLog.warnLog("Error trying to touch the session");
-				}
-
+				
 				// Insert the parameter in mongo
 				ParametersRepository oParametersRepository = new ParametersRepository();
 				oParametersRepository.insertParameter(oParameter);
