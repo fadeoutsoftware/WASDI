@@ -114,7 +114,7 @@ public class Mosaic extends Operation {
 			m_oProcessWorkspaceLogger.log("Running Mosaic");
         	
             // Run the gdal mosaic
-            if (GdalUtils.runGDALMosaic(oParameter)) {
+            if (GdalUtils.runGDALMosaic(oParameter, m_oProcessWorkspaceLogger)) {
                 // Log here and to the user
                 WasdiLog.debugLog("Mosaic.executeOperation adding product to Workspace");
                 m_oProcessWorkspaceLogger.log("Adding output file to the workspace");
