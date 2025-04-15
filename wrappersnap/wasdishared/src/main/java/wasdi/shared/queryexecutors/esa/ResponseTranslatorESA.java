@@ -129,14 +129,22 @@ public class ResponseTranslatorESA extends ResponseTranslator {
 				sDownloadLink = "https://payload={\"url\": \"" + sHref + "\"}";
 				break;
 			}
-			if (!sDownloadLink.contains("url")) {
-				String sHref = oItem.optString("href");
-				if (!Utils.isNullOrEmpty(sHref)) {
-					sDownloadLink = "https://payload={\"url\": \"" + sHref + "\"}";
-					break;
+		}
+		
+		if (!sDownloadLink.contains("url")) {
+			JSONObject oAssets = oJsonItem.optJSONObject("assets");
+			if (oAssets != null) {
+				JSONObject oEnclosure = oAssets.getJSONObject("enclosure");
+				if (oEnclosure != null) {
+					sTitle = oEnclosure.getString("title");
+					if (!Utils.isNullOrEmpty(sTitle) && sTitle.equalsIgnoreCase("Download")) {
+						String sHref = oEnclosure.getString("href");
+						sDownloadLink = "https://payload={\"url\": \"" + sHref + "\"}";
+					}
 				}
 			}
 		}
+		
 		return sDownloadLink;
 	}
 	
