@@ -129,6 +129,13 @@ public class ResponseTranslatorESA extends ResponseTranslator {
 				sDownloadLink = "https://payload={\"url\": \"" + sHref + "\"}";
 				break;
 			}
+			if (!sDownloadLink.contains("url")) {
+				String sHref = oItem.optString("href");
+				if (!Utils.isNullOrEmpty(sHref)) {
+					sDownloadLink = "https://payload={\"url\": \"" + sHref + "\"}";
+					break;
+				}
+			}
 		}
 		return sDownloadLink;
 	}
