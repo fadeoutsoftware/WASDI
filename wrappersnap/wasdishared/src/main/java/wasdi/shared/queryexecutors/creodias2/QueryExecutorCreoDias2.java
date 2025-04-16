@@ -117,7 +117,7 @@ public class QueryExecutorCreoDias2 extends QueryExecutorHttpGet {
 			}
 			
 			if (sPlatform.equals(Platforms.LANDSAT8)) {
-				sPlatform = "LANDSAT-8";
+				sPlatform = "LANDSAT-8-ESA";
 			}
 			
 			Date oProductDate = MissionUtils.getDateFromSatelliteImageFileName(sProduct, sPlatform);
