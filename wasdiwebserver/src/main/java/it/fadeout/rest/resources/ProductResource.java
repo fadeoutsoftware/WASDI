@@ -943,8 +943,8 @@ public class ProductResource {
             }
 
             if (oDownloadedFile == null) {
-                WasdiLog.warnLog("ProductResource.deleteProduct: invalid product");
-                oReturn.setStringValue("Invalid Product");
+                WasdiLog.warnLog("ProductResource.deleteProduct: invalid product " + sProductName);
+                oReturn.setStringValue("Invalid Product "+ sProductName);
                 oReturn.setIntValue(403);
                 return oReturn;
             }
