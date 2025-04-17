@@ -202,7 +202,12 @@ public class WasdiGraph {
 	 * @throws Exception
 	 */
 	public void execute() throws Exception {
-		
+
+        ArrayList<String> asInputFileNames = new ArrayList<String>();
+        ArrayList<String> asOutputFileNames = new ArrayList<String>();
+
+		GraphSetting oGraphSettings = null;
+
 		try {
 			WasdiLog.infoLog("WasdiGraph.execute: start");
 			
@@ -212,10 +217,7 @@ public class WasdiGraph {
 	        
 	        ArrayList<File> aoOutputFiles = new ArrayList<>(); 
 	        
-	        ArrayList<String> asInputFileNames = new ArrayList<String>();
-	        ArrayList<String> asOutputFileNames = new ArrayList<String>();
-
-			GraphSetting oGraphSettings = (GraphSetting) m_oParams.getSettings();
+	        oGraphSettings = (GraphSetting) m_oParams.getSettings();
 			
 			WasdiLog.infoLog("WasdiGraph.execute: setting input files");
 			
@@ -346,12 +348,22 @@ public class WasdiGraph {
 	            	
 	            }
 			}
+						
+			m_oProcessWorkspaceLogger.log("Done " + new EndMessageProvider().getGood());
 			
+		} 
+		finally {
 			try {
 				ExecuteGraphPayload oPayload = new ExecuteGraphPayload();
-				oPayload.setInputFiles(asInputFileNames.toArray(new String[0]));
-				oPayload.setOutputFiles(asOutputFileNames.toArray(new String[0]));
-				oPayload.setWorkflowName(oGraphSettings.getWorkflowName());
+				if (asInputFileNames!= null) {
+					oPayload.setInputFiles(asInputFileNames.toArray(new String[0]));	
+				}
+				if (asOutputFileNames!=null) {
+					oPayload.setOutputFiles(asOutputFileNames.toArray(new String[0]));	
+				}
+				if (oGraphSettings != null) {
+					oPayload.setWorkflowName(oGraphSettings.getWorkflowName());	
+				}
 				
 				String sPayload = LauncherMain.s_oMapper.writeValueAsString(oPayload);
 				m_oProcess.setPayload(sPayload);						
@@ -360,9 +372,6 @@ public class WasdiGraph {
 				WasdiLog.errorLog("WasdiGraph.execute: payload exception: "+ oPayloadEx.toString());
 			}			
 			
-			m_oProcessWorkspaceLogger.log("Done " + new EndMessageProvider().getGood());
-			
-		} finally {
             closeProcess();
 		}
 			

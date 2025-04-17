@@ -67,7 +67,7 @@ public class Mosaic extends Operation {
             
             MosaicSetting oSettings = (MosaicSetting) oParameter.getSettings();
             
-            boolean bMissingInputs = false;
+            boolean bAddedOneInput = false;
             
 			// for each product
 			for (int iProducts = 0; iProducts<oSettings.getSources().size(); iProducts ++) {
@@ -82,23 +82,18 @@ public class Mosaic extends Operation {
 				if (!oFile.exists()) {
 					WasdiLog.warnLog("Mosaic.executeOperation: Missing input file " + oSettings.getSources().get(iProducts));
 					m_oProcessWorkspaceLogger.log("Missing input file " + oSettings.getSources().get(iProducts));
-					bMissingInputs = true;
+				}
+				else {
+					bAddedOneInput = true;
 				}
 			}
 			
-			// If we are missing inputs, we cannot proceed
-			if (bMissingInputs) {
-				
-				if (oSettings.getSources().size() == 1) {
-	            	m_oProcessWorkspaceLogger.log("Impossible to run the mosaic due to one single and missing input");
-	                WasdiLog.warnLog("Mosaic.executeOperation: Impossible to run the mosaic due to one single and missing input");
-	                m_oProcessWorkspaceLogger.log(":( " + new EndMessageProvider().getBad());
-	                return false;
-				}
-				else {
-	            	m_oProcessWorkspaceLogger.log("Try to execute the mosaic with the inputs we have");
-	                WasdiLog.warnLog("Mosaic.executeOperation: Try to execute the mosaic with the inputs we have");					
-				}
+			// If we are missing all the inputs, we cannot proceed
+			if (!bAddedOneInput) {
+            	m_oProcessWorkspaceLogger.log("Impossible to run the mosaic due to all missing inputs missing");
+                WasdiLog.warnLog("Mosaic.executeOperation: Impossible to run the mosaic due all inputs missing");
+                m_oProcessWorkspaceLogger.log(":( " + new EndMessageProvider().getBad());
+                return false;
 			}
 			
 			
