@@ -19,5 +19,5 @@ WORKDIR {{ sWasdiLauncherRootDirectoryPath }}
 COPY --chown={{ sWasdiLauncherRootDirectoryOwner }}:{{ sWasdiLauncherRootDirectoryGroup }} ./dataToCopy/{{ sWasdiLauncherBuildTargetFileName }} {{ sWasdiLauncherRootDirectoryPath }}/{{ sWasdiLauncherBuildTargetFileName }}
 
 #ENV LD_LIBRARY_PATH="{{ sWasdiLauncherRootDirectoryPath }}/linux-x86-64/"
-ENV PATH="{{ sWasdiLauncherRootDirectoryPath }}/:{{ sWasdiLauncherRootDirectoryPath }}/linux-x86-64/:${PATH}"
+#ENV PATH="{{ sWasdiLauncherRootDirectoryPath }}/:{{ sWasdiLauncherRootDirectoryPath }}/linux-x86-64/:${PATH}"
 
