@@ -438,6 +438,18 @@ public class LauncherMain  {
 
                         oSnapLogger.addHandler(oConsoleHandler);                    	
                     }
+                    
+                    // Filter the apache logs
+              		try {  			
+              			ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("ucar.nc2");
+              			if (oLogger!=null) {
+              				oLogger.setLevel(ch.qos.logback.classic.Level.WARN);	
+              			}
+              		}
+              		catch (Exception oEx) {
+              			WasdiLog.errorLog("Disabling ucar.nc2 logging exception " + oEx.toString());
+              		}   		
+                    
                 } 
                 catch (Exception oEx) {
                 	WasdiLog.errorLog("LauncherMain.configureSNAP: exception configuring SNAP log file " + oEx.toString());

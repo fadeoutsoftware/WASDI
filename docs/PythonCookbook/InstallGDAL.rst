@@ -54,3 +54,14 @@ Now, you should be able to import gdal in your code.
 .. code-block:: python
 
    from osgeo import gdal
+
+.. note::
+	| You may have still a problem when running a python script with gdal.
+	| If you see this error:
+	| ImportError: DLL load failed while importing _gdal: The specified module could not be found.
+	| This probably means that you are missing the VC - redist libraries.
+	| These can be found here:
+	| https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022
+	|
+	| This is the direct link to the version for x64 Machines:
+	| https://aka.ms/vs/17/release/vc_redist.x64.exe

@@ -9,6 +9,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.settings.MosaicSetting;
 import wasdi.shared.utils.JsonUtils;
+import wasdi.shared.utils.ProcessWorkspaceLogger;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
@@ -300,7 +301,7 @@ public class GdalUtils {
      * @param oMosaicParameter
      * @return
      */
-	public static Boolean runGDALMosaic(MosaicParameter oMosaicParameter) {
+	public static Boolean runGDALMosaic(MosaicParameter oMosaicParameter, ProcessWorkspaceLogger oPWLogger) {
 		
 		MosaicSetting oMosaicSetting = (MosaicSetting) oMosaicParameter.getSettings();
 		
@@ -417,9 +418,15 @@ public class GdalUtils {
 				
 				// Get full path
 				String sProductFile = sWorkspacePath+oMosaicSetting.getSources().get(iProducts);
-				WasdiLog.debugLog("Mosaic.runGDALMosaic: Adding input Product [" + iProducts +"] = " + sProductFile);
 								
-				asArgs.add(sProductFile);
+				// Check if the file exists
+				File oFile = new File(sProductFile);
+								
+				// This is not promising
+				if (oFile.exists()) {
+					WasdiLog.debugLog("GdalUtils.runGDALMosaic: Adding input Product [" + iProducts +"] = " + sProductFile);
+					asArgs.add(sProductFile);
+				}
 			}
 			
 			// Run the command
@@ -428,6 +435,9 @@ public class GdalUtils {
 			// Is there an output to log?
 			if (!Utils.isNullOrEmpty(oShellExecReturn.getOperationLogs())) {
 				WasdiLog.debugLog("Mosaic.runGDALMosaic: logs = " + oShellExecReturn.getOperationLogs());
+				if (oPWLogger!=null) {
+					oPWLogger.log("Mosaic logs = " + oShellExecReturn.getOperationLogs());
+				}
 			}
 			
 			File oOutputFile = new File(sWorkspacePath+sOuptutFile); 
@@ -458,6 +468,9 @@ public class GdalUtils {
     			else {
     				// Error
     				WasdiLog.errorLog("Mosaic.runGDALMosaic: error creating mosaic, the output file  = " + sOuptutFile + " does not exists");
+    				if (oPWLogger!=null) {
+    					oPWLogger.log("Mosaic error creating mosaic, the output file does not exists ");
+    				}    				
     				return false;
     			}
 			}
