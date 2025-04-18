@@ -85,7 +85,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		if (!Utils.isNullOrEmpty(sPlatform)) {
 			
 			if (sPlatform.equals(Platforms.LANDSAT8)) {
-				sPlatform = "LANDSAT-8";
+				sPlatform = "LANDSAT-8-ESA";
 			}
 			
 			asQueryElements.add(createCollectionNameEqFilter(sPlatform));

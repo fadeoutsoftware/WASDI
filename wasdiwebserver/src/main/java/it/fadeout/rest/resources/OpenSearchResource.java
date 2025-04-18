@@ -168,7 +168,7 @@ public class OpenSearchResource {
 			return null;
 		}
 		
-		WasdiLog.debugLog("OpenSearchResource.search: Selected Provider " +sProvider);
+		WasdiLog.debugLog("OpenSearchResource.search: Selected Provider " + sProvider);
 				
 		// Get the number of elements per page
 		ArrayList<QueryResultViewModel> aoResults = new ArrayList<>();
