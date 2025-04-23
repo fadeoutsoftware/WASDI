@@ -9,7 +9,7 @@
     <artifactId>jwasdilib</artifactId>
     <name>jwasdilib</name>
     <packaging>jar</packaging>
-    <version>0.7.4</version>
+    <version>0.7.5</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
