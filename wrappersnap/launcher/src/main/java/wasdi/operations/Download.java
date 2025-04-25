@@ -212,6 +212,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                     
                     if (Utils.isNullOrEmpty(sFileName)) {
                         oProviderAdapter.unsubscribe(this);
+                        oProviderAdapter.closeConnections();
                         
                         oProviderAdapter = getNextDataProvider(oParameter);
                                                 
@@ -229,6 +230,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
 
                 oProviderAdapter.unsubscribe(this);
+                oProviderAdapter.closeConnections();
 
                 m_oProcessWorkspaceLogger.log("Got File, try to read");
 

@@ -226,7 +226,15 @@ public class LSAProviderAdapter extends ProviderAdapter {
 		}
 		
 		return 0;
+	}
+	
+	@Override
+	public void closeConnections() {
+		super.closeConnections();
 		
+		if (m_bAuthenticated) {
+			LSAHttpUtils.logout();
+		}
 	}
 	
 }
