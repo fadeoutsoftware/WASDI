@@ -2,9 +2,12 @@ package wasdi.dataproviders;
 
 import java.io.File;
 
+import org.apache.commons.io.FileUtils;
+
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.lsa.LSAHttpUtils;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -125,7 +128,7 @@ public class LSAProviderAdapter extends ProviderAdapter {
 		}
 
 		if(isHttpsProtocol(sFileURL)) {
-			sResult = downloadHttps(sFileURL, sSaveDirOnServer, iMaxRetry, sResult);
+			sResult = downloadHttps(sFileURL, sSaveDirOnServer, iMaxRetry);
 		}
 
 		return sResult;
@@ -156,7 +159,11 @@ public class LSAProviderAdapter extends ProviderAdapter {
 		return sResult;
 	}
 
-	private String downloadHttps(String sFileURL, String sSaveDirOnServer, int iMaxRetry, String sResult) {
+	private String downloadHttps(String sFileURL, String sSaveDirOnServer, int iMaxRetry) {
+		
+		String sResult = "";
+		
+		// Try 5 times
 		for (int iAttemp = 0; iAttemp < iMaxRetry; iAttemp ++) {
 
 			WasdiLog.debugLog("LSAProviderAdapter.downloadHttps: attemp #" + iAttemp);
@@ -169,7 +176,30 @@ public class LSAProviderAdapter extends ProviderAdapter {
 			}
 			
 			if (!Utils.isNullOrEmpty(sResult)) {
-				return sResult;
+				
+				File oDownloadedFile = new File(sResult);
+				
+				if (oDownloadedFile.exists()) {
+					String sDetectedPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(oDownloadedFile.getName());
+					if (!Utils.isNullOrEmpty(sDetectedPlatform)) {
+						if (sDetectedPlatform.equals(Platforms.SENTINEL1) || sDetectedPlatform.equals(Platforms.SENTINEL2)) {
+							if (oDownloadedFile.length()<1000000l) {
+								WasdiLog.warnLog("LSAProviderAdapter.downloadHttps: The file should be a S1 or S2, but is smaller than 1Mb. We do not trust it, retry");
+								FileUtils.deleteQuietly(oDownloadedFile);
+								sResult = "";
+							}
+						}
+					}
+				}
+				else {
+					WasdiLog.infoLog("LSAProviderAdapter.downloadHttps: the returned file " + sResult + " does not exists, we try again");
+					sResult = "";
+				}
+				
+				// Now we can check again if it is still valid
+				if (!Utils.isNullOrEmpty(sResult)) {
+					return sResult;	
+				}
 			}
 
 			try {
