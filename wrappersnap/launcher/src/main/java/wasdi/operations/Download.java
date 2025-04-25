@@ -212,6 +212,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                     
                     if (Utils.isNullOrEmpty(sFileName)) {
                         oProviderAdapter.unsubscribe(this);
+                        oProviderAdapter.closeConnections();
                         
                         oProviderAdapter = getNextDataProvider(oParameter);
                                                 
@@ -229,6 +230,8 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
 
                 oProviderAdapter.unsubscribe(this);
+                WasdiLog.debugLog("Download.executeOperation: calling closeConnections");
+                oProviderAdapter.closeConnections();
 
                 m_oProcessWorkspaceLogger.log("Got File, try to read");
 
@@ -541,6 +544,9 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 		
 		// Must obtain the URI!!
 		String sFileUri = oQueryExecutor.getUriFromProductName(oParameter.getName(), WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode()).defaultProtocol, oParameter.getUrl(), oParameter.getPlatform());
+		
+		// Close connections
+		oQueryExecutor.closeConnections();
 		
 		if (!Utils.isNullOrEmpty(sFileUri)) {
 			// If we got the URI, this is the best Provider Adapter

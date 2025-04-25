@@ -177,4 +177,16 @@ public class QueryExecutorLSA extends QueryExecutor {
 		
 		return aoReturnList;
 	}
+	
+	@Override
+	public void closeConnections() {
+		if (m_bAuthenticated) {
+			WasdiLog.debugLog("QueryExecutorLSA.closeConnections: calling logut");
+			LSAHttpUtils.logout();
+			m_bAuthenticated = false;
+		}
+		else {
+			WasdiLog.debugLog("QueryExecutorLSA.closeConnections: not authenticated");
+		}
+	}
 }

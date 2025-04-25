@@ -1184,5 +1184,9 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		
 		return sDestinationFileName;
 	}
+	
+	public void closeConnections() {
+		
+	}
 
 }

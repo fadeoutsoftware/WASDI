@@ -27,7 +27,8 @@ public class LSAHttpUtils {
     public static String s_sLoginBaseUrl = "https://sso.collgs.lu/auth/realms/lucollgs/protocol/openid-connect/auth?";
     public static String s_sClientId = "client_id=account&response_mode=fragment&response_type=code&";
     public static String s_sRedirectUrl = "redirect_uri=https://collgs.lu/geocatalog.html";
-    
+    public static String s_sLogoutUrl = "https://sso.collgs.lu/auth/realms/lucollgs/protocol/openid-connect/logout?redirect_uri=https://collgs.lu/";
+    	
     public static void authenticate(String sUser, String sPassword) {
     	
     	try {
@@ -191,6 +192,24 @@ public class LSAHttpUtils {
 			WasdiLog.debugLog("QueryExecutorLSA.httpPostResults: Exception " + oE);
 		}
 		return sResult;
+	}
+	
+	public static void logout() {
+    	try {
+    		
+    		WasdiLog.debugLog("LSAProviderAdapter.logout ");
+    		
+    		// Create the cookie manager
+    		CookieManager oCookieManager = (CookieManager) CookieHandler.getDefault();
+    		
+    		// Logout 
+    		LSAHttpUtils.httpGetResults(s_sLogoutUrl, oCookieManager);
+    		//String sLogoutPage = httpGetResults(s_sLogoutUrl, oCookieManager);
+    		//WasdiLog.debugLog("LSAProviderAdapter.logout result: " + sLogoutPage);
+    	}
+    	catch (Exception oEx) {
+			WasdiLog.debugLog("LSAProviderAdapter.logout: Exception " + oEx.toString());
+		}		
 	}
 	
 }
