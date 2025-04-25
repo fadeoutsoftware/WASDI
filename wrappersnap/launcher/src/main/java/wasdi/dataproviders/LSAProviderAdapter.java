@@ -230,10 +230,15 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	
 	@Override
 	public void closeConnections() {
-		super.closeConnections();
+		
 		
 		if (m_bAuthenticated) {
+			WasdiLog.debugLog("LSAProviderAdapter.closeConnections: calling logut");
 			LSAHttpUtils.logout();
+			m_bAuthenticated = false;
+		}
+		else {
+			WasdiLog.debugLog("LSAProviderAdapter.closeConnections: not authenticated");
 		}
 	}
 	

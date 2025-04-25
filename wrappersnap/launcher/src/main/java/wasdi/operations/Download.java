@@ -230,6 +230,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
 
                 oProviderAdapter.unsubscribe(this);
+                WasdiLog.debugLog("Download.executeOperation: calling closeConnections");
                 oProviderAdapter.closeConnections();
 
                 m_oProcessWorkspaceLogger.log("Got File, try to read");
