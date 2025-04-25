@@ -229,8 +229,7 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	}
 	
 	@Override
-	public void closeConnections() {
-		
+	public void closeConnections() {	
 		
 		if (m_bAuthenticated) {
 			WasdiLog.debugLog("LSAProviderAdapter.closeConnections: calling logut");

@@ -202,10 +202,10 @@ public class LSAHttpUtils {
     		// Create the cookie manager
     		CookieManager oCookieManager = (CookieManager) CookieHandler.getDefault();
     		
-    		
-    		// Logout URL
-    		String sLogoutPage = httpGetResults(s_sLogoutUrl, oCookieManager);
-    		WasdiLog.debugLog("LSAProviderAdapter.logout result: " + sLogoutPage);
+    		// Logout 
+    		LSAHttpUtils.httpGetResults(s_sLogoutUrl, oCookieManager);
+    		//String sLogoutPage = httpGetResults(s_sLogoutUrl, oCookieManager);
+    		//WasdiLog.debugLog("LSAProviderAdapter.logout result: " + sLogoutPage);
     	}
     	catch (Exception oEx) {
 			WasdiLog.debugLog("LSAProviderAdapter.logout: Exception " + oEx.toString());

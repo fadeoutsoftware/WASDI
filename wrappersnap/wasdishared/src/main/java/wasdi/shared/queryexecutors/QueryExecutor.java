@@ -301,4 +301,7 @@ public abstract class QueryExecutor {
 		m_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);		
 	}
 
+	public void closeConnections() {
+		
+	}
 }

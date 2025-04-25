@@ -545,6 +545,9 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 		// Must obtain the URI!!
 		String sFileUri = oQueryExecutor.getUriFromProductName(oParameter.getName(), WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode()).defaultProtocol, oParameter.getUrl(), oParameter.getPlatform());
 		
+		// Close connections
+		oQueryExecutor.closeConnections();
+		
 		if (!Utils.isNullOrEmpty(sFileUri)) {
 			// If we got the URI, this is the best Provider Adapter
 			
