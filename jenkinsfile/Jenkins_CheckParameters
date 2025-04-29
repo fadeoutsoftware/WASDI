@@ -1,0 +1,93 @@
+import jenkins.model.*
+import hudson.model.*
+
+def setEnvironmentVariable() {
+  sSourceJobName = env.JOB_BASE_NAME.replaceAll('_Deploy', '_BuildAndDeploy')
+
+  def aoParameters = Jenkins.instance.getAllItems(Job)
+                          .find { job -> job.fullName == sSourceJobName }
+                          .getBuildByNumber(env.sCurrentRevision.toInteger())
+                          .getAction(hudson.model.ParametersAction)
+
+  env.sAnsibleInventory                = aoParameters.getParameter('sAnsibleInventory').value
+  env.sAnsibleLimit                    = aoParameters.getParameter('sAnsibleLimit').value
+  env.sWasdiLauncher                   = aoParameters.getParameter('sWasdiLauncher').value
+  env.sWasdiScheduler                  = aoParameters.getParameter('sWasdiScheduler').value
+  env.sWasdiTomcatOgcProcessesServer   = aoParameters.getParameter('sWasdiTomcatOgcProcessesServer').value
+  env.sWasdiTomcatOpenEoServer         = aoParameters.getParameter('sWasdiTomcatOpenEoServer').value
+  env.sWasdiTomcatWasdiWebServer       = aoParameters.getParameter('sWasdiTomcatWasdiWebServer').value
+  env.sWasdiTrigger                    = aoParameters.getParameter('sWasdiTrigger').value
+  env.sWasdiUtils                      = aoParameters.getParameter('sWasdiUtils').value
+
+  echo "sSourceJobName = " + sSourceJobName
+}
+
+def getAnsibleExtraVariableProject() {
+  def aAnsibleExtraVariableProject = []
+
+  aAnsibleExtraVariableProject.add('sDeployWasdiLauncherContainer=' + env.sWasdiLauncher.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiSchedulerContainer=' + env.sWasdiScheduler.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTomcatOgcProcessesServerContainer=' + env.sWasdiTomcatOgcProcessesServer.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTomcatOpenEoServerContainer=' + env.sWasdiTomcatOpenEoServer.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTomcatWasdiWebServerContainer=' + env.sWasdiTomcatWasdiWebServer.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiTriggerContainer=' + env.sWasdiTrigger.toString())
+  aAnsibleExtraVariableProject.add('sDeployWasdiUtilsContainer=' + env.sWasdiUtils.toString())
+
+  aAnsibleExtraVariableProject.unique()
+
+  if ( aAnsibleExtraVariableProject.size() > 0 ) {
+    return aAnsibleExtraVariableProject.join(' ')
+  }
+
+  return ''
+}
+
+pipeline {
+  agent any
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '365'))
+    disableConcurrentBuilds()
+  }
+
+  stages {
+    stage('INITIALIZE') {
+      steps {
+        script {
+          setEnvironmentVariable()
+          env.sAnsibleExtraVariableProject = getAnsibleExtraVariableProject()
+        }
+      }
+    }
+
+    stage('DEBUG') {
+      steps {
+        echo "env.GIT_BRANCH                       = " + env.GIT_BRANCH
+        echo "env.sAnsibleExtraVariableProject     = " + env.sAnsibleExtraVariableProject
+        echo "env.sAnsibleInventory                = " + env.sAnsibleInventory
+        echo "env.sAnsibleLimit                    = " + env.sAnsibleLimit
+        echo "env.sCurrentRevision                 = " + env.sCurrentRevision
+        echo "env.sSourceBranch                    = " + env.sSourceBranch
+        echo "env.sWasdiAnsiblePath                = " + env.sWasdiAnsiblePath
+        echo "env.sWasdiLauncher                   = " + env.sWasdiLauncher
+        echo "env.sWasdiScheduler                  = " + env.sWasdiScheduler
+        echo "env.sWasdiTomcatOgcProcessesServer   = " + env.sWasdiTomcatOgcProcessesServer
+        echo "env.sWasdiTomcatOpenEoServer         = " + env.sWasdiTomcatOpenEoServer
+        echo "env.sWasdiTomcatWasdiWebServer       = " + env.sWasdiTomcatWasdiWebServer
+        echo "env.sWasdiTrigger                    = " + env.sWasdiTrigger
+        echo "env.sWasdiUtils                      = " + env.sWasdiUtils
+        echo "env.WORKSPACE                        = " + env.WORKSPACE
+
+        sh script: "pwd", label: "Current location"
+      }
+    }
+
+    
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
