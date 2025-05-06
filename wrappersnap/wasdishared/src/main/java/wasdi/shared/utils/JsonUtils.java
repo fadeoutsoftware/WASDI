@@ -34,13 +34,13 @@ public final class JsonUtils {
 	public static boolean writeMapAsJsonFile(Map<String, Object> aoJSONMap, String sFileFullPath) throws FileNotFoundException, IOException {
 
 		if (aoJSONMap == null) {
-			WasdiLog.errorLog("WasdiFileUtils.writeMapAsJsonFile: aoJSONMap is null");
+			WasdiLog.errorLog("JsonUtils.writeMapAsJsonFile: aoJSONMap is null");
 
 			return false;
 		}
 
 		if (Utils.isNullOrEmpty(sFileFullPath)) {
-			WasdiLog.errorLog("WasdiFileUtils.writeMapAsJsonFile: sFileFullPath is null");
+			WasdiLog.errorLog("JsonUtils.writeMapAsJsonFile: sFileFullPath is null");
 
 			return false;
 		}
@@ -65,9 +65,9 @@ public final class JsonUtils {
 			JSONTokener oTokener = new JSONTokener(oReader);
 			oJson = new JSONObject(oTokener);
 		} catch (FileNotFoundException oFnf) {
-			WasdiLog.errorLog("WasdiFileUtils.loadJsonFromFile: file " + sFileFullPath + " was not found: " + oFnf);
+			WasdiLog.errorLog("JsonUtils.loadJsonFromFile: file " + sFileFullPath + " was not found: " + oFnf);
 		} catch (Exception oE) {
-			WasdiLog.errorLog("WasdiFileUtils.loadJsonFromFile: " + oE);
+			WasdiLog.errorLog("JsonUtils.loadJsonFromFile: " + oE);
 		}
 		return oJson;
 	}

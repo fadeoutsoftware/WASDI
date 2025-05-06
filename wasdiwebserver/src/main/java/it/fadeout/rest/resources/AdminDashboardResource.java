@@ -741,7 +741,7 @@ public class AdminDashboardResource {
 	@Path("resourcePermissions/types")
 	@Produces({"application/json", "application/xml", "text/xml" })
 	public Response getResourceTypes(@HeaderParam("x-session-token") String sSessionId) {
-		WasdiLog.debugLog("SubscriptionResource.getSubscriptionTypes");
+		WasdiLog.debugLog("AdminDashboardResource.getResourceTypes");
 		try {
 			ArrayList<String> asResourceTypes = new ArrayList<>();
 			
@@ -754,7 +754,7 @@ public class AdminDashboardResource {
 			return Response.ok(asResourceTypes).build();
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("SubscriptionResource.getSubscriptionTypes: error ", oEx);
+			WasdiLog.errorLog("AdminDashboardResource.getResourceTypes: error ", oEx);
 			return Response.serverError().build();			
 		}		
 	}
