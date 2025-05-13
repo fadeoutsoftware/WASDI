@@ -989,7 +989,7 @@ public class ProcessorsResource  {
 			String sUserId = oUser.getUserId();
 			
 			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {				
-				WasdiLog.warnLog("ProcessorsResource.internalRun: user cannot access the workspace");
+				WasdiLog.warnLog("ProcessorsResource.internalRun: user " + sUserId + "cannot access the workspace " + sWorkspaceId);
 				oRunningProcessorViewModel.setStatus("ERROR");
 				oRunningProcessorViewModel.setMessage("Workspace cannot be accessed or does not exists.");
 				return oRunningProcessorViewModel;

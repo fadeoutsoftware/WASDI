@@ -383,7 +383,7 @@ public class FileBufferResource {
 				sMission = MissionUtils.getPlatformFromSatelliteImageFileName(sFileName);
 			}
 			
-			WasdiLog.infoLog("FileBufferResource.imageImport: Detected Mission: " + sMission);
+			WasdiLog.debugLog("FileBufferResource.imageImport: Detected Mission: " + sMission);
 			
 			if (!PermissionsUtils.canUserAccessMission(oUser.getUserId(), sMission)) {
 				// Invalid credentials

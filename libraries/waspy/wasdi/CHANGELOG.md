@@ -4,6 +4,10 @@ WASDI python programming library CHANGELOG.md, according to the
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
 
+## [0.8.7.6] - 2025-05-06
+### Added
+- addFileToWasdi: added bForceUpdate flag to force the lib overwrite a file if exists
+
 ## [0.8.7.6] - 2025-04-10
 ### Fixed
 - fileExistsOnWasdi: better log of the 404: is not an error in this case
