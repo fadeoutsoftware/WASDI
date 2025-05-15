@@ -1350,5 +1350,11 @@
 			"GEOEYE",
 			"WORLDVIEW2"
 		]
+	},
+	"logos": {
+		"wasdi_logo_only": "/assets/icons/logo-only.svg",
+		"wasdi_logo_name": "/assets/icons/logo-name/svg",
+		"coplac_logo_only": "",
+		"coplac_logo_name": ""
 	}
 }

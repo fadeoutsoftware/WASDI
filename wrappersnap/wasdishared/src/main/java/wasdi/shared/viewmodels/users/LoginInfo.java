@@ -14,6 +14,7 @@ public class LoginInfo {
     private String userId;
     private String userPassword;
     private String googleIdToken;
+    private String skin;
     
     //singleton pattern
     private static LoginInfo s_oInvalid;
@@ -23,6 +24,7 @@ public class LoginInfo {
     	oLoginInfo.userId = "";
     	oLoginInfo.userPassword = "";
     	oLoginInfo.googleIdToken = "";
+    	oLoginInfo.skin = "";
     	s_oInvalid = oLoginInfo;
     }
     
@@ -39,7 +41,8 @@ public class LoginInfo {
         LoginInfo oLoginInfo = (LoginInfo)oOther;
         if( this.userId.equals( oLoginInfo.userId )&&
         	this.userPassword.equals( oLoginInfo.userPassword ) &&
-        	this.googleIdToken.equals( oLoginInfo.getGoogleIdToken() )
+        	this.googleIdToken.equals( oLoginInfo.getGoogleIdToken() ) &&
+        	this.skin.equals(oLoginInfo.getSkin())
         		) {
         	return true;
         } else
@@ -51,12 +54,14 @@ public class LoginInfo {
     	String sUserId = "";
     	String sUserPw = "";
     	String sGoogleToken = "";
+    	String sSkin = "";
     	
     	if (!Utils.isNullOrEmpty(userId)) sUserId = userId;
     	if (!Utils.isNullOrEmpty(userPassword)) sUserPw = userId;
     	if (!Utils.isNullOrEmpty(googleIdToken)) sGoogleToken = googleIdToken;
+    	if (!Utils.isNullOrEmpty(skin)) sSkin = skin;
     	
-    	String sInternal = sUserId+sUserPw+sGoogleToken;
+    	String sInternal = sUserId + sUserPw + sGoogleToken + sSkin;
     	return sInternal.hashCode();
     }
 
@@ -84,5 +89,12 @@ public class LoginInfo {
 		this.googleIdToken = googleIdToken;
 	}
 
+	public String getSkin() {
+		return skin;
+	}
+	
+	public void setSkin(String skin) {
+		this.skin = skin;
+	}
 
 }

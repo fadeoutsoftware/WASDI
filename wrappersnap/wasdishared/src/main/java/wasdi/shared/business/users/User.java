@@ -115,6 +115,11 @@ public class User {
 	 * Public Nick Name the user decide to expose
 	 */
 	private String publicNickName;
+	
+	/**
+	 * Skin type to use in the UI: determines the logo and the branding of the interface
+	 */
+	private String skinType = SkinType.WASDI.name();
 
 	static {
     	s_oInvalid = new User();
@@ -327,5 +332,13 @@ public class User {
 
 	public void setPublicNickName(String publicNickName) {
 		this.publicNickName = publicNickName;
+	}
+
+	public String getSkinType() {
+		return skinType;
+	}
+
+	public void setSkinType(String skinType) {
+		this.skinType = skinType;
 	}
 }

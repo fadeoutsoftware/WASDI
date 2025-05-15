@@ -3,6 +3,7 @@ package wasdi.shared.viewmodels.users;
 import java.util.Collections;
 import java.util.Set;
 
+import wasdi.shared.business.users.SkinType;
 import wasdi.shared.business.users.UserType;
 import wasdi.shared.utils.Utils;
 
@@ -27,6 +28,8 @@ public class UserViewModel {
 	private String role;
 	private Set<String> grantedAuthorities;
 	
+	private String skin = SkinType.WASDI.name();
+	
 	//singleton pattern
 	private static UserViewModel s_oInvalid;
 	
@@ -41,6 +44,7 @@ public class UserViewModel {
 
     	oViewModel.role = null;
     	oViewModel.grantedAuthorities = Collections.emptySet();
+    	oViewModel.skin = null;
 
     	s_oInvalid = oViewModel;
     }
@@ -59,7 +63,8 @@ public class UserViewModel {
         	this.name.equals( oUserViewModel.name ) &&
         	this.surname.equals( oUserViewModel.surname ) &&
         	this.sessionId.equals( oUserViewModel.sessionId ) &&
-        	this.authProvider.equals(oUserViewModel.authProvider) ) {
+        	this.authProvider.equals(oUserViewModel.authProvider) &&
+        	this.skin.equals(oUserViewModel.skin)) {
         	return true;
         } else
         	return false;
@@ -73,14 +78,16 @@ public class UserViewModel {
     	String sSurname = "";
     	String sSessionId = "";
     	String sAuthProvider = "";
+    	String sSkin = "";
     	
     	if (!Utils.isNullOrEmpty(userId)) sUserId = userId;
     	if (!Utils.isNullOrEmpty(name)) sName = name;
     	if (!Utils.isNullOrEmpty(surname)) sSurname = surname;
     	if (!Utils.isNullOrEmpty(sessionId)) sSessionId = sessionId;
     	if (!Utils.isNullOrEmpty(authProvider)) sAuthProvider = authProvider;
+    	if (!Utils.isNullOrEmpty(skin)) sSkin = skin;
     	
-    	String sHashCode = sUserId+sName+sSurname+sSessionId+sAuthProvider;
+    	String sHashCode = sUserId+sName+sSurname+sSessionId+sAuthProvider+sSkin;
     	
     	return sHashCode.hashCode();
     }
@@ -171,5 +178,13 @@ public class UserViewModel {
 
 	public void setPublicNickName(String publicNickName) {
 		this.publicNickName = publicNickName;
+	}
+	
+	public String getSkin() {
+		return skin;
+	}
+	
+	public void setSkin(String skin) {
+		this.skin = skin;
 	}
 }

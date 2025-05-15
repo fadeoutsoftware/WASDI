@@ -29,6 +29,7 @@ import wasdi.shared.business.Project;
 import wasdi.shared.business.Subscription;
 import wasdi.shared.business.missions.ClientConfig;
 import wasdi.shared.business.missions.Mission;
+import wasdi.shared.business.users.SkinType;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
@@ -130,6 +131,18 @@ public class AuthResource {
 				WasdiLog.warnLog("AuthResource.login: password null or empty, user not authenticated");
 				return UserViewModel.getInvalid();	
 			}
+			
+			String sSkin = null;
+			if (Utils.isNullOrEmpty(oLoginInfo.getSkin())) {
+				WasdiLog.warnLog("AuthResource.login: skin not specified. Applying wasdi default");
+				sSkin = SkinType.WASDI.name();
+			} 
+			else if (!oLoginInfo.getSkin().equals(SkinType.WASDI.name()) && oLoginInfo.getSkin().equals(SkinType.COPLAC.name())) {
+				WasdiLog.warnLog("AuthResource.login: skin from client does not match any known type. Applying wasdi default");
+				sSkin = SkinType.WASDI.name();
+			} else {
+				sSkin = oLoginInfo.getSkin();
+			}
 
 			WasdiLog.debugLog("AuthResource.login: requested access from " + oLoginInfo.getUserId());
 			
@@ -211,6 +224,9 @@ public class AuthResource {
 					return UserViewModel.getInvalid();						
 				}				
 			}
+			
+			// let's set the skin type for the user
+			oUser.setSkinType(sSkin);
 
 			if(oUser.getValidAfterFirstAccess() == null) {
 				// this is to fix legacy users for which confirmation has never been activated
@@ -260,6 +276,7 @@ public class AuthResource {
 				oUserVM.setSessionId(oSession.getSessionId());
 				oUserVM.setType(PermissionsUtils.getUserType(oUser));
 				oUserVM.setPublicNickName(oUser.getPublicNickName());
+				oUserVM.setSkin(sSkin);
 				if (Utils.isNullOrEmpty(oUserVM.getPublicNickName())) {
 					String sPublicNick = oUserVM.getName();
 					oUserVM.setPublicNickName(sPublicNick);
