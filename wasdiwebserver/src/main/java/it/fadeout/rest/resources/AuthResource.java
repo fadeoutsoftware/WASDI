@@ -52,6 +52,7 @@ import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.users.ChangeUserPasswordViewModel;
 import wasdi.shared.viewmodels.users.LoginInfo;
 import wasdi.shared.viewmodels.users.RegistrationInfoViewModel;
+import wasdi.shared.viewmodels.users.SkinViewModel;
 import wasdi.shared.viewmodels.users.UserViewModel;
 
 /**
@@ -260,6 +261,7 @@ public class AuthResource {
 				oUserVM.setSessionId(oSession.getSessionId());
 				oUserVM.setType(PermissionsUtils.getUserType(oUser));
 				oUserVM.setPublicNickName(oUser.getPublicNickName());
+				oUserVM.setSkin(oUser.getSkin());
 				if (Utils.isNullOrEmpty(oUserVM.getPublicNickName())) {
 					String sPublicNick = oUserVM.getName();
 					oUserVM.setPublicNickName(sPublicNick);
@@ -1245,6 +1247,31 @@ public class AuthResource {
 			return Response.serverError().build();
 		}
 		
+	}
+	
+	@GET
+	@Path("/skin")	
+	public Response getSkin(@HeaderParam("x-session-token") String sSessionId, @QueryParam("skin") String sSkin) {
+		try {
+			SkinViewModel oSkinViewModel = new SkinViewModel();
+			
+			if (Utils.isNullOrEmpty(sSkin)) sSkin = "wasdi";
+			
+			WasdiLog.debugLog("AuthResource.getSkin( skin: " + sSkin);
+			
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oUser==null) {
+				WasdiLog.warnLog("AuthResource.getSkin: invalid user or session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}			
+			
+			return Response.ok(oSkinViewModel).build();
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("AuthResource.getSkin exception ", oEx);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
 	}
 	
 	/** 

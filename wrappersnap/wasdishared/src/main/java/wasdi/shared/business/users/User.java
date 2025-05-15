@@ -115,6 +115,11 @@ public class User {
 	 * Public Nick Name the user decide to expose
 	 */
 	private String publicNickName;
+	
+	/**
+	 * Skin profile of the user
+	 */
+	private String skin = "wasdi";
 
 	static {
     	s_oInvalid = new User();
@@ -327,5 +332,13 @@ public class User {
 
 	public void setPublicNickName(String publicNickName) {
 		this.publicNickName = publicNickName;
+	}
+
+	public String getSkin() {
+		return skin;
+	}
+
+	public void setSkin(String skin) {
+		this.skin = skin;
 	}
 }

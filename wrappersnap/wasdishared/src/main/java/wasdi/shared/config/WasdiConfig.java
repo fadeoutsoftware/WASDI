@@ -263,6 +263,11 @@ public class WasdiConfig {
 	 * Configuration of the openEO Backend WASDI Server Implementation
 	 */
 	public OpenEO openEO = new OpenEO();
+	
+	/**
+	 * List of the allowed user skins
+	 */
+	public ArrayList<SkinConfig> skins = new ArrayList<>();
 		
 	/**
 	 * Get the Catalogue Config for the specified Platform Type
