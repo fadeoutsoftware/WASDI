@@ -218,7 +218,13 @@ public class GdalUtils {
 							}
 							
 							if (oBand.containsKey("noDataValue")) {
-								oBandInfo.noDataValue = (double) oBand.get("noDataValue");
+								try {
+									oBandInfo.noDataValue = (double) oBand.get("noDataValue");	
+								}
+								catch (Exception oEx) {
+									WasdiLog.warnLog("GdalUtils.getGdalInfoResult: error converting noDataValue, assuming NaN");
+									oBandInfo.noDataValue = Double.NaN;
+								}
 							}
 							
 							oGdalInfoResult.bands.add(oBandInfo);

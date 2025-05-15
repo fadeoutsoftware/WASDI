@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.7.6
+Version 0.8.7.7
 
-Last Update: 10/04/2025
+Last Update: 06/05/2025
 
 Tested with: Python 3.7 - Python 3.13 
 
@@ -3217,7 +3217,7 @@ def _uploadFile(sFileName):
     return bResult
 
 
-def addFileToWASDI(sFileName, sStyle=""):
+def addFileToWASDI(sFileName, sStyle="", bForceUpdate=False):
     """
     Add a file to the wasdi workspace
 
@@ -3226,10 +3226,10 @@ def addFileToWASDI(sFileName, sStyle=""):
     :param sStyle: name of a valid WMS style
     :return: status of the operation
     """
-    return _internalAddFileToWASDI(sFileName, False, sStyle)
+    return _internalAddFileToWASDI(sFileName, False, sStyle, bForceUpdate)
 
 
-def asynchAddFileToWASDI(sFileName, sStyle=""):
+def asynchAddFileToWASDI(sFileName, sStyle="", bForceUpdate=False):
     """
     Triggers the ingestion of File Name in the workspace
 
@@ -3238,7 +3238,7 @@ def asynchAddFileToWASDI(sFileName, sStyle=""):
     :param sStyle: name of a valid WMS style
     :return: Process Id of the ingestion
     """
-    return _internalAddFileToWASDI(sFileName, True, sStyle)
+    return _internalAddFileToWASDI(sFileName, True, sStyle, bForceUpdate)
 
 
 def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
@@ -4095,7 +4095,7 @@ def _normPath(sPath):
     return sPath
 
 
-def _internalAddFileToWASDI(sFileName, bAsynch=None, sStyle=""):
+def _internalAddFileToWASDI(sFileName, bAsynch=None, sStyle="", bForceUpdate=False):
     _log('[INFO] waspy._internalAddFileToWASDI( ' + str(sFileName) + ', ' + str(bAsynch) + ' )')
 
     if sFileName is None:
@@ -4149,7 +4149,7 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None, sStyle=""):
     try:
         if getIsOnServer() is False:
             if getUploadActive() is True:
-                if fileExistsOnWasdi(sFileName) is False:
+                if fileExistsOnWasdi(sFileName) is False or bForceUpdate:
                     if os.path.exists(getPath(sFileName)) is True:
                         _log('[INFO] waspy._internalAddFileToWASDI: remote file is missing, uploading')
                         try:

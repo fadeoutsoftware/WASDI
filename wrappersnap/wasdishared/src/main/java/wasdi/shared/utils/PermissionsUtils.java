@@ -839,7 +839,7 @@ public class PermissionsUtils {
 			
 		} 
 		catch (Exception oE) {
-			WasdiLog.errorLog("PermissionsUtils.canUserAccessImage error: " + oE);
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteImage error: " + oE);
 		}
 
 		return false;			

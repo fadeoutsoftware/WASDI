@@ -17,7 +17,6 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.payloads.IngestPayload;
 import wasdi.shared.utils.EndMessageProvider;
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;

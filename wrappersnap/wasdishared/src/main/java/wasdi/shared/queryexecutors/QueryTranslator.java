@@ -727,7 +727,9 @@ public abstract class QueryTranslator {
 				try {
 					 sFilter =  sFilter.strip();
 					 String [] asNameValue = sFilter.split(":");
-					 oQueryViewModel.filters.put(asNameValue[0].strip(), asNameValue[1].strip());
+					 if (asNameValue.length>1) {
+						 oQueryViewModel.filters.put(asNameValue[0].strip(), asNameValue[1].strip());
+					 }
 				}
 				catch (Exception oEx) {
 					WasdiLog.errorLog("QueryTranslator.fillFilters: inner exception " + oEx.toString());

@@ -629,7 +629,7 @@ public class WorkspaceResource {
 			
 			//kill active processes
 			ProcessWorkspaceService oProcessWorkspaceService = new ProcessWorkspaceService();
-			if(oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId, sSessionId, true)) {
+			if(!oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId, sSessionId, true)) {
 				WasdiLog.warnLog("WorkspaceResource.deleteWorkspace: WARNING: could not schedule kill processes in workspace");
 			}
 			

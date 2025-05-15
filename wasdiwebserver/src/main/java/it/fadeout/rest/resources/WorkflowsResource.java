@@ -171,7 +171,7 @@ public class WorkflowsResource {
     /**
      * Update a SNAP Workflow XML file
      *
-     * @param fileInputStream Xml file containing the new version of the Snap Workflow
+     * @param oFileInputStream Xml file containing the new version of the Snap Workflow
      * @param sSessionId      Session of the current user
      * @param sWorkflowId     Used to check if the workflow exists, and then, upload the file
      * @return std http response
@@ -179,7 +179,7 @@ public class WorkflowsResource {
     @POST
     @Path("/updatefile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response updateFile(@FormDataParam("file") InputStream fileInputStream,
+    public Response updateFile(@FormDataParam("file") InputStream oFileInputStream,
                                     @HeaderParam("x-session-token") String sSessionId,
                                     @QueryParam("workflowid") String sWorkflowId) {
         WasdiLog.debugLog("WorkflowsResource.updateFile( InputStream, WorkflowId: " + sWorkflowId);
@@ -220,7 +220,7 @@ public class WorkflowsResource {
             // save uploaded file in ".temp" format
             
             try {
-                writeFile(fileInputStream, oWorkflowXmlFileTemp);
+                writeFile(oFileInputStream, oWorkflowXmlFileTemp);
             } 
             catch (Exception oEx) {
             	WasdiLog.errorLog("WorkflowsResource.updateFile error writing file: " + oEx);
@@ -236,10 +236,16 @@ public class WorkflowsResource {
             	
                 // Overwrite the old file
                 Files.write(oWorkflowXmlFile.toPath(), Files.readAllBytes(oWorkflowXmlFileTemp.toPath()));
-                // Delete the temp file
-                Files.delete(oWorkflowXmlFileTemp.toPath());
+                
+                try {
+                    // Delete the temp file
+                    Files.delete(oWorkflowXmlFileTemp.toPath());                	
+                }
+                catch (Exception oEx) {
+                	WasdiLog.errorLog("WorkflowsResource.updateFile. error during the deletion of the xml temporary file");
+                }
 
-                WasdiLog.debugLog("WorkflowsResource.updateFile: workflow files updated! workflowID" + oWorkflow.getWorkflowId());
+                WasdiLog.debugLog("WorkflowsResource.updateFile: workflow files updated! workflowID " + oWorkflow.getWorkflowId());
 
                 if (Wasdi.getActualNode() != null) {
                     oWorkflow.setNodeCode(Wasdi.getActualNode().getNodeCode());
@@ -275,6 +281,7 @@ public class WorkflowsResource {
      */
     @GET
     @Path("/getxml")
+    @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public Response getXML(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId) {
 
@@ -331,10 +338,11 @@ public class WorkflowsResource {
      * @return
      */
     @POST
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML)    
     @Path("/updatexml")
     public Response updateXML(@HeaderParam("x-session-token") String sSessionId,
-                                 @QueryParam("workflowId") String sWorkflowId,
-                                 @FormDataParam("graphXml") String sGraphXml) {
+                                 @QueryParam("workflowId") String sWorkflowId, String sGraphXml) {
 
         // convert string to file and invoke updateGraphFile
         WasdiLog.debugLog("WorkflowsResource.updateXML: workflowId " + sWorkflowId + " invoke WorkflowsResource.updateFile");
