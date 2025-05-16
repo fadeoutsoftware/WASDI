@@ -1256,8 +1256,15 @@ public class SubscriptionResource {
 			SubscriptionListViewModel oSubscriptionListViewModel = new SubscriptionListViewModel();
 			oSubscriptionListViewModel.setSubscriptionId(oSubscription.getSubscriptionId());
 			oSubscriptionListViewModel.setName(oSubscription.getName());
-			oSubscriptionListViewModel.setTypeId(oSubscription.getType());
-			oSubscriptionListViewModel.setTypeName(SubscriptionType.get(oSubscription.getType()).getTypeName());
+			
+			if (oSubscription.getType()!=null) {
+				oSubscriptionListViewModel.setTypeId(oSubscription.getType());
+				oSubscriptionListViewModel.setTypeName(SubscriptionType.get(oSubscription.getType()).getTypeName());				
+			}
+			else {
+				oSubscriptionListViewModel.setTypeId(SubscriptionType.Free.getTypeId());
+				oSubscriptionListViewModel.setTypeName(SubscriptionType.Free.getTypeName());
+			}
 			oSubscriptionListViewModel.setOrganizationName(sOrganizationName);
 			oSubscriptionListViewModel.setReason(sReason);
 			oSubscriptionListViewModel.setStartDate(TimeEpochUtils.fromEpochToDateString(oSubscription.getStartDate()));

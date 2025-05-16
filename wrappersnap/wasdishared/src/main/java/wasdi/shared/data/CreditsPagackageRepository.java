@@ -91,7 +91,11 @@ public class CreditsPagackageRepository extends MongoRepository {
 							Aggregates.group(null, Accumulators.sum("credits", "$creditsRemaining"))
 						));
 				
-				return oResult.first().getDouble("credits");
+				if (oResult != null) {
+					if (oResult.first() != null) {
+						return oResult.first().getDouble("credits");		
+					}
+				}
 				
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("CreditsPagackageRepository.getTotalCreditsByUser: error", oEx);
