@@ -33,6 +33,7 @@ import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserSession;
+import wasdi.shared.config.SkinConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.SessionRepository;
@@ -1253,18 +1254,35 @@ public class AuthResource {
 	@Path("/skin")	
 	public Response getSkin(@HeaderParam("x-session-token") String sSessionId, @QueryParam("skin") String sSkin) {
 		try {
-			SkinViewModel oSkinViewModel = new SkinViewModel();
 			
 			if (Utils.isNullOrEmpty(sSkin)) sSkin = "wasdi";
 			
-			WasdiLog.debugLog("AuthResource.getSkin( skin: " + sSkin);
+			WasdiLog.debugLog("AuthResource.getSkin( skin: " + sSkin + ")");
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
 				WasdiLog.warnLog("AuthResource.getSkin: invalid user or session");
 				return Response.status(Status.UNAUTHORIZED).build();
-			}			
+			}		
+			
+			SkinConfig oSelectedSkin = new SkinConfig();
+			
+			// iterate over the list of skins to look for the one in the query
+			for (SkinConfig oSkinConfig : WasdiConfig.Current.skins) {
+				if (oSkinConfig.name.equals(sSkin)) {
+					oSelectedSkin = oSkinConfig;
+					break;
+				}
+			}
+			
+			SkinViewModel oSkinViewModel = new SkinViewModel();
+			oSkinViewModel.setLogoImage(oSelectedSkin.logoImage);
+			oSkinViewModel.setLogoText(oSelectedSkin.logoText);
+			oSkinViewModel.setHelpLink(oSelectedSkin.helpLink);
+			oSkinViewModel.setSupportLink(oSelectedSkin.supportLink);
+			oSkinViewModel.setBrandMainColor(oSelectedSkin.brandMainColor);
+			oSkinViewModel.setBrandSecondaryColor(oSelectedSkin.brandSecondaryColor);
 			
 			return Response.ok(oSkinViewModel).build();
 		}

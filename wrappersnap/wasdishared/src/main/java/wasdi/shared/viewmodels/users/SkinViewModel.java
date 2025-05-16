@@ -2,10 +2,12 @@ package wasdi.shared.viewmodels.users;
 
 public class SkinViewModel {
 	
-	private String logoImage ="/assets/icons/logo-only.svg";
-	private String logoText = "/assets/icons/logo-name.svg";
-	private String helpLink = "https://wasdi.readthedocs.io/en/latest/";
-	private String supportLink = "https://discord.gg/FkRu2GypSg";
+	private String logoImage;
+	private String logoText;
+	private String helpLink;
+	private String supportLink;
+	private String brandMainColor;
+	private String brandSecondaryColor;
 	
 	public String getLogoImage() {
 		return logoImage;
@@ -30,6 +32,18 @@ public class SkinViewModel {
 	}
 	public void setLogoText(String logoText) {
 		this.logoText = logoText;
+	}
+	public String getBrandMainColor() {
+		return brandMainColor;
+	}
+	public void setBrandMainColor(String brandMainColor) {
+		this.brandMainColor = brandMainColor;
+	}
+	public String getBrandSecondaryColor() {
+		return brandSecondaryColor;
+	}
+	public void setBrandSecondaryColor(String brandSecondaryColor) {
+		this.brandSecondaryColor = brandSecondaryColor;
 	}
 	
 

@@ -6,4 +6,6 @@ public class SkinConfig {
 	public String logoText = "/assets/icons/logo-name.svg";
 	public String helpLink = "https://wasdi.readthedocs.io/en/latest/";
 	public String supportLink = "https://discord.gg/FkRu2GypSg";
+	public String brandMainColor = "#43526B";
+	public String brandSecondaryColor = "#009036";
 }
