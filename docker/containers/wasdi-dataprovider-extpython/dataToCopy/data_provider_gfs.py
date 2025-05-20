@@ -248,7 +248,7 @@ def getFileName(sInputFilePath, sOutputFilePath):
 
     sUrl = oFileNameViewModel.url
     # Extract the file name from the Url
-    sFileName = sUrl + ".grb2"
+    sFileName = "GFS_" + sUrl + ".grb2"
     
     oRes = {
         'fileName': sFileName
