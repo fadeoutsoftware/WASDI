@@ -46,7 +46,7 @@ public class EsriHDRLightReader extends WasdiProductReader {
 	}
 
 	@Override
-	public File getFileForPublishBand(String sBand, String sLayerId) {
+	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
 		return null;
 	}
 	

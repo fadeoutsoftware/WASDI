@@ -180,7 +180,7 @@ public class GHSLTilesProductReader extends WasdiProductReader {
 
 
 	@Override
-	public File getFileForPublishBand(String sBand, String sLayerId) {
+	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
     	WasdiLog.debugLog("GHSLTilesProductReader.readSnapProduct: publishing of bands is not yet supported");
 		return null;
 	}

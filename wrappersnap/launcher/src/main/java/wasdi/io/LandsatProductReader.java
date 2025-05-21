@@ -261,12 +261,12 @@ public class LandsatProductReader extends SnapProductReader {
 	
 	
 	@Override
-	public File getFileForPublishBand(String sBand, String sLayerId) {
+	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
 		if (m_oProductFile.getName().startsWith("LC08_L2SP_")) {
             WasdiLog.debugLog("LandsatProductReader.getFileForPublishBand: Landsat-8 L2 product. Skipping publishing of bands");
             return null;
 		}
-		return super.getFileForPublishBand(sBand, sLayerId);
+		return super.getFileForPublishBand(sBand, sLayerId, sPlatform);
 	}
 
 	
