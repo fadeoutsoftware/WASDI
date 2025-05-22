@@ -1465,7 +1465,7 @@ public class ProcessorsResource  {
 			}
 			
 			if (!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessWorkspaceId)) {
-				WasdiLog.warnLog("ProcessorsResource.addLog: user cannot access the process workspace");
+				WasdiLog.warnLog("ProcessorsResource.addLog: user cannot access the process workspace " + oUser.getUserId() + " PWS: " + sProcessWorkspaceId);
 				return Response.status(Status.FORBIDDEN).build();				
 			}
 						

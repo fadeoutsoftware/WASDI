@@ -1328,9 +1328,9 @@
 			]
 		},
 		{
-			"name": "ReturnNatFIM",
+			"name": "Return NatFIM",
 			"indexname": "platformname",
-			"indexvalue": "Return NatFIM",
+			"indexvalue": "ReturnNatFIM",
 			"ispublic": false,
 			"userid": "return@fadeout.it",
 			"filters":[
