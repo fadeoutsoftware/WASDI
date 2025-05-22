@@ -59,7 +59,7 @@ public class BigBangProductReader extends WasdiProductReader {
 	}
 
 	@Override
-	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
+	public File getFileForPublishBand(String sBand, String sLayerId) {
     	WasdiLog.debugLog("BigBangProductReader.getFileForPublishBand: no bands for BigBang products");
 		return null;
 	}
