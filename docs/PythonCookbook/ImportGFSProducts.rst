@@ -1,6 +1,6 @@
-How to Import GFS Products
+How to Import GFS Forecast Products
 =========================================
-The following code shows how to import GFS products to a workspace.
+The following code shows how to import GFS forecast products to a workspace.
 
 
 Prerequisites
