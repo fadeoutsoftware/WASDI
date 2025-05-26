@@ -21,17 +21,17 @@ Recipe
    Assume you have at least one workspace and you have configured it in the config.json file.
 
 To search for GFS products, the following fields are mandatory:
- - Collection: this is always going to be 'GFS'
+ - Platform (this is always going to be 'GFS')
  - Start Date
  - End Date
  - Bounding Box
 
 
 Four additional search parameters, specific for GFS products, are also mandatory:
- - producttype: Specifies the meteorological variable or product (e.g., temperature, wind, precipitation)
- - productlevel: Defines the vertical atmospheric level (e.g., surface, 500 hPa, 2m above ground)
- - modelRun: Indicates the model cycle runtime (00, 06, 12, 18 UTC)
- - forecastTime: Sets the forecast hour of product (from 000 - 384)
+ - Product Type: Specifies the meteorological variable or product (e.g., temperature, wind, precipitation)
+ - Product Level: Defines the vertical atmospheric level (e.g., surface, 500 hPa, 2m above ground)
+ - Model Run: Indicates the model cycle runtime (00, 06, 12, 18 UTC)
+ - Forecast Time: Sets the forecast hour of product (from 000 to 384 hours)
 
 
 .. note::
@@ -113,3 +113,6 @@ What it does:
 
 .. note::
    The Date is formatted by the User Interface as "YYYY-MM-DD". A single search date is given for both the start and end date, as we are looking for the product from this specific date.
+
+.. note::
+   Ensure that the Product name always ends with ".grb2", so that the product can be accessed for further processing.
