@@ -1,4 +1,4 @@
-Import GFS Products
+How to Import GFS Products
 =========================================
 The following code shows how to import GFS products to a workspace.
 
