@@ -43,7 +43,7 @@ Let's see an example of code to search for GFS precipitation forecast products:
 
 .. code-block:: python
 
-    def get_precipitation_forecast_products():
+    def getPrecipitationForecastProducts():
         wasdi.wasdiLog("** GFS Precipitation Forecast Products **")
 
         # Create the Bounding Box Object: usually you will read it from the parameters
