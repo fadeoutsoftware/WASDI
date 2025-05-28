@@ -75,7 +75,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.rule=Host(`{{ aoRiseConfiguration['baseUrl']['apiEntryPoint'] }}`) && PathPrefix(`/`)"
       - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.service=s_{{ sWasdiClientServiceName }}"
 {% if bWasdiSslEnabled == True %}
