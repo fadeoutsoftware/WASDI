@@ -129,7 +129,7 @@ def executeAndRetrieve(sInputFilePath, sOutputFilePath):
             for sTime in aoForecastTime:
                 oResult = {}
                 sDate = oDate.strftime("%Y-%m-%d")
-                oResult["title"] = "GFS_"+sDate+"_t" + sModel + "_" + sTime + "_" + sVariable + "_" + sLevel
+                oResult["title"] = "GFS_"+sDate+"_" + sModel + "_" + sTime + "_" + sVariable + "_" + sLevel
                 oResult["id"] = "gfs." + sDate + "_" + "gfs.t"+sModel+"z.pgrb2.0p25."+sTime + "_" + sLevel
                 oResult["link"] = sDate +"_" + sModel + "_" + sTime + "_" + sVariable + "_" + sLevel
                 oResult["summary"] = "GFS Model date: " + sDate + " ran at: " + sModel + " forecast time: " + sTime + " Variable: " + sVariable + " Level: " + sLevel
@@ -248,7 +248,7 @@ def getFileName(sInputFilePath, sOutputFilePath):
 
     sUrl = oFileNameViewModel.url
     # Extract the file name from the Url
-    sFileName = sUrl + ".grb2"
+    sFileName = "GFS_" + sUrl + ".grb2"
     
     oRes = {
         'fileName': sFileName
