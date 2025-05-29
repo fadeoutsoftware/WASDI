@@ -11,12 +11,12 @@
 			"apiKey": "super-secret-WASDI-key"
 		},
 				{
-			"baseUrl": "https://return-water-dt-01.fadeout.cloud/",
+			"baseUrl": "https://return-water-dt-01.fadeout.cloud/cimavariables/",
 			"mission":"CIMAVariables",
 			"apiKey": "super-secret-WASDI-key"
 		},
 				{
-			"baseUrl": "https://return-water-dt-01.fadeout.cloud/",
+			"baseUrl": "https://return-water-dt-01.fadeout.cloud/natdhmsindexes/",
 			"mission":"NATDHMSIndexes",
 			"apiKey": "super-secret-WASDI-key"
 		}
