@@ -1,12 +1,12 @@
 {
 	"providers": [
 		{
-			"baseUrl": "https://wasdi-box.fadeout.cloud/return/",
+			"baseUrl": "https://return-water-dt-01.fadeout.cloud/return/",
 			"mission":"ReturnRaster",
 			"apiKey": "super-secret-WASDI-key"
 		},		
 		{
-			"baseUrl": "https://wasdi-box.fadeout.cloud/meteocean/",
+			"baseUrl": "https://return-water-dt-01.fadeout.cloud/meteocean/",
 			"mission":"MeteOcean",
 			"apiKey": "super-secret-WASDI-key"
 		},
