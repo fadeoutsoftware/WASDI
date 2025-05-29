@@ -1178,6 +1178,38 @@
 			]
 		},
 		{
+			"name": "NATDHMS Indexes",
+			"indexname": "platformname",
+			"indexvalue": "NATDHMSIndexes",
+			"selected": false,
+			"ispublic": false,
+			"userid": "{{ sReturnUserId }}",
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "CIMA_FAPAR|CIMA_SPEI|CIMA_SSMI",
+					"indexvalue": "CIMA_FAPAR"
+				}
+			]
+		},
+		{
+			"name": "CIMA Variables",
+			"indexname": "platformname",
+			"indexvalue": "CIMAVariables",
+			"selected": false,
+			"ispublic": false,
+			"userid": "{{ sReturnUserId }}",
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "CIMA_AIR_TEMP_AVG|CIMA_AIR_TEMP_MIN|CIMA_AIR_TEMP_MAX|CIMA_PREC",
+					"indexvalue": "CIMA_AIR_TEMP_AVG"
+				}
+			]
+		},
+		{
 			"name": "MeteOcean",
 			"indexname": "platformname",
 			"indexvalue": "MeteOcean",
@@ -1337,7 +1369,7 @@
 				{
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
-                    "indexvalues": "aree_bagnate|protected_areas|attivita_ecomiche|beni_culturali|edifici_strategici|ferrovie|reti_elettriche|sezioni_censimento|sorgenti_inquinanti|stazioni|strade",
+                    "indexvalues": "aree_bagnate|protected_areas|attivita_ecomiche|beni_culturali|edifici_strategici|ferrovie|reti_elettriche|sezioni_censimento|sorgenti_inquinanti|stazioni|strade|apfsr",
                     "indexvalue": "aree_bagnate"
                 }				
 			]
