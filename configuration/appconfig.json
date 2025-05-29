@@ -1204,7 +1204,7 @@
 				{
 					"indexname": "producttype",
 					"indexlabel": "Product Type",
-					"indexvalues": "CIMA_AIR_TEMP_AVG|CIMA_AIR_TEMP_MIN|CIMA_AIR_TEMP_MAX|CIMA_FAPAR|CIMA_PREC|CIMA_SPEI|CIMA_SSMI",
+					"indexvalues": "CIMA_AIR_TEMP_AVG|CIMA_AIR_TEMP_MIN|CIMA_AIR_TEMP_MAX|CIMA_PREC",
 					"indexvalue": "CIMA_AIR_TEMP_AVG"
 				}
 			]
