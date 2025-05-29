@@ -9,6 +9,16 @@
 			"baseUrl": "https://wasdi-box.fadeout.cloud/meteocean/",
 			"mission":"MeteOcean",
 			"apiKey": "super-secret-WASDI-key"
+		},
+				{
+			"baseUrl": "https://return-water-dt-01.fadeout.cloud/",
+			"mission":"CIMAVariables",
+			"apiKey": "super-secret-WASDI-key"
+		},
+				{
+			"baseUrl": "https://return-water-dt-01.fadeout.cloud/",
+			"mission":"NATDHMSIndexes",
+			"apiKey": "super-secret-WASDI-key"
 		}
 	]
 }
