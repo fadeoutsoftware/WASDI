@@ -338,6 +338,7 @@ public class AuthResource {
 			oUserVM.setUserId(oUser.getUserId());
 			oUserVM.setType(PermissionsUtils.getUserType(oUser));
 			oUserVM.setPublicNickName(oUser.getPublicNickName());
+			oUserVM.setSkin(oUser.getSkin());
 			
 			if (Utils.isNullOrEmpty(oUserVM.getPublicNickName())) {
 				String sPublicNick = oUserVM.getName();
