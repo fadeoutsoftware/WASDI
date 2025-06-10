@@ -1284,6 +1284,7 @@ public class AuthResource {
 			oSkinViewModel.setSupportLink(oSelectedSkin.supportLink);
 			oSkinViewModel.setBrandMainColor(oSelectedSkin.brandMainColor);
 			oSkinViewModel.setBrandSecondaryColor(oSelectedSkin.brandSecondaryColor);
+			oSkinViewModel.setDefaultCategories(oSelectedSkin.defaultCategories);
 			
 			return Response.ok(oSkinViewModel).build();
 		}
