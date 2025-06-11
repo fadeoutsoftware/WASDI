@@ -1277,6 +1277,8 @@ public class AuthResource {
 				}
 			}
 			
+			WasdiLog.infoLog("AuthResource.getSkin: selected skin: " + oSelectedSkin.name);
+			
 			SkinViewModel oSkinViewModel = new SkinViewModel();
 			oSkinViewModel.setLogoImage(oSelectedSkin.logoImage);
 			oSkinViewModel.setLogoText(oSelectedSkin.logoText);
@@ -1285,6 +1287,7 @@ public class AuthResource {
 			oSkinViewModel.setBrandMainColor(oSelectedSkin.brandMainColor);
 			oSkinViewModel.setBrandSecondaryColor(oSelectedSkin.brandSecondaryColor);
 			oSkinViewModel.setDefaultCategories(oSelectedSkin.defaultCategories);
+			WasdiLog.infoLog("AuthResource.getSkin: default categories for skin: " + oSelectedSkin.defaultCategories.size());
 			
 			return Response.ok(oSkinViewModel).build();
 		}

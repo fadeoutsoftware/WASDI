@@ -600,6 +600,10 @@ public class ProcessorsResource  {
 				// Check and apply category filter
 				if (oFilters.getCategories().size()>0) {
 					
+					for (String sCategory : oFilters.getCategories()) {
+						WasdiLog.infoLog("*** CATEGORY filter: " + sCategory);
+					}
+					
 					boolean bCategoryFound = false;
 					
 					for (String sProcessorCategory : oProcessor.getCategories()) {
@@ -610,6 +614,9 @@ public class ProcessorsResource  {
 					}
 					
 					if (!bCategoryFound) continue;
+				}
+				else {
+					WasdiLog.infoLog("***** NO FILTER FOR CATEGORY");
 				}
 				
 				// Check and apply publisher filter
