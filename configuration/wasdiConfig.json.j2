@@ -441,7 +441,7 @@
             "supportLink": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['supportLink'] }}",
             "brandMainColor": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['brandMainColor'] }}",
             "brandSecondaryColor": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['brandSecondaryColor'] }}",
-            "defaultCategories": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['defaultCategories'] }}"
+            "defaultCategories": {{ aoWasdiConfiguration['skins'][sCurrentSkin]['defaultCategories'] }}
 
         }{% if not loop.last %},
 {% endif %}
