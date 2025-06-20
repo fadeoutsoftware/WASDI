@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.net.io.Util;
 
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
@@ -50,17 +49,6 @@ public class LSAHttpUtils {
     		}
     		
     		String sActionLink = getLoginAction(sLoginPage);
-    		
-    		/*
-    		// Get the path of the login link
-    		String sActionToSearch = "action=\"";
-    		int iActionStart=sLoginPage.indexOf(sActionToSearch);
-    		int iActionEnd = iActionStart+sActionToSearch.length();
-    		int iLinkEnd= sLoginPage.indexOf("\" method=\"post\">");
-    		
-    		String sActionLink = sLoginPage.substring(iActionEnd, iLinkEnd);
-    		sActionLink = sActionLink.replace("&amp;", "&");
-    		 */
     		 
     		// Body with the login data
     		String sLoginData = "username=" + StringUtils.encodeUrl(sUser) + "&password=" + StringUtils.encodeUrl(sPassword);
