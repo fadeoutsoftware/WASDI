@@ -851,7 +851,6 @@ public class WasdiFileUtils {
      * @return the size of the folder in bytes
      */
     public static long getWorkspaceFolderSize(String sUserId, String sWorkspaceId) {
-    	WasdiLog.infoLog("WasdiFileUtils.getWorkspaceFolderSize. (userId: " + sUserId + ", workspaceId: " + sWorkspaceId + ")");
 
     	long lWorkspaceSize = 0L;
     	
@@ -861,16 +860,11 @@ public class WasdiFileUtils {
 		
     	try {
 	    	String sWorkspacePath = PathsConfig.getWorkspacePath(sUserId, sWorkspaceId);
-	    	WasdiLog.infoLog("WasdiFileUtils.getWorkspaceFolderSize. Path to workspace: " + sWorkspacePath);
 	        File oWorkspaceDir = new File(sWorkspacePath);
 	        
 	        if (oWorkspaceDir.exists()) {
 	        	lWorkspaceSize = FileUtils.sizeOfDirectory(oWorkspaceDir);
-	        	WasdiLog.infoLog("WasdiFileUtils.getWorkspaceFolderSize. Workspace exists and has size: " + lWorkspaceSize);
 	        	return lWorkspaceSize;
-	        }
-	        else {
-	        	WasdiLog.infoLog("WasdiFileUtils.getWorkspaceFolderSize. Workspace does NOT exist");
 	        }
 	        
     	} catch (Exception oEx) {
