@@ -1250,7 +1250,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sRiseServerServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sRiseServerServiceName }}.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`/rise`)"
+      - "traefik.http.routers.r_{{ sRiseServerServiceName }}.rule=Host(`{{ sRiseAPIBaseUrl }}`) && PathPrefix(`/{{ sRiseAPIPath }}`)"
       - "traefik.http.routers.r_{{ sRiseServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sRiseServerServiceName }}.service=s_{{ sRiseServerServiceName }}"
 {% if bWasdiSslEnabled == True %}
