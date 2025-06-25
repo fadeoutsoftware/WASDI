@@ -103,7 +103,8 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 				|| sFileName.toUpperCase().startsWith("VNP15A2H")
 				|| sFileName.toUpperCase().startsWith("MCD43A4")
 				|| sFileName.toUpperCase().startsWith("MCD43A3")
-				|| sFileName.toUpperCase().startsWith("VNP43MA3")) {
+				|| sFileName.toUpperCase().startsWith("VNP43MA3")
+				|| sFileName.toUpperCase().startsWith("VNP43IA3")) {
 			WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile: VIIRS product asked for download");
 			return executeDownloadFromEarthData(sDownloadUrl, sDownloadUser, sDownloadPassword, sSavedFilePath, iMaxRetry);
 		}
@@ -260,7 +261,11 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 			}
 		}
 		if (sPlatformType.equals(Platforms.VIIRS) 
-				&& (sFileName.startsWith("VNP21A1D") || sFileName.startsWith("VNP21A1N") || sFileName.startsWith("VNP15A2H") || sFileName.startsWith("VNP43MA3"))) {
+				&& (sFileName.startsWith("VNP21A1D") 
+						|| sFileName.startsWith("VNP21A1N") 
+						|| sFileName.startsWith("VNP15A2H") 
+						|| sFileName.startsWith("VNP43MA3")
+						|| sFileName.startsWith("VNP43IA3"))) {
 			return DataProviderScores.DOWNLOAD.getValue();
 		}
 

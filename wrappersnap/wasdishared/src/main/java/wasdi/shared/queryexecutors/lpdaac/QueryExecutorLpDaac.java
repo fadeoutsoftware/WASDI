@@ -41,6 +41,7 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		as_WASDI_NASA_PRODUCT_MAPPING.put("MCD43A3", "C2278860820-LPCLOUD");
 		as_WASDI_NASA_PRODUCT_MAPPING.put("VNP15A2H", "C2545314545-LPCLOUD");
 		as_WASDI_NASA_PRODUCT_MAPPING.put("VNP43MA3", "C2545314605-LPCLOUD");
+		as_WASDI_NASA_PRODUCT_MAPPING.put("VNP43IA3", "C2545314588-LPCLOUD");
 	}
 	
 	public QueryExecutorLpDaac() {		
@@ -56,7 +57,8 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 				|| sProduct.toUpperCase().startsWith("VNP21A1D")
 				|| sProduct.toUpperCase().startsWith("VNP21A1N")
 				|| sProduct.toUpperCase().startsWith("VNP15A2H")
-				|| sProduct.toUpperCase().startsWith("VNP43MA3")) {
+				|| sProduct.toUpperCase().startsWith("VNP43MA3")
+				|| sProduct.toUpperCase().startsWith("VNP43IA3")) {
 			return sOriginalUrl;
 		}
 		return null;

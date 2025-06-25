@@ -148,7 +148,7 @@ public class QueryTranslatorLSA extends QueryTranslator {
 			sLSAQuery += "&uid=" + oWasdiQuery.productName;
 		}
 		
-		String sBaseAddress = "https://collgs.lu/catalog/oseo/search?parentId=" + sParentId;
+		String sBaseAddress = "https://ivv.collgs.lu/catalog/oseo/search?parentId=" + sParentId;
 		
 		sLSAQuery = sBaseAddress + sLSAQuery;
 		
