@@ -8,6 +8,11 @@ public class StorageUsageControl {
 	public Long storageSizeFreeSubscription = 20000000000L;
 	
 	/**
+	 * Maximum storage space (in bytes) for STANDARD subscription plans
+	 */
+	public Long storageSizeStandardSubscription = 107374182400L;
+	
+	/**
 	 * Number of days to wait for, before proceeding to the deletion of a workspace, after the warning has been sent by email to the user
 	 */
 	public int deletionDelayFromWarning = 10;
