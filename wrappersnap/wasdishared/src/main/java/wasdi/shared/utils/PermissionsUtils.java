@@ -122,23 +122,25 @@ public class PermissionsUtils {
 					|| sUserSubscriptionType.equals(SubscriptionType.OneYearProfessional.getTypeId())) {
 					return bIsSubscriptionValidInTime;
 				}
-                	
-                Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(oUser.getUserId());
-                if (lTotalStorageUsage < 0L) {
-                    WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. There was an error computing the total storage space for the user");
-                    return false;
-                }
                 
-                Long lStorageLimitSubscription = WasdiConfig.Current.storageUsageControl.storageSizeStandardSubscription;
-                
-                if (lTotalStorageUsage < lStorageLimitSubscription) {
-                    return true;
-                } 
-                else {
-                    WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + 
-                            " exceed the maximum storage size for " + sUserSubscriptionType + " subscription: " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
-                    return false;
-                }
+				if (bIsSubscriptionValidInTime) {
+	                Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(oUser.getUserId());
+	                if (lTotalStorageUsage < 0L) {
+	                    WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. There was an error computing the total storage space for the user");
+	                    return false;
+	                }
+	                
+	                Long lStorageLimitSubscription = WasdiConfig.Current.storageUsageControl.storageSizeStandardSubscription;
+	                
+	                if (lTotalStorageUsage < lStorageLimitSubscription) {
+	                    return true;
+	                } 
+	                else {
+	                    WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + 
+	                            " exceed the maximum storage size for " + sUserSubscriptionType + " subscription: " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
+	                    return false;
+	                }
+				}
 
 	        }
 			
