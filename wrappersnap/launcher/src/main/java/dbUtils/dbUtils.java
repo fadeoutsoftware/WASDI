@@ -2974,7 +2974,9 @@ public class dbUtils {
 					User oUser = oMapper.readValue(sJSON, User.class);	
 					String sType = PermissionsUtils.getUserType(oUser.getUserId());
 					
-					if (sType.equals(UserType.NONE.name()) || sType.equals(UserType.FREE.name())) {
+					if (sType.equals(UserType.NONE.name()) 
+							|| sType.equals(UserType.FREE.name()) 
+							|| sType.equals(UserType.STANDARD.name())) {
 						aoToChekUsers.add(oUser);
 						WasdiLog.debugLog(++i + "\t" + sType + "\t" + oUser.getUserId());						
 					}

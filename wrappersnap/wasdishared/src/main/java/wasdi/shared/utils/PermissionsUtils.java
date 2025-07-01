@@ -112,7 +112,7 @@ public class PermissionsUtils {
 
 			String sUserSubscriptionType = oUserSubscription.getType();
 	
-			// time-based model + storage-control model for free and 
+		 
 			if (!sUserSubscriptionType.equals(SubscriptionType.Free.getTypeId())) {
 				 
 				boolean bIsSubscriptionValidInTime = oProjectRepository.checkValidSubscription(sActiveProjectOfUser);
