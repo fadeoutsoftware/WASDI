@@ -15,6 +15,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.EndMessageProvider;
+import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.LoggerWrapper;
@@ -298,6 +299,8 @@ public class WasdiScheduler
 		
 		// Counter of the number of cycle with only waiting processes, to trigger the watch dog
 		int iWatchDogCount = 0;
+		int iWDCreatedCount = -1;
+		int iWDWaitingCount = -1;
 		
 		while(true) {
 			
@@ -334,20 +337,65 @@ public class WasdiScheduler
 					// Now lets take a look to the blocking situations
 					if (aoRunningList.size()==0 && aoReadyList.size()==0 && aoWaitingList.size()>0 && aoCreatedList.size()>0) {
 						
-						// We have people waiting, but nothinng running or ready. Is not good
+						// Check if we have the same number of elements in the waiting queue
+						if (iWDWaitingCount != aoWaitingList.size()) {
+							// If the number is different, or is the first time we detect it, or something moved
+							// In both cases we can reset the counter
+							iWatchDogCount = 0;
+						}
+						
+						// Save the number of processes in waiting
+						iWDWaitingCount = aoWaitingList.size();
+						
+						// Check if we have the same number of elements in the created queue
+						if (iWDCreatedCount != aoCreatedList.size()) {
+							// If the number is different, or is the first time we detect it, or something moved
+							// In both cases we can reset the counter							
+							iWatchDogCount = 0;
+						}
+						
+						// Save the number of processes created
+						iWDCreatedCount = aoCreatedList.size();						
+						
+						// We have people waiting, but nothinng running or ready. And nothing change in the last 30 secondos. This is not good
 						iWatchDogCount++;
 						
 						if (iWatchDogCount == s_iWatchDogCounter) {
-							// We got it for too many time! We force the waiting in stopped
+							// We got it for too many time! The number of waiting and created is always the same and nothing is running.
+							// This is likely to be a deadlock,  We force the waiting processor in stopped
 							iWatchDogCount = 0;
-							WasdiLog.warnLog("WasdiScheduler.main: watchdog triggered: we have " + aoWaitingList.size() + " waiting to stop");
+							WasdiLog.warnLog("WasdiScheduler.main: watchdog triggered: we have " + aoWaitingList.size() + " suspect waiting processes");
+							
+							// We check first if there are blocked Processes that are not User Processors
+							boolean bAllUserProcesses = true;
 							
 							for(int iWaiting = 0; iWaiting<aoWaitingList.size(); iWaiting++) {
 								try {
 									ProcessWorkspace oProcessWorkspace = aoWaitingList.get(iWaiting);
+									
+									if (!LauncherOperationsUtils.doesOperationLaunchApplication(oProcessWorkspace.getOperationType())) {
+										bAllUserProcesses = false;
+									}									
+								}
+								catch (Exception oInnerEx) {
+									WasdiLog.errorLog("WasdiScheduler.main: exception in the watchdog check loop: ", oInnerEx);
+								}
+							}							
+							
+							for(int iWaiting = 0; iWaiting<aoWaitingList.size(); iWaiting++) {
+								try {
+									ProcessWorkspace oProcessWorkspace = aoWaitingList.get(iWaiting);
+									
+									if (LauncherOperationsUtils.doesOperationLaunchApplication(oProcessWorkspace.getOperationType()) && !bAllUserProcesses) {
+										WasdiLog.warnLog("WasdiScheduler.main: watchdog we save for now " + oProcessWorkspace.getProcessObjId() + " becuase in the waiting list, not all were user processors. Try before to stop other operations.");
+										continue;
+									}
+									
 									oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
 									oProcessWorkspace.setStatus(ProcessStatus.STOPPED.name());
-									s_oProcessWorkspaceRepository.updateProcess(oProcessWorkspace);								
+									s_oProcessWorkspaceRepository.updateProcess(oProcessWorkspace);
+									
+									WasdiLog.warnLog("WasdiScheduler.main: watchdog Stopped " + oProcessWorkspace.getProcessObjId());
 								}
 								catch (Exception oInnerEx) {
 									WasdiLog.errorLog("WasdiScheduler.main: exception in the watchdog stopping loop: ", oInnerEx);
@@ -357,6 +405,8 @@ public class WasdiScheduler
 					}
 					else {
 						iWatchDogCount = 0;
+						iWDWaitingCount = -1;
+						iWDCreatedCount = -1;
 					}					
 				}
 			}
