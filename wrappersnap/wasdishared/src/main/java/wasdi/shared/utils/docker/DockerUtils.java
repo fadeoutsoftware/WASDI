@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -449,6 +450,9 @@ public class DockerUtils {
         	String sBuildOutput = oResponse.getResponseBody();
         	sBuildOutput = cleanDockerLogsString(sBuildOutput);
         	
+        	String sBuildDate = Utils.getFormatDate(new Date());
+        	sBuildOutput = sBuildDate + " - v." + m_oProcessor.getVersion() + "|START_BUILD_LOG|"+sBuildOutput;
+        	
         	// Save the build output
         	m_oProcessor.getBuildLogs().add(sBuildOutput);
         	ProcessorRepository oProcessorRepository = new ProcessorRepository();
@@ -654,7 +658,12 @@ public class DockerUtils {
             		CreateParams oContainerCreateParams = new CreateParams();
             		
                     String sProcessorType = m_oProcessor.getType();
-                    ProcessorTypeConfig oProcessorTypeConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig(sProcessorType);            		
+                    ProcessorTypeConfig oProcessorTypeConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig(sProcessorType);
+                    
+                    if (oProcessorTypeConfig==null) {
+                    	WasdiLog.errorLog("DockerUtils.start: impossible to find the configuration for " + sProcessorType + " we need to stop here.");
+                    	return "";
+                    }
             		
             		// Set the user
             		oContainerCreateParams.User = m_sWasdiSystemUserName+":"+m_sWasdiSystemGroupName;
@@ -923,6 +932,8 @@ public class DockerUtils {
         	// Get the version of the Docker
             int iVersion = StringUtils.getAsInteger(sVersion);
             
+            List<Object> aoOutputJsonMap = getContainersInfo(true);
+            
             // If it is a WASDI Valid one
         	while (iVersion>0)  {
         		
@@ -937,7 +948,7 @@ public class DockerUtils {
                 }
                 
                 // Check if we have a container
-                String sId = getContainerIdFromWasdiAppName(sProcessorName, sVersion);
+                String sId = getContainerIdFromWasdiAppName(sProcessorName, sVersion, aoOutputJsonMap);
                 
                 if (!Utils.isNullOrEmpty(sId)) {
                 	// Clean the container
@@ -953,8 +964,10 @@ public class DockerUtils {
                 	WasdiLog.debugLog("DockerUtils.delete: no container found for " + sProcessorName + " version "  + sVersion);
                 }
                 
+                List<Object> aoImagesAvailable = getImagesList();
+                
                 // Check the image
-                if (isImageAvailable(sProcessorName,sVersion)) {
+                if (isImageAvailable(sProcessorName,sVersion, m_sDockerRegistry, aoImagesAvailable)) {
 
                 	// Remove the image
                     WasdiLog.debugLog("DockerUtils.delete: Removing image for " + sProcessorName + " version "  + sVersion + " Docker Image: " + sDockerName);
@@ -1008,7 +1021,7 @@ public class DockerUtils {
                         			
                         			// Do we have a backup?
                         			WasdiLog.debugLog("DockerUtils.delete: delete " + sProcessorName + " version "  + sVersion + " in registry " + oRegistryConfig.address);
-                        			if (isImageAvailable(sProcessorName, sVersion, oRegistryConfig.address)) {
+                        			if (isImageAvailable(sProcessorName, sVersion, oRegistryConfig.address, aoImagesAvailable)) {
                         				
                         				// Yes! Clean also it!!
                             			sDockerName = oRegistryConfig.address + "/" + sBaseDockerName;
@@ -1130,17 +1143,37 @@ public class DockerUtils {
     		HashMap<String, String> asHeaders = new HashMap<>();
     		
     		// The content is taken from the sample on line
-    		//asHeaders.put("Content-Type", "application/tar");
-    		asHeaders.put("X-Registry-Auth", sToken);    		
+    		asHeaders.put("X-Registry-Auth", sToken);
     		
-    		// Is a post!
-    		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "", asHeaders);
+    		// P.Campanella 2025-02-19: since we experience sometimes bad answers from the registry, add the retry here
+    		int iAttemp = 0;
+    		int iResponseCode = -1;
     		
-    		if (oResponse.getResponseCode() == 200) {
+    		while (iAttemp<WasdiConfig.Current.dockers.numberOfAttemptsToPingTheServer) {
+        		// Is a post!
+        		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "", asHeaders);
+        		iResponseCode = oResponse.getResponseCode();
+        		
+        		if (iResponseCode==200) break;
+        		
+        		iAttemp= iAttemp+1;
+        		
+        		WasdiLog.debugLog("DockerUtils.push: the registry returned " + iResponseCode + " make another try (n. " + iAttemp + ") after a sleep");
+        		
+    			try {
+    				Thread.sleep(WasdiConfig.Current.dockers.millisBetweenAttmpts);
+    			}
+    			catch (InterruptedException oEx) {
+					Thread.currentThread().interrupt();
+					WasdiLog.errorLog("DockerUtils.push: Current thread was interrupted", oEx);
+				}        		
+    		}
+    		
+    		if (iResponseCode == 200) {
     			return true;
     		}
     		else {
-    			WasdiLog.errorLog("DockerUtils.push: Error pushing image " + sImage + " got answer http " + oResponse.getResponseCode());
+    			WasdiLog.errorLog("DockerUtils.push: Error pushing image " + sImage + " got answer http " + iResponseCode);
     			return false;
     		}
     	} 
@@ -1198,12 +1231,27 @@ public class DockerUtils {
      * @param sVersion
      * @return
      */
-    @SuppressWarnings("unchecked")
 	protected String getContainerIdFromWasdiAppName(String sProcessorName, String sVersion) {
     	try {
-    		
     		List<Object> aoOutputJsonMap = getContainersInfo(true);
-            
+    		return getContainerIdFromWasdiAppName(sProcessorName, sVersion, aoOutputJsonMap);            
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.getContainerIdFromWasdiAppName: " + oEx.toString());
+		}
+    	return "";
+    }
+	
+    /**
+     * Gets the container id starting from processor name and version
+     * @param sProcessorName Name of the processor
+     * @param sVersion Version as string
+     * @param aoOutputJsonMap List of the containers info objects
+     * @return
+     */    
+    @SuppressWarnings("unchecked")
+    protected String getContainerIdFromWasdiAppName(String sProcessorName, String sVersion, List<Object> aoOutputJsonMap) {
+    	try {
             String sMyImage = "wasdi/" + sProcessorName + ":" + sVersion;
             String sId = "";
             
@@ -1227,7 +1275,7 @@ public class DockerUtils {
     	catch (Exception oEx) {
     		WasdiLog.errorLog("DockerUtils.getContainerIdFromWasdiAppName: " + oEx.toString());
 		}
-    	return "";
+    	return "";    	
     }
     
     /**
@@ -1742,7 +1790,6 @@ public class DockerUtils {
      * @param sRegistry optional Docker registry
      * @return true if the image is available
      */
-    @SuppressWarnings("unchecked")
 	public boolean isImageAvailable(String sProcessorName, String sVersion, String sRegistry) {
     	
     	try {
@@ -1768,7 +1815,27 @@ public class DockerUtils {
                 WasdiLog.errorLog("DockerUtils.isImageAvailable: exception converting API result " + oEx);
                 return false;
             }
-            
+    
+            return isImageAvailable(sProcessorName, sVersion, sRegistry, aoOutputJsonMap);
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.isImageAvailable: " + oEx.toString());
+            return false;
+        }
+    }    
+    
+    /**
+     * Check if an image is available on the local registry
+     * @param sProcessorName Processor Name
+     * @param sVersion Processor Version
+     * @param sRegistry optional Docker registry
+     * @param aoOutputJsonMap list of images as returned by registry api
+     * @return true if the image is available
+     */
+    @SuppressWarnings("unchecked")
+	public boolean isImageAvailable(String sProcessorName, String sVersion, String sRegistry, List<Object> aoOutputJsonMap) {
+    	
+    	try {
             // Define the name of our image
             String sMyImage = "";
             
@@ -1804,7 +1871,48 @@ public class DockerUtils {
     		WasdiLog.errorLog("DockerUtils.isImageAvailable: " + oEx.toString());
             return false;
         }
-    }    
+    }
+    
+    /**
+     * Get a list of images available in docker
+     * @return
+     */
+	public List<Object> getImagesList() {
+		List<Object> aoReturn = new ArrayList<>();
+    	try {
+    		
+    		
+    		// Get the internal API address
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		
+    		// End point to get the list of images
+    		sUrl += "images/json";
+    		
+    		// Get the list
+    		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
+    		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
+    			return aoReturn;
+    		}
+    		
+    		// Here we put the results
+    		List<Object> aoOutputJsonMap = null;
+
+            try {
+                aoOutputJsonMap = JsonUtils.s_oMapper.readValue(oResponse.getResponseBody(), new TypeReference<List<Object>>(){});
+            } catch (Exception oEx) {
+                WasdiLog.errorLog("DockerUtils.getImagesList: exception converting API result " + oEx);
+                return aoReturn;
+            }
+    
+            return aoOutputJsonMap;
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.getImagesList: " + oEx.toString());
+            return aoReturn;
+        }
+		
+	}    
     
     /**
      * Remove an image from a Registry

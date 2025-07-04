@@ -11,7 +11,6 @@ import wasdi.shared.business.ecostress.EcoStressItemForReading;
 import wasdi.shared.data.S3VolumeRepository;
 import wasdi.shared.data.ecostress.EcoStressRepository;
 import wasdi.shared.queryexecutors.PaginatedQuery;
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.TimeEpochUtils;
@@ -30,12 +29,8 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 	boolean m_bAuthenticated = false;
 
 	public QueryExecutorCloudferro() {
-		m_sProvider = "CLOUDFERRO";
-
 		this.m_oQueryTranslator = new QueryTranslatorCloudferro();
 		this.m_oResponseTranslator = new ResponseTranslatorCloudferro();
-
-		m_asSupportedPlatforms.add(Platforms.ECOSTRESS);
 	}
 
 	/**
@@ -43,7 +38,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 	 * For Cloudferro, we need just the original link..
 	 */
 	@Override
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		if (sProduct.toUpperCase().startsWith("EEHCM")
 				|| sProduct.toUpperCase().startsWith("EEHSEBS")
 				|| sProduct.toUpperCase().startsWith("EEHSTIC")

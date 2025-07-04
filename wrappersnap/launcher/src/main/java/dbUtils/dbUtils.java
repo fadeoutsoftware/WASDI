@@ -3,6 +3,7 @@ package dbUtils;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
@@ -23,8 +24,12 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
+import org.bson.Document;
+import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.MongoCursor;
 
 import wasdi.processors.DockerProcessorEngine;
 import wasdi.processors.WasdiProcessorEngine;
@@ -49,9 +54,11 @@ import wasdi.shared.business.statistics.Job;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserSession;
+import wasdi.shared.business.users.UserType;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.MongoConfig;
 import wasdi.shared.config.PathsConfig;
+import wasdi.shared.config.StorageUsageControl;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
@@ -78,7 +85,9 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.OgcProcessesClient;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.ProcessWorkspaceLogger;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
@@ -87,7 +96,8 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.modis.MODISUtils;
-import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
+import wasdi.shared.utils.wasdiAPI.WorkspaceAPIClient;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
@@ -954,6 +964,7 @@ public class dbUtils {
 
             System.out.println("\t1 - Delete User");
             System.out.println("\t2 - Print User Mails");
+            System.out.println("\t3 - Delete Duplicate Users");
             System.out.println("\tx - back");
             System.out.println("");
 
@@ -1026,6 +1037,47 @@ public class dbUtils {
                 for (User oUser : aoUsers) {
                     System.out.println(oUser.getUserId());
                 }
+            }
+            else if (sInputString.equals("3")) {
+                System.out.println("Please write DELETE for a real delete");
+                String sCommand = s_oScanner.nextLine();
+                
+                boolean bDelete = false;
+                
+                if (sCommand.equals("DELETE")) {
+                	
+                	System.out.println("This is a REAL Delete, are you sure [1/0]?");
+
+                    String sConfirm = s_oScanner.nextLine();
+                	
+                    if (sConfirm.equals("1")) {
+                    	bDelete = true;
+                    }
+                    else {
+                    	System.out.println("Ok just a list");
+                    }
+                }
+                else {
+                	System.out.println("Ok just a list");
+                }
+
+                System.out.println("Searching folders associated to not longer existing workspaces on node");
+                
+                UserRepository oUserRepository = new UserRepository();
+                ArrayList<User> aoAllUsers = oUserRepository.getAllUsers();
+                
+                
+                for (int iUsers=0; iUsers<aoAllUsers.size(); iUsers++) {
+                	User oUser = aoAllUsers.get(iUsers);
+                	
+                	for (int iDup = iUsers+1; iDup<aoAllUsers.size(); iDup++) {
+                		User oMaybeDuplicate = aoAllUsers.get(iDup);
+                		
+                		if (oMaybeDuplicate.getUserId().equals(oUser.getUserId())) {
+                			System.out.println("Found Duplicate User " + oMaybeDuplicate.getUserId());
+                		}
+                	}
+                }                
             }
         } catch (Exception oEx) {
             System.out.println("USERS Exception: " + oEx);
@@ -1236,6 +1288,8 @@ public class dbUtils {
             System.out.println("\t3 - Delete Workspace");
             System.out.println("\t4 - Reconstruct Workspace");
             System.out.println("\t5 - Clean Workspaces not existing in node");
+            System.out.println("\t6 - Add Workspace size");
+            System.out.println("\t7 - Delete folders associated to not-existing workspaces");
             System.out.println("\tx - back");
             System.out.println("");
 
@@ -1614,7 +1668,6 @@ public class dbUtils {
 
                 }
             }
-            
             else if (sInputString.equals("5")) {
             	
                 System.out.println("Please write DELETE for a real delete");
@@ -1801,7 +1854,82 @@ public class dbUtils {
 	                }
 				}
 
-            }             
+            }  
+            else if (sInputString.equals("6")) {
+            	addStorageToWorkspace();
+            }
+            else if (sInputString.equals("7")) {
+            	
+                System.out.println("Please write DELETE for a real delete");
+                String sCommand = s_oScanner.nextLine();
+                
+                boolean bDelete = false;
+                
+                if (sCommand.equals("DELETE")) {
+                	
+                	System.out.println("This is a REAL Delete, are you sure [1/0]?");
+
+                    String sConfirm = s_oScanner.nextLine();
+                	
+                    if (sConfirm.equals("1")) {
+                    	bDelete = true;
+                    }
+                    else {
+                    	System.out.println("Ok just a list");
+                    }
+                }
+                else {
+                	System.out.println("Ok just a list");
+                }
+
+                System.out.println("Searching folders associated to not longer existing workspaces on node");
+                
+                UserRepository oUserRepository = new UserRepository();
+                ArrayList<User> aoAllUsers = oUserRepository.getAllUsers();
+                
+                
+                WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+                
+                for (User oUser : aoAllUsers) {
+					String sUserPath = PathsConfig.getWasdiBasePath()+oUser.getUserId()+"/";
+					
+					File oUserFolder = new File(sUserPath);
+					
+					if (!oUserFolder.exists()) {
+						System.out.println("There are no workspaces of " + oUser.getUserId() + " in this Node");
+						continue;
+					}
+					
+					String[] asWorkspaceFolders = oUserFolder.list(new FilenameFilter() {
+						  @Override
+						  public boolean accept(File oCurrentFile, String sFileName) {
+						    return new File(oCurrentFile, sFileName).isDirectory();
+						  }
+						});
+					
+					if (asWorkspaceFolders != null) {
+						for (int iWs = 0; iWs < asWorkspaceFolders.length; iWs++) {
+							String sWorkspace = asWorkspaceFolders[iWs];
+							Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspace);
+							
+							if (oWorkspace == null) {
+								System.out.println("Found folder " + sUserPath + sWorkspace + " that does not have a corresponding Workspace entry");
+								
+								if (bDelete) {
+									File oWsFolder = new File (sUserPath+sWorkspace);
+									FileUtils.deleteQuietly(oWsFolder);
+									System.out.println("********** DELETED " + sUserPath+sWorkspace);
+								}
+								else {
+									System.out.println("********** as if I deleted " + sUserPath+sWorkspace);
+								}
+							}
+						}
+					}
+				}
+                
+                
+            }              
         } 
         catch (InterruptedException oEx) {
         	Thread.currentThread().interrupt();
@@ -1811,6 +1939,35 @@ public class dbUtils {
             System.out.println("Workspace Sharing Exception: " + oEx);
         }
     }
+    
+    
+    private static void addStorageToWorkspace() {
+    	
+    	System.out.println("Adding storage size to workspace in node");
+
+    	String sCurrentNode = WasdiConfig.Current.nodeCode;
+    	
+    	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+    	
+    	List<Workspace> aoWorkspacedOnNode = oWorkspaceRepository.getWorkspaceByNode(sCurrentNode);
+    	
+    	System.out.println("Found " + aoWorkspacedOnNode.size() + " on the node");
+    
+    	for (Workspace oWorkspace : aoWorkspacedOnNode) {
+    		String sUserId = oWorkspace.getUserId();
+    		String sWorkspaceId = oWorkspace.getWorkspaceId();
+    		
+    		long lWorkspaceDirSize = WasdiFileUtils.getWorkspaceFolderSize(sUserId, sWorkspaceId);
+    		oWorkspace.setStorageSize(lWorkspaceDirSize);
+    		
+    		if (!oWorkspaceRepository.updateWorkspace(oWorkspace)) {
+    			System.out.println("Workspace " + sWorkspaceId + " has not been updated with its storage size");
+    		}
+    	}
+    	
+    	System.out.println("Update of storage size in workspaces ended");
+    }
+    
 
     /*
      *
@@ -2312,7 +2469,7 @@ public class dbUtils {
 			oOgcProcessesClient.setHeaders(asHeaders);
 		}
 		
-		ProcessList oProcList = oOgcProcessesClient.getProcesses();
+		//ProcessList oProcList = oOgcProcessesClient.getProcesses();
 		
 		// Call the deploy function: is a post of the App Deploy Body
 		boolean bApiAnswer = oOgcProcessesClient.deployProcess(sDeployBody);
@@ -2611,6 +2768,8 @@ public class dbUtils {
             Options oOptions = new Options();
 
             oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
+            oOptions.addOption("ct", "cleantask", false, "Command to start the WASDI Clean Teask for free extra space");
+            oOptions.addOption("hello", "hello", false, "Command to just check the hello mode");
 
             String sConfigFilePath = "/etc/wasdi/wasdiConfig.json";
 
@@ -2646,6 +2805,19 @@ public class dbUtils {
                 // no log4j configuration
                 System.err.println("DbUtils - Error loading log configuration.  Reason: " + exp.toString());
             }
+            
+          // Filter the mongodb logs
+    		try {
+    			System.setProperty("DEBUG.MONGO", "false");
+    			ch.qos.logback.classic.Logger oMongoLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.mongodb.driver");
+    			oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);	
+    			
+    			System.out.print("");
+    			//oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+    		}
+    		catch (Exception oEx) {
+    			WasdiLog.errorLog("Disabling mongo driver logging exception " + oEx.toString());
+    		} 
 
             // If this is not the main node
             if (!s_sMyNodeCode.equals("wasdi")) {
@@ -2685,83 +2857,269 @@ public class dbUtils {
             // add connection to statistics db
             MongoRepository.addMongoConnection("wasdi-stats", WasdiConfig.Current.mongoStatistics.user, WasdiConfig.Current.mongoStatistics.password, WasdiConfig.Current.mongoStatistics.address, WasdiConfig.Current.mongoStatistics.replicaName, WasdiConfig.Current.mongoStatistics.dbName);
 
-            boolean bExit = false;
+            
+            
+            if (oLine.hasOption("cleantask"))  {
+            	runWasdiCleanTask();
+            }
+            else if (oLine.hasOption("hello")) {
+            	System.out.println("---- WASDI db Utils HELLO MODE!!!----");
+            	System.out.println("Bye bye");
+            }
+            else {
+                boolean bExit = false;
 
-            s_oScanner = new Scanner(System.in);
+                s_oScanner = new Scanner(System.in);
 
-            while (!bExit) {
-                System.out.println("---- WASDI db Utils ----");
-                System.out.println("Welcome, how can I help you?");
+                while (!bExit) {
+                    System.out.println("---- WASDI db Utils ----");
+                    System.out.println("Welcome, how can I help you?");
 
-                System.out.println("\t1 - Downloaded Products");
-                System.out.println("\t2 - Product Workspace");
-                System.out.println("\t3 - Processors");
-                System.out.println("\t4 - Metadata");
-                System.out.println("\t5 - Password");
-                System.out.println("\t6 - Users");
-                System.out.println("\t7 - Workflows");
-                System.out.println("\t8 - Workspaces");
-                System.out.println("\t9 - Migrate DB to local");
-                System.out.println("\t10 - Categories");
-                System.out.println("\t11 - ProcessWorkspace");
-                System.out.println("\t12 - Logs");
-                System.out.println("\t13 - EcoStress");
-                System.out.println("\t14 - Subscriptions");
-                System.out.println("\t15 - MOD11A2 data import");
-                System.out.println("\tx - Exit");
-                System.out.println("");
-
-
-                String sInputString = s_oScanner.nextLine();
-
-                if (sInputString.equals("1")) {
-                    downloadedProducts();
-                } else if (sInputString.equals("2")) {
-                    productWorkspace();
-                } else if (sInputString.equals("3")) {
-                    processors();
-                } else if (sInputString.equals("4")) {
-                    metadata();
-                } else if (sInputString.equals("5")) {
-                    password();
-                } else if (sInputString.equals("6")) {
-                    users();
-                } else if (sInputString.equals("7")) {
-                    workflows();
-                } else if (sInputString.equals("8")) {
-                    workspaces();
-                } else if (sInputString.equals("9")) {
-                    migrateToLocal();
-                } else if (sInputString.equals("10")) {
-                    categories();
-                } else if (sInputString.equals("11")) {
-                    processWorkpsaces();
-                } else if (sInputString.equals("12")) {
-                    logs();
-                } else if (sInputString.equals("13")) {
-                    ecoStress();
-                } else if (sInputString.equals("14")) {
-                    subscriptions();
-                } else if (sInputString.equals("15")) {
-                	modis();
-                }
-                else if (sInputString.toLowerCase().equals("x")) {
-                    bExit = true;
-                } else {
-                    System.out.println("Please select a valid option or x to exit");
+                    System.out.println("\t1 - Downloaded Products");
+                    System.out.println("\t2 - Product Workspace");
+                    System.out.println("\t3 - Processors");
+                    System.out.println("\t4 - Metadata");
+                    System.out.println("\t5 - Password");
+                    System.out.println("\t6 - Users");
+                    System.out.println("\t7 - Workflows");
+                    System.out.println("\t8 - Workspaces");
+                    System.out.println("\t9 - Migrate DB to local");
+                    System.out.println("\t10 - Categories");
+                    System.out.println("\t11 - ProcessWorkspace");
+                    System.out.println("\t12 - Logs");
+                    System.out.println("\t13 - EcoStress");
+                    System.out.println("\t14 - Subscriptions");
+                    System.out.println("\t15 - MOD11A2 data import");
+                    System.out.println("\tx - Exit");
                     System.out.println("");
-                    System.out.println("");
+
+
+                    String sInputString = s_oScanner.nextLine();
+
+                    if (sInputString.equals("1")) {
+                        downloadedProducts();
+                    } else if (sInputString.equals("2")) {
+                        productWorkspace();
+                    } else if (sInputString.equals("3")) {
+                        processors();
+                    } else if (sInputString.equals("4")) {
+                        metadata();
+                    } else if (sInputString.equals("5")) {
+                        password();
+                    } else if (sInputString.equals("6")) {
+                        users();
+                    } else if (sInputString.equals("7")) {
+                        workflows();
+                    } else if (sInputString.equals("8")) {
+                        workspaces();
+                    } else if (sInputString.equals("9")) {
+                        migrateToLocal();
+                    } else if (sInputString.equals("10")) {
+                        categories();
+                    } else if (sInputString.equals("11")) {
+                        processWorkpsaces();
+                    } else if (sInputString.equals("12")) {
+                        logs();
+                    } else if (sInputString.equals("13")) {
+                        ecoStress();
+                    } else if (sInputString.equals("14")) {
+                        subscriptions();
+                    } else if (sInputString.equals("15")) {
+                    	modis();
+                    }
+                    else if (sInputString.toLowerCase().equals("x")) {
+                        bExit = true;
+                    } else {
+                        System.out.println("Please select a valid option or x to exit");
+                        System.out.println("");
+                        System.out.println("");
+                    }
                 }
+                
+                s_oScanner.close();
             }
 
-
             System.out.println("bye bye");
-
-            s_oScanner.close();
 
         } catch (Exception e) {
         	System.out.println("Exception: " + e.toString());
         }
     }
+
+    /**
+     * Executes the WASDI clean task based on limits of space usage for users
+     */
+	private static void runWasdiCleanTask() {
+		try {
+			
+			if (!WasdiConfig.Current.nodeCode.equals("wasdi")) {
+				WasdiLog.errorLog("dbUtils.runWasdiCleanTask: Clean Task must run only on the main node");
+				return;
+			}
+			
+			UserRepository oUserRepository = new UserRepository();
+			MongoCursor<Document> oAllUsersIterator = oUserRepository.getIteratorOverAllUsers();
+			ObjectMapper oMapper = new ObjectMapper();
+			oMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+			ArrayList<User> aoToChekUsers = new ArrayList<>();
+			
+			WasdiLog.debugLog("dbUtils.runWasdiCleanTask: Users with NONE or FREE subscriptions who will be checked for ");
+
+			int i = 0;
+			while (oAllUsersIterator.hasNext()) {
+				String sJSON = oAllUsersIterator.next().toJson();
+				
+				try {
+					User oUser = oMapper.readValue(sJSON, User.class);	
+					String sType = PermissionsUtils.getUserType(oUser.getUserId());
+					
+					if (sType.equals(UserType.NONE.name()) || sType.equals(UserType.FREE.name())) {
+						aoToChekUsers.add(oUser);
+						WasdiLog.debugLog(++i + "\t" + sType + "\t" + oUser.getUserId());						
+					}
+				} catch (Exception oEx) {
+					WasdiLog.errorLog("dbUtils.runWasdiCleanTask: Impossible to map entity to user class", oEx);
+				}
+			}
+			
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			SessionRepository oSessionRepository = new SessionRepository();
+			NodeRepository oNodeRepository = new NodeRepository();
+			
+			List<String> asUsersExceedingStorage = new ArrayList<String>();
+			
+			for (User oCandidate : aoToChekUsers) {
+				
+				String sCandidateUserId = oCandidate.getUserId();
+				
+				if (!PermissionsUtils.userHasValidSubscription(oCandidate)) {
+					
+					StorageUsageControl oStorageUsageControl = WasdiConfig.Current.storageUsageControl;
+					Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(sCandidateUserId);
+					
+					WasdiLog.infoLog("dbUtils.runWasdiCleanTask: " + sCandidateUserId + ", total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
+					
+					long lNow = new Date().getTime(); 
+					long lStorageWarningDate = oCandidate.getStorageWarningSentDate().longValue();
+					
+					
+					// if the user has not a valid subscription REALLY because of the storage (and not of other problems, like no active projects)
+					// AND if we didn't yet send the warning to the user, then we do it
+					if (lTotalStorageUsage > oStorageUsageControl.storageSizeFreeSubscription && lStorageWarningDate == 0L) {
+						
+						if (!oStorageUsageControl.isDeletionInTestMode) {
+							WasdiLog.warnLog("dbUtils.runWasdiCleanTask: sending email to" + sCandidateUserId);
+							String sEmailTitle = oStorageUsageControl.warningEmailConfig.title;
+							String sEmailText = fillEmailTemplate(oCandidate.getName(), lTotalStorageUsage);
+							MailUtils.sendEmail(sCandidateUserId, sEmailTitle, sEmailText);							
+						}
+						else {
+							WasdiLog.warnLog("dbUtils.runWasdiCleanTask: TEST MODE: think I'm sending an e-mail alert to " + sCandidateUserId);
+						}
+						
+						oCandidate.setStorageWarningSentDate((double)lNow);
+						oUserRepository.updateUser(oCandidate);							
+						
+						continue;
+					}
+					else if (lTotalStorageUsage > oStorageUsageControl.storageSizeFreeSubscription) {
+						WasdiLog.infoLog("dbUtils.runWasdiCleanTask: The user " + sCandidateUserId + " already received the notification, waiting for reaction");
+					} else {
+						WasdiLog.infoLog("dbUtils.runWasdiCleanTask: The user " + sCandidateUserId + " is not exceeding the storage space");
+					}
+					
+					// if the warning period has passed and the storage occupied by the user still exceeds the limit, 
+					// then we proceed to the deletion of the workspaces
+					long lDaysFromWarning =  lStorageWarningDate == 0L 
+									? 0L 
+									: (lNow - lStorageWarningDate) / (1000 * 60 * 60 * 24);
+					
+					if (lTotalStorageUsage > oStorageUsageControl.storageSizeFreeSubscription && lDaysFromWarning > oStorageUsageControl.deletionDelayFromWarning) {
+						
+						// managing the deletion in testing mode
+						if (oStorageUsageControl.isDeletionInTestMode) {
+							WasdiLog.warnLog("dbUtils.runWasdiCleanTask: TEST MODE: think I'm deleting  workspaces for user " + sCandidateUserId);
+							asUsersExceedingStorage.add(sCandidateUserId);
+							continue;
+						}
+						else {
+							WasdiLog.warnLog("dbUtils.runWasdiCleanTask: deleting  workspaces for user " + sCandidateUserId);
+						}
+						
+						
+						UserSession oSession = oSessionRepository.insertUniqueSession(sCandidateUserId);
+						if (oSession== null) {
+							WasdiLog.errorLog("dbUtils.runWasdiCleanTask: Invalid session. Impossible to proceed with the cleaning task");
+							continue;
+						}					
+						
+						List<Workspace> aoWorkspaces = oWorkspaceRepository.getWorkspacesSortedByOldestUpdate(sCandidateUserId);				
+						
+						for (Workspace oWorkspace : aoWorkspaces) {
+							
+							String sWorkspaceID = oWorkspace.getWorkspaceId();
+							
+							Node oNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
+							HttpCallResponse oResponse = WorkspaceAPIClient.deleteWorkspace(oNode, oSession.getSessionId(), sWorkspaceID);
+							
+							int iResponseCode = oResponse.getResponseCode();
+							
+							if (iResponseCode < 200 || iResponseCode > 299) {
+								WasdiLog.warnLog("dbUtils.runWasdiCleanTask: Deletion of wokrspace " + sWorkspaceID + "returned error code " + iResponseCode);
+								continue;
+							}
+							
+							lTotalStorageUsage = lTotalStorageUsage - oWorkspace.getStorageSize();
+							
+							if (lTotalStorageUsage < oStorageUsageControl.storageSizeFreeSubscription) {
+								WasdiLog.infoLog("dbUtils.runWasdiCleanTask: Workspaces of user " + sCandidateUserId + " have been cleaned. Total usage storage: " + lTotalStorageUsage);
+								oCandidate.setStorageWarningSentDate(0.0);
+								oUserRepository.updateUser(oCandidate);								
+								break;
+							}
+						}
+						
+						// remove the session once the cleaning for the user ends
+						oSessionRepository.deleteSession(oSession);
+						
+					}
+					
+				}
+				else {
+					// If the user has a valid and there is still a warning flag attached, clean the flag
+					Double dStorageWarningDate = oCandidate.getStorageWarningSentDate();
+					if (dStorageWarningDate != null && dStorageWarningDate > 0.0 ) {
+						WasdiLog.warnLog("dbUtils.runWasdiCleanTask: User " + oCandidate.getUserId() + " warning flag will be set back to zero");
+						oCandidate.setStorageWarningSentDate(0.0);
+						oUserRepository.updateUser(oCandidate);
+					}
+				}
+			}
+			
+			// when we are in testing mode, send mail to admins
+			if (!asUsersExceedingStorage.isEmpty()) {				
+				List<User> aoAdminUsers = oUserRepository.getAdminUsers();
+				String sUsers = String.join("\n", asUsersExceedingStorage);
+				WasdiLog.infoLog("dbUtils.runWasdiCleanTask: Test deletion of workspaces for users: " + sUsers);
+				for (User oAdmin : aoAdminUsers) {
+					MailUtils.sendEmail(oAdmin.getUserId(), "Deletion test", "Test deletion of workspaces for users:\n" + sUsers);
+				}
+			}
+		
+		} catch (Exception oEx) {
+        	WasdiLog.errorLog("Exception: ", oEx);
+        }
+		
+	}
+	
+	private static String fillEmailTemplate(String sUserName, long lUserStorageSize) {
+		String sStorageLimit = FileUtils.byteCountToDisplaySize(WasdiConfig.Current.storageUsageControl.storageSizeFreeSubscription);
+		String sUserStorage = FileUtils.byteCountToDisplaySize(lUserStorageSize);
+		String message = WasdiConfig.Current.storageUsageControl.warningEmailConfig.message;
+		return message.replaceAll("<user>", sUserName)
+				.replaceAll("<storage_size>", sUserStorage)
+				.replaceAll("<storage_limit>", sStorageLimit);
+	}
 	
 }

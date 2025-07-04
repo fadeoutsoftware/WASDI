@@ -57,10 +57,9 @@ Here's an example of the field included in a config file:
       "WORKSPACEID" : "workspaceId"
    }
    
-The workspace id can be found in WASDI application both on navigation bar or inside workspace details 
-window.
+The workspace id can be found in WASDI application both on navigation bar or above the workspace's name.
 
-.. image:: ../_static/libs_concepts_images/workspaceid.jpg
+.. image:: ../_static/libs_concepts_images/1_workspaceid_new.png
     :scale: 20%
 
 .. note::

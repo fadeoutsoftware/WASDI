@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
@@ -33,6 +34,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -81,7 +83,10 @@ public class WasdiFileUtils {
 						"dotx",
 						"rtf",
 						"odt",
-						"csv"
+						"csv",
+						"htm",
+						"html",
+						"md"
 				)
 		);
 		
@@ -253,7 +258,9 @@ public class WasdiFileUtils {
 				oOutStream.write(ayBytes, 0, iRead);
 			}
 			oOutStream.flush();
+			oOutStream.close();
 		}
+		
 	}
 	
 	public static boolean writeFile(String sContent, File oFile) throws FileNotFoundException, IOException {
@@ -534,7 +541,7 @@ public class WasdiFileUtils {
 
 		String[] asTokens = sFileName.split("\\.(?=[^\\.]+$)");
 		if (asTokens.length != 2) {
-			WasdiLog.errorLog("WasdiFileUtils.isHelpFile: " + sFileName + " is not a help file-name");
+			WasdiLog.debugLog("WasdiFileUtils.isHelpFile: " + sFileName + " is not a help file-name");
 			return false;
 		}
 
@@ -627,6 +634,11 @@ public class WasdiFileUtils {
 	 */
 	public static boolean isShapeFileZipped(String sZipFile, int iMaxFileInZipFile) {
 		int iFileCounter = 0;
+		
+		if (Utils.isNullOrEmpty(sZipFile)) return false;
+		
+		if (!sZipFile.toLowerCase().endsWith(".zip")) return false;
+		
 		Path oZipPath = Paths.get(sZipFile).toAbsolutePath().normalize();
 		if(!oZipPath.toFile().exists()) {
 			return false;
@@ -639,7 +651,7 @@ public class WasdiFileUtils {
 				ZipEntry oZipEntry = aoEntries.nextElement();
 				
 				if (iFileCounter > iMaxFileInZipFile) {
-					WasdiLog.errorLog("WasdiFileUtils.isShapeFileZipped: too many files inside the zip. The limit is " + iMaxFileInZipFile);
+					WasdiLog.warnLog("WasdiFileUtils.isShapeFileZipped: too many files inside the zip. The limit is " + iMaxFileInZipFile);
 					return false;
 				}
 				
@@ -649,8 +661,12 @@ public class WasdiFileUtils {
 				iFileCounter++;
 			}			
 			
-		} catch (Exception e) {
-			WasdiLog.errorLog("WasdiFileUtils.isShapeFileZipped: error", e);
+		}
+		catch (ZipException oZipException) {
+			WasdiLog.debugLog("WasdiFileUtils.isShapeFileZipped: Zip Error, this is not a zip file likely " + oZipException.toString());
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("WasdiFileUtils.isShapeFileZipped: error", oEx);
 		}
 		
 		return false;
@@ -828,5 +844,35 @@ public class WasdiFileUtils {
 			}
 		}
 	}
+	
+    
+    /**
+     * Compute the size of the folder representing a workspace on the file system
+     * @return the size of the folder in bytes
+     */
+    public static long getWorkspaceFolderSize(String sUserId, String sWorkspaceId) {
+
+    	long lWorkspaceSize = 0L;
+    	
+    	if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sWorkspaceId)) {
+    		return lWorkspaceSize;
+    	}
+		
+    	try {
+	    	String sWorkspacePath = PathsConfig.getWorkspacePath(sUserId, sWorkspaceId);
+	        File oWorkspaceDir = new File(sWorkspacePath);
+	        
+	        if (oWorkspaceDir.exists()) {
+	        	lWorkspaceSize = FileUtils.sizeOfDirectory(oWorkspaceDir);
+	        	return lWorkspaceSize;
+	        }
+	        
+    	} catch (Exception oEx) {
+    		WasdiLog.errorLog("WasdiFileUtils.getWorkspaceFolderSize. Error computing workspace size", oEx);
+    	}
+    	
+        return lWorkspaceSize;
+    	
+    }
 	
 }

@@ -178,13 +178,9 @@ public class GHSLTilesProductReader extends WasdiProductReader {
 		return new MetadataViewModel("Metadata");
 	}
 
-	@Override
-	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
-		return sDownloadedFileFullPath;
-	}
 
 	@Override
-	public File getFileForPublishBand(String sBand, String sLayerId) {
+	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
     	WasdiLog.debugLog("GHSLTilesProductReader.readSnapProduct: publishing of bands is not yet supported");
 		return null;
 	}

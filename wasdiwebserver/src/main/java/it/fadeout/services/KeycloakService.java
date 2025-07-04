@@ -251,6 +251,7 @@ public class KeycloakService implements AuthProviderService {
 			WasdiLog.debugLog("KeycloakService.logout: about to logout: " + sUrl + ", " + sPayload);
 			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, asHeaders); 
 			String sLogoutResult = oHttpCallResponse.getResponseBody();
+			WasdiLog.debugLog("KeycloakService.logout: logout result " + sLogoutResult);
 			return true;
 		} catch (Exception oE) {
 			WasdiLog.debugLog("KeycloakService.getKeycloakAdminCliToken: " + oE);

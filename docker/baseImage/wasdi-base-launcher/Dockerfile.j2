@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 
-MAINTAINER "WASDI SARL"
+LABEL org.opencontainers.image.authors="WASDI SARL"
 
 
 # From now, all commands executed are executed with the user 'root'
@@ -68,8 +68,8 @@ RUN apt-get update && \
     apt-get install \
         g++ \
         libgfortran5 \
-        libjhdf4-jni \
-        libjhdf5-jni \
+#        libjhdf4-jni \
+#        libjhdf5-jni \
         libopenjp2-7-dev \
         libproj-dev \
         make \

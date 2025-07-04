@@ -41,7 +41,6 @@ public class QueryExecutorLSA extends QueryExecutor {
 	boolean m_bAuthenticated = false;
 	
 	public QueryExecutorLSA() {
-		m_sProvider="LSA";
 		this.m_oQueryTranslator = new QueryTranslatorLSA();
 		this.m_oResponseTranslator = new ResponseTranslatorLSA();
 		
@@ -177,5 +176,17 @@ public class QueryExecutorLSA extends QueryExecutor {
 
 		
 		return aoReturnList;
+	}
+	
+	@Override
+	public void closeConnections() {
+		if (m_bAuthenticated) {
+			WasdiLog.debugLog("QueryExecutorLSA.closeConnections: calling logut");
+			LSAHttpUtils.logout();
+			m_bAuthenticated = false;
+		}
+		else {
+			WasdiLog.debugLog("QueryExecutorLSA.closeConnections: not authenticated");
+		}
 	}
 }

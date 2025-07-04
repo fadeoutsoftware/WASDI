@@ -84,13 +84,6 @@ public class AdsNetcdfZipProductReader extends WasdiProductReader {
 		return new MetadataViewModel("Metadata");
 	}
 
-	@Override
-	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
-		String sFileName = sDownloadedFileFullPath;
-
-		return sFileName;
-	}
-
 	private List<String> extractDates(String sDownloadedFileFullPath, String sFileNameFromProvider) {
 		List<String> asDates = new ArrayList<>();
 
@@ -113,9 +106,5 @@ public class AdsNetcdfZipProductReader extends WasdiProductReader {
 		return sFileName.replace("date_", "").replace(".nc", "");
 	}
 
-	@Override
-	public File getFileForPublishBand(String sBand, String sLayerId) {
-		return m_oProductFile;
-	}
 
 }

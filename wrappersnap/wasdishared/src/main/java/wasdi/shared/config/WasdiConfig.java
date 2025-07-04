@@ -131,6 +131,10 @@ public class WasdiConfig {
 	 */
 	public boolean addDateTimeToLogs=false;
 	
+	/**
+	 * Configuration of the parameters checking invalid subscriptions in WASDI and deleting the workspaces accordingly
+	 */
+	public StorageUsageControl storageUsageControl;
 	
 	/**
 	 * Set true to NOT filter the internal http calls (keycloak, docker..).
@@ -260,6 +264,11 @@ public class WasdiConfig {
 	 */
 	public OpenEO openEO = new OpenEO();
 	
+	/**
+	 * List of the allowed user skins
+	 */
+	public ArrayList<SkinConfig> skins = new ArrayList<>();
+		
 	/**
 	 * Get the Catalogue Config for the specified Platform Type
 	 * @param sPlatformType Platform of interest

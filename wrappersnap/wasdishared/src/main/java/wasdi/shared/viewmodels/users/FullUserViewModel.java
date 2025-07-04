@@ -3,6 +3,7 @@ package wasdi.shared.viewmodels.users;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserType;
 import wasdi.shared.utils.PermissionsUtils;
+import wasdi.shared.utils.Utils;
 
 public class FullUserViewModel {
 	
@@ -18,6 +19,7 @@ public class FullUserViewModel {
 	private String confirmationDate;
 	private String lastLogin;
 	private String description;
+	private String publicNickName;
 	
 	public String getUserId() {
 		return userId;
@@ -125,6 +127,12 @@ public class FullUserViewModel {
 		oFullUserViewModel.setLastLogin(oUser.getLastLogin());
 		if (oFullUserViewModel.getLastLogin() == null) oFullUserViewModel.setLastLogin("");
 		
+		oFullUserViewModel.setPublicNickName(oUser.getPublicNickName());
+		if (Utils.isNullOrEmpty(oFullUserViewModel.getPublicNickName())) {
+			String sPublicNick = oFullUserViewModel.getName();
+			oFullUserViewModel.setPublicNickName(sPublicNick);
+		}
+		
 		return oFullUserViewModel;
 	}
 	
@@ -133,5 +141,11 @@ public class FullUserViewModel {
 	}
 	public void setLastLogin(String lastLogin) {
 		this.lastLogin = lastLogin;
+	}
+	public String getPublicNickName() {
+		return publicNickName;
+	}
+	public void setPublicNickName(String publicNickName) {
+		this.publicNickName = publicNickName;
 	}
 }

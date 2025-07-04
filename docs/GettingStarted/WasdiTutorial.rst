@@ -12,7 +12,9 @@ The Home page of WASDI is reachable at the address:
 
 https://www.wasdi.net/
 
-.. image:: ../_static/wasdi_tutorial_images/Devmanimage11.png
+
+.. ../_static/wasdi_tutorial_images/Devmanimage11.png
+.. image:: ../_static/wasdi_tutorial_images/1_login.png
 
 
 WASDI Login
@@ -42,16 +44,16 @@ The workspace concept is the same of several other development tools or language
 
 Once logged for the first time, the user is asked to create a new workspace.
 
-.. image:: ../_static/wasdi_tutorial_images/Devmanimage22.png
+.. image:: ../_static/wasdi_tutorial_images/2_create_workspace.png
 
 
 To work with the Editor a Workspace is needed: just click on the text suggestion or on the New Workspace Button on the top right of the screen.
 
 Wasdi Sections
 --------------
-The WASDI Sections are listed in the top blue bar:
+The WASDI Sections are listed in the blue bar on the left side of your screen:
 
-.. image:: ../_static/wasdi_tutorial_images/Devmanimage1.png
+.. image:: ../_static/wasdi_tutorial_images/3_functionality_bar.png
 
 * **App Store**: Space Marketplace: explore and run available applications;
 
@@ -75,62 +77,56 @@ Search
 The search section has many features; in this guide we will make a basic introduction just to let the user start working with EO Images.
 
 
-.. image:: ../_static/wasdi_tutorial_images/Devmanimage24.png
+.. image:: ../_static/wasdi_tutorial_images/4_search.png
 
 
 The user can set the filters:
 
 
-.. image:: ../_static/wasdi_tutorial_images/Devmanimage17.png
+.. image:: ../_static/wasdi_tutorial_images/5_search_filters.png
 
 
-To enable one mission specific filter, first select the tab and the Checkbox of the mission. If no checkbox is selected, the system will search all the available missions, otherwise, selected it will search only for the selected ones.
+To enable one mission specific filter, first select the mission type from the dropdown menu.
 
 
-WASDI has a Multi Provider search system: this means that the same query is sent to many data providers. The user can switch providers on/off:
+WASDI has a Multi Provider search system: this means that the same query is sent to many data providers. 
+The results are shown in different tabs for different providers and the user can switch providers on and off:
 
 
-.. image:: ../_static/wasdi_tutorial_images/Devmanimage2.png
+.. image:: ../_static/wasdi_tutorial_images/6_search_multi_providers.png
 
 
 The SERCO ONDA DIAS is the **priority one** Provider because data is stored in the Cloud where WASDI is installed so this is, usually, the fastest provider available.
 
+.. .. image:: ../_static/wasdi_tutorial_images/Devmanimage9.png
 
-To start a query click on the SEARCH button on the top right of the screen:
-
-.. image:: ../_static/wasdi_tutorial_images/Devmanimage9.png
-
-
-
-The results are shown in different tabs for different providers:
+.. .. image:: ../_static/wasdi_tutorial_images/Devmanimage25.png
+   
+To add a image to WASDI, click on the “+” icon near to the name of the image. The system will ask for the workspace where the image should be added, then will start the import of the image.
 
 
-.. image:: ../_static/wasdi_tutorial_images/Devmanimage25.png
+.. image:: ../_static/wasdi_tutorial_images/7-send_product_to_workspace.png
 
+The image will appear in the workspace once the import is completed.
 
-To add a image to WASDI, click on the “+” icon near to the name of the image. The system will ask for the workspace to use and then will start the import of the image.
-
-
-.. image:: ../_static/wasdi_tutorial_images/Devmanimage23.png
 
 Editor
 ^^^^^^
 Editor is where the user can interact with the EO Images.
 
-.. image:: ../_static/wasdi_tutorial_images/Devmanimage16.png
+.. image:: ../_static/wasdi_tutorial_images/8-overview-edit.png
 
 
 
 On the left the tree of the products in the workspace is shown. Each product has its own metadata and band subfolder.
 
 
-.. image:: ../_static/wasdi_tutorial_images/Devmanimage21.png
+.. image:: ../_static/wasdi_tutorial_images/9_details_products.png
 
 
-The user can browse the bands of the image. Just click on a band to see the band image.
+The user can browse the bands of the image. Just click on the icon close to the band's name to see the band image.
 
-.. image:: ../_static/wasdi_tutorial_images/Devmanimage13.png
-
+.. .. image:: ../_static/wasdi_tutorial_images/Devmanimage13.png
 
 WASDI will publish on the fly in OGC-WMS standard the selected bands.
 

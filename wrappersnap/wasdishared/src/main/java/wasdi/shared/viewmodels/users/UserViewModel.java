@@ -20,8 +20,11 @@ public class UserViewModel {
 	private String link;
 	private String description;
 	private String sessionId;
+	private String publicNickName;
 	
 	private String type;
+	
+	private String skin="wasdi";
 
 	private String role;
 	private Set<String> grantedAuthorities;
@@ -162,5 +165,21 @@ public class UserViewModel {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public String getPublicNickName() {
+		return publicNickName;
+	}
+
+	public void setPublicNickName(String publicNickName) {
+		this.publicNickName = publicNickName;
+	}
+
+	public String getSkin() {
+		return skin;
+	}
+
+	public void setSkin(String skin) {
+		this.skin = skin;
 	}
 }

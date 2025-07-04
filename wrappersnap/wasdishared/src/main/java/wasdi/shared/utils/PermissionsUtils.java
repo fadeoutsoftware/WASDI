@@ -17,6 +17,7 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.Project;
 import wasdi.shared.business.S3Volume;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.Style;
@@ -31,6 +32,7 @@ import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserType;
 import wasdi.shared.config.PathsConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.CommentRepository;
 import wasdi.shared.data.JupyterNotebookRepository;
 import wasdi.shared.data.NodeRepository;
@@ -56,6 +58,7 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.wasdiAPI.ProcessorAPIClient;
 import wasdi.shared.utils.wasdiAPI.WorkspaceAPIClient;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.organizations.SubscriptionType;
 
 /**
  * Wrap all the methods to check user rights and permissions
@@ -76,16 +79,63 @@ public class PermissionsUtils {
 	public static boolean userHasValidSubscription(User oUser) {
 		
 		if (oUser == null) return false;
+		
 	
 		try {
-			String sActiveProjectOfUser = oUser.getActiveProjectId();
-			ProjectRepository oProjectRepository = new ProjectRepository();
-			boolean bUserHasAValidSubscription = oProjectRepository.checkValidSubscription(sActiveProjectOfUser);
 			
-			return bUserHasAValidSubscription;
+			String sActiveProjectOfUser = oUser.getActiveProjectId();
+			
+			if (sActiveProjectOfUser == null) {
+				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + " has not an active project selected");
+				return false;
+			}
+			
+			ProjectRepository oProjectRepository = new ProjectRepository();
+			Project oUserProject = oProjectRepository.getProjectById(sActiveProjectOfUser);
+			
+			if (oUserProject == null) {
+				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + " has " + sActiveProjectOfUser + " active project selected but cannot be found in the db");
+				return false;				
+			}
+			
+			String sSubscriptionId = oUserProject.getSubscriptionId();
+			
+			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+			Subscription oUserSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
+			
+			if (oUserSubscription == null) {
+				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + " has " + sSubscriptionId + " subscription that cannot be found in the db");
+				return false;				
+			}
+			
+			// time-based model for not-free subscriptions
+			if (!oUserSubscription.getType().equals(SubscriptionType.Free.getTypeId())) {			
+				return oProjectRepository.checkValidSubscription(sActiveProjectOfUser);
+				
+			}
+			
+			// storage-based model for free subscriptions
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(oUser.getUserId());			
+			
+			if (lTotalStorageUsage < 0L) {
+				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. There was an error computing the total storage space for the user");
+				return false;
+			}
+			
+			
+			if (lTotalStorageUsage < WasdiConfig.Current.storageUsageControl.storageSizeFreeSubscription) {
+				return true;
+			} 
+			else {
+				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + 
+						" exceed the maximum storage size for free subscriptions: " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
+				return false;
+			}
+			
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("PermissionsUtils.userHasValidSubscription: error: " + oEx);
+			WasdiLog.errorLog("PermissionsUtils.userHasValidSubscription: error: ", oEx);
 		}
 		
 		return false;
@@ -297,6 +347,10 @@ public class PermissionsUtils {
 			if (sUserId.equals(oSubscription.getUserId())) {
 				return true;
 			}
+			
+			if (UserApplicationRole.isAdmin(sUserId)) {
+				return true;
+			}
 
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
@@ -335,6 +389,10 @@ public class PermissionsUtils {
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 			
 			if (oSubscriptionRepository.isOwnedByUser(sUserId, sSubscriptionId)) {
+				return true;
+			}
+			
+			if (UserApplicationRole.isAdmin(sUserId)) {
 				return true;
 			}
 
@@ -781,7 +839,7 @@ public class PermissionsUtils {
 			
 		} 
 		catch (Exception oE) {
-			WasdiLog.errorLog("PermissionsUtils.canUserAccessImage error: " + oE);
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteImage error: " + oE);
 		}
 
 		return false;			

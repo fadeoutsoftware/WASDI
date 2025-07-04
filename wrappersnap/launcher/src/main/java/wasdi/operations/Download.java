@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.esa.snap.core.datamodel.Product;
 
 import wasdi.ProcessWorkspaceUpdateSubscriber;
 import wasdi.dataproviders.ProviderAdapter;
@@ -29,6 +28,7 @@ import wasdi.shared.payloads.DownloadPayload;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.queryexecutors.QueryExecutorFactory;
 import wasdi.shared.utils.EndMessageProvider;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.gis.BoundingBoxUtils;
@@ -101,7 +101,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             	
             	if (oProviderAdapter != null) {
                     WasdiLog.debugLog("Got Data Provider " + oProviderAdapter.getCode());
-                    m_oProcessWorkspaceLogger.log("Fetch - SELECTED " + oProviderAdapter.getCode());            	            		
+                    m_oProcessWorkspaceLogger.log("Fetch - SELECTED PROVIDER " + oProviderAdapter.getCode());            	            		
             	}
             	else {
                     WasdiLog.errorLog("Download.executeOperation: Impossible to get a valid Data Provider");
@@ -118,6 +118,14 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             	return false;
             }
             
+            // Read the Platform Type from the parameter
+    		String sPlatformType = oParameter.getPlatform();
+    		
+    		// If not, try to autodetect it
+    		if (Utils.isNullOrEmpty(sPlatformType)) {
+    			sPlatformType = MissionUtils.getPlatformFromSatelliteImageFileName(sFileName);
+    		}            
+            
             // get file size
             long lFileSizeByte = oProviderAdapter.getDownloadFileSize(oParameter.getUrl());
             // set file size
@@ -131,7 +139,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             // Get the file name
             String sFileNameWithoutPath = oProviderAdapter.getFileName(oParameter.getUrl());
             WasdiLog.debugLog("Download.executeOperation: File to download: " + sFileNameWithoutPath);
-            m_oProcessWorkspaceLogger.log("FILE " + sFileNameWithoutPath);
+            m_oProcessWorkspaceLogger.log("Importing in WASDI file: " + sFileNameWithoutPath);
             
             
             // Check if the file is already available
@@ -155,8 +163,6 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 } else {
                     WasdiLog.errorLog("Download.executeOperation: sFileNameWithoutPath is null or empty!!");
                 }
-                
-                Product oProduct = null;
 
                 oProviderAdapter.subscribe(this);
                 
@@ -190,8 +196,6 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
         				
         				sFileNameWithoutPath = oProductFile.getName(); 
         				
-        				oProduct = oProductReader.getSnapProduct();
-        				
         				try {
         					oVM = oProductReader.getProductViewModel();
         				}
@@ -208,6 +212,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                     
                     if (Utils.isNullOrEmpty(sFileName)) {
                         oProviderAdapter.unsubscribe(this);
+                        oProviderAdapter.closeConnections();
                         
                         oProviderAdapter = getNextDataProvider(oParameter);
                                                 
@@ -225,6 +230,8 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
 
                 oProviderAdapter.unsubscribe(this);
+                WasdiLog.debugLog("Download.executeOperation: calling closeConnections");
+                oProviderAdapter.closeConnections();
 
                 m_oProcessWorkspaceLogger.log("Got File, try to read");
 
@@ -234,6 +241,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 oAlreadyDownloaded.setFileName(sFileNameWithoutPath);
                 oAlreadyDownloaded.setFilePath(sFileName);
                 oAlreadyDownloaded.setProductViewModel(oVM);
+                oAlreadyDownloaded.setPlatform(sPlatformType);
 
                 String sBoundingBox = oParameter.getBoundingBox();
 
@@ -245,12 +253,6 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                     oAlreadyDownloaded.setBoundingBox(sBoundingBox);
                 } else {
                     WasdiLog.debugLog("Download.executeOperation: bounding box not available in the parameter");
-                }
-
-				if (oProduct != null) {
-					if (oProduct.getStartTime()!=null) {
-							oAlreadyDownloaded.setRefDate(oProduct.getStartTime().getAsDate());
-						}						
                 }
 
                 oAlreadyDownloaded.setCategory(DownloadedFileCategory.DOWNLOAD.name());
@@ -316,14 +318,14 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             
             return true;
             
-        } catch (Exception oEx) {
+        } 
+        catch (Exception oEx) {
         	
             WasdiLog.errorLog("Download.executeOperation: Exception ", oEx);
 
             String sError = oEx.toString();
             oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-            m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.DOWNLOAD.name(), oParam.getWorkspace(),
-                        sError, oParam.getExchange());
+            m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.DOWNLOAD.name(), oParam.getWorkspace(), sError, oParam.getExchange());
         }
 
         WasdiLog.debugLog("Download.executeOperation: return file name " + sFileName);
@@ -465,7 +467,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 	            }
 	            
 	            // Compute the score for this Provider Adapter				
-	            int iScore = oProviderAdapter.getScoreForFile(oParameter.getName());
+	            int iScore = oProviderAdapter.getScoreForFile(oParameter.getName(), oParameter.getPlatform());
 	            
 	            // Score must be > 0, otherwise file is not supported
 	            if (iScore > 0) {
@@ -494,11 +496,19 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 					return oProviderAdapter;
 				}
 			}
+			
+			if (m_aoDataProviderRanking.size()>0) {
+				// We have data providers that should support the platform, but we are not finding it
+				WasdiLog.infoLog("Download.getBestProviderAdapater: there are providers " + m_aoDataProviderRanking.size() + " but none looks to find the file " + oParameter.getName() + ". We try in any case to proceed");
+				if (m_oProcessWorkspaceLogger!=null) m_oProcessWorkspaceLogger.log("There are providers [" + m_aoDataProviderRanking.size() + "] that should, but none looks to find the file " + oParameter.getName() + ". We try in any case to proceed");
+				
+				// We can try in any case to proceed:
+				return m_aoDataProviderRanking.get(0);
+			}
+			
 		}
 		catch (Exception oEx) {
-        	
-            WasdiLog.errorLog("Download.getBestProviderAdapater: Exception "
-                    + ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Download.getBestProviderAdapater: Exception "+ ExceptionUtils.getStackTrace(oEx));
         }
 		
 		return null;
@@ -512,6 +522,8 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 		
 		// Move to the next Data Provider
 		m_iDataProviderIndex++;
+		// Keep the index of the one we should test now
+		int iInitialDataProviderIndex = m_iDataProviderIndex;
 		
 		// For the selected data providers, starting from the last
 		for (; m_iDataProviderIndex<m_aoDataProviderRanking.size(); m_iDataProviderIndex++) {
@@ -520,16 +532,43 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 			ProviderAdapter oProviderAdapter = m_aoDataProviderRanking.get(m_iDataProviderIndex);
 			
 			if (doesProviderAdapterFindFile(oProviderAdapter, oParameter)) {
-				
+				// Ok we fond our file
 	            DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode());
 	            oParameter.setDownloadUser(oDataProviderConfig.user);
 	            oParameter.setDownloadPassword(oDataProviderConfig.password);
 				
-				// Ok return this
+				// Return this Provider Adapter
 				return oProviderAdapter;
 			}
 		}
 		
+		try {
+			// Here it means that we did not found anything. Lets check if it is a problem of query or if providers are finished			
+			if (iInitialDataProviderIndex<m_aoDataProviderRanking.size()) {
+				
+				// Yes, we have al least one data provider to try 
+				ProviderAdapter oProviderAdapter = m_aoDataProviderRanking.get(iInitialDataProviderIndex);
+				
+				// Log it
+				WasdiLog.warnLog("Download.getNextDataProvider: The provider " + oProviderAdapter.getCode() + " Should support the platform but is not finding " + oParameter.getName() + ". We try in any case because all failed");
+				
+				// Try to set credentials
+	            DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode());
+	            oParameter.setDownloadUser(oDataProviderConfig.user);
+	            oParameter.setDownloadPassword(oDataProviderConfig.password);
+	            
+	            // Re-set the data provider index
+	            m_iDataProviderIndex = iInitialDataProviderIndex;
+				
+				// Ok return this
+				return oProviderAdapter;				
+			}			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("Download.getNextDataProvider: exception trying to recover at least a Data Provider: ", oEx);
+		}
+		
+		// If we arrive here there is no chance to find the file
 		return null;
 	}
 	
@@ -543,7 +582,10 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 		QueryExecutor oQueryExecutor = QueryExecutorFactory.getExecutor(oProviderAdapter.getCode());
 		
 		// Must obtain the URI!!
-		String sFileUri = oQueryExecutor.getUriFromProductName(oParameter.getName(), WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode()).defaultProtocol, oParameter.getUrl());
+		String sFileUri = oQueryExecutor.getUriFromProductName(oParameter.getName(), WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode()).defaultProtocol, oParameter.getUrl(), oParameter.getPlatform());
+		
+		// Close connections
+		oQueryExecutor.closeConnections();
 		
 		if (!Utils.isNullOrEmpty(sFileUri)) {
 			// If we got the URI, this is the best Provider Adapter

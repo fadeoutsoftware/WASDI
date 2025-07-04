@@ -2,9 +2,12 @@ package wasdi.dataproviders;
 
 import java.io.File;
 
+import org.apache.commons.io.FileUtils;
+
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.lsa.LSAHttpUtils;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -27,7 +30,6 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	
 	public LSAProviderAdapter() {
 		super();
-		m_sDataProviderCode = "LSA";
 	}
 
 
@@ -126,7 +128,7 @@ public class LSAProviderAdapter extends ProviderAdapter {
 		}
 
 		if(isHttpsProtocol(sFileURL)) {
-			sResult = downloadHttps(sFileURL, sSaveDirOnServer, iMaxRetry, sResult);
+			sResult = downloadHttps(sFileURL, sSaveDirOnServer, iMaxRetry);
 		}
 
 		return sResult;
@@ -157,20 +159,47 @@ public class LSAProviderAdapter extends ProviderAdapter {
 		return sResult;
 	}
 
-	private String downloadHttps(String sFileURL, String sSaveDirOnServer, int iMaxRetry, String sResult) {
+	private String downloadHttps(String sFileURL, String sSaveDirOnServer, int iMaxRetry) {
+		
+		String sResult = "";
+		
+		// Try 5 times
 		for (int iAttemp = 0; iAttemp < iMaxRetry; iAttemp ++) {
 
-			WasdiLog.debugLog("LSAProviderAdapter.executeDownloadFile: attemp #" + iAttemp);
+			WasdiLog.debugLog("LSAProviderAdapter.downloadHttps: attemp #" + iAttemp);
 			
 			try {
 				sResult = downloadViaHttp(sFileURL, "", "", sSaveDirOnServer);
 			}
 			catch (Exception oEx) {
-				WasdiLog.debugLog("LSAProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
+				WasdiLog.debugLog("LSAProviderAdapter.downloadHttps: exception in download via http call: " + oEx.toString());
 			}
 			
 			if (!Utils.isNullOrEmpty(sResult)) {
-				return sResult;
+				
+				File oDownloadedFile = new File(sResult);
+				
+				if (oDownloadedFile.exists()) {
+					String sDetectedPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(oDownloadedFile.getName());
+					if (!Utils.isNullOrEmpty(sDetectedPlatform)) {
+						if (sDetectedPlatform.equals(Platforms.SENTINEL1) || sDetectedPlatform.equals(Platforms.SENTINEL2)) {
+							if (oDownloadedFile.length()<1000000l) {
+								WasdiLog.warnLog("LSAProviderAdapter.downloadHttps: The file should be a S1 or S2, but is smaller than 1Mb. We do not trust it, retry");
+								FileUtils.deleteQuietly(oDownloadedFile);
+								sResult = "";
+							}
+						}
+					}
+				}
+				else {
+					WasdiLog.infoLog("LSAProviderAdapter.downloadHttps: the returned file " + sResult + " does not exists, we try again");
+					sResult = "";
+				}
+				
+				// Now we can check again if it is still valid
+				if (!Utils.isNullOrEmpty(sResult)) {
+					return sResult;	
+				}
 			}
 
 			try {
@@ -179,7 +208,7 @@ public class LSAProviderAdapter extends ProviderAdapter {
 			}
 			catch (InterruptedException oEx) {
 				Thread.currentThread().interrupt();
-				WasdiLog.debugLog("LSAProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
+				WasdiLog.debugLog("LSAProviderAdapter.downloadHttps: exception in sleep for retry: " + oEx.toString());
 			}
 		}
 		
@@ -187,7 +216,7 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		if (Utils.isNullOrEmpty(sFileURL)) return "";
 		
 		String sFileName = "";
@@ -227,7 +256,19 @@ public class LSAProviderAdapter extends ProviderAdapter {
 		}
 		
 		return 0;
+	}
+	
+	@Override
+	public void closeConnections() {	
 		
+		if (m_bAuthenticated) {
+			WasdiLog.debugLog("LSAProviderAdapter.closeConnections: calling logut");
+			LSAHttpUtils.logout();
+			m_bAuthenticated = false;
+		}
+		else {
+			WasdiLog.debugLog("LSAProviderAdapter.closeConnections: not authenticated");
+		}
 	}
 	
 }

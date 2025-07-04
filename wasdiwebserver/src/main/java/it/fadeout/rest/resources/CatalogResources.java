@@ -234,7 +234,7 @@ public class CatalogResources {
 				if (Utils.isNullOrEmpty(sExtension)) {
 					// We are without extension, is it a S1 or S2 ?
 					if (sFileName.startsWith("S1") || sFileName.startsWith("S2")) {
-						WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file starts with S1 or S2, try to add .zip" );
+						WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file starts with S1 or S2, try to add .zip" );
 						// Yes! Retry with extension
 						sFileName += ".zip";
 						bRetry = true;
@@ -242,7 +242,7 @@ public class CatalogResources {
 				}
 				
 				if (bRetry) {
-					WasdiLog.warnLog("CatalogResources.checkDownloadEntryAvailabilityByName: retry adding extension new file name = " + sFileName);
+					WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: retry adding extension new file name = " + sFileName);
 					oFile = this.getEntryFile(sFileName,sWorkspaceId);
 				}
 				
@@ -285,12 +285,12 @@ public class CatalogResources {
 			PrimitiveResult oResult = new PrimitiveResult();
 			
 			if (oFile!=null) {
-				WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file found!");
+				WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file found!");
 				oResult.setBoolValue(true);
 				return Response.ok(oResult).build();
 			}
 			else {
-				WasdiLog.infoLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found!");
+				WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: file not found!");
 				oResult.setBoolValue(false);
 				return Response.status(Status.NOT_FOUND).entity(oResult).build();
 			}
@@ -315,10 +315,15 @@ public class CatalogResources {
 	@PUT
 	@Path("/upload/ingest")
 	@Produces({"application/json", "text/xml"})
-	public Response ingestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle) {
+	public Response ingestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle, @QueryParam("platform") String sPlatform) {
 		
 		if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) sParentProcessWorkspaceId = "";
 		if (Utils.isNullOrEmpty(sStyle)) sStyle = "";
+		
+		// If we do not have a platform, we try to get it from the file name
+		if (Utils.isNullOrEmpty(sPlatform)) {
+			sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(sFile);
+		}
 
 		WasdiLog.debugLog("CatalogResource.ingestFile File: " + sFile + " Ws: " + sWorkspaceId + " ParentId " + sParentProcessWorkspaceId + " Style " + sStyle);
 
@@ -368,6 +373,7 @@ public class CatalogResources {
 			oParameter.setStyle(sStyle);
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+			oParameter.setPlatform(sPlatform);
 
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), oParameter, sParentProcessWorkspaceId);
 			
@@ -398,7 +404,7 @@ public class CatalogResources {
 	@GET
 	@Path("/upload/ingestinws")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult ingestFileInWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle) {
+	public PrimitiveResult ingestFileInWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle, @QueryParam("platform") String sPlatform) {
 		
 		// Create the result object
 		PrimitiveResult oResult = new PrimitiveResult();
@@ -420,6 +426,11 @@ public class CatalogResources {
 			oResult.setIntValue(401);
 			return oResult;			
 		}
+		
+		// If we do not have a platform, we try to get it from the file name
+		if (Utils.isNullOrEmpty(sPlatform)) {
+			sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(sFile);
+		}		
 		
 		// Get the user account
 		String sUserId = oUser.getUserId();
@@ -473,6 +484,7 @@ public class CatalogResources {
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+			oParameter.setPlatform(sPlatform);
 
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), oParameter, sParentProcessWorkspaceId);
 
@@ -707,11 +719,8 @@ public class CatalogResources {
 		
 		try {
 			
-			// Get the user Id
-			String sUserId = oUser.getUserId();
-			
 			// Get the workspace path and the full path
-			String sWorkspacePath = PathsConfig.getWorkspacePath(sUserId, sWorkspaceId);
+			String sWorkspacePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 			String sFullFilePath = sWorkspacePath + sFileName;
 			
 			// Check if we have the file in the db

@@ -12,9 +12,6 @@ public class ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult 
 
 	private static class Id {
 		
-		public Id() {
-		}
-
 		private String operationType;
 		private String operationSubType;
 		private String status;

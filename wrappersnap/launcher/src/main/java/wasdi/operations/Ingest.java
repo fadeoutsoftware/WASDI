@@ -113,6 +113,7 @@ public class Ingest extends Operation {
             if (WasdiFileUtils.isShapeFileZipped(sFilePath, 100)) {
             	bUnzipAfterCopy = true;
             	sDestinationFileName = WasdiFileUtils.getShpFileNameFromZipFile(sFilePath, 30);
+            	WasdiFileUtils.deleteFile(sFilePath);
             }
 
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 50);
@@ -172,7 +173,7 @@ public class Ingest extends Operation {
 
             // add product to db
             addProductToDbAndWorkspaceAndSendToRabbit(oImportProductViewModel, oDstFile.getAbsolutePath(),
-                    oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), null, true, true, oParameter.getStyle());
+                    oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), null, true, true, oParameter.getStyle(), oParameter.getPlatform());
             
             updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
 

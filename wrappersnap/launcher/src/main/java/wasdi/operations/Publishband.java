@@ -27,6 +27,7 @@ import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.payloads.PublishBandPayload;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -157,8 +158,14 @@ public class Publishband extends Operation {
             // Create the Product Reader
 			WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oInputFile);
 			
+			String sPlatform = oDownloadedFile.getPlatform();
+			
+			if (Utils.isNullOrEmpty(sPlatform)) {
+				sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(sPlatform);
+			}
+			
 			// Ask to obtain the file to send to geoserver
-			File oFileToCopy = oReadProduct.getFileForPublishBand(oParameter.getBandName(), sLayerId);
+			File oFileToCopy = oReadProduct.getFileForPublishBand(oParameter.getBandName(), sLayerId, sPlatform);
 			
 			if (oFileToCopy == null) {
                 WasdiLog.debugLog("Publishband.executeOperation:  File for geoserver is null, return");
@@ -213,8 +220,10 @@ public class Publishband extends Operation {
 					
 					// Does it match?
 					if (oChild.getName().startsWith(sBaseFileNameFilter))  {
-						asFilesToCopy.add(oChild.getPath());
-						WasdiLog.debugLog("Publishband.executeOperation: found other file to copy " + oChild.getName());
+						if (!oChild.getName().toLowerCase().endsWith(".zip")) {
+							asFilesToCopy.add(oChild.getPath());
+							WasdiLog.debugLog("Publishband.executeOperation: found other file to copy " + oChild.getName());							
+						}
 					}
 				}
 			}

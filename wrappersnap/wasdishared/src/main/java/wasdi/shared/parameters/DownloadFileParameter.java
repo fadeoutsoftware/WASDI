@@ -41,6 +41,11 @@ public class DownloadFileParameter extends BaseParameter{
      */
     private String provider;
     
+    /**
+     * Platform (aka mission) of the file to import
+     */
+    private String platform;
+    
     
     /**
      * Number of Retry
@@ -108,5 +113,13 @@ public class DownloadFileParameter extends BaseParameter{
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getPlatform() {
+		return platform;
+	}
+
+	public void setPlatform(String platform) {
+		this.platform = platform;
 	}	
 }

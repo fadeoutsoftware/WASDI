@@ -9,7 +9,6 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.queryexecutors.ConcreteQueryTranslator;
@@ -26,19 +25,20 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 
 public class QueryExecutorCM2 extends QueryExecutor {
 	
-	private static DataProviderConfig s_oDataProviderConfig;
 	protected String m_sPythonScript = "";
 	protected String m_sExchangeFolder = "";
 	
 	private static final Object s_oTempFolderLock = new Object();
 	
 	public QueryExecutorCM2() {
-		m_sProvider = "COPERNICUSMARINE";
-		
-		s_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sProvider);
-		WasdiLog.debugLog("QueryExecutorCM2: got data provider config");
-		
-		m_sParserConfigPath = s_oDataProviderConfig.parserConfig;
+
+	}
+	
+	@Override
+	public void init() {
+		super.init();
+				
+		m_sParserConfigPath = m_oDataProviderConfig.parserConfig;
 		WasdiLog.debugLog("QueryExecutorCM2:  parser config path is " + m_sParserConfigPath );
 		
 		m_oQueryTranslator = new ConcreteQueryTranslator();
@@ -53,7 +53,7 @@ public class QueryExecutorCM2 extends QueryExecutor {
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("QueryExecutorCM2: exception reading config files ", oEx);
-		}
+		}		
 	}
 	
 	protected List<String> getCommandLineArgs(String sCommand, String sQuery) {
@@ -171,12 +171,18 @@ public class QueryExecutorCM2 extends QueryExecutor {
 			return iCount;
 			//return 2;
 			
-		} catch (Exception oEx) {
+		} 
+		catch (Exception oEx) {
 			WasdiLog.errorLog("QueryExecutorCM2.executeCount: error ",oEx);
 		}		
 		finally {
-			FileUtils.deleteQuietly(new File(sInputFullPath));
-			FileUtils.deleteQuietly(new File(sOutputFullPath));
+			if (WasdiConfig.Current.dockers.removeParameterFilesForPythonsShellExec) {
+				FileUtils.deleteQuietly(new File(sInputFullPath));
+				FileUtils.deleteQuietly(new File(sOutputFullPath));				
+			}
+			else {
+				WasdiLog.infoLog("QueryExecutorCM2.executeCount: removeParameterFilesForPythonsShellExec is  FALSE, we keep the parameter files");
+			}
 		}
 		return -1;
 	}
@@ -232,14 +238,20 @@ public class QueryExecutorCM2 extends QueryExecutor {
 			WasdiLog.errorLog("QueryExecutorCM2.executeAndRetrieve: error ",oEx);
 		}		
 		finally {
-			FileUtils.deleteQuietly(new File(sInputFullPath));
-			FileUtils.deleteQuietly(new File(sOutputFullPath));
+			if (WasdiConfig.Current.dockers.removeParameterFilesForPythonsShellExec) {
+				FileUtils.deleteQuietly(new File(sInputFullPath));
+				FileUtils.deleteQuietly(new File(sOutputFullPath));
+			}
+			else {
+				WasdiLog.infoLog("QueryExecutorCM2.executeAndRetrieve: removeParameterFilesForPythonsShellExec is  FALSE, we keep the parameter files");
+			}
+			
 		}
 		return aoReturnList;
 	}
 		
 	@Override
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		return sOriginalUrl;
 	}
 	

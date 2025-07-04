@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.io.Util;
 import org.esa.snap.core.datamodel.Product;
 import org.json.JSONObject;
@@ -51,7 +50,6 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * 
 	 */
 	public ONDAProviderAdapter() {
-		m_sDataProviderCode = "ONDA";
 	}
 
 	/* (non-Javadoc)
@@ -237,14 +235,6 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 								}
 								else {
 									WasdiLog.debugLog("ONDAProviderAdapter.ExecuteDownloadFile: file not readable: " + sResult + " try again");
-									try {
-										String sDestination = oProductFile.getPath();
-										sDestination += ".attemp"+ (iMaxRetry-iAttempts+1);
-										FileUtils.copyFile(oProductFile, new File(sDestination));										
-									}
-									catch (Exception oEx) {
-										WasdiLog.debugLog("ONDAProviderAdapter.ExecuteDownloadFile: Exception making copy of attempt file " + oEx.toString());
-									}
 								}								
 							}
 							catch (Exception oReadEx) {
@@ -531,7 +521,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * @see wasdi.filebuffer.DownloadFile#GetFileName(java.lang.String)
 	 */
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		//check whether the file has already been downloaded, else return null
 
 		if (Utils.isNullOrEmpty(sFileURL)) {
@@ -602,7 +592,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		if (sPlatformType.equals(Platforms.SENTINEL1) || sPlatformType.equals(Platforms.SENTINEL2) 
 				|| sPlatformType.equals(Platforms.SENTINEL3) || sPlatformType.equals(Platforms.SENTINEL5P) ||
 				sPlatformType.equals(Platforms.LANDSAT8)) {
-			Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName);
+			Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName, sPlatformType);
 			
 			if (oImageDate!=null) {
 				Date oNow = new Date();

@@ -33,7 +33,6 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 	 * Basic constructor
 	 */
 	public TerrascopeProviderAdapter() {
-		m_sDataProviderCode = "TERRASCOPE";
 	}
 	
 	@Override
@@ -243,7 +242,7 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		if (Utils.isNullOrEmpty(sFileURL)) return "";
 
 		String sFileName = "";

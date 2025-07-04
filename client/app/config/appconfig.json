@@ -405,7 +405,7 @@
 				{
 					"indexname": "producttype",
 					"indexlabel": "Product",
-					"indexvalues": "VIIRS_1d_composite|VIIRS_5d_composite|VNP21A1D|VNP21A1N",
+					"indexvalues": "VIIRS_1d_composite|VIIRS_5d_composite|VNP21A1D|VNP21A1N|VNP15A2H|VNP43MA3",
 					"regex": ".*",
 					"indexvalue": "VIIRS_1d_composite"
 				}
@@ -554,7 +554,7 @@
 				{
 					"indexname": "dataset",
 					"indexlabel": "Dataset",
-					"indexvalues": "10m_2020_V1",
+					"indexvalues": "10m_2020_V1|10m_2021_V2",
 					"regex": ".*",
 					"indexvalue": "10m_2020_V1"
 				}
@@ -1125,6 +1125,38 @@
 			"indexvalue": "ReturnRaster",
 			"selected": false,
 			"ispublic": true,
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "CIMA_AIR_TEMP_AVG|CIMA_AIR_TEMP_MIN|CIMA_AIR_TEMP_MAX|CIMA_FAPAR|CIMA_PREC|CIMA_SPEI|CIMA_SSMI",
+					"indexvalue": "CIMA_AIR_TEMP_AVG"
+				}
+			]
+		},
+		{
+			"name": "NATDHMS Indexes",
+			"indexname": "platformname",
+			"indexvalue": "NATDHMSIndexes",
+			"selected": false,
+			"ispublic": false,
+			"userid": "return@fadeout.it",
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "CIMA_FAPAR|CIMA_SPEI|CIMA_SSMI",
+					"indexvalue": "CIMA_FAPAR"
+				}
+			]
+		},
+		{
+			"name": "CIMA Variables",
+			"indexname": "platformname",
+			"indexvalue": "CIMAVariables",
+			"selected": false,
+			"ispublic": false,
+			"userid": "return@fadeout.it",
 			"filters": [
 				{
 					"indexname": "producttype",

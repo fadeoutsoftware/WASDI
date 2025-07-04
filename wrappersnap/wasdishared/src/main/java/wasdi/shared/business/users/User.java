@@ -105,6 +105,21 @@ public class User {
 	 * User type: is it free, standard or professional?!?
 	 */
 	private String type = UserType.FREE.name();
+	
+	/**
+	 * If the user exceed the space will receive a warning. In case, here we have the timstamp of the moment we sent this advice 
+	 */
+	private Double storageWarningSentDate = 0.0;
+	
+	/**
+	 * Public Nick Name the user decide to expose
+	 */
+	private String publicNickName;
+	
+	/**
+	 * Skin profile of the user
+	 */
+	private String skin = "wasdi";
 
 	static {
     	s_oInvalid = new User();
@@ -301,5 +316,29 @@ public class User {
 		
 		return sUserName;
 		
+	}
+
+	public Double getStorageWarningSentDate() {
+		return storageWarningSentDate;
+	}
+
+	public void setStorageWarningSentDate(Double storageWarningSentDate) {
+		this.storageWarningSentDate = storageWarningSentDate;
+	}
+
+	public String getPublicNickName() {
+		return publicNickName;
+	}
+
+	public void setPublicNickName(String publicNickName) {
+		this.publicNickName = publicNickName;
+	}
+
+	public String getSkin() {
+		return skin;
+	}
+
+	public void setSkin(String skin) {
+		this.skin = skin;
 	}
 }

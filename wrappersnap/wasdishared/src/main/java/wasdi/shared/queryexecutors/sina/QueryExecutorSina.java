@@ -1,15 +1,13 @@
 package wasdi.shared.queryexecutors.sina;
 
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.time.YearMonth;
-
 import wasdi.shared.queryexecutors.PaginatedQuery;
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
@@ -24,11 +22,8 @@ public class QueryExecutorSina extends QueryExecutor {
 	private String m_sFileListUrl = null;
 	
 	public QueryExecutorSina() {
-		this.m_sProvider = "SINA";
-		
 		this.m_oQueryTranslator = new QueryTranslatorSina();
 		this.m_oResponseTranslator = new ResponseTranslatorSina();
-		this.m_asSupportedPlatforms.add(Platforms.BIGBANG);
 	}
 	
 	@Override
@@ -46,7 +41,7 @@ public class QueryExecutorSina extends QueryExecutor {
 	
 	
 	@Override
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		return sOriginalUrl;
 	}
 

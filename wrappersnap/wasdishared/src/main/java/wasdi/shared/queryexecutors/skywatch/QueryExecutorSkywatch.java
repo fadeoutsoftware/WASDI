@@ -31,8 +31,6 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 public class QueryExecutorSkywatch extends QueryExecutor {
 
 	public QueryExecutorSkywatch() {
-		m_sProvider = "SKYWATCH";
-
 		this.m_oQueryTranslator = new QueryTranslatorSkywatch();
 		this.m_oResponseTranslator = new ResponseTranslatorSkywatch();
 	}
@@ -42,7 +40,7 @@ public class QueryExecutorSkywatch extends QueryExecutor {
 	 * For Skywatch, we need just the original link..
 	 */
 	@Override
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		if (sProduct.startsWith("SKYWATCH_")) {
 			return sOriginalUrl;
 		}

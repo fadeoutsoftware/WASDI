@@ -8,11 +8,13 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -51,8 +53,13 @@ public class UserRepository extends  MongoRepository{
      * @return
      */
     public User getUser(String sUserId) {
+    	
+    	if (Utils.isNullOrEmpty(sUserId)) return null;
 
         try {
+        	// We force always lower case users
+        	sUserId = sUserId.toLowerCase();
+        	
             Document oUserDocument = getCollection(m_sThisCollection).find(new Document("userId", sUserId)).first();
             if(oUserDocument == null)
             {
@@ -98,35 +105,7 @@ public class UserRepository extends  MongoRepository{
 
         return  null;
     }
-    
-    /**
-     * Verify login of a google user
-     * @param sGoogleIdToken
-     * @param sEmail
-     * @param sAuthProvider
-     * @return
-     */
-    public User googleLogin(String sGoogleIdToken, String sEmail, String sAuthProvider) {
-        try {
-            User oUser = getUser(sEmail);
-
-            if (oUser != null){
-            	if ( oUser.getUserId() != null && oUser.getAuthServiceProvider() != null && null != oUser.getGoogleIdToken() ) {
-            		if(oUser.getGoogleIdToken().equals(sGoogleIdToken)) {
-            			if ( oUser.getAuthServiceProvider().equals(sAuthProvider)   ) {
-            				return oUser;
-            			}
-            		}
-            	}
-            }
-            return null;
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("UserRepository.googleLogin : error ", oEx);
-        }
-
-        return  null;
-    }
-    
+        
     /**
      * Delete a user
      * @param sUserId
@@ -193,6 +172,38 @@ public class UserRepository extends  MongoRepository{
     	return aoReturnList;
     }
     
+    
+    /**
+     * Get an iterator over the collection of users
+     * @return an iterator for the Usersc collection
+     */
+    public MongoCursor<Document> getIteratorOverAllUsers ()  {
+    	try {
+    		
+    		return getCollection(m_sThisCollection).find().iterator();
+    		
+    	} catch (Exception oEx) {
+    		
+    		WasdiLog.errorLog("UserRepository.getIteratorOVerAllUsers. Impossible to ger cursor", oEx);
+    	
+    	}
+    	return null;
+    }
+    
+    /**
+     * Get the list of all users
+     * @return
+     */
+    public ArrayList<User> getAdminUsers ()
+    {
+    	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("role", UserApplicationRole.ADMIN.name()));
+        final ArrayList<User> aoReturnList = new ArrayList<User>();
+        
+        fillList(aoReturnList, oWSDocuments, User.class);
+    	
+    	return aoReturnList;
+    }
+    
     /**
      * Get a sorted list of users
      * @param sOrderBy db field on which to perform the sorting operation
@@ -239,18 +250,16 @@ public class UserRepository extends  MongoRepository{
 		Bson oFilterLikeUserId = Filters.eq("userId", oRegex);
 		Bson oFilterLikeName = Filters.eq("name", oRegex);
 		Bson oFilterLikeSurname = Filters.eq("surname", oRegex);
+		Bson oFilterLikeNickName = Filters.eq("publicNickName", oRegex);
 
-		Bson oFilter = Filters.or(oFilterLikeUserId, oFilterLikeName, oFilterLikeSurname);
+		Bson oFilter = Filters.or(oFilterLikeUserId, oFilterLikeName, oFilterLikeSurname, oFilterLikeNickName);
 
 		try {
-			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
-					.find(oFilter)
-					.sort(new Document(sOrderBy, iOrder));
-			
-			
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter).sort(new Document(sOrderBy, iOrder));
 
 			fillList(aoReturnList, oWSDocuments, User.class);
-		} catch (Exception oEx) {
+		} 
+		catch (Exception oEx) {
 			WasdiLog.errorLog("UserRepository.getAllUsers : error ", oEx);
 		}
 

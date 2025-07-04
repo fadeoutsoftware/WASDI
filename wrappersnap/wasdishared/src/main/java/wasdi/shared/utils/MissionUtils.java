@@ -215,10 +215,10 @@ public class MissionUtils {
 		try {
 			if (Utils.isNullOrEmpty(sFileName)) return null;
 
-			if (sFileName.toUpperCase().startsWith("S1A_") || sFileName.toUpperCase().startsWith("S1B_")) {
+			if (sFileName.toUpperCase().startsWith("S1A_") || sFileName.toUpperCase().startsWith("S1B_") || sFileName.toUpperCase().startsWith("S1C_")) {
 				return Platforms.SENTINEL1;
 			}
-			else if (sFileName.toUpperCase().startsWith("S2A_") || sFileName.toUpperCase().startsWith("S2B_")) {
+			else if (sFileName.toUpperCase().startsWith("S2A_") || sFileName.toUpperCase().startsWith("S2B_") || sFileName.toUpperCase().startsWith("S2C_")) {
 				return Platforms.SENTINEL2;
 			}
 			else if (sFileName.toUpperCase().startsWith("S3A_") || sFileName.toUpperCase().startsWith("S3B_") || sFileName.toUpperCase().startsWith("S3__")) {
@@ -244,7 +244,10 @@ public class MissionUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("RIVER-FLD") 
 					|| sFileName.toUpperCase().startsWith("VNP21A1D.")
-					|| sFileName.toUpperCase().startsWith("VNP21A1N.")) {
+					|| sFileName.toUpperCase().startsWith("VNP21A1N.")
+					|| sFileName.toUpperCase().startsWith("VNP15A2H.")
+					|| sFileName.toUpperCase().startsWith("VNP43MA3.")
+					|| sFileName.toUpperCase().startsWith("VNP43IA3.")) {
 				return Platforms.VIIRS;
 			}
 			else if (sFileName.toUpperCase().startsWith("PROBAV_")) {
@@ -332,10 +335,13 @@ public class MissionUtils {
 	 * @param sFileName Name of the Satellite Image File
 	 * @return Reference Date 
 	 */
-	public static Date getDateFromSatelliteImageFileName(String sFileName) {
+	public static Date getDateFromSatelliteImageFileName(String sFileName, String sPlatform) {
 		
 		try {
-			String sPlatform = getPlatformFromSatelliteImageFileName(sFileName);
+			if (Utils.isNullOrEmpty(sPlatform)) {
+				sPlatform = getPlatformFromSatelliteImageFileName(sFileName);	
+			}
+			
 			if (Utils.isNullOrEmpty(sPlatform)) return new Date();
 			
 			if (sPlatform.equals(Platforms.SENTINEL1)) {
@@ -408,10 +414,14 @@ public class MissionUtils {
 	 * @param sFileName Name of the Satellite Image File
 	 * @return Product Type, or ""  
 	 */
-	public static String getProductTypeSatelliteImageFileName(String sFileName) {
+	public static String getProductTypeSatelliteImageFileName(String sFileName, String sPlatform) {
 		
 		try {
-			String sPlatform = getPlatformFromSatelliteImageFileName(sFileName);
+			
+			if (Utils.isNullOrEmpty(sPlatform)) {
+				sPlatform = getPlatformFromSatelliteImageFileName(sFileName);	
+			}
+			
 			if (Utils.isNullOrEmpty(sPlatform)) return "";
 			
 			if (sPlatform.equals(Platforms.SENTINEL1)) {

@@ -63,5 +63,7 @@ public class Platforms {
 	public static String BIGBANG = "BIGBANG";
 	public static String RETURN_RASTER = "ReturnRaster";
 	public static String METEOCEAN = "MeteOcean"; 
+	public static String NATDHMS_INDEXES = "NATDHMSIndexes";
+	public static String CIMA_VARIABLES = "CIMAVariables";
 
 }

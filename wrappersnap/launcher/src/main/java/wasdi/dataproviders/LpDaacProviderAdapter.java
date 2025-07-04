@@ -32,7 +32,6 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 	private static final String s_sUrlCreateToken = "https://urs.earthdata.nasa.gov/api/users/token";
 	
 	public LpDaacProviderAdapter() {
-		m_sDataProviderCode = "LPDAAC";
 	}
 
 	@Override
@@ -101,9 +100,12 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 		
 		if (sFileName.toUpperCase().startsWith("VNP21A1D") 
 				|| sFileName.toUpperCase().startsWith("VNP21A1N")
+				|| sFileName.toUpperCase().startsWith("VNP15A2H")
 				|| sFileName.toUpperCase().startsWith("MCD43A4")
 				|| sFileName.toUpperCase().startsWith("MCD43A3")
-				|| sFileName.toUpperCase().startsWith("MCD43D16")) {
+				|| sFileName.toUpperCase().startsWith("MCD43D16")
+				|| sFileName.toUpperCase().startsWith("VNP43MA3")
+				|| sFileName.toUpperCase().startsWith("VNP43IA3")) {
 			WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile: VIIRS product asked for download");
 			return executeDownloadFromEarthData(sDownloadUrl, sDownloadUser, sDownloadPassword, sSavedFilePath, iMaxRetry);
 		}
@@ -237,7 +239,7 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		String sResult = "";
 		WasdiLog.debugLog("LpDaacProviderAdapter.getFileName. File url: " + sFileURL);
 		try {			
@@ -259,7 +261,12 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 				return DataProviderScores.DOWNLOAD.getValue();
 			}
 		}
-		if (sPlatformType.equals(Platforms.VIIRS) && (sFileName.startsWith("VNP21A1D") || sFileName.startsWith("VNP21A1N"))) {
+		if (sPlatformType.equals(Platforms.VIIRS) 
+				&& (sFileName.startsWith("VNP21A1D") 
+						|| sFileName.startsWith("VNP21A1N") 
+						|| sFileName.startsWith("VNP15A2H") 
+						|| sFileName.startsWith("VNP43MA3")
+						|| sFileName.startsWith("VNP43IA3"))) {
 			return DataProviderScores.DOWNLOAD.getValue();
 		}
 

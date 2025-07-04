@@ -140,14 +140,9 @@ public class ShapeProductReader extends WasdiProductReader{
 	public MetadataViewModel getProductMetadataViewModel() {
 		return new MetadataViewModel("Metadata");
 	}
-
-	@Override
-	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
-		return sDownloadedFileFullPath;
-	}
 	
 	@Override
-	public File getFileForPublishBand(String sBand, String sLayerId) {
+	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
 		return m_oProductFile;
 	}
 	

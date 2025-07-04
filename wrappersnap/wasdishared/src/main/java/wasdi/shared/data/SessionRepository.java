@@ -14,6 +14,7 @@ import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.users.UserSession;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -124,7 +125,8 @@ public class SessionRepository extends MongoRepository {
         final ArrayList<UserSession> aoReturnList = new ArrayList<>();
         try {
             long lNow = new Date().getTime();
-            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.and(Filters.gte("lastTouch", lNow - 24*60*60*1000), Filters.eq("userId", sUserId)));
+            long lTimespan = WasdiConfig.Current.keycloack.sessionExpireHours * 60L * 60L * 1000L;
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.and(Filters.gte("lastTouch", lNow - lTimespan), Filters.eq("userId", sUserId)));
 
             fillList(aoReturnList, oWSDocuments, UserSession.class);
         } catch (Exception oEx) {
@@ -143,7 +145,8 @@ public class SessionRepository extends MongoRepository {
         final ArrayList<UserSession> aoReturnList = new ArrayList<>();
         try {
             long lNow = new Date().getTime();
-            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.and(Filters.lt("lastTouch", lNow - 24*60*60*1000), Filters.eq("userId", sUserId)));
+            long lTimespan = WasdiConfig.Current.keycloack.sessionExpireHours * 60L * 60L * 1000L;
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.and(Filters.lt("lastTouch", lNow - lTimespan), Filters.eq("userId", sUserId)));
             
             fillList(aoReturnList, oWSDocuments, UserSession.class);
             
@@ -212,5 +215,32 @@ public class SessionRepository extends MongoRepository {
         	WasdiLog.errorLog("SessionRepository.deleteSessionsByUserId: error ", oEx);
         	return -1;
         }
+    }  
+    
+    
+    /**
+     * Delete a Session
+     * @param oSession
+     * @return
+     */
+    public boolean isNotExpiredSession(UserSession oSession) {
+    	
+    	if (oSession == null) return false;
+    	
+        try {
+            long lNow = new Date().getTime();
+            long lTimespan = WasdiConfig.Current.keycloack.sessionExpireHours * 60L * 60L * 1000L;
+            long lLimit = lNow - lTimespan;
+            
+            if (oSession.getLastTouch() >= lLimit) return true;
+        } 
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("SessionRepository.isValidSession : error ", oEx);
+        }
+        
+        // Not valid, we can delete it!
+        deleteSession(oSession);
+        
+        return false;
     }    
 }

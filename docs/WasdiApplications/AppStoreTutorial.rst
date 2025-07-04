@@ -8,7 +8,7 @@ Wasdi App Store
 In this tutorial the WASDI app store will be introduced.
 The document will cover and highlight the main feature of this WASDI sections and also, will present how a WASDI application can be launched.
 
-The app store concept is pretty common for mobile devices and our efforts
+The app store concept is pretty common for mobile devices and our effort
 was invested to develop the same user experience for WASDI.
 An user can upload, execute and share his own application directly on
 a web browser, with a fast and consistent user experience.
@@ -21,15 +21,15 @@ Introduction
 
 The main app store view consist of a list of entries reporting various WASDI applications:
 
-.. image:: ../_static/appstore_images/1.png
+.. image:: ../_static/appstore_images/1_overview.png
 
 It is possible to search the applications by using the following search field
 
-.. image:: ../_static/appstore_images/2Zoom.png
+.. image:: ../_static/appstore_images/2_search_bar.png
 
 Also, an user can enable some filters related to categories, developer, ratings and price
 
-.. image:: ../_static/appstore_images/3Zoom.png
+.. image:: ../_static/appstore_images/3_filters.png
 
 Launch an application
 ------------------------
@@ -44,11 +44,11 @@ obtain the final product map.
 
 Click on the **Automatic S1-S2 Floods** icon
 
-.. image:: ../_static/appstore_images/4.png
+.. image:: ../_static/appstore_images/4_filter_app.png
 
 and then on *Open Application*
 
-.. image:: ../_static/appstore_images/5.png
+.. image:: ../_static/appstore_images/5_open_app.png
 
 The application UI it is shown. Several tabs are available to the user, allowing to customize the elaboration:
 
@@ -89,24 +89,24 @@ The single pixels in the result images uses the following value legend:
 
 Select the area of the event and then click on "run" to start the processing.
 
-.. image:: ../_static/appstore_images/6.png
+.. image:: ../_static/appstore_images/6_run_app.png
 
 After launching the elaboration the user will be redirected to the **edit view** of the newly generated workspace.
 
-.. image:: ../_static/appstore_images/7.png
+.. image:: ../_static/appstore_images/7_ws_after_run.png
 
 Here, the user can open the lower information bar, by clicking on the arrow in the lower right angle of the current perspective.
 
-.. image:: ../_static/appstore_images/8.png
+.. image:: ../_static/appstore_images/8_arrow.png
 
 A panel with all the sub-operations is reported, showing the process status and the percentage of each single operation.
 In the following image there is reported the very early phases of the elaboration.
 
-.. image:: ../_static/appstore_images/9.png
+.. image:: ../_static/appstore_images/9_operations.png
 
 After the initial setup WASDI starts to fetch the required images. Each image is then added to the current workspace.
 
-.. image:: ../_static/appstore_images/10.png
+.. image:: ../_static/appstore_images/10_downloads_list.png
 
 Selecting a result image from the product list it is possible to view the resulting GeoTiff image, geo-localized on the
 current map. In this case the image reports only permanent water belonging to the normal streams of rivers or from lake and sea.
@@ -127,17 +127,19 @@ We have seen how a deployed application can be launched and how products can be 
 For create a new application open a workspace and click on the icon **New App** from the
 bar.
 
-.. image:: ../_static/appstore_images/NA1.png
+.. image:: ../_static/appstore_images/12_new_app.png
+
+.. image:: ../_static/appstore_images/12A_new_app.png
 
 A new dialog will be opened allowing the user to insert basic values like name and description of the
 new application
 
-.. image:: ../_static/appstore_images/NA2.png
+.. image:: ../_static/appstore_images/13_overview_new_app.png
 
 The user, that from now on we refer as the developer, can use several programming languages for the applications
 reported in the following image.
 
-.. image:: ../_static/appstore_images/NA3.png
+.. image:: ../_static/appstore_images/14_programmin_language.png
 
 In order to upload the effective application a *.Zip* file, containing a set of files that must be prepared beforehand.
 Please refer to the particular WASDI libraries in order to acquire all the details about conventions and file format required.
@@ -151,6 +153,6 @@ A JSON descriptor of the required fields can be edited to allow users to interac
 Clicking on the User Interface(UI) tab it is possible to add such widgets by clicking to the corresponding buttons.
 The resulting JSON will be then parsed to check syntax coherence and, if the test is passed, used to generates UIs.
 
-.. image:: ../_static/appstore_images/NA4.png
+.. image:: ../_static/appstore_images/15_ui.png
 
 

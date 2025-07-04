@@ -34,6 +34,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserSession;
 import wasdi.shared.business.users.UserType;
@@ -281,37 +282,47 @@ public class Wasdi extends ResourceConfig {
 	public static User getUserFromSession(String sSessionId) {
 		
 		User oUser = null;
+		SessionRepository oSessionRepository = new SessionRepository();
+		UserRepository oUserRepo = new UserRepository();
 		
 		try {			
 			// Check The Session with Keycloak
 			String sUserId = null;
 			
 			try  {
-				//introspect
+				// Try to Introspect the token
 				String sPayload = "token=" + sSessionId;
+				
+				// Add headers
 				Map<String,String> asHeaders = new HashMap<>();
 				asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+				
+				// Post to keycloak server
 				HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(Wasdi.s_sKeyCloakIntrospectionUrl, sPayload, asHeaders, s_sClientId + ":" + s_sClientSecret); 
 				String sResponse = oHttpCallResponse.getResponseBody();
+				
+				// Try to read the result
 				JSONObject oJSON = null;
+				
 				if(!Utils.isNullOrEmpty(sResponse)) {
 					oJSON = new JSONObject(sResponse);
+					
+					if(oJSON != null) {
+						sUserId = oJSON.optString("preferred_username", null);
+					}					
 				}
-				if(null!=oJSON) {
-					sUserId = oJSON.optString("preferred_username", null);		// TODO: should I force the lower case here? If we are going to set all the user with lower case in our DB, then I guess so
-				}
+				
 			}
 			catch (Exception oKeyEx) {
 				WasdiLog.errorLog("Wasdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
 			}
 
 			if(!Utils.isNullOrEmpty(sUserId)) {
-				sUserId = sUserId.toLowerCase();  // force the user id to be lowercase
-				UserRepository oUserRepo = new UserRepository();
+				// Get the user from the repo
 				oUser = oUserRepo.getUser(sUserId);
 				
 				if( oUser == null ) {
-					
+					// Probably we need to add the user to the db!
 					WasdiLog.warnLog("Wasdi.getUserFromSession: the session is valid but the user does not exists, add it");
 					
 					AuthResource oAuthResource = new AuthResource();
@@ -322,7 +333,8 @@ public class Wasdi extends ResourceConfig {
 
 					if (oRegistrationResult==null) {
 						WasdiLog.warnLog("Wasdi.getUserFromSession: we had a problem registering the user, return invalid");
-					} else {
+					} 
+					else {
 					
 						if (oRegistrationResult.getBoolValue()==null) {
 							WasdiLog.warnLog("Wasdi.getUserFromSession: we had a problem registering the user, return invalid");
@@ -333,32 +345,44 @@ public class Wasdi extends ResourceConfig {
 						}
 					}
 					
+					// Re-read the user: if it has been registered, oUser will be valid, if not still null
 					oUser = oUserRepo.getUser(sUserId);
 				}
 			} 
 			else {
-				//check session against DB
 				
-				SessionRepository oSessionRepository = new SessionRepository();
+				// Session not found in keyclock: check session against DB
 				UserSession oUserSession = oSessionRepository.getSession(sSessionId);
 				
-				if(null==oUserSession) {
+				// We really do not have this session
+				if(oUserSession == null) {
 					return null;
-				} else {
-					sUserId = oUserSession.getUserId();
+				} 
+								
+				// Ok but the session itself, is expired or not?
+				if (oSessionRepository.isNotExpiredSession(oUserSession)==false) {
+					// Is expired. It has been deleted, and we return false
+					return null;
 				}
 				
+				// Ok we should have a user so
+				sUserId = oUserSession.getUserId();				
+				
+				// Check if the user id is not null
 				if(!Utils.isNullOrEmpty(sUserId)){
-					sUserId = sUserId.toLowerCase();
-					UserRepository oUserRepository = new UserRepository();
-					oUser = oUserRepository.getUser(sUserId);
-				} 
-				else {
-					return null;
+					
+					// Try to read the user
+					oUser = oUserRepo.getUser(sUserId);
+					
+					if (oUser!=null) {
+						// If it is not null, we can touch the session
+						safeTouchSession(oUserSession);
+					}
+					
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.errorLog("Wasdi.getUserFromSession: something bad happened: " + oE);
+			WasdiLog.errorLog("Wasdi.getUserFromSession: something bad happened: ", oE);
 		}
 
 		return oUser;
@@ -370,16 +394,35 @@ public class Wasdi extends ResourceConfig {
 	 * @param oUser
 	 */
 	public static void clearUserExpiredSessions(User oUser) {
+		
 		SessionRepository oSessionRepository = new SessionRepository();
 		List<UserSession> aoEspiredSessions = oSessionRepository.getAllExpiredSessions(oUser.getUserId());
+		
 		for (UserSession oUserSession : aoEspiredSessions) {
-			//delete data base session
+			//delete data base sessions
 			if (!oSessionRepository.deleteSession(oUserSession)) {
 
 				WasdiLog.debugLog("AuthService.Login: Error deleting session.");
 			}
 		}
 	}	
+	
+	/**
+	 * Safe Touch Session: it really makes the touch only if the session is at least one minute old.
+	 * 
+	 * @param oSession Session to touch
+	 * @return True if was more recent than one minute, or if was touched. False in case of error in the update of the session in the db
+	 */
+	public static boolean safeTouchSession(UserSession oSession) {
+		double dNow = Utils.nowInMillis();
+		double dSessionAge = dNow - oSession.getLastTouch();
+		if (dSessionAge>60*1000) {
+			SessionRepository oSessionRepository = new SessionRepository();
+			return oSessionRepository.touchSession(oSession);
+		}
+		
+		return true;		
+	}
 
 	/**
 	 * Get The owner of a workspace starting from the workspace id
@@ -475,7 +518,8 @@ public class Wasdi extends ResourceConfig {
 
 		//filter out invalid sessions
 		User oUser = getUserFromSession(sSessionId);
-		if(null == oUser) {
+		
+		if(oUser == null) {
 			WasdiLog.debugLog("Wasdi.runProcess( " + sUserId + ", " + sSessionId + ", " + sOperationType + ", " + sProductName + ", ... ): session not valid, aborting");
 			oResult.setIntValue(401);
 			oResult.setBoolValue(false);
@@ -503,6 +547,7 @@ public class Wasdi extends ResourceConfig {
 					
 			// Is the workspace here?
 			String sWsNodeCode = oWorkspace.getNodeCode();
+			
 			if (!sWsNodeCode.equals(sMyNodeCode)) {
 				
 				// No: forward the call on the owner node
@@ -541,36 +586,28 @@ public class Wasdi extends ResourceConfig {
 			else {
 				// The Workspace is here. Just add the Parameter and the ProcessWorkspace to the database 
 				
-				//create a WASDI session here
-				
-				//maybe store original keycloak session id in WASDI DB, to keep more params, e.g., the user
-				UserSession oSession = new UserSession();
-				oSession.setUserId(sUserId);
-
-				Boolean bNew = false;
-				//store the keycloak access token instead, so we can retrieve the user and perform a further check
-				// NO!!! LIBS does not have the ability to refresh the token!!
-				if (Utils.isNullOrEmpty(sParentId)) {
-					sSessionId = UUID.randomUUID().toString();
-					bNew = true;
-				}
-				oSession.setSessionId(sSessionId);
-				oSession.setLoginDate(Utils.nowInMillis());
-				oSession.setLastTouch(Utils.nowInMillis());
-				
 				SessionRepository oSessionRepo = new SessionRepository();
-				Boolean bRet = false;
-				if(bNew) {
-					bRet = oSessionRepo.insertSession(oSession);
-				} else {
-					bRet = oSessionRepo.touchSession(oSession);
+				
+				if (Utils.isNullOrEmpty(sParentId)) {
+					
+					//Create a WASDI session here
+					UserSession oSession = new UserSession();
+					oSession.setUserId(sUserId);
+					
+					sSessionId = UUID.randomUUID().toString();
+					oSession.setSessionId(sSessionId);
+					oSession.setLoginDate(Utils.nowInMillis());
+					oSession.setLastTouch(Utils.nowInMillis());
+					
+					if (!oSessionRepo.insertSession(oSession)) {
+						WasdiLog.warnLog("could not insert session " + oSession.getSessionId() + " in DB, try with the old one");						
+					}
+					else {
+						// Assign this new session to the parameter
+						oParameter.setSessionID(sSessionId);
+					}
 				}
-				if (bRet) {
-					oParameter.setSessionID(oSession.getSessionId());
-				} else {
-					throw new IllegalArgumentException("could not insert session " + oSession.getSessionId() + " in DB, aborting");
-				}
-
+				
 				// Insert the parameter in mongo
 				ParametersRepository oParametersRepository = new ParametersRepository();
 				oParametersRepository.insertParameter(oParameter);
@@ -592,7 +629,7 @@ public class Wasdi extends ResourceConfig {
 					//TODO - enforce the presence of a valid subscription and of an active project
 					if (Utils.isNullOrEmpty(oUser.getActiveProjectId())
 							|| Utils.isNullOrEmpty(oUser.getActiveSubscriptionId())) {
-						WasdiLog.debugLog("Wasdi.runProcess: Process Scheduled for Launcher. The user does not have a valid subscription and an active project");
+						WasdiLog.warnLog("Wasdi.runProcess: Process Scheduled for Launcher. The user does not have a valid subscription and an active project");
 					}
 
 					oProcess.setProjectId(oUser.getActiveProjectId());
@@ -603,14 +640,16 @@ public class Wasdi extends ResourceConfig {
 					oProcess.setNodeCode(sWsNodeCode);
 					oRepository.insertProcessWorkspace(oProcess);
 					WasdiLog.debugLog("Wasdi.runProcess: Process Scheduled for Launcher");
-				} catch (Exception oEx) {
-					WasdiLog.debugLog("Wasdi.runProcess: " + oEx);
+				} 
+				catch (Exception oEx) {
+					WasdiLog.errorLog("Wasdi.runProcess: " + oEx);
 					oResult.setBoolValue(false);
 					oResult.setIntValue(500);
 					return oResult;
 				}				
 			}
-		} catch (Exception oE) {
+		} 
+		catch (Exception oE) {
 			WasdiLog.errorLog("Wasdi.runProcess: " + oE);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
@@ -802,8 +841,15 @@ public class Wasdi extends ResourceConfig {
 			
 			// If we do not have the list, take the list of shared nodes. This works for free and standard users
 			// This is also a fallback option for Professional users: what if also the professional does not has any node?
-			if (aoNodes == null) {
-				aoNodes = oNodeRepository.getSharedActiveNodesList();
+			if (aoNodes == null || UserApplicationRole.isAdmin(oUser.getUserId())) {
+				
+				if (aoNodes==null) {
+					aoNodes = oNodeRepository.getSharedActiveNodesList();	
+				}
+				else {
+					aoNodes.addAll(oNodeRepository.getSharedActiveNodesList());
+				}
+				
 				
 				// By config we can decide to use also the main node as computing node, or not
 				if (WasdiConfig.Current.loadBalancer.includeMainClusterAsNode) {
@@ -983,10 +1029,43 @@ public class Wasdi extends ResourceConfig {
 				NodeScoreByProcessWorkspaceViewModel oViewModel = new NodeScoreByProcessWorkspaceViewModel();
 				oViewModel.setNodeCode(sDefaultNode);
 				aoOrderedNodeList.add(oViewModel);
-			}			
+			}
+			else {
+				
+				try {
+					// Review the list to "downgrade" low performance nodes
+					ArrayList<NodeScoreByProcessWorkspaceViewModel> aoLowPerformanceNodes = new ArrayList<>();
+					
+					// For all the candidates
+					for (NodeScoreByProcessWorkspaceViewModel oNodeCandiate : aoOrderedNodeList) {
+						
+						// Read also the absolute RAM available
+						Long lGb = oNodeCandiate.getMemoryAbsoluteAvailable()/1073741824L;
+						
+						// If it is less of the "performance required" value
+						if (lGb.intValue() < WasdiConfig.Current.loadBalancer.minTotalMemoryGBytes) {
+							// Set it as low performance
+							aoLowPerformanceNodes.add(oNodeCandiate);
+						}
+					}
+					
+					// Remove the low performance nodes from the ordered list
+					for (NodeScoreByProcessWorkspaceViewModel oNode : aoLowPerformanceNodes) {
+						aoOrderedNodeList.remove(oNode);
+					}
+					
+					// Ad re-add so they will go at the bottom of the options
+					for (NodeScoreByProcessWorkspaceViewModel oNode : aoLowPerformanceNodes) {
+						aoOrderedNodeList.add(oNode);
+					}					
+				}
+				catch (Exception oInnerEx) {
+					WasdiLog.errorLog("Wasdi.getNodesSortedByScore: exception removing low performance nodes ", oInnerEx);
+				}
+			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("Wasdi.getNodesSortedByScore: exception " + oEx.toString());
+			WasdiLog.errorLog("Wasdi.getNodesSortedByScore: exception " + oEx.toString());
 		}
 		
 		return aoOrderedNodeList;

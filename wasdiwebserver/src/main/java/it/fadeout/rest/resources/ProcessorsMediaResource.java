@@ -28,6 +28,7 @@ import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CommentRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ReviewRepository;
+import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
@@ -574,6 +575,8 @@ public class ProcessorsMediaResource {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
+		UserRepository oUserRepository = new UserRepository();
+		
 		// Get all the processors
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
@@ -617,6 +620,18 @@ public class ProcessorsMediaResource {
 				PublisherFilterViewModel oPublisherFilter = new PublisherFilterViewModel();
 				oPublisherFilter.setPublisher(oProcessor.getUserId());
 				oPublisherFilter.setAppCount(1);
+				
+				User oAppPublisher = oUserRepository.getUser(oProcessor.getUserId());
+				if (oAppPublisher != null) {
+					oPublisherFilter.setNickName(oAppPublisher.getPublicNickName());
+					if (Utils.isNullOrEmpty(oPublisherFilter.getNickName())) {
+						oPublisherFilter.setNickName(oAppPublisher.getName());
+					}
+				}
+				else {
+					oPublisherFilter.setNickName(oProcessor.getUserId());
+				}
+				
 				aoPublishers.add(oPublisherFilter);
 			}
 		}

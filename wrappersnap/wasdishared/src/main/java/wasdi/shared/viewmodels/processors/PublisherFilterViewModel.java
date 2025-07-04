@@ -12,6 +12,7 @@ package wasdi.shared.viewmodels.processors;
  */
 public class PublisherFilterViewModel {
 	private String publisher;
+	private String nickName;
 	private int appCount;
 	
 	public String getPublisher() {
@@ -25,5 +26,11 @@ public class PublisherFilterViewModel {
 	}
 	public void setAppCount(int appCount) {
 		this.appCount = appCount;
+	}
+	public String getNickName() {
+		return nickName;
+	}
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
 	}
 }

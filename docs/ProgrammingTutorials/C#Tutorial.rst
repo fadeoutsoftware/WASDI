@@ -33,15 +33,7 @@ Open the Wasdi web-application in a browser by typing https://www.wasdi.net/.
 
 |
 
-On the main page, the marketplace is shown (Space Market).
-
-.. image:: ../_static/c#_tutorial_images/02_marketplace_page.PNG
-   :scale: 36%
-   :align: center
-   :alt: the Marketplace page
-
-|
-
+On the main page, the marketplace is shown.
 Go to the Workspaces page by pressing the **Workspaces** button.
 
 .. image:: ../_static/c#_tutorial_images/03_workspaces_button.PNG
@@ -60,7 +52,7 @@ Create a new workspace by pressing the **New Workspace** button.
 
 |
 
-On the pop-up window, specify the name of the new workspace and press **OK**. For this tutorial, I will choose **TutorialWorkspace**.
+On the pop-up window, specify the name of the new workspace and press **Create workspace**. For this tutorial, I will choose **TutorialWorkspace**.
 
 .. note::
 	Although it is not mandatory, it is strongly recommended to use the indicated name. This would allow the code to be copy/pasted without adjustments.

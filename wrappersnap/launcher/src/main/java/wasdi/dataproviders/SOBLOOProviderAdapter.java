@@ -39,7 +39,6 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 
 	public SOBLOOProviderAdapter() {
 		super();
-		m_sDataProviderCode = "SOBLOO";
 	}
 
 	@Override
@@ -79,7 +78,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	
 	
 	@Override
-	public String getFileName(String sComplexUrl) throws Exception {
+	public String getFileName(String sComplexUrl, String sDownloadPath) throws Exception {
 		Preconditions.checkNotNull(sComplexUrl);
 		Preconditions.checkArgument(!sComplexUrl.isEmpty());
 		
@@ -365,7 +364,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		
 		if (sPlatformType.equals(Platforms.SENTINEL1) || sPlatformType.equals(Platforms.SENTINEL2) 
 				|| sPlatformType.equals(Platforms.SENTINEL3)) {
-			Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName);
+			Date oImageDate = MissionUtils.getDateFromSatelliteImageFileName(sFileName, sPlatformType);
 			
 			if (oImageDate!=null) {
 				Date oNow = new Date();

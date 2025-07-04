@@ -116,7 +116,7 @@
         <dependency>
             <groupId>fadeout.software.wasdi</groupId>
             <artifactId>jwasdilib</artifactId>
-            <version>0.7.4</version>
+            <version>0.7.5</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
         <dependency>

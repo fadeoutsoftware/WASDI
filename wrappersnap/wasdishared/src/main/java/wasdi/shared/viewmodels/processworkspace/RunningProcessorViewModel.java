@@ -17,6 +17,8 @@ public class RunningProcessorViewModel {
 	private String processingIdentifier;
 	private String status;
 	private String jsonEncodedResult;
+	private String message;
+	
 	public String getProcessorId() {
 		return processorId;
 	}
@@ -46,6 +48,12 @@ public class RunningProcessorViewModel {
 	}
 	public void setJsonEncodedResult(String jsonEncodedResult) {
 		this.jsonEncodedResult = jsonEncodedResult;
+	}
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
 	}
 	
 	

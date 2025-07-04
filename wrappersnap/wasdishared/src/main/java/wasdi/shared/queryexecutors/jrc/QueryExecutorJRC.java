@@ -36,10 +36,8 @@ public class QueryExecutorJRC extends QueryExecutor {
 
 	
 	public QueryExecutorJRC() {
-		m_sProvider = "JRC";
 		m_oQueryTranslator = new QueryTranslatorJRC();
 		m_oResponseTranslator = new ResponseTranslatorJRC();
-		m_asSupportedPlatforms.add(Platforms.JRC_GHSL);
 	}
 	
 	@Override
@@ -221,11 +219,11 @@ public class QueryExecutorJRC extends QueryExecutor {
 	}
 	
 	@Override
-    public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+    public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 
         if (Utils.isNullOrEmpty(sOriginalUrl)) {
             WasdiLog.warnLog("QueryExecutorJRC.getUriFromProductName: sOriginalUrl is null, try to recover with the base implementation");
-            return super.getUriFromProductName(sProduct, sProtocol, sOriginalUrl);
+            return super.getUriFromProductName(sProduct, sProtocol, sOriginalUrl, Platforms.JRC_GHSL);
         }
         else {
             String [] asParts = sOriginalUrl.split(";");

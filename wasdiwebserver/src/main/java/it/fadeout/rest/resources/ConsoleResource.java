@@ -389,7 +389,7 @@ public class ConsoleResource {
 			if (oNotebook == null) {
 				
 				// No: so for sure is not ready
-				WasdiLog.warnLog("ConsoleResource.isNotebookReady: notebook not active, return false");
+				WasdiLog.debugLog("ConsoleResource.isNotebookReady: notebook not active, return false");
 				
 				PrimitiveResult oResult = new PrimitiveResult();
 				oResult.setBoolValue(false);
@@ -409,14 +409,14 @@ public class ConsoleResource {
 				oResult.setBoolValue(true);
 			} else {
 				// No way
-				WasdiLog.debugLog("ConsoleResource.isNotebookReady: JupyterNotebook changed, not ready");
+				WasdiLog.infoLog("ConsoleResource.isNotebookReady: JupyterNotebook changed, not ready");
 				oResult.setBoolValue(false);				
 			}	
 			
 			return Response.ok(oResult).build();
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ConsoleResource.isNotebookReady: JupyterNotebook started");
+			WasdiLog.errorLog("ConsoleResource.isNotebookReady: exception ", oEx);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 		

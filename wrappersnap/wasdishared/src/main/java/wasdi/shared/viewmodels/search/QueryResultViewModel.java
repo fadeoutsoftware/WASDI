@@ -78,6 +78,10 @@ public class QueryResultViewModel {
 	 * If this is accessible in a Volume, here we have the path in the volume
 	 */
 	protected String volumePath="";
+	/**
+	 * Unique code of the platform/mission of this entry 
+	 */
+	protected String platform="";
 	
 	
 	@Override
@@ -172,5 +176,13 @@ public class QueryResultViewModel {
 
 	public void setVolumePath(String volumePath) {
 		this.volumePath = volumePath;
+	}
+
+	public String getPlatform() {
+		return platform;
+	}
+
+	public void setPlatform(String platform) {
+		this.platform = platform;
 	}	
 }

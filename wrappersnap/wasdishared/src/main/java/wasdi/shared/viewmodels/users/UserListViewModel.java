@@ -12,6 +12,7 @@ public class UserListViewModel {
 	private String lastLogin;
 	private String name;
 	private String surname;
+	private String publicNickName;
 	
 	public String getUserId() {
 		return userId;
@@ -48,6 +49,12 @@ public class UserListViewModel {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getPublicNickName() {
+		return publicNickName;
+	}
+	public void setPublicNickName(String publicNickName) {
+		this.publicNickName = publicNickName;
 	}
 	
 }

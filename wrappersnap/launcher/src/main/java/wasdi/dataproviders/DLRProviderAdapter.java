@@ -12,7 +12,6 @@ import wasdi.shared.utils.log.WasdiLog;
 public class DLRProviderAdapter extends ProviderAdapter {
 
 	public DLRProviderAdapter() {
-		m_sDataProviderCode = "DLR";
 	}
 
 	@Override
@@ -96,7 +95,7 @@ public class DLRProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public String getFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		String sResult = null;
 		
 		if (Utils.isNullOrEmpty(sFileURL)) {

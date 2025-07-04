@@ -53,7 +53,8 @@
         "confidentialClient": "{{ aoWasdiConfiguration['keycloak']['confidentialClient'] }}",
         "client": "{{ aoWasdiConfiguration['keycloak']['client'] }}",
         "clientSecret": "{{ aoWasdiConfiguration['keycloak']['clientSecret'] }}",
-        "realm": "{{ aoWasdiConfiguration['keycloak']['realm'] }}"
+        "realm": "{{ aoWasdiConfiguration['keycloak']['realm'] }}",
+        "sessionExpireHours": 24
     },
     "metrics": {
         "api": {
@@ -110,6 +111,15 @@
 {% endif %}
         },
         "waitingTime": {{ aoWasdiConfiguration['metrics']['waitingTime'] }}
+    },
+    "storageUsageControl": {
+        "storageSizeFreeSubscription": 20000000000,
+        "deletionDelayFromWarning": 10,
+        "isDeletionInTestMode": true,
+        "warningEmailConfig": {
+            "title": "Storage exceeded in WASDI",
+            "message":"Dear <user>\n, your storage space in WASDI is <storage_size>, which exceeds the maximum limit of <storage_limit> allowed by your subscription. Please, proceed to free up some storage space, otherwise some of your workspaces will be automatically deleted in <warning_delay> days.\n\n Kind regards,\n the WASDI team"
+        }
     },
     "ogcProcessesApi": {
         "baseAddress": "{{ aoWasdiConfiguration['ogcProcessesApi']['baseAddress'] }}",
@@ -402,7 +412,8 @@
     "loadBalancer": {
         "includeMainClusterAsNode": {{ aoWasdiConfiguration['loadBalancer']['includeMainClusterAsNode'] | lower }},
         "diskOccupiedSpaceMaxPercentage": {{ aoWasdiConfiguration['loadBalancer']['diskOccupiedSpaceMaxPercentage'] }},
-        "metricsMaxAgeSeconds": {{ aoWasdiConfiguration['loadBalancer']['metricsMaxAgeSeconds'] }}
+        "metricsMaxAgeSeconds": {{ aoWasdiConfiguration['loadBalancer']['metricsMaxAgeSeconds'] }},
+        "minTotalMemoryGBytes": 30
     },
     "catalogues": [
 {% for sCurrentCatalogue in aoWasdiConfiguration['catalogues'] | default({}) | sort %}
@@ -420,11 +431,35 @@
 {% endfor %}
 
     ],
+    "skins": [
+{% for sCurrentSkin in aoWasdiConfiguration['skins'] | sort %}
+        {
+            "name": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['name'] }}",
+            "logoImage": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['logoImage'] }}",
+            "logoText": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['logoText'] }}",
+            "helpLink": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['helpLink'] }}",
+            "supportLink": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['supportLink'] }}",
+            "brandMainColor": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['brandMainColor'] }}",
+            "brandSecondaryColor": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['brandSecondaryColor'] }}",
+            "defaultCategories": [
+            {% for sCurrentDefaultCategories in aoWasdiConfiguration['skins'][sCurrentSkin]['defaultCategories'] %}
+                "{{ sCurrentDefaultCategories }}"{% if not loop.last %},
+            {% endif %}
+            {% endfor %}
+            ]
+
+        }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+    ],
     "dataProviders": [
 {% for sCurrentDataProvider in aoWasdiConfiguration['dataProviders'] | sort %}
         {
             "name": "{{ sCurrentDataProvider }}",
             "description": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['description'] }}",
+            "queryExecutorClasspath": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['queryExecutorClasspath'] }}",
+            "providerAdapterClasspath": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['providerAdapterClasspath'] }}",
+            "pythonScript": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['pythonScript'] }}",
             "link": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['link'] }}",
             "searchListPageSize": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['searchListPageSize'] }}",
             "defaultProtocol": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['defaultProtocol'] }}",
@@ -589,6 +624,7 @@
         ],
 {% endif %}
         "removeDockersAfterShellExec": {{ aoWasdiConfiguration['dockers']['removeDockersAfterShellExec'] | lower }},
+        "removeParameterFilesForPythonsShellExec": true,
 {% if aoWasdiConfiguration['dockers']['shellExecCommands'] | length == 0 %}
         "shellExecCommands": {}
 {% else %}

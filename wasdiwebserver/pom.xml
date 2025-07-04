@@ -35,7 +35,7 @@
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionMavenCompilerPlugin>3.11.0</sVersionMavenCompilerPlugin>
         <sVersionMavenWarPlugin>3.4.0</sVersionMavenWarPlugin>
-        <sVersionOrbit>1.0.1</sVersionOrbit>
+        <sVersionOrbit>1.0.2</sVersionOrbit>
         <sVersionJersey2>2.45</sVersionJersey2>
         <sVersionServletApi>2.5</sVersionServletApi>
         <sVersionStripeJava>22.0.0</sVersionStripeJava>

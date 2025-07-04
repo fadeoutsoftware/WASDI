@@ -16,11 +16,14 @@ public class AppDetailViewModel {
 	private String processorDescription;
 	private String imgLink;
 	private String publisher;
+	private String publisherNickName;
 	private Float score;
 	private String friendlyName;
 	private String link;
 	private String email;
 	private Float ondemandPrice;
+	private Float squareKilometerPrice = 0f;
+	private String areaParameterName;
 	private Float subscriptionPrice;
 	private Double updateDate;
 	private Double publishDate;
@@ -105,6 +108,18 @@ public class AppDetailViewModel {
 	}
 	public void setOndemandPrice(Float ondemandPrice) {
 		this.ondemandPrice = ondemandPrice;
+	}
+	public Float getSquareKilometerPrice() {
+		return squareKilometerPrice;
+	}
+	public void setSquareKilometerPrice(Float squareKilometerPrice) {
+		this.squareKilometerPrice = squareKilometerPrice;
+	}
+	public String getAreaParameterName() {
+		return areaParameterName;
+	}
+	public void setAreaParameterName(String areaParameterName) {
+		this.areaParameterName = areaParameterName;
 	}
 	public Float getSubscriptionPrice() {
 		return subscriptionPrice;
@@ -201,6 +216,12 @@ public class AppDetailViewModel {
 	}
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
+	}
+	public String getPublisherNickName() {
+		return publisherNickName;
+	}
+	public void setPublisherNickName(String publisherNickName) {
+		this.publisherNickName = publisherNickName;
 	}
 	
 }

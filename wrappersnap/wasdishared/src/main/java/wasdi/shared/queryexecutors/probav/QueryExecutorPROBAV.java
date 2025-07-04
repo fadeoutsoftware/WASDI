@@ -31,7 +31,6 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 
 	public QueryExecutorPROBAV(){
-		m_sProvider = "PROBAV";
 		m_bUseBasicAuthInHttpQuery = false;
 		m_oQueryTranslator = new QueryTranslatorProbaV();
 		

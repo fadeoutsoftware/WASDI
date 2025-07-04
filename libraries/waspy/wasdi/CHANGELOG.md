@@ -3,6 +3,39 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+
+## [0.8.7.6] - 2025-05-06
+### Added
+- addFileToWasdi: added bForceUpdate flag to force the lib overwrite a file if exists
+
+## [0.8.7.6] - 2025-04-10
+### Fixed
+- fileExistsOnWasdi: better log of the 404: is not an error in this case
+
+## [0.8.7.5] - 2025-04-09
+### Added
+- executeAndWaitProcessor: synch execution of a processor
+- log of all API errors
+### Fixed
+- executeProcessor: log the retry
+- executeProcessor: log error message from server if the app cannot be started
+- executeWorkflow: added 3 retry
+- multiSubset: added 3 retry
+
+## [0.8.7.4] - 2025-03-04
+### Added
+- addFileToWasdi: log if the file does not exists
+- crendentials.json: is now possible to store only user and password in a Json in the <user home>/.wasdi folder.
+- executeProcessor: log the error message if the app is not started
+
+## [0.8.7.3] - 2025-02-18
+### Added
+- setProductStyle: set the default style of a product
+
+## [0.8.7.2] - 2025-02-03
+### Fixed
+- Import and Preprocess: avoid multiple graphs
+
 ## [0.8.7.1] - 2024-12-12
 ### Fixed
 - Import and Preprocess to support the "DONE" returned by asynch file import

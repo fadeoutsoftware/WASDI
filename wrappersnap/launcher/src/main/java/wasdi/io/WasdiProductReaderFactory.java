@@ -107,6 +107,11 @@ public class WasdiProductReaderFactory {
 			return new ModisProductReader(oFile);
 		}
 		
+		if (oFile.getName().toLowerCase().endsWith(".h5")) {
+			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating HDF File Reader for " + oFile.getName());
+			return new HDFProductReader(oFile);
+		}
+		
 		if (oFile.getName().toUpperCase().startsWith(ResponseTranslatorJRC.s_sFileNamePrefix) && oFile.getName().endsWith(".zip")) {
 			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating GHSL Tiles File Reader for " + oFile.getName());
 			return new GHSLTilesProductReader(oFile);

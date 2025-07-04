@@ -156,7 +156,7 @@ public class WasdiLib {
 	/**
 	 * Path of the Parameters file
 	 */
-	private String m_sParametersFilePath = "";
+	private String m_sParametersFilePath = "./parameters.txt";
 
 	/*
 	 * Default data provider to be used for search and import operations 
@@ -539,6 +539,9 @@ public class WasdiLib {
 	 * @return True if the system is initialized, False if there is any error
 	 */
 	public boolean init(String sConfigFilePath) {
+
+		if ( sConfigFilePath == null) sConfigFilePath = "";
+
 		log("WasdiLib.init( " + sConfigFilePath + " )");
 		try {
 
@@ -547,49 +550,47 @@ public class WasdiLib {
 					File oConfigFile = new File(sConfigFilePath);
 					if (oConfigFile.exists()) {
 						ConfigReader.setConfigFilePath(sConfigFilePath);
+						log("Config File Path " + sConfigFilePath);
+
+						m_sUser = ConfigReader.getPropValue("USER", "");
+						m_sPassword = ConfigReader.getPropValue("PASSWORD", "");
+						m_sBasePath = ConfigReader.getPropValue("BASEPATH", "");
+						m_sBaseUrl = ConfigReader.getPropValue("BASEURL", "https://www.wasdi.net/wasdiwebserver/rest");
+						setBaseUrl(m_sBaseUrl);
+						m_sSessionId = ConfigReader.getPropValue("SESSIONID","");
+						m_sActiveWorkspace = ConfigReader.getPropValue("WORKSPACEID","");
+						m_sMyProcId = ConfigReader.getPropValue("MYPROCID","");
+						m_sParametersFilePath = ConfigReader.getPropValue("PARAMETERSFILEPATH","./parameters.txt");
+						String sVerbose = ConfigReader.getPropValue("VERBOSE","");
+						if (sVerbose.equals("1") || sVerbose.toUpperCase().equals("TRUE")) {
+							m_bVerbose = true;
+						}
+			
+						String sDownloadActive = ConfigReader.getPropValue("DOWNLOADACTIVE", "1");
+			
+						if (sDownloadActive.equals("0") || sDownloadActive.toUpperCase().equals("FALSE")) {
+							m_bDownloadActive = false;
+						}
+			
+						String sUploadactive = ConfigReader.getPropValue("UPLOADACTIVE", "1");
+			
+						if (sUploadactive.equals("0") || sUploadactive.toUpperCase().equals("FALSE")) {
+							setUploadActive(false);
+						}
+			
+						String sIsOnServer = ConfigReader.getPropValue("ISONSERVER", "0");
+			
+						if (sIsOnServer.equals("1") || sIsOnServer.toUpperCase().equals("TRUE")) {
+							m_bIsOnServer = true;
+							// On Server Force Download to false
+							m_bDownloadActive = false;
+							m_bVerbose = true;
+						} else {
+							m_bIsOnServer = false;
+						}
+			
 					}
 				}
-			}
-
-			log("Config File Path " + sConfigFilePath);
-
-			m_sUser = ConfigReader.getPropValue("USER", "");
-			m_sPassword = ConfigReader.getPropValue("PASSWORD", "");
-			m_sBasePath = ConfigReader.getPropValue("BASEPATH", "");
-			m_sBaseUrl = ConfigReader.getPropValue("BASEURL", "https://www.wasdi.net/wasdiwebserver/rest");
-			setBaseUrl(m_sBaseUrl);
-			m_sSessionId = ConfigReader.getPropValue("SESSIONID","");
-			m_sActiveWorkspace = ConfigReader.getPropValue("WORKSPACEID","");
-			m_sMyProcId = ConfigReader.getPropValue("MYPROCID","");
-			m_sParametersFilePath = ConfigReader.getPropValue("PARAMETERSFILEPATH","./parameters.txt");
-			String sVerbose = ConfigReader.getPropValue("VERBOSE","");
-			if (sVerbose.equals("1") || sVerbose.toUpperCase().equals("TRUE")) {
-				m_bVerbose = true;
-			}
-
-			log("SessionId from config " + m_sSessionId);
-
-			String sDownloadActive = ConfigReader.getPropValue("DOWNLOADACTIVE", "1");
-
-			if (sDownloadActive.equals("0") || sDownloadActive.toUpperCase().equals("FALSE")) {
-				m_bDownloadActive = false;
-			}
-
-			String sUploadactive = ConfigReader.getPropValue("UPLOADACTIVE", "1");
-
-			if (sUploadactive.equals("0") || sUploadactive.toUpperCase().equals("FALSE")) {
-				setUploadActive(false);
-			}
-
-			String sIsOnServer = ConfigReader.getPropValue("ISONSERVER", "0");
-
-			if (sIsOnServer.equals("1") || sIsOnServer.toUpperCase().equals("TRUE")) {
-				m_bIsOnServer = true;
-				// On Server Force Download to false
-				m_bDownloadActive = false;
-				m_bVerbose = true;
-			} else {
-				m_bIsOnServer = false;
 			}
 
 			if (m_sBasePath.equals("")) {

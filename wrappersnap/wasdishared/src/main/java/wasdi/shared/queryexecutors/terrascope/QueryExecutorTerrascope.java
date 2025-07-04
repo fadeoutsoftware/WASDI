@@ -45,19 +45,16 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 	private static final Object s_oTempFolderLock = new Object();
 
 	public QueryExecutorTerrascope() {
-		m_sProvider="TERRASCOPE";
 		this.m_oQueryTranslator = new QueryTranslatorTerrascope();
 		this.m_oResponseTranslator = new ResponseTranslatorTerrascope();
 
 		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
-//		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
-//		m_asSupportedPlatforms.add(Platforms.PROBAV);
 		m_asSupportedPlatforms.add(Platforms.DEM);
 		m_asSupportedPlatforms.add(Platforms.WORLD_COVER);
 		m_asSupportedPlatforms.add(Platforms.FCOVER);
 		
 		
-		s_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sProvider);
+		s_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig("TERRASCOPE");
 		WasdiLog.debugLog("QueryExecutorTerrascope: got data provider config");
 		
 		m_sParserConfigPath = s_oDataProviderConfig.parserConfig;
@@ -70,12 +67,13 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 			m_sPythonScript = oAppConf.getString("pythonScript");
 			WasdiLog.debugLog("QueryExecutorTerrascope: python script path " + m_sPythonScript);
 			
-			m_sExchangeFolder = WasdiConfig.Current.paths.wasdiTempFolder; // oAppConf.getString("exchangeFolder");
+			m_sExchangeFolder = WasdiConfig.Current.paths.wasdiTempFolder; 
 			WasdiLog.debugLog("QueryExecutorTerrascope: exchange folder: " + m_sExchangeFolder);
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("QueryExecutorTerrascope: exception reading config files ", oEx);
 		}
+
 	}
 	
 	/**
@@ -83,7 +81,7 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 	 * For Terrascope, we need just the original link..
 	 */
 	@Override
-	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
 		if (sProduct.toUpperCase().startsWith("COPERNICUS_DSM_COG_")
 				|| sProduct.toUpperCase().startsWith("ESA_WORLDCOVER")
 				|| sProduct.startsWith("c_gls_FCOVER300")) {
