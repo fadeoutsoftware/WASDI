@@ -601,6 +601,20 @@
 			]
 		},
 		{
+			"name": "FCOVER",
+			"indexname": "platformname",
+			"indexvalue": "FCOVER",
+			"filters": [
+				{
+					"indexname": "producttype",
+					"indexlabel": "collection",
+					"indexvalues": "clms_global_fcover_300m_v1_10daily_netcdf",
+					"regex": ".*",
+					"indexvalue": "clms_global_fcover_300m_v1_10daily_netcdf"
+				}
+			]
+		},
+		{
 			"name": "THEMATICS",
 			"indexname": "platformname",
 			"indexvalue": "StaticFiles",
@@ -1365,15 +1379,15 @@
 			"indexvalue": "ReturnNatFIM",
 			"ispublic": false,
 			"userid": "return@fadeout.it",
-			"filters":[
+			"filters": [
 				{
-                    "indexname": "producttype",
-                    "indexlabel": "Product Type",
-                    "indexvalues": "aree_bagnate|protected_areas|attivita_ecomiche|beni_culturali|edifici_strategici|ferrovie|reti_elettriche|sezioni_censimento|sorgenti_inquinanti|stazioni|strade",
-                    "indexvalue": "aree_bagnate"
-                }				
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "aree_bagnate|protected_areas|attivita_ecomiche|beni_culturali|edifici_strategici|ferrovie|reti_elettriche|sezioni_censimento|sorgenti_inquinanti|stazioni|strade",
+					"indexvalue": "aree_bagnate"
+				}
 			]
-		}		
+		}
 	],
 	"orbitsearch": {
 		"sensortypes": [
