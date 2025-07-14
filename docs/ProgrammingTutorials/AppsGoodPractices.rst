@@ -154,13 +154,13 @@ The `readme.md` file is the user manual for your processor. It should clearly de
 
 We recommend the following standard format for your `readme.md` files:
 
-**Overview**
+**Overview** - 
 A concise, one or two-sentence summary of the processor's main function.
 
-**Key Features**
+**Key Features** - 
 A bulleted list highlighting the most important capabilities of your application (e.g., "Automated Time-Series Generation", "Dual Flood Detection Algorithms", "Geospatial Cropping & Statistics").
 
-**Output Maps**
+**Output Maps** - 
 This section describes the files created by the processor. Include the following for each output:
 
   * Filename Convention: Explain how output files are named.
@@ -169,12 +169,12 @@ This section describes the files created by the processor. Include the following
   * Data Type: Specify the raster data type (e.g., Float32, UInt8).
   * Payload: Mention any important information returned in the final job payload.
 
-**Parameters**
+**Parameters** - 
 List all user-configurable parameters, grouped into logical sections like "Basic", "Advanced", etc. For each parameter, provide:
 
   * `PARAMETER_NAME` (default is value): A brief description of what the parameter does.
 
-**JSON Sample**
+**JSON Sample** - 
 Include a complete JSON example showing a typical configuration for running the processor. 
 For example: 
 
