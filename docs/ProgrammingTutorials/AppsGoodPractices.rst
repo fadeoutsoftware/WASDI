@@ -178,10 +178,8 @@ List all user-configurable parameters, grouped into logical sections like "Basic
 Include a complete JSON example showing a typical configuration for running the processor. For example: 
 
 .. code-block:: json
-    ```json
     {
      "SUFFIX": "_flood.tiff",
      "PERMANENT_WATER_VALUE": 2,
      "DELETE_CONVERTED_FILE": true,
     }
-    ```
