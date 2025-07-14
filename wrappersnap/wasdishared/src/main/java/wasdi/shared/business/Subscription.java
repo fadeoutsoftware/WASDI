@@ -1,7 +1,10 @@
 package wasdi.shared.business;
 
 import wasdi.shared.business.users.UserType;
+import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
 
 
@@ -151,6 +154,42 @@ public class Subscription {
 
 	public void setBuySuccess(boolean buySuccess) {
 		this.buySuccess = buySuccess;
+	}
+
+	
+	public static SubscriptionListViewModel convertSubscriptionToViewModel(Subscription oSubscription, String sCurrentUserId, String sOrganizationName, String sReason) {
+		try {
+			SubscriptionListViewModel oSubscriptionListViewModel = new SubscriptionListViewModel();
+			oSubscriptionListViewModel.setSubscriptionId(oSubscription.getSubscriptionId());
+			oSubscriptionListViewModel.setName(oSubscription.getName());
+			
+			if (oSubscription.getType()!=null) {
+				oSubscriptionListViewModel.setTypeId(oSubscription.getType());
+				oSubscriptionListViewModel.setTypeName(SubscriptionType.get(oSubscription.getType()).getTypeName());				
+			}
+			else {
+				oSubscriptionListViewModel.setTypeId(SubscriptionType.Free.getTypeId());
+				oSubscriptionListViewModel.setTypeName(SubscriptionType.Free.getTypeName());
+			}
+			oSubscriptionListViewModel.setOrganizationName(sOrganizationName);
+			oSubscriptionListViewModel.setReason(sReason);
+			oSubscriptionListViewModel.setStartDate(TimeEpochUtils.fromEpochToDateString(oSubscription.getStartDate()));
+			oSubscriptionListViewModel.setEndDate(TimeEpochUtils.fromEpochToDateString(oSubscription.getEndDate()));		
+			oSubscriptionListViewModel.setBuySuccess(oSubscription.isBuySuccess());
+			oSubscriptionListViewModel.setOwnerUserId(oSubscription.getUserId());
+
+			return oSubscriptionListViewModel;			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("Subscription.convert exception: ", oEx);
+			if (oSubscription!=null) {
+				String sSubId = oSubscription.getSubscriptionId();
+				if (Utils.isNullOrEmpty(sSubId)) sSubId = "Subscritption Id == NULL";
+				
+				WasdiLog.errorLog("Subscription.convert Subscription Id: " + sSubId);
+			}
+			return null;
+		}
 	}
 
 }
