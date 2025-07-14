@@ -24,77 +24,6 @@ networks:
           gateway: "{{ sWasdiDockerNetworkGateway }}"
 
 services:
-{% if bWasdiClientEnabled == True %}
-  {{ sWasdiClientServiceName }}:
-    depends_on:
-{% if bWasdiGeoserverEnabled == True %}
-      {{ sWasdiGeoserverServiceName }}:
-{% if sEnvironmentName == "test" %}
-        condition: service_healthy
-{% else %}
-        condition: service_started
-{% endif %}
-{% endif %}
-{% if bWasdiKeycloakEnabled == True %}
-      {{ sWasdiKeycloakServiceName }}:
-{% if sEnvironmentName == "test" %}
-        condition: service_healthy
-{% else %}
-        condition: service_started
-{% endif %}
-{% endif %}
-{% if bWasdiRabbitMqEnabled == True %}
-      {{ sWasdiRabbitMqServiceName }}:
-{% if sEnvironmentName == "test" %}
-        condition: service_healthy
-{% else %}
-        condition: service_started
-{% endif %}
-{% endif %}
-{% if bWasdiTomcatWasdiWebServerEnabled == True %}
-      {{ sWasdiTomcatWasdiWebServerServiceName }}:
-{% if sEnvironmentName == "test" %}
-        condition: service_healthy
-{% else %}
-        condition: service_started
-{% endif %}
-{% endif %}
-      {{ sWasdiTraefikServiceName }}:
-{% if sEnvironmentName == "test" %}
-        condition: service_healthy
-{% else %}
-        condition: service_started
-{% endif %}
-{% if ( aoWasdiClientEnvironmentVariable | default([]) | length ) > 0 %}
-    environment:
-{% for aoWasdiClientCurrentEnvironmentVariable in aoWasdiClientEnvironmentVariable %}
-      - {{ aoWasdiClientCurrentEnvironmentVariable['key'] }}={{ aoWasdiClientCurrentEnvironmentVariable['value'] }}
-{% endfor %}
-{% endif %}
-    image: "{{ sWasdiClientServiceName }}:latest"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.entrypoints={{ sWasdiTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.rule=Host(`{{ aoRiseConfiguration['baseUrl']['apiEntryPoint'] }}`) && PathPrefix(`/`)"
-      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
-      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.service=s_{{ sWasdiClientServiceName }}"
-{% if bWasdiSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.tls=true"
-{% endif %}
-      - "traefik.http.services.s_{{ sWasdiClientServiceName }}.loadbalancer.server.port={{ sWasdiClientInternalPort }}"
-{% if ( aWasdiClientPorts | length ) > 0 %}
-    ports:
-{% for sWasdiClientCurrentPort in aWasdiClientPorts %}
-      - "{{ sWasdiClientCurrentPort | regex_replace('^:', '') }}"
-{% endfor %}
-{% endif %}
-    pull_policy: "never"
-    restart: "always"
-    ulimits:
-      nofile:
-        soft: {{ sWasdiClientUlimitNofile }}
-        hard: {{ sWasdiClientUlimitNofile }}
-{% endif %}
 
 {% if bWasdiClientV2Enabled == True %}
   {{ sWasdiClientV2ServiceName }}:
@@ -167,8 +96,6 @@ services:
         soft: {{ sWasdiClientV2UlimitNofile }}
         hard: {{ sWasdiClientV2UlimitNofile }}
 {% endif %}
-
-
 
 {% if bRiseClientEnabled == True %}
   {{ sRiseClientServiceName }}:
@@ -1388,3 +1315,39 @@ services:
       - {{ sWasdiConfigurationRootDirectoryPath }}:{{ sWasdiConfigurationRootDirectoryPath }}:ro
       - {{ sWasdiDataPartitionRootDirectoryPath }}:{{ sWasdiDataPartitionRootDirectoryPath }}:ro
 {% endif %}
+
+
+{% if bPrintServerEnabled == True %}
+  wasdi-print-server:
+    depends_on:
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
+    image: "print-server:latest"
+    environment:
+      - NODE_ENV=production
+      - PORT={{ iPrintServerPort }}
+    labels:
+      - "traefik.enable=true" 
+      - "traefik.http.routers.r_wasdi-print-server.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_wasdi-print-server.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`/print`)"
+      - "traefik.http.routers.r_wasdi-print-server.middlewares=mw_wasdi-secure-denyFrame@file,mw_wasdi-print-server-stripprefix"
+      - "traefik.http.routers.r_wasdi-print-server.service=s_wasdi-print-server"
+{% if bWasdiSslEnabled == True %}      
+      - "traefik.http.routers.r_wasdi-print-server.tls=true"
+{% endif %}      
+      - "traefik.http.services.s_wasdi-print-server.loadbalancer.server.port={{ iPrintServerPort }}"
+      - "traefik.http.middlewares.mw_wasdi-print-server-stripprefix.stripprefix.prefixes=/print"
+      - "traefik.http.middlewares.mw_wasdi-print-server-stripprefix.stripprefix.forceslash=true"
+    pull_policy: "never"
+    restart: "always"
+    ulimits:
+      nofile:
+        soft: 524288
+        hard: 524288
+{% endif %}
+
+
