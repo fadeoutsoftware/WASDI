@@ -62,7 +62,7 @@ Your application should always validate that mandatory parameters have been prov
         #Case 2
         sEventDate = wasdi.getParameter('EVENTDATE')
     
-        if sEventDate == "" or sEventDate == None:
+        if sEventDate is None or sEventDate == "":
             sEventDate = datetime.today() # Here sEventDate is assigned the current date
 
 
