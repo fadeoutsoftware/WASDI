@@ -39,7 +39,7 @@ To handle this, include a boolean `DELETE` parameter that defaults to true.
 3.  Check for Mandatory Parameters
 ----------------------------
 
-Your application should always validate that mandatory parameters have been provided. If a required parameter is missing, the app should log a clear message and exit gracefully. Exiting with a `DONE` status is generally preferred in this case, as it clearly indicates to the user that it is not due to an issue with the application, but rather with the inputs.
+Your application should always validate that mandatory parameters have been provided. If a required parameter is missing, the app should log a clear message and exit gracefully. Exiting with a `DONE` status is generally preferred in this case, as it clearly indicates to the user that it is not due to an issue with the application, but rather a problem with the inputs.
 
 .. code-block:: python
 
@@ -48,6 +48,23 @@ Your application should always validate that mandatory parameters have been prov
         wasdi.wasdiLog("ERROR: BBOX parameter is mandatory.")
         wasdi.updateStatus("DONE", "BBOX parameter not provided.") 
         return
+
+.. note::
+   Make sure to give default values to the parameters whenever possible, so as to auto-recover.
+
+    .. code-block:: python
+    
+        from datetime import datetime
+    
+        # Case 1
+        iFloodValue = wasdi.getParameter('FLOOD_VALUE', 1) # Here the default value of FLOOD_VALUE is 1
+    
+        #Case 2
+        sEventDate = wasdi.getParameter('EVENTDATE')
+    
+        if sEventDate == "" or sEventDate == None:
+            sEventDate = datetime.today() # Here sEventDate is assigned the current date
+
 
 
 4.  Allow Optional Output Filenames
