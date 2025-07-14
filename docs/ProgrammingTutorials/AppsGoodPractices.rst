@@ -175,21 +175,14 @@ List all user-configurable parameters, grouped into logical sections like "Basic
   * `PARAMETER_NAME` (default is value): A brief description of what the parameter does.
 
 **JSON Sample**
-Include a complete JSON example showing a typical configuration for running the processor. For example: 
+Include a complete JSON example showing a typical configuration for running the processor. 
+For example: 
 
-```json
-    {
-     "SUFFIX": "_flood.tiff",
-     "PERMANENT_WATER_VALUE": 2,
-     "DELETE_CONVERTED_FILE": true,
-    }
-```
 
 .. code-block:: json
 
    {
-      "USER": "yourusername@goes.here",
-      "PASSWORD": "your secret password goes here",
-      "WORKSPACEID": "71805896-654b-468c-8fc5-5d2ad6ba61f3",
-      "PARAMETERSFILEPATH": "./params.json"
+     "SUFFIX": "_flood.tiff",
+     "PERMANENT_WATER_VALUE": 2,
+     "DELETE_CONVERTED_FILE": true,
    }
