@@ -70,7 +70,7 @@ Your application should always validate that mandatory parameters have been prov
 4.  Allow Optional Output Filenames
 ----------------------------
 
-Giving users control over output filenames is a powerful feature. Your application should accept an optional parameter for the output name. If the parameter is not provided, the app should generate a sensible default name, often composed of other inputs like a base name and a date.
+Giving users control over output filenames is a powerful feature. Your application should accept an optional parameter for the output name. If the parameter is not provided, the app should generate a sensible default name, often composed of other inputs like a base name, a date and a suffix.
 
 .. code-block:: python
 
@@ -79,7 +79,8 @@ Giving users control over output filenames is a powerful feature. Your applicati
         # Create a default name
         sDate = wasdi.getParameter('DATE')
         sBaseName = wasdi.getParameter('BASENAME')
-        sOutputName = f"{sBaseName}_output_{sDate}.tif"
+        sSuffix = wasdi.getParameter('SUFFIX')
+        sOutputName = f"{sBaseName}_{sDate}_{sSuffix}.tif"
 
 
 5.  Avoid Duplication and Add a 'Force Rerun' Flag
@@ -117,10 +118,11 @@ During processing, your app might create temporary files on the local disk of th
     
     try:
         # ... logic that creates a temporary local file ...
-        sTempFilePath = "/tmp/my_temp_file.txt"
+        sTempFilePath = wasdi.getPath(sTempFileName)
     finally:
         # Ensure cleanup happens even if errors occur
         if os.path.exists(sTempFilePath):
+            wasdi.deleteProduct(sTempFilePath)
             os.remove(sTempFilePath)
 
 
@@ -129,17 +131,17 @@ During processing, your app might create temporary files on the local disk of th
 
 The payload is a JSON object that stores the results of a processor run. It is extremely useful for traceability and for chaining applications together. It is good practice to structure the payload with distinct `inputs` and `outputs` sections.
 
-  * The `inputs` section should contain a dictionary of the parameters used for the run.
+  * The `inputs` section should contain a dictionary of the input parameters used for the run.
   * The `outputs` section should contain the names of the final files produced by the application.
 
 .. code-block:: python
 
     # At the end of the run() method
     aoPayload = {}
-    aoPayload["inputs"] = wasdi.getParametersDict()
-    aoPayload["outputs"] = {
-        "flood_map": "final_flood_map.tif",
-        "water_depth": "final_wdm.tif"
+    aoPayload["INPUTS"] = wasdi.getParametersDict()
+    aoPayload["OUTPUTS"] = {
+        "Flood_Map": "Final_Flood_Map.tif",
+        "Water_Depth_Map": "Final_WDM.tif"
     }
     
     wasdi.setPayload(aoPayload)
@@ -168,7 +170,7 @@ This section describes the files created by the processor. Include the following
   * Payload: Mention any important information returned in the final job payload.
 
 **Parameters**
-List all user-configurable parameters, grouped into logical sections like "Required", "Optional", "Advanced", etc. For each parameter, provide:
+List all user-configurable parameters, grouped into logical sections like "Basic", "Advanced", etc. For each parameter, provide:
 
   * `PARAMETER_NAME` (default is value): A brief description of what the parameter does.
 
