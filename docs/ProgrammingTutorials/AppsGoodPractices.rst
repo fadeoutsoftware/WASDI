@@ -76,7 +76,7 @@ To complement this, add a `FORCE_RERUN` flag (defaulting to false) that allows t
 
     bForceRerun = wasdi.getParameter('FORCE_RERUN', False)
     sOutputFile = "final_product.tif"
-    [cite_start]asWorkspaceFiles = wasdi.getProductsByActiveWorkspace() # [cite: 62]
+    asWorkspaceFiles = wasdi.getProductsByActiveWorkspace()
     
     if sOutputFile in asWorkspaceFiles and not bForceRerun:
         wasdi.wasdiLog(f"Output file {sOutputFile} already exists. Skipping.")
@@ -157,12 +157,13 @@ List all user-configurable parameters, grouped into logical sections like "Requi
 
 **JSON Sample**
 Include a complete JSON example showing a typical configuration for running the processor. For example: 
-  
-```json
-{
- "SUFFIX": "_flood.tiff",
- "PERMANENT_WATER_VALUE": 2,
- "DELETE_CONVERTED_FILE": true,
-...
-}
-```
+
+.. code-block:: json
+    ```json
+    {
+     "SUFFIX": "_flood.tiff",
+     "PERMANENT_WATER_VALUE": 2,
+     "DELETE_CONVERTED_FILE": true,
+    ...
+    }
+    ```
