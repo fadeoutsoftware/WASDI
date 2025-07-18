@@ -67,7 +67,7 @@ public class QueryExecutorOData extends QueryExecutorHttpGet {
 				return null;
 			}
 			
-			String sCreodiasQuery = m_oQueryTranslator.getSearchUrl(oQuery);
+			String sQueryForDataProvider = m_oQueryTranslator.getSearchUrl(oQuery);
 			
 			// We add some retry if the query goes wrong
 			int iMaxAttempt = 5;
@@ -77,12 +77,12 @@ public class QueryExecutorOData extends QueryExecutorHttpGet {
 			
 			for (iRetry=0; iRetry<iMaxAttempt; iRetry++) {
 				// Call standard http get API
-				oHttpResponse = HttpUtils.httpGet(sCreodiasQuery, null, null);
+				oHttpResponse = HttpUtils.httpGet(sQueryForDataProvider, null, null);
 							
-				// Check if we have a valid HTTP Response: CREODIAS returns 200 also in case of zero results
+				// Check if we have a valid HTTP Response: we could have 200 also in case of zero results
 				if (oHttpResponse.getResponseCode()< 200 || oHttpResponse.getResponseCode() > 299) {
 					// So these codes are a problem
-					WasdiLog.warnLog("QueryExecutorOData.executeAndRetrieve: Attempt: " + iRetry + " Error when trying to retrieve the results on CreoDias. Response code: " + oHttpResponse.getResponseCode() + " Message: " + oHttpResponse.getResponseBody());
+					WasdiLog.warnLog("QueryExecutorOData.executeAndRetrieve: Attempt: " + iRetry + " Error when trying to retrieve the results on the data provider. Response code: " + oHttpResponse.getResponseCode() + " Message: " + oHttpResponse.getResponseBody());
 					
 					try {
 						// Sleep a little bit
@@ -98,33 +98,33 @@ public class QueryExecutorOData extends QueryExecutorHttpGet {
 				}
 			}
 			
-			String sCreodiasResult = oHttpResponse.getResponseBody();
+			String sResultFromDataProvider = oHttpResponse.getResponseBody();
 			
 			// We need to re-check: we may be here for a good one or because we finished retries
 			if (oHttpResponse.getResponseCode()< 200 || oHttpResponse.getResponseCode() > 299) {
-				WasdiLog.errorLog("QueryExecutorOData.executeAndRetrieve. Final error when trying to retrieve the results on CreoDias. Response code: " + oHttpResponse.getResponseCode() + " Message: " + sCreodiasResult);
+				WasdiLog.errorLog("QueryExecutorOData.executeAndRetrieve. Final error when trying to retrieve the results on the data provider. Response code: " + oHttpResponse.getResponseCode() + " Message: " + sResultFromDataProvider);
 				return null;
 			}
 
-			if (Utils.isNullOrEmpty(sCreodiasResult)) {
-				WasdiLog.debugLog("QueryExecutorOData.executeAndRetrieve. The data provider returned an empty string for query: " + sCreodiasQuery);
+			if (Utils.isNullOrEmpty(sResultFromDataProvider)) {
+				WasdiLog.debugLog("QueryExecutorOData.executeAndRetrieve. The data provider returned an empty string for query: " + sQueryForDataProvider);
 				return null;
 			}
 			
 			// Convert the results
-			List<QueryResultViewModel> aoRes = m_oResponseTranslator.translateBatch(sCreodiasResult, bFullViewModel);
+			List<QueryResultViewModel> aoRes = m_oResponseTranslator.translateBatch(sResultFromDataProvider, bFullViewModel);
 			
 			return aoRes;
 		
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("QueryExecutorOData.executeAndRetrieve. Error when trying to retrieve the Creodias results for query. ", oEx);
+			WasdiLog.errorLog("QueryExecutorOData.executeAndRetrieve. Error when trying to retrieve the results for query. ", oEx);
 			return null;
 		}
 		
 	}
 	
 	/**
-	 * Overrided because it looks that CREODIAS can return the Sentinel1 files also named _COG.
+	 * Overrided because it looks that CREODIAS (and most probably also Copernicus Data Center) can return the Sentinel1 files also named _COG.
 	 * In this case we need to select the correct original one
 	 */
 	@Override
@@ -178,7 +178,7 @@ public class QueryExecutorOData extends QueryExecutorHttpGet {
 			return "";					
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("QueryExecutor.getUriFromProductName: exception " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorOData.getUriFromProductName: exception " + oEx.toString());
 		}
 		
 		return "";

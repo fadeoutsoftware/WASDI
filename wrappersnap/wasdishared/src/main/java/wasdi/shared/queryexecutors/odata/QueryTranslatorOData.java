@@ -81,7 +81,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 	
 	@Override
 	protected String translate(String sQueryFromClient) {
-		Preconditions.checkNotNull(sQueryFromClient, "QueryTranslatorCreoDias2.translate: query is null");
+		Preconditions.checkNotNull(sQueryFromClient, "QueryTranslatorOData.translate: query is null");
 		
 		
 		String sQuery = this.prepareQuery(sQueryFromClient);
@@ -195,7 +195,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 	 * @param sCollectionName the name of a platform
 	 * @return the string that represents the OData filter by platform 
 	 */
-	private String createCollectionNameEqFilter(String sCollectionName) {
+	protected String createCollectionNameEqFilter(String sCollectionName) {
 		List<String> asFilterElements = Arrays.asList("Collection/Name", sODataEQ, "'" + sCollectionName.toUpperCase() + "'");
 		return String.join(" ", asFilterElements); 
 	}
@@ -205,7 +205,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 	 * @param sCollectionName the name of a product
 	 * @return the string that represents the OData filter by product name 
 	 */
-	private String createProductNameEqFilter(String sProductName) {
+	protected String createProductNameEqFilter(String sProductName) {
 		return "contains(Name, '" + sProductName.toUpperCase() + "')"; 
 	}
 	
@@ -215,7 +215,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 	 * @param bStartDate if true, the sDate refers to the beginning of the sensing time. If false, the sDate refers to the end of the sensing time.
 	 * @return the string that represents the OData filter by sensing date
 	 */
-	private String createSensingDateFilter(String sDate, boolean bStartDate) {
+	protected String createSensingDateFilter(String sDate, boolean bStartDate) {
 		String sInclusion = bStartDate ? sODataGE : sODataLE;		// TODO: so far, I consider both intervals as included. 
 		String sContentFilterOption = "ContentDate/Start";
 		List<String> asFilterElements = Arrays.asList(sContentFilterOption, sInclusion, sDate);
@@ -230,7 +230,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 	 * @param sW west
 	 * @return the string that represents the OData filter by footprint
 	 */
-	private String createGeographicalFillter(Double sN, Double sS, Double sE, Double sW) {
+	protected String createGeographicalFillter(Double sN, Double sS, Double sE, Double sW) {
 		List<String> asCoordinates = new LinkedList<>();
 		asCoordinates.add(sW + " " + sS);
 		asCoordinates.add(sE + " " + sS);
@@ -246,7 +246,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 	 * @param sValue the value of the attribute
 	 * @return the string that represent the OData filter by string attribute
 	 */
-	private String createStringAttribute(String sName, String sValue) {
+	protected String createStringAttribute(String sName, String sValue) {
 		return "Attributes/OData.CSC.StringAttribute/any(i0:i0/Name eq '" + sName+ "' and i0/Value eq '" + sValue + "')";
 	}
 	
@@ -257,7 +257,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 	 * @param sValue the value of the attribute
 	 * @return the string that represent the OData filter by integer attribute
 	 */
-	private String createIntegerAttribute(String sName, String sOperator, int sValue) {
+	protected String createIntegerAttribute(String sName, String sOperator, int sValue) {
 		return "Attributes/OData.CSC.IntegerAttribute/any(i0:i0/Name eq '" + sName+ "' and i0/Value " + sOperator +  " " + sValue + ")";
 	}
 	
@@ -267,7 +267,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 	 * @param sValue the value of the attribute
 	 * @return the string that represent the OData filter by double attribute
 	 */
-	private String createDoubleAttribute(String sName, String sOperator, double sValue) {
+	protected String createDoubleAttribute(String sName, String sOperator, double sValue) {
 		return "Attributes/OData.CSC.DoubleAttribute/any(i0:i0/Name eq '" + sName+ "' and i0/Value " + sOperator +  " " + sValue + ")";
 	}
 	
@@ -275,7 +275,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 	 * @param oQueryViewModel the view model representing the WASDI query 
 	 * @return true if the view models has valid information for all the four cardinal points, false otherwise 
 	 */
-	private boolean isBoundingBoxValid(QueryViewModel oQueryViewModel) {
+	protected boolean isBoundingBoxValid(QueryViewModel oQueryViewModel) {
 		return oQueryViewModel.north != null 
 				&& oQueryViewModel.south != null
 				&& oQueryViewModel.west != null
@@ -288,7 +288,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 	 * @param iRelativeOrbit the relative orbit number
 	 * @return true if the relative orbit number is valid, false otherwise
 	 */
-	private boolean isValidRelativeOrbit(String sPlatform, int iRelativeOrbit) {
+	protected boolean isValidRelativeOrbit(String sPlatform, int iRelativeOrbit) {
 		if (Utils.isNullOrEmpty(sPlatform) || iRelativeOrbit <= 0) 
 			return false;
 		
@@ -314,11 +314,11 @@ public class QueryTranslatorOData extends QueryTranslator {
 	 * @param iAbsoluteOrbit the relative orbit number
 	 * @return true if the absolute orbit number is valid, false otherwise
 	 */
-	private boolean isValidAbsoluteOrbit(String sPlatform, int iAbsoluteOrbit) {
+	protected boolean isValidAbsoluteOrbit(String sPlatform, int iAbsoluteOrbit) {
 		if (Utils.isNullOrEmpty(sPlatform) || iAbsoluteOrbit <= 0) 
 			return false;
 		
-		if (sPlatform.equals(Platforms.SENTINEL5P) && iAbsoluteOrbit >= 1 && iAbsoluteOrbit <= 30000)
+		if (sPlatform.equals(Platforms.SENTINEL5P) && iAbsoluteOrbit >= 1 && iAbsoluteOrbit <= 40222)
 			return true;
 		
 		if (sPlatform.equals(Platforms.ENVISAT) && iAbsoluteOrbit >= 6 && iAbsoluteOrbit <= 113) 
@@ -337,7 +337,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 	 * @param sTimeliness the string representing the timeliness in WASDI format
 	 * @return the OData code for timeliness if the platform supports that attribute, null otherwise
 	 */
-	private String getTimelinessCode(String sPlatform, String sTimeliness) {
+	protected String getTimelinessCode(String sPlatform, String sTimeliness) {
 		if (Utils.isNullOrEmpty(sTimeliness))
 			return null;
 		if (sPlatform.equalsIgnoreCase(Platforms.SENTINEL3) || sPlatform.equalsIgnoreCase(Platforms.SENTINEL6)) {
@@ -364,7 +364,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 	 * @param sPlatform the platform's name
 	 * @return the OData code for the product level if the platform supports that attribute, an empty string otherwise
 	 */
-	private String getProductLevelCode(String sProductLevel, String sPlatform) {
+	protected String getProductLevelCode(String sProductLevel, String sPlatform) {
 		if (Utils.isNullOrEmpty(sProductLevel) || Utils.isNullOrEmpty(sPlatform))
 			return "";
 		if (sPlatform.equals(Platforms.SENTINEL3)) {
@@ -392,7 +392,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 	 * @param sId the string representing the platform serial id in WASDI format
 	 * @return the OData code for the platform serial id if the platform has that id, an empty string otherwise
 	 */
-	private String getPlatformSerialIdentifierCode(String sId) {
+	protected String getPlatformSerialIdentifierCode(String sId) {
 		if (Utils.isNullOrEmpty(sId))
 			return "";
 		if (sId.equalsIgnoreCase("S1A_*") || sId.equalsIgnoreCase("S2A_*"))
@@ -407,9 +407,9 @@ public class QueryTranslatorOData extends QueryTranslator {
 	 * @param sQuery the string representing the WASDI query
 	 * @param oViewModel the view model
 	 */
-	private void refineQueryViewModel(String sQuery, QueryViewModel oViewModel) {
+	protected void refineQueryViewModel(String sQuery, QueryViewModel oViewModel) {
 		try {
-			WasdiLog.debugLog("QueryTranslatorCreoDias2.refineQueryViewModel. Try to fill view model with missing information");
+			WasdiLog.debugLog("QueryTranslatorOData.refineQueryViewModel. Try to fill view model with missing information");
 			if (Utils.isNullOrEmpty(oViewModel.polarisation))
 				oViewModel.polarisation = extractValue(sQuery, "polarisationmode");
 			if (Utils.isNullOrEmpty(oViewModel.platformSerialIdentifier))
@@ -422,14 +422,14 @@ public class QueryTranslatorOData extends QueryTranslator {
 					try {
 						oViewModel.relativeOrbit = Integer.parseInt(sRelativeOrbit); 
 					} catch (NumberFormatException oEx) {
-						WasdiLog.debugLog("QueryTranslatorCreoDias2.refineQueryViewModel. Impossible to parse relative orbit. " + oEx.getMessage());
+						WasdiLog.debugLog("QueryTranslatorOData.refineQueryViewModel. Impossible to parse relative orbit. " + oEx.getMessage());
 					}
 				}
 			}
 			findSwathIdentifier(sQuery, oViewModel);			
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("QueryTranslatorCreoDias2.refineQueryViewModel: error ", oEx);
+			WasdiLog.errorLog("QueryTranslatorOData.refineQueryViewModel: error ", oEx);
 		}
 	}
 	
@@ -451,7 +451,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 				oViewModel.timeliness = oMatcher.group(1);
 			}
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("QueryTranslatorCreoDias2.findSwathIdentifier: error while retrieving the swath idenfier from regex.", oEx);
+			WasdiLog.errorLog("QueryTranslatorOData.findSwathIdentifier: error while retrieving the swath idenfier from regex.", oEx);
 		}
 	}
 
@@ -474,7 +474,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 			
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("QueryTranslatorCreoDias2.getSearchUrl: exception generating the page parameter  " + oEx.toString());
+			WasdiLog.debugLog("QueryTranslatorOData.getSearchUrl: exception generating the page parameter  " + oEx.toString());
 		}
 		
 		sUrl += "&" + sODataOrderBy + "ContentDate/Start%20asc&$expand=Attributes"; // TODO: do we get these values from the client or we have a default order?

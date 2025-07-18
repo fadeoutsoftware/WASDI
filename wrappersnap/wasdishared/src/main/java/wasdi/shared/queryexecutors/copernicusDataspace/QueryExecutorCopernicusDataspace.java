@@ -9,6 +9,4 @@ public class QueryExecutorCopernicusDataspace extends QueryExecutorOData {
 		this.m_oResponseTranslator = new ResponseTranslatorCopernicusDataspace();
 	}
 	
-
-	
 }
