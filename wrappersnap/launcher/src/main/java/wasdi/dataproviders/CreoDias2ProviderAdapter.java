@@ -463,7 +463,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			return "";
 		}
 		try {
-			return sFileURL.split(ResponseTranslatorCreoDias2.SLINK_SEPARATOR_CREODIAS2)[ResponseTranslatorCreoDias2.IPOSITIONOF_LINK];
+			return sFileURL.split(ResponseTranslatorCreoDias2.SLINK_SEPARATOR)[ResponseTranslatorCreoDias2.IPOSITIONOF_LINK];
 		} catch (Exception oE) {
 			WasdiLog.errorLog("CREODIASProviderAdapter.getODataDownloadUrl: " + oE);
 		}
@@ -571,7 +571,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		if (isHttpsProtocol(sFileURL)) {
 			WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName: http protocol - Retrieve file at local path: " + sFileURL);
 			try {			
-				String[] asTokens = sFileURL.split(ResponseTranslatorCreoDias2.SLINK_SEPARATOR_CREODIAS2);
+				String[] asTokens = sFileURL.split(ResponseTranslatorCreoDias2.SLINK_SEPARATOR);
 				sResult = asTokens[ResponseTranslatorCreoDias2.IPOSITIONOF_FILENAME];
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("CreoDias2ProviderAdaper.getFileName: exception while trying to retrieve the file name." + oEx.getMessage());

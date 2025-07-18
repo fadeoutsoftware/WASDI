@@ -51,7 +51,7 @@ public class ResponseTranslatorOData extends ResponseTranslator {
 	private static final String SSENSOR_MODE = "sensoroperationalmode";
 	private static final String SSIZE = "size";
 	
-	public static final String SLINK_SEPARATOR_CREODIAS2 = ",";
+	public static final String SLINK_SEPARATOR = ",";
 	public static final String SLINK_PROPERTY_CREODIAS = "link";
 	public static final int IPOSITIONOF_LINK = 0;
 	public static final int IPOSITIONOF_FILENAME = 1;
@@ -228,7 +228,7 @@ public class ResponseTranslatorOData extends ResponseTranslator {
 				WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: the download URL is null or empty. ");
 				sLink = "http://";
 			} 
-			oLink.append(sLink).append(SLINK_SEPARATOR_CREODIAS2); //0: on-line download link
+			oLink.append(sLink).append(SLINK_SEPARATOR); //0: on-line download link
 		
 			String sTitle = oResult.getTitle();  
 			if(Utils.isNullOrEmpty(sTitle)) {
@@ -236,21 +236,21 @@ public class ResponseTranslatorOData extends ResponseTranslator {
 				sTitle = "";
 			}
 			sTitle = sTitle + ".zip";
-			oLink.append(sTitle).append(SLINK_SEPARATOR_CREODIAS2); //1: file title (zip format)
+			oLink.append(sTitle).append(SLINK_SEPARATOR); //1: file title (zip format)
 			
 			
 			String sSizeInBytes = ""; 
 			if(dSizeInBytes > -1) {
 				sSizeInBytes = Double.toString(dSizeInBytes);
 			} 
-			oLink.append(sSizeInBytes).append(SLINK_SEPARATOR_CREODIAS2); //2: size in bytes
+			oLink.append(sSizeInBytes).append(SLINK_SEPARATOR); //2: size in bytes
 
 			
 			String sPathIdentifier = sS3Path;
 			if(Utils.isNullOrEmpty(sPathIdentifier)) {
 				sPathIdentifier = "";
 			} 
-			oLink.append(sPathIdentifier).append(SLINK_SEPARATOR_CREODIAS2); //3: path identifier
+			oLink.append(sPathIdentifier).append(SLINK_SEPARATOR); //3: path identifier
 
 			oResult.getProperties().put(SLINK_PROPERTY_CREODIAS, oLink.toString());
 			oResult.setLink(oLink.toString());
