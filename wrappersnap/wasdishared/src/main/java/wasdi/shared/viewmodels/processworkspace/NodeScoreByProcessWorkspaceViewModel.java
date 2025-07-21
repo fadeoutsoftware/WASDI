@@ -5,19 +5,19 @@ public class NodeScoreByProcessWorkspaceViewModel {
 	private String nodeCode;
 	private Integer numberOfProcesses;
 
-	private Double diskPercentageUsed;
-	private Double diskPercentageAvailable;
+	private Double diskPercentageUsed = 0.0;
+	private Double diskPercentageAvailable = 0.0;
 
-	private Long diskAbsoluteTotal;
-	private Long diskAbsoluteUsed;
-	private Long diskAbsoluteAvailable;
+	private Long diskAbsoluteTotal = 0L;
+	private Long diskAbsoluteUsed = 0L;
+	private Long diskAbsoluteAvailable = 0L;
 
-	private Double memoryPercentageUsed;
-	private Double memoryPercentageAvailable;
+	private Double memoryPercentageUsed = 0.0;
+	private Double memoryPercentageAvailable = 0.0;
 
-	private Long memoryAbsoluteTotal;
-	private Long memoryAbsoluteUsed;
-	private Long memoryAbsoluteAvailable;
+	private Long memoryAbsoluteTotal = 0L;
+	private Long memoryAbsoluteUsed = 0L;
+	private Long memoryAbsoluteAvailable = 0L;
 
 	private String licenses;
 

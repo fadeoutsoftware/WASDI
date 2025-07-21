@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -871,117 +872,133 @@ public class Wasdi extends ResourceConfig {
 				
 				// Read the metrics of the node
 				String sNodeCode = oNode.getNodeCode();
-				MetricsEntryRepository oMetricsEntryRepository = new MetricsEntryRepository();
-				MetricsEntry oMetricsEntry = oMetricsEntryRepository.getLatestMetricsEntryByNode(sNodeCode);
+				
+				
+				if (WasdiConfig.Current.loadBalancer.activateMetrics) {
+					MetricsEntryRepository oMetricsEntryRepository = new MetricsEntryRepository();
+					MetricsEntry oMetricsEntry = oMetricsEntryRepository.getLatestMetricsEntryByNode(sNodeCode);
 
-				if (oMetricsEntry == null) {
-					WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics are null for node " + sNodeCode + ". Skip.");
-					continue;
-				}
+					if (oMetricsEntry == null) {
+						WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics are null for node " + sNodeCode + ". Skip.");
+						continue;
+					}
 
 
-				// Check the metrics entry of the node. If the metrics are too old, the node is skipped.
-				Timestamp oTimestamp = oMetricsEntry.getTimestamp();
+					// Check the metrics entry of the node. If the metrics are too old, the node is skipped.
+					Timestamp oTimestamp = oMetricsEntry.getTimestamp();
 
-				if (oTimestamp == null) {
-					WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics timestamp values are null for node " + sNodeCode + ". Skip.");
-					continue;
-				}
-
-				Double oTimestampInMillis = oTimestamp.getMillis();
-
-				if (oTimestampInMillis == null) {
-					Double oTimestampInSeconds = oTimestamp.getSeconds();
-
-					if (oTimestampInSeconds == null) {
+					if (oTimestamp == null) {
 						WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics timestamp values are null for node " + sNodeCode + ". Skip.");
 						continue;
-					} else {
-						oTimestampInMillis = BigDecimal.valueOf(oTimestampInSeconds).multiply(BigDecimal.valueOf(1000L)).doubleValue();
 					}
+
+					Double oTimestampInMillis = oTimestamp.getMillis();
+
+					if (oTimestampInMillis == null) {
+						Double oTimestampInSeconds = oTimestamp.getSeconds();
+
+						if (oTimestampInSeconds == null) {
+							WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics timestamp values are null for node " + sNodeCode + ". Skip.");
+							continue;
+						} else {
+							oTimestampInMillis = BigDecimal.valueOf(oTimestampInSeconds).multiply(BigDecimal.valueOf(1000L)).doubleValue();
+						}
+					}
+
+					long lMillisPassesSinceTheLastMetricsEntry = BigDecimal.valueOf(Utils.nowInMillis()).subtract(BigDecimal.valueOf(oTimestampInMillis)).longValue();
+					long lMaximumAllowedAgeOfInformation = ((long)WasdiConfig.Current.loadBalancer.metricsMaxAgeSeconds) * 1000L;
+
+					boolean bMetricsEntryTooOld = lMillisPassesSinceTheLastMetricsEntry > lMaximumAllowedAgeOfInformation;
+
+					if (bMetricsEntryTooOld) {
+						WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics too old for node " + sNodeCode + ". Possibly, the node is down. Skip.");
+						continue;
+					}
+
+
+					// Get the list of disks to estimate space
+					List<Disk> aoDisks = oMetricsEntry.getDisks();
+
+					if (aoDisks != null) {
+
+						NodeScoreByProcessWorkspaceViewModel oViewModel = new NodeScoreByProcessWorkspaceViewModel();
+						oViewModel.setNodeCode(sNodeCode);
+
+						String sTimestampAsString = Utils.getFormatDate(oTimestampInMillis);
+						oViewModel.setTimestampAsString(sTimestampAsString);
+
+						List<License> asLicenses = oMetricsEntry.getLicenses();
+						if (asLicenses != null) {
+							String sLicenses = asLicenses.stream()
+									.filter(License::getStatus)
+									.map(License::getName)
+									.sorted()
+									.collect(Collectors.joining(", "));
+
+							oViewModel.setLicenses(sLicenses);
+						}
+
+						Disk oDisk = null;
+						Double oPercentageUsed = null;
+						
+						if (aoDisks.size() <= 0) {
+							oViewModel.setDiskPercentageAvailable(0.0);
+							oViewModel.setDiskPercentageUsed(0.0);
+							oViewModel.setDiskAbsoluteAvailable(0L);
+							oViewModel.setDiskAbsoluteUsed(0L);
+							oViewModel.setDiskAbsoluteTotal(0L);
+						}
+						else {
+							oDisk= aoDisks.get(0);
+							
+							oPercentageUsed = oDisk.getPercentageUsed();
+							oViewModel.setDiskPercentageAvailable(oDisk.getPercentageAvailable());
+							oViewModel.setDiskPercentageUsed(oPercentageUsed);
+							oViewModel.setDiskAbsoluteAvailable(oDisk.getAbsoluteAvailable());
+							oViewModel.setDiskAbsoluteUsed(oDisk.getAbsoluteUsed());
+							oViewModel.setDiskAbsoluteTotal(oDisk.getAbsoluteTotal());						
+						}
+
+
+						// Get the memory info to estimate memory availability
+						Memory oMemory = oMetricsEntry.getMemory();
+
+						if (oMemory == null) {
+							oViewModel.setMemoryPercentageAvailable(0.0);
+							oViewModel.setMemoryPercentageUsed(0.0);
+							oViewModel.setMemoryAbsoluteAvailable(0L);
+							oViewModel.setMemoryAbsoluteUsed(0L);
+							oViewModel.setMemoryAbsoluteTotal(0L);
+						}
+						else {
+							oViewModel.setMemoryPercentageAvailable(oMemory.getPercentageAvailable());
+							oViewModel.setMemoryPercentageUsed(oPercentageUsed);
+							oViewModel.setMemoryAbsoluteAvailable(oMemory.getAbsoluteAvailable());
+							oViewModel.setMemoryAbsoluteUsed(oMemory.getAbsoluteUsed());
+							oViewModel.setMemoryAbsoluteTotal(oMemory.getAbsoluteTotal());						
+						}
+						
+						if (oPercentageUsed != null && oPercentageUsed.doubleValue() <= WasdiConfig.Current.loadBalancer.diskOccupiedSpaceMaxPercentage) {
+							aoOrderedNodeList.add(oViewModel);
+						}
+						else {
+							WasdiLog.debugLog("Wasdi.getNodesSortedByScore: Node " + oNode.getNodeCode() + " excluded because of space problem ( full > " + WasdiConfig.Current.loadBalancer.diskOccupiedSpaceMaxPercentage + "%)");
+							aoExcludedNodeList.add(oViewModel);
+						}
+					}				
 				}
-
-				long lMillisPassesSinceTheLastMetricsEntry = BigDecimal.valueOf(Utils.nowInMillis()).subtract(BigDecimal.valueOf(oTimestampInMillis)).longValue();
-				long lMaximumAllowedAgeOfInformation = ((long)WasdiConfig.Current.loadBalancer.metricsMaxAgeSeconds) * 1000L;
-
-				boolean bMetricsEntryTooOld = lMillisPassesSinceTheLastMetricsEntry > lMaximumAllowedAgeOfInformation;
-
-				if (bMetricsEntryTooOld) {
-					WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics too old for node " + sNodeCode + ". Possibly, the node is down. Skip.");
-					continue;
-				}
-
-
-				// Get the list of disks to estimate space
-				List<Disk> aoDisks = oMetricsEntry.getDisks();
-
-				if (aoDisks != null) {
-
+				else {
+					// Metrics are disabled: just add 
 					NodeScoreByProcessWorkspaceViewModel oViewModel = new NodeScoreByProcessWorkspaceViewModel();
 					oViewModel.setNodeCode(sNodeCode);
-
-					String sTimestampAsString = Utils.getFormatDate(oTimestampInMillis);
+					
+					Date oNow = new Date();
+					String sTimestampAsString = Utils.getFormatDate(oNow);
 					oViewModel.setTimestampAsString(sTimestampAsString);
 
-					List<License> asLicenses = oMetricsEntry.getLicenses();
-					if (asLicenses != null) {
-						String sLicenses = asLicenses.stream()
-								.filter(License::getStatus)
-								.map(License::getName)
-								.sorted()
-								.collect(Collectors.joining(", "));
-
-						oViewModel.setLicenses(sLicenses);
-					}
-
-					Disk oDisk = null;
-					Double oPercentageUsed = null;
-					
-					if (aoDisks.size() <= 0) {
-						oViewModel.setDiskPercentageAvailable(0.0);
-						oViewModel.setDiskPercentageUsed(0.0);
-						oViewModel.setDiskAbsoluteAvailable(0L);
-						oViewModel.setDiskAbsoluteUsed(0L);
-						oViewModel.setDiskAbsoluteTotal(0L);
-					}
-					else {
-						oDisk= aoDisks.get(0);
-						
-						oPercentageUsed = oDisk.getPercentageUsed();
-						oViewModel.setDiskPercentageAvailable(oDisk.getPercentageAvailable());
-						oViewModel.setDiskPercentageUsed(oPercentageUsed);
-						oViewModel.setDiskAbsoluteAvailable(oDisk.getAbsoluteAvailable());
-						oViewModel.setDiskAbsoluteUsed(oDisk.getAbsoluteUsed());
-						oViewModel.setDiskAbsoluteTotal(oDisk.getAbsoluteTotal());						
-					}
-
-
-					// Get the memory info to estimate memory availability
-					Memory oMemory = oMetricsEntry.getMemory();
-
-					if (oMemory == null) {
-						oViewModel.setMemoryPercentageAvailable(0.0);
-						oViewModel.setMemoryPercentageUsed(0.0);
-						oViewModel.setMemoryAbsoluteAvailable(0L);
-						oViewModel.setMemoryAbsoluteUsed(0L);
-						oViewModel.setMemoryAbsoluteTotal(0L);
-					}
-					else {
-						oViewModel.setMemoryPercentageAvailable(oMemory.getPercentageAvailable());
-						oViewModel.setMemoryPercentageUsed(oPercentageUsed);
-						oViewModel.setMemoryAbsoluteAvailable(oMemory.getAbsoluteAvailable());
-						oViewModel.setMemoryAbsoluteUsed(oMemory.getAbsoluteUsed());
-						oViewModel.setMemoryAbsoluteTotal(oMemory.getAbsoluteTotal());						
-					}
-					
-					if (oPercentageUsed != null && oPercentageUsed.doubleValue() <= WasdiConfig.Current.loadBalancer.diskOccupiedSpaceMaxPercentage) {
-						aoOrderedNodeList.add(oViewModel);
-					}
-					else {
-						WasdiLog.debugLog("Wasdi.getNodesSortedByScore: Node " + oNode.getNodeCode() + " excluded because of space problem ( full > " + WasdiConfig.Current.loadBalancer.diskOccupiedSpaceMaxPercentage + "%)");
-						aoExcludedNodeList.add(oViewModel);
-					}
+					aoOrderedNodeList.add(oViewModel);
 				}
+
 			}
 			
 			// Lets verify if we have at least one node, otherwise we relax the first filter
@@ -1033,31 +1050,35 @@ public class Wasdi extends ResourceConfig {
 			else {
 				
 				try {
-					// Review the list to "downgrade" low performance nodes
-					ArrayList<NodeScoreByProcessWorkspaceViewModel> aoLowPerformanceNodes = new ArrayList<>();
 					
-					// For all the candidates
-					for (NodeScoreByProcessWorkspaceViewModel oNodeCandiate : aoOrderedNodeList) {
+					if (WasdiConfig.Current.loadBalancer.activateMetrics) {
+						// Review the list to "downgrade" low performance nodes
+						ArrayList<NodeScoreByProcessWorkspaceViewModel> aoLowPerformanceNodes = new ArrayList<>();
 						
-						// Read also the absolute RAM available
-						Long lGb = oNodeCandiate.getMemoryAbsoluteAvailable()/1073741824L;
+						// For all the candidates
+						for (NodeScoreByProcessWorkspaceViewModel oNodeCandiate : aoOrderedNodeList) {
+							
+							// Read also the absolute RAM available
+							Long lGb = oNodeCandiate.getMemoryAbsoluteAvailable()/1073741824L;
+							
+							// If it is less of the "performance required" value
+							if (lGb.intValue() < WasdiConfig.Current.loadBalancer.minTotalMemoryGBytes) {
+								// Set it as low performance
+								aoLowPerformanceNodes.add(oNodeCandiate);
+							}
+						}
 						
-						// If it is less of the "performance required" value
-						if (lGb.intValue() < WasdiConfig.Current.loadBalancer.minTotalMemoryGBytes) {
-							// Set it as low performance
-							aoLowPerformanceNodes.add(oNodeCandiate);
+						// Remove the low performance nodes from the ordered list
+						for (NodeScoreByProcessWorkspaceViewModel oNode : aoLowPerformanceNodes) {
+							aoOrderedNodeList.remove(oNode);
+						}
+						
+						// Ad re-add so they will go at the bottom of the options
+						for (NodeScoreByProcessWorkspaceViewModel oNode : aoLowPerformanceNodes) {
+							aoOrderedNodeList.add(oNode);
 						}
 					}
 					
-					// Remove the low performance nodes from the ordered list
-					for (NodeScoreByProcessWorkspaceViewModel oNode : aoLowPerformanceNodes) {
-						aoOrderedNodeList.remove(oNode);
-					}
-					
-					// Ad re-add so they will go at the bottom of the options
-					for (NodeScoreByProcessWorkspaceViewModel oNode : aoLowPerformanceNodes) {
-						aoOrderedNodeList.add(oNode);
-					}					
 				}
 				catch (Exception oInnerEx) {
 					WasdiLog.errorLog("Wasdi.getNodesSortedByScore: exception removing low performance nodes ", oInnerEx);
