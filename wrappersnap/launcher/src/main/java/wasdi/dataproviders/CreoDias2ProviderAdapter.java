@@ -320,7 +320,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	private String extractProductIdentifierFromURL(String sFileURL) {
 		Preconditions.checkNotNull(sFileURL, "URL is null");
 		try {
-			String[] asParts = sFileURL.split(ResponseTranslatorCreoDias2.SLINK_SEPARATOR_CREODIAS2);
+			String[] asParts = sFileURL.split(ResponseTranslatorCreoDias2.SLINK_SEPARATOR);
 			String sProductIdentifier = asParts[ResponseTranslatorCreoDias2.IPOSITIONOF_PRODUCTIDENTIFIER];
 			return sProductIdentifier;
 		} catch (Exception oE) {
