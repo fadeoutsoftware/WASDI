@@ -116,13 +116,15 @@ public class CopernicusDataspaceProviderAdapter extends ProviderAdapter {
 		long lLowerWatingTime = 1L;
 		long lUpperWatingTime = 10L;
 		
+		String sDownloadedFilePath = null;
+		
 		while (iAttemptCount < iMaxRetry) {
 			String sAccessToken = getAuthenticationToken(sDownloadUser, sDownloadPassword);
 			
 			if (Utils.isNullOrEmpty(sAccessToken)) {
 				WasdiLog.debugLog("CopernicusDataspaceProviderAdapter.executeDownloadFile. Error retrieving the access token. Impossible to continue.");
 				// TODO: better to return an empty string or null?
-				return "";
+				return sDownloadedFilePath;
 			}
 			
 			WasdiLog.debugLog("CopernicusDataspaceProviderAdapter.executeDownloadFile. Access token correctly received.");
@@ -135,7 +137,7 @@ public class CopernicusDataspaceProviderAdapter extends ProviderAdapter {
 			
 			// TODO: understand if I should also pass the name of the file - I think no. The method already parses the "File-disposition" attribute in the header. Should also work for Creodias2
 			long lStartTime = System.currentTimeMillis();
-			String sDownloadedFilePath = downloadViaHttp(sDownloadUrl, Collections.emptyMap(), sSaveDirOnServer);
+			sDownloadedFilePath = downloadViaHttp(sDownloadUrl, Collections.emptyMap(), sSaveDirOnServer);
 			
 			if(Utils.isNullOrEmpty(sDownloadedFilePath)) {
 				// we will try again
@@ -153,6 +155,8 @@ public class CopernicusDataspaceProviderAdapter extends ProviderAdapter {
 				return sDownloadedFilePath;
 			}
 		}
+		
+		return sDownloadedFilePath;
 
 	}
 	
