@@ -6,7 +6,7 @@ public class ResponseTranslatorCopernicusDataspace extends ResponseTranslatorODa
 
 
 	public ResponseTranslatorCopernicusDataspace() {
-		m_sODataBaseDownloadURL = "https://catalogue.dataspace.copernicus.eu/odata/v1/Assets(";
+		m_sODataBaseDownloadURL = "https://download.dataspace.copernicus.eu/odata/v1/Products(";
 		m_sProvider = "COPERNICUS_DATASPACE";
 	}
 
