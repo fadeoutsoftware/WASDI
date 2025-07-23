@@ -3,8 +3,12 @@ package wasdi.dataproviders;
 import java.net.IDN;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.json.JSONArray;
@@ -22,10 +26,10 @@ public class CopernicusDataspaceProviderAdapter extends ProviderAdapter {
 	
 	private static final String sCOPERNICUS_DATASPACE_BASE_URL = "https://catalogue.dataspace.copernicus.eu/odata/v1/Products?";
 	
-	private static final String sODATA_FILE_URL_START = "https://catalogue.dataspace.copernicus.eu/odata/v1/Products(";
+	private static final String sODATA_FILE_URL_START = "https://download.dataspace.copernicus.eu/odata/v1/Products(";
 	private static final String sODATA_FILE_URL_END = ")/$value";
 	
-	private static final String sAUTHENTICATION_URL = "https://identity.cloudferro.com/auth/realms/wekeo-elasticity/protocol/openid-connect/token";
+	private static final String sAUTHENTICATION_URL = "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token";
 	private static final String sDOWNLOAD_URL_END = "?token=";
 	
 
@@ -85,7 +89,7 @@ public class CopernicusDataspaceProviderAdapter extends ProviderAdapter {
 		lSizeInBytes = Long.parseLong(sFileSize);
 		WasdiLog.debugLog("CopernicusDataspaceProviderAdapter.getDownloadFileSize. File size: " + lSizeInBytes);
 
-		return 0;
+		return lSizeInBytes;
 	}
 	
 	
@@ -122,22 +126,24 @@ public class CopernicusDataspaceProviderAdapter extends ProviderAdapter {
 			String sAccessToken = getAuthenticationToken(sDownloadUser, sDownloadPassword);
 			
 			if (Utils.isNullOrEmpty(sAccessToken)) {
-				WasdiLog.debugLog("CopernicusDataspaceProviderAdapter.executeDownloadFile. Error retrieving the access token. Impossible to continue.");
-				// TODO: better to return an empty string or null?
-				return sDownloadedFilePath;
+				WasdiLog.warnLog("CopernicusDataspaceProviderAdapter.executeDownloadFile. Error retrieving the access token. Impossible to continue.");
+				return null;
 			}
 			
 			WasdiLog.debugLog("CopernicusDataspaceProviderAdapter.executeDownloadFile. Access token correctly received.");
-			String sODataDownloadUrl = getODataDownloadUrl(sFileURL);
-//			String sProductId = getProductIdFromURL(sODataDownloadUrl);
-			// with the auth token, we can send the download request
-			String sDownloadUrl = sODataDownloadUrl + sDOWNLOAD_URL_END + sAccessToken;
 			
+			String sODataDownloadUrl = getODataDownloadUrl(sFileURL);
+			
+			Map<String, String> oHeader = new HashMap<>();
+			oHeader.put("Authorization", "Bearer " + sAccessToken);
+	        oHeader.put("Authorization", "Bearer " + sAccessToken);
+	        oHeader.put("accept", "application/json, text/plain, */*");
+	        oHeader.put("Accept-encoding", "gzip, deflate, br, zstd");
+	        			
 			WasdiLog.debugLog("CopernicusDataspaceProviderAdapter.executeDownloadFile. Access token correctly received. Download url (withouth accesso token): " + sODataDownloadUrl + sDOWNLOAD_URL_END);
 			
-			// TODO: understand if I should also pass the name of the file - I think no. The method already parses the "File-disposition" attribute in the header. Should also work for Creodias2
 			long lStartTime = System.currentTimeMillis();
-			sDownloadedFilePath = downloadViaHttp(sDownloadUrl, Collections.emptyMap(), sSaveDirOnServer);
+			sDownloadedFilePath = downloadViaHttp(sODataDownloadUrl, oHeader, sSaveDirOnServer);
 			
 			if(Utils.isNullOrEmpty(sDownloadedFilePath)) {
 				// we will try again
@@ -161,10 +167,17 @@ public class CopernicusDataspaceProviderAdapter extends ProviderAdapter {
 	}
 	
 	private String getAuthenticationToken(String sUsername, String sPassword) {
-		String sPayload = "client_id=cdse-public&password=" + sPassword + "&username=" + sUsername + "&grant_type=password";
+		Map<Object, Object> data = new HashMap<>();
+        data.put("grant_type", "password");
+        data.put("username", sUsername);
+        data.put("password", sPassword);
+        data.put("client_id", "cdse-public");
+        
+        String sEncodedFormData = getFormURLEncodedString(data);
+        
 		HttpCallResponse oResponse = null;
 		try {
-			oResponse = HttpUtils.httpPost(sAUTHENTICATION_URL, sPayload);
+			oResponse = HttpUtils.httpPost(sAUTHENTICATION_URL, sEncodedFormData);
 			if (oResponse == null ||  oResponse.getResponseCode() < 200 || oResponse.getResponseCode() > 299) {
 				WasdiLog.debugLog("CopernicusDataspaceProviderAdapter.getAuthenticationToken. Error code while trying to retrieve the auth token.");
 				return "";
@@ -184,6 +197,19 @@ public class CopernicusDataspaceProviderAdapter extends ProviderAdapter {
 		
 		return sAccessToken;
 	}
+	
+    private String getFormURLEncodedString(Map<Object, Object> oData) {
+        StringBuilder oResult = new StringBuilder();
+        for (Map.Entry<Object, Object> oEntry : oData.entrySet()) {
+            if (oResult.length() > 0) {
+            	oResult.append("&");
+            }
+            oResult.append(URLEncoder.encode(oEntry.getKey().toString(), StandardCharsets.UTF_8));
+            oResult.append("=");
+            oResult.append(URLEncoder.encode(oEntry.getValue().toString(), StandardCharsets.UTF_8));
+        }
+        return oResult.toString();
+    }
 	
 
 	@Override
