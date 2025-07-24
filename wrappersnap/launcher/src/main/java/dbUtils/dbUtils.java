@@ -2827,7 +2827,10 @@ public class dbUtils {
             }
             
             // add connection to ecostress db
-            MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
+            if (WasdiConfig.Current.mongoEcostress!=null) {
+            	MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);	
+            }
+            
             
             Stream<String> oModisConfigStream = null;
             try {
