@@ -83,136 +83,7 @@ import wasdi.shared.viewmodels.organizations.SubscriptionViewModel;
  */
 @Path("/subscriptions")
 public class SubscriptionResource {
-	
-	/**
-	 * Extract a List of subscriptions for the user
-	 * @param oUser Target User
-	 * @param bValid True to get only valid subscriptions
-	 * @return
-	 */
-	protected List<SubscriptionListViewModel> getUsersSubscriptionsList(User oUser, boolean bValid) {
 		
-		List<SubscriptionListViewModel> aoSubscriptionLVM = new ArrayList<>();
-
-		// Domain Check
-		if (oUser == null) {
-			WasdiLog.warnLog("SubscriptionResource.getUsersSubscriptionsList: invalid session");
-			return aoSubscriptionLVM;
-		}
-
-		try {
-			// 1. subscriptions directly owned by the user
-			// 2. subscriptions belonging to organizations owned by the user
-			// 3. subscriptions belonging to organizations shared with the user
-			// 4. subscriptions shared with the user on individual basis
-
-
-			// Get the list of Subscriptions owned by the user
-			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-			List<Subscription> aoOwnedSubscriptions = oSubscriptionRepository.getSubscriptionsByUser(oUser.getUserId());
-
-			Set<String> asOwnedSubscriptionIds = aoOwnedSubscriptions.stream().map(Subscription::getSubscriptionId).collect(Collectors.toSet());
-			Set<String> asOrganizationIdsOfOwnedSubscriptions = aoOwnedSubscriptions.stream().map(Subscription::getOrganizationId).filter(Objects::nonNull).collect(Collectors.toSet());
-			Map<String, String> aoOrganizationNamesOfOwnedSubscriptions = getOrganizationNamesById(asOrganizationIdsOfOwnedSubscriptions);
-
-			// For each
-			for (Subscription oSubscription : aoOwnedSubscriptions) {
-				
-				if (bValid) {
-					if (!oSubscription.isValid()) continue;
-				}				
-				
-				// Create View Model
-				SubscriptionListViewModel oSubscriptionViewModel = convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), aoOrganizationNamesOfOwnedSubscriptions.get(oSubscription.getOrganizationId()), "owner");
-				
-				if (oSubscriptionViewModel != null) {
-					oSubscriptionViewModel.setOrganizationId(oSubscription.getOrganizationId());
-					oSubscriptionViewModel.setReadOnly(false);
-					aoSubscriptionLVM.add(oSubscriptionViewModel);
-				}
-				else {
-					WasdiLog.warnLog("SubscriptionResource.getUsersSubscriptionsList: Error converting a Owned Subscription, jumping");
-				}
-			}
-			
-			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-			
-			// Get the list of Subscriptions shared by organizations
-			Set<String> asOrganizationIdsOfOwnedByOrSharedWithUser = new OrganizationResource().getIdsOfOrganizationsOwnedByOrSharedWithUser(oUser.getUserId());
-			Map<String, String> aoOrganizationNamesOfOwnedByOrSharedWithUser = getOrganizationNamesById(asOrganizationIdsOfOwnedByOrSharedWithUser);
-			
-			List<Subscription> aoOrganizationalSubscriptions = getSubscriptionsSharedByOrganizations(asOrganizationIdsOfOwnedByOrSharedWithUser);
-			
-			for (Subscription oSubscription : aoOrganizationalSubscriptions) {
-				if (!asOwnedSubscriptionIds.contains(oSubscription.getSubscriptionId())) {
-					
-					boolean bToAdd=true;
-
-					if (bValid) {
-						bToAdd = oSubscription.isValid();
-					}
-					
-					
-					if (bToAdd) {
-						SubscriptionListViewModel oSubscriptionViewModel = convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), aoOrganizationNamesOfOwnedByOrSharedWithUser.get(oSubscription.getOrganizationId()), "shared by " + aoOrganizationNamesOfOwnedByOrSharedWithUser.get(oSubscription.getOrganizationId()));
-						
-						if (oSubscriptionViewModel != null) {
-							
-							oSubscriptionViewModel.setReadOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId()));
-							aoSubscriptionLVM.add(oSubscriptionViewModel);
-						}
-						else {
-							WasdiLog.warnLog("SubscriptionResource.getUsersSubscriptionsList: Error converting an Organization Subscription, jumping");
-						}						
-												
-					}
-				}
-			}
-			
-
-			// Get the list of Subscriptions shared with this user
-			List<Subscription> aoSharedSubscriptions = getSubscriptionsSharedWithUser(oUser.getUserId());
-			List<UserResourcePermission> aoSubscriptionSharings = oUserResourcePermissionRepository.getSubscriptionSharingsByUserId(oUser.getUserId());
-
-			Map<String, String> aoSubscriptionUser = aoSubscriptionSharings.stream().collect(Collectors.toMap(UserResourcePermission::getResourceId, UserResourcePermission::getUserId));
-
-
-			List<String> asOrganizationIdsOfDirectSubscriptionSharings = aoSharedSubscriptions.stream().map(Subscription::getOrganizationId).collect(Collectors.toList());
-
-			Map<String, String> asNamesOfOrganizationsOfDirectSubscriptionSharings = getOrganizationNamesById(asOrganizationIdsOfDirectSubscriptionSharings);
-
-			for (Subscription oSubscription : aoSharedSubscriptions) {
-				
-				boolean bToAdd=true;
-
-				if (bValid) {
-					bToAdd = oSubscription.isValid();
-				}
-				
-				if (bToAdd) {
-					SubscriptionListViewModel oSubscriptionViewModel = convertSubscriptionToViewModel(oSubscription, oUser.getUserId(),
-							asNamesOfOrganizationsOfDirectSubscriptionSharings.get(oSubscription.getOrganizationId()),
-							"shared by " + aoSubscriptionUser.get(oSubscription.getSubscriptionId()));
-	
-					if (oSubscriptionViewModel!=null) {
-						oSubscriptionViewModel.setReadOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId()));
-						aoSubscriptionLVM.add(oSubscriptionViewModel);
-					}
-					else {
-						WasdiLog.warnLog("SubscriptionResource.getUsersSubscriptionsList: Error converting a Shared Subscription, jumping");
-					}						
-				}
-			}
-			
-			return aoSubscriptionLVM;
-		} 
-		catch (Exception oEx) {
-			WasdiLog.errorLog("SubscriptionResource.getUsersSubscriptionsList error: " + oEx);
-			return aoSubscriptionLVM;
-		}		
-	}
-	
-	
 	@GET
 	@Path("/active")
 	@Produces({ "application/xml", "application/json", "text/xml" })
@@ -235,7 +106,8 @@ public class SubscriptionResource {
 
 			WasdiLog.debugLog("SubscriptionResource.getActiveByUser: subscriptions for " + oUser.getUserId());
 
-			List<SubscriptionListViewModel> aoSubscriptions = getUsersSubscriptionsList(oUser, true);
+			//List<SubscriptionListViewModel> aoSubscriptions = getUsersSubscriptionsList(oUser, true);
+			List<SubscriptionListViewModel> aoSubscriptions = PermissionsUtils.getUsersSubscriptionsList(oUser, true);
 			
 			if (aoSubscriptions == null) {
 				return Response.status(Status.NOT_FOUND).build();
@@ -294,7 +166,7 @@ public class SubscriptionResource {
 
 			WasdiLog.debugLog("SubscriptionResource.getListByUser: subscriptions for " + oUser.getUserId() + " Valid = " + bValid);
 
-			aoSubscriptionLVM = getUsersSubscriptionsList(oUser, bValid);
+			aoSubscriptionLVM = PermissionsUtils.getUsersSubscriptionsList(oUser, bValid);
 			
 			return Response.ok(aoSubscriptionLVM).build();
 		} 
@@ -391,7 +263,7 @@ public class SubscriptionResource {
 
 			String sOrganizationName = null;
 
-			if (oSubscription.getOrganizationId() != null) {
+			if (!Utils.isNullOrEmpty(oSubscription.getOrganizationId())) {
 				OrganizationRepository oOrganizationRepository = new OrganizationRepository();
 				Organization oOrganization = oOrganizationRepository.getById(oSubscription.getOrganizationId());
 				sOrganizationName = oOrganization.getName();
@@ -444,12 +316,12 @@ public class SubscriptionResource {
 					oSubscription.setBuySuccess(false);		
 				}
 			}
+				
+			if (Utils.isNullOrEmpty(sUserId)) sUserId = oUser.getUserId();
 			
 			UserRepository oUserRepo = new UserRepository();
 			User oTargetUser = oUserRepo.getUser(sUserId);
-			
-			if (Utils.isNullOrEmpty(sUserId)) sUserId = oUser.getUserId();
-			
+
 			while (oSubscriptionRepository.getByNameAndUserId(sName, sUserId) != null) {
 				sName = Utils.cloneName(sName);
 				WasdiLog.debugLog("SubscriptionResource.createSubscription: a subscription with the same name already exists. Changing the name to " + sName);
@@ -993,12 +865,12 @@ public class SubscriptionResource {
 	@GET
 	@Path("/stripe/confirmation/{CHECKOUT_SESSION_ID}")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public String confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
+	public Response confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
 		WasdiLog.debugLog("SubscriptionResource.confirmation( sCheckoutSessionId: " + sCheckoutSessionId + ")");
 
 		if (Utils.isNullOrEmpty(sCheckoutSessionId)) {
 			WasdiLog.warnLog("SubscriptionResource.confirmation: Stripe returned a null CHECKOUT_SESSION_ID, aborting");
-			return null;
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
 		try {
@@ -1009,7 +881,7 @@ public class SubscriptionResource {
 
 			if (oStripePaymentDetail == null || Utils.isNullOrEmpty(sClientReferenceId)) {
 				WasdiLog.warnLog("SubscriptionResource.confirmation: Stripe returned an invalid result, aborting");
-				return null;
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
 
 			String sSubscriptionId = null;
@@ -1064,19 +936,12 @@ public class SubscriptionResource {
 			}		
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("SubscriptionResource.confirmation error " + oEx);
+			WasdiLog.errorLog("SubscriptionResource.confirmation error ", oEx);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
-
-
-		String sHtmlContent = "<script type=\"text/javascript\">\r\n" + 
-				"setTimeout(\r\n" + 
-				"function ( )\r\n" + 
-				"{\r\n" + 
-				"  self.close();\r\n" + 
-				"}, 1000 );\r\n" + 
-				"</script>";
 		
-		return sHtmlContent;
+		return Response.ok().build();
+
 	}
 
 	
@@ -1178,7 +1043,7 @@ public class SubscriptionResource {
 				Subscription oSubscription = aoSubscriptions.get(iSubscriptions);
 				
 				// Create View Model
-				SubscriptionListViewModel oSubscriptionViewModel = convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), aoOrganizationNames.get(oSubscription.getOrganizationId()), "owner");
+				SubscriptionListViewModel oSubscriptionViewModel = Subscription.convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), aoOrganizationNames.get(oSubscription.getOrganizationId()), "owner");
 				
 				if (oSubscriptionViewModel != null) {
 					oSubscriptionViewModel.setOrganizationId(oSubscription.getOrganizationId());
@@ -1250,41 +1115,7 @@ public class SubscriptionResource {
 		return oSubscriptionViewModel;
 	}
 
-	/**
-	 * Convert a Subscription entity to a view model
-	 * @param oSubscription
-	 * @param sCurrentUserId
-	 * @param sOrganizationName
-	 * @param sReason
-	 * @return
-	 */
-	private static SubscriptionListViewModel convertSubscriptionToViewModel(Subscription oSubscription, String sCurrentUserId, String sOrganizationName, String sReason) {
-		try {
-			SubscriptionListViewModel oSubscriptionListViewModel = new SubscriptionListViewModel();
-			oSubscriptionListViewModel.setSubscriptionId(oSubscription.getSubscriptionId());
-			oSubscriptionListViewModel.setName(oSubscription.getName());
-			oSubscriptionListViewModel.setTypeId(oSubscription.getType());
-			oSubscriptionListViewModel.setTypeName(SubscriptionType.get(oSubscription.getType()).getTypeName());
-			oSubscriptionListViewModel.setOrganizationName(sOrganizationName);
-			oSubscriptionListViewModel.setReason(sReason);
-			oSubscriptionListViewModel.setStartDate(TimeEpochUtils.fromEpochToDateString(oSubscription.getStartDate()));
-			oSubscriptionListViewModel.setEndDate(TimeEpochUtils.fromEpochToDateString(oSubscription.getEndDate()));		
-			oSubscriptionListViewModel.setBuySuccess(oSubscription.isBuySuccess());
-			oSubscriptionListViewModel.setOwnerUserId(oSubscription.getUserId());
 
-			return oSubscriptionListViewModel;			
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("SubscriptionResource.convert exception: ", oEx);
-			if (oSubscription!=null) {
-				String sSubId = oSubscription.getSubscriptionId();
-				if (Utils.isNullOrEmpty(sSubId)) sSubId = "Subscritption Id == NULL";
-				
-				WasdiLog.errorLog("SubscriptionResource.convert Subscription Id: " + sSubId);
-			}
-			return null;
-		}
-	}
 
 	/**
 	 * Converts a Subscription View Model to  an entity
@@ -1326,8 +1157,7 @@ public class SubscriptionResource {
 		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
 		List<Organization> aoOrganizations = oOrganizationRepository.getOrganizations(asOrganizationIds);
 
-		return aoOrganizations.stream()
-				.collect(Collectors.toMap(Organization::getOrganizationId, Organization::getName));
+		return aoOrganizations.stream().collect(Collectors.toMap(Organization::getOrganizationId, Organization::getName));
 	}
 
 	private Set<String> getIdsOfSubscriptionsOwnedByUser(String sUserId) {
@@ -1374,6 +1204,137 @@ public class SubscriptionResource {
 	private static SubscriptionTypeViewModel convert(SubscriptionType oSubscriptionType) {
 		return new SubscriptionTypeViewModel(oSubscriptionType.name(), oSubscriptionType.getTypeName(), oSubscriptionType.getTypeDescription());
 	}
+	
+	
+
+// 2025-07-14: Moved to PermissionUtils: kept here some time 
+//	/**
+//	 * Extract a List of subscriptions for the user
+//	 * @param oUser Target User
+//	 * @param bValid True to get only valid subscriptions
+//	 * @return
+//	 */
+//	protected List<SubscriptionListViewModel> getUsersSubscriptionsList(User oUser, boolean bValid) {
+//		
+//		List<SubscriptionListViewModel> aoSubscriptionLVM = new ArrayList<>();
+//
+//		// Domain Check
+//		if (oUser == null) {
+//			WasdiLog.warnLog("SubscriptionResource.getUsersSubscriptionsList: invalid session");
+//			return aoSubscriptionLVM;
+//		}
+//
+//		try {
+//			// 1. subscriptions directly owned by the user
+//			// 2. subscriptions belonging to organizations owned by the user
+//			// 3. subscriptions belonging to organizations shared with the user
+//			// 4. subscriptions shared with the user on individual basis
+//
+//
+//			// Get the list of Subscriptions owned by the user
+//			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+//			List<Subscription> aoOwnedSubscriptions = oSubscriptionRepository.getSubscriptionsByUser(oUser.getUserId());
+//
+//			Set<String> asOwnedSubscriptionIds = aoOwnedSubscriptions.stream().map(Subscription::getSubscriptionId).collect(Collectors.toSet());
+//			Set<String> asOrganizationIdsOfOwnedSubscriptions = aoOwnedSubscriptions.stream().map(Subscription::getOrganizationId).filter(Objects::nonNull).collect(Collectors.toSet());
+//			Map<String, String> aoOrganizationNamesOfOwnedSubscriptions = getOrganizationNamesById(asOrganizationIdsOfOwnedSubscriptions);
+//
+//			// For each
+//			for (Subscription oSubscription : aoOwnedSubscriptions) {
+//				
+//				if (bValid) {
+//					if (!oSubscription.isValid()) continue;
+//				}				
+//				
+//				// Create View Model
+//				SubscriptionListViewModel oSubscriptionViewModel = Subscription.convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), aoOrganizationNamesOfOwnedSubscriptions.get(oSubscription.getOrganizationId()), "owner");
+//				
+//				if (oSubscriptionViewModel != null) {
+//					oSubscriptionViewModel.setOrganizationId(oSubscription.getOrganizationId());
+//					oSubscriptionViewModel.setReadOnly(false);
+//					aoSubscriptionLVM.add(oSubscriptionViewModel);
+//				}
+//				else {
+//					WasdiLog.warnLog("SubscriptionResource.getUsersSubscriptionsList: Error converting a Owned Subscription, jumping");
+//				}
+//			}
+//			
+//			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+//			
+//			// Get the list of Subscriptions shared by organizations
+//			Set<String> asOrganizationIdsOfOwnedByOrSharedWithUser = new OrganizationResource().getIdsOfOrganizationsOwnedByOrSharedWithUser(oUser.getUserId());
+//			Map<String, String> aoOrganizationNamesOfOwnedByOrSharedWithUser = getOrganizationNamesById(asOrganizationIdsOfOwnedByOrSharedWithUser);
+//			
+//			List<Subscription> aoOrganizationalSubscriptions = getSubscriptionsSharedByOrganizations(asOrganizationIdsOfOwnedByOrSharedWithUser);
+//			
+//			for (Subscription oSubscription : aoOrganizationalSubscriptions) {
+//				if (!asOwnedSubscriptionIds.contains(oSubscription.getSubscriptionId())) {
+//					
+//					boolean bToAdd=true;
+//
+//					if (bValid) {
+//						bToAdd = oSubscription.isValid();
+//					}
+//					
+//					
+//					if (bToAdd) {
+//						SubscriptionListViewModel oSubscriptionViewModel = Subscription.convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), aoOrganizationNamesOfOwnedByOrSharedWithUser.get(oSubscription.getOrganizationId()), "shared by " + aoOrganizationNamesOfOwnedByOrSharedWithUser.get(oSubscription.getOrganizationId()));
+//						
+//						if (oSubscriptionViewModel != null) {
+//							
+//							oSubscriptionViewModel.setReadOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId()));
+//							aoSubscriptionLVM.add(oSubscriptionViewModel);
+//						}
+//						else {
+//							WasdiLog.warnLog("SubscriptionResource.getUsersSubscriptionsList: Error converting an Organization Subscription, jumping");
+//						}
+//					}
+//				}
+//			}
+//			
+//
+//			// Get the list of Subscriptions shared with this user
+//			List<Subscription> aoSharedSubscriptions = getSubscriptionsSharedWithUser(oUser.getUserId());
+//			List<UserResourcePermission> aoSubscriptionSharings = oUserResourcePermissionRepository.getSubscriptionSharingsByUserId(oUser.getUserId());
+//
+//			Map<String, String> aoSubscriptionUser = aoSubscriptionSharings.stream().collect(Collectors.toMap(UserResourcePermission::getResourceId, UserResourcePermission::getUserId));
+//
+//
+//			List<String> asOrganizationIdsOfDirectSubscriptionSharings = aoSharedSubscriptions.stream().map(Subscription::getOrganizationId).collect(Collectors.toList());
+//
+//			Map<String, String> asNamesOfOrganizationsOfDirectSubscriptionSharings = getOrganizationNamesById(asOrganizationIdsOfDirectSubscriptionSharings);
+//
+//			for (Subscription oSubscription : aoSharedSubscriptions) {
+//				
+//				boolean bToAdd=true;
+//
+//				if (bValid) {
+//					bToAdd = oSubscription.isValid();
+//				}
+//				
+//				if (bToAdd) {
+//					SubscriptionListViewModel oSubscriptionViewModel = Subscription.convertSubscriptionToViewModel(oSubscription, oUser.getUserId(),
+//							asNamesOfOrganizationsOfDirectSubscriptionSharings.get(oSubscription.getOrganizationId()),
+//							"shared by " + aoSubscriptionUser.get(oSubscription.getSubscriptionId()));
+//	
+//					if (oSubscriptionViewModel!=null) {
+//						oSubscriptionViewModel.setReadOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId()));
+//						aoSubscriptionLVM.add(oSubscriptionViewModel);
+//					}
+//					else {
+//						WasdiLog.warnLog("SubscriptionResource.getUsersSubscriptionsList: Error converting a Shared Subscription, jumping");
+//					}						
+//				}
+//			}
+//			
+//			return aoSubscriptionLVM;
+//		} 
+//		catch (Exception oEx) {
+//			WasdiLog.errorLog("SubscriptionResource.getUsersSubscriptionsList error: " + oEx);
+//			return aoSubscriptionLVM;
+//		}		
+//	}
+//		
 
 
 }

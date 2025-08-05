@@ -156,7 +156,7 @@ public abstract class QueryExecutor {
 		try {
 			String sClientQuery = "";
 			
-			sClientQuery = sProduct + " AND ( beginPosition:[1893-09-07T00:00:00.000Z TO 2893-09-07T00:00:00.000Z] AND endPosition:[1893-09-07T23:59:59.999Z TO 2893-09-07T23:59:59.999Z] ) ";
+			sClientQuery = sProduct + " AND ( beginPosition:[1960-09-07T00:00:00.000Z TO 2193-09-07T23:59:59.999Z] AND endPosition:[1960-09-07T00:00:00.000Z TO 2193-09-07T23:59:59.999Z] ) ";
 			
 			if (Utils.isNullOrEmpty(sPlatform)) {
 				sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(sProduct);	
@@ -301,4 +301,7 @@ public abstract class QueryExecutor {
 		m_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);		
 	}
 
+	public void closeConnections() {
+		
+	}
 }

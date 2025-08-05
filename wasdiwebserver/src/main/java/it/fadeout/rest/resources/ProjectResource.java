@@ -115,12 +115,17 @@ public class ProjectResource {
 			}			
 			
 			boolean bFoundActiveProject = false;
+			Map<String, String> asProjectIdSubscriptionId = new HashMap<>();
 
 			// For each
 			for (Project oProject : aoProjects) {
 				// Create View Model
 				ProjectListViewModel oProjectViewModel = convert(oProject, aoSubscriptionNames.get(oProject.getSubscriptionId()), oUser.getActiveProjectId());
 				aoProjectList.add(oProjectViewModel);
+				
+				if (asProjectIdSubscriptionId.containsKey(oProject.getProjectId())==false) {
+					asProjectIdSubscriptionId.put(oProject.getProjectId(), oProject.getSubscriptionId());
+				}
 				
 				if (oProjectViewModel.isActiveProject()) {
 					bFoundActiveProject = true;
@@ -130,6 +135,14 @@ public class ProjectResource {
 			// Force a default project if available and none is selected
 			if (!bFoundActiveProject && aoProjectList.size()>0) {
 				aoProjectList.get(0).setActiveProject(true);
+				UserRepository oUserRepository = new UserRepository();
+				oUser.setActiveProjectId(aoProjectList.get(0).getProjectId());
+				
+				if (asProjectIdSubscriptionId.containsKey(oUser.getActiveProjectId())) {
+					oUser.setActiveSubscriptionId(asProjectIdSubscriptionId.get(oUser.getActiveProjectId()));					
+				}
+				
+				oUserRepository.updateUser(oUser);
 			}
 
 			return Response.ok(aoProjectList).build();

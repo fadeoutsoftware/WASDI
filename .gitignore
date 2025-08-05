@@ -1015,3 +1015,5 @@ docs/venv/
 wrappersnap/utils/target/
 wrappersnap/utils/dependency-reduced-pom.xml
 libraries/.vscode/
+.vscode/
+docker/containers/docker-compose-INPROD.yml

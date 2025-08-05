@@ -203,7 +203,7 @@ public class ResponseTranslatorLSA extends ResponseTranslator {
 						
 					// Extract Download link
 					if (oLinkEntry.getAttribute("title").equals("Source package download")) {
-						String sLink = "https://collgs.lu/" + oLinkEntry.getAttribute("href");
+						String sLink = oLinkEntry.getAttribute("href");
 						oResult.setLink(sLink);
 					}
 					

@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -376,7 +377,7 @@ public class Wasdi extends ResourceConfig {
 					
 					if (oUser!=null) {
 						// If it is not null, we can touch the session
-						oSessionRepository.touchSession(oUserSession);
+						safeTouchSession(oUserSession);
 					}
 					
 				}
@@ -406,6 +407,23 @@ public class Wasdi extends ResourceConfig {
 			}
 		}
 	}	
+	
+	/**
+	 * Safe Touch Session: it really makes the touch only if the session is at least one minute old.
+	 * 
+	 * @param oSession Session to touch
+	 * @return True if was more recent than one minute, or if was touched. False in case of error in the update of the session in the db
+	 */
+	public static boolean safeTouchSession(UserSession oSession) {
+		double dNow = Utils.nowInMillis();
+		double dSessionAge = dNow - oSession.getLastTouch();
+		if (dSessionAge>60*1000) {
+			SessionRepository oSessionRepository = new SessionRepository();
+			return oSessionRepository.touchSession(oSession);
+		}
+		
+		return true;		
+	}
 
 	/**
 	 * Get The owner of a workspace starting from the workspace id
@@ -501,7 +519,8 @@ public class Wasdi extends ResourceConfig {
 
 		//filter out invalid sessions
 		User oUser = getUserFromSession(sSessionId);
-		if(null == oUser) {
+		
+		if(oUser == null) {
 			WasdiLog.debugLog("Wasdi.runProcess( " + sUserId + ", " + sSessionId + ", " + sOperationType + ", " + sProductName + ", ... ): session not valid, aborting");
 			oResult.setIntValue(401);
 			oResult.setBoolValue(false);
@@ -529,6 +548,7 @@ public class Wasdi extends ResourceConfig {
 					
 			// Is the workspace here?
 			String sWsNodeCode = oWorkspace.getNodeCode();
+			
 			if (!sWsNodeCode.equals(sMyNodeCode)) {
 				
 				// No: forward the call on the owner node
@@ -567,36 +587,28 @@ public class Wasdi extends ResourceConfig {
 			else {
 				// The Workspace is here. Just add the Parameter and the ProcessWorkspace to the database 
 				
-				//create a WASDI session here
-				
-				//maybe store original keycloak session id in WASDI DB, to keep more params, e.g., the user
-				UserSession oSession = new UserSession();
-				oSession.setUserId(sUserId);
-
-				Boolean bNew = false;
-				//store the keycloak access token instead, so we can retrieve the user and perform a further check
-				// NO!!! LIBS does not have the ability to refresh the token!!
-				if (Utils.isNullOrEmpty(sParentId)) {
-					sSessionId = UUID.randomUUID().toString();
-					bNew = true;
-				}
-				oSession.setSessionId(sSessionId);
-				oSession.setLoginDate(Utils.nowInMillis());
-				oSession.setLastTouch(Utils.nowInMillis());
-				
 				SessionRepository oSessionRepo = new SessionRepository();
-				Boolean bRet = false;
-				if(bNew) {
-					bRet = oSessionRepo.insertSession(oSession);
-				} else {
-					bRet = oSessionRepo.touchSession(oSession);
+				
+				if (Utils.isNullOrEmpty(sParentId)) {
+					
+					//Create a WASDI session here
+					UserSession oSession = new UserSession();
+					oSession.setUserId(sUserId);
+					
+					sSessionId = UUID.randomUUID().toString();
+					oSession.setSessionId(sSessionId);
+					oSession.setLoginDate(Utils.nowInMillis());
+					oSession.setLastTouch(Utils.nowInMillis());
+					
+					if (!oSessionRepo.insertSession(oSession)) {
+						WasdiLog.warnLog("could not insert session " + oSession.getSessionId() + " in DB, try with the old one");						
+					}
+					else {
+						// Assign this new session to the parameter
+						oParameter.setSessionID(sSessionId);
+					}
 				}
-				if (bRet) {
-					oParameter.setSessionID(oSession.getSessionId());
-				} else {
-					throw new IllegalArgumentException("could not insert session " + oSession.getSessionId() + " in DB, aborting");
-				}
-
+				
 				// Insert the parameter in mongo
 				ParametersRepository oParametersRepository = new ParametersRepository();
 				oParametersRepository.insertParameter(oParameter);
@@ -618,7 +630,7 @@ public class Wasdi extends ResourceConfig {
 					//TODO - enforce the presence of a valid subscription and of an active project
 					if (Utils.isNullOrEmpty(oUser.getActiveProjectId())
 							|| Utils.isNullOrEmpty(oUser.getActiveSubscriptionId())) {
-						WasdiLog.debugLog("Wasdi.runProcess: Process Scheduled for Launcher. The user does not have a valid subscription and an active project");
+						WasdiLog.warnLog("Wasdi.runProcess: Process Scheduled for Launcher. The user does not have a valid subscription and an active project");
 					}
 
 					oProcess.setProjectId(oUser.getActiveProjectId());
@@ -629,14 +641,16 @@ public class Wasdi extends ResourceConfig {
 					oProcess.setNodeCode(sWsNodeCode);
 					oRepository.insertProcessWorkspace(oProcess);
 					WasdiLog.debugLog("Wasdi.runProcess: Process Scheduled for Launcher");
-				} catch (Exception oEx) {
-					WasdiLog.debugLog("Wasdi.runProcess: " + oEx);
+				} 
+				catch (Exception oEx) {
+					WasdiLog.errorLog("Wasdi.runProcess: " + oEx);
 					oResult.setBoolValue(false);
 					oResult.setIntValue(500);
 					return oResult;
 				}				
 			}
-		} catch (Exception oE) {
+		} 
+		catch (Exception oE) {
 			WasdiLog.errorLog("Wasdi.runProcess: " + oE);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
@@ -858,117 +872,133 @@ public class Wasdi extends ResourceConfig {
 				
 				// Read the metrics of the node
 				String sNodeCode = oNode.getNodeCode();
-				MetricsEntryRepository oMetricsEntryRepository = new MetricsEntryRepository();
-				MetricsEntry oMetricsEntry = oMetricsEntryRepository.getLatestMetricsEntryByNode(sNodeCode);
+				
+				
+				if (WasdiConfig.Current.loadBalancer.activateMetrics) {
+					MetricsEntryRepository oMetricsEntryRepository = new MetricsEntryRepository();
+					MetricsEntry oMetricsEntry = oMetricsEntryRepository.getLatestMetricsEntryByNode(sNodeCode);
 
-				if (oMetricsEntry == null) {
-					WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics are null for node " + sNodeCode + ". Skip.");
-					continue;
-				}
+					if (oMetricsEntry == null) {
+						WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics are null for node " + sNodeCode + ". Skip.");
+						continue;
+					}
 
 
-				// Check the metrics entry of the node. If the metrics are too old, the node is skipped.
-				Timestamp oTimestamp = oMetricsEntry.getTimestamp();
+					// Check the metrics entry of the node. If the metrics are too old, the node is skipped.
+					Timestamp oTimestamp = oMetricsEntry.getTimestamp();
 
-				if (oTimestamp == null) {
-					WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics timestamp values are null for node " + sNodeCode + ". Skip.");
-					continue;
-				}
-
-				Double oTimestampInMillis = oTimestamp.getMillis();
-
-				if (oTimestampInMillis == null) {
-					Double oTimestampInSeconds = oTimestamp.getSeconds();
-
-					if (oTimestampInSeconds == null) {
+					if (oTimestamp == null) {
 						WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics timestamp values are null for node " + sNodeCode + ". Skip.");
 						continue;
-					} else {
-						oTimestampInMillis = BigDecimal.valueOf(oTimestampInSeconds).multiply(BigDecimal.valueOf(1000L)).doubleValue();
 					}
+
+					Double oTimestampInMillis = oTimestamp.getMillis();
+
+					if (oTimestampInMillis == null) {
+						Double oTimestampInSeconds = oTimestamp.getSeconds();
+
+						if (oTimestampInSeconds == null) {
+							WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics timestamp values are null for node " + sNodeCode + ". Skip.");
+							continue;
+						} else {
+							oTimestampInMillis = BigDecimal.valueOf(oTimestampInSeconds).multiply(BigDecimal.valueOf(1000L)).doubleValue();
+						}
+					}
+
+					long lMillisPassesSinceTheLastMetricsEntry = BigDecimal.valueOf(Utils.nowInMillis()).subtract(BigDecimal.valueOf(oTimestampInMillis)).longValue();
+					long lMaximumAllowedAgeOfInformation = ((long)WasdiConfig.Current.loadBalancer.metricsMaxAgeSeconds) * 1000L;
+
+					boolean bMetricsEntryTooOld = lMillisPassesSinceTheLastMetricsEntry > lMaximumAllowedAgeOfInformation;
+
+					if (bMetricsEntryTooOld) {
+						WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics too old for node " + sNodeCode + ". Possibly, the node is down. Skip.");
+						continue;
+					}
+
+
+					// Get the list of disks to estimate space
+					List<Disk> aoDisks = oMetricsEntry.getDisks();
+
+					if (aoDisks != null) {
+
+						NodeScoreByProcessWorkspaceViewModel oViewModel = new NodeScoreByProcessWorkspaceViewModel();
+						oViewModel.setNodeCode(sNodeCode);
+
+						String sTimestampAsString = Utils.getFormatDate(oTimestampInMillis);
+						oViewModel.setTimestampAsString(sTimestampAsString);
+
+						List<License> asLicenses = oMetricsEntry.getLicenses();
+						if (asLicenses != null) {
+							String sLicenses = asLicenses.stream()
+									.filter(License::getStatus)
+									.map(License::getName)
+									.sorted()
+									.collect(Collectors.joining(", "));
+
+							oViewModel.setLicenses(sLicenses);
+						}
+
+						Disk oDisk = null;
+						Double oPercentageUsed = null;
+						
+						if (aoDisks.size() <= 0) {
+							oViewModel.setDiskPercentageAvailable(0.0);
+							oViewModel.setDiskPercentageUsed(0.0);
+							oViewModel.setDiskAbsoluteAvailable(0L);
+							oViewModel.setDiskAbsoluteUsed(0L);
+							oViewModel.setDiskAbsoluteTotal(0L);
+						}
+						else {
+							oDisk= aoDisks.get(0);
+							
+							oPercentageUsed = oDisk.getPercentageUsed();
+							oViewModel.setDiskPercentageAvailable(oDisk.getPercentageAvailable());
+							oViewModel.setDiskPercentageUsed(oPercentageUsed);
+							oViewModel.setDiskAbsoluteAvailable(oDisk.getAbsoluteAvailable());
+							oViewModel.setDiskAbsoluteUsed(oDisk.getAbsoluteUsed());
+							oViewModel.setDiskAbsoluteTotal(oDisk.getAbsoluteTotal());						
+						}
+
+
+						// Get the memory info to estimate memory availability
+						Memory oMemory = oMetricsEntry.getMemory();
+
+						if (oMemory == null) {
+							oViewModel.setMemoryPercentageAvailable(0.0);
+							oViewModel.setMemoryPercentageUsed(0.0);
+							oViewModel.setMemoryAbsoluteAvailable(0L);
+							oViewModel.setMemoryAbsoluteUsed(0L);
+							oViewModel.setMemoryAbsoluteTotal(0L);
+						}
+						else {
+							oViewModel.setMemoryPercentageAvailable(oMemory.getPercentageAvailable());
+							oViewModel.setMemoryPercentageUsed(oPercentageUsed);
+							oViewModel.setMemoryAbsoluteAvailable(oMemory.getAbsoluteAvailable());
+							oViewModel.setMemoryAbsoluteUsed(oMemory.getAbsoluteUsed());
+							oViewModel.setMemoryAbsoluteTotal(oMemory.getAbsoluteTotal());						
+						}
+						
+						if (oPercentageUsed != null && oPercentageUsed.doubleValue() <= WasdiConfig.Current.loadBalancer.diskOccupiedSpaceMaxPercentage) {
+							aoOrderedNodeList.add(oViewModel);
+						}
+						else {
+							WasdiLog.debugLog("Wasdi.getNodesSortedByScore: Node " + oNode.getNodeCode() + " excluded because of space problem ( full > " + WasdiConfig.Current.loadBalancer.diskOccupiedSpaceMaxPercentage + "%)");
+							aoExcludedNodeList.add(oViewModel);
+						}
+					}				
 				}
-
-				long lMillisPassesSinceTheLastMetricsEntry = BigDecimal.valueOf(Utils.nowInMillis()).subtract(BigDecimal.valueOf(oTimestampInMillis)).longValue();
-				long lMaximumAllowedAgeOfInformation = ((long)WasdiConfig.Current.loadBalancer.metricsMaxAgeSeconds) * 1000L;
-
-				boolean bMetricsEntryTooOld = lMillisPassesSinceTheLastMetricsEntry > lMaximumAllowedAgeOfInformation;
-
-				if (bMetricsEntryTooOld) {
-					WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics too old for node " + sNodeCode + ". Possibly, the node is down. Skip.");
-					continue;
-				}
-
-
-				// Get the list of disks to estimate space
-				List<Disk> aoDisks = oMetricsEntry.getDisks();
-
-				if (aoDisks != null) {
-
+				else {
+					// Metrics are disabled: just add 
 					NodeScoreByProcessWorkspaceViewModel oViewModel = new NodeScoreByProcessWorkspaceViewModel();
 					oViewModel.setNodeCode(sNodeCode);
-
-					String sTimestampAsString = Utils.getFormatDate(oTimestampInMillis);
+					
+					Date oNow = new Date();
+					String sTimestampAsString = Utils.getFormatDate(oNow);
 					oViewModel.setTimestampAsString(sTimestampAsString);
 
-					List<License> asLicenses = oMetricsEntry.getLicenses();
-					if (asLicenses != null) {
-						String sLicenses = asLicenses.stream()
-								.filter(License::getStatus)
-								.map(License::getName)
-								.sorted()
-								.collect(Collectors.joining(", "));
-
-						oViewModel.setLicenses(sLicenses);
-					}
-
-					Disk oDisk = null;
-					Double oPercentageUsed = null;
-					
-					if (aoDisks.size() <= 0) {
-						oViewModel.setDiskPercentageAvailable(0.0);
-						oViewModel.setDiskPercentageUsed(0.0);
-						oViewModel.setDiskAbsoluteAvailable(0L);
-						oViewModel.setDiskAbsoluteUsed(0L);
-						oViewModel.setDiskAbsoluteTotal(0L);
-					}
-					else {
-						oDisk= aoDisks.get(0);
-						
-						oPercentageUsed = oDisk.getPercentageUsed();
-						oViewModel.setDiskPercentageAvailable(oDisk.getPercentageAvailable());
-						oViewModel.setDiskPercentageUsed(oPercentageUsed);
-						oViewModel.setDiskAbsoluteAvailable(oDisk.getAbsoluteAvailable());
-						oViewModel.setDiskAbsoluteUsed(oDisk.getAbsoluteUsed());
-						oViewModel.setDiskAbsoluteTotal(oDisk.getAbsoluteTotal());						
-					}
-
-
-					// Get the memory info to estimate memory availability
-					Memory oMemory = oMetricsEntry.getMemory();
-
-					if (oMemory == null) {
-						oViewModel.setMemoryPercentageAvailable(0.0);
-						oViewModel.setMemoryPercentageUsed(0.0);
-						oViewModel.setMemoryAbsoluteAvailable(0L);
-						oViewModel.setMemoryAbsoluteUsed(0L);
-						oViewModel.setMemoryAbsoluteTotal(0L);
-					}
-					else {
-						oViewModel.setMemoryPercentageAvailable(oMemory.getPercentageAvailable());
-						oViewModel.setMemoryPercentageUsed(oPercentageUsed);
-						oViewModel.setMemoryAbsoluteAvailable(oMemory.getAbsoluteAvailable());
-						oViewModel.setMemoryAbsoluteUsed(oMemory.getAbsoluteUsed());
-						oViewModel.setMemoryAbsoluteTotal(oMemory.getAbsoluteTotal());						
-					}
-					
-					if (oPercentageUsed != null && oPercentageUsed.doubleValue() <= WasdiConfig.Current.loadBalancer.diskOccupiedSpaceMaxPercentage) {
-						aoOrderedNodeList.add(oViewModel);
-					}
-					else {
-						WasdiLog.debugLog("Wasdi.getNodesSortedByScore: Node " + oNode.getNodeCode() + " excluded because of space problem ( full > " + WasdiConfig.Current.loadBalancer.diskOccupiedSpaceMaxPercentage + "%)");
-						aoExcludedNodeList.add(oViewModel);
-					}
+					aoOrderedNodeList.add(oViewModel);
 				}
+
 			}
 			
 			// Lets verify if we have at least one node, otherwise we relax the first filter
@@ -1020,31 +1050,35 @@ public class Wasdi extends ResourceConfig {
 			else {
 				
 				try {
-					// Review the list to "downgrade" low performance nodes
-					ArrayList<NodeScoreByProcessWorkspaceViewModel> aoLowPerformanceNodes = new ArrayList<>();
 					
-					// For all the candidates
-					for (NodeScoreByProcessWorkspaceViewModel oNodeCandiate : aoOrderedNodeList) {
+					if (WasdiConfig.Current.loadBalancer.activateMetrics) {
+						// Review the list to "downgrade" low performance nodes
+						ArrayList<NodeScoreByProcessWorkspaceViewModel> aoLowPerformanceNodes = new ArrayList<>();
 						
-						// Read also the absolute RAM available
-						Long lGb = oNodeCandiate.getMemoryAbsoluteAvailable()/1073741824L;
+						// For all the candidates
+						for (NodeScoreByProcessWorkspaceViewModel oNodeCandiate : aoOrderedNodeList) {
+							
+							// Read also the absolute RAM available
+							Long lGb = oNodeCandiate.getMemoryAbsoluteAvailable()/1073741824L;
+							
+							// If it is less of the "performance required" value
+							if (lGb.intValue() < WasdiConfig.Current.loadBalancer.minTotalMemoryGBytes) {
+								// Set it as low performance
+								aoLowPerformanceNodes.add(oNodeCandiate);
+							}
+						}
 						
-						// If it is less of the "performance required" value
-						if (lGb.intValue() < WasdiConfig.Current.loadBalancer.minTotalMemoryGBytes) {
-							// Set it as low performance
-							aoLowPerformanceNodes.add(oNodeCandiate);
+						// Remove the low performance nodes from the ordered list
+						for (NodeScoreByProcessWorkspaceViewModel oNode : aoLowPerformanceNodes) {
+							aoOrderedNodeList.remove(oNode);
+						}
+						
+						// Ad re-add so they will go at the bottom of the options
+						for (NodeScoreByProcessWorkspaceViewModel oNode : aoLowPerformanceNodes) {
+							aoOrderedNodeList.add(oNode);
 						}
 					}
 					
-					// Remove the low performance nodes from the ordered list
-					for (NodeScoreByProcessWorkspaceViewModel oNode : aoLowPerformanceNodes) {
-						aoOrderedNodeList.remove(oNode);
-					}
-					
-					// Ad re-add so they will go at the bottom of the options
-					for (NodeScoreByProcessWorkspaceViewModel oNode : aoLowPerformanceNodes) {
-						aoOrderedNodeList.add(oNode);
-					}					
 				}
 				catch (Exception oInnerEx) {
 					WasdiLog.errorLog("Wasdi.getNodesSortedByScore: exception removing low performance nodes ", oInnerEx);

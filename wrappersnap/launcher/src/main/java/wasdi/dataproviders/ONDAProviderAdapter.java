@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.io.Util;
 import org.esa.snap.core.datamodel.Product;
 import org.json.JSONObject;

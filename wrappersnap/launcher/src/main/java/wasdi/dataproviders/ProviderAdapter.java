@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.esa.snap.core.datamodel.Product;
@@ -1184,6 +1183,10 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		}
 		
 		return sDestinationFileName;
+	}
+	
+	public void closeConnections() {
+		
 	}
 
 }

@@ -115,6 +115,7 @@ If you already know WASDI features and you are a Python developer check out the 
    ProgrammingTutorials/UITutorial.rst
    ProgrammingTutorials/JavascriptTutorialHtml.rst
    ProgrammingTutorials/JavascriptTutorial.rst
+   ProgrammingTutorials/AppsGoodPractices.rst
 
 
 Reference center
@@ -143,6 +144,8 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    PythonCookbook/createConfig.rst
    PythonCookbook/BasicAppStructure.rst
    PythonCookbook/ReadParameters.rst
+   PythonCookbook/ImportSearchedImages.rst
+   PythonCookbook/ImportAndPreprocess.rst
    PythonCookbook/SearchS1Images.rst
    PythonCookbook/SearchS2Images.rst
    PythonCookbook/SearchS3Images.rst
@@ -150,9 +153,8 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    PythonCookbook/SearchCMImages.rst
    PythonCookbook/SearchEcostressProducts.rst
    PythonCookbook/SearchERA5Images.rst
+   PythonCookbook/ImportGFSProducts.rst
    PythonCookbook/CallCDSAPIsFromWASDI.rst
-   PythonCookbook/ImportSearchedImages.rst
-   PythonCookbook/ImportAndPreprocess.rst
    PythonCookbook/RunSnapWorkflow.rst
    PythonCookbook/RunApplication.rst
    PythonCookbook/SavePayload.rst

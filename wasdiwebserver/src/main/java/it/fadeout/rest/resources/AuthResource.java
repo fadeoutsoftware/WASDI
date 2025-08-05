@@ -33,6 +33,7 @@ import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserSession;
+import wasdi.shared.config.SkinConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.SessionRepository;
@@ -52,6 +53,7 @@ import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.users.ChangeUserPasswordViewModel;
 import wasdi.shared.viewmodels.users.LoginInfo;
 import wasdi.shared.viewmodels.users.RegistrationInfoViewModel;
+import wasdi.shared.viewmodels.users.SkinViewModel;
 import wasdi.shared.viewmodels.users.UserViewModel;
 
 /**
@@ -144,7 +146,7 @@ public class AuthResource {
 				WasdiLog.debugLog("AuthResource.login: user not found: " + sLowerCaseUserId + ", check if this is the first access");
 				
 				// Try to retrieve info about this user 
-				String sUserInfo = m_oKeycloakService.getUserData(m_oKeycloakService.getToken(), sLowerCaseUserId); // TODO - not sure if this will still work: for the user with multiple accounts yes, but what about the other two?
+				String sUserInfo = m_oKeycloakService.getUserData(m_oKeycloakService.getToken(), sLowerCaseUserId);
 				
 				if (Utils.isNullOrEmpty(sUserInfo)) {
 					// No, something did not work well
@@ -260,6 +262,7 @@ public class AuthResource {
 				oUserVM.setSessionId(oSession.getSessionId());
 				oUserVM.setType(PermissionsUtils.getUserType(oUser));
 				oUserVM.setPublicNickName(oUser.getPublicNickName());
+				oUserVM.setSkin(oUser.getSkin());
 				if (Utils.isNullOrEmpty(oUserVM.getPublicNickName())) {
 					String sPublicNick = oUserVM.getName();
 					oUserVM.setPublicNickName(sPublicNick);
@@ -335,6 +338,7 @@ public class AuthResource {
 			oUserVM.setUserId(oUser.getUserId());
 			oUserVM.setType(PermissionsUtils.getUserType(oUser));
 			oUserVM.setPublicNickName(oUser.getPublicNickName());
+			oUserVM.setSkin(oUser.getSkin());
 			
 			if (Utils.isNullOrEmpty(oUserVM.getPublicNickName())) {
 				String sPublicNick = oUserVM.getName();
@@ -1245,6 +1249,49 @@ public class AuthResource {
 			return Response.serverError().build();
 		}
 		
+	}
+	
+	@GET
+	@Path("/skin")	
+	public Response getSkin(@HeaderParam("x-session-token") String sSessionId, @QueryParam("skin") String sSkin) {
+		try {
+			
+			if (Utils.isNullOrEmpty(sSkin)) sSkin = "wasdi";
+			
+			WasdiLog.debugLog("AuthResource.getSkin( skin: " + sSkin + ")");
+			
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oUser==null) {
+				WasdiLog.warnLog("AuthResource.getSkin: invalid user or session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}		
+			
+			SkinConfig oSelectedSkin = new SkinConfig();
+			
+			// iterate over the list of skins to look for the one in the query
+			for (SkinConfig oSkinConfig : WasdiConfig.Current.skins) {
+				if (oSkinConfig.name.equals(sSkin)) {
+					oSelectedSkin = oSkinConfig;
+					break;
+				}
+			}
+						
+			SkinViewModel oSkinViewModel = new SkinViewModel();
+			oSkinViewModel.setLogoImage(oSelectedSkin.logoImage);
+			oSkinViewModel.setLogoText(oSelectedSkin.logoText);
+			oSkinViewModel.setHelpLink(oSelectedSkin.helpLink);
+			oSkinViewModel.setSupportLink(oSelectedSkin.supportLink);
+			oSkinViewModel.setBrandMainColor(oSelectedSkin.brandMainColor);
+			oSkinViewModel.setBrandSecondaryColor(oSelectedSkin.brandSecondaryColor);
+			oSkinViewModel.setDefaultCategories(oSelectedSkin.defaultCategories);
+			
+			return Response.ok(oSkinViewModel).build();
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("AuthResource.getSkin exception ", oEx);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
 	}
 	
 	/** 

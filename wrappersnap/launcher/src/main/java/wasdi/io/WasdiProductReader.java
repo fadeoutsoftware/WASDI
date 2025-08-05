@@ -119,14 +119,6 @@ public abstract class WasdiProductReader {
     public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider, String sPlatform) {
     	return sDownloadedFileFullPath;
     }
-
-    /**
-     * Get the file in a format suitable for publish band
-     * @return
-     */
-    public File getFileForPublishBand(String sBand, String sLayerId)  {
-    	return getFileForPublishBand(sBand, sLayerId, "");    	
-    }
     
     /**
      * Get the file in a format suitable for publish band

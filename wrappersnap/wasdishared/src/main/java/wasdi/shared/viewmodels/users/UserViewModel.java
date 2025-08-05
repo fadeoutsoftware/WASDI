@@ -23,6 +23,8 @@ public class UserViewModel {
 	private String publicNickName;
 	
 	private String type;
+	
+	private String skin="wasdi";
 
 	private String role;
 	private Set<String> grantedAuthorities;
@@ -171,5 +173,13 @@ public class UserViewModel {
 
 	public void setPublicNickName(String publicNickName) {
 		this.publicNickName = publicNickName;
+	}
+
+	public String getSkin() {
+		return skin;
+	}
+
+	public void setSkin(String skin) {
+		this.skin = skin;
 	}
 }

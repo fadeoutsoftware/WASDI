@@ -92,6 +92,9 @@ public class OpenSearchResource {
 					
 					iCounter = oExecutor.executeCount(sQuery);
 					
+					// Close connections
+					oExecutor.closeConnections();
+					
 					if (iCounter>=0) {
 						return iCounter;
 					}
@@ -168,7 +171,7 @@ public class OpenSearchResource {
 			return null;
 		}
 		
-		WasdiLog.debugLog("OpenSearchResource.search: Selected Provider " +sProvider);
+		WasdiLog.debugLog("OpenSearchResource.search: Selected Provider " + sProvider);
 				
 		// Get the number of elements per page
 		ArrayList<QueryResultViewModel> aoResults = new ArrayList<>();
@@ -186,6 +189,9 @@ public class OpenSearchResource {
 				PaginatedQuery oQuery = new PaginatedQuery(sQuery, sOffset, sLimit, sSortedBy, sOrder);
 				// Execute the query
 				List<QueryResultViewModel> aoProviderResults = oExecutor.executeAndRetrieve(oQuery);
+				
+				// Close connections
+				oExecutor.closeConnections();				
 				
 				// Do we have results?
 				if (aoProviderResults != null) {
@@ -329,6 +335,9 @@ public class OpenSearchResource {
 						
 						// Make the count
 						int iQueryCount = oExecutor.executeCount(sQuery);
+						
+						// Close connections
+						oExecutor.closeConnections();
 						
 						// Every result >= 0 means a valid result
 						if (iQueryCount>=0) {
@@ -522,6 +531,9 @@ public class OpenSearchResource {
 							// Exit from the providers cylcle
 							if (!bSwitchToNextProvider) sProvider = null;				
 						}
+						
+						// Close connections
+						oExecutor.closeConnections();						
 
 						if (bSwitchToNextProvider) {
 							

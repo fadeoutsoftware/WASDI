@@ -3,6 +3,7 @@ package dbUtils;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
@@ -963,6 +964,7 @@ public class dbUtils {
 
             System.out.println("\t1 - Delete User");
             System.out.println("\t2 - Print User Mails");
+            System.out.println("\t3 - Delete Duplicate Users");
             System.out.println("\tx - back");
             System.out.println("");
 
@@ -1035,6 +1037,47 @@ public class dbUtils {
                 for (User oUser : aoUsers) {
                     System.out.println(oUser.getUserId());
                 }
+            }
+            else if (sInputString.equals("3")) {
+                System.out.println("Please write DELETE for a real delete");
+                String sCommand = s_oScanner.nextLine();
+                
+                boolean bDelete = false;
+                
+                if (sCommand.equals("DELETE")) {
+                	
+                	System.out.println("This is a REAL Delete, are you sure [1/0]?");
+
+                    String sConfirm = s_oScanner.nextLine();
+                	
+                    if (sConfirm.equals("1")) {
+                    	bDelete = true;
+                    }
+                    else {
+                    	System.out.println("Ok just a list");
+                    }
+                }
+                else {
+                	System.out.println("Ok just a list");
+                }
+
+                System.out.println("Searching folders associated to not longer existing workspaces on node");
+                
+                UserRepository oUserRepository = new UserRepository();
+                ArrayList<User> aoAllUsers = oUserRepository.getAllUsers();
+                
+                
+                for (int iUsers=0; iUsers<aoAllUsers.size(); iUsers++) {
+                	User oUser = aoAllUsers.get(iUsers);
+                	
+                	for (int iDup = iUsers+1; iDup<aoAllUsers.size(); iDup++) {
+                		User oMaybeDuplicate = aoAllUsers.get(iDup);
+                		
+                		if (oMaybeDuplicate.getUserId().equals(oUser.getUserId())) {
+                			System.out.println("Found Duplicate User " + oMaybeDuplicate.getUserId());
+                		}
+                	}
+                }                
             }
         } catch (Exception oEx) {
             System.out.println("USERS Exception: " + oEx);
@@ -1246,6 +1289,7 @@ public class dbUtils {
             System.out.println("\t4 - Reconstruct Workspace");
             System.out.println("\t5 - Clean Workspaces not existing in node");
             System.out.println("\t6 - Add Workspace size");
+            System.out.println("\t7 - Delete folders associated to not-existing workspaces");
             System.out.println("\tx - back");
             System.out.println("");
 
@@ -1624,7 +1668,6 @@ public class dbUtils {
 
                 }
             }
-            
             else if (sInputString.equals("5")) {
             	
                 System.out.println("Please write DELETE for a real delete");
@@ -1815,6 +1858,78 @@ public class dbUtils {
             else if (sInputString.equals("6")) {
             	addStorageToWorkspace();
             }
+            else if (sInputString.equals("7")) {
+            	
+                System.out.println("Please write DELETE for a real delete");
+                String sCommand = s_oScanner.nextLine();
+                
+                boolean bDelete = false;
+                
+                if (sCommand.equals("DELETE")) {
+                	
+                	System.out.println("This is a REAL Delete, are you sure [1/0]?");
+
+                    String sConfirm = s_oScanner.nextLine();
+                	
+                    if (sConfirm.equals("1")) {
+                    	bDelete = true;
+                    }
+                    else {
+                    	System.out.println("Ok just a list");
+                    }
+                }
+                else {
+                	System.out.println("Ok just a list");
+                }
+
+                System.out.println("Searching folders associated to not longer existing workspaces on node");
+                
+                UserRepository oUserRepository = new UserRepository();
+                ArrayList<User> aoAllUsers = oUserRepository.getAllUsers();
+                
+                
+                WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+                
+                for (User oUser : aoAllUsers) {
+					String sUserPath = PathsConfig.getWasdiBasePath()+oUser.getUserId()+"/";
+					
+					File oUserFolder = new File(sUserPath);
+					
+					if (!oUserFolder.exists()) {
+						System.out.println("There are no workspaces of " + oUser.getUserId() + " in this Node");
+						continue;
+					}
+					
+					String[] asWorkspaceFolders = oUserFolder.list(new FilenameFilter() {
+						  @Override
+						  public boolean accept(File oCurrentFile, String sFileName) {
+						    return new File(oCurrentFile, sFileName).isDirectory();
+						  }
+						});
+					
+					if (asWorkspaceFolders != null) {
+						for (int iWs = 0; iWs < asWorkspaceFolders.length; iWs++) {
+							String sWorkspace = asWorkspaceFolders[iWs];
+							Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspace);
+							
+							if (oWorkspace == null) {
+								System.out.println("Found folder " + sUserPath + sWorkspace + " that does not have a corresponding Workspace entry");
+								
+								if (bDelete) {
+									File oWsFolder = new File (sUserPath+sWorkspace);
+									FileUtils.deleteQuietly(oWsFolder);
+									System.out.println("********** DELETED " + sUserPath+sWorkspace);
+								}
+								else {
+									System.out.println("********** as if I deleted " + sUserPath+sWorkspace);
+								}
+							}
+						}
+					}
+				}
+                
+                
+            }              
         } 
         catch (InterruptedException oEx) {
         	Thread.currentThread().interrupt();
@@ -2883,7 +2998,7 @@ public class dbUtils {
 					StorageUsageControl oStorageUsageControl = WasdiConfig.Current.storageUsageControl;
 					Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(sCandidateUserId);
 					
-					WasdiLog.debugLog("dbUtils.runWasdiCleanTask: " + sCandidateUserId + ", total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
+					WasdiLog.infoLog("dbUtils.runWasdiCleanTask: " + sCandidateUserId + ", total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
 					
 					long lNow = new Date().getTime(); 
 					long lStorageWarningDate = oCandidate.getStorageWarningSentDate().longValue();
@@ -2908,8 +3023,10 @@ public class dbUtils {
 						
 						continue;
 					}
-					else {
+					else if (lTotalStorageUsage > oStorageUsageControl.storageSizeFreeSubscription) {
 						WasdiLog.infoLog("dbUtils.runWasdiCleanTask: The user " + sCandidateUserId + " already received the notification, waiting for reaction");
+					} else {
+						WasdiLog.infoLog("dbUtils.runWasdiCleanTask: The user " + sCandidateUserId + " is not exceeding the storage space");
 					}
 					
 					// if the warning period has passed and the storage occupied by the user still exceeds the limit, 
@@ -2984,7 +3101,7 @@ public class dbUtils {
 			if (!asUsersExceedingStorage.isEmpty()) {				
 				List<User> aoAdminUsers = oUserRepository.getAdminUsers();
 				String sUsers = String.join("\n", asUsersExceedingStorage);
-				System.out.println(sUsers);
+				WasdiLog.infoLog("dbUtils.runWasdiCleanTask: Test deletion of workspaces for users: " + sUsers);
 				for (User oAdmin : aoAdminUsers) {
 					MailUtils.sendEmail(oAdmin.getUserId(), "Deletion test", "Test deletion of workspaces for users:\n" + sUsers);
 				}

@@ -258,7 +258,9 @@ public class WasdiFileUtils {
 				oOutStream.write(ayBytes, 0, iRead);
 			}
 			oOutStream.flush();
+			oOutStream.close();
 		}
+		
 	}
 	
 	public static boolean writeFile(String sContent, File oFile) throws FileNotFoundException, IOException {

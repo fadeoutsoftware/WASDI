@@ -10,6 +10,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.net.io.Util;
 
@@ -24,15 +26,16 @@ public class LSAHttpUtils {
 		// / private constructor to hide the public implicit one 
 	}
 	
-    public static String s_sLoginBaseUrl = "https://sso.collgs.lu/auth/realms/lucollgs/protocol/openid-connect/auth?";
+    public static String s_sLoginBaseUrl = "https://ivv.collgs.lu/sso/realms/lucollgs/protocol/openid-connect/auth?";
     public static String s_sClientId = "client_id=account&response_mode=fragment&response_type=code&";
     public static String s_sRedirectUrl = "redirect_uri=https://collgs.lu/geocatalog.html";
-    
+    public static String s_sLogoutUrl = "https://ivv.collgs.lu/sso/realms/lucollgs/protocol/openid-connect/logout?redirect_uri=https://collgs.lu/";
+    	
     public static void authenticate(String sUser, String sPassword) {
     	
     	try {
     		
-    		WasdiLog.debugLog("LSAProviderAdapter.authenticate: " + sUser);
+    		WasdiLog.debugLog("LSAHttpUtils.authenticate: " + sUser);
     		
     		// Create the cookie manager
     		CookieManager oCookieManager = new CookieManager();
@@ -45,24 +48,38 @@ public class LSAHttpUtils {
     			throw new Exception("Authentication failed - httpGETResults returned NULL string");
     		}
     		
-    		// Get the path of the login link
-    		String sActionToSearch = "action=\"";
-    		int iActionStart=sLoginPage.indexOf(sActionToSearch);
-    		int iActionEnd = iActionStart+sActionToSearch.length();
-    		int iLinkEnd= sLoginPage.indexOf("\" method=\"post\">");
-    		
-    		String sActionLink = sLoginPage.substring(iActionEnd, iLinkEnd);
-    		sActionLink = sActionLink.replace("&amp;", "&");
-    		
+    		String sActionLink = getLoginAction(sLoginPage);
+    		 
     		// Body with the login data
     		String sLoginData = "username=" + StringUtils.encodeUrl(sUser) + "&password=" + StringUtils.encodeUrl(sPassword);
-    		
     		// Log in
     		LSAHttpUtils.httpPostResults(sActionLink, sLoginData, oCookieManager);
+    		
     	}
     	catch (Exception oEx) {
-			WasdiLog.debugLog("LSAProviderAdapter.authenticate: Exception " + oEx.toString());
+			WasdiLog.errorLog("LSAHttpUtils.authenticate: Exception  ", oEx);
 		}
+    }
+    
+    private static String getLoginAction(String sJavascripCode) {    	
+    	try { 
+	    	Pattern oPattern = Pattern.compile(
+	                "\"loginAction\"\\s*:\\s*\"(https:\\/\\/ivv\\.collgs\\.lu\\/sso\\/realms\\/lucollgs\\/login-actions\\/authenticate\\?session_code=[^&\"]+&execution=[^&\"]+&client_id=account&tab_id=[^&\"]+&client_data=[^\"]+)\""
+	            );
+	
+	
+	        Matcher oMatcher = oPattern.matcher(sJavascripCode);
+	
+	        if (oMatcher.find()) {
+	            String sLoginActionUrl = oMatcher.group(1);
+	            return sLoginActionUrl;
+	        } 
+    	}
+        catch (Exception oE) {
+        	WasdiLog.errorLog("LSAHttpUtils.getLoginAction. impossible to extract the login action URL", oE);
+        }
+        
+        return "";
     }
     
 	/**
@@ -72,7 +89,7 @@ public class LSAHttpUtils {
 	 * @return
 	 */
 	public static String httpGetResults(String sUrl, CookieManager oCookieManager) {
-		WasdiLog.debugLog("QueryExecutorLSA.httpGetResults( " + sUrl + " )");
+		WasdiLog.debugLog("LSAHttpUtils.httpGetResults( " + sUrl + " )");
 
 		HashMap<String, String> asHeaders = new HashMap<String, String>();
 		
@@ -84,7 +101,7 @@ public class LSAHttpUtils {
 
 	
 	public static String httpPostResults(String sUrl, String sPayload, CookieManager oCookieManager) {
-		WasdiLog.debugLog("QueryExecutorLSA.httpPostResults( " + sUrl + " )");
+		WasdiLog.debugLog("LSAHttpUtils.httpPostResults( " + sUrl + " )");
 		String sResult = null;
 		long lStart = 0l;
 		int iResponseSize = -1;
@@ -158,7 +175,7 @@ public class LSAHttpUtils {
 				}
 				else {
 					
-					WasdiLog.debugLog("QueryExecutorLSA.httpPostResults: provider did not return 200 but "+iResponseCode+ " (1/2) and the following message:\n" + oConnection.getResponseMessage());
+					WasdiLog.debugLog("LSAHttpUtils.httpPostResults: provider did not return 200 but "+iResponseCode+ " (1/2) and the following message:\n" + oConnection.getResponseMessage());
 					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 					InputStream oErrorStream = oConnection.getErrorStream();
 					Util.copyStream(oErrorStream, oBytearrayOutputStream);
@@ -172,7 +189,7 @@ public class LSAHttpUtils {
 					}
 				}
 			}catch (Exception oEint) {
-				WasdiLog.debugLog("QueryExecutorLSA.httpPostResults: Exception " + oEint);
+				WasdiLog.debugLog("LSAHttpUtils.httpPostResults: Exception " + oEint);
 			} finally {
 				oConnection.disconnect();
 			}
@@ -185,12 +202,30 @@ public class LSAHttpUtils {
 				dSpeed = ( (double) iResponseSize ) / dMillis;
 				dSpeed *= 1000.0;
 			}
-			WasdiLog.debugLog("QueryExecutorLSA.httpPostResults( " + sUrl + ") performance: " + dMillis + " ms, " + iResponseSize + " B (" + dSpeed + " B/s)");
+			WasdiLog.debugLog("LSAHttpUtils.httpPostResults( " + sUrl + ") performance: " + dMillis + " ms, " + iResponseSize + " B (" + dSpeed + " B/s)");
 		}
 		catch (Exception oE) {
-			WasdiLog.debugLog("QueryExecutorLSA.httpPostResults: Exception " + oE);
+			WasdiLog.debugLog("LSAHttpUtils.httpPostResults: Exception " + oE);
 		}
 		return sResult;
+	}
+	
+	public static void logout() {
+    	try {
+    		
+    		WasdiLog.debugLog("LSAHttpUtils.logout ");
+    		
+    		// Create the cookie manager
+    		CookieManager oCookieManager = (CookieManager) CookieHandler.getDefault();
+    		
+    		// Logout 
+    		LSAHttpUtils.httpGetResults(s_sLogoutUrl, oCookieManager);
+    		//String sLogoutPage = httpGetResults(s_sLogoutUrl, oCookieManager);
+    		//WasdiLog.debugLog("LSAProviderAdapter.logout result: " + sLogoutPage);
+    	}
+    	catch (Exception oEx) {
+			WasdiLog.debugLog("LSAHttpUtils.logout: Exception " + oEx.toString());
+		}		
 	}
 	
 }

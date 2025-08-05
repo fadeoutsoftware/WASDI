@@ -2,9 +2,9 @@ package it.fadeout.rest.resources;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.DELETE;
@@ -56,7 +56,9 @@ import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.WorkspaceAPIClient;
 import wasdi.shared.viewmodels.ClientMessageCodes;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
 import wasdi.shared.viewmodels.workspaces.WorkspaceEditorViewModel;
@@ -598,19 +600,37 @@ public class WorkspaceResource {
 			String sWorkspaceOwner = Wasdi.getWorkspaceOwner(sWorkspaceId);
 			if (!sWorkspaceOwner.equals(oUser.getUserId())) {
 				// This is not the owner of the workspace
-				WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: User " + oUser.getUserId() + " is not the owner [" + sWorkspaceOwner + "]: delete the sharing, not the ws");
+				WasdiLog.infoLog("WorkspaceResource.deleteWorkspace: User " + oUser.getUserId() + " is not the owner [" + sWorkspaceOwner + "]: delete the sharing, not the ws");
                 UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
                 oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkspaceId(oUser.getUserId(), sWorkspaceId);
 				return Response.ok().build();
 			}
+			
+			if (!WasdiConfig.Current.nodeCode.equals(oWorkspace.getNodeCode())) {
+				WasdiLog.infoLog("WorkspaceResource.deleteWorkspace: redirecting delete command on target node");
+				
+				try {
+					NodeRepository oNodeRepo = new NodeRepository();
+					Node oTargetNode = oNodeRepo.getNodeByCode(oWorkspace.getNodeCode());
+					
+					HttpCallResponse oHttpResponse = WorkspaceAPIClient.deleteWorkspace(oTargetNode, sSessionId, sWorkspaceId);
+					
+					return Response.status(oHttpResponse.getResponseCode()).build();					
+				}
+				catch (Exception oEx) {
+					WasdiLog.errorLog("WorkspaceResource.deleteWorkspace: exception calling delete API on target node", oEx);
+					return Response.serverError().build();
+				}
+			}
+			
 			
 			// Terminate and clean the console/Jupyter Lab instance if present
 			terminateConsole(oWorkspace, sSessionId);
 			
 			//kill active processes
 			ProcessWorkspaceService oProcessWorkspaceService = new ProcessWorkspaceService();
-			if(oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId, sSessionId, true)) {
-				WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: WARNING: could not schedule kill processes in workspace");
+			if(!oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId, sSessionId, true)) {
+				WasdiLog.warnLog("WorkspaceResource.deleteWorkspace: WARNING: could not schedule kill processes in workspace");
 			}
 			
 			// get workspace path
@@ -669,7 +689,7 @@ public class WorkspaceResource {
 								try {
 									// Remove Geoserver layer (and file)
 									if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
-										WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
+										WasdiLog.infoLog("WorkspaceResource.deleteWorkspace: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
 									}
 
 									try {
@@ -710,7 +730,7 @@ public class WorkspaceResource {
 						try {
 							File oDir = new File(sWorkspacePath);
 							if (!oDir.exists()) {
-								WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: trying to delete non existing directory " + sWorkspacePath);
+								WasdiLog.warnLog("WorkspaceResource.deleteWorkspace: trying to delete non existing directory " + sWorkspacePath);
 							}
 							// try anyway for two reasons:
 							// 1. non existing directories are handled anyway
@@ -736,6 +756,9 @@ public class WorkspaceResource {
 						WasdiLog.errorLog("WorkspaceResource.deleteWorkspace: Error deleting workspace directory: " + oEx);
 					}
 				}
+				else {
+					WasdiLog.infoLog("WorkspaceResource.deleteWorkspace: delete files flag is False, we are not cleaning the Disk!");
+				}
 
 				// Delete Product Workspace entry
 				oProductWorkspaceRepository.deleteByWorkspaceId(sWorkspaceId);
@@ -758,7 +781,7 @@ public class WorkspaceResource {
 				return Response.ok().build();
 			} 
 			else {
-				WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: Error deleting workspace on data base");
+				WasdiLog.errorLog("WorkspaceResource.deleteWorkspace: Error deleting workspace on data base");
 			}
 				
 

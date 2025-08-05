@@ -23,19 +23,19 @@ You don't have them? Then `go get them <../GettingStarted/WasdiTutorial.rst>`_!
 Create and Open Jupyter Lab
 ---------------------------
 
-Open the workspace and once you are in the editor, click on the "Create Jupyter" button:
+Open the workspace and once you are in the editor, click on the "Notebook" button:
 
 .. image:: ../_static/JupyterNotebookTutorial/00.CreateJupyter.png
 
-An alert will invite you to wait for it to be ready. Do it: click OK, but wait a moment
+An alert will invite you to wait for it to be ready.
 
 .. image:: ../_static/JupyterNotebookTutorial/01.Patience.png
 
-Jupyter won't open automatically. If you pay attention, you will notice that the button changed into "Open Jupyter"
+When the notebook is ready, a notification will tell you. 
 
 .. image:: ../_static/JupyterNotebookTutorial/02.OpenJupyter.png
 
-Click on it, and Jupyter Lab will open in another tab of the browser
+Jupyter won't open automatically. You will need to click again on Notebook button. At that point, Jupyter Lab will open in another tab of the browser
 
 
 Get started coding

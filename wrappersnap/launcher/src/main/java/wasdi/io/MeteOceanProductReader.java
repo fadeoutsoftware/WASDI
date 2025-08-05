@@ -135,7 +135,7 @@ public class MeteOceanProductReader extends WasdiProductReader {
 	}
 
 	@Override
-	public File getFileForPublishBand(String sBand, String sLayerId) {
+	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
 		try {
 			
 			String sInputFile = m_oProductFile.getAbsolutePath();
@@ -289,7 +289,7 @@ public class MeteOceanProductReader extends WasdiProductReader {
 		System.out.println(oReader.getProductBoundingBox());
 		
 		
-		oReader.getFileForPublishBand("hs", "hs_layer");
+		oReader.getFileForPublishBand("hs", "hs_layer", "");
 		
 	}
 	

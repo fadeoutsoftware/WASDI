@@ -431,6 +431,27 @@
 {% endfor %}
 
     ],
+    "skins": [
+{% for sCurrentSkin in aoWasdiConfiguration['skins'] | sort %}
+        {
+            "name": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['name'] }}",
+            "logoImage": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['logoImage'] }}",
+            "logoText": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['logoText'] }}",
+            "helpLink": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['helpLink'] }}",
+            "supportLink": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['supportLink'] }}",
+            "brandMainColor": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['brandMainColor'] }}",
+            "brandSecondaryColor": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['brandSecondaryColor'] }}",
+            "defaultCategories": [
+            {% for sCurrentDefaultCategories in aoWasdiConfiguration['skins'][sCurrentSkin]['defaultCategories'] %}
+                "{{ sCurrentDefaultCategories }}"{% if not loop.last %},
+            {% endif %}
+            {% endfor %}
+            ]
+
+        }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+    ],
     "dataProviders": [
 {% for sCurrentDataProvider in aoWasdiConfiguration['dataProviders'] | sort %}
         {

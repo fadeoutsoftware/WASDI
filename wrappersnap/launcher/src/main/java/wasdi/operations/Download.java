@@ -212,6 +212,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                     
                     if (Utils.isNullOrEmpty(sFileName)) {
                         oProviderAdapter.unsubscribe(this);
+                        oProviderAdapter.closeConnections();
                         
                         oProviderAdapter = getNextDataProvider(oParameter);
                                                 
@@ -229,6 +230,8 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
 
                 oProviderAdapter.unsubscribe(this);
+                WasdiLog.debugLog("Download.executeOperation: calling closeConnections");
+                oProviderAdapter.closeConnections();
 
                 m_oProcessWorkspaceLogger.log("Got File, try to read");
 
@@ -493,6 +496,16 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 					return oProviderAdapter;
 				}
 			}
+			
+			if (m_aoDataProviderRanking.size()>0) {
+				// We have data providers that should support the platform, but we are not finding it
+				WasdiLog.infoLog("Download.getBestProviderAdapater: there are providers " + m_aoDataProviderRanking.size() + " but none looks to find the file " + oParameter.getName() + ". We try in any case to proceed");
+				if (m_oProcessWorkspaceLogger!=null) m_oProcessWorkspaceLogger.log("There are providers [" + m_aoDataProviderRanking.size() + "] that should, but none looks to find the file " + oParameter.getName() + ". We try in any case to proceed");
+				
+				// We can try in any case to proceed:
+				return m_aoDataProviderRanking.get(0);
+			}
+			
 		}
 		catch (Exception oEx) {
             WasdiLog.errorLog("Download.getBestProviderAdapater: Exception "+ ExceptionUtils.getStackTrace(oEx));
@@ -509,6 +522,8 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 		
 		// Move to the next Data Provider
 		m_iDataProviderIndex++;
+		// Keep the index of the one we should test now
+		int iInitialDataProviderIndex = m_iDataProviderIndex;
 		
 		// For the selected data providers, starting from the last
 		for (; m_iDataProviderIndex<m_aoDataProviderRanking.size(); m_iDataProviderIndex++) {
@@ -517,16 +532,43 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 			ProviderAdapter oProviderAdapter = m_aoDataProviderRanking.get(m_iDataProviderIndex);
 			
 			if (doesProviderAdapterFindFile(oProviderAdapter, oParameter)) {
-				
+				// Ok we fond our file
 	            DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode());
 	            oParameter.setDownloadUser(oDataProviderConfig.user);
 	            oParameter.setDownloadPassword(oDataProviderConfig.password);
 				
-				// Ok return this
+				// Return this Provider Adapter
 				return oProviderAdapter;
 			}
 		}
 		
+		try {
+			// Here it means that we did not found anything. Lets check if it is a problem of query or if providers are finished			
+			if (iInitialDataProviderIndex<m_aoDataProviderRanking.size()) {
+				
+				// Yes, we have al least one data provider to try 
+				ProviderAdapter oProviderAdapter = m_aoDataProviderRanking.get(iInitialDataProviderIndex);
+				
+				// Log it
+				WasdiLog.warnLog("Download.getNextDataProvider: The provider " + oProviderAdapter.getCode() + " Should support the platform but is not finding " + oParameter.getName() + ". We try in any case because all failed");
+				
+				// Try to set credentials
+	            DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode());
+	            oParameter.setDownloadUser(oDataProviderConfig.user);
+	            oParameter.setDownloadPassword(oDataProviderConfig.password);
+	            
+	            // Re-set the data provider index
+	            m_iDataProviderIndex = iInitialDataProviderIndex;
+				
+				// Ok return this
+				return oProviderAdapter;				
+			}			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("Download.getNextDataProvider: exception trying to recover at least a Data Provider: ", oEx);
+		}
+		
+		// If we arrive here there is no chance to find the file
 		return null;
 	}
 	
@@ -541,6 +583,9 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 		
 		// Must obtain the URI!!
 		String sFileUri = oQueryExecutor.getUriFromProductName(oParameter.getName(), WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode()).defaultProtocol, oParameter.getUrl(), oParameter.getPlatform());
+		
+		// Close connections
+		oQueryExecutor.closeConnections();
 		
 		if (!Utils.isNullOrEmpty(sFileUri)) {
 			// If we got the URI, this is the best Provider Adapter

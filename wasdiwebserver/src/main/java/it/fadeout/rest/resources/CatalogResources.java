@@ -242,7 +242,7 @@ public class CatalogResources {
 				}
 				
 				if (bRetry) {
-					WasdiLog.warnLog("CatalogResources.checkDownloadEntryAvailabilityByName: retry adding extension new file name = " + sFileName);
+					WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: retry adding extension new file name = " + sFileName);
 					oFile = this.getEntryFile(sFileName,sWorkspaceId);
 				}
 				
@@ -718,9 +718,6 @@ public class CatalogResources {
 		}
 		
 		try {
-			
-			// Get the user Id
-			String sUserId = oUser.getUserId();
 			
 			// Get the workspace path and the full path
 			String sWorkspacePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);

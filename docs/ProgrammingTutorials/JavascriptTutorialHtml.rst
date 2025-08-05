@@ -513,7 +513,7 @@ We can then test the page by launching the application **hellowasdiworld**: afte
 
 .. image:: ../_static/javascript_html_tutorial/6.png
 
-If you open WASDI on wasdi.net, login with your user credentials and open the workspace, you will see that the processor were executed:
+If you open WASDI on wasdi.net, login with your user credentials and open the workspace, you will see that the processor was executed:
 
 .. image:: ../_static/javascript_html_tutorial/7.png
     :scale: 50

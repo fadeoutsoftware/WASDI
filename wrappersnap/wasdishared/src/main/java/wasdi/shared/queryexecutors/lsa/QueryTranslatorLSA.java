@@ -98,7 +98,18 @@ public class QueryTranslatorLSA extends QueryTranslator {
 		if (oWasdiQuery.platformName != null) {
 			if (oWasdiQuery.platformName.equals("Sentinel-1")) {
 				if (Utils.isNullOrEmpty(oWasdiQuery.productType)) {
+					
 					sParentId = "S1_SAR_GRD";
+					
+					if (!Utils.isNullOrEmpty(oWasdiQuery.productName)) {
+						if (oWasdiQuery.productName.contains("_SLC_")) {
+							sParentId = "S1_SAR_SLC";
+						}
+						else if (oWasdiQuery.productName.contains("_OCN_")) {
+							sParentId = "S1_SAR_OCN";
+						} 
+					}
+					
 				}
 				else {
 					sParentId = "S1_SAR_" + oWasdiQuery.productType;
@@ -113,6 +124,12 @@ public class QueryTranslatorLSA extends QueryTranslator {
 			else if (oWasdiQuery.platformName.equals("Sentinel-2")) {
 				if (Utils.isNullOrEmpty(oWasdiQuery.productType)) {
 					sParentId = "S2_MSIL2A";
+					
+					if (!Utils.isNullOrEmpty(oWasdiQuery.productName)) {
+						if (oWasdiQuery.productName.contains("_MSIL1C_")) {
+							sParentId = "S2_MSIL1C";
+						}
+					}
 				}
 				else {
 					if(oWasdiQuery.productType.equals("S2MSI2A")) {
@@ -131,7 +148,7 @@ public class QueryTranslatorLSA extends QueryTranslator {
 			sLSAQuery += "&uid=" + oWasdiQuery.productName;
 		}
 		
-		String sBaseAddress = "https://collgs.lu/catalog/oseo/search?parentId=" + sParentId;
+		String sBaseAddress = "https://ivv.collgs.lu/catalog/oseo/search?parentId=" + sParentId;
 		
 		sLSAQuery = sBaseAddress + sLSAQuery;
 		
