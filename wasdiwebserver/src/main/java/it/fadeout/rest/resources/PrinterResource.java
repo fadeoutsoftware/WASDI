@@ -22,13 +22,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.PrinterViewModel;
 
-@Path("print")
+@Path("/print")
 public class PrinterResource {
-
+		
     @POST
-    @Path("storemap")
+    @Path("/storemap")
+    @Produces({ "application/xml", "application/json", "text/xml" })
     @Consumes(MediaType.APPLICATION_JSON)
     public Response storemap(PrinterViewModel oPrinterViewModel) {
         if(oPrinterViewModel == null) {
