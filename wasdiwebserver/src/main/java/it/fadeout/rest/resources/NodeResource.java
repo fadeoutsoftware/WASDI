@@ -67,6 +67,8 @@ public class NodeResource {
 			return null;			
 		}
 		
+		boolean bUserIsAdmin = oUser.getRole().equals(UserApplicationRole.ADMIN.getRole());
+		
 		// get list of all active nodes
 		NodeRepository oNodeRepository = new NodeRepository();
 		List<Node> aoNodes = oNodeRepository.getNodesList();
@@ -76,6 +78,8 @@ public class NodeResource {
 			return null;
 		}
 		
+		UserResourcePermissionRepository oPermissionRepository = new UserResourcePermissionRepository();
+		
 		// returning list
 		List<NodeViewModel> aoNodeViewModelList = new ArrayList<>();
 		
@@ -83,8 +87,14 @@ public class NodeResource {
 		for (Node oNode:aoNodes) {
 			try {
 				
+				boolean bNodeActive = oNode.getActive() || bAlsoNotActive;
+				
+				boolean bNodeIsShared = oNode.getShared();
+				
+				boolean bUserHasPermission = oPermissionRepository.isNodeSharedWithUser(oUser.getUserId(), oNode.getNodeCode());
+				
 				// checks whether the node is active
-				if (oNode.getActive() || bAlsoNotActive) {
+				if (bNodeActive && (bUserIsAdmin || bNodeIsShared || bUserHasPermission))  {
 					
 					// Create the view model and fill it
 					NodeViewModel oNodeViewModel = new NodeViewModel();
