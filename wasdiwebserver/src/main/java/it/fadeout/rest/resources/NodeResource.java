@@ -93,10 +93,11 @@ public class NodeResource {
 				
 				boolean bUserHasPermission = oPermissionRepository.isNodeSharedWithUser(oUser.getUserId(), oNode.getNodeCode());
 				
-				// checks whether the node is active
-				if (bNodeActive && (bUserIsAdmin || bNodeIsShared || bUserHasPermission))  {
+				boolean bIsUserDefaultNode = oUser.getDefaultNode().equals(oNode.getNodeCode());
+				
+				if (bNodeActive && (bUserIsAdmin || bNodeIsShared || bUserHasPermission || bIsUserDefaultNode))  {
 					
-					// Create the view model and fill it
+					// Create the view model
 					NodeViewModel oNodeViewModel = new NodeViewModel();
 					
 					if (oNode.getCloudProvider()!=null) {
