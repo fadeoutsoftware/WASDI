@@ -2065,7 +2065,7 @@ public class DockerUtils {
         		WasdiLog.debugLog("DockerUtils.run: the container is not available");
         		
         		// Since we are creating the Container, we need to set up our name
-        		sContainerName = sImageName.replace(":", "_") + "_" + Utils.getRandomName();
+        		sContainerName = sImageName.replace(":", "_").replace("/", "_") + "_" + Utils.getRandomName();
         		WasdiLog.debugLog("DockerUtils.run: try to create a container named " + sContainerName);
         		
         		if (sContainerName.length()>62) {
