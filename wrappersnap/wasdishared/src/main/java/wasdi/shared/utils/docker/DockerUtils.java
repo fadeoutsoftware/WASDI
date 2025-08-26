@@ -2121,7 +2121,15 @@ public class DockerUtils {
                         		oContainerCreateParams.HostConfig.ExtraHosts.add(sExtraHost);
                         	}
                     	}
-                    }            		   
+                    }
+                    
+                    if (WasdiConfig.Current.dockers.groupAdd != null) {
+                    	if (WasdiConfig.Current.dockers.groupAdd.size()>0) {
+                    		for (String sGroupId : WasdiConfig.Current.dockers.groupAdd) {
+								oContainerCreateParams.HostConfig.GroupAdd.add(sGroupId);
+							}
+                    	}
+                    }
             		
                     // Convert the payload in JSON (NOTE: is hand-made !!)
             		String sContainerCreateParams = oContainerCreateParams.toJson();
