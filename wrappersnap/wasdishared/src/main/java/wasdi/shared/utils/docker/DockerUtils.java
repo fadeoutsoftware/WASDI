@@ -2125,6 +2125,7 @@ public class DockerUtils {
                     
                     if (WasdiConfig.Current.dockers.groupAdd != null) {
                     	if (WasdiConfig.Current.dockers.groupAdd.size()>0) {
+                    		WasdiLog.debugLog("Adding Group Add with " + WasdiConfig.Current.dockers.groupAdd.size() + " entries");
                     		for (String sGroupId : WasdiConfig.Current.dockers.groupAdd) {
 								oContainerCreateParams.HostConfig.GroupAdd.add(sGroupId);
 							}
