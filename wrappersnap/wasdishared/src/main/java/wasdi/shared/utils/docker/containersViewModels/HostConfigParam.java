@@ -56,6 +56,7 @@ public class HostConfigParam {
 	public ArrayList<String> Links = new ArrayList<>();
 	public ArrayList<String> Binds = new ArrayList<>();
 	public ArrayList<String> ExtraHosts = new ArrayList<>();
+	public ArrayList<String> GroupAdd = new ArrayList<>();
 	public ArrayList<MountVolumeParam> Mounts = new ArrayList<>();
 	public HashMap<String, Object> RestartPolicy = new HashMap<String, Object>();
 	
@@ -114,6 +115,19 @@ public class HostConfigParam {
 			else {
 				sReturn += "\"Binds\": null,\n";
 			}
+			
+			if (GroupAdd.size()>0) {
+				sReturn += "\"GroupAdd\": [ ";
+				for (int iGroups = 0; iGroups<GroupAdd.size(); iGroups++) {
+					String sGroup = GroupAdd.get(iGroups);
+					sReturn += "\"" + sGroup.replace("\\", "\\\\") + "\"";
+					if (iGroups<GroupAdd.size()-1) sReturn +=",\n";
+				}
+				sReturn += "],\n";				
+			}
+//			else {
+//				sReturn += "\"Binds\": null,\n";
+//			}			
 			
 			sReturn += "\"ExtraHosts\": [ ";
 			for (int iExtraHosts = 0; iExtraHosts<ExtraHosts.size(); iExtraHosts++) {
