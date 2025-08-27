@@ -115,6 +115,7 @@ If you already know WASDI features and you are a Python developer check out the 
    ProgrammingTutorials/UITutorial.rst
    ProgrammingTutorials/JavascriptTutorialHtml.rst
    ProgrammingTutorials/JavascriptTutorial.rst
+   ProgrammingTutorials/AppsGoodPractices.rst
 
 
 Reference center

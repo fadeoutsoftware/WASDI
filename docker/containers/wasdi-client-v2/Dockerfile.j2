@@ -96,6 +96,9 @@ WORKDIR /var/www/html
 # Copy data
 COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/ /var/www/html/
 
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} set-env.sh /usr/local/bin/set-env.sh
+RUN chmod +x /usr/local/bin/set-env.sh
+
 
 # Start the container
-CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
+CMD ["/usr/local/bin/set-env.sh", "/usr/sbin/nginx", "-g", "daemon off;"]

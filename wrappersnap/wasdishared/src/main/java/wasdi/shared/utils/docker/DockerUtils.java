@@ -2065,7 +2065,7 @@ public class DockerUtils {
         		WasdiLog.debugLog("DockerUtils.run: the container is not available");
         		
         		// Since we are creating the Container, we need to set up our name
-        		sContainerName = sImageName.replace(":", "_") + "_" + Utils.getRandomName();
+        		sContainerName = sImageName.replace(":", "_").replace("/", "_") + "_" + Utils.getRandomName();
         		WasdiLog.debugLog("DockerUtils.run: try to create a container named " + sContainerName);
         		
         		if (sContainerName.length()>62) {
@@ -2121,7 +2121,16 @@ public class DockerUtils {
                         		oContainerCreateParams.HostConfig.ExtraHosts.add(sExtraHost);
                         	}
                     	}
-                    }            		   
+                    }
+                    
+                    if (WasdiConfig.Current.dockers.groupAdd != null) {
+                    	if (WasdiConfig.Current.dockers.groupAdd.size()>0) {
+                    		WasdiLog.debugLog("Adding Group Add with " + WasdiConfig.Current.dockers.groupAdd.size() + " entries");
+                    		for (String sGroupId : WasdiConfig.Current.dockers.groupAdd) {
+								oContainerCreateParams.HostConfig.GroupAdd.add(sGroupId);
+							}
+                    	}
+                    }
             		
                     // Convert the payload in JSON (NOTE: is hand-made !!)
             		String sContainerCreateParams = oContainerCreateParams.toJson();

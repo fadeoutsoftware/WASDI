@@ -347,15 +347,15 @@ public class WasdiScheduler
 						// Save the number of processes in waiting
 						iWDWaitingCount = aoWaitingList.size();
 						
-						// Check if we have the same number of elements in the created queue
-						if (iWDCreatedCount != aoCreatedList.size()) {
-							// If the number is different, or is the first time we detect it, or something moved
+						// Check if we the number of created elements is decreased
+						if (iWDCreatedCount > aoCreatedList.size()) {
+							// If the number is decreased, or is the first time we detect it, or something moved
 							// In both cases we can reset the counter							
 							iWatchDogCount = 0;
 						}
 						
 						// Save the number of processes created
-						iWDCreatedCount = aoCreatedList.size();						
+						iWDCreatedCount = aoCreatedList.size();			
 						
 						// We have people waiting, but nothinng running or ready. And nothing change in the last 30 secondos. This is not good
 						iWatchDogCount++;

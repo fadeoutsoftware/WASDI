@@ -8,14 +8,21 @@ package wasdi.shared.utils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.Node;
+import wasdi.shared.business.Organization;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Project;
 import wasdi.shared.business.S3Volume;
@@ -58,6 +65,7 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.wasdiAPI.ProcessorAPIClient;
 import wasdi.shared.utils.wasdiAPI.WorkspaceAPIClient;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
 
 /**
@@ -83,13 +91,15 @@ public class PermissionsUtils {
 	
 		try {
 			
+			
+			
 			String sActiveProjectOfUser = oUser.getActiveProjectId();
 			
 			if (sActiveProjectOfUser == null) {
 				WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + " has not an active project selected");
 				return false;
 			}
-			
+			 
 			ProjectRepository oProjectRepository = new ProjectRepository();
 			Project oUserProject = oProjectRepository.getProjectById(sActiveProjectOfUser);
 			
@@ -141,6 +151,198 @@ public class PermissionsUtils {
 		return false;
 	}
 	
+	
+	private static Map<String, String> getOrganizationNamesById(Collection<String> asOrganizationIds) {
+		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+		List<Organization> aoOrganizations = oOrganizationRepository.getOrganizations(asOrganizationIds);
+
+		return aoOrganizations.stream().collect(Collectors.toMap(Organization::getOrganizationId, Organization::getName));
+	}
+	
+	/**
+	 * Get Organization Name from id
+	 * @param sOrganizationId
+	 * @param aoOrgCache
+	 * @return
+	 */
+	public static String getOrganizationNameById(String sOrganizationId, Map<String, Organization> aoOrgCache) {
+		
+		if (Utils.isNullOrEmpty(sOrganizationId)) return null;
+		
+		try {
+			if (aoOrgCache != null) {
+				if (aoOrgCache.containsKey(sOrganizationId)) {
+					return aoOrgCache.get(sOrganizationId).getName();
+				}
+			}
+			
+			OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+			
+			Organization oOrg = oOrganizationRepository.getById(sOrganizationId);
+			
+			if (oOrg == null) return null;
+			
+			if (aoOrgCache != null) {
+				aoOrgCache.put(sOrganizationId, oOrg);
+			}
+			
+			return oOrg.getName();			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PermissionUtils.getOrganizationNameById: exception ", oEx );
+			return null;
+		}
+		
+		
+	}
+
+	
+	public static List<SubscriptionListViewModel> getUsersSubscriptionsList(User oUser, boolean bValid) {
+		
+		List<SubscriptionListViewModel> aoSubscriptionLVM = new ArrayList<>();
+
+		// Domain Check
+		if (oUser == null) {
+			WasdiLog.warnLog("PermissionsUtils.getUsersSubscriptionsList: invalid session");
+			return aoSubscriptionLVM;
+		}
+
+		try {
+			// 1. subscriptions directly owned by the user
+			// 2. subscriptions belonging to organizations owned by the user
+			// 3. subscriptions belonging to organizations shared with the user
+			// 4. subscriptions shared with the user on individual basis
+
+
+			// Get the list of Subscriptions owned by the user
+			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+			List<Subscription> aoOwnedSubscriptions = oSubscriptionRepository.getSubscriptionsByUser(oUser.getUserId());
+			
+			HashMap<String, Organization> aoOrgCache = new HashMap<>();
+			List<String> asAddedSubscriptions = new ArrayList<>();
+			
+			// For each
+			for (Subscription oSubscription : aoOwnedSubscriptions) {
+				
+				if (bValid) {
+					if (!oSubscription.isValid()) continue;
+				}				
+				
+				// Create View Model
+				SubscriptionListViewModel oSubscriptionViewModel = Subscription.convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), getOrganizationNameById(oSubscription.getOrganizationId(), aoOrgCache), "owner");
+				
+				if (oSubscriptionViewModel != null) {
+					asAddedSubscriptions.add(oSubscription.getSubscriptionId());
+					oSubscriptionViewModel.setOrganizationId(oSubscription.getOrganizationId());
+					oSubscriptionViewModel.setReadOnly(false);
+					aoSubscriptionLVM.add(oSubscriptionViewModel);
+				}
+				else {
+					WasdiLog.warnLog("SubscriptionResource.getUsersSubscriptionsList: Error converting a Owned Subscription, jumping");
+				}
+			}
+			
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			
+			String sUserId = oUser.getUserId(); 
+			
+			OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+			
+			// Get the list of orgs owned by the user
+			List<Organization> aoOwnedOrganizations = oOrganizationRepository.getOrganizationsOwnedByUser(oUser.getUserId());
+			
+			// And the ones shared with 
+			List<UserResourcePermission> aoSharedOrgs = oUserResourcePermissionRepository.getOrganizationSharingsByUserId(sUserId);
+			
+			Set<String> asOrganizationIdsOfOwnedByOrSharedWithUser = new HashSet<>();
+			
+			// Add the id of the owned 
+			for (Organization oOrg : aoOwnedOrganizations) {
+				asOrganizationIdsOfOwnedByOrSharedWithUser.add(oOrg.getOrganizationId());
+			}
+			
+			// And shared ones
+			for (UserResourcePermission oPerm : aoSharedOrgs) {
+				if (!asOrganizationIdsOfOwnedByOrSharedWithUser.contains(oPerm.getResourceId())) {
+					asOrganizationIdsOfOwnedByOrSharedWithUser.add(oPerm.getResourceId());	
+				}
+			}
+			
+			// Get the list of subscriptions associated to these organizations
+			List<Subscription> aoOrganizationalSubscriptions = oSubscriptionRepository.getSubscriptionsByOrganizations(asOrganizationIdsOfOwnedByOrSharedWithUser);
+			
+			for (Subscription oSubscription : aoOrganizationalSubscriptions) {
+				
+				if (!asAddedSubscriptions.contains(oSubscription.getSubscriptionId())) {
+					
+					boolean bToAdd=true;
+
+					if (bValid) {
+						bToAdd = oSubscription.isValid();
+					}
+					
+					
+					if (bToAdd) {
+						String sOrganizationName = getOrganizationNameById(oSubscription.getOrganizationId(), aoOrgCache);
+						SubscriptionListViewModel oSubscriptionViewModel = Subscription.convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), sOrganizationName, "shared by " + sOrganizationName);
+						
+						if (oSubscriptionViewModel != null) {
+							
+							oSubscriptionViewModel.setReadOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId()));
+							aoSubscriptionLVM.add(oSubscriptionViewModel);
+						}
+						else {
+							WasdiLog.warnLog("PermissionsUtils.getUsersSubscriptionsList: Error converting an Organization Subscription, jumping");
+						}						
+												
+					}
+				}
+			}
+			
+
+			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository.getSubscriptionSharingsByUserId(sUserId);
+			List<Subscription> aoSharedSubscriptions = new ArrayList<>();
+			
+			for (UserResourcePermission oUserResourcePermission : aoSharings) {
+				String sSubscriptionId = oUserResourcePermission.getResourceId();
+				if (asAddedSubscriptions.contains(sSubscriptionId)==false) {
+					Subscription oSub = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
+					if (oSub != null) {
+						aoSharedSubscriptions.add(oSub);
+					}
+				}
+			}			
+
+			for (Subscription oSubscription : aoSharedSubscriptions) {
+				
+				boolean bToAdd=true;
+
+				if (bValid) {
+					bToAdd = oSubscription.isValid();
+				}
+				
+				if (bToAdd) {
+					String sOrganizationName = getOrganizationNameById(oSubscription.getOrganizationId(), aoOrgCache);
+					
+					SubscriptionListViewModel oSubscriptionViewModel = Subscription.convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), sOrganizationName, "shared by user");
+	
+					if (oSubscriptionViewModel!=null) {
+						oSubscriptionViewModel.setReadOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId()));
+						aoSubscriptionLVM.add(oSubscriptionViewModel);
+					}
+					else {
+						WasdiLog.warnLog("SubscriptionResource.getUsersSubscriptionsList: Error converting a Shared Subscription, jumping");
+					}						
+				}
+			}
+			
+			return aoSubscriptionLVM;
+		} 
+		catch (Exception oEx) {
+			WasdiLog.errorLog("SubscriptionResource.getUsersSubscriptionsList error: " + oEx);
+			return aoSubscriptionLVM;
+		}		
+	}	
 	
 	/**
 	 * Get the type of a user
