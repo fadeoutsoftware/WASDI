@@ -32,6 +32,10 @@ public class WasdiConfig {
 	 * Node Code
 	 */
 	public String nodeCode = "wasdi";
+	/**
+	 * Wasdi print server url
+	 */
+	public String printServerAddress="";
 	
 	/**
 	 * Cloud of the main node

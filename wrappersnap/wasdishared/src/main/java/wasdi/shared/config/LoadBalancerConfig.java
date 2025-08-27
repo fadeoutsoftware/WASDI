@@ -29,5 +29,10 @@ public class LoadBalancerConfig {
 	 * Min RAM required for a Node: under this limit, it is considered a low performance mode and so penalized in the final ranking
 	 */
 	public int minTotalMemoryGBytes = 30;
+	
+	/**
+	 * If true, WASDI expects to have the metrics of the nodes updated to choose the node. If false, this step is not used
+	 */
+	public boolean activateMetrics = true;
 
 }
