@@ -134,6 +134,11 @@ public class DockersConfig {
 	public List<ProcessorTypeConfig> processorTypes = new ArrayList<>();
 	
 	/**
+	 * List of group id to add to the docker create command
+	 */
+	public List<String> groupAdd = new ArrayList<>();
+	
+	/**
 	 * Get the list of registers ordered by priority
 	 * @return Ordered list of registers
 	 */
