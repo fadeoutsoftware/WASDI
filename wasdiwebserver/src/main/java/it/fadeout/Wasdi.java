@@ -193,8 +193,11 @@ public class Wasdi extends ResourceConfig {
 		catch (Throwable oEx) {
 			WasdiLog.errorLog("Wasdi.initWasdi: Local Database config exception " + oEx.toString());
 		}
-
-		MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
+		
+		if (WasdiConfig.Current.mongoEcostress!=null) {
+			MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);	
+		}
+		
 		
 		// Configure Rabbit
 		try {

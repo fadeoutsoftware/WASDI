@@ -322,6 +322,7 @@ public class ProcessScheduler {
 									if (oPotentialNewProcess.getParentId().equals(oWaitingProcess.getProcessObjId())) {
 										oCandidate = oPotentialNewProcess;
 										oToUnblock = oWaitingProcess;
+										break;
 									}
 								}
 							}
