@@ -747,7 +747,7 @@ then
         addContentFromLineNumber \
             "CORS_JETTY" \
             "${sGeoserverWebApplicationConfigurationFile}" \
-            "${iCorsJettyBlockStartLineNumber}" \
+            "$((iCorsJettyBlockStartLineNumber + 1))" \
             "" \
             "-->"
 
