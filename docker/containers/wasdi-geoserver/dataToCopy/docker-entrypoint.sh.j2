@@ -719,8 +719,8 @@ then
     iCorsJettyBlockStartLineNumber=""
     iCorsJettyBlockStopLineNumber=""
 
-    displayLog "" "CORS_JETTY" "Search the line at which the CORS for Jetty block is starting"
-    iCorsJettyBlockStartLineNumber="$(grep --extended-regexp --ignore-case --line-number ".*Uncomment.*CORS$" ${sGeoserverWebApplicationConfigurationFile} | cut --delimiter ':' --fields 1)"
+    displayLog "" "CORS_JETTY" "Search the line at which the CORS for Jetty filter mapping is starting"
+    iCorsJettyBlockStartLineNumber="$(grep --extended-regexp --ignore-case --line-number ".*Uncomment.*filter-mapping.*CORS" ${sGeoserverWebApplicationConfigurationFile} | cut --delimiter ':' --fields 1)"
 
     if [[ -n "${iCorsJettyBlockStartLineNumber}" ]]
     then
@@ -731,7 +731,7 @@ then
 
     if [[ -n "${iCorsJettyBlockStartLineNumber}" ]]
     then
-        displayLog "" "CORS_JETTY" "Search the line at which the CORS for Jetty block is finishing"
+        displayLog "" "CORS_JETTY" "Search the line at which the CORS for Jetty filter mapping is finishing"
         iCorsJettyBlockStopLineNumber="$(grep --line-number "\-->" ${sGeoserverWebApplicationConfigurationFile} | cut --delimiter ':' --fields 1 | awk -v iCorsJettyBlockStartLineNumber=${iCorsJettyBlockStartLineNumber} '{ if ( $1 > iCorsJettyBlockStartLineNumber ) print $0}' | head --lines 1)"
 
         if [[ -n "${iCorsJettyBlockStopLineNumber}" ]]
