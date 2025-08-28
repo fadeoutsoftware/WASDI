@@ -21,6 +21,8 @@ import it.geosolutions.geoserver.rest.GeoServerRESTPublisher.Purge;
 import it.geosolutions.geoserver.rest.GeoServerRESTReader;
 import it.geosolutions.geoserver.rest.HTTPUtils;
 import it.geosolutions.geoserver.rest.decoder.RESTBoundingBox;
+import it.geosolutions.geoserver.rest.decoder.RESTCoverage;
+import it.geosolutions.geoserver.rest.decoder.RESTCoverageStore;
 import it.geosolutions.geoserver.rest.decoder.RESTLayer;
 import it.geosolutions.geoserver.rest.decoder.RESTLayer.Type;
 import it.geosolutions.geoserver.rest.decoder.RESTLayerList;
@@ -220,10 +222,25 @@ public class GeoServerManager {
 
     	RESTLayer oLayer = m_oGsReader.getLayer(m_sWorkspace, sLayerId);
     	
+    	
     	if (oLayer == null) return false;
     	return true;
     }
+
     
+    /**
+     * Checks if a coverage store exists
+     * @param sLayerId layer id to check
+     * @return true if exists, false if it does not exists
+     */
+    public boolean coverageStoreExists(String sCoverageId) {
+
+    	RESTCoverageStore oCoverageStore = m_oGsReader.getCoverageStore(m_sWorkspace, sCoverageId);
+    	
+    	if (oCoverageStore == null) return false;
+    	return true;
+    }
+
     
     /**
      * Publish a raster that had Pyramidization

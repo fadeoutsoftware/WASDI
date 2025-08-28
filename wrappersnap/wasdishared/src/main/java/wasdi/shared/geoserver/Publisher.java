@@ -6,17 +6,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
+import wasdi.shared.viewmodels.HttpCallResponse;
 
 
 /**
@@ -148,19 +151,58 @@ public class Publisher {
     }
 
 
-    private String publishGeoTiffImage(String sFileName, String sStoreName, String sEPSG, String sStyle, GeoServerManager oManager) throws Exception {
-
-        File oFile = new File(sFileName);
-
-        //publish image pyramid
+    public String publishGeoTiffImage(String sFileName, String sStoreName, String sEPSG, String sStyle, GeoServerManager oManager) throws Exception {
+        
+        String sUrl = WasdiConfig.Current.geoserver.address;
+        if (!sUrl.endsWith("/")) sUrl += "/";
+        sUrl += "rest/workspaces/wasdi/coveragestores/" + sStoreName + "/external.geotiff?coverageName="+sStoreName;
+        
+        //publish image
         try {
+        	boolean bCoverageDone = false;
         	
-            //Pubblico il layer
-            if (!oManager.publishStandardGeoTiff(sStoreName, oFile, sEPSG, sStyle, s_oLogger)) {
-            	WasdiLog.errorLog("Publisher.PublishGeoTiffImage: unable to publish geotiff " + sStoreName);
-            	return null;
+        	if (!oManager.coverageStoreExists(sStoreName)) {
+                Map<String, String> asHeaders = HttpUtils.getBasicAuthorizationHeaders(WasdiConfig.Current.geoserver.user, WasdiConfig.Current.geoserver.password);
+                asHeaders.put("Content-Type", "application/json");
+                asHeaders.put("Accept", "application/json");
+                String sResponse = HttpUtils.httpPut(sUrl, sFileName, asHeaders);
+                
+                WasdiLog.debugLog("Publisher.PublishGeoTiffImage: Create Coverage URL");
+                WasdiLog.debugLog(sUrl);
+                
+                WasdiLog.infoLog("Publisher.PublishGeoTiffImage: Create Coverage got Response Code: " + sResponse);
+                
+                if (!Utils.isNullOrEmpty(sResponse)) {
+                	bCoverageDone = true;
+                }
+        		
+        	}
+        	else {
+        		bCoverageDone = true;
+        	}
+            
+            if (bCoverageDone) {
+            	WasdiLog.infoLog("Publisher.PublishGeoTiffImage: coverage created or already existing");
+            	
+            	sUrl = WasdiConfig.Current.geoserver.address;
+                if (!sUrl.endsWith("/")) sUrl += "/";
+                sUrl += "rest/layers/wasdi:"+sStoreName;
+                Map<String, String> asHeaders = HttpUtils.getBasicAuthorizationHeaders(WasdiConfig.Current.geoserver.user, WasdiConfig.Current.geoserver.password);
+                asHeaders.put("Content-Type", "application/json");
+                String sPayload =  "{\"layer\": {\"name\": \""+ sStoreName +"\",\"defaultStyle\": {\"name\": \""+ sStyle +"\"}}}";
+                
+                String sResponse = HttpUtils.httpPut(sUrl, sPayload, asHeaders);
+                
+                WasdiLog.debugLog("Publisher.PublishGeoTiffImage: Create Layer payload");
+                WasdiLog.debugLog(sPayload);
+                WasdiLog.debugLog("Publisher.PublishGeoTiffImage: Create Layer URL");
+                WasdiLog.debugLog(sUrl);
+                
+                WasdiLog.infoLog("Publisher.PublishGeoTiffImage: Create Layer created " + sResponse);
             }
-            WasdiLog.infoLog("Publisher.PublishGeoTiffImage: geotiff published " + sStoreName);
+            else {
+            	WasdiLog.warnLog("Publisher.PublishGeoTiffImage: impossible to find or create the Coverage Store");
+            }
 
         } catch (Exception oEx) {
         	WasdiLog.errorLog("Publisher.PublishGeoTiffImage Exception: unable to publish geotiff " + sStoreName, oEx);
