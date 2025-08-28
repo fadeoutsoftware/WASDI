@@ -701,19 +701,29 @@ then
 
     if [[ -n "${iCorsJettyBlockStartLineNumber}" && -n "${iCorsJettyBlockStopLineNumber}" ]]
     then
-        addContentFromLineNumber \
-            "CORS_JETTY" \
-            "${sGeoserverWebApplicationConfigurationFile}" \
-            "${iCorsJettyBlockStartLineNumber}" \
-            "" \
-            "-->"
+        # Check if the comment block is already uncommented before modifying
+        sStartLineContent="$(sed --quiet "${iCorsJettyBlockStartLineNumber}p" ${sGeoserverWebApplicationConfigurationFile})"
+        if [[ "${sStartLineContent}" =~ .*"<!--".* ]]
+        then
+            addContentFromLineNumber \
+                "CORS_JETTY" \
+                "${sGeoserverWebApplicationConfigurationFile}" \
+                "${iCorsJettyBlockStartLineNumber}" \
+                "" \
+                "-->"
 
-        addContentFromLineNumber \
-            "CORS_JETTY" \
-            "${sGeoserverWebApplicationConfigurationFile}" \
-            "${iCorsJettyBlockStopLineNumber}" \
-            "    <!--" \
-            ""
+            # Only add comment prefix if the stop line doesn't already have a complete comment
+            sStopLineContent="$(sed --quiet "${iCorsJettyBlockStopLineNumber}p" ${sGeoserverWebApplicationConfigurationFile})"
+            if [[ ! "${sStopLineContent}" =~ .*"<!--".*"-->" ]]
+            then
+                addContentFromLineNumber \
+                    "CORS_JETTY" \
+                    "${sGeoserverWebApplicationConfigurationFile}" \
+                    "${iCorsJettyBlockStopLineNumber}" \
+                    "    <!--" \
+                    ""
+            fi
+        fi
     fi
 
     iCorsJettyBlockStartLineNumber=""
@@ -744,19 +754,29 @@ then
 
     if [[ -n "${iCorsJettyBlockStartLineNumber}" && -n "${iCorsJettyBlockStopLineNumber}" ]]
     then
-        addContentFromLineNumber \
-            "CORS_JETTY" \
-            "${sGeoserverWebApplicationConfigurationFile}" \
-            "${iCorsJettyBlockStartLineNumber}" \
-            "" \
-            "-->"
+        # Check if the comment block is already uncommented before modifying
+        sStartLineContent="$(sed --quiet "${iCorsJettyBlockStartLineNumber}p" ${sGeoserverWebApplicationConfigurationFile})"
+        if [[ "${sStartLineContent}" =~ .*"<!--".* ]]
+        then
+            addContentFromLineNumber \
+                "CORS_JETTY" \
+                "${sGeoserverWebApplicationConfigurationFile}" \
+                "${iCorsJettyBlockStartLineNumber}" \
+                "" \
+                "-->"
 
-        addContentFromLineNumber \
-            "CORS_JETTY" \
-            "${sGeoserverWebApplicationConfigurationFile}" \
-            "${iCorsJettyBlockStopLineNumber}" \
-            "    <!--" \
-            ""
+            # Only add comment prefix if the stop line doesn't already have a complete comment
+            sStopLineContent="$(sed --quiet "${iCorsJettyBlockStopLineNumber}p" ${sGeoserverWebApplicationConfigurationFile})"
+            if [[ ! "${sStopLineContent}" =~ .*"<!--".*"-->" ]]
+            then
+                addContentFromLineNumber \
+                    "CORS_JETTY" \
+                    "${sGeoserverWebApplicationConfigurationFile}" \
+                    "${iCorsJettyBlockStopLineNumber}" \
+                    "    <!--" \
+                    ""
+            fi
+        fi
     fi
 fi
 
