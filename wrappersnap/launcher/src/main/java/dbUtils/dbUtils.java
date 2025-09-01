@@ -2977,7 +2977,9 @@ public class dbUtils {
 					User oUser = oMapper.readValue(sJSON, User.class);	
 					String sType = PermissionsUtils.getUserType(oUser.getUserId());
 					
-					if (sType.equals(UserType.NONE.name()) || sType.equals(UserType.FREE.name())) {
+					if (sType.equals(UserType.NONE.name()) 
+							|| sType.equals(UserType.FREE.name()) 
+							|| sType.equals(UserType.STANDARD.name())) {
 						aoToChekUsers.add(oUser);
 						WasdiLog.debugLog(++i + "\t" + sType + "\t" + oUser.getUserId());						
 					}
@@ -3001,7 +3003,7 @@ public class dbUtils {
 					StorageUsageControl oStorageUsageControl = WasdiConfig.Current.storageUsageControl;
 					Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(sCandidateUserId);
 					
-					WasdiLog.infoLog("dbUtils.runWasdiCleanTask: " + sCandidateUserId + ", total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
+					WasdiLog.infoLog("dbUtils.runWasdiCleanTask: " + sCandidateUserId + ", type: " + PermissionsUtils.getUserType(sCandidateUserId) + ", total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
 					
 					long lNow = new Date().getTime(); 
 					long lStorageWarningDate = oCandidate.getStorageWarningSentDate().longValue();

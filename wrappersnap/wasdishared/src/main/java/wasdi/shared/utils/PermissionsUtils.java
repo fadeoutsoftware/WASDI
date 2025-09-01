@@ -118,14 +118,43 @@ public class PermissionsUtils {
 				return false;				
 			}
 			
-			// time-based model for not-free subscriptions
-			if (!oUserSubscription.getType().equals(SubscriptionType.Free.getTypeId())) {			
-				return oProjectRepository.checkValidSubscription(sActiveProjectOfUser);
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+
+			String sUserSubscriptionType = oUserSubscription.getType();
+	
+		 
+			if (!sUserSubscriptionType.equals(SubscriptionType.Free.getTypeId())) {
+				 
+				boolean bIsSubscriptionValidInTime = oProjectRepository.checkValidSubscription(sActiveProjectOfUser);
 				
-			}
+				// we apply only the time-based check to free subscriptions
+				if (sUserSubscriptionType.equals(SubscriptionType.OneMonthProfessional.getTypeId()) 
+					|| sUserSubscriptionType.equals(SubscriptionType.OneYearProfessional.getTypeId())) {
+					return bIsSubscriptionValidInTime;
+				}
+                
+				if (bIsSubscriptionValidInTime) {
+	                Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(oUser.getUserId());
+	                if (lTotalStorageUsage < 0L) {
+	                    WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. There was an error computing the total storage space for the user");
+	                    return false;
+	                }
+	                
+	                Long lStorageLimitSubscription = WasdiConfig.Current.storageUsageControl.storageSizeStandardSubscription;
+	                
+	                if (lTotalStorageUsage < lStorageLimitSubscription) {
+	                    return true;
+	                } 
+	                else {
+	                    WasdiLog.warnLog("PermissionsUtils.userHasValidSubscription. User " + oUser.getUserId() + 
+	                            " exceed the maximum storage size for " + sUserSubscriptionType + " subscription: " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
+	                    return false;
+	                }
+				}
+
+	        }
 			
 			// storage-based model for free subscriptions
-			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(oUser.getUserId());			
 			
 			if (lTotalStorageUsage < 0L) {

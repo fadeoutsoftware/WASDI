@@ -379,6 +379,10 @@ public abstract class Operation {
                         
             oWorkspace.setStorageSize(lWorkspaceSize);
             
+            if (!oWorkspaceRepository.updateWorkspace(oWorkspace)) {
+            	WasdiLog.warnLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: error updating the storage size for workspace: " + sWorkspace);
+            }
+            
         } catch (Exception oEx) {
         	WasdiLog.errorLog("Operation.addProductToDbAndWorkspaceAndSendToRabbit: error in updating the storage size of the workspace", oEx);
         }
