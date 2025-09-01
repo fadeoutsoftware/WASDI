@@ -1256,7 +1256,7 @@ public class AuthResource {
 	public Response getSkin(@HeaderParam("x-session-token") String sSessionId, @QueryParam("skin") String sSkin) {
 		try {
 			
-			if (Utils.isNullOrEmpty(sSkin)) sSkin = "wasdi";
+			if (Utils.isNullOrEmpty(sSkin)) sSkin = WasdiConfig.Current.defaultSkin;
 			
 			WasdiLog.debugLog("AuthResource.getSkin( skin: " + sSkin + ")");
 			

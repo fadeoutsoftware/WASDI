@@ -48,6 +48,11 @@ public class WasdiConfig {
 	public String usersDefaultNode;
 	
 	/**
+	 * Default skin to apply
+	 */
+	public String defaultSkin = "wasdi";
+	
+	/**
 	 * System name of the wasdi user
 	 */
 	public String systemUserName = "appwasdi";
