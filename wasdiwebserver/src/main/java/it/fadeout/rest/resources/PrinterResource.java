@@ -34,6 +34,7 @@ public class PrinterResource {
     @Produces({ "application/xml", "application/json", "text/xml" })
     @Consumes(MediaType.APPLICATION_JSON)
     public Response storemap(PrinterViewModel oPrinterViewModel) {
+    	WasdiLog.infoLog("Storing data to print");
         if(oPrinterViewModel == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -49,6 +50,7 @@ public class PrinterResource {
             return Response.status(Response.Status.BAD_REQUEST)
                     .build();
         }
+        WasdiLog.infoLog("data is valid");
         try {
             // Serialize the incoming PrintMapRequest object to JSON string
             ObjectMapper oObjectMapper = new ObjectMapper();
@@ -63,12 +65,13 @@ public class PrinterResource {
 
             // Send the request and get the response
             HttpClient oHttpClient = HttpClient.newHttpClient();
-            HttpResponse<String> externalApiResponse = oHttpClient.send(oExternalApiRequest, HttpResponse.BodyHandlers.ofString());
-
+            HttpResponse<String> oExternalApiResponse = oHttpClient.send(oExternalApiRequest, HttpResponse.BodyHandlers.ofString());
+            WasdiLog.infoLog("response is valid");
             // Check if the external API call was successful (e.g., 200 OK)
-            if (externalApiResponse.statusCode() == 200) {
+            if (oExternalApiResponse.statusCode() == 200) {
+            	WasdiLog.infoLog("response is valid");
                 // Parse the UUID from the external API's response body
-                Map<String, String> oResponseMap = oObjectMapper.readValue(externalApiResponse.body(), Map.class);
+                Map<String, String> oResponseMap = oObjectMapper.readValue(oExternalApiResponse.body(), Map.class);
                 String sUUID = oResponseMap.get("uuid");
 
                 if (sUUID != null && !sUUID.trim().isEmpty()) {
@@ -80,24 +83,27 @@ public class PrinterResource {
                             .build();
                 }
             } else {
+            	WasdiLog.errorLog("This is a bad gateway");
                 return Response.status(Response.Status.BAD_GATEWAY) // Indicate issue with upstream service
-                        .entity(Map.of("error", "External print service failed to store map. Status: " + externalApiResponse.statusCode()))
+                        .entity(Map.of("error", "External print service failed to store map. Status: " + oExternalApiResponse.statusCode()))
                         .build();
             }
 
         } catch (JsonProcessingException e) {
+        	WasdiLog.errorLog("This is not working because of json",e);
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(Map.of("error", "Invalid JSON format in request body."))
                     .build();
         } catch (Exception e) {
+        	WasdiLog.errorLog("This is not working because of ",e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(Map.of("error", "An unexpected error occurred during print job submission."))
+                    .entity(Map.of("error", "An unexpected error occurred during print job submission."+e))
                     .build();
         }
     }
 
     @GET
-    @Produces({ "application/pdf", "image/png" })
+    @Produces({ "application/pdf", "image/png" ,"text/xml"})
     public Response print(@QueryParam("uuid") String sUUID) {
         if (sUUID == null || sUUID.trim().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
