@@ -2999,7 +2999,7 @@ public class dbUtils {
 				
 				String sCandidateUserId = oCandidate.getUserId();
 				
-				PrimitiveResult oCheckSubscriptionResult = PermissionsUtils.userHasValidSubscription(oUser);
+				PrimitiveResult oCheckSubscriptionResult = PermissionsUtils.userHasValidSubscription(oCandidate);
 				
 				if (oCheckSubscriptionResult.getBoolValue()) {
 					

@@ -10,6 +10,10 @@ public class SkinViewModel {
 	private String supportLink;
 	private String brandMainColor;
 	private String brandSecondaryColor;
+	private String tabTitle;
+	private String favIcon;
+	private boolean activateSubscriptions=true;
+	
 	private ArrayList<String> defaultCategories;
 	
 	public String getLogoImage() {
@@ -66,6 +70,30 @@ public class SkinViewModel {
 
 	public void setDefaultCategories(ArrayList<String> defaultCategories) {
 		this.defaultCategories = defaultCategories;
+	}
+
+	public String getTabTitle() {
+		return tabTitle;
+	}
+
+	public void setTabTitle(String tabTitle) {
+		this.tabTitle = tabTitle;
+	}
+
+	public String getFavIcon() {
+		return favIcon;
+	}
+
+	public void setFavIcon(String favIcon) {
+		this.favIcon = favIcon;
+	}
+
+	public boolean isActivateSubscriptions() {
+		return activateSubscriptions;
+	}
+
+	public void setActivateSubscriptions(boolean activateSubscriptions) {
+		this.activateSubscriptions = activateSubscriptions;
 	}
 	
 	

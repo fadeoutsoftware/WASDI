@@ -91,6 +91,12 @@ public class PermissionsUtils {
 		oResult.setStringValue("");
 		oResult.setBoolValue(false);
 		
+		if (!WasdiConfig.Current.activateSubscriptionChecks) {
+			WasdiLog.infoLog("PermissionsUtils.userHasValidSubscription: activateSubscriptionChecks == FALSE, we allow all");
+			oResult.setBoolValue(true);
+			return oResult;			
+		}
+		
 		// We need a user to start
 		if (oUser == null) {
 			
