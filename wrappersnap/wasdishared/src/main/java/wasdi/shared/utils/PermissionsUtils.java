@@ -92,7 +92,7 @@ public class PermissionsUtils {
 		oResult.setBoolValue(false);
 		
 		if (!WasdiConfig.Current.activateSubscriptionChecks) {
-			WasdiLog.infoLog("PermissionsUtils.userHasValidSubscription: activateSubscriptionChecks == FALSE, we allow all");
+			WasdiLog.debugLog("PermissionsUtils.userHasValidSubscription: activateSubscriptionChecks == FALSE, we allow all");
 			oResult.setBoolValue(true);
 			return oResult;			
 		}
