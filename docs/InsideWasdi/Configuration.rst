@@ -19,10 +19,9 @@ components including:
 -  Web Server
 -  Database Utils
 
-Main }
+Main
 ------
-
-}
+These are the configuration properties at root level of the JSON file.
 
 ::
 
@@ -30,7 +29,8 @@ Main }
 
    ### Root Level Properties
 
-   ```json
+.. code:: json   
+
    {
      "nodeCode": "wasdi",
      "printServerAddress": "",
@@ -69,8 +69,7 @@ Root Properties Description
 | ``nodeCode``          | String      | Unique identifier for this    |
 |                       |             | WASDI node (default: “wasdi”) |
 +-----------------------+-------------+-------------------------------+
-| `                     | String      | URL of the WASDI print server |
-| `printServerAddress`` |             |                               |
+| ``printServerAddress``| String      | URL of the WASDI print server |
 +-----------------------+-------------+-------------------------------+
 | ``mainNodeCloud``     | String      | Cloud provider of the main    |
 |                       |             | node (e.g., “CREODIAS”).      |
@@ -166,8 +165,8 @@ Root Properties Description
 | ``useNot              | Boolean     | Use Docker internal names for |
 | ebooksDockerAddress`` |             | Jupyter notebooks             |
 +-----------------------+-------------+-------------------------------+
-| `                     | Boolean     | Enable NVIDIA GPU support for |
-| `nvidiaGPUAvailable`` |             | containers: set it true if    |
+| ``nvidiaGPUAvailable``| Boolean     | Enable NVIDIA GPU support for |
+|                       |             | containers: set it true if    |
 |                       |             | this node have a GPU          |
 +-----------------------+-------------+-------------------------------+
 
@@ -175,7 +174,8 @@ Database Configuration
 ----------------------
 
 MongoDB Configurations
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 WASDI supports multiple MongoDB instances for different purposes:
 
@@ -226,9 +226,12 @@ Property        Type    Description
 
 Authentication Configuration
 ----------------------------
+Settings about the authentication system.
 
 Keycloak Configuration
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Keycloak is used as authentication server for WASDI.
+
 
 .. code:: json
 
@@ -265,6 +268,7 @@ Property               Type    Description
 
 File System Paths Configuration
 -------------------------------
+In this section all the main paths needed by WASDI are configured.
 
 .. code:: json
 
@@ -304,8 +308,8 @@ Paths Configuration Properties
 +-----------------------+-------------+-------------------------------+
 | ``metadataPath``      | String      | Metadata files path           |
 +-----------------------+-------------+-------------------------------+
-| `                     | String      | Docker templates path         |
-| `dockerTemplatePath`` |             |                               |
+| ``dockerTemplatePath``| String      | Docker templates path         |
+|                       |             |                               |
 +-----------------------+-------------+-------------------------------+
 | ``sftpRootPath``      | String      | Root of the local SFTP server |
 +-----------------------+-------------+-------------------------------+
@@ -330,8 +334,8 @@ Paths Configuration Properties
 +-----------------------+-------------+-------------------------------+
 | ``s3VolumesBasePath`` | String      | S3 volumes mount folder path  |
 +-----------------------+-------------+-------------------------------+
-| ``                    | String      | Path to this configuration    |
-| wasdiConfigFilePath`` |             | file                          |
+|``wasdiConfigFilePath``| String      | Path to this configuration    |
+|                       |             | file                          |
 +-----------------------+-------------+-------------------------------+
 
 Docker Configuration
@@ -378,20 +382,20 @@ Docker Configuration Properties
 |                       |             | some clouds for network       |
 |                       |             | reasons)                      |
 +-----------------------+-------------+-------------------------------+
-| ``pip                 | String      | Address to use to access PyPI |
-| InstallWasdiAddress`` |             | to install waspy              |
+|``pipInstallWasdiAddress``| String      | Address to use to access PyPI |
+|                          |             | to install waspy              |
 +-----------------------+-------------+-------------------------------+
-| ``interna             | String      | Address to use to reach       |
-| lDockersBaseAddress`` |             | internal dockers (default:    |
+| ``internalDockersBaseAddress`` | String      | Address to use to reach   |
+|                                |             | internal dockers (default:|
 |                       |             | “localhost”)                  |
 +-----------------------+-------------+-------------------------------+
-| ``numberOfAtte        | Integer     | Number of attempts to ping    |
-| mptsToPingTheServer`` |             | server before deciding it’s   |
-|                       |             | down (default: 4)             |
+|``numberOfAttemptsToPingTheServer``| Integer     | Number of attempts to ping    |
+|                                   |             | server before deciding it’s   |
+|                                   |             | down (default: 4)             |
 +-----------------------+-------------+-------------------------------+
-| ``m                   | Integer     | Time (ms) to wait between     |
-| illisBetweenAttmpts`` |             | attempts to check if docker   |
-|                       |             | is started (default: 5000)    |
+| ``millisBetweenAttmpts`` | Integer     | Time (ms) to wait between     |
+|                          |             | attempts to check if docker   |
+|                          |             | is started (default: 5000)    |
 +-----------------------+-------------+-------------------------------+
 | ``millisB             | Integer     | Time (ms) to wait between     |
 | etweenStatusPolling`` |             | calls to docker engine API    |
@@ -433,8 +437,8 @@ Docker Configuration Properties
 | ckersAfterShellExec`` |             | execute (true for production, |
 |                       |             | false for debug)              |
 +-----------------------+-------------+-------------------------------+
-| `                     | Boolean     | Remove input/output files     |
-| `removeParameterFiles |             | after Python shell exec (true |
+|                        | Boolean     | Remove input/output files     |
+| ``removeParameterFiles |             | after Python shell exec (true |
 | ForPythonsShellExec`` |             | for production)               |
 +-----------------------+-------------+-------------------------------+
 | ``dockerNetworkMode`` | String      | Docker network mode (default: |
@@ -492,8 +496,8 @@ contains the following properties:
 | ``containerVersion``  | String      | Version of the docker image   |
 |                       |             | to use                        |
 +-----------------------+-------------+-------------------------------+
-| ``                    | Boolean     | If true (default), all        |
-| includeFirstCommand`` |             | command line parts are passed |
+|                     | Boolean     | If true (default), all        |
+| ``includeFirstCommand`` |             | command line parts are passed |
 |                       |             | as docker args. If false, the |
 |                       |             | first element is not passed   |
 |                       |             | to docker command line        |
@@ -507,8 +511,8 @@ contains the following properties:
 | ovePathFromFirstArg`` |             | path from the first command   |
 |                       |             | in the arg list               |
 +-----------------------+-------------+-------------------------------+
-| `                     | String      | Prefix that will be added as  |
-| `addPrefixToCommand`` |             | arg[0] of the shell execute   |
+|                      | String      | Prefix that will be added as  |
+| ``addPrefixToCommand`` |             | arg[0] of the shell execute   |
 +-----------------------+-------------+-------------------------------+
 | ``ad                  | Ar          | List of additional mount      |
 | ditionalMountPoints`` | ray[String] | points for this specific      |
