@@ -581,7 +581,7 @@ contains the following properties:
 +----------------------------------------+---------------+-------------------------------+
 
 Docker Registry Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: json
 
@@ -628,8 +628,10 @@ Docker Registry Configuration Properties
 Messaging Configuration
 -----------------------
 
+Configurations related to messages.
+
 RabbitMQ Configuration
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: json
 
@@ -919,7 +921,7 @@ Additional Service Configurations
 ---------------------------------
 
 GeoServer Configuration
-~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: json
 
@@ -935,44 +937,44 @@ GeoServer Configuration
 GeoServer Configuration Properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-+-----------------------+-------------+-------------------------------+
-| Property              | Type        | Description                   |
-+=======================+=============+===============================+
-| ``address``           | String      | GeoServer server address      |
-|                       |             | (e.g.,                        |
-|                       |             | “http:                        |
-|                       |             | //localhost:8080/geoserver/”) |
-+-----------------------+-------------+-------------------------------+
-| ``user``              | String      | GeoServer username for        |
-|                       |             | authentication                |
-+-----------------------+-------------+-------------------------------+
-| ``password``          | String      | GeoServer password for the    |
-|                       |             | above user                    |
-+-----------------------+-------------+-------------------------------+
-| ``maxGeotiffDimensionPyramid`` | String      | Maximum dimension in MB to    |
-|                       |             | publish single images. Over   |
-|                       |             | this limit, WASDI will create |
-|                       |             | a pyramid of the image        |
-+-----------------------+-------------+-------------------------------+
-| ``gdalRetileCommand`` | String      | GDAL retile command for       |
-|                       |             | pyramid creation (default:    |
-|                       |             | “gdal_retile.py -r bilinear   |
-|                       |             | -levels 4 -ps 2048 2048 -co   |
-|                       |             | TILED=YES”)                   |
-+-----------------------+-------------+-------------------------------+
-| ``localDebugPublishBand`` | Boolean     | Special debug mode for        |
-|                       |             | PublishBand operation. Forces |
-|                       |             | input DownloadedFile to be    |
-|                       |             | gathered from database using  |
-|                       |             | /data/wasdi/ instead of real  |
-|                       |             | local folder (default: false) |
-+-----------------------+-------------+-------------------------------+
-| ``defaultLayerToGetStyleImages`` | String      | Default layer used to get     |
-|                       |             | style images (default:        |
-|                       |             | “wasdi:ESA_CCI_LAND_COVER_2015”) |
-+-----------------------+-------------+-------------------------------+
++----------------------------------+-------------+----------------------------------+
+| Property                         | Type        | Description                      |
++==================================+=============+==================================+
+| ``address``                      | String      | GeoServer server address         |
+|                                  |             | (e.g.,                           |
+|                                  |             | “http:                           |
+|                                  |             | //localhost:8080/geoserver/”)    |
++----------------------------------+-------------+----------------------------------+
+| ``user``                         | String      | GeoServer username for           |
+|                                  |             | authentication                   |
++----------------------------------+-------------+----------------------------------+
+| ``password``                     | String      | GeoServer password for the       |
+|                                  |             | above user                       |
++----------------------------------+-------------+----------------------------------+
+| ``maxGeotiffDimensionPyramid``   | String      | Maximum dimension in MB to       |
+|                                  |             | publish single images. Over      |
+|                                  |             | this limit, WASDI will create    |
+|                                  |             | a pyramid of the image           |
++----------------------------------+-------------+----------------------------------+
+| ``gdalRetileCommand``            | String      | GDAL retile command for          |
+|                                  |             | pyramid creation (default:       |
+|                                  |             | “gdal_retile.py -r bilinear      |
+|                                  |             | -levels 4 -ps 2048 2048 -co      |
+|                                  |             | TILED=YES”)                      |
++----------------------------------+-------------+----------------------------------+
+| ``localDebugPublishBand``        | Boolean     | Special debug mode for           |
+|                                  |             | PublishBand operation. Forces    |
+|                                  |             | input DownloadedFile to be       |
+|                                  |             | gathered from database using     |
+|                                  |             | /data/wasdi/ instead of real     |
+|                                  |             | local folder (default: false)    |
++----------------------------------+-------------+----------------------------------+
+| ``defaultLayerToGetStyleImages`` | String      | Default layer used to get        |
+|                                  |             | style images (default:           |
+|                                  |             | “wasdi:ESA_CCI_LAND_COVER_2015”) |
++----------------------------------+-------------+----------------------------------+
 
-SFTP Configurationiguration Structure
+SFTP Configuration Structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 SFTP Configuration
@@ -993,12 +995,12 @@ SFTP Configuration
 SFTP Configuration Properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-+-----------------------+-------------+-------------------------------+
-| Property              | Type        | Description                   |
-+=======================+=============+===============================+
++------------------------------+-------------+-------------------------------+
+| Property                     | Type        | Description                   |
++==============================+=============+===============================+
 | ``sftpManagementMailSender`` | String      | Sender address for SFTP       |
-|                       |             | account emails                |
-+-----------------------+-------------+-------------------------------+
+|                              |             | account emails                |
++------------------------------+-------------+-------------------------------+
 
 *Note: The JSON example above shows additional properties (``address``,
 ``user``, ``password``, ``port``, ``uploadRootPath``) that may be used
@@ -1051,16 +1053,16 @@ Stripe Configuration
 StripeConfig Properties
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-+-----------------------+-------------+-------------------------------+
-| Property              | Type        | Description                   |
-+=======================+=============+===============================+
-| ``apiKey``            | String      | Stripe API key for            |
-|                       |             | authentication and payment    |
-|                       |             | processing                    |
-+-----------------------+-------------+-------------------------------+
++-----------------------+---------------------------+-------------------------------+
+| Property              | Type                      | Description                   |
++=======================+===========================+===============================+
+| ``apiKey``            | String                    | Stripe API key for            |
+|                       |                           | authentication and payment    |
+|                       |                           | processing                    |
++-----------------------+---------------------------+-------------------------------+
 | ``products``          | List<StripeProductConfig> | List of product-related       |
 |                       |                           | configuration entries         |
-+-----------------------+-------------+-------------------------------+
++-----------------------+---------------------------+-------------------------------+
 
 StripeProductConfig Properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1089,33 +1091,33 @@ Storage Usage Control
 StorageUsageControl Properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-+-----------------------+-------------+-------------------------------+
-| Property              | Type        | Description                   |
-+=======================+=============+===============================+
-| ``storageSizeFreeSubscription`` | Long        | Maximum storage space (in     |
-|                       |             | bytes) for FREE subscription  |
-|                       |             | plans (default: 20GB)         |
-+-----------------------+-------------+-------------------------------+
++-------------------------------------+-------------+-------------------------------+
+| Property                            | Type        | Description                   |
++=====================================+=============+===============================+
+| ``storageSizeFreeSubscription``     | Long        | Maximum storage space (in     |
+|                                     |             | bytes) for FREE subscription  |
+|                                     |             | plans (default: 20GB)         |
++-------------------------------------+-------------+-------------------------------+
 | ``storageSizeStandardSubscription`` | Long        | Maximum storage space (in     |
-|                       |             | bytes) for STANDARD           |
-|                       |             | subscription plans (default:  |
-|                       |             | 100GB)                        |
-+-----------------------+-------------+-------------------------------+
-| ``deletionDelayFromWarning`` | int         | Number of days to wait before |
-|                       |             | proceeding to workspace       |
-|                       |             | deletion after warning email  |
-|                       |             | is sent (default: 10)         |
-+-----------------------+-------------+-------------------------------+
-| ``isDeletionInTestMode`` | boolean     | If true, workspaces with      |
-|                       |             | invalid subscriptions will    |
-|                       |             | not be actually deleted, but  |
-|                       |             | admin notification emails     |
-|                       |             | will be sent instead          |
-+-----------------------+-------------+-------------------------------+
-| ``warningEmailConfig`` | Warning     | Configuration for warning     |
-|                       | EmailConfig | emails sent to users before   |
-|                       |             | workspace deletion            |
-+-----------------------+-------------+-------------------------------+
+|                                     |             | bytes) for STANDARD           |
+|                                     |             | subscription plans (default:  |
+|                                     |             | 100GB)                        |
++-------------------------------------+-------------+-------------------------------+
+| ``deletionDelayFromWarning``        | int         | Number of days to wait before |
+|                                     |             | proceeding to workspace       |
+|                                     |             | deletion after warning email  |
+|                                     |             | is sent (default: 10)         |
++-------------------------------------+-------------+-------------------------------+
+| ``isDeletionInTestMode``            | boolean     | If true, workspaces with      |
+|                                     |             | invalid subscriptions will    |
+|                                     |             | not be actually deleted, but  |
+|                                     |             | admin notification emails     |
+|                                     |             | will be sent instead          |
++-------------------------------------+-------------+-------------------------------+
+| ``warningEmailConfig``              | Warning     | Configuration for warning     |
+|                                     | EmailConfig | emails sent to users before   |
+|                                     |             | workspace deletion            |
++-------------------------------------+-------------+-------------------------------+
 
 WarningEmailConfig Properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1181,11 +1183,11 @@ SkinConfig Properties
 | ``brandMainColor``    | String      | Primary brand color in hex    |
 |                       |             | format (default: “#43526B”)   |
 +-----------------------+-------------+-------------------------------+
-| ``brandSecondaryColor`` | String      | Secondary brand color in hex  |
+|``brandSecondaryColor``| String      | Secondary brand color in hex  |
 |                       |             | format (default: “#009036”)   |
 +-----------------------+-------------+-------------------------------+
-| ``defaultCategories`` | ArrayList<String> | List of default categories    |
-|                       |                   | for the skin                  |
+| ``defaultCategories`` | ArrayList   | List of default categories    |
+|                       |  <String>   | for the skin                  |
 +-----------------------+-------------+-------------------------------+
 
 Node Score Configuration
@@ -1365,35 +1367,35 @@ SchedulerQueueConfig Properties
 
 Each of these, is a specific queue.
 
-+-----------------------+-------------+-------------------------------+
-| Property              | Type        | Description                   |
-+=======================+=============+===============================+
-| ``name``              | String      | Name identifier of the queue  |
-+-----------------------+-------------+-------------------------------+
-| ``maxQueue``          | String      | Maximum number of elements    |
-|                       |             | allowed in this queue         |
-+-----------------------+-------------+-------------------------------+
-| ``timeoutMs``         | String      | Queue timeout in milliseconds |
-|                       |             | for this specific queue       |
-+-----------------------+-------------+-------------------------------+
-| ``opTypes``           | String      | Comma-separated operation     |
-|                       |             | types supported by this queue |
-+-----------------------+-------------+-------------------------------+
-| ``opSubType``         | String      | Operation subtype (requires   |
-|                       |             | opTypes to contain only one   |
-|                       |             | operation)                    |
-+-----------------------+-------------+-------------------------------+
-| ``enabled``           | String      | Flag to enable or disable     |
-|                       |             | this queue                    |
-+-----------------------+-------------+-------------------------------+
++--------------------------+-------------+-------------------------------+
+| Property                 | Type        | Description                   |
++==========================+=============+===============================+
+| ``name``                 | String      | Name identifier of the queue  |
++--------------------------+-------------+-------------------------------+
+| ``maxQueue``             | String      | Maximum number of elements    |
+|                          |             | allowed in this queue         |
++--------------------------+-------------+-------------------------------+
+| ``timeoutMs``            | String      | Queue timeout in milliseconds |
+|                          |             | for this specific queue       |
++--------------------------+-------------+-------------------------------+
+| ``opTypes``              | String      | Comma-separated operation     |
+|                          |             | types supported by this queue |
++--------------------------+-------------+-------------------------------+
+| ``opSubType``            | String      | Operation subtype (requires   |
+|                          |             | opTypes to contain only one   |
+|                          |             | operation)                    |
++--------------------------+-------------+-------------------------------+
+| ``enabled``              | String      | Flag to enable or disable     |
+|                          |             | this queue                    |
++--------------------------+-------------+-------------------------------+
 | ``specialWaitCondition`` | boolean     | Flag to apply special wait    |
-|                       |             | condition considering waiting |
-|                       |             | queue (default: false)        |
-+-----------------------+-------------+-------------------------------+
-| ``maxWaitingQueue``   | int         | Maximum waiting processes     |
-|                       |             | before breaking FIFO rules    |
-|                       |             | (default: 100)                |
-+-----------------------+-------------+-------------------------------+
+|                          |             | condition considering waiting |
+|                          |             | queue (default: false)        |
++--------------------------+-------------+-------------------------------+
+| ``maxWaitingQueue``      | int         | Maximum waiting processes     |
+|                          |             | before breaking FIFO rules    |
+|                          |             | (default: 100)                |
++--------------------------+-------------+-------------------------------+
 
 Load Balancer Configuration
 ---------------------------
@@ -1413,31 +1415,31 @@ Load Balancer Configuration
 LoadBalancerConfig Properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-+-----------------------+-------------+-------------------------------+
-| Property              | Type        | Description                   |
-+=======================+=============+===============================+
-| ``includeMainClusterAsNode`` | boolean     | Flag to include main node in  |
-|                       |             | computational node evaluation |
-|                       |             | (default: false)              |
-+-----------------------+-------------+-------------------------------+
++------------------------------------+-------------+-------------------------------+
+| Property                           | Type        | Description                   |
++====================================+=============+===============================+
+| ``includeMainClusterAsNode``       | boolean     | Flag to include main node in  |
+|                                    |             | computational node evaluation |
+|                                    |             | (default: false)              |
++------------------------------------+-------------+-------------------------------+
 | ``diskOccupiedSpaceMaxPercentage`` | int         | Maximum percentage of disk    |
-|                       |             | space occupied to consider a  |
-|                       |             | node available (default: 90)  |
-+-----------------------+-------------+-------------------------------+
-| ``metricsMaxAgeSeconds`` | int         | Maximum age in seconds for    |
-|                       |             | node metrics before           |
-|                       |             | considering node down         |
-|                       |             | (default: 600)                |
-+-----------------------+-------------+-------------------------------+
-| ``minTotalMemoryGBytes`` | int         | Minimum RAM in GB required    |
-|                       |             | for a node to avoid low       |
-|                       |             | performance penalty (default: |
-|                       |             | 30)                           |
-+-----------------------+-------------+-------------------------------+
-| ``activateMetrics``   | boolean     | Flag to enable/disable        |
-|                       |             | metrics-based node selection  |
-|                       |             | (default: true)               |
-+-----------------------+-------------+-------------------------------+
+|                                    |             | space occupied to consider a  |
+|                                    |             | node available (default: 90)  |
++------------------------------------+-------------+-------------------------------+
+| ``metricsMaxAgeSeconds``           | int         | Maximum age in seconds for    |
+|                                    |             | node metrics before           |
+|                                    |             | considering node down         |
+|                                    |             | (default: 600)                |
++------------------------------------+-------------+-------------------------------+
+| ``minTotalMemoryGBytes``           | int         | Minimum RAM in GB required    |
+|                                    |             | for a node to avoid low       |
+|                                    |             | performance penalty (default: |
+|                                    |             | 30)                           |
++------------------------------------+-------------+-------------------------------+
+| ``activateMetrics``                | boolean     | Flag to enable/disable        |
+|                                    |             | metrics-based node selection  |
+|                                    |             | (default: true)               |
++------------------------------------+-------------+-------------------------------+
 
 Configuration File Location
 ---------------------------
