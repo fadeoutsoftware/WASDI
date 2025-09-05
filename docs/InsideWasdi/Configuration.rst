@@ -91,8 +91,8 @@ Root Properties Description
 | ``defaultSkin``       | String      | Default UI skin to apply      |
 |                       |             | (default: “wasdi”)            |
 +-----------------------+-------------+-------------------------------+
-| ``activat             | String      | Flag to activate or not the   |
-| eSubscriptionChecks`` |             | check and managament of       |
+| ``activateSubscriptionChecks``| Boolean     | Flag to activate or not the   |
+|                       |             | check and management of       |
 |                       |             | subscriptions                 |
 +-----------------------+-------------+-------------------------------+
 | ``systemUserName``    | String      | System user name for WASDI    |
@@ -159,12 +159,13 @@ Root Properties Description
 +-----------------------+-------------+-------------------------------+
 | ``addDateTimeToLogs`` | Boolean     | Add timestamp to log lines    |
 +-----------------------+-------------+-------------------------------+
-| ``filt                | Boolean     | Filter internal HTTP calls    |
-| erInternalHttpCalls`` |             | from HTTP logs                |
-+-----------------------+-------------+-------------------------------+
-| ``useNot              | Boolean     | Use Docker internal names for |
-| ebooksDockerAddress`` |             | Jupyter notebooks             |
-+-----------------------+-------------+-------------------------------+
+| ``filterInternalHttpCalls``   | Boolean     | Filter internal HTTP calls    |
+|                               |             | from HTTP logs                |
++-------------------------------+-------------+-------------------------------+
++-------------------------------+-------------+-------------------------------+
+| ``useNotebooksDockerAddress`` | Boolean     | Use Docker internal names for |
+|                               |             | Jupyter notebooks             |
++-------------------------------+-------------+-------------------------------+
 | ``nvidiaGPUAvailable``| Boolean     | Enable NVIDIA GPU support for |
 |                       |             | containers: set it true if    |
 |                       |             | this node have a GPU          |
@@ -319,8 +320,8 @@ Paths Configuration Properties
 +-----------------------+-------------+-------------------------------+
 | ``userHomePath``      | String      | User home path                |
 +-----------------------+-------------+-------------------------------+
-| ``mis                 | String      | Missions configuration file   |
-| sionsConfigFilePath`` |             | path                          |
+| ``missionsConfigFilePath``| String      | Missions configuration file   |
+|                       |             | path                          |
 +-----------------------+-------------+-------------------------------+
 | ``gdalPath``          | String      | GDAL binary path              |
 +-----------------------+-------------+-------------------------------+
@@ -329,8 +330,7 @@ Paths Configuration Properties
 | ``pythonExecPath``    | String      | Full path to Python           |
 |                       |             | executable                    |
 +-----------------------+-------------+-------------------------------+
-| ``t                   | String      | Traefik mounted volume path   |
-| raefikMountedVolume`` |             |                               |
+| ``traefikMountedVolume`` | String      | Traefik mounted volume path   |
 +-----------------------+-------------+-------------------------------+
 | ``s3VolumesBasePath`` | String      | S3 volumes mount folder path  |
 +-----------------------+-------------+-------------------------------+
@@ -377,14 +377,14 @@ Docker Configuration Properties
 +-----------------------+-------------+-------------------------------+
 | Property              | Type        | Description                   |
 +=======================+=============+===============================+
-| ``extraHosts``        | Ar          | Extra hosts to add to         |
-|                       | ray[String] | containers (may be needed in  |
-|                       |             | some clouds for network       |
-|                       |             | reasons)                      |
-+-----------------------+-------------+-------------------------------+
-|``pipInstallWasdiAddress``| String      | Address to use to access PyPI |
-|                          |             | to install waspy              |
-+-----------------------+-------------+-------------------------------+
+| ``extraHosts``        | Array[String] | Extra hosts to add to         |
+|                       |               | containers (may be needed in  |
+|                       |               | some clouds for network       |
+|                       |               | reasons)                      |
++-------------------------------+---------------+-------------------------------+
+|``pipInstallWasdiAddress``     | String        | Address to use to access PyPI |
+|                               |               | to install waspy              |
++-------------------------------+---------------+-------------------------------+
 | ``internalDockersBaseAddress`` | String      | Address to use to reach   |
 |                                |             | internal dockers (default:|
 |                       |             | “localhost”)                  |
@@ -397,60 +397,60 @@ Docker Configuration Properties
 |                          |             | attempts to check if docker   |
 |                          |             | is started (default: 5000)    |
 +-----------------------+-------------+-------------------------------+
-| ``millisB             | Integer     | Time (ms) to wait between     |
-| etweenStatusPolling`` |             | calls to docker engine API    |
-|                       |             | for status (default: 1000)    |
+| ``millisBetweenStatusPolling`` | Integer     | Time (ms) to wait between     |
+|                          |             | calls to docker engine API    |
+|                          |             | for status (default: 1000)    |
 +-----------------------+-------------+-------------------------------+
-| ``numberOfPollStatu   | Integer     | Number of cycles before       |
-| sPollingCycleForLog`` |             | waitContainer function logs   |
+| ``numberOfPollStatusPollingCycleForLog`` | Integer     | Number of cycles before       |
+|                       |             | waitContainer function logs   |
 |                       |             | activity (default: 30)        |
 +-----------------------+-------------+-------------------------------+
-| ``mi                  | Integer     | Time (ms) to wait for docker  |
-| llisWaitAfterDelete`` |             | to complete delete operation  |
+| ``millisWaitAfterDelete`` | Integer     | Time (ms) to wait for docker  |
+|                       |             | to complete delete operation  |
 |                       |             | (default: 15000)              |
 +-----------------------+-------------+-------------------------------+
-| ``millisWaitAfter     | Integer     | Time (ms) to wait after       |
-| DeployScriptCreated`` |             | deploy.sh file creation       |
+| ``millisWaitAfterDeployScriptCreated`` | Integer     | Time (ms) to wait after       |
+|                       |             | deploy.sh file creation       |
 |                       |             | (default: 2000)               |
 +-----------------------+-------------+-------------------------------+
-| `                     | Integer     | Time (ms) to wait for docker  |
-| `millisWaitForLogin`` |             | login operation (default:     |
+| ``millisWaitForLogin`` | Integer     | Time (ms) to wait for docker  |
+|                       |             | login operation (default:     |
 |                       |             | 4000)                         |
 +-----------------------+-------------+-------------------------------+
-| ``d                   | String      | Command to use to start       |
-| ockerComposeCommand`` |             | docker compose (default:      |
+| ``dockerComposeCommand`` | String      | Command to use to start       |
+|                       |             | docker compose (default:      |
 |                       |             | “docker-compose”)             |
 +-----------------------+-------------+-------------------------------+
-| ``inter               | String      | Address of the local Docker   |
-| nalDockerAPIAddress`` |             | instance API (default:        |
+| ``internalDockerAPIAddress`` | String      | Address of the local Docker   |
+|                       |             | instance API (default:        |
 |                       |             | “http://127.0.0.1:2375/”)     |
 +-----------------------+-------------+-------------------------------+
-| ``docke               | String      | Path of file with docker      |
-| rsDeployLogFilePath`` |             | build logs (default:          |
+| ``dockerDeployLogFilePath`` | String      | Path of file with docker      |
+|                       |             | build logs (default:          |
 |                       |             | “/var/log/wasdi/dockers.log”) |
 +-----------------------+-------------+-------------------------------+
-| ``logDo               | Boolean     | Enable logging of payload for |
-| ckerAPICallsPayload`` |             | Docker Engine API calls       |
+| ``logDockerAPICallsPayload`` | Boolean     | Enable logging of payload for |
+|                       |             | Docker Engine API calls       |
 |                       |             | (default: false)              |
 +-----------------------+-------------+-------------------------------+
-| ``removeDo            | Boolean     | Remove containers after shell |
-| ckersAfterShellExec`` |             | execute (true for production, |
+| ``removeDockerContainersAfterShellExec`` | Boolean     | Remove containers after shell |
+|                       |             | execute (true for production, |
 |                       |             | false for debug)              |
 +-----------------------+-------------+-------------------------------+
-|                        | Boolean     | Remove input/output files     |
-| ``removeParameterFiles |             | after Python shell exec (true |
-| ForPythonsShellExec`` |             | for production)               |
+| ``removeParameterFilesForPythonsShellExec`` | Boolean     | Remove input/output files     |
+|                       |             | after Python shell exec (true |
+|                       |             | for production)               |
 +-----------------------+-------------+-------------------------------+
 | ``dockerNetworkMode`` | String      | Docker network mode (default: |
 |                       |             | “net-wasdi”, can be           |
 |                       |             | overridden by shell exec      |
 |                       |             | items)                        |
 +-----------------------+-------------+-------------------------------+
-| ``pro                 | Integer     | Standard processors internal  |
-| cessorsInternalPort`` |             | port (default: 5000)          |
+| ``processorsInternalPort`` | Integer     | Standard processors internal  |
+|                       |             | port (default: 5000)          |
 +-----------------------+-------------+-------------------------------+
-| ``groupAdd``          | Ar          | List of group IDs to add to   |
-|                       | ray[String] | docker create command         |
+| ``groupAdd``          | Array[String] | List of group IDs to add to   |
+|                       |               | docker create command         |
 +-----------------------+-------------+-------------------------------+
 | ``registers``         | Array       | List of supported docker      |
 |                       | [DockerRegi | registries                    |
@@ -473,12 +473,11 @@ Docker Configuration Properties
 |                       |             | external tools run in         |
 |                       |             | containers.                   |
 +-----------------------+-------------+-------------------------------+
-| ``processorTypes``    | Arra        | Configuration of processor    |
-|                       | y[Processor | types                         |
-|                       | TypeConfig] |                               |
-+-----------------------+-------------+-------------------------------+
-| ``eoepca``            | E           | Configuration of EoEpca       |
-|                       | OEPCAConfig | related docker parameters     |
+| ``processorTypes``    | Array[ProcessorTypeConfig] | Configuration of processor    |
+|                       |                            | types                         |
++-----------------------+----------------------------+-------------------------------+
+| ``eoepca``            | EOEPCAConfig | Configuration of EoEpca       |
+|                       |              | related docker parameters     |
 +-----------------------+-------------+-------------------------------+
 
 ShellExecItemConfig Properties
@@ -507,19 +506,19 @@ contains the following properties:
 |                       |             | WASDI is configured to be     |
 |                       |             | dockerized (default: false)   |
 +-----------------------+-------------+-------------------------------+
-| ``rem                 | Boolean     | If true, WASDI removes the    |
-| ovePathFromFirstArg`` |             | path from the first command   |
+| ``removePathFromFirstArg``| Boolean     | If true, WASDI removes the    |
+|                       |             | path from the first command   |
 |                       |             | in the arg list               |
 +-----------------------+-------------+-------------------------------+
 |                      | String      | Prefix that will be added as  |
 | ``addPrefixToCommand`` |             | arg[0] of the shell execute   |
 +-----------------------+-------------+-------------------------------+
-| ``ad                  | Ar          | List of additional mount      |
-| ditionalMountPoints`` | ray[String] | points for this specific      |
+| ``additionalMountPoints`` | Array[String] | List of additional mount      |
+|                       |             | points for this specific      |
 |                       |             | docker                        |
 +-----------------------+-------------+-------------------------------+
-| ``o                   | Boolean     | Enable override of            |
-| verrideDockerConfig`` |             | system/docker config (user,   |
+| ``overrideDockerConfig`` | Boolean     | Enable override of            |
+|                       |             | system/docker config (user,   |
 |                       |             | group, network) with specific |
 |                       |             | values for this docker        |
 +-----------------------+-------------+-------------------------------+
@@ -551,16 +550,16 @@ contains the following properties:
 +=======================+=============+===============================+
 | ``processorType``     | String      | Name of the processor type    |
 +-----------------------+-------------+-------------------------------+
-| ``ad                  | Ar          | List of additional mount      |
-| ditionalMountPoints`` | ray[String] | points for this specific      |
+| ``additionalMountPoints`` | Array[String] | List of additional mount      |
+|                       |             | points for this specific      |
 |                       |             | docker                        |
 +-----------------------+-------------+-------------------------------+
-| ``commands``          | Ar          | List of additional commands   |
-|                       | ray[String] | for this specific docker      |
+| ``commands``          | Array[String] | List of additional commands   |
+|                       |               | for this specific docker      |
 +-----------------------+-------------+-------------------------------+
-| ``e                   | Array[Envi  | List of environment variables |
-| nvironmentVariables`` | ronmentVari | to pass when creating the     |
-|                       | ableConfig] | container                     |
+| ``environmentVariables`` | Array[EnvironmentVariableConfig] | List of environment variables |
+|                       |             | to pass when creating the     |
+|                       |             | container                     |
 +-----------------------+-------------+-------------------------------+
 | ``image``             | String      | Name of the base image to use |
 |                       |             | (if needed)                   |
@@ -568,32 +567,23 @@ contains the following properties:
 | ``version``           | String      | Version of the base image to  |
 |                       |             | use (if needed)               |
 +-----------------------+-------------+-------------------------------+
-| ``extraHosts``        | Ar          | Personalized extra hosts for  |
-|                       | ray[String] | this processor type           |
+| ``extraHosts``        | Array[String] | Personalized extra hosts for  |
+|                       |               | this processor type           |
 +-----------------------+-------------+-------------------------------+
-| ``mount               | Boolean     | If true, mount only           |
-| OnlyWorkspaceFolder`` |             | ``/data/wasdi/[usr]/[wsid]/`` |
+| ``mountOnlyWorkspaceFolder`` | Boolean     | If true, mount only           |
+|                       |             | ``/data/wasdi/[usr]/[wsid]/`` |
 |                       |             | folder instead of entire      |
 |                       |             | ``/data/wasdi`` folder        |
 +-----------------------+-------------+-------------------------------+
-| ``templateFilesTo     | Ar          | List of file names that must  |
-| ExcludeFromDownload`` | ray[String] | not be downloaded when        |
-|                       |             | zipping the processor         |
+| ``templateFilesToExcludeFromDownload`` | Array[String] | List of file names that must  |
+|                                        |               | not be downloaded when        |
+|                                        |               | zipping the processor         |
 +-----------------------+-------------+-------------------------------+
 
 Docker Registry Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-} }
-
-::
-
-
-
-
-   ### Docker Registry Configuration
-
-   ```json
+.. code:: json
    {
      "registers": [
        {
@@ -696,8 +686,8 @@ Notifications Configuration Properties
 | ``                    | String      | Title of the password         |
 | pwRecoveryMailTitle`` |             | recovery email                |
 +-----------------------+-------------+-------------------------------+
-| ``p                   | String      | Sender address for password   |
-| wRecoveryMailSender`` |             | recovery emails               |
+| ``pwRecoveryMailSender`` | String      | Sender address for password   |
+|                       |             | recovery emails               |
 +-----------------------+-------------+-------------------------------+
 | `                     | String      | Text content of the password  |
 | `pwRecoveryMailText`` |             | recovery email                |
@@ -705,8 +695,8 @@ Notifications Configuration Properties
 | ``sftpMailTitle``     | String      | Title of the SFTP account     |
 |                       |             | notification email            |
 +-----------------------+-------------+-------------------------------+
-| ``sftpM               | String      | Sender address for SFTP       |
-| anagementMailSender`` |             | account emails                |
+| ``sftpManagementMailSender`` | String      | Sender address for SFTP       |
+|                       |             | account emails                |
 +-----------------------+-------------+-------------------------------+
 | ``sftpMailText``      | String      | Text content of the SFTP      |
 |                       |             | account notification email    |
@@ -802,14 +792,14 @@ Data Provider Configuration Properties
 |                       |             | QueryExecutors and            |
 |                       |             | ProviderAdapters)             |
 +-----------------------+-------------+-------------------------------+
-| ``que                 | String      | Full class name and path of   |
-| ryExecutorClasspath`` |             | the QueryExecutor             |
+| ``queryExecutorClasspath`` | String      | Full class name and path of   |
+|                       |             | the QueryExecutor             |
 |                       |             | implementation (used to       |
 |                       |             | create the Java class with    |
 |                       |             | reflection)                   |
 +-----------------------+-------------+-------------------------------+
-| ``provi               | String      | Full class name and path of   |
-| derAdapterClasspath`` |             | the ProviderAdapter           |
+| ``providerAdapterClasspath`` | String      | Full class name and path of   |
+|                       |             | the ProviderAdapter           |
 |                       |             | implementation (used to       |
 |                       |             | create the Java class with    |
 |                       |             | reflection)                   |
@@ -863,8 +853,8 @@ Data Provider Configuration Properties
 |                       |             | where this data provider is   |
 |                       |             | hosted                        |
 +-----------------------+-------------+-------------------------------+
-| `                     | Ar          | List of platforms supported   |
-| `supportedPlatforms`` | ray[String] | by this data provider         |
+| ``supportedPlatforms``| Array[String] | List of platforms supported   |
+|                       |               | by this data provider         |
 +-----------------------+-------------+-------------------------------+
 
 Catalogue Configuration
@@ -916,13 +906,12 @@ Catalogue Configuration Properties
 |                       |             | defined by the Platform class |
 |                       |             | (e.g., “S1”, “S2”, “S3”)      |
 +-----------------------+-------------+-------------------------------+
-| ``catalogues``        | Ar          | List of catalogues supporting |
-|                       | ray[String] | the Platform Type. Each       |
-|                       |             | string is the code of a       |
-|                       |             | Q                             |
-|                       |             | ueryExecutor/ProviderAdapter. |
-|                       |             | The first element has the     |
-|                       |             | highest priority.             |
+| ``catalogues``        | Array[String] | List of catalogues supporting |
+|                       |               | the Platform Type. Each       |
+|                       |               | string is the code of a       |
+|                       |               | QueryExecutor/ProviderAdapter.|
+|                       |               | The first element has the     |
+|                       |               | highest priority.             |
 +-----------------------+-------------+-------------------------------+
 
 Additional Service Configurations
@@ -959,8 +948,8 @@ GeoServer Configuration Properties
 | ``password``          | String      | GeoServer password for the    |
 |                       |             | above user                    |
 +-----------------------+-------------+-------------------------------+
-| ``maxGeot             | String      | Maximum dimension in MB to    |
-| iffDimensionPyramid`` |             | publish single images. Over   |
+| ``maxGeotiffDimensionPyramid`` | String      | Maximum dimension in MB to    |
+|                       |             | publish single images. Over   |
 |                       |             | this limit, WASDI will create |
 |                       |             | a pyramid of the image        |
 +-----------------------+-------------+-------------------------------+
@@ -970,17 +959,16 @@ GeoServer Configuration Properties
 |                       |             | -levels 4 -ps 2048 2048 -co   |
 |                       |             | TILED=YES”)                   |
 +-----------------------+-------------+-------------------------------+
-| ``l                   | Boolean     | Special debug mode for        |
-| ocalDebugPublisBand`` |             | PublishBand operation. Forces |
+| ``localDebugPublishBand`` | Boolean     | Special debug mode for        |
+|                       |             | PublishBand operation. Forces |
 |                       |             | input DownloadedFile to be    |
 |                       |             | gathered from database using  |
 |                       |             | /data/wasdi/ instead of real  |
 |                       |             | local folder (default: false) |
 +-----------------------+-------------+-------------------------------+
-| ``defaultLa           | String      | Default layer used to get     |
-| yerToGetStyleImages`` |             | style images (default:        |
-|                       |             | “wa                           |
-|                       |             | sdi:ESA_CCI_LAND_COVER_2015”) |
+| ``defaultLayerToGetStyleImages`` | String      | Default layer used to get     |
+|                       |             | style images (default:        |
+|                       |             | “wasdi:ESA_CCI_LAND_COVER_2015”) |
 +-----------------------+-------------+-------------------------------+
 
 SFTP Configurationiguration Structure
@@ -1007,9 +995,8 @@ SFTP Configuration Properties
 +-----------------------+-------------+-------------------------------+
 | Property              | Type        | Description                   |
 +=======================+=============+===============================+
-| ``sftpManagem         | String      | Address of the local Web      |
-| entWSServiceAddress`` |             | Socket server to create and   |
-|                       |             | delete SFTP users             |
+| ``sftpManagementMailSender`` | String      | Sender address for SFTP       |
+|                       |             | account emails                |
 +-----------------------+-------------+-------------------------------+
 
 *Note: The JSON example above shows additional properties (``address``,
@@ -1070,9 +1057,8 @@ StripeConfig Properties
 |                       |             | authentication and payment    |
 |                       |             | processing                    |
 +-----------------------+-------------+-------------------------------+
-| ``products``          | Lis         | List of product-related       |
-|                       | t<StripePro | configuration entries         |
-|                       | ductConfig> |                               |
+| ``products``          | List<StripeProductConfig> | List of product-related       |
+|                       |                           | configuration entries         |
 +-----------------------+-------------+-------------------------------+
 
 StripeProductConfig Properties
@@ -1105,28 +1091,28 @@ StorageUsageControl Properties
 +-----------------------+-------------+-------------------------------+
 | Property              | Type        | Description                   |
 +=======================+=============+===============================+
-| ``storageS            | Long        | Maximum storage space (in     |
-| izeFreeSubscription`` |             | bytes) for FREE subscription  |
+| ``storageSizeFreeSubscription`` | Long        | Maximum storage space (in     |
+|                       |             | bytes) for FREE subscription  |
 |                       |             | plans (default: 20GB)         |
 +-----------------------+-------------+-------------------------------+
-| ``storageSizeS        | Long        | Maximum storage space (in     |
-| tandardSubscription`` |             | bytes) for STANDARD           |
+| ``storageSizeStandardSubscription`` | Long        | Maximum storage space (in     |
+|                       |             | bytes) for STANDARD           |
 |                       |             | subscription plans (default:  |
 |                       |             | 100GB)                        |
 +-----------------------+-------------+-------------------------------+
-| ``delet               | int         | Number of days to wait before |
-| ionDelayFromWarning`` |             | proceeding to workspace       |
+| ``deletionDelayFromWarning`` | int         | Number of days to wait before |
+|                       |             | proceeding to workspace       |
 |                       |             | deletion after warning email  |
 |                       |             | is sent (default: 10)         |
 +-----------------------+-------------+-------------------------------+
-| ``i                   | boolean     | If true, workspaces with      |
-| sDeletionInTestMode`` |             | invalid subscriptions will    |
+| ``isDeletionInTestMode`` | boolean     | If true, workspaces with      |
+|                       |             | invalid subscriptions will    |
 |                       |             | not be actually deleted, but  |
 |                       |             | admin notification emails     |
 |                       |             | will be sent instead          |
 +-----------------------+-------------+-------------------------------+
-| `                     | Warning     | Configuration for warning     |
-| `warningEmailConfig`` | EmailConfig | emails sent to users before   |
+| ``warningEmailConfig`` | Warning     | Configuration for warning     |
+|                       | EmailConfig | emails sent to users before   |
 |                       |             | workspace deletion            |
 +-----------------------+-------------+-------------------------------+
 
@@ -1194,11 +1180,11 @@ SkinConfig Properties
 | ``brandMainColor``    | String      | Primary brand color in hex    |
 |                       |             | format (default: “#43526B”)   |
 +-----------------------+-------------+-------------------------------+
-| ``                    | String      | Secondary brand color in hex  |
-| brandSecondaryColor`` |             | format (default: “#009036”)   |
+| ``brandSecondaryColor`` | String      | Secondary brand color in hex  |
+|                       |             | format (default: “#009036”)   |
 +-----------------------+-------------+-------------------------------+
-| ``defaultCategories`` | ArrayL      | List of default categories    |
-|                       | ist<String> | for the skin                  |
+| ``defaultCategories`` | ArrayList<String> | List of default categories    |
+|                       |                   | for the skin                  |
 +-----------------------+-------------+-------------------------------+
 
 Node Score Configuration
@@ -1218,8 +1204,8 @@ NodeScoreConfig Properties
 +-----------------------+-------------+-------------------------------+
 | Property              | Type        | Description                   |
 +=======================+=============+===============================+
-| ``m                   | int         | Minimum total memory in GB    |
-| inTotalMemoryGBytes`` |             | required for node scoring     |
+| ``minTotalMemoryGBytes`` | int         | Minimum total memory in GB    |
+|                       |             | required for node scoring     |
 |                       |             | (default: 30)                 |
 +-----------------------+-------------+-------------------------------+
 
@@ -1331,12 +1317,12 @@ These are the configurations of the default scheduler
 +-----------------------+-------------+-------------------------------+
 | Property              | Type        | Description                   |
 +=======================+=============+===============================+
-| ``processi            | String      | Number of milliseconds to     |
-| ngThreadWaitStartMS`` |             | wait after a process is       |
+| ``processingThreadWaitStartMS`` | String      | Number of milliseconds to     |
+|                       |             | wait after a process is       |
 |                       |             | started                       |
 +-----------------------+-------------+-------------------------------+
-| ``processingT         | String      | Number of milliseconds to     |
-| hreadSleepingTimeMS`` |             | sleep between scheduler       |
+| ``processingThreadSleepingTimeMS`` | String      | Number of milliseconds to     |
+|                       |             | sleep between scheduler       |
 |                       |             | cycles                        |
 +-----------------------+-------------+-------------------------------+
 | ``launcherPath``      | String      | Full path of Launcher jar     |
@@ -1353,12 +1339,12 @@ These are the configurations of the default scheduler
 | ``timeoutMs``         | String      | Default queue timeout in      |
 |                       |             | milliseconds                  |
 +-----------------------+-------------+-------------------------------+
-| ``lastSta             | int         | Direction to order process    |
-| teChangeDateOrderBy`` |             | workspaces in scheduler queue |
+| ``lastStateChangeDateOrderBy`` | int         | Direction to order process    |
+|                       |             | workspaces in scheduler queue |
 |                       |             | (default: -1)                 |
 +-----------------------+-------------+-------------------------------+
-| ``so                  | int         | Number of cycles before       |
-| metimesCheckCounter`` |             | starting periodic checks      |
+| ``sometimesCheckCounter`` | int         | Number of cycles before       |
+|                       |             | starting periodic checks      |
 |                       |             | (default: 30)                 |
 +-----------------------+-------------+-------------------------------+
 | ``watchDogCounter``   | int         | Counter for deadlock          |
@@ -1369,9 +1355,8 @@ These are the configurations of the default scheduler
 |                       |             | deactivate the watch dog      |
 |                       |             | functionality (default: true) |
 +-----------------------+-------------+-------------------------------+
-| ``schedulers``        | ArrayList   | List of configured scheduler  |
-|                       | <SchedulerQ | queues                        |
-|                       | ueueConfig> |                               |
+| ``schedulers``        | ArrayList<SchedulerQueueConfig> | List of configured scheduler  |
+|                       |                                 | queues                        |
 +-----------------------+-------------+-------------------------------+
 
 SchedulerQueueConfig Properties
@@ -1400,8 +1385,8 @@ Each of these, is a specific queue.
 | ``enabled``           | String      | Flag to enable or disable     |
 |                       |             | this queue                    |
 +-----------------------+-------------+-------------------------------+
-| ``s                   | boolean     | Flag to apply special wait    |
-| pecialWaitCondition`` |             | condition considering waiting |
+| ``specialWaitCondition`` | boolean     | Flag to apply special wait    |
+|                       |             | condition considering waiting |
 |                       |             | queue (default: false)        |
 +-----------------------+-------------+-------------------------------+
 | ``maxWaitingQueue``   | int         | Maximum waiting processes     |
@@ -1430,21 +1415,21 @@ LoadBalancerConfig Properties
 +-----------------------+-------------+-------------------------------+
 | Property              | Type        | Description                   |
 +=======================+=============+===============================+
-| ``inclu               | boolean     | Flag to include main node in  |
-| deMainClusterAsNode`` |             | computational node evaluation |
+| ``includeMainClusterAsNode`` | boolean     | Flag to include main node in  |
+|                       |             | computational node evaluation |
 |                       |             | (default: false)              |
 +-----------------------+-------------+-------------------------------+
-| ``diskOccupie         | int         | Maximum percentage of disk    |
-| dSpaceMaxPercentage`` |             | space occupied to consider a  |
+| ``diskOccupiedSpaceMaxPercentage`` | int         | Maximum percentage of disk    |
+|                       |             | space occupied to consider a  |
 |                       |             | node available (default: 90)  |
 +-----------------------+-------------+-------------------------------+
-| ``m                   | int         | Maximum age in seconds for    |
-| etricsMaxAgeSeconds`` |             | node metrics before           |
+| ``metricsMaxAgeSeconds`` | int         | Maximum age in seconds for    |
+|                       |             | node metrics before           |
 |                       |             | considering node down         |
 |                       |             | (default: 600)                |
 +-----------------------+-------------+-------------------------------+
-| ``m                   | int         | Minimum RAM in GB required    |
-| inTotalMemoryGBytes`` |             | for a node to avoid low       |
+| ``minTotalMemoryGBytes`` | int         | Minimum RAM in GB required    |
+|                       |             | for a node to avoid low       |
 |                       |             | performance penalty (default: |
 |                       |             | 30)                           |
 +-----------------------+-------------+-------------------------------+
