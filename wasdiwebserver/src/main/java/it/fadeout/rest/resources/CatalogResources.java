@@ -74,7 +74,8 @@ public class CatalogResources {
 			@QueryParam("token") String sTokenSessionId,
 			@QueryParam("filename") String sFileName,
 			@QueryParam("workspace") String sWorkspaceId,
-			@QueryParam("procws") String sProcessObjId
+			@QueryParam("procws") String sProcessObjId,
+		    @QueryParam("disposition") String sDisposition // This is now optional
 			)
 	{			
 
@@ -128,13 +129,24 @@ public class CatalogResources {
 					return prepareAndReturnZip(oFile);
 				} else {
 					// No, just return the stream
-					WasdiLog.debugLog("CatalogResources.downloadEntryByName: no need to zip file " + oFile.getName());
-					oStream = new FileStreamingOutput(oFile);
-					WasdiLog.debugLog("CatalogResources.downloadEntryByName: file ok return content");
-					oResponseBuilder = Response.ok(oStream);
-					oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
+					 WasdiLog.debugLog("CatalogResources.downloadEntryByName: no need to zip file " + oFile.getName());
+		             oStream = new FileStreamingOutput(oFile);
+		             WasdiLog.debugLog("CatalogResources.downloadEntryByName: file ok return content");
+		             oResponseBuilder = Response.ok(oStream);
+		             
+		             // Check if the disposition is explicitly set to inline
+		             if (sDisposition != null && "inline".equalsIgnoreCase(sDisposition)) {
+		                 oResponseBuilder.header("Content-Disposition", "inline; filename=\"" + oFile.getName() + "\"");
+		             } else {
+		                 // Default behavior: download (for backwards compatibility)
+		                 oResponseBuilder.header("Content-Disposition", "attachment; filename=\"" + oFile.getName() + "\"");
+		             }
+		             
+		             oResponseBuilder.header("Access-Control-Expose-Headers", "Content-Disposition");
+		             
+					/*oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
 					//oResponseBuilder.header("Content-Length", Long.toString(oFile.length()));
-					oResponseBuilder.header("Access-Control-Expose-Headers", "Content-Disposition");
+					oResponseBuilder.header("Access-Control-Expose-Headers", "Content-Disposition");*/
 				}
 			}
 			
