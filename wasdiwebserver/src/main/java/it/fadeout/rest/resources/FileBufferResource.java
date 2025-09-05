@@ -340,10 +340,13 @@ public class FileBufferResource {
 				return oResult;
 			}
 			
-			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+			PrimitiveResult oCheckSubscriptionResult = PermissionsUtils.userHasValidSubscription(oUser);
+			
+			if (!oCheckSubscriptionResult.getBoolValue()) {
 				// Need a subscription valid to import data
 				WasdiLog.warnLog("FileBufferResource.imageImport: No valid Subscription");
 				oResult.setIntValue(401);
+				oResult.setStringValue(oCheckSubscriptionResult.getStringValue());
 				return oResult;
 			}
 

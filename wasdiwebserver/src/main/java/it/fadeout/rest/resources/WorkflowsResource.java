@@ -840,10 +840,13 @@ public class WorkflowsResource {
             return oResult;
         }
         
-        if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+        PrimitiveResult oCheckSubscriptionResult = PermissionsUtils.userHasValidSubscription(oUser);
+        
+        if (!oCheckSubscriptionResult.getBoolValue()) {
             WasdiLog.warnLog("WorkflowsResource.run: user does not have a valid subscription");
             oResult.setBoolValue(false);
             oResult.setIntValue(401);
+            oResult.setStringValue(oCheckSubscriptionResult.getStringValue());
             return oResult;
         }
 

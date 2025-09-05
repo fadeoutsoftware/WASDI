@@ -979,10 +979,12 @@ public class ProcessorsResource  {
 				return oRunningProcessorViewModel;
 			}
 			
-			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+			PrimitiveResult oCheckSubscriptionResult = PermissionsUtils.userHasValidSubscription(oUser);
+			
+			if (!oCheckSubscriptionResult.getBoolValue()) {
 				WasdiLog.warnLog("ProcessorsResource.internalRun: user " + oUser.getUserId() + " does not have a valid subscription");
 				oRunningProcessorViewModel.setStatus("ERROR");
-				oRunningProcessorViewModel.setMessage("Invalid Subscription.");
+				oRunningProcessorViewModel.setMessage(oCheckSubscriptionResult.getStringValue());
 				return oRunningProcessorViewModel;
 			}
 			
@@ -1229,9 +1231,11 @@ public class ProcessorsResource  {
 				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 			}
 			
-			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+			PrimitiveResult oCheckSubscriptionResult = PermissionsUtils.userHasValidSubscription(oUser);
+			
+			if (!oCheckSubscriptionResult.getBoolValue()) {
 				WasdiLog.warnLog("ProcessorsResource.getCreditsForRun: user " + oUser.getUserId() + " does not have a valid subscription");
-				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(oCheckSubscriptionResult.getStringValue())).build();
 			}
 
 			String sUserId = oUser.getUserId();
@@ -2703,10 +2707,12 @@ public class ProcessorsResource  {
 			}
 			String sUserId = oUser.getUserId();
 			
+			PrimitiveResult oCheckSubscriptionResult = PermissionsUtils.userHasValidSubscription(oUser);
+			
 			// user should have a valid subscription before paying for an app
-			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+			if (!oCheckSubscriptionResult.getBoolValue()) {
 				WasdiLog.warnLog("ProcessorsResource.createAppPayment: invalid subscription");
-				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("Invalid subscription")).build();
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(oCheckSubscriptionResult.getStringValue())).build();
 			}
 			
 			// check existence of the processor
@@ -2781,10 +2787,12 @@ public class ProcessorsResource  {
 				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 			}
 			
+			PrimitiveResult oCheckSubscriptionResult = PermissionsUtils.userHasValidSubscription(oUser);
+			
 			// user should have a valid subscription before paying for an app
-			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+			if (!oCheckSubscriptionResult.getBoolValue()) {
 				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: invalid subscription");
-				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("Invalid subscription")).build();
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(oCheckSubscriptionResult.getStringValue())).build();
 			}
 			
 			AppPaymentRepository oAppPaymentRepository = new AppPaymentRepository();

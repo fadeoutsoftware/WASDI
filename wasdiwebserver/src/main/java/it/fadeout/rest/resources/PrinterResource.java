@@ -53,10 +53,15 @@ public class PrinterResource {
             // Serialize the incoming PrintMapRequest object to JSON string
             ObjectMapper oObjectMapper = new ObjectMapper();
             String oPrinterBodyJson =oObjectMapper.writeValueAsString(oPrinterViewModel);
+            
+            String sUrl = WasdiConfig.Current.printServerAddress;
+            if (!sUrl.endsWith("/")) sUrl += "/";
+            sUrl += "storeMap";
+            
             //todo change the url and put in the config file
             // Build the HTTP POST request to the external WASDI API
             HttpRequest oExternalApiRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(WasdiConfig.Current.printServerAddress+"/storeMap"))
+                    .uri(URI.create(sUrl))
                     .header("Content-Type", MediaType.APPLICATION_JSON)
                     .POST(HttpRequest.BodyPublishers.ofString(oPrinterBodyJson))
                     .build();
