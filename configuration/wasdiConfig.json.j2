@@ -2,6 +2,7 @@
     "nodeCode": "{{ aoWasdiConfiguration['nodeCode'] }}",
     "mainNodeCloud": "{{ aoWasdiConfiguration['mainNodeCloud'] }}",
     "usersDefaultNode": "{{ aoWasdiConfiguration['usersDefaultNode'] }}",
+    "defaultSkin": "wasdi",
     "addDateTimeToLogs": {{ aoWasdiConfiguration['addDateTimeToLogs'] | lower }},
     "baseUrl": "{{ aoWasdiConfiguration['baseUrl'] }}",
     "connectionTimeout": {{ aoWasdiConfiguration['connectionTimeout'] }},
@@ -443,6 +444,8 @@
             "supportLink": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['supportLink'] }}",
             "brandMainColor": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['brandMainColor'] }}",
             "brandSecondaryColor": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['brandSecondaryColor'] }}",
+            "tabTitle": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['tabTitle'] }}",
+            "favIcon": "{{ aoWasdiConfiguration['skins'][sCurrentSkin]['favIcon'] }}",
             "defaultCategories": [
             {% for sCurrentDefaultCategories in aoWasdiConfiguration['skins'][sCurrentSkin]['defaultCategories'] %}
                 "{{ sCurrentDefaultCategories }}"{% if not loop.last %},

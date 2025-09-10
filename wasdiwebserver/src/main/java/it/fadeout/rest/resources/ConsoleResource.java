@@ -89,10 +89,13 @@ public class ConsoleResource {
 				return oResult;
 			}
 			
+			PrimitiveResult oCheckSubscriptionResult = PermissionsUtils.userHasValidSubscription(oUser);
+			
 			// Check the subscription
-			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+			if (!oCheckSubscriptionResult.getBoolValue()) {
 				WasdiLog.warnLog("ConsoleResource.create: No valid Subscription");
 				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
+				oResult.setStringValue(oCheckSubscriptionResult.getStringValue());
 				return oResult;			
 			}			
 

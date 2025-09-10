@@ -30,6 +30,8 @@ import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ClientMessageCodes;
+import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**
@@ -159,11 +161,12 @@ public class ProcessingResources {
             return Response.status(Status.UNAUTHORIZED).build();
         } 
         
+        PrimitiveResult oCheckSubscriptionResult = PermissionsUtils.userHasValidSubscription(oUser);
         
         // Check the subscription
-        if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+        if (!oCheckSubscriptionResult.getBoolValue()) {
         	WasdiLog.warnLog("ProcessingResources.sen2CorConversion: invalid subscription");
-            return Response.status(Status.FORBIDDEN).build();     	
+            return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(oCheckSubscriptionResult.getStringValue())).build();     	
         }
         
         // Check if we can write the workspace        
@@ -232,14 +235,17 @@ public class ProcessingResources {
             return oResult;
         }
         
+        PrimitiveResult oCheckSubscriptionResult = PermissionsUtils.userHasValidSubscription(oUser);
+        
         // Check the subscription
-        if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+        if (!oCheckSubscriptionResult.getBoolValue()) {
         	
         	WasdiLog.warnLog("ProsessingResources.callExecuteSNAPOperation: invalid subscription");
         	
             // Not authorized
             oResult.setIntValue(401);
             oResult.setBoolValue(false);
+            oResult.setStringValue(oCheckSubscriptionResult.getStringValue());
 
             return oResult;        	
         }
@@ -361,12 +367,15 @@ public class ProcessingResources {
                 return oResult;
             }
             
+            PrimitiveResult oCheckSubscriptionResult = PermissionsUtils.userHasValidSubscription(oUser);
+            
             // Is there a valid subscription?
-            if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+            if (!oCheckSubscriptionResult.getBoolValue()) {
             	WasdiLog.warnLog("ProsessingResources.runProcess: invalid subscription");
                 // Not authorised
                 oResult.setIntValue(401);
                 oResult.setBoolValue(false);
+                oResult.setStringValue(oCheckSubscriptionResult.getStringValue());
 
                 return oResult;
             }

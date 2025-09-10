@@ -53,6 +53,12 @@ public class WasdiConfig {
 	public String defaultSkin = "wasdi";
 	
 	/**
+	 * Flag to activate or not the check and managament of subscriptions.
+	 * 
+	 */
+	public boolean activateSubscriptionChecks = true;
+	
+	/**
 	 * System name of the wasdi user
 	 */
 	public String systemUserName = "appwasdi";

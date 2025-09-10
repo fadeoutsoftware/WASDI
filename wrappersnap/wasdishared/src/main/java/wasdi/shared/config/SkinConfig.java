@@ -10,5 +10,7 @@ public class SkinConfig {
 	public String supportLink = "https://discord.gg/FkRu2GypSg";
 	public String brandMainColor = "#43526B";
 	public String brandSecondaryColor = "#009036";
+	public String tabTitle = "Wasdi 2.0";
+	public String favIcon = "";	
 	public ArrayList<String> defaultCategories = new ArrayList<>();
 }

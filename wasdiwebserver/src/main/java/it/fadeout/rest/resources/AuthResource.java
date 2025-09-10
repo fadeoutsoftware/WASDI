@@ -652,7 +652,8 @@ public class AuthResource {
 				oResult.setIntValue(304);
 				WasdiLog.debugLog("AuthResource.userRegistration: " + oRegistrationInfoViewModel.getUserId() + " already in wasdi");
 				return oResult;
-			} else {
+			} 
+			else {
 				WasdiLog.debugLog("AuthResource.userRegistration: " + oRegistrationInfoViewModel.getUserId() + " is a new user");
 				//no, it's a new user! :)
 				//let's check it's a legit one (against kc)  
@@ -664,6 +665,7 @@ public class AuthResource {
 				}
 				
 				User oNewUser = m_oKeycloakService.getUser(sLowerCasedUserId);
+				
 				if(null==oNewUser) {
 					PrimitiveResult oResult = new PrimitiveResult();
 					//not found
@@ -687,7 +689,9 @@ public class AuthResource {
 				catch (Exception oEx) {
 					WasdiLog.errorLog("AuthResource.userRegistration: Exception reading Users default node " + oEx);
 				}
+				
 				oNewUser.setDefaultNode(sDefaultNode);
+				oNewUser.setSkin(WasdiConfig.Current.defaultSkin);
 				
 
 				//store user in DB
@@ -1285,6 +1289,9 @@ public class AuthResource {
 			oSkinViewModel.setBrandMainColor(oSelectedSkin.brandMainColor);
 			oSkinViewModel.setBrandSecondaryColor(oSelectedSkin.brandSecondaryColor);
 			oSkinViewModel.setDefaultCategories(oSelectedSkin.defaultCategories);
+			oSkinViewModel.setTabTitle(oSelectedSkin.tabTitle);
+			oSkinViewModel.setActivateSubscriptions(WasdiConfig.Current.activateSubscriptionChecks);
+			oSkinViewModel.setFavIcon(oSelectedSkin.favIcon);
 			
 			return Response.ok(oSkinViewModel).build();
 		}
