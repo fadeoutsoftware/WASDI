@@ -2998,15 +2998,18 @@ public class dbUtils {
 			for (User oCandidate : aoToChekUsers) {
 				
 				String sCandidateUserId = oCandidate.getUserId();
+				String sCandidateUserType = PermissionsUtils.getUserType(sCandidateUserId);
 				
-				PrimitiveResult oCheckSubscriptionResult = PermissionsUtils.userHasValidSubscription(oCandidate);
+				WasdiLog.infoLog("dbUtils.runWasdiCleanTask. Checking " + sCandidateUserType + " user: " + sCandidateUserId);
 				
-				if (oCheckSubscriptionResult.getBoolValue()) {
+				boolean bUserHasValidSubscription = PermissionsUtils.userHasValidSubscription(oCandidate).getBoolValue();
+				
+				if (!bUserHasValidSubscription) {
 					
 					StorageUsageControl oStorageUsageControl = WasdiConfig.Current.storageUsageControl;
 					Long lTotalStorageUsage = oWorkspaceRepository.getStorageUsageForUser(sCandidateUserId);
 					
-					WasdiLog.infoLog("dbUtils.runWasdiCleanTask: " + sCandidateUserId + ", type: " + PermissionsUtils.getUserType(sCandidateUserId) + ", total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
+					WasdiLog.infoLog("dbUtils.runWasdiCleanTask: " + sCandidateUserId + ", type: " + sCandidateUserType + ", total storage size: " + lTotalStorageUsage + ", " + Utils.getNormalizedSize(Double.parseDouble(lTotalStorageUsage.toString())));
 					
 					long lNow = new Date().getTime(); 
 					long lStorageWarningDate = oCandidate.getStorageWarningSentDate().longValue();
@@ -3014,7 +3017,12 @@ public class dbUtils {
 					
 					// if the user has not a valid subscription REALLY because of the storage (and not of other problems, like no active projects)
 					// AND if we didn't yet send the warning to the user, then we do it
-					if (lTotalStorageUsage > oStorageUsageControl.storageSizeFreeSubscription && lStorageWarningDate == 0L) {
+					boolean bIsExceedingFreeLimits = (sCandidateUserType.equals(UserType.FREE.name()) || sCandidateUserType.equals(UserType.NONE.name())) 
+							&& lTotalStorageUsage > oStorageUsageControl.storageSizeFreeSubscription;
+					boolean bIsExceedingStandardLimits = sCandidateUserType.equals(UserType.STANDARD.name()) 
+							&& lTotalStorageUsage > oStorageUsageControl.storageSizeStandardSubscription; 
+							
+					if ( (bIsExceedingFreeLimits || bIsExceedingStandardLimits) && lStorageWarningDate == 0L) {
 						
 						if (!oStorageUsageControl.isDeletionInTestMode) {
 							WasdiLog.warnLog("dbUtils.runWasdiCleanTask: sending email to" + sCandidateUserId);
@@ -3031,7 +3039,7 @@ public class dbUtils {
 						
 						continue;
 					}
-					else if (lTotalStorageUsage > oStorageUsageControl.storageSizeFreeSubscription) {
+					else if (bIsExceedingFreeLimits || bIsExceedingStandardLimits) {
 						WasdiLog.infoLog("dbUtils.runWasdiCleanTask: The user " + sCandidateUserId + " already received the notification, waiting for reaction");
 					} else {
 						WasdiLog.infoLog("dbUtils.runWasdiCleanTask: The user " + sCandidateUserId + " is not exceeding the storage space");
