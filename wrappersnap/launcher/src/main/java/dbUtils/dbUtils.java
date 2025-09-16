@@ -3021,14 +3021,21 @@ public class dbUtils {
 							&& lTotalStorageUsage > oStorageUsageControl.storageSizeFreeSubscription;
 					boolean bIsExceedingStandardLimits = sCandidateUserType.equals(UserType.STANDARD.name()) 
 							&& lTotalStorageUsage > oStorageUsageControl.storageSizeStandardSubscription; 
+					long lMaximumStorageAllowedForUser = bIsExceedingStandardLimits 
+							? oStorageUsageControl.storageSizeStandardSubscription 
+							: oStorageUsageControl.storageSizeFreeSubscription;
 							
 					if ( (bIsExceedingFreeLimits || bIsExceedingStandardLimits) && lStorageWarningDate == 0L) {
 						
 						if (!oStorageUsageControl.isDeletionInTestMode) {
-							WasdiLog.warnLog("dbUtils.runWasdiCleanTask: sending email to" + sCandidateUserId);
+							WasdiLog.warnLog("dbUtils.runWasdiCleanTask: sending email to: " + sCandidateUserId);
 							String sEmailTitle = oStorageUsageControl.warningEmailConfig.title;
-							String sEmailText = fillEmailTemplate(oCandidate.getName(), lTotalStorageUsage);
-							MailUtils.sendEmail(sCandidateUserId, sEmailTitle, sEmailText);							
+							String sEmailText = fillEmailTemplate(oCandidate.getName(), lMaximumStorageAllowedForUser, lTotalStorageUsage);
+							boolean bIsEmailSent = MailUtils.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sCandidateUserId, sEmailTitle, sEmailText);
+							
+							if (!bIsEmailSent) {
+								WasdiLog.warnLog("dbUtils.runWasdiCleanTask. Email not sent to user " + sCandidateUserId);
+							}
 						}
 						else {
 							WasdiLog.warnLog("dbUtils.runWasdiCleanTask: TEST MODE: think I'm sending an e-mail alert to " + sCandidateUserId);
@@ -3051,7 +3058,7 @@ public class dbUtils {
 									? 0L 
 									: (lNow - lStorageWarningDate) / (1000 * 60 * 60 * 24);
 					
-					if (lTotalStorageUsage > oStorageUsageControl.storageSizeFreeSubscription && lDaysFromWarning > oStorageUsageControl.deletionDelayFromWarning) {
+					if ((bIsExceedingFreeLimits || bIsExceedingStandardLimits) && lDaysFromWarning > oStorageUsageControl.deletionDelayFromWarning) {
 						
 						// managing the deletion in testing mode
 						if (oStorageUsageControl.isDeletionInTestMode) {
@@ -3082,13 +3089,13 @@ public class dbUtils {
 							int iResponseCode = oResponse.getResponseCode();
 							
 							if (iResponseCode < 200 || iResponseCode > 299) {
-								WasdiLog.warnLog("dbUtils.runWasdiCleanTask: Deletion of wokrspace " + sWorkspaceID + "returned error code " + iResponseCode);
+								WasdiLog.warnLog("dbUtils.runWasdiCleanTask: Deletion of workspace " + sWorkspaceID + " returned error code " + iResponseCode);
 								continue;
 							}
 							
 							lTotalStorageUsage = lTotalStorageUsage - oWorkspace.getStorageSize();
 							
-							if (lTotalStorageUsage < oStorageUsageControl.storageSizeFreeSubscription) {
+							if (lTotalStorageUsage < lMaximumStorageAllowedForUser) {
 								WasdiLog.infoLog("dbUtils.runWasdiCleanTask: Workspaces of user " + sCandidateUserId + " have been cleaned. Total usage storage: " + lTotalStorageUsage);
 								oCandidate.setStorageWarningSentDate(0.0);
 								oUserRepository.updateUser(oCandidate);								
@@ -3129,8 +3136,8 @@ public class dbUtils {
 		
 	}
 	
-	private static String fillEmailTemplate(String sUserName, long lUserStorageSize) {
-		String sStorageLimit = FileUtils.byteCountToDisplaySize(WasdiConfig.Current.storageUsageControl.storageSizeFreeSubscription);
+	private static String fillEmailTemplate(String sUserName, long lMaxAllowedStorage, long lUserStorageSize) {
+		String sStorageLimit = FileUtils.byteCountToDisplaySize(lMaxAllowedStorage);
 		String sUserStorage = FileUtils.byteCountToDisplaySize(lUserStorageSize);
 		String message = WasdiConfig.Current.storageUsageControl.warningEmailConfig.message;
 		return message.replaceAll("<user>", sUserName)
