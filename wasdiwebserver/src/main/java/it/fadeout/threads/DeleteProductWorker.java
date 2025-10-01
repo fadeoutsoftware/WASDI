@@ -4,6 +4,9 @@ import java.util.List;
 
 import it.fadeout.rest.resources.ProductResource;
 import wasdi.shared.business.Node;
+import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.rabbit.Send;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
@@ -30,6 +33,7 @@ public class DeleteProductWorker extends Thread {
 		WasdiLog.debugLog("DeleteProductWorker.run: starting the deletion of files in the workspace");
 		
 		ProductResource oProductResource = new ProductResource();
+		boolean bDirty = false;
 		
 		try {
 			for (String sFile : m_asFiles) {
@@ -38,6 +42,10 @@ public class DeleteProductWorker extends Thread {
 				
 				if (iStatusCode < 200 || iStatusCode > 299) {
 					WasdiLog.debugLog("DeleteProductWorker.run: deletion of file " + sFile + " in workspace " + m_sWorkspaceId + " not successful");
+					bDirty = bDirty || true;
+				}
+				else {
+					bDirty = bDirty || false;
 				}
 				
 			}
@@ -46,6 +54,23 @@ public class DeleteProductWorker extends Thread {
 		}
 		
 		WasdiLog.debugLog("DeleteProductWorker.run: deletion of files done");
+		
+		try {
+            // Search for exchange name
+            String sExchange = WasdiConfig.Current.rabbit.exchange;
+
+            // Set default if is empty
+            if (Utils.isNullOrEmpty(sExchange)) {
+                sExchange = "amq.topic";
+            }
+
+            // Send the Asynch Message to the clients
+            Send oSendToRabbit = new Send(sExchange);
+            oSendToRabbit.SendRabbitMessage(!bDirty, "DELETE", m_sWorkspaceId, null, m_sWorkspaceId);
+            oSendToRabbit.Free();
+        } catch (Exception oEx) {
+            WasdiLog.errorLog("ProductResource.deleteProduct: exception sending asynch notification");
+        }
 	}
 	
 	
