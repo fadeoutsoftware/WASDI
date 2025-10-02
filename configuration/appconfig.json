@@ -1365,15 +1365,87 @@
 			"indexvalue": "ReturnNatFIM",
 			"ispublic": false,
 			"userid": "return@fadeout.it",
-			"filters":[
+			"filters": [
 				{
-                    "indexname": "producttype",
-                    "indexlabel": "Product Type",
-                    "indexvalues": "aree_bagnate|protected_areas|attivita_ecomiche|beni_culturali|edifici_strategici|ferrovie|reti_elettriche|sezioni_censimento|sorgenti_inquinanti|stazioni|strade",
-                    "indexvalue": "aree_bagnate"
-                }				
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "aree_bagnate|protected_areas|attivita_ecomiche|beni_culturali|edifici_strategici|ferrovie|reti_elettriche|sezioni_censimento|sorgenti_inquinanti|stazioni|strade",
+					"indexvalue": "aree_bagnate"
+				}
 			]
-		}		
+		},
+		{
+			"name": "Metagrid",
+			"indexname": "platformname",
+			"indexvalue": "Metagrid",
+			"selected": false,
+			"ispublic": false,
+			"userid": "return@fadeout.it",
+			"filters": [
+				{
+					"indexname": "framework",
+					"indexlabel": "framework",
+					"indexvalues": "CORDEX_FPS|Reanalysis",
+					"indexvalue": "CORDEX_FPS"
+				},
+				{
+					"indexname": "scenario",
+					"indexlabel": "scenario",
+					"indexvalues": "ECMWF-ERAINT|Historical|Rcp85",
+					"visibilityConditions": "framework:CORDEX_FPS",
+					"indexvalue": "ECMWF-ERAINT"
+				},
+				{
+					"indexname": "research_institute",
+					"indexlabel": "research institute",
+					"indexvalues": "BCCR-WRF381BF|BCCR-WRF381DA|BTU|CMCC|CNRM|ETH|FZJ-WRF381BB|HCLIMcom|ICTP|IDL-WRF381BH|IPSL-WRF381BE|JLU|KIT|KNMI|MOHC|WEGC-WRF381BL",
+					"visibilityConditions": "framework:CORDEX_FPS&scenario:ECMWF-ERAINT",
+					"indexvalue": "BCCR-WRF381BF"
+				},
+				{
+					"indexname": "research_institute",
+					"indexlabel": "research institute",
+					"indexvalues": "BTU|CMCC|CNRM|ETH|FZJ-IDL-WRF381CA|FZJ-IDL-WRF381DA|HCLIMcom|ICTP|IPSL-WEGC-WRF381DA|IPSL-WRF381CE|JLU|KIT|KNMI|MOHC",
+					"visibilityConditions": "framework:CORDEX_FPS&scenario:Historical|Rcp85",
+					"indexvalue": "BTU"
+				},
+				{
+					"indexname": "research_institute",
+					"indexlabel": "research institute",
+					"indexvalues": "SPHERA",
+					"visibilityConditions": "framework:Reanalysis",
+					"indexvalue": "SPHERA"
+				},
+				{
+					"indexname": "model",
+					"indexlabel": "model",
+					"indexvalues": "CPM",
+					"visibilityConditions": "framework:CORDEX_FPS",
+					"indexvalue": "CPM"
+				},
+				{
+					"indexname": "variable",
+					"indexlabel": "variable",
+					"indexvalues": "pr|tas|uas|vas",
+					"visibilityConditions": "framework:CORDEX_FPS",
+					"indexvalue": "pr"
+				},
+				{
+					"indexname": "variable",
+					"indexlabel": "variable",
+					"indexvalues": "10u|10v|pr|tas|uv500hPa|uv700hPa|wz700hPa",
+					"visibilityConditions": "framework:Reanalysis",
+					"indexvalue": "10u"
+				},
+				{
+					"indexname": "component",
+					"indexlabel": "component",
+					"indexvalues": "u|v",
+					"visibilityConditions": "variable:uv500hPa|uv700hPa",
+					"indexvalue": "u"
+				}
+			]
+		}
 	],
 	"orbitsearch": {
 		"sensortypes": [
