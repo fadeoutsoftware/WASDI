@@ -1351,3 +1351,32 @@ services:
 {% endif %}
 
 
+{% if bTelegramBotEnabled == True %}
+  wasdi-telegram-server:
+    depends_on:
+      {{ sWasdiTraefikServiceName }}:
+{% if sEnvironmentName == "test" %}
+        condition: service_healthy
+{% else %}
+        condition: service_started
+{% endif %}
+    image: "telegram-server:latest"
+    labels:
+      - "traefik.enable=true" 
+      - "traefik.http.routers.r_wasdi-telegram-server.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_wasdi-telegram-server.rule=Host(`{{ sWasdiTraefikRuleHost }}`) && PathPrefix(`/telegram`)"
+      - "traefik.http.routers.r_wasdi-telegram-server.middlewares=mw_wasdi-secure-denyFrame@file,mw_wasdi-telegram-server-stripprefix"
+      - "traefik.http.routers.r_wasdi-telegram-server.service=s_wasdi-telegram-server"
+{% if bWasdiSslEnabled == True %}      
+      - "traefik.http.routers.r_wasdi-telegram-server.tls=true"
+{% endif %}      
+      - "traefik.http.services.s_wasdi-telegram-server.loadbalancer.server.port={{ iPrintServerPort }}"
+      - "traefik.http.middlewares.mw_wasdi-telegram-server-stripprefix.stripprefix.prefixes=/print"
+      - "traefik.http.middlewares.mw_wasdi-telegram-server-stripprefix.stripprefix.forceslash=true"
+    pull_policy: "never"
+    restart: "always"
+    ulimits:
+      nofile:
+        soft: 524288
+        hard: 524288
+{% endif %}
