@@ -344,13 +344,13 @@ public class ProcessScheduler {
 						// Execute the process
 						if (executeProcess(oCreatedProcess) != null) {
 							
-							WasdiLog.infoLog(m_sLogPrefix + ".run: Lauched " + oCreatedProcess.getProcessObjId());
-							
 							// Give a little bit of time to the launcher to start
 							waitForProcessToStart();
 							
 							// Move The process in the running list
 							aoRunningList.add(oCreatedProcess);		
+							
+							WasdiLog.infoLog(m_sLogPrefix + ".run: Lauched " + oCreatedProcess.getProcessObjId() + " Running Queue Size = " + aoRunningList.size());
 						}
 						else {
 							WasdiLog.infoLog(m_sLogPrefix + ".run: ERROR Lauching " + oCreatedProcess.getProcessObjId());
@@ -396,7 +396,7 @@ public class ProcessScheduler {
 				int iWaitingSize = getWaitingList(aoWaitingList).size();
 				
 				if (iRunningSize>0 || iCreatedSize >0 || iReadySize >0 || iWaitingSize>0) {
-					WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Running = " + iRunningSize + " Created = " + iCreatedSize +  " Ready = " + iReadySize + " Waiting = " + iWaitingSize);					
+					WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Running = " + iRunningSize + " Created = " + iCreatedSize +  " Ready = " + iReadySize + " Waiting = " + iWaitingSize + " Max Running Queue = " + m_iNumberOfConcurrentProcess + " Max Waiting Queue = " + m_iMaxWaitingQueue);					
 				}
 			}
 			catch (Exception oInnerEx) {

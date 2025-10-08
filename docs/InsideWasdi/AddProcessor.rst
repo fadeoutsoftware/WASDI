@@ -10,13 +10,16 @@ Each processor type is an option to deploy a new application in WASDI. Each new 
 Processor Types are mainly composed by:
 
 * A Docker templalte folder: this is the folder where can be found the basic Dockerfile and other needed files to create a container with the user code
+
 * A Processor Engine: each processor type has an associated Processor Engine. The processor engine has the main goal to implement these operations:
+
 	* deploy: create an instance of the processor
 	* redeploy + libraryUpdate: force the engine to generate an update of the app
 	* run: execute an app
 	* delete: delete the app
 	* environmentUpdate: when supported, allow to manipulate the environment of the application (add remove update packages)
 	* refreshPackagesInfo: when supported, must refresh the list of packages available in the workspace
+
 * A dedicatated Configuration: all the processor have a common configuration in WasdiConfig->dockers->ProcessorTypes
 	
 Usually the source code and/or executables of the user are uploaded in WASDI and saved in a folder with the name of the new processor.
@@ -37,7 +40,7 @@ Declare the new Processor Type in
 
 .. code-block:: java
 
-	wasdi.shared->business->processors->ProcessorTypes.java
+	wasdi.shared.business.processors.ProcessorTypes.java
 
 The processor type name is used in the db to store the type of application.
 Each processor type has also an associted folder that must be returned in the getTemplateFolder method of ProcessorTypes. 
