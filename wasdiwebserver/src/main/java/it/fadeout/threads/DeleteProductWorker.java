@@ -69,7 +69,7 @@ public class DeleteProductWorker extends Thread {
             oSendToRabbit.SendRabbitMessage(!bDirty, "DELETE", m_sWorkspaceId, null, m_sWorkspaceId);
             oSendToRabbit.Free();
         } catch (Exception oEx) {
-            WasdiLog.errorLog("ProductResource.deleteProduct: exception sending asynch notification");
+            WasdiLog.errorLog("DeleteProductWorker.deleteProduct: exception sending asynch notification");
         }
 	}
 	
