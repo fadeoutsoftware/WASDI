@@ -24,6 +24,7 @@ import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
+import it.fadeout.threads.DeleteProductWorker;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
@@ -1166,7 +1167,6 @@ public class ProductResource {
                                          List<String> asProductList) {
     	
         // Support variable used to identify if deletions of one or more products failed
-        AtomicBoolean bDirty = new AtomicBoolean(false);
         PrimitiveResult oPrimitiveResult = new PrimitiveResult();
         
     	User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -1185,18 +1185,16 @@ public class ProductResource {
             return oPrimitiveResult;    		
     	}
         
-        if (asProductList != null) {
-            asProductList.stream().forEach(sFile -> {
-                // if one deletion fail is detected the bDirty boolean becames true
-                bDirty.set(bDirty.get() || ! deleteProduct(sSessionId,sFile,bDeleteFile,sWorkspaceId,bDeleteLayer).getBoolValue());
-            });
+        if (asProductList != null && asProductList.size() > 0) {
+        	
+        	DeleteProductWorker oWorker = new DeleteProductWorker();
+        	oWorker.init(asProductList, sSessionId, sWorkspaceId, bDeleteFile, bDeleteLayer);
+        	oWorker.start();
 
-            
 
-            if (bDirty.get()) oPrimitiveResult.setIntValue(207);
-            else oPrimitiveResult.setIntValue(200);
+            oPrimitiveResult.setIntValue(200);
             // returns the opposite value of Dirty
-            oPrimitiveResult.setBoolValue(!bDirty.get());
+            oPrimitiveResult.setBoolValue(true);
 
             return oPrimitiveResult;        	
         }
