@@ -33,7 +33,8 @@ The end-to-end workflow is managed by the automatic processor and proceeds in th
         * Co-registration: It loads the pre-event image to create a reference grid, then warps the post-event image to ensure perfect pixel-to-pixel alignment.
         * SCL Masking: It aligns the SCL band for both images and masks out all pixels corresponding to clouds and shadows.
         * TCT Change Detection: It calculates the **Delta TCT** (Brightness, Greenness, Wetness) to identify where the landscape has changed.
-        * Prioritized Mask Creation: It builds a final 3-class mask based on the priority:   **1 (Landslide) > 255 (Cloud) > 0 (No Landslide)**.
+        * Prioritized Mask Creation: It builds a final 3-class mask based on the priority:   
+          **1 (Landslide) > 255 (Cloud) > 0 (No Landslide)**.
 
 6.  **Automated Mosaicking**: After all manual jobs are complete, the automatic processor collects the individual 3-class masks. It then uses a prioritized merging algorithm to stitch them into a single, seamless mosaic TIFF file that respects the `1 > 255 > 0` pixel priority across tile boundaries.
 
