@@ -41,13 +41,13 @@ The end-to-end workflow is managed by the automatic processor and proceeds in th
 3 Application Parameters
 ------------------------
 
-This section describes the parameters for the main **automatic app**, which is the primary entry point for the workflow.
+This section describes the parameters for the main **automatic processor**, which is the primary entry point for the workflow.
 
 3.1 Basic Parameters
 ~~~~~~~~~~~~~~~~~~~~
 
 -   **BASENAME**: A base name or prefix for the final mosaic output file.
--   **EVENT_DATE**: The date of the event (e.g., landslide trigger), in `YYYY-MM-DD` format. This is the reference date for finding pre- and post-event imagery.
+-   **EVENT_DATE**: The date of the event (landslide trigger), in `YYYY-MM-DD` format. This is the reference date for finding pre- and post-event imagery.
 -   **BBOX**: The Bounding Box that defines the overall Area of Interest for the search and analysis.
 
 3.2 Advanced Parameters
@@ -56,8 +56,8 @@ This section describes the parameters for the main **automatic app**, which is t
 -   **DAYS_BACK** (defaults to `200`): The number of days to search backward from the event date for a pre-event image.
 -   **DAYS_FORWARD** (defaults to `200`): The number of days to search forward from the event date for a post-event image.
 -   **MIN_DAYS_DISTANCE** (defaults to `0`): The minimum number of days required between the pre-event image and the event date.
--   **MAX_CLOUD** (defaults to `30.0`): The maximum overall cloud percentage for an S2 tile to be considered in the initial search.
--   **SPECIFIC_MAX_CLOUD_COVERAGE** (defaults to `1.0`): The maximum allowed cloud percentage **within the BBOX** during the precise SCL-based check.
+-   **MAX_CLOUD** (defaults to `10.0`): The maximum overall cloud percentage for an S2 tile to be considered in the initial search.
+-   **SPECIFIC_MAX_CLOUD_COVERAGE** (defaults to `1.0`): The maximum allowed cloud percentage within the BBOX during the precise SCL-based check.
 -   **MIN_COVERAGE** (defaults to `10.0`): The minimum percentage of the BBOX that must be covered by a candidate image's footprint.
 -   **FORCE_RERUN** (defaults to `false`): If `true`, the processor will delete any existing results for a tile pair and re-run the analysis.
 -   **DELETE** (defaults to `true`): If `true`, all intermediate files will be deleted, leaving only the final mosaic.
@@ -71,24 +71,25 @@ The workflow generates a primary final output and several intermediate products 
 ~~~~~~~~~~~~~~~~~~
 
 -   **Landslide Mosaic Mask**: A single, mosaicked raster file where pixel values indicate the combined classification result from all processed tiles.
-    -   `{BASENAME}_landslide-mask-mosaic.tif`
-    -   **Example**: `Wayanad_Event_landslide-mask-mosaic.tif`
+        - `{BASENAME}_landslide-mask-mosaic.tif`
+        - Example: `Wayanad_Event_landslide-mask-mosaic.tif`
+
 
 4.2 Understanding the Pixel Values
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The final mask uses a prioritized system to represent the analysis results:
 
-* **`1` (Landslide)**: A landslide was detected. This value has the highest priority.
-* **`255` (Cloud / Un-analyzable)**: The area was obscured by clouds or shadows in either the pre- or post-event image.
-* **`0` (No Landslide)**: The area was analyzed and found to be stable. This value is also used for areas at the edge of a satellite's imaging path (the black borders). This is crucial for allowing valid data from adjacent tiles to correctly fill gaps during mosaicking.
+* `1` (Landslide): A landslide was detected. This value has the highest priority.
+* `255` (Cloud / No-Data): The area was obscured by clouds or shadows in either the pre- or post-event image, or has No-Data.
+* `0` (No Landslide): The area was analyzed and found to be stable. This value is also used for areas at the edge of a satellite's imaging path (some S2 tiles may not fully cover the BBOX specified by the user). This is crucial for allowing valid data from adjacent tiles to correctly fill gaps during mosaicking.
 
 4.3 Intermediate Outputs (from each Manual App sub-process)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--   **Aligned True-Color Images**: `..._pre-event_...tif` and `..._post-event_...tif`
--   **Individual Landslide Mask**: `..._landslide-mask.tif`
--   **Quick-Look PNGs**: `..._landslide-mask.png` and `..._ndvi-distribution.png`
+-   Aligned True-Color Images: `..._pre-event_...tif` and `..._post-event_...tif`
+-   Individual Landslide Mask: `..._landslide-mask.tif`
+-   Quick-Look PNGs: `..._landslide-mask.png` and `..._ndvi-distribution.png`
 
 5 How to Use It
 ---------------
@@ -101,24 +102,27 @@ The primary way to use the system is by running the automatic processor with a s
 .. code-block:: json
 
     {
-      "BASENAME": "Wayanad_Event",
-      "EVENT_DATE": "2025-07-30",
+      "BASENAME": "Wayanad",
+      "EVENT_DATE": "2024-06-30",
       "BBOX": {
         "northEast": {
-          "lat": 11.6,
-          "lng": 76.25
+          "lat": 11.575830515901927,
+          "lng": 76.20769500732423
         },
         "southWest": {
-          "lat": 11.4,
-          "lng": 76.0
+          "lat": 11.456741052534444,
+          "lng": 76.09371185302736
         }
       },
-      "DAYS_BACK": 90,
-      "DAYS_FORWARD": 60,
-      "MAX_CLOUD": 40.0,
-      "SPECIFIC_MAX_CLOUD_COVERAGE": 5.0,
-      "DELETE": true,
-      "FORCE_RERUN": false
+      "PROVIDER": "AUTO",
+      "DAYS_BACK": 200,
+      "DAYS_FORWARD": 200,
+      "MAX_CLOUD": 10,
+      "SPECIFIC_MAX_CLOUD_COVERAGE": 1,
+      "MIN_DAYS_DISTANCE": 0,
+      "MIN_COVERAGE": 0,
+      "DELETE_S2_FILES": true,
+      "DELETE": false
     }
 
 
@@ -130,5 +134,5 @@ The manual processor can also be run on its own. It requires the user to manuall
 6 References
 ------------
 
-- Coluzzi, R., et al. (2025). "Rapid landslide detection from free optical satellite imagery using a robust change detection technique." (Fictional Reference)
-- Nedkov, R. (2017). "Adapting the Tasseled Cap transformation for Sentinel-2 MSI data." *GISTAM 2017 - Proceedings of the 3rd International Conference on Geographical Information Systems Theory, Applications and Management*. `[Link] <https://www.scitepress.org/PublicationsDetail.aspx?ID=6G85A3Fq52E=&t=1>`_
+- Coluzzi, R., Perrone, A., Samela, C. et al. "Rapid landslide detection from free optical satellite imagery using a robust change detection technique." *Sci Rep* 15, 4697 (2025). [`Link <https://doi.org/10.1038/s41598-025-89542-8>`_]
+- Shi, T., & Xu, H. (2019). "Tasseled Cap Transformation Coefficients for Sentinel-2 Surface Reflectance." *IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing*, 12(9), 3174-3182. [`Link <https://doi.org/10.1109/JSTARS.2019.2922770>`_]
