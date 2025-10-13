@@ -29,6 +29,7 @@ The end-to-end workflow is managed by the automatic processor and proceeds in th
 4.  **Sub-Process Execution**: For each validated, cloud-free pair, the automatic processor launches a `landslide_detection_s2_manual` sub-process. It passes the paths to the pre- and post-event `.zip` files and instructs the manual processor not to perform cleanup. This allows multiple tiles to be processed in parallel.
 
 5.  **Core Analysis (in Manual App)**: Each manual app sub-process independently performs the following:
+
         * Co-registration: It loads the pre-event image to create a reference grid, then warps the post-event image to ensure perfect pixel-to-pixel alignment.
         * SCL Masking: It aligns the SCL band for both images and masks out all pixels corresponding to clouds and shadows.
         * TCT Change Detection: It calculates the **Delta TCT** (Brightness, Greenness, Wetness) to identify where the landscape has changed.
@@ -71,6 +72,7 @@ The workflow generates a primary final output and several intermediate products 
 ~~~~~~~~~~~~~~~~~~
 
 -   **Landslide Mosaic Mask**: A single, mosaicked raster file where pixel values indicate the combined classification result from all processed tiles.
+
         *   `{BASENAME}_landslide-mask-mosaic.tif`
         *   Example: `Wayanad_Event_landslide-mask-mosaic.tif`
 
@@ -135,4 +137,4 @@ The manual processor can also be run on its own. It requires the user to manuall
 ------------
 
 - Coluzzi, R., Perrone, A., Samela, C. et al. "Rapid landslide detection from free optical satellite imagery using a robust change detection technique." *Sci Rep* 15, 4697 (2025). [`Link <https://doi.org/10.1038/s41598-025-89542-8>`_]
-- Shi, T., & Xu, H. (2019). "Tasseled Cap Transformation Coefficients for Sentinel-2 Surface Reflectance." *IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing*, 12(9), 3174-3182. [`Link <https://doi.org/10.1109/JSTARS.2019.2922770>`_]
+- Shi, T., & Xu, H. (2019). "Tasseled Cap Transformation Coefficients for Sentinel-2 Surface Reflectance." *IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing*, 12(9), 3174-3182. [`Link <https://doi.org/10.1109/JSTARS.2019.2938388>`_]
