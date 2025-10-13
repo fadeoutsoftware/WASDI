@@ -32,7 +32,7 @@ The end-to-end workflow is managed by the automatic processor and proceeds in th
         * Co-registration: It loads the pre-event image to create a reference grid, then warps the post-event image to ensure perfect pixel-to-pixel alignment.
         * SCL Masking: It aligns the SCL band for both images and masks out all pixels corresponding to clouds and shadows.
         * TCT Change Detection: It calculates the **Delta TCT** (Brightness, Greenness, Wetness) to identify where the landscape has changed.
-        * Prioritized Mask Creation: It builds a final 3-class mask based on the priority: **1 (Landslide) > 255 (Cloud) > 0 (No Landslide)**.
+        * Prioritized Mask Creation: It builds a final 3-class mask based on the priority:   **1 (Landslide) > 255 (Cloud) > 0 (No Landslide)**.
 
 6.  **Automated Mosaicking**: After all manual jobs are complete, the automatic processor collects the individual 3-class masks. It then uses a prioritized merging algorithm to stitch them into a single, seamless mosaic TIFF file that respects the `1 > 255 > 0` pixel priority across tile boundaries.
 
@@ -71,8 +71,8 @@ The workflow generates a primary final output and several intermediate products 
 ~~~~~~~~~~~~~~~~~~
 
 -   **Landslide Mosaic Mask**: A single, mosaicked raster file where pixel values indicate the combined classification result from all processed tiles.
-        - `{BASENAME}_landslide-mask-mosaic.tif`
-        - Example: `Wayanad_Event_landslide-mask-mosaic.tif`
+        *   `{BASENAME}_landslide-mask-mosaic.tif`
+        *   Example: `Wayanad_Event_landslide-mask-mosaic.tif`
 
 
 4.2 Understanding the Pixel Values
@@ -80,9 +80,9 @@ The workflow generates a primary final output and several intermediate products 
 
 The final mask uses a prioritized system to represent the analysis results:
 
-* `1` (Landslide): A landslide was detected. This value has the highest priority.
-* `255` (Cloud / No-Data): The area was obscured by clouds or shadows in either the pre- or post-event image, or has No-Data.
-* `0` (No Landslide): The area was analyzed and found to be stable. This value is also used for areas at the edge of a satellite's imaging path (some S2 tiles may not fully cover the BBOX specified by the user). This is crucial for allowing valid data from adjacent tiles to correctly fill gaps during mosaicking.
+* 1 (Landslide): A landslide was detected. This value has the highest priority.
+* 255 (Cloud / No-Data): The area was obscured by clouds or shadows in either the pre- or post-event image, or has No-Data.
+* 0 (No Landslide): The area was analyzed and found to be stable. This value is also used for areas at the edge of a satellite's imaging path (some S2 tiles may not fully cover the BBOX specified by the user). This is crucial for allowing valid data from adjacent tiles to correctly fill gaps during mosaicking.
 
 4.3 Intermediate Outputs (from each Manual App sub-process)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
