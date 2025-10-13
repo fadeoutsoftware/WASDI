@@ -75,7 +75,7 @@ The workflow generates a primary final output and several intermediate products 
 -   **Landslide Mosaic Mask**: A single, mosaicked raster file where pixel values indicate the combined classification result from all processed tiles.
 
         *   `{BASENAME}_landslide-mask-mosaic.tif`
-        *   Example: `Wayanad_Event_landslide-mask-mosaic.tif`
+        *   Example: `Wayanad_landslide-mask-mosaic.tif`
 
 
 4.2 Understanding the Pixel Values
@@ -93,6 +93,25 @@ The final mask uses a prioritized system to represent the analysis results:
 -   Aligned True-Color Images: `..._pre-event_...tif` and `..._post-event_...tif`
 -   Individual Landslide Mask: `..._landslide-mask.tif`
 -   Quick-Look PNGs: `..._landslide-mask.png` and `..._ndvi-distribution.png`
+
+Below are shown the examples of the intermediate outputs for the landslide event of Wayanad (India) on the 30th of July 2024. [`Reference for the event <https://eos.org/thelandslideblog/planet-labs-wayanad>`_].
+
+.. figure:: ../_static/LandslideDetectionS2/example_Wayanad_pre-event_cropped.png
+   :alt: The cropped pre-event S2 image.
+The cropped pre-event S2 image.
+
+.. figure:: ../_static/LandslideDetectionS2/example_Wayanad_post-event_cropped.png
+   :alt: The cropped post-event S2 image.
+The cropped post-event S2 image.
+
+.. figure:: ../_static/LandslideDetectionS2/example_Wayanad_landslide-mask_cropped.png
+   :alt: The landslide mask found by analysing the pre and post images.
+The landslide mask found over Wayanad.
+
+.. figure:: ../_static/LandslideDetectionS2/example_Wayanad_ndvi-distribution.png
+   :alt: The NDVI Distribution provides the definitive numerical proof that the detection was successful.
+The NDVI Distribution provides the definitive numerical proof that the detection was successful.
+
 
 5 How to Use It
 ---------------
