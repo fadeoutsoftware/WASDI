@@ -9,34 +9,34 @@ Landslide Detection S2
 
 The Landslide Detection S2 application is a two-tier system designed to automatically identify and map landslides over a specified Area of Interest (AoI) using Sentinel-2 L2A imagery. The system consists of two interconnected processors:
 
-* **The Automatic App (Orchestrator)**: This is the main user entry point (`landslide_detection_s2_automatic`). It automates the entire workflow, from finding the best satellite images to managing the analysis and producing a final, seamless mosaic.
+* **The Automatic Application (Orchestrator)**: This is the main user entry point (`landslide_detection_s2_automatic`). It automates the entire workflow, from finding the best satellite images to managing the analysis and producing a final, seamless mosaic.
 
-* **The Manual App (Analysis Engine)**: This is the core scientific processor (`landslide_detection_s2_manual`). It performs a detailed change detection analysis on a single pair of pre- and post-event images provided by the automatic app.
+* **The Manual Application (Analysis Engine)**: This is the core scientific processor (`landslide_detection_s2_manual`). It performs a detailed change detection analysis on a single pair of pre- and post-event images provided by the automatic app.
 
 The core methodology is based on a robust change detection technique using the **Tasseled Cap Transformation (TCT)**. The algorithm identifies the unique signature of a landslide: a simultaneous, sharp **increase in soil brightness** and a **decrease in vegetation greenness**.
 
 2 Process Workflow
 --------------------
 
-The end-to-end workflow is managed by the automatic app and proceeds in the following steps:
+The end-to-end workflow is managed by the automatic processor and proceeds in the following steps:
 
-1.  **Automated Image Search**: The automatic app queries the Sentinel-2 L2A archive based on the user-defined `EVENT_DATE`, `BBOX`, and a time window (`DAYS_BACK`, `DAYS_FORWARD`). It filters the results by a maximum overall cloud percentage.
+1.  **Automated Image Search**: The automatic processor queries the Sentinel-2 L2A archive based on the user-defined `EVENT_DATE`, `BBOX`, and a time window (`DAYS_BACK`, `DAYS_FORWARD`). It filters the results by a maximum overall cloud percentage.
 
-2.  **Intelligent Candidate Filtering**: The app groups the found images by their satellite tile ID. For each tile, it identifies the most recent pre-event image and the earliest post-event image as the best candidates.
+2.  **Intelligent Candidate Filtering**: The processor groups the found images by their satellite tile ID. For each tile, it identifies the most recent pre-event image and the earliest post-event image as the best candidates.
 
-3.  **Precise Cloud Screening**: For the best candidate pair, the app performs a detailed cloud check. It downloads and unzips the product to analyze the Scene Classification Layer (SCL), calculating the cloud/shadow percentage **specifically within the user's BBOX**. If the pair passes, the unzipped folder is preserved for the next step.
+3.  **Precise Cloud Screening**: For the best candidate pair, the processor performs a detailed cloud check. It downloads and unzips the product to analyze the Scene Classification Layer (SCL), calculating the cloud/shadow percentage specifically within the user's BBOX. If the pair passes, the unzipped folder is preserved for the next step.
 
-4.  **Sub-Process Execution**: For each validated, cloud-free pair, the automatic app launches a `landslide_detection_s2_manual` sub-process. It passes the paths to the pre- and post-event `.zip` files and instructs the manual app not to perform cleanup. This allows multiple tiles to be processed in parallel.
+4.  **Sub-Process Execution**: For each validated, cloud-free pair, the automatic processor launches a `landslide_detection_s2_manual` sub-process. It passes the paths to the pre- and post-event `.zip` files and instructs the manual processor not to perform cleanup. This allows multiple tiles to be processed in parallel.
 
 5.  **Core Analysis (in Manual App)**: Each manual app sub-process independently performs the following:
-    * **Co-registration**: It loads the pre-event image to create a reference grid, then warps the post-event image to ensure perfect pixel-to-pixel alignment.
-    * **SCL Masking**: It aligns the SCL band for both images and masks out all pixels corresponding to clouds and shadows.
-    * **TCT Change Detection**: It calculates the "Delta TCT" (Brightness, Greenness, Wetness) to identify where the landscape has changed.
-    * **Prioritized Mask Creation**: It builds a final 3-class mask based on the priority: **1 (Landslide) > 255 (Cloud) > 0 (No Landslide)**.
+        * Co-registration: It loads the pre-event image to create a reference grid, then warps the post-event image to ensure perfect pixel-to-pixel alignment.
+        * SCL Masking: It aligns the SCL band for both images and masks out all pixels corresponding to clouds and shadows.
+        * TCT Change Detection: It calculates the **Delta TCT** (Brightness, Greenness, Wetness) to identify where the landscape has changed.
+        * Prioritized Mask Creation: It builds a final 3-class mask based on the priority: **1 (Landslide) > 255 (Cloud) > 0 (No Landslide)**.
 
-6.  **Automated Mosaicking**: After all manual jobs are complete, the automatic app collects the individual 3-class masks. It then uses a prioritized merging algorithm to stitch them into a single, seamless `_landslide-mask-mosaic.tif` that respects the `1 > 255 > 0` pixel priority across tile boundaries.
+6.  **Automated Mosaicking**: After all manual jobs are complete, the automatic processor collects the individual 3-class masks. It then uses a prioritized merging algorithm to stitch them into a single, seamless mosaic TIFF file that respects the `1 > 255 > 0` pixel priority across tile boundaries.
 
-7.  **Final Cleanup**: If the `DELETE` parameter is `true`, the automatic app's final cleanup routine deletes all intermediate files created during the entire run, including input `.zip` files, unzipped `.SAFE` folders, temporary `.vrt` files, and all outputs from the individual manual runs.
+7.  **Final Cleanup**: If the `DELETE` parameter is `true`, the automatic processor's final cleanup routine deletes all intermediate files created during the entire run, including input `.zip` files, unzipped `.SAFE` folders, temporary `.vrt` files, and all outputs from the individual manual processor runs.
 
 3 Application Parameters
 ------------------------
@@ -96,7 +96,7 @@ The final mask uses a prioritized system to represent the analysis results:
 5.1 Running the Automatic Workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The primary way to use the system is by running the automatic app with a set of parameters.
+The primary way to use the system is by running the automatic processor with a set of parameters.
 
 .. code-block:: json
 
@@ -125,7 +125,7 @@ The primary way to use the system is by running the automatic app with a set of 
 5.2 Running the Manual App Standalone
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The manual app can also be run on its own. It requires the user to manually select the pre- and post-event `.zip` files from the workspace and provide a `BBOX`. It will perform the full analysis for that single pair.
+The manual processor can also be run on its own. It requires the user to manually select the pre- and post-event `.zip` files from the workspace and provide a `BBOX`. It will perform the full analysis for that single pair.
 
 6 References
 ------------
