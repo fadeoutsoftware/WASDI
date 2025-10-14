@@ -106,7 +106,7 @@ The cropped post-event S2 image.
 
 .. figure:: ../_static/LandslideDetectionS2/example_Wayanad_landslide-mask_cropped.png
    :alt: The landslide mask found by analysing the pre and post images.
-The landslide mask found by analysing the pre- and post- event images.
+The landslide mask found by analysing the pre- and post- event images (this output is generated in both the PNG and TIFF format).
 
 .. figure:: ../_static/LandslideDetectionS2/example_Wayanad_ndvi-distribution.png
    :alt: The NDVI Distribution provides the definitive numerical proof that the detection was successful.
