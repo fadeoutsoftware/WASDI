@@ -1184,10 +1184,10 @@ services:
       - "traefik.http.routers.r_{{ sRiseServerServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sRiseServerServiceName }}.loadbalancer.server.port={{ sRiseServerInternalPort }}"
-{% if ( aWasdiTomcatWasdiWebServerPorts | length ) > 0 %}
+{% if ( aoRiseServerPorts | length ) > 0 %}
     ports:
-{% for sWasdiTomcatWasdiWebServerCurrentPort in aWasdiTomcatWasdiWebServerPorts %}
-      - "{{ sWasdiTomcatWasdiWebServerCurrentPort | regex_replace('^:', '') }}"
+{% for sRiseServerCurrentPort in aoRiseServerPorts %}
+      - "{{ sRiseServerCurrentPort | regex_replace('^:', '') }}"
 {% endfor %}
 {% endif %}
     pull_policy: "never"
