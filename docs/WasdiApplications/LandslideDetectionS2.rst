@@ -72,22 +72,13 @@ The workflow generates a primary final output and several intermediate products 
 4.1 Primary Output
 ~~~~~~~~~~~~~~~~~~
 
--   **Landslide Mosaic Mask**: A single, mosaicked raster file where pixel values indicate the combined classification result from all processed tiles.
+-   **Landslide Mosaic Mask**: A single, mosaicked raster file where pixel values indicate the combined classification result (individual landslide masks) from all the processed tiles.
 
         *   `{BASENAME}_landslide-mask-mosaic.tif`
         *   Example: `Wayanad_landslide-mask-mosaic.tif`
 
 
-4.2 Understanding the Pixel Values
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The final mask uses a prioritized system to represent the analysis results:
-
-* 1 (Landslide): A landslide was detected. This value has the highest priority.
-* 255 (Cloud / No-Data): The area was obscured by clouds or shadows in either the pre- or post-event image, or has No-Data.
-* 0 (No Landslide): The area was analyzed and found to be stable. This value is also used for areas at the edge of a satellite's imaging path (some S2 tiles may not fully cover the BBOX specified by the user). This is crucial for allowing valid data from adjacent tiles to correctly fill gaps during mosaicking.
-
-4.3 Intermediate Outputs (from each Manual App sub-process)
+4.2 Intermediate Outputs (from each Manual App sub-process)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -   Aligned True-Color Images: `..._pre-event_...tif` and `..._post-event_...tif`
@@ -111,6 +102,15 @@ The landslide mask found by analysing the pre- and post- event images (this outp
 .. figure:: ../_static/LandslideDetectionS2/example_Wayanad_ndvi-distribution.png
    :alt: The NDVI Distribution provides the definitive numerical proof that the detection was successful.
 The NDVI Distribution provides the definitive numerical proof that the detection was successful.
+
+4.3 Understanding the Pixel Values
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Both the individual and the final landslide mask uses a prioritized system to represent the analysis results:
+
+* 1 (Landslide): A landslide was detected. This value has the highest priority.
+* 255 (Cloud / No-Data): The area was obscured by clouds or shadows in either the pre- or post-event image, or has No-Data.
+* 0 (No Landslide): The area was analyzed and found to be stable. This value is also used for areas at the edge of a satellite's imaging path (some S2 tiles may not fully cover the BBOX specified by the user). This is crucial for allowing valid data from adjacent tiles to correctly fill gaps during mosaicking.
 
 
 5 How to Use It
