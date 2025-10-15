@@ -84,7 +84,7 @@ The code below, for instance, shows how to download a grib file representing a E
         wasdi.wasdiLog(f"output file path {sDownloadPath}")
 
         wasdi.wasdiLog("calling the CDS client")
-        sCDSUrl = "https://cds-beta.climate.copernicus.eu/api"
+        sCDSUrl = "https://cds.climate.copernicus.eu/api"
 		sCDSAPIKey = "1111-1111-1111-111" # TODO: add here the CDS Personal Access Token
         oCDSClient = cdsapi.Client(url=sCDSUrl, key=sCDSAPIKey)
         oCDSClient.retrieve(sDataset, oRequest).download(target=sDownloadPath)
