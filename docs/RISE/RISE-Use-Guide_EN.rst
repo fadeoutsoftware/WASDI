@@ -399,18 +399,23 @@ E. Impacts Evaluation
 
 .. figure:: ../_static/RISE_user_manual/17_AoO-Impacts-Evaluation.png
 
-- In the event of flooding, click the "Impacts Evaluation" button (1) to generate a summary of the estimated impacts within your AoO.
-- Select the area type (2) for the impact summary:
-    * **Urban Flood Map:** Impacts on urban areas
-    * **Bare Soil Flood Map:** Impacts on non-urban areas
-    * **Merged Impacts:** Impacts on urban and non-urban areas combined
-- The feature provides a summary of the following impacts affected by the flood:
-    * **Population Affected:** Estimated number of people affected.
-    * **Exposures Affected:** Estimated number of critical infrastructures (e.g. airports, hospitals, schools, etc.) impacted.
-    * **Roads Affected:** Estimated number of roads affected.
-    * **Crops:** Estimated total and affected crop area (in km²).
-    * **Grasslands:** Estimated total and affected grassland area (in km²).
-    * **Built Up:** Estimated total and affected building area (in km²).
+In the event of flooding, click the "Impacts Evaluation" button (1) to generate a summary of the estimated impacts within your AoO.
+
+Select the area type (2) for the impact summary:
+
+* **Urban Flood Map:** Impacts on urban areas
+* **Bare Soil Flood Map:** Impacts on non-urban areas
+* **Merged Impacts:** Impacts on urban and non-urban areas combined
+
+The feature provides a summary of the following impacts affected by the flood:
+
+* **Population Affected:** Estimated number of people affected.
+* **Exposures Affected:** Estimated number of critical infrastructures (e.g. airports, hospitals, schools, etc.) impacted.
+* **Roads Affected:** Estimated number of roads affected.
+* **Crops:** Estimated total and affected crop area (in km²).
+* **Grasslands:** Estimated total and affected grassland area (in km²).
+* **Built Up:** Estimated total and affected building area (in km²).
+
 Hover over the donut chart (3) to review the share (in %) of affected vs. non-affected area for Crops, Grasslands and Built Up areas.
 
 F. Manage Events
@@ -456,5 +461,6 @@ If you wish to upload associated images and documents and link it to the event, 
 * Click **'Save'** (3) to confirm your changes.
 
 The event, including its maps, details, images, and documents, is now saved and available for review whenever needed.
+
 
 
