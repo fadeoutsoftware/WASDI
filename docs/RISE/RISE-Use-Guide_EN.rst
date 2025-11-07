@@ -131,7 +131,7 @@ In RISE, user roles are defined as follows:
 The table below summarizes the permissions associated with each role in RISE:
 
 .. list-table::
-   :widths: 60 10 10 10 10
+   :widths: 60 15 15 15 15
    :header-rows: 1
 
    * - **Actions**
@@ -229,13 +229,16 @@ D. Subscriptions: Add a new RISE subscription
 
 - From the **User Account** page, navigate to the **Subscriptions** section in your user account (1).
 - Click **'Buy New Subscription'** (2).
-- Configure your subscription by specifying:
-   * **Name and Description**: Give a name and identify the purpose of the subscription.
-   * **Number of AoOs**: Select how many Areas of Operations (AoOs) you want to monitor.
-   * **Plugins**: Choose the Earth-Observation (EO) data you want access to (e.g. flood, drought, buildings, etc.). More details on each plugins in the **'Area of Operations'** section below.
-   * **Area Type**:
-     - **Emergency Only Area**: Ideal for short-term, high-priority monitoring (e.g., natural disasters or ongoing incidents). Data is delivered rapidly but stored for only **3 months**.
-     - **Long Term Area**: Suited for continuous or periodic monitoring (e.g., environmental studies or infrastructure tracking). Data delivery may be slower, but it is archived for long-term access.
+
+Configure your subscription by specifying:
+
+* **Name and Description**: Give a name and identify the purpose of the subscription.
+* **Number of AoOs**: Select how many Areas of Operations (AoOs) you want to monitor.
+* **Plugins**: Choose the Earth-Observation (EO) data you want access to (e.g. flood, drought, buildings, etc.). More details on each plugins in the **'Area of Operations'** section below.
+**Area Type**:
+
+* **Emergency Only Area**: Ideal for short-term, high-priority monitoring (e.g., natural disasters or ongoing incidents). Data is delivered rapidly but stored for only **3 months**.
+* **Long Term Area**: Suited for continuous or periodic monitoring (e.g., environmental studies or infrastructure tracking). Data delivery may be slower, but it is archived for long-term access.
 
 E. Areas of Operations: Create a new AoO
 ----------------------------------------------
@@ -416,6 +419,7 @@ F. Manage Events
 .. figure:: ../_static/RISE_user_manual/18_Events.png
 
 In RISE, you can save a specific view as an event (e.g. during a flood) to allow you and your collaborators to revisit and review the corresponding maps at a later time. This ensures continued access to the maps from that date, even after the 3-month retention period, during which RISE automatically deletes older maps for monitoring-only Areas of Operations (AoO).
+
 Once an event is saved, a flag (1) will appear on the timebar at the date of the saved view. Clicking the flag will load the event, displaying the corresponding maps. Additionally, the event’s start, peak, and end dates will be visible in the lower section of the left panel (2).
 
 To create an event, follow these steps:
@@ -452,4 +456,5 @@ If you wish to upload associated images and documents and link it to the event, 
 * Click **'Save'** (3) to confirm your changes.
 
 The event, including its maps, details, images, and documents, is now saved and available for review whenever needed.
+
 
