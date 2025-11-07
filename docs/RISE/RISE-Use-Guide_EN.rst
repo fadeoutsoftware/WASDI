@@ -6,43 +6,35 @@ RISE User Guide - EN
 
 1. Getting Started with RISE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-To begin using RISE, one member must create the organization and will automatically assume the ADMIN role (see role details below). Follow the steps below to complete the setup.
-
+To begin using RISE, one member must create the organization and will automatically assume the ADMIN role (see role details in section: **'B. Organization: Invite collaborators'**). Follow the steps below to complete the setup.
 
 Step 1: Create a RISE Account
 -------------------------------
 
-
 .. figure:: ../_static/RISE_user_manual/01_Creation-Org_Landing-Page.png
-
 
 * Go to: https://rise.wasdi.net/
 * Click the **'Sign Up'** button in the top-right corner
 
-
 .. figure:: ../_static/RISE_user_manual/02_Creation-Org_Create-Account.png
-
 
 Enter your **personal account credentials** as follows:
 
-* **User ID**: A unique login name (8+ characters).
-* **Email Address**: Must not be linked to an existing RISE account.
-* **Password**: Must include:
+- **User ID**: A unique login name (8+ characters).
+- **Email Address**: Must not be linked to an existing RISE account.
+- **Password**: Must include:
    * Minimum 8 characters
    * 1+ lowercase letter
    * 1+ capital letter
    * 1+ number
-   * 1+ special character (@,$,!,%,*,#,?,&)
+   * 1+ special character (@, $, !, %, *, #, ?, &)
 
 Check the boxes to accept the **'Terms and Conditions'** and **'Privacy Policy'**. You may click the links to review them before proceeding.
-
 
 Step 2: Enter your Personal Information
 -------------------------------
 
-
 .. figure:: ../_static/RISE_user_manual/03_Creation-Org_Name.png
-
 
 Provide your:
 
@@ -50,13 +42,10 @@ Provide your:
 * Last name
 * Phone number
 
-
 Step 3: Enter your Organization's Information
 -------------------------------
 
-
 .. figure:: ../_static/RISE_user_manual/04_Creation-Org_Org-Details.png
-
 
 * Fill in your **organization’s details**.
 * Then, click **'Register'** to complete the form.
@@ -65,13 +54,10 @@ Step 3: Enter your Organization's Information
 
 **Your are now all set up. Welcome to RISE!**
 
-
 2. RISE Dashboard
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
 .. figure:: ../_static/RISE_user_manual/05_Dashboard.png
-
 
 The **Dashboard** serves as RISE’s home screen, providing quick access to **Areas of Operations (AoO)**, a summary of active hazard events, and user account management.
 
@@ -85,7 +71,7 @@ To open an AoO, click on its marker on the map.
 **Left Panel:** The panel on the left (2) offers a live situation overview of the AoOs status, including:
 
 * Ongoing hazard events
-* Estimated affected population
+* Estimated affected population of these ongoing hazard events 
 * Critical alerts
 
 **Top-Right Menu:** Click the user icon (3) in the top-right corner to access:
@@ -106,15 +92,12 @@ To open an AoO, click on its marker on the map.
 
 **Navigation Tip**: From any RISE page, click the **RISE logo** (7) to return to the Dashboard instantly.
 
-
 3. User Account
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 A. Overview
 ----------------------------------------------
 
-
 .. figure:: ../_static/RISE_user_manual/06_User-Account.png
-
 
 From the user account page, you can access the following sections from the left panel:
 
@@ -124,20 +107,15 @@ From the user account page, you can access the following sections from the left 
 * **Areas of Operations:** Configure your AoOs (ADMIN/HQ roles only).
 See the sections below on how to invite collaborators to the organisation, add a new Subscription, and create a new Area of Operations.
 
-
 B. Organization: Invite collaborators
 ----------------------------------------------
 
-
 .. figure:: ../_static/RISE_user_manual/07_Invite-Collaborators.png
-
 
 * From the **User Account** page, click on 'Organization' (1).
 * Click on the 'Invite a collaborator to RISE' button (2).
 
-
 .. figure:: ../_static/RISE_user_manual/08_Invite-Collaborators.png
-
 
 * Enter the collaborator's email address in the first two fields (1).
 * Assign a role to this future RISE user (2).
@@ -233,14 +211,10 @@ The table below summarizes the permissions associated with each role in RISE:
      - ✅
 
 
-
-
 C. Organization: Modify the list and roles of collaborators
 ----------------------------------------------
 
-
 .. figure:: ../_static/RISE_user_manual/09_Modify-Collaborators.png
-
 
 * To modify a user's role, click on the pencil icon (1).
 * Click on the drop-down menu (2) and choose the desired role for the collaborator in question.
@@ -248,44 +222,36 @@ C. Organization: Modify the list and roles of collaborators
 * Cancel the ongoing role modification of a collaborator (4).
 * Delete a collaborator from the organization (5).
 
-
-D. Subscriptions: Add a new RISE subscription (AoO)
+D. Subscriptions: Add a new RISE subscription
 ----------------------------------------------
-
 
 .. figure:: ../_static/RISE_user_manual/10_Subscriptions.png
 
-
-* From the **User Account** page, navigate to the **Subscriptions** section in your user account (1).
-* Click **'Buy New Subscription'** (2).
-* Configure your subscription by specifying:
+- From the **User Account** page, navigate to the **Subscriptions** section in your user account (1).
+- Click **'Buy New Subscription'** (2).
+- Configure your subscription by specifying:
    * **Name and Description**: Give a name and identify the purpose of the subscription.
    * **Number of AoOs**: Select how many Areas of Operations (AoOs) you want to monitor.
    * **Plugins**: Choose the Earth-Observation (EO) data you want access to (e.g. flood, drought, buildings, etc.). More details on each plugins in the **'Area of Operations'** section below.
    * **Area Type**:
-     * **Emergency Only Area**: Ideal for short-term, high-priority monitoring (e.g., natural disasters or ongoing incidents). Data is delivered rapidly but stored for only **3 months**.
-     * **Long Term Area**: Suited for continuous or periodic monitoring (e.g., environmental studies or infrastructure tracking). Data delivery may be slower, but it is archived for long-term access.
-
+     - **Emergency Only Area**: Ideal for short-term, high-priority monitoring (e.g., natural disasters or ongoing incidents). Data is delivered rapidly but stored for only **3 months**.
+     - **Long Term Area**: Suited for continuous or periodic monitoring (e.g., environmental studies or infrastructure tracking). Data delivery may be slower, but it is archived for long-term access.
 
 E. Areas of Operations: Create a new AoO
 ----------------------------------------------
 
-
 .. figure:: ../_static/RISE_user_manual/11_Creation-AoO.png
-
 
 * **Prerequisite**: Ensure you have an **active subscription** (see section above for details).
 * Go to the **'Area of Operations'** (1) section in your user account.
 * Click **'Create New Area of Operations'** (2).
 
-
 .. figure:: ../_static/RISE_user_manual/12_Creation-AoO.png
-
 
 Configure your AoO with the following details:
 
-* **AoO Name & Description (1)**: Provide a name and concise description for your AoO.
-* **Public AoO (2):** Check this box to make the AoO visible to all RISE users.
+* **Name & Description (1)**: Provide a name and concise description for your AoO.
+* **Is Public (2):** Check this box to make the AoO visible to all RISE users.
 * **Support Archive (3):** Enable this option to generate historical data archives for the selected plugins/layers.
 * **Select Plugins (4):** Choose the plugins (or layers) you want to include in your AoO.
 
@@ -300,15 +266,12 @@ You can use the **Base Map Controls** (10) to adjust the map style (e.g., standa
 
 Once your AoO is defined, click **'Save'** (11) to finalize the creation. *Note: The first maps may take some time to process. You will receive an email notification when they are ready for review.*
 
-
 4. Area of Operations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 A. Plugins (Layers)
 ---------------------------------------------------
 
-
 .. figure:: ../_static/RISE_user_manual/13_AoO-Layers.png
-
 
 * Click on any plugin located at the top (1) to display its latest available map. The map appears instantly on the screen. Note: several maps from different plugins can be displayed simultaneously.
 * When a plugin is checked, its map details are automatically displayed in the left sidebar (2). 
@@ -384,31 +347,25 @@ For more information on plugins and their maps, see the table below:
      - 1-2 days
      - Scale from dark blue (243.15 K or -30 °C) to red (323.15 K or 50 °C)
 
-
 B. Map details and features
 -------------------------------------
 
-
 .. figure:: ../_static/RISE_user_manual/14_AoO-Layers-Tools.png
 
-
-* Date and time of the satellite image used to generate the map (timezone: CET) (1).
-* Click the button with three dots (2) to access additional options:
+- Date and time of the satellite image used to generate the map (timezone: CET) (1).
+- Click the button with three dots (2) to access additional options:
     * Show or hide the legend (a).
     * Center the view on the selected layer (b).
     * Download the map (c).
     * Consult map details (source, resolution, etc.) and/or force layer update (d).
-* Adjust map opacity to control its transparency (3).
-* To temporarily hide a layer, uncheck the corresponding box. To show it again, check it (4).
-* To remove a layer from the view, click the red trash can icon once the layer is active (5).
-
+- Adjust map opacity to control its transparency (3).
+- To temporarily hide a layer, uncheck the corresponding box. To show it again, check it (4).
+- To remove a layer from the view, click the red trash can icon once the layer is active (5).
 
 C. Analysis tools
 --------------------------------------------
 
-
 .. figure:: ../_static/RISE_user_manual/15_AoO-Layers-Tools.png
-
 
 On the right side of the operation zone page, we have the following features:
 
@@ -420,13 +377,10 @@ On the right side of the operation zone page, we have the following features:
 * **Layer analyzer (6):** Allows analysis of map data displayed in a defined area.
 * **Base Map Controls (7):** Adjust the map style (e.g., standard, topography, satellite) and zoom level.
 
-
 D. Historical data review
 -------------------------------------------
 
-
 .. figure:: ../_static/RISE_user_manual/16_AoO-Time-Functionnalities.png
-
 
 By default, your view is positioned on today (or Live) and will displays the latest available maps for the plugins you activate.
 
@@ -437,20 +391,17 @@ By default, your view is positioned on today (or Live) and will displays the lat
 * Navigate day by day (back/forward) (6).
 * Click on the flags (7) in the timeline to view hazard events, either manually saved by a member or automatically detected by RISE.
 
-
 E. Impacts Evaluation
 -----------------------------------
 
-
 .. figure:: ../_static/RISE_user_manual/17_AoO-Impacts-Evaluation.png
 
-
-* In the event of flooding, click the "Impacts Evaluation" button (1) to generate a summary of the estimated impacts within your AoO.
-* Select the area type (2) for the impact summary:
+- In the event of flooding, click the "Impacts Evaluation" button (1) to generate a summary of the estimated impacts within your AoO.
+- Select the area type (2) for the impact summary:
     * **Urban Flood Map:** Impacts on urban areas
     * **Bare Soil Flood Map:** Impacts on non-urban areas
     * **Merged Impacts:** Impacts on urban and non-urban areas combined
-* The feature provides a summary of the following impacts affected by the flood:
+- The feature provides a summary of the following impacts affected by the flood:
     * **Population Affected:** Estimated number of people affected.
     * **Exposures Affected:** Estimated number of critical infrastructures (e.g. airports, hospitals, schools, etc.) impacted.
     * **Roads Affected:** Estimated number of roads affected.
@@ -459,13 +410,10 @@ E. Impacts Evaluation
     * **Built Up:** Estimated total and affected building area (in km²).
 Hover over the donut chart (3) to review the share (in %) of affected vs. non-affected area for Crops, Grasslands and Built Up areas.
 
-
 F. Manage Events
 ---------------------------------------
 
-
 .. figure:: ../_static/RISE_user_manual/18_Events.png
-
 
 In RISE, you can save a specific view as an event (e.g. during a flood) to allow you and your collaborators to revisit and review the corresponding maps at a later time. This ensures continued access to the maps from that date, even after the 3-month retention period, during which RISE automatically deletes older maps for monitoring-only Areas of Operations (AoO).
 Once an event is saved, a flag (1) will appear on the timebar at the date of the saved view. Clicking the flag will load the event, displaying the corresponding maps. Additionally, the event’s start, peak, and end dates will be visible in the lower section of the left panel (2).
@@ -475,15 +423,11 @@ To create an event, follow these steps:
 * Ensure to be currently at the date of the view you would like to save
 * Click on **'Manage Events'** (3).
 
-
 .. figure:: ../_static/RISE_user_manual/19_Events-Create-Event.png
-
 
 Click on **'Create new Event'**
 
-
 .. figure:: ../_static/RISE_user_manual/20_Events-Create-Event.png
-
 
 Indicate the following event's details:
 
@@ -496,19 +440,16 @@ Indicate the following event's details:
 * **Type:** Define the nature of the event.
 Once you have filled in these details, click "Save".
 
-
 .. figure:: ../_static/RISE_user_manual/21_Events-Edit-Event.png
-
 
 After creating the event, you will find it listed along with its details on the **Manage Events** page.
 If you wish to upload associated images and documents and link it to the event, click the **pen icon** (1) next to the event to edit it.
 
-
 .. figure:: ../_static/RISE_user_manual/22_Events-Upload-image-doc.png
-
 
 * Select the image or document by clicking **'Choose File'** (1), or simply drag and drop the files into the designated area.
 * Click **'Upload'** (2) to add the image or document.
 * Click **'Save'** (3) to confirm your changes.
 
 The event, including its maps, details, images, and documents, is now saved and available for review whenever needed.
+
