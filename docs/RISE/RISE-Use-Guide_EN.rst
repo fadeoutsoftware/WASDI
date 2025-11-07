@@ -11,14 +11,12 @@ To begin using RISE, one member must create the organization and will automatica
 Step 1: Create a RISE Account
 -------------------------------
 
-IMAGE 1: landing page
-
 .. figure:: ../_static/RISE_user_manual/01_Creation-Org_Landing-Page.png
 
 * Go to: https://rise.wasdi.net/
 * Click the **'Sign Up'** button in the top-right corner
 
-IMAGE 2: Create an account
+.. figure:: ../_static/RISE_user_manual/02_Creation-Org_Create-Account.png
 
 Enter your **personal account credentials** as follows:
 * **User ID**: A unique login name (8+ characters).
@@ -35,9 +33,10 @@ Check the boxes to accept the **Terms and Conditions** and **Privacy Policy**. Y
 Step 2: Enter your Personal Information
 -------------------------------
 
-IMAGE 3: ID & PW
+.. figure:: ../_static/RISE_user_manual/03_Creation-Org_Name.png
 
 Provide your:
+
 * First name
 * Last name
 * Phone number
@@ -45,7 +44,7 @@ Provide your:
 Step 3: Enter your Organization's Information
 -------------------------------
 
-IMAGE 0.4: ID & PW
+.. figure:: ../_static/RISE_user_manual/04_Creation-Org_Org-Details.png
 
 * Fill in your **organization’s details**.
 * Then, click **'Register'** to complete the form.
@@ -57,12 +56,13 @@ IMAGE 0.4: ID & PW
 1. RISE Dashboard
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-IMAGE 5
+.. figure:: ../_static/RISE_user_manual/05_Dashboard.png
 
 The **Dashboard** serves as RISE’s home screen, providing quick access to **Areas of Operations (AoO)**, a summary of active hazard events, and user account management.
 
 **Interactive Map (Center)**
 The map displays AoOs as clickable markers (1). Each marker type indicates the zone’s access level:
+
 * **Yellow markers:** Private AoOs, created by members of your organization.
 * **Green markers:** Public AoOs, accessible to all RISE users.
 * **Blue markers:** Shared AoOs, provided by users from other organizations.
@@ -70,12 +70,14 @@ To open an AoO, click on its marker on the map.
 
 **Left Panel:**
 The panel on the left (2) offers a live situation overview of the AoOs status, including:
+
 * Ongoing hazard events
 * Estimated affected population
 * Critical alerts
 
 **Top-Right Menu:**
 Click the user icon (3) in the top-right corner to access:
+
 * **Account:** Update personal details and account settings.
 * **Organization:** View organization details and manage members (ADMIN/HQ roles only).
 * **Subscriptions:** Handle billing and plans (ADMIN/HQ roles only).
@@ -86,6 +88,7 @@ Click the user icon (3) in the top-right corner to access:
 
 **Map Tools:**
 The following features are available on all RISE's pages including an interactive map:
+
 * **Search bar** (4): Locate specific places.
 * **Measurement tool** (5): Calculate distances/areas.
 * **Base map controls** (6): Change the base map style (standard, topology, satellite, etc.) and zoom level.
@@ -98,9 +101,10 @@ From any RISE page, click the **RISE logo** (7) to return to the Dashboard insta
 A. Overview
 ----------------------------------------------
 
-IMAGE 6
+.. figure:: ../_static/RISE_user_manual/06_User-Account.png
 
 From the user account page, you can access the following sections from the left panel:
+
 * **User:** Update personal details and account settings.
 * **Organization:** View organization details and manage list of members and their roles (ADMIN/HQ roles only).
 * **Subscriptions:** Handle billing and plans (ADMIN/HQ roles only).
@@ -110,18 +114,19 @@ See the sections below on how to invite collaborators to the organisation, add a
 B. Organization: Invite collaborators
 ----------------------------------------------
 
-IMAGE 7
+.. figure:: ../_static/RISE_user_manual/07_Invite-Collaborators.png
 
 * From the **User Account** page, click on 'Organization' (1).
 * Click on the 'Invite a collaborator to RISE' button (2).
 
-IMAGE 8
+.. figure:: ../_static/RISE_user_manual/08_Invite-Collaborators.png
 
 * Enter the collaborator's email address in the first two fields (1).
 * Assign a role to this future RISE user (2).
 * After choosing the appropriate role for the collaborator, click on 'Invite a new user'
 
 In RISE, user roles are defined as follows:
+
 * **ADMIN:** Full system control, user & global settings management.
 * **HQ:** Strategic oversight, multi-team reporting & coordination.
 * **FIELD:** On-site operations, task execution, data collection.
@@ -214,7 +219,7 @@ The table below summarizes the permissions associated with each role in RISE:
 C. Organization: Modify the list and roles of collaborators
 ----------------------------------------------
 
-IMAGE 9
+.. figure:: ../_static/RISE_user_manual/09_Modify-Collaborators.png
 
 * To modify a user's role, click on the pencil icon (1).
 * Click on the drop-down menu (2) and choose the desired role for the collaborator in question.
@@ -225,7 +230,7 @@ IMAGE 9
 D. Subscriptions: Add a new RISE subscription (AoO)
 ----------------------------------------------
 
-IMAGE 10
+.. figure:: ../_static/RISE_user_manual/10_Subscriptions.png
 
 * From the **User Account** page, navigate to the **Subscriptions** section in your user account (1).
 * Click **'Buy New Subscription'** (2).
@@ -241,21 +246,23 @@ IMAGE 10
 E. Areas of Operations: Create a new AoO
 ----------------------------------------------
 
-IMAGE 11
+.. figure:: ../_static/RISE_user_manual/11_Creation-AoO.png
 
 * **Prerequisite**: Ensure you have an **active subscription** (see section above for details).
 * Go to the **'Area of Operations'** (1) section in your user account.
 * Click **'Create New Area of Operations'** (2).
 
-IMAGE 12
+.. figure:: ../_static/RISE_user_manual/12_Creation-AoO.png
 
 Configure your AoO with the following details:
+
 * **AoO Name & Description (1)**: Provide a name and concise description for your AoO.
 * **Public AoO (2):** Check this box to make the AoO visible to all RISE users.
 * **Support Archive (3):** Enable this option to generate historical data archives for the selected plugins/layers.
 * **Select Plugins (4):** Choose the plugins (or layers) you want to include in your AoO.
 
 Next, use the tools on the left side of the map and listed below to define your AoO's location and area:
+
 * **Search Bar (5):** Locate specific places on the map.
 * **Import Shapefile (6):** Upload a pre-existing shapefile (geospatial vector data) to define your AoO.
 * **Manual Bounding Box (7):** Define the AoO by entering coordinates manually or in JSON format.
@@ -270,7 +277,7 @@ Once your AoO is defined, click **'Save'** (11) to finalize the creation. *Note:
 A. Plugins (Layers)
 ---------------------------------------------------
 
-IMAGE 13
+.. figure:: ../_static/RISE_user_manual/13_AoO-Layers.png
 
 * Click on any plugin located at the top (1) to display its latest available map. The map appears instantly on the screen. Note: several maps from different plugins can be displayed simultaneously.
 * When a plugin is checked, its map details are automatically displayed in the left sidebar (2). 
@@ -350,7 +357,7 @@ For more information on plugins and their maps, see the table below:
 B. Map details and features
 -------------------------------------
 
-IMAGE 14
+.. figure:: ../_static/RISE_user_manual/14_AoO-Layers-Tools.png
 
 * Date and time of the satellite image used to generate the map (timezone: CET) (1).
 * Click the button with three dots (2) to access additional options:
@@ -365,9 +372,10 @@ IMAGE 14
 C. Analysis tools
 --------------------------------------------
 
-IMAGE 15
+.. figure:: ../_static/RISE_user_manual/15_AoO-Layers-Tools.png
 
 On the right side of the operation zone page, we have the following features:
+
 * **User account (1):** Click here to return to dashboard, change language, etc.
 * **Search bar (2):** Look for a specific location (e.g., city, country) to access it instantly.
 * **Measurements (3):**Tool for calculating the area of a zone (polygon, square, circle, etc.) or the distance between two or more points.
@@ -379,9 +387,10 @@ On the right side of the operation zone page, we have the following features:
 D. Historical data review
 -------------------------------------------
 
-IMAGE 16
+.. figure:: ../_static/RISE_user_manual/16_AoO-Time-Functionnalities.png
 
 By default, your view is positioned on today (or Live) and will displays the latest available maps for the plugins you activate.
+
 * Click, hold, and drag the yellow bar on the timeline (1) to explore maps at different dates. 
 * Your can also click directly on the calendar icon (2) to go to a specific date.
 * The indicated date (3) corresponds to the day currently displayed. **Warning: The displayed date may not match the actual date of the maps due to varying update frequencies. For accuracy, always check the exact data capture date for each map in the left panel (4).**
@@ -390,8 +399,9 @@ By default, your view is positioned on today (or Live) and will displays the lat
 * Click on the flags (7) in the timeline to view hazard events, either manually saved by a member or automatically detected by RISE.
 
 E. Impacts Evaluation
+-----------------------------------
 
-IMAGE 17
+.. figure:: ../_static/RISE_user_manual/17_AoO-Impacts-Evaluation.png
 
 * In the event of flooding, click the "Impacts Evaluation" button (1) to generate a summary of the estimated impacts within your AoO.
 * Select the area type (2) for the impact summary:
@@ -408,23 +418,26 @@ IMAGE 17
 Hover over the donut chart (3) to review the share (in %) of affected vs. non-affected area for Crops, Grasslands and Built Up areas.
 
 F. Manage Events
+---------------------------------------
 
-IMAGE 18
+.. figure:: ../_static/RISE_user_manual/18_Events.png
 
 In RISE, you can save a specific view as an event (e.g. during a flood) to allow you and your collaborators to revisit and review the corresponding maps at a later time. This ensures continued access to the maps from that date, even after the 3-month retention period, during which RISE automatically deletes older maps for monitoring-only Areas of Operations (AoO).
 Once an event is saved, a flag (1) will appear on the timebar at the date of the saved view. Clicking the flag will load the event, displaying the corresponding maps. Additionally, the event’s start, peak, and end dates will be visible in the lower section of the left panel (2).
 
 To create an event, follow these steps:
+
 * Ensure to be currently at the date of the view you would like to save
 * Click on **'Manage Events'** (3).
 
-IMAGE 19
+.. figure:: ../_static/RISE_user_manual/19_Events-Create-Event.png
 
 Click on **'Create new Event'**
 
-IMAGE 20
+.. figure:: ../_static/RISE_user_manual/20_Events-Create-Event.png
 
 Indicate the following event's details:
+
 * **Name:** Assign a clear name to the event.
 * **Public Event:** Choose whether to make the event visible to all RISE users. Note: The associated AoO must also be set as public.
 * **Description:** Add a detailed description of the event.
@@ -434,17 +447,15 @@ Indicate the following event's details:
 * **Type:** Define the nature of the event.
 Once you have filled in these details, click "Save".
 
-IMAGE 21
+.. figure:: ../_static/RISE_user_manual/21_Events-Edit-Event.png
 
 After creating the event, you will find it listed along with its details on the **Manage Events** page.
 If you wish to upload associated images and documents and link it to the event, click the **pen icon** (1) next to the event to edit it.
 
-IMAGE 22
+.. figure:: ../_static/RISE_user_manual/22_Events-Upload-image-doc.png
 
 * Select the image or document by clicking **'Choose File'** (1), or simply drag and drop the files into the designated area.
 * Click **'Upload'** (2) to add the image or document.
 * Click **'Save'** (3) to confirm your changes.
 
-
 The event, including its maps, details, images, and documents, is now saved and available for review whenever needed.
-
