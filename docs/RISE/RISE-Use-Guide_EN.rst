@@ -12,6 +12,7 @@ Step 1: Create a RISE Account
 -------------------------------
 
 IMAGE 1: landing page
+.. figure:: ../_static/RISE_user_manual/01_Creation-Org_Landing-Page.png
 
 * Go to: https://rise.wasdi.net/
 * Click the **'Sign Up'** button in the top-right corner
@@ -442,5 +443,6 @@ IMAGE 22
 * Select the image or document by clicking **'Choose File'** (1), or simply drag and drop the files into the designated area.
 * Click **'Upload'** (2) to add the image or document.
 * Click **'Save'** (3) to confirm your changes.
+
 
 The event, including its maps, details, images, and documents, is now saved and available for review whenever needed.
