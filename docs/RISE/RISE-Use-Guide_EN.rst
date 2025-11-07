@@ -12,6 +12,7 @@ Step 1: Create a RISE Account
 -------------------------------
 
 IMAGE 1: landing page
+
 .. figure:: ../_static/RISE_user_manual/01_Creation-Org_Landing-Page.png
 
 * Go to: https://rise.wasdi.net/
@@ -446,3 +447,4 @@ IMAGE 22
 
 
 The event, including its maps, details, images, and documents, is now saved and available for review whenever needed.
+
