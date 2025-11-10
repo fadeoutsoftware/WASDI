@@ -345,8 +345,8 @@ For more information on plugins and their maps, see the table below:
      - Precipitation over the last 24 hours, 12 hours, and 3 hours
      - Daily
      - Color scale: Green: 0 - 39 mm, Yellow: 40 - 100 mm, Orange: 101 - 200 mm, Red: > 200 mm
-   * - Temperature
-     - Land surface temperature (expressed in Kelvin)
+   * - Min, Max, and Avg Temperature
+     - Min, Max, and Avg Land surface temperature (expressed in Kelvin)
      - 1-2 days
      - Scale from dark blue (243.15 K or -30 °C) to red (323.15 K or 50 °C)
 
@@ -461,6 +461,7 @@ If you wish to upload associated images and documents and link it to the event, 
 * Click **'Save'** (3) to confirm your changes.
 
 The event, including its maps, details, images, and documents, is now saved and available for review whenever needed.
+
 
 
 
