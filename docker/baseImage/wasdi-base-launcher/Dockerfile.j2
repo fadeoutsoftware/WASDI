@@ -142,38 +142,38 @@ RUN apt-get update && \
 # From now, all commands executed are executed with the user '{{ sWasdiSystemUserName }}'
 USER {{ sWasdiSystemUserName }}
 
-# RUN specific to install JDK 11
+# RUN specific to install JDK 21
 RUN mkdir --parents \
-        {{ sWasdiJdk11RootDirectoryPath }} \
-        {{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }} && \
-    chown {{ sWasdiJdk11RootDirectoryOwner }}:{{ sWasdiJdk11RootDirectoryGroup }} \
-        {{ sWasdiJdk11RootDirectoryPath }} \
-        {{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }} && \
-    chmod {{ sWasdiJdk11RootDirectoryMode }} \
-        {{ sWasdiJdk11RootDirectoryPath }} \
-        {{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }} && \
+        {{ sWasdiJdk21RootDirectoryPath }} \
+        {{ sWasdiJdk21RootDirectoryPath }}/{{ sWasdiJdk21Version }} && \
+    chown {{ sWasdiJdk21RootDirectoryOwner }}:{{ sWasdiJdk21RootDirectoryGroup }} \
+        {{ sWasdiJdk21RootDirectoryPath }} \
+        {{ sWasdiJdk21RootDirectoryPath }}/{{ sWasdiJdk21Version }} && \
+    chmod {{ sWasdiJdk21RootDirectoryMode }} \
+        {{ sWasdiJdk21RootDirectoryPath }} \
+        {{ sWasdiJdk21RootDirectoryPath }}/{{ sWasdiJdk21Version }} && \
     wget \
         --no-verbose \
-        --output-document /tmp/{{ sWasdiJdk11SourceUrl | basename }} \
+        --output-document /tmp/{{ sWasdiJdk21SourceUrl | basename }} \
         --progress=bar:force:noscroll \
         --show-progress \
-        {{ sWasdiJdk11SourceUrl }} && \
+        {{ sWasdiJdk21SourceUrl }} && \
     tar \
-        --directory {{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }} \
+        --directory {{ sWasdiJdk21RootDirectoryPath }}/{{ sWasdiJdk21Version }} \
         --extract \
-        --file /tmp/{{ sWasdiJdk11SourceUrl | basename }} \
+        --file /tmp/{{ sWasdiJdk21SourceUrl | basename }} \
         --strip-components=1 && \
     ln \
         --symbolic \
-        {{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }} \
-        {{ sWasdiJdk11RootDirectoryPath }}/latest && \
-    chown --no-dereference {{ sWasdiJdk11RootDirectoryOwner }}:{{ sWasdiJdk11RootDirectoryGroup }} \
-        {{ sWasdiJdk11RootDirectoryPath }}/latest && \
+        {{ sWasdiJdk21RootDirectoryPath }}/{{ sWasdiJdk21Version }} \
+        {{ sWasdiJdk21RootDirectoryPath }}/latest && \
+    chown --no-dereference {{ sWasdiJdk21RootDirectoryOwner }}:{{ sWasdiJdk21RootDirectoryGroup }} \
+        {{ sWasdiJdk21RootDirectoryPath }}/latest && \
     rm --force \
-        /tmp/{{ sWasdiJdk11SourceUrl | basename }}
+        /tmp/{{ sWasdiJdk21SourceUrl | basename }}
 
-ENV JAVA_HOME="{{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }}"
-ENV PATH="{{ sWasdiJdk11RootDirectoryPath }}/{{ sWasdiJdk11Version }}/bin:${PATH}"
+ENV JAVA_HOME="{{ sWasdiJdk21RootDirectoryPath }}/{{ sWasdiJdk21Version }}"
+ENV PATH="{{ sWasdiJdk21RootDirectoryPath }}/{{ sWasdiJdk21Version }}/bin:${PATH}"
 
 
 # Set the workdir
