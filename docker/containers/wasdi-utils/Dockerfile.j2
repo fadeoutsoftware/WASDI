@@ -135,8 +135,6 @@ CMD [ \
     "{{ sWasdiJdk21RootDirectoryPath }}/{{ sWasdiJdk21Version }}/bin/java", \
     "-Xmx24g", \
     "-Xms1024m", \
-    "-XX:+AggressiveOpts", \
-    "-Xverify:none", \
     "-jar", \
     "{{ sWasdiUtilsRootDirectoryPath }}/{{ sWasdiUtilsBuildTargetFileName }}", \
     "--config", \

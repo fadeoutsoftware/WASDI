@@ -39,6 +39,6 @@ docker \
     --network {{ sWasdiDockerNetworkName }} \
     --rm \
     {{ sWasdiUtilsServiceName }}:latest \
-    "/opt/wasdi/jdk11/11.0.23+9/bin/java" "-Xmx24g" "-Xms1024m" "-XX:+AggressiveOpts" "-Xverify:none" "-jar" "/opt/wasdi/wasdi-utils/dbUtils.jar" "--config" "/etc/wasdi/wasdiConfig.json" "--cleantask"
+    "/opt/wasdi/jdk21/latest/bin/java" "-Xmx24g" "-Xms1024m" "-jar" "/opt/wasdi/wasdi-utils/dbUtils.jar" "--config" "/etc/wasdi/wasdiConfig.json" "--cleantask"
 
 echo "#### END ${sInstanceTime} ####"
