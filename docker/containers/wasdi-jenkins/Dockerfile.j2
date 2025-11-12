@@ -159,6 +159,36 @@ RUN mkdir --parents \
         /tmp/{{ sWasdiJdk17SourceUrl | basename }}
 
 
+# RUN specific to install JDK 21
+RUN mkdir --parents \
+        {{ sWasdiJdk21RootDirectoryPath }} \
+        {{ sWasdiJdk21RootDirectoryPath }}/{{ sWasdiJdk21Version }} && \
+    chown {{ sWasdiJdk21RootDirectoryOwner }}:{{ sWasdiJdk21RootDirectoryGroup }} \
+        {{ sWasdiJdk21RootDirectoryPath }} \
+        {{ sWasdiJdk21RootDirectoryPath }}/{{ sWasdiJdk21Version }} && \
+    chmod {{ sWasdiJdk21RootDirectoryMode }} \
+        {{ sWasdiJdk21RootDirectoryPath }} \
+        {{ sWasdiJdk21RootDirectoryPath }}/{{ sWasdiJdk21Version }} && \
+    wget \
+        --no-verbose \
+        --output-document /tmp/{{ sWasdiJdk21SourceUrl | basename }} \
+        --progress=bar:force:noscroll \
+        --show-progress \
+        {{ sWasdiJdk21SourceUrl }} && \
+    tar \
+        --directory {{ sWasdiJdk21RootDirectoryPath }}/{{ sWasdiJdk21Version }} \
+        --extract \
+        --file /tmp/{{ sWasdiJdk21SourceUrl | basename }} \
+        --strip-components=1 && \
+    ln \
+        --symbolic \
+        {{ sWasdiJdk21RootDirectoryPath }}/{{ sWasdiJdk21Version }} \
+        {{ sWasdiJdk21RootDirectoryPath }}/latest && \
+    chown --no-dereference {{ sWasdiJdk21RootDirectoryOwner }}:{{ sWasdiJdk21RootDirectoryGroup }} \
+        {{ sWasdiJdk21RootDirectoryPath }}/latest && \
+    rm --force \
+        /tmp/{{ sWasdiJdk21SourceUrl | basename }}
+
 # RUN specific to install Maven
 # -> we do not install the apt package
 #    to avoid to install opendjk with apt
