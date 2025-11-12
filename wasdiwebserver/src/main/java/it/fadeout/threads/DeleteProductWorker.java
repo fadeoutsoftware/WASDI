@@ -3,7 +3,6 @@ package it.fadeout.threads;
 import java.util.List;
 
 import it.fadeout.rest.resources.ProductResource;
-import wasdi.shared.business.Node;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.Utils;

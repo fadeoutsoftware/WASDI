@@ -32,7 +32,6 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
-import wasdi.snapopearations.BandImageManager;
 
 public class Publishband extends Operation {
 
@@ -367,9 +366,6 @@ public class Publishband extends Operation {
 
             m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(), oParam.getWorkspace(), sError, oParam.getExchange());            
         } 
-        finally {
-            BandImageManager.stopCacheThread();
-        }
 
 		return false;
 	}

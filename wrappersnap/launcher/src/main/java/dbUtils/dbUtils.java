@@ -98,7 +98,6 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.modis.MODISUtils;
 import wasdi.shared.utils.wasdiAPI.WorkspaceAPIClient;
 import wasdi.shared.viewmodels.HttpCallResponse;
-import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
@@ -1066,6 +1065,7 @@ public class dbUtils {
                 
                 UserRepository oUserRepository = new UserRepository();
                 ArrayList<User> aoAllUsers = oUserRepository.getAllUsers();
+                ArrayList<User> aoUsersToDelete = new ArrayList<>();
                 
                 
                 for (int iUsers=0; iUsers<aoAllUsers.size(); iUsers++) {
@@ -1076,9 +1076,20 @@ public class dbUtils {
                 		
                 		if (oMaybeDuplicate.getUserId().equals(oUser.getUserId())) {
                 			System.out.println("Found Duplicate User " + oMaybeDuplicate.getUserId());
+                			if (bDelete) {
+                				aoUsersToDelete.add(oMaybeDuplicate);
+                			}
                 		}
                 	}
-                }                
+                }
+                
+                if (bDelete) {
+                	System.out.println("Deleting Duplicate Users ");
+                	
+                	for (User oUser : aoUsersToDelete) {
+						oUserRepository.deleteUser(oUser.getUserId());
+					}
+                }
             }
         } catch (Exception oEx) {
             System.out.println("USERS Exception: " + oEx);

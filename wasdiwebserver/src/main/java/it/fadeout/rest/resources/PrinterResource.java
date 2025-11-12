@@ -1,7 +1,6 @@
 package it.fadeout.rest.resources;
 
 import java.net.URI;
-
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -23,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.PrinterViewModel;
 
 @Path("/print")

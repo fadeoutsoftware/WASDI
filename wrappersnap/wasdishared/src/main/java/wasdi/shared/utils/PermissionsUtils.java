@@ -8,14 +8,11 @@ package wasdi.shared.utils;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 
@@ -24,7 +21,6 @@ import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.Organization;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Project;
 import wasdi.shared.business.S3Volume;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.Style;
@@ -48,7 +44,6 @@ import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;
 import wasdi.shared.data.ProcessorRepository;
-import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.data.S3VolumeRepository;
 import wasdi.shared.data.ScheduleRepository;
@@ -66,7 +61,6 @@ import wasdi.shared.utils.wasdiAPI.ProcessorAPIClient;
 import wasdi.shared.utils.wasdiAPI.WorkspaceAPIClient;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
-import wasdi.shared.viewmodels.organizations.SubscriptionType;
 
 /**
  * Wrap all the methods to check user rights and permissions

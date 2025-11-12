@@ -22,23 +22,23 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionAmqpClient>5.25.0</sVersionAmqpClient>
-        <sVersionAssertjCore>3.26.3</sVersionAssertjCore>
-        <sVersionAwsJavaSdkS3>1.12.779</sVersionAwsJavaSdkS3>
-        <sVersionCommonsCompress>1.27.1</sVersionCommonsCompress>
-        <sVersionCommonsLang3>3.17.0</sVersionCommonsLang3>
-        <sVersionCommonsNet>3.11.1</sVersionCommonsNet>
-        <sVersionCommonsValidator>1.9.0</sVersionCommonsValidator>
+        <sVersionAmqpClient>5.27.1</sVersionAmqpClient>
+        <sVersionAssertjCore>3.27.6</sVersionAssertjCore>
+        <sVersionAwsJavaSdkS3>1.12.793</sVersionAwsJavaSdkS3>
+        <sVersionCommonsCompress>1.28.0</sVersionCommonsCompress>
+        <sVersionCommonsLang3>3.19.0</sVersionCommonsLang3>
+        <sVersionCommonsNet>3.12.0</sVersionCommonsNet>
+        <sVersionCommonsValidator>1.10.0</sVersionCommonsValidator>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionGeoserverManager>1.7.0</sVersionGeoserverManager>
         <!--sVersionGson>2.12.1</sVersionGson-->
-        <sVersionGuava>33.4.6-jre</sVersionGuava>
-        <sVersionJackson>2.18.3</sVersionJackson>
-        <sVersionJson>20250107</sVersionJson>
+        <sVersionGuava>33.5.0-jre</sVersionGuava>
+        <sVersionJackson>2.20.1</sVersionJackson>
+        <sVersionJson>20250517</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionJunitJupiter>5.7.0</sVersionJunitJupiter>
-        <sVersionLog4j>2.24.2</sVersionLog4j>
-        <sVersionMongoDb>4.11.5</sVersionMongoDb>
+        <sVersionLog4j>2.25.2</sVersionLog4j>
+        <sVersionMongoDb>5.6.1</sVersionMongoDb>
         <sVersionGeoTools>28.2</sVersionGeoTools>
         <sVersionJersey2>2.43</sVersionJersey2>
         <sVersionMercurius>1.0</sVersionMercurius>

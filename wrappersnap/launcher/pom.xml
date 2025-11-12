@@ -18,28 +18,27 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+    	<maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionAssertjCore>3.26.3</sVersionAssertjCore>
-        <sVersionBcpkixJdk15on>1.79</sVersionBcpkixJdk15on>
-        <sVersionCommonsCli>1.9.0</sVersionCommonsCli>
+        <sVersionAssertjCore>3.27.6</sVersionAssertjCore>
+        <sVersionBcpkixJdk15on>1.82</sVersionBcpkixJdk15on>
+        <sVersionCommonsCli>1.10.0</sVersionCommonsCli>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
-        <sVersionJson>20240303</sVersionJson>
+        <sVersionJson>20250517</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionJUniversalChardet>2.5.0</sVersionJUniversalChardet>
-        <sVersionLog4j>2.23.1</sVersionLog4j>
+        <sVersionLog4j>2.25.2</sVersionLog4j>
         <sVersionMavenJarPlugin>3.3.0</sVersionMavenJarPlugin>
         <sVersionMavenShadePlugin>3.5.0</sVersionMavenShadePlugin>
         <sVersionNetcdfAll>5.5.2</sVersionNetcdfAll>
-        <sVersionOkHttp>4.12.0</sVersionOkHttp>
-        <sVersionMicrowavetbx>11.0.1</sVersionMicrowavetbx>
-        <sVersionOpticaltbx>11.0.0</sVersionOpticaltbx>
-        <sVersionSnap>11.0.1</sVersionSnap>
+        <sVersionOkHttp>5.3.0</sVersionOkHttp>
+        <sVersionMicrowavetbx>13.0.0</sVersionMicrowavetbx>
+        <sVersionOpticaltbx>13.0.0</sVersionOpticaltbx>
+        <sVersionSnap>13.0.0</sVersionSnap>
         <sVersionSMOSTbx>11.0.0</sVersionSMOSTbx>
-        <sVersionSshj>0.39.0</sVersionSshj>
-        <sVersionLogback>1.5.16</sVersionLogback>
+        <sVersionSshj>0.40.0</sVersionSshj>
+        <sVersionLogback>1.5.21</sVersionLogback>
     </properties>
 
     <build>

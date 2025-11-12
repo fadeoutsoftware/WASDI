@@ -34,7 +34,6 @@ import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
 import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
-import wasdi.snapopearations.BandImageManager;
 
 public class SnapProductReader extends WasdiProductReader {
 
@@ -280,6 +279,7 @@ public class SnapProductReader extends WasdiProductReader {
 		m_oProduct = getSnapProduct();
 		
 		String sBaseDir = m_oProductFile.getParentFile().getPath();
+		
 		if (!sBaseDir.endsWith("/")) sBaseDir += "/";
 		
 		if (m_oProductFile.getName().toLowerCase().endsWith(".tif") || m_oProductFile.getName().toLowerCase().endsWith(".tiff")) {
@@ -311,7 +311,7 @@ public class SnapProductReader extends WasdiProductReader {
 	        	WasdiLog.debugLog("SnapProductReader.getFileForPublishBand:  Managing S2 Product Band " + sBand);
 
 	            Band oBand = m_oProduct.getBand(sBand);
-	            Product oGeotiffProduct = new Product(sBand, "GEOTIFF");
+	            Product oGeotiffProduct = new Product(sBand, "GeoTIFF", m_oProduct.getSceneRasterWidth(), m_oProduct.getSceneRasterHeight());
 	            oGeotiffProduct.addBand(oBand);
 	            String sOutputFilePath = sBaseDir + sLayerId + ".tif";
 				try {
@@ -337,25 +337,8 @@ public class SnapProductReader extends WasdiProductReader {
 	            // MultiLevelImage oBandImage = oBand.getSourceImage();
 	            RenderedImage oBandImage = oBand.getSourceImage();
 
-	            // Check if the Colour Model is present
-	            ColorModel oColorModel = oBandImage.getColorModel();
-
-	            // Tested for Copernicus Marine - netcdf files
-	            if (oColorModel == null) {
-
-	                // Colour Model not present: try a different way to get the Image
-	                BandImageManager oImgManager = new BandImageManager(m_oProduct);
-
-	                // Create full dimension and View port
-	                Dimension oOutputImageSize = new Dimension(oBand.getRasterWidth(), oBand.getRasterHeight());
-
-	                // Render the image
-	                oBandImage = oImgManager.buildImageWithMasks(oBand, oOutputImageSize, null, false, true);
-	            }
-
 	            // Get TIFF Metadata
 	            GeoTIFFMetadata oMetadata = ProductUtils.createGeoTIFFMetadata(m_oProduct);
-
 	            
 	            try {
 					if (GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata)) {

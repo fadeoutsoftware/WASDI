@@ -19,7 +19,6 @@ import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
-import wasdi.shared.viewmodels.HttpCallResponse;
 
 
 /**

@@ -28,6 +28,7 @@ eu.esa.sar.io.strix.StriXProductReaderPlugIn
 eu.esa.sar.io.terrasarx.TerraSarXProductReaderPlugIn
 eu.esa.sar.io.TAXI.RATProductReaderPlugIn
 eu.esa.sar.io.uavsar.UAVSARReaderPlugIn
+eu.esa.sar.iogdal.biomass.BiomassProductReaderPlugIn
 eu.esa.sar.iogdal.sentinel1.Sentinel1GDALProductReaderPlugIn
 eu.esa.opt.dataio.alos.ceos.avnir2.Avnir2ProductReaderPlugIn
 eu.esa.opt.dataio.alos.ceos.prism.PrismProductReaderPlugIn
@@ -247,6 +248,7 @@ gov.nasa.gsfc.seadas.dataio.NSIDCProductReaderPlugIn
 
 
 eu.esa.opt.dataio.s3.Sentinel3ProductReaderPlugIn
+eu.esa.opt.dataio.s3.Sentinel3Level1ReaderPlugIn
 eu.esa.opt.dataio.s3.slstr.SlstrLevel1B1kmProductReaderPlugIn
 eu.esa.opt.dataio.s3.slstr.SlstrLevel1B500mProductReaderPlugIn
 eu.esa.opt.dataio.s3.meris.MerisLevel1ProductPlugIn
@@ -292,10 +294,6 @@ eu.esa.opt.dataio.spot.SpotVgtProductReaderPlugIn
 eu.esa.opt.dataio.spot6.Spot6ProductReaderPlugin
 eu.esa.opt.dataio.worldview2.WorldView2ProductReaderPlugin
 eu.esa.opt.dataio.worldview2esa.WorldView2ESAProductReaderPlugin
-org.esa.smos.ee2netcdf.reader.NetcdfProductReaderPlugin
-org.esa.smos.dataio.smos.SmosProductReaderPlugIn
-org.esa.smos.dataio.smos.bufr.SmosBufrReaderPlugIn
-org.esa.smos.dataio.smos.bufr.SmosLightBufrReaderPlugIn
 org.esa.snap.dataio.arcbin.ArcBinGridReaderPlugIn
 org.esa.snap.dataio.bigtiff.BigGeoTiffProductReaderPlugIn
 org.esa.snap.binning.reader.BinnedProductReaderPlugin

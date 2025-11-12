@@ -22,16 +22,16 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionCommonsIo>2.18.0</sVersionCommonsIo>
-        <sVersionCommonsLang3>3.17.0</sVersionCommonsLang3>
-        <sVersionCommonsNet>3.11.1</sVersionCommonsNet>
+        <sVersionCommonsIo>2.21.0</sVersionCommonsIo>
+        <sVersionCommonsLang3>3.19.0</sVersionCommonsLang3>
+        <sVersionCommonsNet>3.12.0</sVersionCommonsNet>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
-        <sVersionGoogleApiClient>2.2.0</sVersionGoogleApiClient>
+        <sVersionGoogleApiClient>2.8.1</sVersionGoogleApiClient>
         <sVersionHttpClient>4.5.14</sVersionHttpClient>
-        <sVersionJackson>2.18.2</sVersionJackson>
+        <sVersionJackson>2.20.1</sVersionJackson>
         <sVersionJavaApiForKml>2.2.1</sVersionJavaApiForKml>
         <sVersionJavaxWebsocketApi>1.1</sVersionJavaxWebsocketApi>
-        <sVersionJson>20240303</sVersionJson>
+        <sVersionJson>20250517</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionMavenCompilerPlugin>3.11.0</sVersionMavenCompilerPlugin>
         <sVersionMavenWarPlugin>3.4.0</sVersionMavenWarPlugin>
