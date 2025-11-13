@@ -104,7 +104,8 @@ What it does:
 
 
 .. note::
-   The developer can decide what is needed in the params.json file and in the specific input parameters for the CDS request. Each dataset on the CDS website, provides an useful interface to select the needed parameters and visualize the corresponding Python request to integrate in the code. For ERA-5 Land datastet, that interface is available `at the following URL <https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/UITutorial.html>`_. Do not forget to accept, on the same user interface, the Terms of Use of the data, otherwise your download will fail.
+   The developer can decide what is needed in the params.json file and in the specific input parameters for the CDS request. Each dataset on the CDS website, provides an useful interface to select the needed parameters and visualize the corresponding Python request to integrate in the code. 
+   For ERA-5 Land datastet, that interface is available, for instance, `at the following URL <https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land?tab=download>`_. Do not forget to accept, on the same user interface, the Terms of Use of the data, otherwise your download will fail.
 
  
 Below we provide an example of prams.json file
