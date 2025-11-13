@@ -215,7 +215,16 @@ public class LauncherMain  {
   		}
   		catch (Exception oEx) {
   			WasdiLog.errorLog("Disabling org.apache.hc.client5.http logging exception " + oEx.toString());
-  		}   		
+  		}
+  		
+  		// Filter ALL ucar.nc2 (NetCDF-Java) logs
+  		try {
+  		    ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("ucar.nc2");
+  		    oLogger.setLevel(ch.qos.logback.classic.Level.WARN); // Or even ERROR
+  		}
+  		catch (Exception oEx) {
+  		    WasdiLog.errorLog("Disabling ucar.nc2 logging exception " + oEx.toString());
+  		}  		
 
   		
         try {

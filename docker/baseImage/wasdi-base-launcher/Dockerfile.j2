@@ -73,7 +73,8 @@ RUN apt-get update && \
         libopenjp2-7-dev \
         libproj-dev \
         make \
-        pkg-config && \
+        pkg-config \
+        libpq5 && \
     mkdir --parents \
         {{ sWasdiDataPartitionRootDirectoryPath }} \
         {{ sWasdiDataRootDirectoryPath }} \
