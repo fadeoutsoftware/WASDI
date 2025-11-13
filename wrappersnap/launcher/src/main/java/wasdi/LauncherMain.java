@@ -207,6 +207,15 @@ public class LauncherMain  {
   		catch (Exception oEx) {
   			WasdiLog.errorLog("Disabling httpclient logging exception " + oEx.toString());
   		}   		
+  		
+  		// Filter the org.apache.commons.httpclient (old version) logs
+  		try {
+  		    ch.qos.logback.classic.Logger oOldHttpClientLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.commons.httpclient");
+  		    oOldHttpClientLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+  		}
+  		catch (Exception oEx) {
+  		    WasdiLog.errorLog("Disabling org.apache.commons.httpclient logging exception " + oEx.toString());
+  		}  		
 
         // Filter the apache logs
   		try {  			
