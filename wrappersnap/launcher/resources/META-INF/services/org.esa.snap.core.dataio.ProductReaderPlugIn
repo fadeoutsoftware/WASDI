@@ -55,7 +55,7 @@ eu.esa.opt.dataio.avhrr.metop.MetopReaderPlugIn
 #
 
 eu.esa.opt.dataio.deimos.DeimosProductReaderPlugin
-eu.esa.opt.dataio.ecostress.EcostressProductReaderPlugIn
+#eu.esa.opt.dataio.ecostress.EcostressProductReaderPlugIn
 eu.esa.opt.dataio.enmap.EnmapProductReaderPlugIn
 eu.esa.opt.dataio.ikonos.IkonosProductReaderPlugin
 eu.esa.opt.dataio.kompsat2.Kompsat2ProductReaderPlugin
