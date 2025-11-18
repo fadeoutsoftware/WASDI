@@ -1210,9 +1210,19 @@
 			]
 		},
 		{
-			"name": "Foca",
+			"name": "Return Foca",
 			"indexname": "platformname",
 			"indexvalue": "foca",
+			"selected": false,
+			"ispublic": false,
+			"userid": "return@fadeout.it",
+			"filters": [
+			]
+		},
+				{
+			"name": "Return Dams",
+			"indexname": "platformname",
+			"indexvalue": "dams",
 			"selected": false,
 			"ispublic": false,
 			"userid": "return@fadeout.it",
