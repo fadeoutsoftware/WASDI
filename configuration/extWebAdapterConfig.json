@@ -19,16 +19,6 @@
 			"baseUrl": "https://return-water-dt-01.fadeout.cloud/natdhmsindexes/",
 			"mission":"NATDHMSIndexes",
 			"apiKey": "super-secret-WASDI-key"
-		},
-		{
-			"baseUrl": "https://return-water-dt-01.fadeout.cloud/foca/",
-			"mission":"foca",
-			"apiKey": "super-secret-WASDI-key"
-		},
-		{
-			"baseUrl": "https://return-water-dt-01.fadeout.cloud/dams/",
-			"mission":"dams",
-			"apiKey": "super-secret-WASDI-key"
 		}
 
 	]
