@@ -681,6 +681,9 @@ public abstract class QueryTranslator {
 				
 				if (iStartIndex>=0) {
 					int iEndIndex = sQuery.substring(iStartIndex).indexOf("AND");
+					
+					if (iEndIndex<0) iEndIndex = sQuery.substring(iStartIndex).indexOf(")");
+					
 					if (iEndIndex>=0) {
 						int iStartIndex2 = iStartIndex + "platformname".length() + 1;
 						String sPlatform = sQuery.substring(iStartIndex2, iStartIndex+iEndIndex);
