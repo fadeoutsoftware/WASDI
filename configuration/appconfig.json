@@ -1375,6 +1375,26 @@
 			]
 		},
 		{
+			"name": "Return Foca",
+			"indexname": "platformname",
+			"indexvalue": "ReturnFoca",
+			"selected": false,
+			"ispublic": false,
+			"userid": "return@fadeout.it",
+			"filters": [
+			]
+		},
+				{
+			"name": "Return Dams",
+			"indexname": "platformname",
+			"indexvalue": "ReturnDams",
+			"selected": false,
+			"ispublic": false,
+			"userid": "return@fadeout.it",
+			"filters": [
+			]
+		},
+		{
 			"name": "Return Metagrid",
 			"indexname": "platformname",
 			"indexvalue": "ReturnMetagrid",
