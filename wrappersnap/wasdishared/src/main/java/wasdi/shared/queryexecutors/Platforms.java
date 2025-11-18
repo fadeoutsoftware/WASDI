@@ -63,6 +63,5 @@ public class Platforms {
 	public static String METEOCEAN = "MeteOcean"; 
 	public static String NATDHMS_INDEXES = "NATDHMSIndexes";
 	public static String CIMA_VARIABLES = "CIMAVariables";
-	public static String FOCA = "foca";
 
 }
