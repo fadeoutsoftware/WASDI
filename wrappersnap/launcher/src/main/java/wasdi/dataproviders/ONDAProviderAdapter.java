@@ -607,7 +607,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
 				}
 				else {
-					return DataProviderScores.DOWNLOAD.getValue();
+					return DataProviderScores.SLOW_DOWNLOAD.getValue();
 				}				
 			}
 			else {
@@ -621,7 +621,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
 				}
 				else {
-					return DataProviderScores.DOWNLOAD.getValue();
+					return DataProviderScores.SLOW_DOWNLOAD.getValue();
 				}
 			}
 		}
