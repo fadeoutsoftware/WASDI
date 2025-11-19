@@ -9,7 +9,6 @@ import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-//import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,12 +33,12 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.util.AwsHostNameUtils;
 
-//import wasdi.shared.business.ecostress.EcoStressItem;
 import wasdi.shared.business.ecostress.EcoStressItemForWriting;
-//import wasdi.shared.business.ecostress.EcoStressLocation;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ecostress.EcoStressRepository;
 import wasdi.shared.utils.log.WasdiLog;
+
+import static java.lang.System.out;
 
 public final class S3BucketUtils {
 
@@ -61,15 +60,24 @@ public final class S3BucketUtils {
 	private S3BucketUtils() {
 		throw new java.lang.UnsupportedOperationException("This is a helper class and cannot be instantiated");
 	}
-
+	
 	public static void parseS3Bucket() {
+		parseS3Bucket(false);
+	}
+
+	public static void parseS3Bucket(boolean bOmitInsert) {
 		String sBucketName = WasdiConfig.Current.s3Bucket.bucketName;
 		String sFolders = WasdiConfig.Current.s3Bucket.folders;
 		
 		String[] asFolders = sFolders.split(", ");
 
 		for (String sFolder : asFolders) {
-			parseFolder(sBucketName, sFolder);
+			if (!bOmitInsert) {
+				parseFolder(sBucketName, sFolder);
+			}
+			else {
+				printStatsForFolder(sBucketName, sFolder);
+			}
 		}
 	}
 
@@ -100,6 +108,49 @@ public final class S3BucketUtils {
 		System.out.println("seconds: " + (lMillis / 1_000) + " (millis: " + lMillis + ")");
 
 		System.out.println("counter: " + iCounter);
+	}
+	
+	
+	public static void printStatsForFolder(String sBucketName, String sFolderPath) {
+		System.out.println("printStatsForFolder | bucketName: " + sBucketName + " | folderPath: " + sFolderPath);
+
+		ObjectListing oObjectListing = m_oConn.listObjects(sBucketName, sFolderPath);
+		int iTotFiles = 0;
+		int iH5XMLFiles = 0;
+		int iCMRXMLFiles = 0;
+		int iH5Files = 0;
+		int iDMRPPFiles = 0;
+		int iAnomalies = 0;
+		
+		do {
+			for (S3ObjectSummary oS3ObjectSummary : oObjectListing.getObjectSummaries()) {
+				String sEntryKey = oS3ObjectSummary.getKey();
+				if (sEntryKey.endsWith(".h5.xml")) {
+					iH5XMLFiles++;
+					iTotFiles++;
+				} else if (sEntryKey.endsWith(".h5")) {
+					iH5Files++;
+					iTotFiles++;
+				} else if (sEntryKey.endsWith(".dmrpp")) {
+					iDMRPPFiles++;
+				} else if (sEntryKey.endsWith(".cmr.xml")) {
+					iCMRXMLFiles++;
+				}
+				else {
+					System.out.println("Found unknown file: " + sEntryKey);
+					iAnomalies++;
+				}
+			}
+			oObjectListing = m_oConn.listNextBatchOfObjects(oObjectListing);
+		} while (oObjectListing.getObjectSummaries().size() != 0);
+
+		out.println("Stats for folder: " + sFolderPath);
+		out.println("Total number of XML and H5 files: " + iTotFiles);
+		out.println("Total number of H5.XML files: " + iH5XMLFiles);
+		out.println("Total number of H5 files: " + iH5Files);
+		out.println("Total number of DMRPP files: " + iDMRPPFiles);
+		out.println("Total number of CMR.XML files: " + iCMRXMLFiles);
+		out.println("Total number of unrecognised files: " + iAnomalies);	
 	}
 
 	private static EcoStressItemForWriting parseEntry(String sBucketName, String sEntryKey) {

@@ -16,7 +16,7 @@ import wasdi.shared.utils.log.WasdiLog;
 public class EcoStressRepository extends MongoRepository {
 
 	public EcoStressRepository() {
-		m_sThisCollection = "catalog";
+		m_sThisCollection = "eeh2_catalog";
 		m_sRepoDb = "ecostress";
 	}
 

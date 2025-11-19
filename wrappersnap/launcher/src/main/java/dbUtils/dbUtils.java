@@ -2676,6 +2676,7 @@ public class dbUtils {
             System.out.println("This tool will parse the config file and ingest in WASDI the Ecostress data hosted on the creodias S3 Bucket. ");
 
             System.out.println("\t1 - Proceed with import");
+            System.out.println("\t2 - Pre-check");
             System.out.println("\tx - back");
             System.out.println("");
 
@@ -2687,6 +2688,9 @@ public class dbUtils {
 
             if (sInputString.equals("1")) {
             	S3BucketUtils.parseS3Bucket();
+            }
+            else if(sInputString.equals("2")) {
+            	S3BucketUtils.parseS3Bucket(true);
             }
 
 		} catch (Exception e) {
