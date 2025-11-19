@@ -2834,6 +2834,14 @@ public class dbUtils {
     		catch (Exception oEx) {
     			WasdiLog.errorLog("Disabling mongo driver logging exception " + oEx.toString());
     		} 
+    		
+    		// Filter the logs of org.apache.http.wire
+    		try {
+    			ch.qos.logback.classic.Logger oHttpWireLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.http.wire");
+    			oHttpWireLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+    		} catch(Exception oE) {
+    			WasdiLog.errorLog("Disabling org.apache.http.wire driver logging exception " + oE.toString());
+    		}
 
             // If this is not the main node
             if (!s_sMyNodeCode.equals("wasdi")) {
