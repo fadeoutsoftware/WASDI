@@ -2837,10 +2837,14 @@ public class dbUtils {
     		
     		// Filter the logs of org.apache.http.wire
     		try {
-    			ch.qos.logback.classic.Logger oHttpWireLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.http.wire");
-    			oHttpWireLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+    			ch.qos.logback.classic.Logger oApacheHttpLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.http");
+    			oApacheHttpLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+    			
+    			ch.qos.logback.classic.Logger oAwsLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("com.amazonaws");
+    			oAwsLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+    			
     		} catch(Exception oE) {
-    			WasdiLog.errorLog("Disabling org.apache.http.wire driver logging exception " + oE.toString());
+    			WasdiLog.errorLog("Disabling drivers for Apache and AWS logging exception " + oE.toString());
     		}
 
             // If this is not the main node
