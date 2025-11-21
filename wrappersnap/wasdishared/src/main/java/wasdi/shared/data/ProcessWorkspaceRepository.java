@@ -1489,7 +1489,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         	Bson oWorkspaceFilter=null;
         	
         	if (!Utils.isNullOrEmpty(sWorkspaceId)) {
-        		oWorkspaceFilter = Filters.eq("userId", sWorkspaceId);
+        		oWorkspaceFilter = Filters.eq("workspaceId", sWorkspaceId);
         	}
  
 
@@ -1560,7 +1560,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         	Bson oWorkspaceFilter=null;
         	
         	if (!Utils.isNullOrEmpty(sWorkspaceId)) {
-        		oWorkspaceFilter = Filters.eq("userId", sWorkspaceId);
+        		oWorkspaceFilter = Filters.eq("workspaceId", sWorkspaceId);
         	}
  
 
