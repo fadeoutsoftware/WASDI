@@ -1467,7 +1467,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      * @param bIncluded
      * @return
      */
-    public long getRunningCountByUser(String sUserId, boolean bIncluded) {
+    public long getRunningCountByUser(String sUserId, boolean bIncluded, String sWorkspaceId) {
 
         try {
 
@@ -1485,9 +1485,22 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     				Filters.eq("status", ProcessStatus.WAITING.name()),
     				Filters.eq("status", ProcessStatus.READY.name())
     				);
+        	
+        	Bson oWorkspaceFilter=null;
+        	
+        	if (!Utils.isNullOrEmpty(sWorkspaceId)) {
+        		oWorkspaceFilter = Filters.eq("userId", sWorkspaceId);
+        	}
  
 
-            long lRunning = getCollection(m_sThisCollection).countDocuments(Filters.and(oStatusFilter, oUserFilter));
+            long lRunning = 0L;
+            
+            if (oWorkspaceFilter==null) {
+            	lRunning = getCollection(m_sThisCollection).countDocuments(Filters.and(oStatusFilter, oUserFilter));
+            }
+            else {
+            	lRunning = getCollection(m_sThisCollection).countDocuments(Filters.and(oStatusFilter, oUserFilter, oWorkspaceFilter));
+            }
             
             return lRunning;
             
@@ -1531,7 +1544,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      * @param bIncluded True returns the total of this user, False returns the total not of this user
      * @return Long 
      */
-    public long getCreatedCountByUser(String sUserId, boolean bIncluded) {
+    public long getCreatedCountByUser(String sUserId, boolean bIncluded, String sWorkspaceId) {
 
         try {
         	
@@ -1543,10 +1556,25 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         	else {
         		oUserFilter = Filters.ne("userId", sUserId);
         	}
+        	
+        	Bson oWorkspaceFilter=null;
+        	
+        	if (!Utils.isNullOrEmpty(sWorkspaceId)) {
+        		oWorkspaceFilter = Filters.eq("userId", sWorkspaceId);
+        	}
+ 
 
-            long lCreated = getCollection(m_sThisCollection).countDocuments(
-            		Filters.and(Filters.eq("status", ProcessStatus.CREATED.name()), oUserFilter)
-            		);
+            long lCreated = 0L;
+            
+            if (oWorkspaceFilter==null) {
+            	lCreated = getCollection(m_sThisCollection).countDocuments(Filters.and(Filters.eq("status", ProcessStatus.CREATED.name()), oUserFilter));
+            }
+            else {
+            	lCreated = getCollection(m_sThisCollection).countDocuments(Filters.and(Filters.eq("status", ProcessStatus.CREATED.name()), oUserFilter, oWorkspaceFilter));
+            }
+        	
+
+            
             
             return lCreated;
 
