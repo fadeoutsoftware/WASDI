@@ -645,7 +645,7 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/summary")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ProcessWorkspaceSummaryViewModel getSummary(@HeaderParam("x-session-token") String sSessionId) {
+	public ProcessWorkspaceSummaryViewModel getSummary(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId) {
 		
 		WasdiLog.debugLog("ProcessWorkspaceResource.getSummary");
 		ProcessWorkspaceSummaryViewModel oSummaryViewModel = new ProcessWorkspaceSummaryViewModel();
@@ -663,11 +663,11 @@ public class ProcessWorkspaceResource {
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			
-			long lUserWaiting = oRepository.getCreatedCountByUser("yoanne.didry@list.lu", true);
-			long lOthersWaiting = oRepository.getCreatedCountByUser("yoanne.didry@list.lu", false);
+			long lUserWaiting = oRepository.getCreatedCountByUser(oUser.getUserId(), true, sWorkspaceId);
+			long lOthersWaiting = oRepository.getCreatedCountByUser(oUser.getUserId(), false, sWorkspaceId);
 			
-			long lUserRunning = oRepository.getRunningCountByUser("yoanne.didry@list.lu", true);
-			long lOthersRunning = oRepository.getRunningCountByUser("yoanne.didry@list.lu", false);
+			long lUserRunning = oRepository.getRunningCountByUser(oUser.getUserId(), true, sWorkspaceId);
+			long lOthersRunning = oRepository.getRunningCountByUser(oUser.getUserId(), false, sWorkspaceId);
 			
 			oSummaryViewModel.setUserProcessRunning((int) lUserRunning);
 			oSummaryViewModel.setUserProcessWaiting((int) lUserWaiting);

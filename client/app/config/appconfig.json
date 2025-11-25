@@ -1137,6 +1137,16 @@
 			]
 		},
 		{
+			"name": "Foca",
+			"indexname": "platformname",
+			"indexvalue": "foca",
+			"selected": false,
+			"ispublic": false,
+			"userid": "return@fadeout.it",
+			"filters": [
+			]
+		},
+		{
 			"name": "CIMA Variables",
 			"indexname": "platformname",
 			"indexvalue": "CIMAVariables",

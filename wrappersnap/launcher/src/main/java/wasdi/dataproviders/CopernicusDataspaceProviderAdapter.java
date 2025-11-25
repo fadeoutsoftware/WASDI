@@ -243,7 +243,7 @@ public class CopernicusDataspaceProviderAdapter extends ProviderAdapter {
 				|| sPlatformType.equals(Platforms.SENTINEL3) 
 				|| sPlatformType.equals(Platforms.SENTINEL5P)
 				|| sPlatformType.equals(Platforms.SENTINEL6)) {
-			return DataProviderScores.DOWNLOAD.getValue();
+			return DataProviderScores.SLOW_DOWNLOAD.getValue();
 		}
 		
 		return 0;

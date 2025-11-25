@@ -171,43 +171,60 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 	
                 	DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode());
                 	
-                    // Download the File
-                	sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oDataProviderConfig.user, oDataProviderConfig.password, sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
-                    
-                    // Is it null?!?
-                    if (Utils.isNullOrEmpty(sFileName)) {
-
-                        int iLastError = oProviderAdapter.getLastServerError();
-                        String sError = "There was an error contacting the provider";
-
-                        if (iLastError > 0)
-                            sError += ": query obtained HTTP Error Code " + iLastError;
-
-                        m_oProcessWorkspaceLogger.log(sError);                        
-                    }
-                    else {
-                        // Control Check for the file Name
-                        sFileName = WasdiFileUtils.fixPathSeparator(sFileName);
-
-                        // Get The product view Model
-        				WasdiProductReader oProductReader = WasdiProductReaderFactory.getProductReader(new File(sFileName));
-        				sFileName = oProductReader.adjustFileAfterDownload(sFileName, sFileNameWithoutPath);
-        				File oProductFile = new File(sFileName);
-        				
-        				sFileNameWithoutPath = oProductFile.getName(); 
-        				
-        				try {
-        					oVM = oProductReader.getProductViewModel();
-        				}
-        				catch (Exception oVMEx) {
-        					WasdiLog.warnLog("Download.executeOperation: exception reading Product View Model " + oVMEx.toString());
+                	if (oDataProviderConfig != null) {
+                        // Download the File
+                		try {
+                			sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oDataProviderConfig.user, oDataProviderConfig.password, sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());	
+                		}
+                		catch (Exception oEx) {
+							WasdiLog.errorLog("Download.executeOperation: exception in oProviderAdapter.executeDownloadFile", oEx );
 						}
-        				
-        				if (oVM == null) {
-            				// Reset the cycle to search a better solution
-            				sFileName = "";        					
-        				}
-                    }
+                        
+                        // Is it null?!?
+                        if (Utils.isNullOrEmpty(sFileName)) {
+
+                            int iLastError = oProviderAdapter.getLastServerError();
+                            String sError = "There was an error contacting the provider";
+
+                            if (iLastError > 0) {
+                            	sError += ": query obtained HTTP Error Code " + iLastError;
+                            }
+
+                            m_oProcessWorkspaceLogger.log(sError);                        
+                        }
+                        else {
+                        	try {
+                                // Control Check for the file Name
+                                sFileName = WasdiFileUtils.fixPathSeparator(sFileName);
+
+                                // Get The product view Model
+                				WasdiProductReader oProductReader = WasdiProductReaderFactory.getProductReader(new File(sFileName));
+                				sFileName = oProductReader.adjustFileAfterDownload(sFileName, sFileNameWithoutPath);
+                				File oProductFile = new File(sFileName);
+                				
+                				sFileNameWithoutPath = oProductFile.getName(); 
+                				
+                				try {
+                					oVM = oProductReader.getProductViewModel();
+                				}
+                				catch (Exception oVMEx) {
+                					WasdiLog.warnLog("Download.executeOperation: exception reading Product View Model " + oVMEx.toString());
+        						}
+                				
+                				if (oVM == null) {
+                    				// Reset the cycle to search a better solution
+                    				sFileName = "";        					
+                				}                        		
+                        	}
+                        	catch (Exception oReadFileEx) {
+								WasdiLog.errorLog("Download.executeOperation: exception trying to read the downloaded file, reset FileName to try with other data providers", oReadFileEx);
+								sFileName = "";
+							}
+                        }                		
+                	}
+                	else {
+                		WasdiLog.errorLog("Download.executeOperation: DataProviderConfig is null for Provider Adapter " + oProviderAdapter.getCode() + " try the next one if exists");
+                	}
                     
                     
                     if (Utils.isNullOrEmpty(sFileName)) {
