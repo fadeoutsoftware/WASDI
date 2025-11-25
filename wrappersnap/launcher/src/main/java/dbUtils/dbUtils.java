@@ -2683,6 +2683,7 @@ public class dbUtils {
             System.out.println("This tool will parse the config file and ingest in WASDI the Ecostress data hosted on the creodias S3 Bucket. ");
 
             System.out.println("\t1 - Proceed with import");
+            System.out.println("\t2 - Pre-check");
             System.out.println("\tx - back");
             System.out.println("");
 
@@ -2694,6 +2695,9 @@ public class dbUtils {
 
             if (sInputString.equals("1")) {
             	S3BucketUtils.parseS3Bucket();
+            }
+            else if(sInputString.equals("2")) {
+            	S3BucketUtils.parseS3Bucket(true);
             }
 
 		} catch (Exception e) {
@@ -2837,6 +2841,18 @@ public class dbUtils {
     		catch (Exception oEx) {
     			WasdiLog.errorLog("Disabling mongo driver logging exception " + oEx.toString());
     		} 
+    		
+    		// Filter the logs of org.apache.http.wire
+    		try {
+    			ch.qos.logback.classic.Logger oApacheHttpLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.http");
+    			oApacheHttpLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+    			
+    			ch.qos.logback.classic.Logger oAwsLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("com.amazonaws");
+    			oAwsLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+    			
+    		} catch(Exception oE) {
+    			WasdiLog.errorLog("Disabling drivers for Apache and AWS logging exception " + oE.toString());
+    		}
 
             // If this is not the main node
             if (!s_sMyNodeCode.equals("wasdi")) {
