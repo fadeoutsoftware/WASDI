@@ -26,10 +26,10 @@ public class LSAHttpUtils {
 		// / private constructor to hide the public implicit one 
 	}
 	
-    public static String s_sLoginBaseUrl = "https://ivv.collgs.lu/sso/realms/lucollgs/protocol/openid-connect/auth?";
+    public static String s_sLoginBaseUrl = "https://collgs.lu/sso/realms/lucollgs/protocol/openid-connect/auth?";
     public static String s_sClientId = "client_id=account&response_mode=fragment&response_type=code&";
     public static String s_sRedirectUrl = "redirect_uri=https://collgs.lu/geocatalog.html";
-    public static String s_sLogoutUrl = "https://ivv.collgs.lu/sso/realms/lucollgs/protocol/openid-connect/logout?redirect_uri=https://collgs.lu/";
+    public static String s_sLogoutUrl = "https://collgs.lu/sso/realms/lucollgs/protocol/openid-connect/logout?redirect_uri=https://collgs.lu/";
     	
     public static void authenticate(String sUser, String sPassword) {
     	
@@ -64,7 +64,7 @@ public class LSAHttpUtils {
     private static String getLoginAction(String sJavascripCode) {    	
     	try { 
 	    	Pattern oPattern = Pattern.compile(
-	                "\"loginAction\"\\s*:\\s*\"(https:\\/\\/ivv\\.collgs\\.lu\\/sso\\/realms\\/lucollgs\\/login-actions\\/authenticate\\?session_code=[^&\"]+&execution=[^&\"]+&client_id=account&tab_id=[^&\"]+&client_data=[^\"]+)\""
+	                "\"loginAction\"\\s*:\\s*\"(https:\\/\\/(?:ivv\\.)?collgs\\.lu\\/sso\\/realms\\/lucollgs\\/login-actions\\/authenticate\\?session_code=[^&\"]+&execution=[^&\"]+&client_id=account&tab_id=[^&\"]+&client_data=[^\"]+)\""
 	            );
 	
 	

@@ -17,16 +17,21 @@ public class ProcessWorkspaceLogger {
 	
 	public void log(String sLogLine) {
 		
-		if (Utils.isNullOrEmpty(m_sProcessWorkspaceId)) {
-			WasdiLog.warnLog("ProcessWorkspaceLogger: Proc WS Id not valid. Log on console - " + sLogLine);
+		try {
+			if (Utils.isNullOrEmpty(m_sProcessWorkspaceId)) {
+				WasdiLog.warnLog("ProcessWorkspaceLogger.log: Proc WS Id not valid. Log on console - " + sLogLine);
+			}
+			else {
+				ProcessorLog oProcessorLog = new ProcessorLog();
+				oProcessorLog.setLogRow(sLogLine);
+				oProcessorLog.setLogDate(Utils.getFormatDate(new Date()));
+				oProcessorLog.setProcessWorkspaceId(m_sProcessWorkspaceId);
+				
+				m_oProcessorLogRepository.insertProcessLog(oProcessorLog);			
+			}			
 		}
-		else {
-			ProcessorLog oProcessorLog = new ProcessorLog();
-			oProcessorLog.setLogRow(sLogLine);
-			oProcessorLog.setLogDate(Utils.getFormatDate(new Date()));
-			oProcessorLog.setProcessWorkspaceId(m_sProcessWorkspaceId);
-			
-			m_oProcessorLogRepository.insertProcessLog(oProcessorLog);			
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessWorkspaceLogger.log: Exception ", oEx);
 		}
 	}
 

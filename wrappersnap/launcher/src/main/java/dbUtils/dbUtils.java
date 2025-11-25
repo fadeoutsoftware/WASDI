@@ -294,10 +294,13 @@ public class dbUtils {
                     List<ProductWorkspace> aoAllProductWorkspace = oProductWorkspaceRepository.getList();
 
                     int iDeleted = 0;
+                    int iProcessed = 0;
+                    int iEntries = aoAllProductWorkspace.size();
 
-                    System.out.println("productWorkspace: found " + aoAllProductWorkspace.size() + " Product Workspace");
+                    System.out.println("productWorkspace: found " + iEntries + " Product Workspace");
 
                     for (ProductWorkspace oProductWorkspace : aoAllProductWorkspace) {
+                    	iProcessed ++;
 
                         Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oProductWorkspace.getWorkspaceId());
 
@@ -305,6 +308,10 @@ public class dbUtils {
                             System.out.println("productWorkspace: workspace " + oProductWorkspace.getWorkspaceId() + " does not exist, delete entry");
                             oProductWorkspaceRepository.deleteByProductName(oProductWorkspace.getProductName());
                             iDeleted++;
+                        }
+                        
+                        if (iProcessed%10000 == 0) {
+                        	System.out.println("\tProcessed " + iProcessed + " entries over " + iEntries);
                         }
                     }
 
