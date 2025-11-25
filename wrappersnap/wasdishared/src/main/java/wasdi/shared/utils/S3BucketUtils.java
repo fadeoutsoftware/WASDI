@@ -183,10 +183,10 @@ public final class S3BucketUtils {
 
 		
 		String sXmlFilePath = sEntryKey;
-		String sH5FilePath = sXmlFilePath.substring(0, sFileName.length() - 4); // remove the ".xml" part of the file name  - questo e' solo il nome, non tutto il file path
+		String sH5FilePath = sXmlFilePath.substring(0, sXmlFilePath.length() - 4); // remove the ".xml" part of the file name  - questo e' solo il nome, non tutto il file path
 		String sH5FileName = sFileName.substring(0, sFileName.length() - 4); 
 				
-		String sUrl = WasdiConfig.Current.s3Bucket.endpoint + sBucketName + "/"+ sDirectoryName + "/" + sFileName;
+		String sUrl = WasdiConfig.Current.s3Bucket.endpoint + sBucketName + "/"+ sDirectoryName + "/" + sH5FileName;
 
 		String sXml = readFile(sBucketName, sXmlFilePath);
 
