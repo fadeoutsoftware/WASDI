@@ -39,12 +39,10 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 	 */
 	@Override
 	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
-		if (sProduct.toUpperCase().startsWith("EEHCM")
-				|| sProduct.toUpperCase().startsWith("EEHSEBS")
-				|| sProduct.toUpperCase().startsWith("EEHSTIC")
-				|| sProduct.toUpperCase().startsWith("EEHSW")
-				|| sProduct.toUpperCase().startsWith("EEHTES")
-				|| sProduct.toUpperCase().startsWith("EEHTSEB")) {
+		if (sProduct.toUpperCase().startsWith("EEH2TES")
+				|| sProduct.toUpperCase().startsWith("EEH2STIC")
+				|| sProduct.toUpperCase().startsWith("ECOv002_L2_CLOUD")
+				|| sProduct.toUpperCase().startsWith("ECOv002_L1B_GEO")) {
 			return sOriginalUrl;
 		}
 		return null;
@@ -64,15 +62,10 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 			return -1;
 		}
 		
-		String sService = oQueryViewModel.productType;
-		int iRelativeOrbit = oQueryViewModel.relativeOrbit;
+		String sDataset = oQueryViewModel.productType;
 		String sDayNightFlag = oQueryViewModel.timeliness;
 		
-		if (sService.equalsIgnoreCase("L1B_GEO") || sService.equalsIgnoreCase("L1B_RAD")) {
-			WasdiLog.debugLog("QueryExecutorCloudferro.executeAndRetrieve. L1B_GEO and L1B_RAD products not supported anymore");
-			return -1;
-		}
-
+	
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 
 		Double dWest = oQueryViewModel.west;
@@ -80,14 +73,17 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		Double dEast = oQueryViewModel.east;
 		Double dSouth = oQueryViewModel.south;
 
-
 		String sDateFrom = oQueryViewModel.startFromDate;
 		String sDateTo = oQueryViewModel.endToDate;
 
 		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
 		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
+		
+		if (sDataset.equals("EEHGPP")) {
+			sDataset = "EEHGPP-final";
+		}
 
-		long lCount = oEcoStressRepository.countItems(dWest,dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, sDayNightFlag);
+		long lCount = oEcoStressRepository.countItems(dWest,dNorth, dEast, dSouth, sDataset, lDateFrom, lDateTo, sDayNightFlag);
 
 		return (int) lCount;
 	}
@@ -108,13 +104,13 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		try {
 			iOffset = Integer.parseInt(sOffset);
 		} catch (Exception oE) {
-			WasdiLog.debugLog("QueryExecutorCloudferro.executeAndRetrieve: " + oE.toString());
+			WasdiLog.errorLog("QueryExecutorCloudferro.executeAndRetrieve: " + oE.toString());
 		}
 
 		try {
 			iLimit = Integer.parseInt(sLimit);
 		} catch (Exception oE) {
-			WasdiLog.debugLog("QueryExecutorCloudferro.executeAndRetrieve: " + oE.toString());
+			WasdiLog.errorLog("QueryExecutorCloudferro.executeAndRetrieve: " + oE.toString());
 		}
 
 		List<QueryResultViewModel> aoResults = new ArrayList<>();
@@ -129,11 +125,6 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		String sService = oQueryViewModel.productType;
 		int iRelativeOrbit = oQueryViewModel.relativeOrbit;
 		String sDayNightFlag = oQueryViewModel.timeliness;
-		
-		if (sService.equalsIgnoreCase("L1B_GEO") || sService.equalsIgnoreCase("L1B_RAD")) {
-			WasdiLog.debugLog("QueryExecutorCloudferro.executeAndRetrieve. L1B_GEO and L1B_RAD products not supported anymore");
-			return null;
-		}
 
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 
@@ -165,7 +156,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 
 
 		List<EcoStressItemForReading> aoItemList = oEcoStressRepository
-				.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, sDayNightFlag, iOffset, iLimit);
+				.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, sDayNightFlag, iOffset, iLimit);
 
 		aoResults = aoItemList.stream()
 				.map((EcoStressItemForReading t) -> ((ResponseTranslatorCloudferro) this.m_oResponseTranslator).translate(t))

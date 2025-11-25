@@ -47,13 +47,23 @@ public class CloudferroProviderAdapter extends ProviderAdapter {
 
 		WasdiLog.debugLog("CloudferroProviderAdapter.executeDownloadFile: try to get " + sFileURL);
 
-		String sResult = "";
+		String sResult = null;
+		
+		String sFileName = getFileName(sFileURL, null);
+		
+		if (Utils.isNullOrEmpty(sFileName) ||
+				!(sFileName.toUpperCase().startsWith("EEH2TES")
+						|| sFileName.toUpperCase().startsWith("EEH2STIC")
+						|| sFileName.toUpperCase().startsWith("ECOv002_L2_CLOUD")
+						|| sFileName.toUpperCase().startsWith("ECOv002_L1B_GEO"))) {
+			return sResult;
+		}
 		
 		if (sFileURL.contains(",")) {
 			String sEndpoint = WasdiConfig.Current.s3Bucket.endpoint;
 			String sBucketName = WasdiConfig.Current.s3Bucket.bucketName;
 			String sFilePath = sFileURL.substring(0, sFileURL.indexOf(",")).replace(sEndpoint + sBucketName + "/", "");
-
+			
 			sResult = S3BucketUtils.downloadFile(sBucketName, sFilePath, sSaveDirOnServer);
 		}
 
@@ -64,7 +74,7 @@ public class CloudferroProviderAdapter extends ProviderAdapter {
 	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		if (Utils.isNullOrEmpty(sFileURL)) return "";
 
-		String sFileName = "";
+		String sFileName = null;
 
 		if (sFileURL.contains(",")) {
 			sFileName = sFileURL.substring(sFileURL.indexOf(",") + 1, sFileURL.indexOf(",", sFileURL.indexOf(",") + 1));

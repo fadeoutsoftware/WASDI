@@ -67,7 +67,7 @@ public class EcoStressRepository extends MongoRepository {
 	}
 	
 	private String wasdiQueryToMongo(Double dWest, Double dNorth, Double dEast, Double dSouth, String sService,
-			Long lDateFrom, Long lDateTo, int iRelativeOrbit, String sDayNightFlag) {
+			Long lDateFrom, Long lDateTo, String sDayNightFlag) {
 		String sCoordinates = "[ [" +dWest + ", " + dNorth + "], [" + dWest +", " + dSouth + "], [" + dEast + ", " + dSouth + "] , [" +  dEast + ", " + dNorth + "], [" +dWest + ", " + dNorth + "] ]";
 
 		String sQuery = 
@@ -95,10 +95,6 @@ public class EcoStressRepository extends MongoRepository {
 			sQuery += ", endingDate: {$lte: " + lDateTo + "}";
 		}
 
-		if (iRelativeOrbit != -1) {
-			sQuery += ", startOrbitNumber: {$eq: " + iRelativeOrbit + "}";
-		}
-
 		if (!Utils.isNullOrEmpty(sDayNightFlag)) {
 			sQuery += ", dayNightFlag: {$eq : \"" + sDayNightFlag + "\"}";
 		}
@@ -114,11 +110,11 @@ public class EcoStressRepository extends MongoRepository {
 	 * @return the full list of items
 	 */
 	public List<EcoStressItemForReading> getEcoStressItemList(Double dWest, Double dNorth, Double dEast, Double dSouth, String sService,
-			Long lDateFrom, Long lDateTo, int iRelativeOrbit, String sDayNightFlag, int iOffset, int iLimit) {
+			Long lDateFrom, Long lDateTo, String sDayNightFlag, int iOffset, int iLimit) {
 
 		final List<EcoStressItemForReading> aoReturnList = new ArrayList<>();
 		
-		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, sDayNightFlag);
+		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, sDayNightFlag);
 
 		try {
 			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Document.parse(sQuery)).skip(iOffset).limit(iLimit);
@@ -156,10 +152,9 @@ public class EcoStressRepository extends MongoRepository {
 		return  null;
 	}
 
-	public long countItems(Double dWest, Double dNorth, Double dEast, Double dSouth, String sService, Long lDateFrom, Long lDateTo,
-			int iRelativeOrbit, String sDayNightFlag) {
+	public long countItems(Double dWest, Double dNorth, Double dEast, Double dSouth, String sService, Long lDateFrom, Long lDateTo, String sDayNightFlag) {
 		
-		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, sDayNightFlag);
+		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, sDayNightFlag);
 
 		try {
 			long lCount = getCollection(m_sThisCollection).countDocuments(Document.parse(sQuery));
