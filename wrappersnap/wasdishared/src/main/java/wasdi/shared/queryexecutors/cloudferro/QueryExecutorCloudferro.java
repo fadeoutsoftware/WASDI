@@ -14,6 +14,7 @@ import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.TimeEpochUtils;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
@@ -82,8 +83,17 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		if (sDataset.equals("EEHGPP")) {
 			sDataset = "EEHGPP-final";
 		}
-
-		long lCount = oEcoStressRepository.countItems(dWest,dNorth, dEast, dSouth, sDataset, lDateFrom, lDateTo, sDayNightFlag);
+		
+		long lCount = 0;
+		
+		if (!Utils.isNullOrEmpty(oQueryViewModel.productName)) {
+			List<EcoStressItemForReading> aoItems = oEcoStressRepository.getEcoStressItemByName(oQueryViewModel.productName, dWest, dNorth, dEast, dSouth, sDataset, lDateFrom, lDateTo, sDayNightFlag);
+			
+			lCount = aoItems != null ? aoItems.size() : -1;
+		}
+		else {
+			lCount = oEcoStressRepository.countItems(dWest,dNorth, dEast, dSouth, sDataset, lDateFrom, lDateTo, sDayNightFlag);
+		}
 
 		return (int) lCount;
 	}
@@ -113,7 +123,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 			WasdiLog.errorLog("QueryExecutorCloudferro.executeAndRetrieve: " + oE.toString());
 		}
 
-		List<QueryResultViewModel> aoResults = new ArrayList<>();
+		List<QueryResultViewModel> aoResults = null;
 
 		// Parse the query
 		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
@@ -122,8 +132,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 			return aoResults;
 		}
 		
-		String sService = oQueryViewModel.productType;
-		int iRelativeOrbit = oQueryViewModel.relativeOrbit;
+		String sDataset = oQueryViewModel.productType;
 		String sDayNightFlag = oQueryViewModel.timeliness;
 
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
@@ -153,15 +162,21 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 				}
 			}
 		}
+		
+		List<EcoStressItemForReading> aoItemList = null;
 
-
-		List<EcoStressItemForReading> aoItemList = oEcoStressRepository
-				.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, sDayNightFlag, iOffset, iLimit);
-
+		if (!Utils.isNullOrEmpty(oQueryViewModel.productName))
+			aoItemList = oEcoStressRepository.getEcoStressItemByName(oQueryViewModel.productName, dWest, dNorth, dEast, dSouth, sDataset, lDateFrom, lDateTo, sDayNightFlag);
+		else
+			aoItemList = oEcoStressRepository
+				.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sDataset, lDateFrom, lDateTo, sDayNightFlag, iOffset, iLimit);
+		
+		if (aoItemList != null) {
 		aoResults = aoItemList.stream()
 				.map((EcoStressItemForReading t) -> ((ResponseTranslatorCloudferro) this.m_oResponseTranslator).translate(t))
 				.collect(Collectors.toList());
-
+		}
+		
 		return aoResults;
 	}
 

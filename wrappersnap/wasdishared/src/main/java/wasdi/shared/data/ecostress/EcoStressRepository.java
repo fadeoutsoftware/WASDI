@@ -104,6 +104,95 @@ public class EcoStressRepository extends MongoRepository {
 
 		return sQuery;
 	}
+	
+	private String wasdiQueryToMongoByName(String sName, Double dWest, Double dNorth, Double dEast, Double dSouth, String sService,
+			Long lDateFrom, Long lDateTo, String sDayNightFlag) {
+		
+		String sQuery = "";
+		
+		if (Utils.isNullOrEmpty(sName)) {
+			WasdiLog.warnLog("EcoStressRepository.wasdiQueryToMongoByName. Can not retrieve a product by name if the name is not specified");
+			return null;
+		}
+		
+		// if the file name is provided without extension, we try to add it
+		if (!sName.endsWith(".h5") ) {
+			sName += ".h5";
+		}
+		
+		sQuery += "{ fileName: {$eq : \"" + sName + "\"}";
+		
+		String sCoordinates = "";
+		
+		if (!(Utils.isNullOrEmpty(dSouth) 
+				|| Utils.isNullOrEmpty(dEast) 
+				|| Utils.isNullOrEmpty(dNorth) 
+				|| Utils.isNullOrEmpty(dWest))) {
+			sCoordinates = "[ [" +dWest + ", " + dNorth + "], [" + dWest +", " + dSouth + "], [" + dEast + ", " + dSouth + "] , [" +  dEast + ", " + dNorth + "], [" +dWest + ", " + dNorth + "] ]";
+
+			sQuery += ",";
+			sQuery += 
+					"     location: {\r\n" + 
+					"       $geoIntersects: {\r\n" + 
+					"          $geometry: {\r\n" + 
+					"             type: \"Polygon\" ,\r\n" + 
+					"             coordinates: [\r\n" + 
+					sCoordinates + 
+					"             ]\r\n" + 
+					"          }\r\n" + 
+					"       }\r\n" + 
+					"     }\r\n";
+		}
+		
+
+		if (!Utils.isNullOrEmpty(sService)) {
+			sQuery += ", s3Path: {$regex : \"" + sService + "\"}";
+		}
+
+		if (lDateFrom != null) {
+			sQuery += ", beginningDate: {$gte: " + lDateFrom + "}";
+		}
+
+		if (lDateTo != null) {
+			sQuery += ", endingDate: {$lte: " + lDateTo + "}";
+		}
+
+		if (!Utils.isNullOrEmpty(sDayNightFlag)) {
+			sQuery += ", dayNightFlag: {$eq : \"" + sDayNightFlag + "\"}";
+		}
+
+		sQuery += "   }" + 
+				"";
+
+		return sQuery;
+	}
+	
+	
+	/**
+	 * Get all the EcoStress Items
+	 * @return the full list of items
+	 */
+	public List<EcoStressItemForReading> getEcoStressItemByName(String sFileName, Double dWest, Double dNorth, Double dEast, Double dSouth, String sService,
+			Long lDateFrom, Long lDateTo, String sDayNightFlag) {
+
+		
+		
+		String sQuery = wasdiQueryToMongoByName(sFileName, dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, sDayNightFlag);
+
+		try {
+			final List<EcoStressItemForReading> aoReturnList = new ArrayList<>();
+			
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Document.parse(sQuery));
+
+			fillList(aoReturnList, oWSDocuments, EcoStressItemForReading.class);
+			
+			return aoReturnList;
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("EcoStressRepository.getEcoStressItemByName: error", oEx);
+		}
+
+		return null;
+	}
 
 	/**
 	 * Get all the EcoStress Items
@@ -111,20 +200,23 @@ public class EcoStressRepository extends MongoRepository {
 	 */
 	public List<EcoStressItemForReading> getEcoStressItemList(Double dWest, Double dNorth, Double dEast, Double dSouth, String sService,
 			Long lDateFrom, Long lDateTo, String sDayNightFlag, int iOffset, int iLimit) {
-
-		final List<EcoStressItemForReading> aoReturnList = new ArrayList<>();
 		
-		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, sDayNightFlag);
-
 		try {
+			final List<EcoStressItemForReading> aoReturnList = new ArrayList<>();
+
+			String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, sDayNightFlag);
+			
 			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Document.parse(sQuery)).skip(iOffset).limit(iLimit);
 
 			fillList(aoReturnList, oWSDocuments, EcoStressItemForReading.class);
+			
+			return aoReturnList;
+			
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("EcoStressRepository.getEcoStressItemList: error", oEx);
 		}
 
-		return aoReturnList;
+		return null;
 	}
 
 	/**
