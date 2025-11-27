@@ -1100,15 +1100,6 @@ public abstract class QueryTranslator {
 
 			oResult.productType = extractValue(sQuery, "dataset");
 
-			String sRelativeOrbitNumber = extractValue(sQuery, "relativeorbitnumber");
-			if (!Utils.isNullOrEmpty(sRelativeOrbitNumber)) {
-				try {
-					oResult.relativeOrbit = Integer.valueOf(sRelativeOrbitNumber);
-				} catch (Exception oE) {
-					WasdiLog.warnLog("QueryTranslator.parseECOSTRESS( " + sQuery  + " ): error while parsing relativeOrbitNumber: " + sRelativeOrbitNumber);
-				}
-			}
-
 			oResult.timeliness = extractValue(sQuery, "dayNightFlag");
 			
 			return true;

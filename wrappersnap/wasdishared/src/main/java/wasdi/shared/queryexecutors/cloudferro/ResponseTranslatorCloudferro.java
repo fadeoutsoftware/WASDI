@@ -19,11 +19,8 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 	private static final String SSIZE_IN_BYTES = "sizeInBytes";
 	private static final String SHREF = "href";
 	private static final String SURL = "url";
-	private static final String SRELATIVEORBITNUMBER = "relativeOrbitNumber";
 	private static final String SSIZE = "size";
 	private static final String SPLATFORM = "platform";
-	private static final String SSENSOR_MODE = "sensorMode";
-	private static final String SINSTRUMENT = "instrument";
 	private static final String SDATE = "date";
 	private static final String SSELF = "self";
 	private static final String STITLE = "title";
@@ -107,13 +104,10 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 
 		String sDate = oResult.getProperties().get(SDATE);
 		String sSummary = "Date: " + sDate + ", ";
-		String sInstrument = oResult.getProperties().get(SINSTRUMENT);
-		sSummary = sSummary + "Instrument: " + sInstrument + ", ";
-
-		String sMode = oResult.getProperties().get(SSENSOR_MODE);
-		sSummary = sSummary + "Mode: " + sMode + ", ";
+		
 		String sSatellite = oResult.getProperties().get(SPLATFORM);
 		sSummary = sSummary + "Satellite: " + sSatellite + ", ";
+		
 		String sSize = oResult.getProperties().get(SSIZE);
 		sSummary = sSummary + "Size: " + sSize;// + " " + sChosenUnit;
 		oResult.setSummary(sSummary);
@@ -135,17 +129,8 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 			oResult.getProperties().put("beginposition", sStartDate);
 		}
 
-		oResult.getProperties().put((SSENSOR_MODE), oItem.getSensor());
-		oResult.getProperties().put("sensoroperationalmode", oItem.getSensor());
-
 		oResult.getProperties().put(SPLATFORM, "ECOSTRESS");
 		oResult.getProperties().put("platformname", "ECOSTRESS");
-
-		oResult.getProperties().put(SINSTRUMENT, oItem.getInstrument());
-		oResult.getProperties().put("instrumentshortname", oItem.getInstrument());
-
-		oResult.getProperties().put(SRELATIVEORBITNUMBER, Integer.valueOf(oItem.getStartOrbitNumber()).toString());
-		oResult.getProperties().put("relativeorbitnumber", Integer.valueOf(oItem.getStartOrbitNumber()).toString());
 
 		oResult.getProperties().put("polarisationmode", oItem.getDayNightFlag());
 
