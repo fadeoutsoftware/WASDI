@@ -14,6 +14,7 @@ import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.TimeEpochUtils;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
@@ -39,12 +40,10 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 	 */
 	@Override
 	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
-		if (sProduct.toUpperCase().startsWith("EEHCM")
-				|| sProduct.toUpperCase().startsWith("EEHSEBS")
-				|| sProduct.toUpperCase().startsWith("EEHSTIC")
-				|| sProduct.toUpperCase().startsWith("EEHSW")
-				|| sProduct.toUpperCase().startsWith("EEHTES")
-				|| sProduct.toUpperCase().startsWith("EEHTSEB")) {
+		if (sProduct.toUpperCase().startsWith("EEH2TES")
+				|| sProduct.toUpperCase().startsWith("EEH2STIC")
+				|| sProduct.toUpperCase().startsWith("ECOV002_L2_CLOUD")
+				|| sProduct.toUpperCase().startsWith("ECOV002_L1B_GEO")) {
 			return sOriginalUrl;
 		}
 		return null;
@@ -64,15 +63,10 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 			return -1;
 		}
 		
-		String sService = oQueryViewModel.productType;
-		int iRelativeOrbit = oQueryViewModel.relativeOrbit;
+		String sDataset = oQueryViewModel.productType;
 		String sDayNightFlag = oQueryViewModel.timeliness;
 		
-		if (sService.equalsIgnoreCase("L1B_GEO") || sService.equalsIgnoreCase("L1B_RAD")) {
-			WasdiLog.debugLog("QueryExecutorCloudferro.executeAndRetrieve. L1B_GEO and L1B_RAD products not supported anymore");
-			return -1;
-		}
-
+	
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 
 		Double dWest = oQueryViewModel.west;
@@ -80,14 +74,26 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		Double dEast = oQueryViewModel.east;
 		Double dSouth = oQueryViewModel.south;
 
-
 		String sDateFrom = oQueryViewModel.startFromDate;
 		String sDateTo = oQueryViewModel.endToDate;
 
 		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
 		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
-
-		long lCount = oEcoStressRepository.countItems(dWest,dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, sDayNightFlag);
+		
+		if (sDataset.equals("EEHGPP")) {
+			sDataset = "EEHGPP-final";
+		}
+		
+		long lCount = 0;
+		
+		if (!Utils.isNullOrEmpty(oQueryViewModel.productName)) {
+			List<EcoStressItemForReading> aoItems = oEcoStressRepository.getEcoStressItemByName(oQueryViewModel.productName, dWest, dNorth, dEast, dSouth, sDataset, lDateFrom, lDateTo, sDayNightFlag);
+			
+			lCount = aoItems != null ? aoItems.size() : -1;
+		}
+		else {
+			lCount = oEcoStressRepository.countItems(dWest,dNorth, dEast, dSouth, sDataset, lDateFrom, lDateTo, sDayNightFlag);
+		}
 
 		return (int) lCount;
 	}
@@ -108,16 +114,16 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		try {
 			iOffset = Integer.parseInt(sOffset);
 		} catch (Exception oE) {
-			WasdiLog.debugLog("QueryExecutorCloudferro.executeAndRetrieve: " + oE.toString());
+			WasdiLog.errorLog("QueryExecutorCloudferro.executeAndRetrieve: " + oE.toString());
 		}
 
 		try {
 			iLimit = Integer.parseInt(sLimit);
 		} catch (Exception oE) {
-			WasdiLog.debugLog("QueryExecutorCloudferro.executeAndRetrieve: " + oE.toString());
+			WasdiLog.errorLog("QueryExecutorCloudferro.executeAndRetrieve: " + oE.toString());
 		}
 
-		List<QueryResultViewModel> aoResults = new ArrayList<>();
+		List<QueryResultViewModel> aoResults = null;
 
 		// Parse the query
 		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
@@ -126,14 +132,8 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 			return aoResults;
 		}
 		
-		String sService = oQueryViewModel.productType;
-		int iRelativeOrbit = oQueryViewModel.relativeOrbit;
+		String sDataset = oQueryViewModel.productType;
 		String sDayNightFlag = oQueryViewModel.timeliness;
-		
-		if (sService.equalsIgnoreCase("L1B_GEO") || sService.equalsIgnoreCase("L1B_RAD")) {
-			WasdiLog.debugLog("QueryExecutorCloudferro.executeAndRetrieve. L1B_GEO and L1B_RAD products not supported anymore");
-			return null;
-		}
 
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 
@@ -162,15 +162,21 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 				}
 			}
 		}
+		
+		List<EcoStressItemForReading> aoItemList = null;
 
-
-		List<EcoStressItemForReading> aoItemList = oEcoStressRepository
-				.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, sDayNightFlag, iOffset, iLimit);
-
+		if (!Utils.isNullOrEmpty(oQueryViewModel.productName))
+			aoItemList = oEcoStressRepository.getEcoStressItemByName(oQueryViewModel.productName, dWest, dNorth, dEast, dSouth, sDataset, lDateFrom, lDateTo, sDayNightFlag);
+		else
+			aoItemList = oEcoStressRepository
+				.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sDataset, lDateFrom, lDateTo, sDayNightFlag, iOffset, iLimit);
+		
+		if (aoItemList != null) {
 		aoResults = aoItemList.stream()
 				.map((EcoStressItemForReading t) -> ((ResponseTranslatorCloudferro) this.m_oResponseTranslator).translate(t))
 				.collect(Collectors.toList());
-
+		}
+		
 		return aoResults;
 	}
 
