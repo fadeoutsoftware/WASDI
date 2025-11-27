@@ -54,8 +54,8 @@ public class CloudferroProviderAdapter extends ProviderAdapter {
 		if (Utils.isNullOrEmpty(sFileName) ||
 				!(sFileName.toUpperCase().startsWith("EEH2TES")
 						|| sFileName.toUpperCase().startsWith("EEH2STIC")
-						|| sFileName.toUpperCase().startsWith("ECOv002_L2_CLOUD")
-						|| sFileName.toUpperCase().startsWith("ECOv002_L1B_GEO"))) {
+						|| sFileName.toUpperCase().startsWith("ECOV002_L2_CLOUD")
+						|| sFileName.toUpperCase().startsWith("ECOV002_L1B_GEO"))) {
 			return sResult;
 		}
 		
