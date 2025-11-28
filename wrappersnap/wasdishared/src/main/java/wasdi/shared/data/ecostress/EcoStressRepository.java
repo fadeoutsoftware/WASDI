@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.bson.Document;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 
 import wasdi.shared.business.ecostress.EcoStressItemForReading;
@@ -56,7 +57,10 @@ public class EcoStressRepository extends MongoRepository {
 		final List<EcoStressItemForReading> aoReturnList = new ArrayList<>();
 
 		try {
-			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
+			
+			BasicDBObject oSort = new BasicDBObject("beginningDate", 1);
+			
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find().sort(oSort);
 
 			fillList(aoReturnList, oWSDocuments, EcoStressItemForReading.class);
 		} catch (Exception oEx) {
@@ -70,7 +74,7 @@ public class EcoStressRepository extends MongoRepository {
 			Long lDateFrom, Long lDateTo, String sDayNightFlag) {
 		String sCoordinates = "[ [" +dWest + ", " + dNorth + "], [" + dWest +", " + dSouth + "], [" + dEast + ", " + dSouth + "] , [" +  dEast + ", " + dNorth + "], [" +dWest + ", " + dNorth + "] ]";
 
-		String sQuery = 
+		String sFilter = 
 				"   {\r\n" + 
 				"     location: {\r\n" + 
 				"       $geoIntersects: {\r\n" + 
@@ -84,25 +88,25 @@ public class EcoStressRepository extends MongoRepository {
 				"     }\r\n";
 
 		if (!Utils.isNullOrEmpty(sService)) {
-			sQuery += ", s3Path: {$regex : \"" + sService + "\"}";
+			sFilter += ", s3Path: {$regex : \"" + sService + "\"}";
 		}
 
 		if (lDateFrom != null) {
-			sQuery += ", beginningDate: {$gte: " + lDateFrom + "}";
+			sFilter += ", beginningDate: {$gte: " + lDateFrom + "}";
 		}
 
 		if (lDateTo != null) {
-			sQuery += ", endingDate: {$lte: " + lDateTo + "}";
+			sFilter += ", endingDate: {$lte: " + lDateTo + "}";
 		}
 
 		if (!Utils.isNullOrEmpty(sDayNightFlag)) {
-			sQuery += ", dayNightFlag: {$eq : \"" + sDayNightFlag + "\"}";
+			sFilter += ", dayNightFlag: {$eq : \"" + sDayNightFlag + "\"}";
 		}
 
-		sQuery += "   }" + 
+		sFilter += "   }" + 
 				"";
-
-		return sQuery;
+		
+		return sFilter;
 	}
 	
 	private String wasdiQueryToMongoByName(String sName, Double dWest, Double dNorth, Double dEast, Double dSouth, String sService,
@@ -182,7 +186,9 @@ public class EcoStressRepository extends MongoRepository {
 		try {
 			final List<EcoStressItemForReading> aoReturnList = new ArrayList<>();
 			
-			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Document.parse(sQuery));
+			BasicDBObject oSort = new BasicDBObject("beginningDate", 1);
+			
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Document.parse(sQuery)).sort(oSort);
 
 			fillList(aoReturnList, oWSDocuments, EcoStressItemForReading.class);
 			
@@ -206,7 +212,9 @@ public class EcoStressRepository extends MongoRepository {
 
 			String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, sDayNightFlag);
 			
-			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Document.parse(sQuery)).skip(iOffset).limit(iLimit);
+			BasicDBObject oSort = new BasicDBObject("beginningDate", 1);
+			
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Document.parse(sQuery)).skip(iOffset).limit(iLimit).sort(oSort);
 
 			fillList(aoReturnList, oWSDocuments, EcoStressItemForReading.class);
 			
