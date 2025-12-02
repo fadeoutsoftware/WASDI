@@ -274,13 +274,9 @@ public class MissionUtils {
 			else if (sFileName.toUpperCase().startsWith("3B-") || sFileName.toUpperCase().contains("IMERG")) {
 				return Platforms.IMERG;
 			}
-			else if (sFileName.toUpperCase().startsWith("EEHCM")
-					|| sFileName.toUpperCase().startsWith("EEHSEBS")
-					|| sFileName.toUpperCase().startsWith("EEHSTIC")
-					|| sFileName.toUpperCase().startsWith("EEHSW")
-					|| sFileName.toUpperCase().startsWith("EEHTES")
-					|| sFileName.toUpperCase().startsWith("EEHTSEB")
-					|| sFileName.toUpperCase().startsWith("ECOSTRESS")) {
+			else if (sFileName.toUpperCase().startsWith("EEH2TES")
+					|| sFileName.toUpperCase().startsWith("EEH2STIC")
+					|| sFileName.toUpperCase().startsWith("ECOV002")) {
 				return Platforms.ECOSTRESS;
 			}
 			else if (sFileName.toUpperCase().startsWith("SKYWATCH_")) {
