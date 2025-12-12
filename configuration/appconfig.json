@@ -1056,7 +1056,7 @@
 				{
 					"indexname": "dataset",
 					"indexlabel": "Dataset",
-					"indexvalues": "EEHTES|EEHSTIC|EEHGPP|L1B_GEO|L2_CLOUD",
+					"indexvalues": "EEHTES|EEHSTIC|EEHGPP|L1B_GEO|L2_CLOUD|L1B_RAD",
 					"regex": ".*",
 					"indexvalue": "EEHTES"
 				},

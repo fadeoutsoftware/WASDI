@@ -43,12 +43,13 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		if (sProduct.toUpperCase().startsWith("EEH2TES")
 				|| sProduct.toUpperCase().startsWith("EEH2STIC")
 				|| sProduct.toUpperCase().startsWith("ECOV002_L2_CLOUD")
-				|| sProduct.toUpperCase().startsWith("ECOV002_L1B_GEO")) {
+				|| sProduct.toUpperCase().startsWith("ECOV002_L1B_GEO")
+				|| sProduct.toUpperCase().startsWith("ECOV002_L1B_RAD")){
 			return sOriginalUrl;
 		}
 		return null;
 	}
-
+	
 	/**
 	 * Executes the count 
 	 */
