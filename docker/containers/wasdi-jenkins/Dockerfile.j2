@@ -189,6 +189,10 @@ RUN mkdir --parents \
     rm --force \
         /tmp/{{ sWasdiJdk21SourceUrl | basename }}
 
+# Set JAVA_HOME to Java 21 for Jenkins to use
+ENV JAVA_HOME="{{ sWasdiJdk21RootDirectoryPath }}/latest"
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
 # RUN specific to install Maven
 # -> we do not install the apt package
 #    to avoid to install opendjk with apt
