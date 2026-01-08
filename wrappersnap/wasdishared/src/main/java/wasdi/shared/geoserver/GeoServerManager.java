@@ -545,7 +545,7 @@ public class GeoServerManager {
     
     private boolean createGeoPckgDataStore(String sFilePath, String sStoreName)  {
 
-        String sUrl = m_sRestUrl + "/rest/workspaces/" + m_sWorkspace + "/datastores/" + sStoreName + ".xml";
+        String sUrl = m_sRestUrl + "/rest/workspaces/" + m_sWorkspace + "/datastores";
 
         String sXml =
             "<dataStore>" +
@@ -556,7 +556,9 @@ public class GeoServerManager {
             "  </connectionParameters>" +
             "</dataStore>";
 
-        String sResult = HTTPUtils.putXml(sUrl, sXml, m_sRestUser, m_sRestPassword);
+        WasdiLog.debugLog("GeoServerManager.createGeoPckgDataStore calling: " + sUrl + " with body " + sXml);
+        
+        String sResult = HTTPUtils.postXml(sUrl, sXml, m_sRestUser, m_sRestPassword);
 
         return sResult != null;
     }
