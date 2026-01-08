@@ -528,7 +528,9 @@ public class GeoServerManager {
         
         final File oFile = new File(sFilePath);
         
-        String sResult = HTTPUtils.put(sUrl.toString(), oFile, "application/geopackage+sqlite3", m_sRestUser, m_sRestPassword);
+        WasdiLog.debugLog("GeoServerManager.createGeoPckgDataStore calling: " + sUrl + " with body " + sFilePath);
+        
+        String sResult = HTTPUtils.put(sUrl.toString(), oFile, "application/octet-stream", m_sRestUser, m_sRestPassword);
         
         if (sResult != null) {
         	WasdiLog.debugLog("GeoServerManager.createGeoPckgDataStore got result: " + sResult);
