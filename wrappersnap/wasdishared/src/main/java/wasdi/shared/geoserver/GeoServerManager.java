@@ -522,25 +522,45 @@ public class GeoServerManager {
      * @param sStoreName
      * @return
      */
+//    private boolean createGeoPckgDataStore(String sFilePath, String sStoreName)  {
+//    	
+//        StringBuilder sUrl = new StringBuilder(m_sRestUrl).append("/rest/workspaces/").append(m_sWorkspace).append("/datastores/").append(sStoreName).append("/file.gpkg");//?charset=ISO-8859-1
+//        
+//        final File oFile = new File(sFilePath);
+//        
+//        WasdiLog.debugLog("GeoServerManager.createGeoPckgDataStore calling: " + sUrl + " with body " + sFilePath);
+//        
+//        String sResult = HTTPUtils.put(sUrl.toString(), oFile, "application/octet-stream", m_sRestUser, m_sRestPassword);
+//        
+//        if (sResult != null) {
+//        	WasdiLog.debugLog("GeoServerManager.createGeoPckgDataStore got result: " + sResult);
+//        } 
+//        else {
+//        	WasdiLog.warnLog("GeoServerManager.createGeoPckgDataStore got null result ");
+//        }
+//
+//        return sResult != null;
+//    }        
+    
+    
     private boolean createGeoPckgDataStore(String sFilePath, String sStoreName)  {
-    	
-        StringBuilder sUrl = new StringBuilder(m_sRestUrl).append("/rest/workspaces/").append(m_sWorkspace).append("/datastores/").append(sStoreName).append("/file.gpkg");//?charset=ISO-8859-1
-        
-        final File oFile = new File(sFilePath);
-        
-        WasdiLog.debugLog("GeoServerManager.createGeoPckgDataStore calling: " + sUrl + " with body " + sFilePath);
-        
-        String sResult = HTTPUtils.put(sUrl.toString(), oFile, "application/octet-stream", m_sRestUser, m_sRestPassword);
-        
-        if (sResult != null) {
-        	WasdiLog.debugLog("GeoServerManager.createGeoPckgDataStore got result: " + sResult);
-        } 
-        else {
-        	WasdiLog.warnLog("GeoServerManager.createGeoPckgDataStore got null result ");
-        }
+
+        String sUrl = m_sRestUrl + "/rest/workspaces/" + m_sWorkspace + "/datastores/" + sStoreName + ".xml";
+
+        String sXml =
+            "<dataStore>" +
+            "  <name>" + sStoreName + "</name>" +
+            "  <connectionParameters>" +
+            "    <entry key=\"dbtype\">geopkg</entry>" +
+            "    <entry key=\"database\">file:" + sFilePath + "</entry>" +
+            "  </connectionParameters>" +
+            "</dataStore>";
+
+        String sResult = HTTPUtils.putXml(sUrl, sXml, m_sRestUser, m_sRestPassword);
 
         return sResult != null;
-    }        
+    }
+    
     
     
     /**
