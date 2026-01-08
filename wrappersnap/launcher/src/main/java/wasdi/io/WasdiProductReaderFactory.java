@@ -37,10 +37,10 @@ public class WasdiProductReaderFactory {
 	            return new ShapeProductReader(oFile);
 				
 			} catch (IOException e) {
-				WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: File must be unzipped");
+				WasdiLog.errorLog("WasdiProductReaderFactory.getProductReader: Exception unzipping shape file");
 				
 			} catch (Exception e) {
-				WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: File must be unzipped");
+				WasdiLog.errorLog("WasdiProductReaderFactory.getProductReader: Exception unzipping shape file");
 			}
 		}
 		
@@ -59,16 +59,17 @@ public class WasdiProductReaderFactory {
 			return new GpmZipProductReader(oFile);
 		}
 
-		if (oFile.getName().toLowerCase().startsWith("adaptor.mars.internal")
-				|| oFile.getName().toLowerCase().contains("era5")
-				|| oFile.getName().toLowerCase().contains("cams")) { 
+		if (oFile.getName().toLowerCase().startsWith("adaptor.mars.internal") || oFile.getName().toLowerCase().contains("era5") || oFile.getName().toLowerCase().contains("cams")) {
+			
 			if (oFile.getName().toLowerCase().endsWith(".netcdf")) {
 				WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating CDS NefCDF File Reader for " + oFile.getName());
 				return new CdsNetcdfProductReader(oFile);
-			} else if (oFile.getName().toLowerCase().endsWith(".grib")) {
+			} 
+			else if (oFile.getName().toLowerCase().endsWith(".grib")) {
 				WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating CDS GRIB File Reader for " + oFile.getName());
 				return new CdsGribProductReader(oFile);
-			} else if (oFile.getName().toLowerCase().endsWith(".netcdf_zip")) {
+			} 
+			else if (oFile.getName().toLowerCase().endsWith(".netcdf_zip")) {
 				WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating ADS NetCDF File Reader for " + oFile.getName());
 				return new AdsNetcdfZipProductReader(oFile);
 			}
@@ -84,9 +85,7 @@ public class WasdiProductReaderFactory {
 			return new Sentinel6ProductReader(oFile);
 		}
 		
-		if (MissionUtils.isLandsat5File(oFile) 
-				|| MissionUtils.isLandsat7File(oFile)
-				|| oFile.getName().toUpperCase().startsWith("LC08_L2SP_")) {
+		if (MissionUtils.isLandsat5File(oFile)  || MissionUtils.isLandsat7File(oFile) || oFile.getName().toUpperCase().startsWith("LC08_L2SP_")) {
 			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating Landsat File Reader for " + oFile.getName());
 			return new LandsatProductReader(oFile);
 		}
@@ -140,6 +139,11 @@ public class WasdiProductReaderFactory {
 		if (oFile.getName().toLowerCase().endsWith(".nc")) {
 			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating CM NetCDF File Reader for " + oFile.getName());
 			return new CmNcProductReader(oFile);
+		}
+		
+		if (MissionUtils.isGeoPackageFile(oFile)) {
+			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating GPKG File Reader for " + oFile.getName());
+			return new GpkgProductReader(oFile);			
 		}
 		
 		WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating SNAP File Reader for " + oFile.getName());

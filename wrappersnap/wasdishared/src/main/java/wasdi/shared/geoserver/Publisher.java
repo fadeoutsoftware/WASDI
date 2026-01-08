@@ -288,4 +288,39 @@ public class Publisher {
     }
 
     
+    /**
+     * Publish a Shape file in geoserver
+     * @param sFileName Full Name and Path of the .shp 
+     * @param asShapeFiles List of the different Full name and Path of the shape (all same names, different extension)
+     * @param sStore name of the store and layer to create 
+     * @param sEPSG Projection
+     * @param sStyle Style 
+     * @param oManager Geoserver Manager
+     * @return Name of the created store/layer if ok, null otherwise
+     * @throws Exception
+     */
+    public String publishGeoPackageFile(String sFileName, String sEPSG, String sStyle, GeoServerManager oManager) throws Exception {
+
+        // Domain Check
+        if (Utils.isNullOrEmpty(sFileName)) return  "";
+        
+        String sBaseName = WasdiFileUtils.getFileNameWithoutLastExtension(sFileName);
+        
+        //Publish GeoPackage File
+        try {
+            if (!oManager.publishGeoPackageFile(sBaseName, new File(sFileName), sEPSG, sStyle, s_oLogger)) {
+            	WasdiLog.errorLog("Publisher.publishGeoPackageFile: unable to publish  " + sFileName);
+            	return null;
+            }
+            WasdiLog.infoLog("Publisher.publishGeoPackageFile: shapefile published " + sFileName);
+
+        } 
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("Publisher.publishGeoPackageFile Exception: unable to publish " + sFileName, oEx);
+        	return null;
+        }
+
+        return sBaseName;
+    }
+    
 }

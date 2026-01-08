@@ -756,7 +756,7 @@ public class WasdiFileUtils {
 
 		return false;
 	}	
-	
+		
 	/**
 	 * Load the log4j2 configuration file for the logger, looking for it first in the parameters passed to the JVM. If the parameter
 	 * was not set, then it looks for file in the folder of the current jar being executed

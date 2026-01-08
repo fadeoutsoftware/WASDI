@@ -426,7 +426,7 @@ public class GeoServerManager {
     		return false;
     	}
     	
-    	boolean bRes = createDbDataStore(oShpFile.getPath(), sStoreName);
+    	boolean bRes = createShapeDataStore(oShpFile.getPath(), sStoreName);
     	
     	if (bRes) {
         	if (!configureLayerStyle(sStoreName, sStyle)) {
@@ -437,8 +437,13 @@ public class GeoServerManager {
 		return bRes;
 	}
     
-    
-    private boolean createDbDataStore(String sShapeFilePath, String sStoreName)  {
+    /**
+     * Creates a datastore for shape files
+     * @param sShapeFilePath
+     * @param sStoreName
+     * @return
+     */
+    private boolean createShapeDataStore(String sShapeFilePath, String sStoreName)  {
     	
         StringBuilder sUrl = new StringBuilder(m_sRestUrl).append("/rest/workspaces/")
                 .append(m_sWorkspace).append("/datastores/").append(sStoreName).append("/file.shp");//?charset=ISO-8859-1
@@ -446,6 +451,75 @@ public class GeoServerManager {
         final File oFile = new File(sShapeFilePath);
         
         String sResult = HTTPUtils.put(sUrl.toString(), oFile, "application/zip", m_sRestUser, m_sRestPassword);
+        
+        if (sResult != null) {
+        	WasdiLog.debugLog(sResult);
+        } 
+
+        return sResult != null;
+    }        
+    
+    
+	/**
+	 * Add a shape file layer
+	 * @param sStoreName layer and store name
+	 * @param oGeoPackageFile Shape File Zipped
+	 * @param sEpsg Projection
+	 * @param sStyle Style
+	 * @param oLogger Logger
+	 * @throws DataException 
+	 */
+    public boolean publishGeoPackageFile(String sStoreName, File oGeoPackageFile, String sEpsg, String sStyle, Logger oLogger) throws Exception {    	
+		
+    	// If the layer is there we clean it
+    	RESTLayer oLayer = m_oGsReader.getLayer(m_sWorkspace, sStoreName);
+    	if (oLayer != null) removeLayer(sStoreName);
+    	
+    	// Default style for geopackages is polygon
+    	if (sStyle == null || sStyle.isEmpty()) sStyle = "polygon";
+    	
+    	
+    	if (sStoreName == null) {
+    		oLogger.error("GeoServerManager.publishGeoPackageFile: Store Name is null");
+    		return false;
+    	}
+    	
+    	if (oGeoPackageFile == null) {
+    		oLogger.error("GeoServerManager.publishGeoPackageFile: oGeoTiffFile is null");
+    		return false;
+    	}
+        
+    	if (sEpsg == null) {
+    		oLogger.error("GeoServerManager.publishGeoPackageFile: sEpsg is null");
+    		return false;
+    	}
+    	
+    	boolean bRes = createGeoPckgDataStore(oGeoPackageFile.getPath(), sStoreName);
+    	
+    	if (bRes) {
+        	if (!configureLayerStyle(sStoreName, sStyle)) {
+        		oLogger.error("GeoServerManager.publishGeoPackageFile: there was an error configuring the style");
+        	}    		
+    	}
+    	
+		return bRes;
+	}    
+    
+    
+    /**
+     * Creates a datastore for geopkg files
+     * @param sFilePath
+     * @param sStoreName
+     * @return
+     */
+    private boolean createGeoPckgDataStore(String sFilePath, String sStoreName)  {
+    	
+        StringBuilder sUrl = new StringBuilder(m_sRestUrl).append("/rest/workspaces/")
+                .append(m_sWorkspace).append("/datastores/").append(sStoreName).append("/file.gpkg");//?charset=ISO-8859-1
+        
+        final File oFile = new File(sFilePath);
+        
+        String sResult = HTTPUtils.put(sUrl.toString(), oFile, "application/geopackage+sqlite3", m_sRestUser, m_sRestPassword);
         
         if (sResult != null) {
         	WasdiLog.debugLog(sResult);

@@ -63,10 +63,11 @@ public class Publishband extends Operation {
             
             // Check integrity
             if (Utils.isNullOrEmpty(sInputFile)) {
+            	
                 // File not good!!
                 WasdiLog.warnLog("Publishband.executeOperation: file is null or empty");
+                
                 String sError = "Input File path is null";
-
                 m_oProcessWorkspaceLogger.log(sError);
 
                 // Send KO to Rabbit
@@ -100,8 +101,8 @@ public class Publishband extends Operation {
                 return false;
             }
             
+            // it was only for backup, restore the real local path
             if (WasdiConfig.Current.geoserver.localDebugPublisBand) {
-            	// it was only for backup, restore the real local path
             	sInputFile = sBackup;
             }
 
@@ -182,8 +183,11 @@ public class Publishband extends Operation {
             sTargetDir += sLayerId + "/";
 
             File oTargetDir = new File(sTargetDir);
-            if (!oTargetDir.exists())
-                oTargetDir.mkdirs();
+            
+            if (!oTargetDir.exists()) {
+            	oTargetDir.mkdirs();
+            }
+                
 
             // List of the files copied
             ArrayList<String> asCopiedFiles = new ArrayList<String>();
@@ -425,6 +429,10 @@ public class Publishband extends Operation {
         }
         
         if (WasdiFileUtils.isShapeFile(sFile)) {
+        	sStyle = "polygon";
+        }
+        
+        if (MissionUtils.isGeoPackageFile(new File(sFile))) {
         	sStyle = "polygon";
         }
                 

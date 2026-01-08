@@ -127,9 +127,11 @@ public class CmNcProductReader extends WasdiProductReader {
 
 			oNodeGroupViewModel.setBands(oBands);
 			oRetViewModel.setBandsGroups(oNodeGroupViewModel);
-		} catch (IOException e) {
-			WasdiLog.debugLog("CmNcProductReader.getProductViewModel: exception reading the shape file: " + e.toString());
-		} finally {
+		} 
+		catch (IOException oInEx) {
+			WasdiLog.debugLog("CmNcProductReader.getProductViewModel: exception reading the file: " + oInEx.toString());
+		} 
+		finally {
 			if (oFile != null)
 				try {
 					oFile.close();
