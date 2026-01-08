@@ -273,6 +273,10 @@ public class Publishband extends Operation {
                 WasdiLog.debugLog("Publishband.executeOperation: Call publish shapefile sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
                 sLayerId = oPublisher.publishShapeFile(sOutputFilePath, asCopiedFiles, sLayerId, sEPSG, sStyle, oGeoServerManager);
             }
+            else if (MissionUtils.isGeoPackageFile(new File(sOutputFilePath))) {
+                WasdiLog.debugLog("Publishband.executeOperation: Call publish GeoPackage sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
+                sLayerId = oPublisher.publishGeoPackageFile(sOutputFilePath, sEPSG, sStyle, oGeoServerManager);            	
+            }
             else {
                 WasdiLog.debugLog("Publishband.executeOperation: Call publish geotiff sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
                 sLayerId = oPublisher.publishGeoTiff(sOutputFilePath, sLayerId, sEPSG, sStyle, oGeoServerManager);            	
