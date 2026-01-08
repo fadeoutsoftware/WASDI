@@ -200,4 +200,51 @@ public class GpkgProductReader extends WasdiProductReader {
 		return new MetadataViewModel("Metadata");
 	}
 
+	@Override
+	public String getEPSG() {
+		String sEPSG = "";
+		try {
+			
+			// Create the getools reader
+			GeoPackage oGeoPackage = new GeoPackage(m_oProductFile);
+			oGeoPackage.init();
+						
+			// Lets check if the file includes vectors and/or rasters
+			boolean bHasVectors = !oGeoPackage.features().isEmpty();
+			boolean bHasRasters = !oGeoPackage.tiles().isEmpty();
+			
+			if (bHasVectors) {
+								
+            	// We search the outer bbox
+				for (FeatureEntry oFeature : oGeoPackage.features()) {
+					
+					int iSrid = oFeature.getSrid();
+					
+					sEPSG = "EPSG:"+iSrid;
+					break;
+				}
+	            	
+			}
+			
+			if (bHasRasters) {
+				
+				// We search the outer bbox
+				for (TileEntry oTile : oGeoPackage.tiles()) {
+					
+					int iSrid = oTile.getSrid();
+					
+					sEPSG = "EPSG:"+iSrid;
+					break;					
+				}
+			}
+						
+			// Close the reader
+			oGeoPackage.close();			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("GpkgProductReader.getEPSG: error reading EPSF of GeoPackage file ", oEx);
+		}
+		
+		return sEPSG;
+	}
 }

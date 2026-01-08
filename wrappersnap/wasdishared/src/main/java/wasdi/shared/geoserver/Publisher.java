@@ -312,7 +312,7 @@ public class Publisher {
             	WasdiLog.errorLog("Publisher.publishGeoPackageFile: unable to publish  " + sFileName);
             	return null;
             }
-            WasdiLog.infoLog("Publisher.publishGeoPackageFile: shapefile published " + sFileName);
+            WasdiLog.infoLog("Publisher.publishGeoPackageFile: GeoPackage File published " + sFileName);
 
         } 
         catch (Exception oEx) {
