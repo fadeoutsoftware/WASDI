@@ -25,6 +25,13 @@ import org.geotools.coverage.grid.io.GridFormatFinder;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.referencing.CRS;
 
+import org.apache.commons.imaging.Imaging;
+import org.apache.commons.imaging.common.ImageMetadata;
+import org.apache.commons.imaging.formats.tiff.TiffImageMetadata;
+import org.apache.commons.imaging.formats.tiff.TiffImageParser;
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
+import org.apache.commons.imaging.formats.tiff.TiffDirectory;
+
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
@@ -79,7 +86,7 @@ public class SnapProductReader extends WasdiProductReader {
      * @param oProductViewModel
      * @param oProduct
      */
-    protected void getSnapProductBandsViewModel(ProductViewModel oProductViewModel, Product oProduct)
+    protected void getSnapProductBandsViewModel2(ProductViewModel oProductViewModel, Product oProduct)
     {
         if (oProductViewModel == null) {
             WasdiLog.infoLog("SnapProductReader.getSnapProductBandsViewModel: ViewModel null, return");
@@ -154,6 +161,85 @@ public class SnapProductReader extends WasdiProductReader {
                 oViewModel.setHeight(oBand.getRasterHeight());
                 oProductViewModel.getBandsGroups().getBands().add(oViewModel);
             }        	
+        }
+    }
+    
+    
+    protected void getSnapProductBandsViewModel(ProductViewModel oProductViewModel, Product oProduct) {
+        if (oProductViewModel == null) {
+            WasdiLog.infoLog("SnapProductReader.getSnapProductBandsViewModel: ViewModel null, return");
+            return;
+        }
+
+        // Initialize band group
+        if (oProductViewModel.getBandsGroups() == null)
+            oProductViewModel.setBandsGroups(new NodeGroupViewModel("Bands"));
+        
+        if (oProductViewModel.getBandsGroups().getBands() == null)
+            oProductViewModel.getBandsGroups().setBands(new ArrayList<>());
+        
+
+        // CASE 1: SNAP successfully opened the product
+        if (oProduct != null) {
+
+            WasdiLog.debugLog("SnapProductReader.getSnapProductBandsViewModel: add bands from SNAP");
+
+            for (Band oBand : oProduct.getBands()) {
+            	
+                BandViewModel oViewModel = new BandViewModel(oBand.getName());
+                oViewModel.setWidth(oBand.getRasterWidth());
+                oViewModel.setHeight(oBand.getRasterHeight());
+                oProductViewModel.getBandsGroups().getBands().add(oViewModel);
+            }
+
+            return;
+        }
+
+        // CASE 2: SNAP failed → fallback to TIFF reader
+        WasdiLog.debugLog("SnapProductReader.getSnapProductBandsViewModel: SNAP product null, checking TIFF fallback");
+
+        if (!m_oProductFile.getName().toUpperCase().endsWith(".TIF") &&
+            !m_oProductFile.getName().toUpperCase().endsWith(".TIFF")) {
+            WasdiLog.debugLog("SnapProductReader.getSnapProductBandsViewModel: Not a TIFF, cannot fallback");
+            return;
+        }
+
+        WasdiLog.infoLog("SnapProductReader.getSnapProductBandsViewModel: Using Apache Commons Imaging fallback for tiff");
+
+        try {
+            // Read TIFF metadata
+            TiffImageMetadata oMetadata = (TiffImageMetadata) Imaging.getMetadata(m_oProductFile);
+
+            if (oMetadata == null) {
+                WasdiLog.errorLog("SnapProductReader.getSnapProductBandsViewModel: TIFF metadata null");
+                return;
+            }
+
+            // Most GeoTIFFs have a single directory
+            TiffDirectory oDir = (TiffDirectory) oMetadata.getDirectories().get(0);
+
+            int iWidth = oDir.getSingleFieldValue(TiffTagConstants.TIFF_TAG_IMAGE_WIDTH);
+            int iHeight = oDir.getSingleFieldValue(TiffTagConstants.TIFF_TAG_IMAGE_LENGTH);
+            int iNumBands = oDir.getFieldValue(TiffTagConstants.TIFF_TAG_SAMPLES_PER_PIXEL);
+
+            WasdiLog.debugLog("SnapProductReader.getSnapProductBandsViewModel: TIFF width=" + iWidth + " height=" + iHeight + " bands=" + iNumBands);
+
+
+            // Add bands using WASDI naming convention
+            for (int i = 0; i < iNumBands; i++) {
+                String sBandName = "Band_" + (i + 1); // WASDI naming convention
+
+                BandViewModel oViewModel = new BandViewModel(sBandName);
+                oViewModel.setWidth(iWidth);
+                oViewModel.setHeight(iHeight);
+
+                oProductViewModel.getBandsGroups().getBands().add(oViewModel);
+            }
+            
+            WasdiLog.debugLog("SnapProductReader.getSnapProductBandsViewModel: backup tiff read done");
+
+        } catch (Exception oEx) {
+            WasdiLog.errorLog("SnapProductReader.getSnapProductBandsViewModel: TIFF fallback error " + oEx.toString());
         }
     }
     
