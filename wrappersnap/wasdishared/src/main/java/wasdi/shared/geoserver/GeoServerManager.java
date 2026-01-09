@@ -511,7 +511,7 @@ public class GeoServerManager {
 	    	
 	    	if (sResult!=null) {
 	    		WasdiLog.debugLog("GeoServerManager.publishGeoPackageFile: got response [" + sResult + "], now configure the style");
-	        	if (!configureLayerStyle(sStoreName, sStyle)) {
+	        	if (!configureLayerStyle(sBandName, sStyle)) {
 	        		WasdiLog.errorLog("GeoServerManager.publishGeoPackageFile: there was an error configuring the style");
 	        	}    			    		
 	    	}

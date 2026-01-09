@@ -318,7 +318,7 @@ public class Publisher {
         	return null;
         }
 
-        return sLayerId;
+        return sBandName;
     }
     
 }

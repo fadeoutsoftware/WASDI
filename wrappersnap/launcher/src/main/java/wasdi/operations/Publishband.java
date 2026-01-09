@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import wasdi.LauncherMain;
+import wasdi.io.GpkgProductReader;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.LauncherOperations;
@@ -144,19 +145,22 @@ public class Publishband extends Operation {
                 return true;
             }
 
+            // Create the Product Reader
+			WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oInputFile);
+			
             // Default Style: can be changed in the following lines depending by the product
-            String sStyle = getStyleByFileName(sInputFile);
+            String sStyle = "";
                         
             // Finally, if specified, we set the style specified by the product
             if (Utils.isNullOrEmpty(oParameter.getStyle()) == false) {
                 sStyle = oParameter.getStyle();
             }
+            else {
+            	sStyle = getStyleByFileName(sInputFile, oParameter.getBandName(), oReadProduct);
+            }
             
             WasdiLog.debugLog("Publishband.executeOperation:  Generating Band Image with style " + sStyle);
-            m_oProcessWorkspaceLogger.log("Generate Band Image with style " + sStyle);
-
-            // Create the Product Reader
-			WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oInputFile);
+            m_oProcessWorkspaceLogger.log("Generate Band Image with style " + sStyle);			
 			
 			String sPlatform = oDownloadedFile.getPlatform();
 			
@@ -377,7 +381,7 @@ public class Publishband extends Operation {
 		return false;
 	}
 
-	protected String getStyleByFileName(String sFile) {
+	protected String getStyleByFileName(String sFile, String sBandName, WasdiProductReader oReadProduct) {
         // Default Style: can be changed in the following lines depending by the product		
 		
         String sStyle = "raster";
@@ -387,56 +391,48 @@ public class Publishband extends Operation {
             sStyle = "DDS_FLOODED_AREAS";
         }
         // Hard Coded set NDVI Style - STYLES HAS TO BE MANAGED
-        if (sFile.toUpperCase().contains("NDVI")) {
+        else if (sFile.toUpperCase().contains("NDVI")) {
             sStyle = "NDVI";
         }
         // Hard Coded set Burned Areas Style - STYLES HAS TO BE MANAGED
-        if (sFile.toUpperCase().contains("BURNEDAREA")) {
+        else if (sFile.toUpperCase().contains("BURNEDAREA")) {
             sStyle = "burned_areas";
         }
         // Hard Coded set Flood Risk Style - STYLES HAS TO BE MANAGED
-        if (sFile.toUpperCase().contains("FRISK")) {
+        else if (sFile.toUpperCase().contains("FRISK")) {
             sStyle = "frisk";
         }
         // Hard Coded set rgb Style - STYLES HAS TO BE MANAGED
-        if (sFile.toUpperCase().contains("_RGB")) {
+        else if (sFile.toUpperCase().contains("_RGB")) {
             sStyle = "wasdi_s2_rgb";
         }
-        
-        if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_CH4_")) {
+        else if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_CH4_")) {
             sStyle = "s5p_ch4";
         }
-        
-        if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_CO_")) {
+        else if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_CO_")) {
             sStyle = "s5p_co";
         }
-        
-        if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_HCHO_")) {
+        else if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_HCHO_")) {
             sStyle = "s5p_hcho";
         }
-        
-        if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_NO2_")) {
+        else if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_NO2_")) {
             sStyle = "s5p_no2";
         }
-        
-        if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_O3_")) {
+        else if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_O3_")) {
             sStyle = "s5p_o3";
         }
-        
-        if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_SO2_")) {
+        else if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_SO2_")) {
             sStyle = "s5p_so2";
         }
-        
-        if (sFile.contains("MeteOcean"))  {
+        else if (sFile.contains("MeteOcean"))  {
         	sStyle = "MeteOcean";
         }
-        
-        if (WasdiFileUtils.isShapeFile(sFile)) {
+        else if (WasdiFileUtils.isShapeFile(sFile)) {
         	sStyle = "polygon";
         }
-        
-        if (MissionUtils.isGeoPackageFile(new File(sFile))) {
-        	sStyle = "polygon";
+        else if (MissionUtils.isGeoPackageFile(new File(sFile))) {
+        	GpkgProductReader oGpkgReader = (GpkgProductReader) oReadProduct;
+        	sStyle = oGpkgReader.getStyleForPublishBand(sBandName);
         }
                 
         return sStyle;

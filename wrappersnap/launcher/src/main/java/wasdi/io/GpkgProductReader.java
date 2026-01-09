@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.geotools.geometry.jts.Geometries;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.geopkg.FeatureEntry;
 import org.geotools.geopkg.GeoPackage;
@@ -22,7 +23,6 @@ public class GpkgProductReader extends WasdiProductReader {
 	public GpkgProductReader(File oProductFile) {
 		super(oProductFile);
 	}
-	
 
 	@Override
 	public ProductViewModel getProductViewModel() {
@@ -249,4 +249,60 @@ public class GpkgProductReader extends WasdiProductReader {
 		
 		return sEPSG;
 	}
+	
+	public String getStyleForPublishBand(String sBandName) {
+		
+		GeoPackage oGeoPackage = null;
+		
+		try {
+			// Create the getools reader
+			oGeoPackage = new GeoPackage(m_oProductFile);
+			oGeoPackage.init();
+			
+			// Lets check if the file includes vectors and/or rasters
+			boolean bHasVectors = !oGeoPackage.features().isEmpty();
+			boolean bHasRasters = !oGeoPackage.tiles().isEmpty();
+			
+			if (bHasVectors) {
+								
+            	// We search the outer bbox
+				for (FeatureEntry oFeature : oGeoPackage.features()) {
+					
+					if (oFeature.getTableName().equals(sBandName)) {
+						Geometries oGeometry = oFeature.getGeometryType();
+						
+						if (oGeometry.equals(Geometries.POINT) || oGeometry.equals(Geometries.MULTIPOINT)) {
+							return "point";
+						}
+						else if (oGeometry.equals(Geometries.LINESTRING) || oGeometry.equals(Geometries.MULTILINESTRING)) {
+							return "line";
+						} 
+						else {
+							return "polygon";
+						}
+					}					
+				}
+			}
+			
+			if (bHasRasters) {
+								
+				for (TileEntry oTile : oGeoPackage.tiles()) {
+					
+					if (oTile.getTableName().equals(sBandName)) {
+						return "raster";
+					}					
+				}
+			}						
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("GpkgProductReader.getProductViewModel: error reading gpkg file ", oEx);
+		}
+		finally {
+			if (oGeoPackage != null) {
+				oGeoPackage.close();
+			}
+		}
+				
+		return "";		
+	}	
 }
