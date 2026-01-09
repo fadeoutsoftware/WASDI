@@ -91,6 +91,8 @@ public class SnapProductReader extends WasdiProductReader {
             
             if (m_oProductFile.getName().toUpperCase().endsWith(".TIF")|| m_oProductFile.getName().toUpperCase().endsWith(".TIFF")) {
             	
+            	System.setProperty("org.geotools.imageio.disable", "true");
+            	
             	GridCoverage2DReader oTiffReader = null;
             	
             	try {
