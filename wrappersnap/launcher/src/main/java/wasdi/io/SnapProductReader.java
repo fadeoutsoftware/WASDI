@@ -1,7 +1,6 @@
 package wasdi.io;
 
 import java.awt.Dimension;
-import java.awt.image.ColorModel;
 import java.awt.image.RenderedImage;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,6 +18,10 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
+import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.io.AbstractGridFormat;
+import org.geotools.coverage.grid.io.GridCoverage2DReader;
+import org.geotools.coverage.grid.io.GridFormatFinder;
 import org.geotools.referencing.CRS;
 
 import wasdi.shared.queryexecutors.Platforms;
@@ -78,31 +81,72 @@ public class SnapProductReader extends WasdiProductReader {
     protected void getSnapProductBandsViewModel(ProductViewModel oProductViewModel, Product oProduct)
     {
         if (oProductViewModel == null) {
-            WasdiLog.debugLog("SnapProductReader.FillBandsViewModel: ViewModel null, return");
+            WasdiLog.infoLog("SnapProductReader.getSnapProductBandsViewModel: ViewModel null, return");
             return;
         }
 
         if (oProduct == null) {
-            WasdiLog.debugLog("SnapProductReader.FillBandsViewModel: Product null, return");
-            return;
+            WasdiLog.infoLog("SnapProductReader.getSnapProductBandsViewModel: Product null, check if it is a tiff to try backup reader");
+            
+            if (m_oProductFile.getName().toUpperCase().endsWith(".TIF")|| m_oProductFile.getName().toUpperCase().endsWith(".TIFF")) {
+            	
+            	try {
+            		WasdiLog.infoLog("SnapProductReader.getSnapProductBandsViewModel: the file is a tiff, try to read with geotools instead");
+            		
+                    // Detect the format (GeoTIFF in this case)
+                    AbstractGridFormat oGridFormat = GridFormatFinder.findFormat(m_oProductFile);
+                    GridCoverage2DReader oTiffReader = oGridFormat.getReader(m_oProductFile);
+
+                    // Read the coverage
+                    GridCoverage2D oCoverage = oTiffReader.read(null);
+                    RenderedImage oImage = oCoverage.getRenderedImage();
+
+                    // GET NUMBER OF BANDS
+                    int iNumBands = oCoverage.getNumSampleDimensions();
+                    
+                    // Initialize the band group
+                    if (oProductViewModel.getBandsGroups() == null) oProductViewModel.setBandsGroups(new NodeGroupViewModel("Bands"));
+                    
+                    if (oProductViewModel.getBandsGroups().getBands() == null) {
+                    	oProductViewModel.getBandsGroups().setBands(new ArrayList<BandViewModel>());
+                    }
+                        
+                    // For Each band, add it to our group
+                    for (int i = 0; i < iNumBands; i++) {
+                    	
+                        String sBandName = oCoverage.getSampleDimension(i).getDescription().toString();
+                        
+                        BandViewModel oViewModel = new BandViewModel(sBandName);
+                        oViewModel.setWidth(oImage.getWidth());
+                        oViewModel.setHeight(oImage.getHeight());
+                        oProductViewModel.getBandsGroups().getBands().add(oViewModel);
+                    }
+
+                    oTiffReader.dispose();            		
+            	}
+            	catch (Exception oEx) {
+					WasdiLog.errorLog("SnapProductReader.getSnapProductBandsViewModel: error trying to recover the tiff reading ", oEx);
+				}
+            }
         }
+        else {
+            if (oProductViewModel.getBandsGroups() == null) oProductViewModel.setBandsGroups(new NodeGroupViewModel("Bands"));
 
-        if (oProductViewModel.getBandsGroups() == null) oProductViewModel.setBandsGroups(new NodeGroupViewModel("Bands"));
+            WasdiLog.debugLog("SnapProductReader.getSnapProductBandsViewModel: add bands");
+            
+            for (Band oBand : oProduct.getBands()) {
 
-        WasdiLog.debugLog("SnapProductReader.FillBandsViewModel: add bands");
-        
-        for (Band oBand : oProduct.getBands()) {
+                if (oProductViewModel.getBandsGroups().getBands() == null)
+                    oProductViewModel.getBandsGroups().setBands(new ArrayList<BandViewModel>());
 
-            if (oProductViewModel.getBandsGroups().getBands() == null)
-                oProductViewModel.getBandsGroups().setBands(new ArrayList<BandViewModel>());
-
-            BandViewModel oViewModel = new BandViewModel(oBand.getName());
-            oViewModel.setWidth(oBand.getRasterWidth());
-            oViewModel.setHeight(oBand.getRasterHeight());
-            oProductViewModel.getBandsGroups().getBands().add(oViewModel);
+                BandViewModel oViewModel = new BandViewModel(oBand.getName());
+                oViewModel.setWidth(oBand.getRasterWidth());
+                oViewModel.setHeight(oBand.getRasterHeight());
+                oProductViewModel.getBandsGroups().getBands().add(oViewModel);
+            }        	
         }
-
     }
+    
 	@Override
 	public String getProductBoundingBox() {
 		
@@ -204,6 +248,9 @@ public class SnapProductReader extends WasdiProductReader {
 		
 		if (Utils.isNullOrEmpty(sPlatform)) {
 			sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(sFileNameFromProvider);
+			if (sPlatform==null) {
+				sPlatform = "";
+			}
 		}
 		
 		try {
@@ -218,8 +265,8 @@ public class SnapProductReader extends WasdiProductReader {
 	            sFileName = sFolderName + "/" + "xfdumanifest.xml";
 	            WasdiLog.debugLog("SnapProductReader.adjustFileAfterDownload: File Name changed in: " + sFileName);
 	        } 
-	        else if(sPlatform.equals(Platforms.LANDSAT5)
-	        		&& sFileNameFromProvider.endsWith(".zip")) {
+	        else if(sPlatform.equals(Platforms.LANDSAT5) && sFileNameFromProvider.endsWith(".zip")) {
+	        	
 	        	WasdiLog.debugLog("SnapProductReader.adjustFileAfterDownload: File is a Landsat-5 product, start unzip");
 	        	String sDownloadFolderPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
 	        	ZipFileUtils oZipExtractor = new ZipFileUtils();

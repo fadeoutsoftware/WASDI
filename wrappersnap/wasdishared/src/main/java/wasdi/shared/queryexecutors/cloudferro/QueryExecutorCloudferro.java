@@ -1,6 +1,5 @@
 package wasdi.shared.queryexecutors.cloudferro;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
