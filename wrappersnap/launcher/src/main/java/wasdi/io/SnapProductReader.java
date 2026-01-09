@@ -22,6 +22,7 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.coverage.grid.io.GridCoverage2DReader;
 import org.geotools.coverage.grid.io.GridFormatFinder;
+import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.referencing.CRS;
 
 import wasdi.shared.queryexecutors.Platforms;
@@ -96,8 +97,7 @@ public class SnapProductReader extends WasdiProductReader {
             		WasdiLog.infoLog("SnapProductReader.getSnapProductBandsViewModel: the file is a tiff, try to read with geotools instead");
             		
                     // Detect the format (GeoTIFF in this case)
-                    AbstractGridFormat oGridFormat = GridFormatFinder.findFormat(m_oProductFile);
-                    oTiffReader = oGridFormat.getReader(m_oProductFile);
+                    oTiffReader = new GeoTiffReader(m_oProductFile);
 
                     // Read the coverage
                     GridCoverage2D oCoverage = oTiffReader.read(null);
