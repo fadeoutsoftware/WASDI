@@ -53,20 +53,21 @@ public class GpkgProductReader extends WasdiProductReader {
 			boolean bHasRasters = !oGeoPackage.tiles().isEmpty();
 			
 			if (bHasVectors) {
-				
-				// We create a band for the vector layer
-				BandViewModel oBandViewModel = new BandViewModel();
-				oBandViewModel.setName("Vectors");
-            	oBandViewModel.setPublished(false);
-            	oBandViewModel.setGeoserverBoundingBox("");
-            	oBandViewModel.setHeight(0);
-            	oBandViewModel.setWidth(0);
-            	oBandViewModel.setPublished(false);
-            	
-            	aoBandsViewModels.add(oBandViewModel);
-				
+								
             	// We search the outer bbox
 				for (FeatureEntry oFeature : oGeoPackage.features()) {
+					
+					// We create a band for the vector layer
+					BandViewModel oBandViewModel = new BandViewModel();
+					oBandViewModel.setName(oFeature.getTableName());
+	            	oBandViewModel.setPublished(false);
+	            	oBandViewModel.setGeoserverBoundingBox("");
+	            	oBandViewModel.setHeight(0);
+	            	oBandViewModel.setWidth(0);
+	            	oBandViewModel.setPublished(false);
+	            	
+	            	aoBandsViewModels.add(oBandViewModel);
+					
 	            	
 	            	Envelope oEnvelope = oFeature.getBounds();
 	            	
@@ -81,18 +82,19 @@ public class GpkgProductReader extends WasdiProductReader {
 			}
 			
 			if (bHasRasters) {
-				
-				BandViewModel oBandViewModel = new BandViewModel();
-				oBandViewModel.setName("Raster");
-            	oBandViewModel.setPublished(false);
-            	oBandViewModel.setGeoserverBoundingBox("");
-            	oBandViewModel.setHeight(0);
-            	oBandViewModel.setWidth(0);
-            	oBandViewModel.setPublished(false);
-            	
-            	aoBandsViewModels.add(oBandViewModel);
-				
+								
 				for (TileEntry oTile : oGeoPackage.tiles()) {
+					
+					BandViewModel oBandViewModel = new BandViewModel();
+					oBandViewModel.setName(oTile.getTableName());
+	            	oBandViewModel.setPublished(false);
+	            	oBandViewModel.setGeoserverBoundingBox("");
+	            	oBandViewModel.setHeight(0);
+	            	oBandViewModel.setWidth(0);
+	            	oBandViewModel.setPublished(false);
+	            	
+	            	aoBandsViewModels.add(oBandViewModel);					
+					
 	            	Envelope oEnvelope = oTile.getBounds();
 	            	
 	            	if (oEnvelope!=null) {

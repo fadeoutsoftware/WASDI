@@ -299,16 +299,14 @@ public class Publisher {
      * @return Name of the created store/layer if ok, null otherwise
      * @throws Exception
      */
-    public String publishGeoPackageFile(String sFileName, String sEPSG, String sStyle, GeoServerManager oManager) throws Exception {
+    public String publishGeoPackageFile(String sFileName, String sLayerId, String sBandName, String sStyle, GeoServerManager oManager) throws Exception {
 
         // Domain Check
         if (Utils.isNullOrEmpty(sFileName)) return  "";
         
-        String sBaseName = WasdiFileUtils.getFileNameWithoutLastExtension(sFileName);
-        
         //Publish GeoPackage File
         try {
-            if (!oManager.publishGeoPackageFile(sBaseName, new File(sFileName), sEPSG, sStyle, s_oLogger)) {
+            if (!oManager.publishGeoPackageFile(sLayerId, new File(sFileName), sBandName, sStyle)) {
             	WasdiLog.errorLog("Publisher.publishGeoPackageFile: unable to publish  " + sFileName);
             	return null;
             }
@@ -320,7 +318,7 @@ public class Publisher {
         	return null;
         }
 
-        return sBaseName;
+        return sLayerId;
     }
     
 }

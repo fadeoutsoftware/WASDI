@@ -469,10 +469,11 @@ public class GeoServerManager {
 	 * @param oLogger Logger
 	 * @throws DataException 
 	 */
-    public boolean publishGeoPackageFile(String sStoreName, File oGeoPackageFile, String sEpsg, String sStyle, Logger oLogger) throws Exception {    	
+    public boolean publishGeoPackageFile(String sStoreName, File oGeoPackageFile, String sBandName, String sStyle) throws Exception {    	
 		
     	// If the layer is there we clean it
     	RESTLayer oLayer = m_oGsReader.getLayer(m_sWorkspace, sStoreName);
+    	
     	if (oLayer != null) {
     		WasdiLog.debugLog("GeoServerManager.publishGeoPackageFile: found layer " + sStoreName + " deleting it");
     		removeLayer(sStoreName);
@@ -483,30 +484,42 @@ public class GeoServerManager {
     	
     	
     	if (sStoreName == null) {
-    		oLogger.error("GeoServerManager.publishGeoPackageFile: Store Name is null");
+    		WasdiLog.errorLog("GeoServerManager.publishGeoPackageFile: Store Name is null");
     		return false;
     	}
     	
     	if (oGeoPackageFile == null) {
-    		oLogger.error("GeoServerManager.publishGeoPackageFile: oGeoTiffFile is null");
-    		return false;
-    	}
-        
-    	if (sEpsg == null) {
-    		oLogger.error("GeoServerManager.publishGeoPackageFile: sEpsg is null");
+    		WasdiLog.errorLog("GeoServerManager.publishGeoPackageFile: oGeoTiffFile is null");
     		return false;
     	}
     	
-    	WasdiLog.debugLog("GeoServerManager.publishGeoPackageFile: calling create geo package store for " + sStoreName);
+    	WasdiLog.debugLog("GeoServerManager.publishGeoPackageFile: calling create geo package store for " + sStoreName + " Band: " + sBandName);
     	
     	boolean bRes = createGeoPckgDataStore(oGeoPackageFile.getPath(), sStoreName);
     	
     	if (bRes) {
-    		WasdiLog.debugLog("GeoServerManager.publishGeoPackageFile: data store created, going to configure style " + sStyle);
     		
-        	if (!configureLayerStyle(sStoreName, sStyle)) {
-        		oLogger.error("GeoServerManager.publishGeoPackageFile: there was an error configuring the style");
-        	}    		
+    		WasdiLog.debugLog("GeoServerManager.publishGeoPackageFile: data store created, going to publish the layer");
+    		
+    		String sUrl = m_sRestUrl + "/rest/workspaces/" + m_sWorkspace + "/datastores/" + sStoreName + "/featuretypes";
+
+	    	String sXml = "<featureType>" + "  <name>" + sBandName + "</name>" + "</featureType>";
+
+	    	WasdiLog.debugLog("GeoServerManager.publishGeoPackageFile: publishing the layer with url " + sUrl);
+	    	
+	    	String sResult = HTTPUtils.post(sUrl, sXml, "application/xml", m_sRestUser, m_sRestPassword);
+	    	
+	    	if (sResult!=null) {
+	    		WasdiLog.debugLog("GeoServerManager.publishGeoPackageFile: got response [" + sResult + "], now configure the style");
+	        	if (!configureLayerStyle(sStoreName, sStyle)) {
+	        		WasdiLog.errorLog("GeoServerManager.publishGeoPackageFile: there was an error configuring the style");
+	        	}    			    		
+	    	}
+	    	else {
+	    		WasdiLog.warnLog("GeoServerManager.publishGeoPackageFile: got a Null response, there is a problem!");
+	    		bRes = false;
+	    	}
+    		
     	}
     	else {
     		WasdiLog.debugLog("GeoServerManager.publishGeoPackageFile: createGeoPckgDataStore returned false");
@@ -522,27 +535,6 @@ public class GeoServerManager {
      * @param sStoreName
      * @return
      */
-//    private boolean createGeoPckgDataStore(String sFilePath, String sStoreName)  {
-//    	
-//        StringBuilder sUrl = new StringBuilder(m_sRestUrl).append("/rest/workspaces/").append(m_sWorkspace).append("/datastores/").append(sStoreName).append("/file.gpkg");//?charset=ISO-8859-1
-//        
-//        final File oFile = new File(sFilePath);
-//        
-//        WasdiLog.debugLog("GeoServerManager.createGeoPckgDataStore calling: " + sUrl + " with body " + sFilePath);
-//        
-//        String sResult = HTTPUtils.put(sUrl.toString(), oFile, "application/octet-stream", m_sRestUser, m_sRestPassword);
-//        
-//        if (sResult != null) {
-//        	WasdiLog.debugLog("GeoServerManager.createGeoPckgDataStore got result: " + sResult);
-//        } 
-//        else {
-//        	WasdiLog.warnLog("GeoServerManager.createGeoPckgDataStore got null result ");
-//        }
-//
-//        return sResult != null;
-//    }        
-    
-    
     private boolean createGeoPckgDataStore(String sFilePath, String sStoreName)  {
 
         String sUrl = m_sRestUrl + "/rest/workspaces/" + m_sWorkspace + "/datastores";

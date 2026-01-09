@@ -187,7 +187,6 @@ public class Publishband extends Operation {
             if (!oTargetDir.exists()) {
             	oTargetDir.mkdirs();
             }
-                
 
             // List of the files copied
             ArrayList<String> asCopiedFiles = new ArrayList<String>();
@@ -275,7 +274,7 @@ public class Publishband extends Operation {
             }
             else if (MissionUtils.isGeoPackageFile(new File(sOutputFilePath))) {
                 WasdiLog.debugLog("Publishband.executeOperation: Call publish GeoPackage sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
-                sLayerId = oPublisher.publishGeoPackageFile(sOutputFilePath, sEPSG, sStyle, oGeoServerManager);            	
+                sLayerId = oPublisher.publishGeoPackageFile(sOutputFilePath, sLayerId, oParameter.getBandName(), sStyle, oGeoServerManager);            	
             }
             else {
                 WasdiLog.debugLog("Publishband.executeOperation: Call publish geotiff sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
