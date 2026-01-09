@@ -90,12 +90,14 @@ public class SnapProductReader extends WasdiProductReader {
             
             if (m_oProductFile.getName().toUpperCase().endsWith(".TIF")|| m_oProductFile.getName().toUpperCase().endsWith(".TIFF")) {
             	
+            	GridCoverage2DReader oTiffReader = null;
+            	
             	try {
             		WasdiLog.infoLog("SnapProductReader.getSnapProductBandsViewModel: the file is a tiff, try to read with geotools instead");
             		
                     // Detect the format (GeoTIFF in this case)
                     AbstractGridFormat oGridFormat = GridFormatFinder.findFormat(m_oProductFile);
-                    GridCoverage2DReader oTiffReader = oGridFormat.getReader(m_oProductFile);
+                    oTiffReader = oGridFormat.getReader(m_oProductFile);
 
                     // Read the coverage
                     GridCoverage2D oCoverage = oTiffReader.read(null);
@@ -124,8 +126,14 @@ public class SnapProductReader extends WasdiProductReader {
 
                     oTiffReader.dispose();            		
             	}
-            	catch (Exception oEx) {
-					WasdiLog.errorLog("SnapProductReader.getSnapProductBandsViewModel: error trying to recover the tiff reading ", oEx);
+            	catch (Throwable oEx) {
+					WasdiLog.errorLog("SnapProductReader.getSnapProductBandsViewModel: error trying to recover the tiff reading " +  oEx.toString());
+					if (oTiffReader!=null)
+						try {
+							oTiffReader.dispose();
+						} catch (IOException oInnerEx) {
+							WasdiLog.errorLog("SnapProductReader.getSnapProductBandsViewModel: error trying to recover the tiff reading " +  oInnerEx.toString());
+						}
 				}
             }
         }
