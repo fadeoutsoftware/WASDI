@@ -196,44 +196,9 @@ public class SnapProductReader extends WasdiProductReader {
             return;
         }
 
-        WasdiLog.infoLog("SnapProductReader.getSnapProductBandsViewModel: Using Apache Commons Imaging fallback for tiff");
+        WasdiLog.infoLog("SnapProductReader.getSnapProductBandsViewModel: Using GDAL fallback for tiff");
 
         try {
-        	/*
-            // Read TIFF metadata
-            TiffImageMetadata oMetadata = (TiffImageMetadata) Imaging.getMetadata(m_oProductFile);
-
-            if (oMetadata == null) {
-                WasdiLog.errorLog("SnapProductReader.getSnapProductBandsViewModel: TIFF metadata null");
-                return;
-            }
-
-            // Most GeoTIFFs have a single directory
-            Directory oDir = (Directory) oMetadata.getDirectories().get(0);
-            oDir.getAllFields().get
-
-            int iWidth = oDir.getSingleFieldValue(TiffTagConstants.TIFF_TAG_IMAGE_WIDTH);
-            int iHeight = oDir.getSingleFieldValue(TiffTagConstants.TIFF_TAG_IMAGE_LENGTH);
-            int iNumBands = oDir.getFieldValue(TiffTagConstants.TIFF_TAG_SAMPLES_PER_PIXEL);
-
-            WasdiLog.debugLog("SnapProductReader.getSnapProductBandsViewModel: TIFF width=" + iWidth + " height=" + iHeight + " bands=" + iNumBands);
-
-
-            // Add bands using WASDI naming convention
-            for (int i = 0; i < iNumBands; i++) {
-                String sBandName = "Band_" + (i + 1); // WASDI naming convention
-
-                BandViewModel oViewModel = new BandViewModel(sBandName);
-                oViewModel.setWidth(iWidth);
-                oViewModel.setHeight(iHeight);
-
-                oProductViewModel.getBandsGroups().getBands().add(oViewModel);
-            }
-            
-            WasdiLog.debugLog("SnapProductReader.getSnapProductBandsViewModel: backup tiff read done");
-            */
-        	
-        	
         	GdalInfoResult oGdalInfo = GdalUtils.getGdalInfoResult(m_oProductFile);
         	if (oGdalInfo != null) {
             	int iWidth = 0;
@@ -263,9 +228,11 @@ public class SnapProductReader extends WasdiProductReader {
 					}
         		}
         		
+        		WasdiLog.infoLog("SnapProductReader.getSnapProductBandsViewModel: GDAL tiff read done");
         	}
-        	
-        	
+        	else {
+        		WasdiLog.warnLog("SnapProductReader.getSnapProductBandsViewModel: impossible to get also gdal info!");	
+        	}
 
         } catch (Exception oEx) {
             WasdiLog.errorLog("SnapProductReader.getSnapProductBandsViewModel: TIFF fallback error " + oEx.toString());
