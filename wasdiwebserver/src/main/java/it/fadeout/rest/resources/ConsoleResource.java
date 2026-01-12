@@ -206,7 +206,9 @@ public class ConsoleResource {
 				if (bIsActive && bIsUpToDate) {
 					WasdiLog.infoLog("ConsoleResource.create: JupyterNotebook started");
 
-					String sUrl = oNotebook.getUrl();
+					String sUrl = "";
+					
+					if (oNotebook!=null) sUrl = oNotebook.getUrl();
 
 					oResult.setStringValue(sUrl);
 					oResult.setBoolValue(true);

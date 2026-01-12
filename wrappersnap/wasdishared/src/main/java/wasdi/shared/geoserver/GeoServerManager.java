@@ -555,35 +555,6 @@ public class GeoServerManager {
         return sResult != null;
     }
     
-    
-    
-    /**
-     * Re-Creation of the createResource: taken from the geosolutions lib, it 
-     * fix the problem to create a valid feature Type
-     * 
-     * @param sShapeFilePath Full path of the shape file NOT zipped
-     * @param sStoreName Name of store and layer 
-     * @param sEPSG Projection
-     * @
-     * return
-     */
-    private boolean createResource(String sShapeFilePath, String sStoreName, String sEPSG)  {
-    	
-        StringBuilder sbUrl = new StringBuilder(m_sRestUrl).append("/rest/workspaces/")
-                .append(m_sWorkspace).append("/").append("datastores").append("/").append(sStoreName)
-                .append("/").append("featuretypes");
-        
-        
-        final String sXmlBody = getFeatureTypeFromShapeFile(sShapeFilePath, sStoreName, sEPSG);
-        final String sResult = HTTPUtils.postXml(sbUrl.toString(), sXmlBody, m_sRestUser, m_sRestPassword);
-        //final String sResult = HTTPUtils.putXml(sbUrl.toString(), sXmlBody, m_sRestUser, m_sRestPassword);
-        if (sResult != null) {
-        	WasdiLog.debugLog(sResult);
-        } 
-
-        return sResult != null;
-    }
-    
     public boolean configureLayer(final String workspace, final String resourceName,
             final GSLayerEncoder layer) throws IllegalArgumentException {
 

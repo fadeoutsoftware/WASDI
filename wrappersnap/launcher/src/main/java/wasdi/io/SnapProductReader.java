@@ -19,24 +19,16 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.coverage.grid.io.GridCoverage2DReader;
-import org.geotools.coverage.grid.io.GridFormatFinder;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.referencing.CRS;
-
-import org.apache.commons.imaging.Imaging;
-import org.apache.commons.imaging.common.ImageMetadata;
-import org.apache.commons.imaging.formats.tiff.TiffImageMetadata;
-import org.apache.commons.imaging.formats.tiff.TiffImageParser;
-import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
-import org.apache.commons.imaging.formats.tiff.TiffDirectory;
 
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.gis.GdalBandInfo;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -207,6 +199,7 @@ public class SnapProductReader extends WasdiProductReader {
         WasdiLog.infoLog("SnapProductReader.getSnapProductBandsViewModel: Using Apache Commons Imaging fallback for tiff");
 
         try {
+        	/*
             // Read TIFF metadata
             TiffImageMetadata oMetadata = (TiffImageMetadata) Imaging.getMetadata(m_oProductFile);
 
@@ -216,7 +209,8 @@ public class SnapProductReader extends WasdiProductReader {
             }
 
             // Most GeoTIFFs have a single directory
-            TiffDirectory oDir = (TiffDirectory) oMetadata.getDirectories().get(0);
+            Directory oDir = (Directory) oMetadata.getDirectories().get(0);
+            oDir.getAllFields().get
 
             int iWidth = oDir.getSingleFieldValue(TiffTagConstants.TIFF_TAG_IMAGE_WIDTH);
             int iHeight = oDir.getSingleFieldValue(TiffTagConstants.TIFF_TAG_IMAGE_LENGTH);
@@ -237,6 +231,41 @@ public class SnapProductReader extends WasdiProductReader {
             }
             
             WasdiLog.debugLog("SnapProductReader.getSnapProductBandsViewModel: backup tiff read done");
+            */
+        	
+        	
+        	GdalInfoResult oGdalInfo = GdalUtils.getGdalInfoResult(m_oProductFile);
+        	if (oGdalInfo != null) {
+            	int iWidth = 0;
+            	int iHeight = 0;
+        		
+        		if (oGdalInfo.size != null) {
+        			if (oGdalInfo.size.size()>=2) {
+            			iWidth= oGdalInfo.size.get(0);
+            			iHeight= oGdalInfo.size.get(1);        				
+        			}
+        		}
+        		
+        		if (oGdalInfo.bands != null) {
+        			int iBandCount = 0;
+        			for (GdalBandInfo oGdalBand : oGdalInfo.bands) {
+        				String sBandName = "Band_" + (iBandCount + 1); 
+        				iBandCount ++;
+        				if (!Utils.isNullOrEmpty(oGdalBand.description)) {
+        					sBandName = oGdalBand.description;
+        				}
+
+                        BandViewModel oViewModel = new BandViewModel(sBandName);
+                        oViewModel.setWidth(iWidth);
+                        oViewModel.setHeight(iHeight);
+
+                        oProductViewModel.getBandsGroups().getBands().add(oViewModel);
+					}
+        		}
+        		
+        	}
+        	
+        	
 
         } catch (Exception oEx) {
             WasdiLog.errorLog("SnapProductReader.getSnapProductBandsViewModel: TIFF fallback error " + oEx.toString());

@@ -257,7 +257,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			String sDownloadUrl = getODataDownloadUrl(sFileURL);
 			String sProductId = getProductIdFromURL(sDownloadUrl);
 			String sUrl = SCREODIAS_BASE_URL + "$filter=Id eq '" + sProductId + "'&$expand=Attributes";
-			URL oURL = new URL(sUrl);
+			URL oURL = new URI(sUrl).toURL();
 			URI oURI = new URI(oURL.getProtocol(), oURL.getUserInfo(), IDN.toASCII(oURL.getHost()), oURL.getPort(), oURL.getPath(), oURL.getQuery(), oURL.getRef());
 			
 			HttpCallResponse sResponse = null;
@@ -339,16 +339,6 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		} catch (Exception e) {
 			WasdiLog.errorLog("CreoDias2ProvierAdapter: Config reader is null");
 		}
-	}
-	
-	
-	private String getAttribute(JSONArray aoAttributes, String sAttributeName) {
-		for (Object oAtt : aoAttributes) {
-			JSONObject oJsonAtt = (JSONObject) oAtt;
-			if (oJsonAtt.get(SODATA_NAME).equals(sAttributeName))
-				return oJsonAtt.optString(SODATA_VALUE);
-		}
-		return "";
 	}
 	
 	

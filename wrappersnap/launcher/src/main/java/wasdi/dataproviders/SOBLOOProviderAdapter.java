@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
+import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
@@ -160,7 +161,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		WasdiLog.debugLog("SOBLOOProviderAdapter.fileSizeViaHttp: sDownloadUser = " + m_sProviderUser);
 		WasdiLog.debugLog("SOBLOOProviderAdapter.fileSizeViaHttp: FileUrl = " + sFileURL);
 
-		URL oUrl = new URL(sFileURL);
+		URL oUrl = new URI(sFileURL).toURL();
 		HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 		setConnectionHeaders(oHttpConn);
 
@@ -212,7 +213,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		
 		while(iAttempts > 0 && Duration.between(oStart, Instant.now()).compareTo(oMaxDuration) <= 0 && iDownloadAttemp < iMaxRetry ) {
 			 
-			URL oUrl = new URL(sURL);
+			URL oUrl = new URI(sURL).toURL();
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 			setConnectionHeaders(oHttpConn);
 	

@@ -196,18 +196,23 @@ public class OpportunitySearchResource {
 				}
 			}
 
-			// ADD CHILDS
-			ArrayList<SwathArea> aoChilds = oSwath.getChilds();
-			ArrayList<CoverageSwathResultViewModel> aoChildsViewModel = new ArrayList<CoverageSwathResultViewModel>();
 
-			for (SwathArea oSwathArea : aoChilds) {
-				CoverageSwathResultViewModel oChild;
-				oChild = getCoverageSwathResultViewModelFromCoverageSwathResult(oSwathArea);
-				aoChildsViewModel.add(oChild);
+			if (oSwath!=null) {
+				// ADD CHILDS
+				ArrayList<SwathArea> aoChilds = oSwath.getChilds();
+				ArrayList<CoverageSwathResultViewModel> aoChildsViewModel = new ArrayList<CoverageSwathResultViewModel>();
 
+				for (SwathArea oSwathArea : aoChilds) {
+					CoverageSwathResultViewModel oChild;
+					oChild = getCoverageSwathResultViewModelFromCoverageSwathResult(oSwathArea);
+					aoChildsViewModel.add(oChild);
+
+				}
+				oVM.aoChilds = aoChildsViewModel;
+				
 			}
-			oVM.aoChilds = aoChildsViewModel;
-		} catch (Exception oE) {
+		} 
+		catch (Exception oE) {
 			WasdiLog.errorLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult: " + oE);
 		}
 		return oVM;

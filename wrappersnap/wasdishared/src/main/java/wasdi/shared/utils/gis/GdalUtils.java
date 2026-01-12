@@ -217,6 +217,10 @@ public class GdalUtils {
 								oBandInfo.colorInterpretation = (String) oBand.get("colorInterpretation");
 							}
 							
+							if (oBand.containsKey("description")) {
+								oBandInfo.description = (String) oBand.get("description");
+							}							
+							
 							if (oBand.containsKey("noDataValue")) {
 								try {
 									oBandInfo.noDataValue = (double) oBand.get("noDataValue");	

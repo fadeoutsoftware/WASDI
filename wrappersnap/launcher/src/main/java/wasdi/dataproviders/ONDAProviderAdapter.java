@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
+import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -371,7 +372,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		
 		try {
 				
-			URL oUrl = new URL(sCheckUrl);
+			URL oUrl = new URI(sCheckUrl).toURL();
 	        HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 	        oHttpConn.setRequestMethod("GET");
 			oHttpConn.setRequestProperty("Accept", "application/json");
@@ -472,7 +473,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		
 		URL oUrl;
 		try {
-			oUrl = new URL(sOrderUrl);
+			oUrl = new URI(sOrderUrl).toURL();
 			
 	        HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 	        oHttpConn.setRequestMethod("POST");

@@ -51,7 +51,7 @@ public class CopernicusDataspaceProviderAdapter extends ProviderAdapter {
 		String sDownloadUrl = getODataDownloadUrl(sFileURL);
 		String sProductId = getProductIdFromURL(sDownloadUrl);
 		String sUrl = sCOPERNICUS_DATASPACE_BASE_URL + "$filter=Id eq '" + sProductId + "'&$expand=Attributes";
-		URL oURL = new URL(sUrl);
+		URL oURL = new URI(sUrl).toURL();
 		URI oURI = new URI(oURL.getProtocol(), oURL.getUserInfo(), IDN.toASCII(oURL.getHost()), oURL.getPort(), oURL.getPath(), oURL.getQuery(), oURL.getRef());
 		
 		HttpCallResponse oResponse = null;

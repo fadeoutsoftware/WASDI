@@ -951,7 +951,14 @@ public class PermissionsUtils {
 			return canUserWriteResource(ResourceTypes.PROCESSOR.getResourceType(), sUserId, oProcessor.getProcessorId());
 
 		} catch (Exception oE) {
-			WasdiLog.errorLog("PermissionsUtils.canUserWriteProcessor( " + sUserId + ", " + oProcessor.getProcessorId() + " ): error: " + oE);
+			
+			String sProcId = "N.A.";
+			
+			if (oProcessor != null) {
+				sProcId = oProcessor.getProcessorId();
+			}
+			
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteProcessor( " + sUserId + ", " + sProcId + " ): error: " + oE);
 		}
 
 		return false;

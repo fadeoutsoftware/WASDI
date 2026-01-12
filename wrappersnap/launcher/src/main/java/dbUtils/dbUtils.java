@@ -2612,68 +2612,69 @@ public class dbUtils {
         	return;
         }
         
-        SubscriptionType oType = SubscriptionType.valueOf(sSubscriptionType);
-        
-        if (oType == null) {
-        	System.out.println("Impossible to find Subscription type " + sSubscriptionType);
-        	return;
+        try {
+            SubscriptionType oType = SubscriptionType.valueOf(sSubscriptionType);
+            
+            if (sOrganizationId != null) {
+            	OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+            	if (oOrganizationRepository.getById(sOrganizationId) == null) {
+            		System.out.println("Impossible to find the organization id");
+            		return;
+            	}
+            }
+            
+            int iDays = 1;
+            
+            if (oType.equals(SubscriptionType.Free)) iDays = 90;
+            else if (oType.equals(SubscriptionType.OneDayStandard)) iDays = 1;
+            else if (oType.equals(SubscriptionType.OneWeekStandard)) iDays = 7;
+            else if (oType.equals(SubscriptionType.OneMonthProfessional)) iDays = 30;
+            else if (oType.equals(SubscriptionType.OneMonthStandard)) iDays = 30;
+            else if (oType.equals(SubscriptionType.OneYearProfessional)) iDays = 365;
+            else if (oType.equals(SubscriptionType.OneYearStandard)) iDays = 365;
+            
+    		Subscription oSubscription = new Subscription();
+    		
+    		oSubscription.setType(oType.getTypeId());
+    		oSubscription.setBuyDate(null);
+    		oSubscription.setUserId(sUserId);
+    		oSubscription.setSubscriptionId(Utils.getRandomName());
+    		oSubscription.setName(sName);
+    		oSubscription.setBuySuccess(true);
+    		oSubscription.setBuyDate(Utils.getDateAsDouble(new Date()));
+    		oSubscription.setDescription(sName);
+    		oSubscription.setDurationDays(iDays);
+    		double dStartDate = Utils.getDateAsDouble(new Date());
+    		oSubscription.setStartDate(dStartDate);
+    		double dEndDate = dStartDate + ((double)iDays)*24.0*60.0*60.0*1000.0;
+    		oSubscription.setEndDate(dEndDate);
+    		if (!Utils.isNullOrEmpty(sOrganizationId)) {
+    			oSubscription.setOrganizationId(sOrganizationId);
+    		}
+    		
+    		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+    		oSubscriptionRepository.insertSubscription(oSubscription);
+    		
+    		Project oProject = new Project();
+    		oProject.setDescription(sName);
+    		oProject.setName(sName);
+    		oProject.setSubscriptionId(oSubscription.getSubscriptionId());
+    		oProject.setProjectId(Utils.getRandomName());
+    		
+    		ProjectRepository oProjectRepository = new  ProjectRepository();
+    		oProjectRepository.insertProject(oProject);
+    		
+    		UserRepository oUserRepository = new UserRepository();
+    		oUser.setActiveProjectId(oProject.getProjectId());
+    		oUser.setActiveSubscriptionId(oSubscription.getSubscriptionId());
+    		oUserRepository.updateUser(oUser);
+    		
+    		System.out.println("Subscription Added for user " + sUserId);	        	
         }
-        
-        if (sOrganizationId != null) {
-        	OrganizationRepository oOrganizationRepository = new OrganizationRepository();
-        	if (oOrganizationRepository.getById(sOrganizationId) == null) {
-        		System.out.println("Impossible to find the organization id");
-        		return;
-        	}
-        }
-        
-        int iDays = 1;
-        
-        if (oType.equals(SubscriptionType.Free)) iDays = 90;
-        else if (oType.equals(SubscriptionType.OneDayStandard)) iDays = 1;
-        else if (oType.equals(SubscriptionType.OneWeekStandard)) iDays = 7;
-        else if (oType.equals(SubscriptionType.OneMonthProfessional)) iDays = 30;
-        else if (oType.equals(SubscriptionType.OneMonthStandard)) iDays = 30;
-        else if (oType.equals(SubscriptionType.OneYearProfessional)) iDays = 365;
-        else if (oType.equals(SubscriptionType.OneYearStandard)) iDays = 365;
-        
-		Subscription oSubscription = new Subscription();
-		
-		oSubscription.setType(oType.getTypeId());
-		oSubscription.setBuyDate(null);
-		oSubscription.setUserId(sUserId);
-		oSubscription.setSubscriptionId(Utils.getRandomName());
-		oSubscription.setName(sName);
-		oSubscription.setBuySuccess(true);
-		oSubscription.setBuyDate(Utils.getDateAsDouble(new Date()));
-		oSubscription.setDescription(sName);
-		oSubscription.setDurationDays(iDays);
-		double dStartDate = Utils.getDateAsDouble(new Date());
-		oSubscription.setStartDate(dStartDate);
-		double dEndDate = dStartDate + ((double)iDays)*24.0*60.0*60.0*1000.0;
-		oSubscription.setEndDate(dEndDate);
-		if (!Utils.isNullOrEmpty(sOrganizationId)) {
-			oSubscription.setOrganizationId(sOrganizationId);
+        catch (Exception oEx) {
+        	System.out.println("Exception: " + oEx.toString());
 		}
-		
-		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-		oSubscriptionRepository.insertSubscription(oSubscription);
-		
-		Project oProject = new Project();
-		oProject.setDescription(sName);
-		oProject.setName(sName);
-		oProject.setSubscriptionId(oSubscription.getSubscriptionId());
-		oProject.setProjectId(Utils.getRandomName());
-		
-		ProjectRepository oProjectRepository = new  ProjectRepository();
-		oProjectRepository.insertProject(oProject);
-		
-		UserRepository oUserRepository = new UserRepository();
-		oUser.setActiveProjectId(oProject.getProjectId());
-		oUser.setActiveSubscriptionId(oSubscription.getSubscriptionId());
-		oUserRepository.updateUser(oUser);
-		
-		System.out.println("Subscription Added for user " + sUserId);		
+	
 	}
 
 	private static void ecoStress() {

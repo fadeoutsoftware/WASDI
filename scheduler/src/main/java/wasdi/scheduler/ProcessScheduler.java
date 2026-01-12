@@ -871,9 +871,14 @@ public class ProcessScheduler {
 			WasdiLog.errorLog(m_sLogPrefix + "executeProcess [" + sProcessObjId +"]: try to set the process in Error");
 			
 			try {
-				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-				m_oProcessWorkspaceRepository.updateProcess(oProcessWorkspace);				
-				WasdiLog.errorLog(m_sLogPrefix + "executeProcess[" + sProcessObjId + "]: Error status set");
+				if (oProcessWorkspace!=null) {
+					oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+					m_oProcessWorkspaceRepository.updateProcess(oProcessWorkspace);				
+					WasdiLog.errorLog(m_sLogPrefix + "executeProcess[" + sProcessObjId + "]: Error status set");					
+				}
+				else {
+					WasdiLog.errorLog(m_sLogPrefix + "executeProcess[" + sProcessObjId + "]: oProcessWorkspace is null!!!");
+				}
 			}
 			catch (Exception oInnerEx) {
 				WasdiLog.errorLog(m_sLogPrefix + "executeProcess[" + sProcessObjId + "]:  INNER Exception ", oInnerEx);

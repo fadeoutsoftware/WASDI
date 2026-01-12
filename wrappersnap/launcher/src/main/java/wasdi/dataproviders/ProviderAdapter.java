@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -420,7 +421,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			int iConnectionTimeOut = WasdiConfig.Current.connectionTimeout;
 			int iReadTimeOut = WasdiConfig.Current.readTimeout;
 			
-			URL oUrl = new URL(sFileURL);
+			URL oUrl = new URI(sFileURL).toURL();
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 			WasdiLog.debugLog("ProviderAdapter.getFileNameViaHttp: Connection Created");
 			
@@ -604,137 +605,141 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		
 		// Return file path
 		String sReturnFilePath = null;
-
-		WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
-
-		URL oUrl = new URL(sFileURL);
-		HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
-		oHttpConn.setRequestMethod(sRequestMethod);
-
-		for (Entry<String, String> asEntry : asHeaders.entrySet()) {
-			oHttpConn.setRequestProperty(asEntry.getKey(), asEntry.getValue());
-		}
-
-		oHttpConn.setRequestProperty("Accept", "*/*");
-		oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
 		
-		// Set Read Timeout
-		oHttpConn.setReadTimeout(WasdiConfig.Current.readTimeout*m_iHttpDownloadReadTimeoutMultiplier);
-		// Set Connection Timeout
-		oHttpConn.setConnectTimeout(WasdiConfig.Current.connectionTimeout);			
-		
+		try {			
+			WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
 
-		if (sPayload != null) {
-			oHttpConn.setRequestProperty("Content-Type", "application/json");
-			oHttpConn.setRequestProperty("Accept-Encoding", "gzip, deflate, br");
-			oHttpConn.setDoOutput(true);
-			byte[] ayBytes = sPayload.getBytes();
-			oHttpConn.setFixedLengthStreamingMode(ayBytes.length);
-			oHttpConn.connect();
-			try (OutputStream os = oHttpConn.getOutputStream()) {
-				os.write(ayBytes);
+			URL oUrl = new URI(sFileURL).toURL();
+			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
+			oHttpConn.setRequestMethod(sRequestMethod);
+
+			for (Entry<String, String> asEntry : asHeaders.entrySet()) {
+				oHttpConn.setRequestProperty(asEntry.getKey(), asEntry.getValue());
 			}
-		}
-		
-		int iResponseCode = oHttpConn.getResponseCode();
 
-		// always check HTTP response code first
-		if (iResponseCode == HttpURLConnection.HTTP_OK) {
+			oHttpConn.setRequestProperty("Accept", "*/*");
+			oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+			
+			// Set Read Timeout
+			oHttpConn.setReadTimeout(WasdiConfig.Current.readTimeout*m_iHttpDownloadReadTimeoutMultiplier);
+			// Set Connection Timeout
+			oHttpConn.setConnectTimeout(WasdiConfig.Current.connectionTimeout);			
+			
 
-			WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: Connected");
-
-			String sFileName = "";
-			String sContentType = oHttpConn.getContentType();
-			long lContentLength = oHttpConn.getContentLengthLong();
-
-			if (Utils.isNullOrEmpty(sOutputFileName)) {
-				String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
-				boolean bFromDisposition = !Utils.isNullOrEmpty(sDisposition); 
-				if (bFromDisposition) {
-					WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: Content-Disposition = " + sDisposition);
-					// extracts file name from header field
-					String sFileNameKey = "filename=";
-					int iStart = sDisposition.indexOf(sFileNameKey);
-					if (iStart > 0) {
-						WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: trying to extract filename from 'Content-Disposition'");
-						int iEnd = sDisposition.indexOf(' ', iStart);
-						if(iEnd < 0) {
-							iEnd = sDisposition.length();
-						}
-						sFileName = sDisposition.substring(iStart + sFileNameKey.length(), iEnd);
-						while(sFileName.startsWith("\"") && sFileName.length()>1) {
-							sFileName=sFileName.substring(1);
-						}
-						assert(!sFileName.startsWith("\""));
-						while(sFileName.endsWith("\"") && sFileName.length()>1) {
-							sFileName=sFileName.substring(0, sFileName.length()-1);
-						}
-						assert(!sFileName.endsWith("\""));
-						
-						
-					} else {
-						bFromDisposition = false;
-					}
+			if (sPayload != null) {
+				oHttpConn.setRequestProperty("Content-Type", "application/json");
+				oHttpConn.setRequestProperty("Accept-Encoding", "gzip, deflate, br");
+				oHttpConn.setDoOutput(true);
+				byte[] ayBytes = sPayload.getBytes();
+				oHttpConn.setFixedLengthStreamingMode(ayBytes.length);
+				oHttpConn.connect();
+				try (OutputStream os = oHttpConn.getOutputStream()) {
+					os.write(ayBytes);
 				}
-				if(!bFromDisposition) {
-					// extracts file name from URL
-					WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: trying to extract filename from URL");
-					sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1);
-				}				
 			}
-			else {
-				sFileName = sOutputFileName;
-			}
-			WasdiLog.debugLog("fileName = " + sFileName);
 			
-			WasdiLog.debugLog("Content-Type = " + sContentType);
-			WasdiLog.debugLog("Content-Length = " + lContentLength);
-			
+			int iResponseCode = oHttpConn.getResponseCode();
 
-			// opens input stream from the HTTP connection
-			InputStream oInputStream = oHttpConn.getInputStream();
-			
-			if (!sSaveDirOnServer.endsWith("/")) sSaveDirOnServer+="/";
-			
-			String sSaveFilePath = sSaveDirOnServer + sFileName;
+			// always check HTTP response code first
+			if (iResponseCode == HttpURLConnection.HTTP_OK) {
 
-			WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: Create Save File Path = " + sSaveFilePath);
+				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: Connected");
 
-			File oTargetFile = new File(sSaveFilePath);
-			File oTargetDir = oTargetFile.getParentFile();
-			oTargetDir.mkdirs();
+				String sFileName = "";
+				String sContentType = oHttpConn.getContentType();
+				long lContentLength = oHttpConn.getContentLengthLong();
 
-			// opens an output stream to save into file
-			FileOutputStream oOutputStream = new FileOutputStream(sSaveFilePath);
+				if (Utils.isNullOrEmpty(sOutputFileName)) {
+					String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
+					boolean bFromDisposition = !Utils.isNullOrEmpty(sDisposition); 
+					if (bFromDisposition) {
+						WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: Content-Disposition = " + sDisposition);
+						// extracts file name from header field
+						String sFileNameKey = "filename=";
+						int iStart = sDisposition.indexOf(sFileNameKey);
+						if (iStart > 0) {
+							WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: trying to extract filename from 'Content-Disposition'");
+							int iEnd = sDisposition.indexOf(' ', iStart);
+							if(iEnd < 0) {
+								iEnd = sDisposition.length();
+							}
+							sFileName = sDisposition.substring(iStart + sFileNameKey.length(), iEnd);
+							while(sFileName.startsWith("\"") && sFileName.length()>1) {
+								sFileName=sFileName.substring(1);
+							}
+							assert(!sFileName.startsWith("\""));
+							while(sFileName.endsWith("\"") && sFileName.length()>1) {
+								sFileName=sFileName.substring(0, sFileName.length()-1);
+							}
+							assert(!sFileName.endsWith("\""));
+							
+							
+						} else {
+							bFromDisposition = false;
+						}
+					}
+					if(!bFromDisposition) {
+						// extracts file name from URL
+						WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: trying to extract filename from URL");
+						sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1);
+					}				
+				}
+				else {
+					sFileName = sOutputFileName;
+				}
+				WasdiLog.debugLog("fileName = " + sFileName);
+				
+				WasdiLog.debugLog("Content-Type = " + sContentType);
+				WasdiLog.debugLog("Content-Length = " + lContentLength);
+				
 
-			//Retry should be handled by the specific provider ExecuteDownloadingFile Method
-			if (copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream)) {
-				sReturnFilePath = sSaveFilePath;
-				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
-			}
-			else {
-				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp copy stream returned false, not setting return file path" );
-			}
+				// opens input stream from the HTTP connection
+				InputStream oInputStream = oHttpConn.getInputStream();
+				
+				if (!sSaveDirOnServer.endsWith("/")) sSaveDirOnServer+="/";
+				
+				String sSaveFilePath = sSaveDirOnServer + sFileName;
 
-		} 
-		else {
-			WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: No file to download. Server replied HTTP code: " + iResponseCode);
-			
-			// Retrieve error
-			InputStream oErrorStream = oHttpConn.getErrorStream();
-			
-			if(null != oErrorStream) {
-				String sResult = IOUtils.toString(oErrorStream, StandardCharsets.UTF_8.toString());
-				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: error message: " + sResult );
+				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: Create Save File Path = " + sSaveFilePath);
+
+				File oTargetFile = new File(sSaveFilePath);
+				File oTargetDir = oTargetFile.getParentFile();
+				oTargetDir.mkdirs();
+
+				// opens an output stream to save into file
+				FileOutputStream oOutputStream = new FileOutputStream(sSaveFilePath);
+
+				//Retry should be handled by the specific provider ExecuteDownloadingFile Method
+				if (copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream)) {
+					sReturnFilePath = sSaveFilePath;
+					WasdiLog.debugLog("ProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
+				}
+				else {
+					WasdiLog.debugLog("ProviderAdapter.downloadViaHttp copy stream returned false, not setting return file path" );
+				}
+
 			} 
 			else {
-				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: provider did not send an error message");
+				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: No file to download. Server replied HTTP code: " + iResponseCode);
+				
+				// Retrieve error
+				InputStream oErrorStream = oHttpConn.getErrorStream();
+				
+				if(null != oErrorStream) {
+					String sResult = IOUtils.toString(oErrorStream, StandardCharsets.UTF_8.toString());
+					WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: error message: " + sResult );
+				} 
+				else {
+					WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: provider did not send an error message");
+				}
+				m_iLastError = iResponseCode;
 			}
-			m_iLastError = iResponseCode;
+			oHttpConn.disconnect();			
 		}
-		oHttpConn.disconnect();
-
-
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProviderAdapter.downloadViaHttp: exception ", oEx);
+		}
+		
 		return sReturnFilePath;
 	}
 
@@ -882,7 +887,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
         WasdiLog.debugLog("ProviderAdapter.getDownloadFileSizeViaHttp: FileUrl = " + sFileURL);
 
-        URL oUrl = new URL(sFileURL);
+        URL oUrl = new URI(sFileURL).toURL();
         HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
         oHttpConn.setRequestMethod("GET");
 		oHttpConn.setRequestProperty("Accept", "*/*");

@@ -318,6 +318,7 @@ public class WasdiGraph {
 			Product[] aoOutputs = oContext.getOutputProducts();
 			if (aoOutputs==null || aoOutputs.length==0)  {
 				m_oProcessWorkspaceLogger.log("No output created by the Workflow");
+				aoOutputs = new Product[0]; 
 			}
 			
 			for (int iOutputs = 0; iOutputs<aoOutputs.length; iOutputs++) {

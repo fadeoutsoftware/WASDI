@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -459,7 +460,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             WasdiLog.debugLog("DockerProcessorEngine.run: calling URL = " + sUrl);
 
             // Create connection
-            URL oProcessorUrl = new URL(sUrl);
+            URL oProcessorUrl = new URI(sUrl).toURL();
 
             WasdiLog.debugLog("DockerProcessorEngine.run: call open connection");
             HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
@@ -957,7 +958,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             String sUrl = sBaseUrl + "/run/--wasdiupdate";
 
             // Connect to the docker
-            URL oProcessorUrl = new URL(sUrl);
+            URL oProcessorUrl = new URI(sUrl).toURL();
             HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
             oConnection.setDoOutput(true);
             oConnection.setRequestMethod("POST");
