@@ -257,7 +257,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			String sDownloadUrl = getODataDownloadUrl(sFileURL);
 			String sProductId = getProductIdFromURL(sDownloadUrl);
 			String sUrl = SCREODIAS_BASE_URL + "$filter=Id eq '" + sProductId + "'&$expand=Attributes";
-			URL oURL = new URI(sUrl).toURL();
+			URL oURL = new URL(sUrl);
 			URI oURI = new URI(oURL.getProtocol(), oURL.getUserInfo(), IDN.toASCII(oURL.getHost()), oURL.getPort(), oURL.getPath(), oURL.getQuery(), oURL.getRef());
 			
 			HttpCallResponse sResponse = null;

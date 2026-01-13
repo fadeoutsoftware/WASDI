@@ -460,7 +460,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             WasdiLog.debugLog("DockerProcessorEngine.run: calling URL = " + sUrl);
 
             // Create connection
-            URL oProcessorUrl = new URI(sUrl).toURL();
+            URL oProcessorUrl = new URL(sUrl);
 
             WasdiLog.debugLog("DockerProcessorEngine.run: call open connection");
             HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
@@ -958,7 +958,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             String sUrl = sBaseUrl + "/run/--wasdiupdate";
 
             // Connect to the docker
-            URL oProcessorUrl = new URI(sUrl).toURL();
+            URL oProcessorUrl = new URL(sUrl);
             HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
             oConnection.setDoOutput(true);
             oConnection.setRequestMethod("POST");

@@ -48,7 +48,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 	        
 	    WasdiLog.debugLog("PROBAVProviderAdapter.getDownloadFileSizeViaHttp: FileUrl = " + sFileURL);
 
-	    URL oUrl = new URI(sFileURL).toURL();
+	    URL oUrl = new URL(sFileURL);
 	    HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 	    oHttpConn.setRequestMethod("GET");
 		oHttpConn.setRequestProperty(s_sAccept, "*/*");
@@ -115,7 +115,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 			
 			WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
 
-			URL oUrl = new URI(sFileURL).toURL();
+			URL oUrl = new URL(sFileURL);
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 			oHttpConn.setRequestMethod("GET");
 			oHttpConn.setRequestProperty(s_sAccept, "*/*");
@@ -357,7 +357,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 			int iConnectionTimeOut = WasdiConfig.Current.connectionTimeout;
 			int iReadTimeOut = WasdiConfig.Current.readTimeout;
 			
-			URL oUrl = new URI(sFileURL).toURL();
+			URL oUrl = new URL(sFileURL);
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 			WasdiLog.debugLog("PROBAVProviderAdapter.getFileNameViaHttp: Connection Created");
 			

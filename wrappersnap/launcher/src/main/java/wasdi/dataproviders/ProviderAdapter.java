@@ -421,7 +421,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			int iConnectionTimeOut = WasdiConfig.Current.connectionTimeout;
 			int iReadTimeOut = WasdiConfig.Current.readTimeout;
 			
-			URL oUrl = new URI(sFileURL).toURL();
+			URL oUrl = new URL(sFileURL);
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 			WasdiLog.debugLog("ProviderAdapter.getFileNameViaHttp: Connection Created");
 			
@@ -609,7 +609,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		try {			
 			WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
 
-			URL oUrl = new URI(sFileURL).toURL();
+			URL oUrl = new URL(sFileURL);
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 			oHttpConn.setRequestMethod(sRequestMethod);
 
@@ -887,7 +887,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
         WasdiLog.debugLog("ProviderAdapter.getDownloadFileSizeViaHttp: FileUrl = " + sFileURL);
 
-        URL oUrl = new URI(sFileURL).toURL();
+        URL oUrl = new URL(sFileURL);
         HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
         oHttpConn.setRequestMethod("GET");
 		oHttpConn.setRequestProperty("Accept", "*/*");

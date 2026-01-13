@@ -372,7 +372,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		
 		try {
 				
-			URL oUrl = new URI(sCheckUrl).toURL();
+			URL oUrl = new URL(sCheckUrl);
 	        HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 	        oHttpConn.setRequestMethod("GET");
 			oHttpConn.setRequestProperty("Accept", "application/json");
@@ -473,7 +473,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		
 		URL oUrl;
 		try {
-			oUrl = new URI(sOrderUrl).toURL();
+			oUrl = new URL(sOrderUrl);
 			
 	        HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 	        oHttpConn.setRequestMethod("POST");

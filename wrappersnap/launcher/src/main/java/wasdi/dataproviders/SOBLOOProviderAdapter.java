@@ -161,7 +161,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		WasdiLog.debugLog("SOBLOOProviderAdapter.fileSizeViaHttp: sDownloadUser = " + m_sProviderUser);
 		WasdiLog.debugLog("SOBLOOProviderAdapter.fileSizeViaHttp: FileUrl = " + sFileURL);
 
-		URL oUrl = new URI(sFileURL).toURL();
+		URL oUrl = new URL(sFileURL);
 		HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 		setConnectionHeaders(oHttpConn);
 
@@ -213,7 +213,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		
 		while(iAttempts > 0 && Duration.between(oStart, Instant.now()).compareTo(oMaxDuration) <= 0 && iDownloadAttemp < iMaxRetry ) {
 			 
-			URL oUrl = new URI(sURL).toURL();
+			URL oUrl = new URL(sURL);
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 			setConnectionHeaders(oHttpConn);
 	
