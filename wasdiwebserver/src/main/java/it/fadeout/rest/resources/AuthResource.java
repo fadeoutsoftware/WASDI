@@ -499,6 +499,7 @@ public class AuthResource {
 			bRes = oManager.checkUser(sAccount);
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("AuthResource.existsSftpAccount: error " + oEx.toString());
+			bRes = false;
 		}
 		return bRes;
 	}

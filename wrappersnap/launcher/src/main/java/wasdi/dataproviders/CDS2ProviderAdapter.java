@@ -91,10 +91,12 @@ public class CDS2ProviderAdapter extends PythonBasedProviderAdapter {
 			
 			if (asArgs == null) {
 				WasdiLog.errorLog("CDS2ProviderAdapter.executeDownloadFile: not arguments for shellExec");
+				return null;
 			}
 			
 			if (asArgs.size() < 5) {
 				WasdiLog.errorLog("CDS2ProviderAdapter.executeDownloadFile: not enough args");
+				return null;
 			}
 			
 			sInputFullPath = asArgs.get(2);

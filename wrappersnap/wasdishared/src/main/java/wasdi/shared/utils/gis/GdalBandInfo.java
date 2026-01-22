@@ -2,7 +2,8 @@ package wasdi.shared.utils.gis;
 
 public class GdalBandInfo {
 	public int band;
-	String type;
-	double noDataValue;
-	String colorInterpretation;
+	public String type;
+	public double noDataValue;
+	public String colorInterpretation;
+	public String description;
 }

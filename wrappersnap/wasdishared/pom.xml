@@ -39,7 +39,7 @@
         <sVersionJunitJupiter>5.7.0</sVersionJunitJupiter>
         <sVersionLog4j>2.25.2</sVersionLog4j>
         <sVersionMongoDb>5.6.1</sVersionMongoDb>
-        <sVersionGeoTools>28.2</sVersionGeoTools>
+        <sVersionGeoTools>28.6</sVersionGeoTools>
         <sVersionJersey2>2.43</sVersionJersey2>
         <sVersionMercurius>1.0</sVersionMercurius>
     </properties>
@@ -221,7 +221,7 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-main</artifactId>
             <version>${sVersionGeoTools}</version>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-shapefile</artifactId>
@@ -231,7 +231,31 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-cql</artifactId>
             <version>${sVersionGeoTools}</version>
-        </dependency>           
+        </dependency>
+		<dependency>
+		   <groupId>org.geotools</groupId>
+		   <artifactId>gt-geopkg</artifactId>
+		   <version>${sVersionGeoTools}</version>
+		</dependency>        
+		
+		<dependency>
+		    <groupId>org.geotools</groupId>
+		    <artifactId>gt-geotiff</artifactId>
+		    <version>${sVersionGeoTools}</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.geotools</groupId>
+		    <artifactId>gt-coverage</artifactId>
+		    <version>${sVersionGeoTools}</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.geotools</groupId>
+		    <artifactId>gt-referencing</artifactId>
+		    <version>${sVersionGeoTools}</version>
+		</dependency>
+				
 		<!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
 		<dependency>
 		    <groupId>org.jsoup</groupId>

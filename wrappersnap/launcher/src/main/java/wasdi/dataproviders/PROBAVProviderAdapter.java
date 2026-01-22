@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.util.Base64;
 import java.util.HashMap;
@@ -106,83 +107,92 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 	
 	@Override
 	protected String downloadViaHttp(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer) throws IOException {
-		
-		String sReturnFilePath = "";
-		
-		WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp: sDownloadUser = " + sDownloadUser);
-		
-		WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
+	
+		try {
+			String sReturnFilePath = "";
+			
+			WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp: sDownloadUser = " + sDownloadUser);
+			
+			WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
 
-		URL oUrl = new URL(sFileURL);
-		HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
-		oHttpConn.setRequestMethod("GET");
-		oHttpConn.setRequestProperty(s_sAccept, "*/*");
-		oHttpConn.setRequestProperty(s_sUserAgent, s_sMozillaAgent);
-		
-		// Basic HTTP Authentication "by hand"
-		String sBasicAuth = sDownloadUser + ":" + sDownloadPassword;
-		String sEncoded = Base64.getEncoder().encodeToString(sBasicAuth.getBytes());
-		sBasicAuth = "Basic " + sEncoded;
-		oHttpConn.setRequestProperty(s_sAuthorization, sBasicAuth);
-		
-		int responseCode = oHttpConn.getResponseCode();
+			URL oUrl = new URL(sFileURL);
+			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
+			oHttpConn.setRequestMethod("GET");
+			oHttpConn.setRequestProperty(s_sAccept, "*/*");
+			oHttpConn.setRequestProperty(s_sUserAgent, s_sMozillaAgent);
+			
+			// Basic HTTP Authentication "by hand"
+			String sBasicAuth = sDownloadUser + ":" + sDownloadPassword;
+			String sEncoded = Base64.getEncoder().encodeToString(sBasicAuth.getBytes());
+			sBasicAuth = "Basic " + sEncoded;
+			oHttpConn.setRequestProperty(s_sAuthorization, sBasicAuth);
+			
+			int iResponseCode = oHttpConn.getResponseCode();
 
-		// always check HTTP response code first
-		if (responseCode == HttpURLConnection.HTTP_OK) {
+			// always check HTTP response code first
+			if (iResponseCode == HttpURLConnection.HTTP_OK) {
 
-			WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp: Connected");
+				WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp: Connected");
 
-			String sFileName = "";
-			String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
-			String sContentType = oHttpConn.getContentType();
-			long lContentLength = oHttpConn.getContentLengthLong();
+				String sFileName = "";
+				String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
+				String sContentType = oHttpConn.getContentType();
+				long lContentLength = oHttpConn.getContentLengthLong();
 
-			WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp. ContentLenght: " + lContentLength);
+				WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp. ContentLenght: " + lContentLength);
 
-			if (sDisposition != null) {
-				// extracts file name from header field
-				int index = sDisposition.indexOf("filename=");
-				if (index > 0) {
-					sFileName = sDisposition.substring(index + 9, sDisposition.length() - 1);
+				if (sDisposition != null) {
+					// extracts file name from header field
+					int index = sDisposition.indexOf("filename=");
+					if (index > 0) {
+						sFileName = sDisposition.substring(index + 9, sDisposition.length() - 1);
+					}
+				} else {
+					// extracts file name from URL
+					sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1, sFileURL.length());
 				}
-			} else {
-				// extracts file name from URL
-				sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1, sFileURL.length());
+
+				WasdiLog.debugLog("Content-Type = " + sContentType);
+				WasdiLog.debugLog("Content-Disposition = " + sDisposition);
+				WasdiLog.debugLog("Content-Length = " + lContentLength);
+				WasdiLog.debugLog("fileName = " + sFileName);
+
+				// opens input stream from the HTTP connection
+				InputStream oInputStream = oHttpConn.getInputStream();
+				
+				if (!sSaveDirOnServer.endsWith("/")) sSaveDirOnServer+="/";
+				
+				String sSaveFilePath = sSaveDirOnServer + sFileName;
+
+				WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp: Create Save File Path = " + sSaveFilePath);
+
+				File oTargetFile = new File(sSaveFilePath);
+				File oTargetDir = oTargetFile.getParentFile();
+				oTargetDir.mkdirs();
+
+				// opens an output stream to save into file
+				FileOutputStream oOutputStream = new FileOutputStream(sSaveFilePath);
+
+				//TODO take countermeasures in case of failure, e.g. retry if timeout. Here or in copyStream?
+				copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
+
+				sReturnFilePath = sSaveFilePath;
+
+				WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
+			} 
+			else {
+				WasdiLog.infoLog("PROBAVProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + iResponseCode);
+				m_iLastError = iResponseCode;
 			}
-
-			WasdiLog.debugLog("Content-Type = " + sContentType);
-			WasdiLog.debugLog("Content-Disposition = " + sDisposition);
-			WasdiLog.debugLog("Content-Length = " + lContentLength);
-			WasdiLog.debugLog("fileName = " + sFileName);
-
-			// opens input stream from the HTTP connection
-			InputStream oInputStream = oHttpConn.getInputStream();
-			
-			if (!sSaveDirOnServer.endsWith("/")) sSaveDirOnServer+="/";
-			
-			String sSaveFilePath = sSaveDirOnServer + sFileName;
-
-			WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp: Create Save File Path = " + sSaveFilePath);
-
-			File oTargetFile = new File(sSaveFilePath);
-			File oTargetDir = oTargetFile.getParentFile();
-			oTargetDir.mkdirs();
-
-			// opens an output stream to save into file
-			FileOutputStream oOutputStream = new FileOutputStream(sSaveFilePath);
-
-			//TODO take countermeasures in case of failure, e.g. retry if timeout. Here or in copyStream?
-			copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
-
-			sReturnFilePath = sSaveFilePath;
-
-			WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
-		} else {
-			WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + responseCode);
-			m_iLastError = responseCode;
+			oHttpConn.disconnect();
+			return sReturnFilePath;				
 		}
-		oHttpConn.disconnect();
-		return sReturnFilePath;		
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PROBAVProviderAdapter.downloadViaHttp exception: ", oEx);
+			return "";
+		}
+		
+	
 	}
 
 	/**

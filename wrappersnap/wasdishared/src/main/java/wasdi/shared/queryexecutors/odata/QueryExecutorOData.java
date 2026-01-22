@@ -98,6 +98,10 @@ public class QueryExecutorOData extends QueryExecutorHttpGet {
 				}
 			}
 			
+			if (oHttpResponse==null) {
+				return null;
+			}
+			
 			String sResultFromDataProvider = oHttpResponse.getResponseBody();
 			
 			// We need to re-check: we may be here for a good one or because we finished retries

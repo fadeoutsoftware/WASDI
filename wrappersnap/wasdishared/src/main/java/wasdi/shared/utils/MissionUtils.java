@@ -207,6 +207,24 @@ public class MissionUtils {
 	
 	
 	/**
+	 * Check if the file is a GeoPackage File	
+	 * @param oFile
+	 * @return
+	 */
+	public static boolean isGeoPackageFile(File oFile) {
+		
+		try {
+			if (oFile.getName().toLowerCase().endsWith(".gpkg")) return true;
+		}
+		catch (Exception oE) {
+			WasdiLog.errorLog("WasdiFileUtils.isDocumentFormatFile exception: ", oE);
+		}
+
+		return false;
+	}
+
+	
+	/**
 	 * Get the Platform code of the mission starting from the file Name
 	 * @param sFileName File Name to investigate
 	 * @return Code of the Platform as definied in the Platforms class. Null if not recognized

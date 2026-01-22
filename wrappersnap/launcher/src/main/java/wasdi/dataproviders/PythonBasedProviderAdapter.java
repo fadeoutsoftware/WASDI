@@ -150,10 +150,12 @@ public class PythonBasedProviderAdapter extends ProviderAdapter {
 			
 			if (asArgs == null) {
 				WasdiLog.errorLog("PythonBasedProviderAdapter.executeDownloadFile: not arguments for shellExec");
+				return null;
 			}
 			
 			if (asArgs.size() < 5) {
 				WasdiLog.errorLog("PythonBasedProviderAdapter.executeDownloadFile: not enough args");
+				return null;
 			}
 			
 			sInputFullPath = asArgs.get(2);

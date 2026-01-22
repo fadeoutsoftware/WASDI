@@ -163,6 +163,7 @@ public class CreditsPackageResource {
 			
 			String sType = oCreditsPackageViewModel.getType();
 			CreditPackageType oPackageType = CreditPackageType.valueOf(sType);
+			
 			if (oPackageType == null) {
 				WasdiLog.errorLog("CreditsResource.addCreditPackage: no credit package corresponding to " + sType);
 				return Response.status(Status.BAD_REQUEST).build();

@@ -2524,11 +2524,21 @@ public class ProcessorsResource  {
 		if (fNewOnDemandPrice != null && fNewSquareKmPrice != null && fNewOnDemandPrice.floatValue() > 0 && fNewSquareKmPrice.floatValue() > 0) {
 			WasdiLog.warnLog("ProcessorsResource.updateProcessorDetails: processor " + oProcessorToUpdate.getProcessorId() + "  has both on deman price and square kilometer price. Just one of them should be set");
 		}
+		
+		if (fNewOnDemandPrice==null) {
+			WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: the ondemand price is null. Information on Stripe won't be updated");
+			return Status.BAD_REQUEST;			
+		}
 				
 		if (fNewOnDemandPrice < 0) {
 			WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: the ondemand price is a negative value. Information on Stripe won't be updated");
 			return Status.BAD_REQUEST;
 		} 
+		
+		if (fNewSquareKmPrice==null) {
+			WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: the square kilometer price is null. Information on Stripe won't be updated");
+			return Status.BAD_REQUEST;			
+		}
 		
 		if (fNewSquareKmPrice < 0) {
 			WasdiLog.warnLog("ProcessorsResource.updatePaymentDetails: the square kilometer price is a negative value. Information on Stripe won't be updated");

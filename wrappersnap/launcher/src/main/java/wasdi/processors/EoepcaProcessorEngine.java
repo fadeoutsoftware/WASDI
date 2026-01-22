@@ -405,6 +405,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			    }
 			    catch (Exception oExInner) {
 			    	WasdiLog.errorLog("EoepcaProcessorEngine.run: error decoding the Json Parameters, also after the decode", oEr);
+			    	aoInputParams = new HashMap<String, Object>();
 			    }
 			}
 			

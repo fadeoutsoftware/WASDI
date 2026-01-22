@@ -197,17 +197,4 @@ public class Ingest extends Operation {
         
 		return false;
 	}
-
-	private void deleteZipFile(File oZippedFileToIngestWithAbsolutePath) {
-		String sFileName = null;
-		try {
-			sFileName = oZippedFileToIngestWithAbsolutePath.getName();
-		    if(!oZippedFileToIngestWithAbsolutePath.delete()) {
-		    	WasdiLog.errorLog("Ingest.executeOperation: could not delete zip file " + oZippedFileToIngestWithAbsolutePath.getName());
-		    }
-		} catch (Exception oE) {
-			WasdiLog.warnLog("Ingest.executeOperation: exception while trying to delete zip file "  + sFileName +  ": " + oE);
-		}
-	}
-
 }

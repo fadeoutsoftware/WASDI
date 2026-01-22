@@ -128,10 +128,12 @@ public class ExtPythonProviderAdapter extends PythonBasedProviderAdapter {
 			
 			if (asArgs == null) {
 				WasdiLog.errorLog("ExtPythonProviderAdapter.getFileName: not arguments for shellExec");
+				return null;
 			}
 			
 			if (asArgs.size() < 5) {
 				WasdiLog.errorLog("ExtPythonProviderAdapter.getFileName: not enough args");
+				return null;
 			}
 			
 			sInputFullPath = asArgs.get(2);

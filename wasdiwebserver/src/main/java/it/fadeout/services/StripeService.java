@@ -109,14 +109,16 @@ public class StripeService {
 	public Map<String, String> createProductAppWithPrice(String sName, String sProcessorId, Float fOnDemandPrice, Float fSquareKilometerPrice) {
 
 		if (Utils.isNullOrEmpty(sName) || Utils.isNullOrEmpty(sProcessorId)) {
-			WasdiLog.warnLog(
-					"StripeService.createProductAppWithPrice: can't create product on Stripe. Produc name or processor id are null or empty");
+			WasdiLog.warnLog("StripeService.createProductAppWithPrice: can't create product on Stripe. Produc name or processor id are null or empty");
 			return null;
 		}
 		
-		if ( (fOnDemandPrice == null && fSquareKilometerPrice == null) 
-				|| (fOnDemandPrice <= 0 && fSquareKilometerPrice <= 0) 
-				|| (fOnDemandPrice > 0 && fSquareKilometerPrice > 0)) {
+		if (fOnDemandPrice==null) {
+			WasdiLog.warnLog("StripeService.createProductAppWithPrice. fOnDemandPrice is null");
+			return null;			
+		}
+		
+		if ( (fOnDemandPrice == null && fSquareKilometerPrice == null)  || (fOnDemandPrice <= 0 && fSquareKilometerPrice <= 0)  || (fOnDemandPrice > 0 && fSquareKilometerPrice > 0)) {
 			WasdiLog.warnLog("StripeService.createProductAppWithPrice. Invalid prices");
 			return null;
 		}
@@ -316,13 +318,12 @@ public class StripeService {
 				JSONArray aoProductPrices = oJsonResponseBody.optJSONArray("data");
 
 				if (aoProductPrices == null) {
-					WasdiLog.warnLog("StripeService.getActiveOnDemandPriceId: prices array is null for product id "
-							+ sProductId);
+					WasdiLog.warnLog("StripeService.getActiveOnDemandPriceId: prices array is null for product id " + sProductId);
+					return null;
 				}
 
 				if (aoProductPrices.length() == 0) {
-					WasdiLog.warnLog("StripeService.getActiveOnDemandPriceId: prices array is empty for product id "
-							+ sProductId);
+					WasdiLog.warnLog("StripeService.getActiveOnDemandPriceId: prices array is empty for product id " + sProductId);
 				}
 
 				List<String> asActivePricesIds = new ArrayList<>();
@@ -340,8 +341,7 @@ public class StripeService {
 				return asActivePricesIds;
 
 			} catch (Exception oEx) {
-				WasdiLog.errorLog("StripeService.getActiveOnDemandPriceId: exception reading the Stripe response ",
-						oEx);
+				WasdiLog.errorLog("StripeService.getActiveOnDemandPriceId: exception reading the Stripe response ", oEx);
 				return null;
 			}
 		} else {

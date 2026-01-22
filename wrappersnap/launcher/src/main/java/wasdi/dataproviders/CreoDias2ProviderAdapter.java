@@ -342,16 +342,6 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	}
 	
 	
-	private String getAttribute(JSONArray aoAttributes, String sAttributeName) {
-		for (Object oAtt : aoAttributes) {
-			JSONObject oJsonAtt = (JSONObject) oAtt;
-			if (oJsonAtt.get(SODATA_NAME).equals(sAttributeName))
-				return oJsonAtt.optString(SODATA_VALUE);
-		}
-		return "";
-	}
-	
-	
 	private String getProductIdFromURL(String sFileUrl) {
 		// url in input is something like: https://datahub.creodias.eu/odata/v1/Products(a6212de3-f2e4-58c2-840b-7f42c3c8c612)/$value
 		return sFileUrl.replace(SODATA_FILE_URL_START, "").replace(SODATA_FILE_URL_END, "");

@@ -426,7 +426,7 @@ public class GeoServerManager {
     		return false;
     	}
     	
-    	boolean bRes = createDbDataStore(oShpFile.getPath(), sStoreName);
+    	boolean bRes = createShapeDataStore(oShpFile.getPath(), sStoreName);
     	
     	if (bRes) {
         	if (!configureLayerStyle(sStoreName, sStyle)) {
@@ -437,8 +437,13 @@ public class GeoServerManager {
 		return bRes;
 	}
     
-    
-    private boolean createDbDataStore(String sShapeFilePath, String sStoreName)  {
+    /**
+     * Creates a datastore for shape files
+     * @param sShapeFilePath
+     * @param sStoreName
+     * @return
+     */
+    private boolean createShapeDataStore(String sShapeFilePath, String sStoreName)  {
     	
         StringBuilder sUrl = new StringBuilder(m_sRestUrl).append("/rest/workspaces/")
                 .append(m_sWorkspace).append("/datastores/").append(sStoreName).append("/file.shp");//?charset=ISO-8859-1
@@ -455,29 +460,97 @@ public class GeoServerManager {
     }        
     
     
-    /**
-     * Re-Creation of the createResource: taken from the geosolutions lib, it 
-     * fix the problem to create a valid feature Type
-     * 
-     * @param sShapeFilePath Full path of the shape file NOT zipped
-     * @param sStoreName Name of store and layer 
-     * @param sEPSG Projection
-     * @
-     * return
-     */
-    private boolean createResource(String sShapeFilePath, String sStoreName, String sEPSG)  {
+	/**
+	 * Add a shape file layer
+	 * @param sStoreName layer and store name
+	 * @param oGeoPackageFile Shape File Zipped
+	 * @param sEpsg Projection
+	 * @param sStyle Style
+	 * @param oLogger Logger
+	 * @throws DataException 
+	 */
+    public boolean publishGeoPackageFile(String sStoreName, File oGeoPackageFile, String sBandName, String sStyle) throws Exception {    	
+		
+    	// If the layer is there we clean it
+    	RESTLayer oLayer = m_oGsReader.getLayer(m_sWorkspace, sStoreName);
     	
-        StringBuilder sbUrl = new StringBuilder(m_sRestUrl).append("/rest/workspaces/")
-                .append(m_sWorkspace).append("/").append("datastores").append("/").append(sStoreName)
-                .append("/").append("featuretypes");
+    	if (oLayer != null) {
+    		WasdiLog.debugLog("GeoServerManager.publishGeoPackageFile: found layer " + sStoreName + " deleting it");
+    		removeLayer(sStoreName);
+    	}
+    	
+    	// Default style for geopackages is polygon
+    	if (sStyle == null || sStyle.isEmpty()) sStyle = "polygon";
+    	
+    	
+    	if (sStoreName == null) {
+    		WasdiLog.errorLog("GeoServerManager.publishGeoPackageFile: Store Name is null");
+    		return false;
+    	}
+    	
+    	if (oGeoPackageFile == null) {
+    		WasdiLog.errorLog("GeoServerManager.publishGeoPackageFile: oGeoTiffFile is null");
+    		return false;
+    	}
+    	
+    	WasdiLog.debugLog("GeoServerManager.publishGeoPackageFile: calling create geo package store for " + sStoreName + " Band: " + sBandName);
+    	
+    	boolean bRes = createGeoPckgDataStore(oGeoPackageFile.getPath(), sStoreName);
+    	
+    	if (bRes) {
+    		
+    		WasdiLog.debugLog("GeoServerManager.publishGeoPackageFile: data store created, going to publish the layer");
+    		
+    		String sUrl = m_sRestUrl + "/rest/workspaces/" + m_sWorkspace + "/datastores/" + sStoreName + "/featuretypes";
+
+	    	String sXml = "<featureType>" + "  <name>" + sBandName + "</name>" + "</featureType>";
+
+	    	WasdiLog.debugLog("GeoServerManager.publishGeoPackageFile: publishing the layer with url " + sUrl);
+	    	
+	    	String sResult = HTTPUtils.post(sUrl, sXml, "application/xml", m_sRestUser, m_sRestPassword);
+	    	
+	    	if (sResult!=null) {
+	    		WasdiLog.debugLog("GeoServerManager.publishGeoPackageFile: got response [" + sResult + "], now configure the style");
+	        	if (!configureLayerStyle(sBandName, sStyle)) {
+	        		WasdiLog.errorLog("GeoServerManager.publishGeoPackageFile: there was an error configuring the style");
+	        	}    			    		
+	    	}
+	    	else {
+	    		WasdiLog.warnLog("GeoServerManager.publishGeoPackageFile: got a Null response, there is a problem!");
+	    		bRes = false;
+	    	}
+    		
+    	}
+    	else {
+    		WasdiLog.debugLog("GeoServerManager.publishGeoPackageFile: createGeoPckgDataStore returned false");
+    	}
+    	
+		return bRes;
+	}    
+    
+    
+    /**
+     * Creates a datastore for geopkg files
+     * @param sFilePath
+     * @param sStoreName
+     * @return
+     */
+    private boolean createGeoPckgDataStore(String sFilePath, String sStoreName)  {
+
+        String sUrl = m_sRestUrl + "/rest/workspaces/" + m_sWorkspace + "/datastores";
+
+        String sXml =
+            "<dataStore>" +
+            "  <name>" + sStoreName + "</name>" +
+            "  <connectionParameters>" +
+            "    <entry key=\"dbtype\">geopkg</entry>" +
+            "    <entry key=\"database\">file:" + sFilePath + "</entry>" +
+            "  </connectionParameters>" +
+            "</dataStore>";
+
+        WasdiLog.debugLog("GeoServerManager.createGeoPckgDataStore calling: " + sUrl + " with body " + sXml);
         
-        
-        final String sXmlBody = getFeatureTypeFromShapeFile(sShapeFilePath, sStoreName, sEPSG);
-        final String sResult = HTTPUtils.postXml(sbUrl.toString(), sXmlBody, m_sRestUser, m_sRestPassword);
-        //final String sResult = HTTPUtils.putXml(sbUrl.toString(), sXmlBody, m_sRestUser, m_sRestPassword);
-        if (sResult != null) {
-        	WasdiLog.debugLog(sResult);
-        } 
+        String sResult = HTTPUtils.postXml(sUrl, sXml, m_sRestUser, m_sRestPassword);
 
         return sResult != null;
     }
