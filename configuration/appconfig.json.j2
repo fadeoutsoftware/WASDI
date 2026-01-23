@@ -1058,6 +1058,34 @@
 			]
 		},
 		{
+			"name": "SWOT",
+			"indexname": "platformname",
+			"indexvalue": "SWOT",
+			"filters": [
+				{
+					"indexname": "productlevel",
+					"indexlabel": "Product Level",
+					"indexvalues": "L2",
+					"regex": ".*",
+					"indexvalue": "L2"
+				},
+				{
+					"indexname": "variables",
+					"indexlabel": "Data Rate",
+					"indexvalues": "L2",
+					"regex": ".*",
+					"indexvalue": "L2"
+				},
+				{
+					"indexname": "resolution",
+					"indexlabel": "Resolution",
+					"indexvalues": "100m|250m",
+					"regex": ".*",
+					"indexvalue": "100m"
+				}
+			]
+		},
+		{
 			"name": "BIGBANG",
 			"indexname": "platformname",
 			"indexvalue": "BIGBANG",
@@ -1288,13 +1316,13 @@
 			"indexvalue": "ReturnNatFIM",
 			"ispublic": false,
 			"userid": "{{ sReturnUserId }}",
-			"filters":[
+			"filters": [
 				{
-                    "indexname": "producttype",
-                    "indexlabel": "Product Type",
-                    "indexvalues": "aree_bagnate|protected_areas|attivita_ecomiche|beni_culturali|edifici_strategici|ferrovie|reti_elettriche|sezioni_censimento|sorgenti_inquinanti|stazioni|strade|apfsr",
-                    "indexvalue": "aree_bagnate"
-                }				
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "aree_bagnate|protected_areas|attivita_ecomiche|beni_culturali|edifici_strategici|ferrovie|reti_elettriche|sezioni_censimento|sorgenti_inquinanti|stazioni|strade|apfsr",
+					"indexvalue": "aree_bagnate"
+				}
 			]
 		},
 		{
@@ -1304,18 +1332,16 @@
 			"selected": false,
 			"ispublic": false,
 			"userid": "return@fadeout.it",
-			"filters": [
-			]
+			"filters": []
 		},
-				{
+		{
 			"name": "Return Dams",
 			"indexname": "platformname",
 			"indexvalue": "ReturnDams",
 			"selected": false,
 			"ispublic": false,
 			"userid": "return@fadeout.it",
-			"filters": [
-			]
+			"filters": []
 		},
 		{
 			"name": "Return Metagrid",
@@ -1388,7 +1414,7 @@
 					"indexvalue": "u"
 				}
 			]
-		}		
+		}
 	],
 	"orbitsearch": {
 		"sensortypes": [

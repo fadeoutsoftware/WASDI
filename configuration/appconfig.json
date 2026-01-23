@@ -1121,6 +1121,34 @@
 			]
 		},
 		{
+			"name": "SWOT",
+			"indexname": "platformname",
+			"indexvalue": "SWOT",
+			"filters": [
+				{
+					"indexname": "productlevel",
+					"indexlabel": "Product Level",
+					"indexvalues": "L2",
+					"regex": ".*",
+					"indexvalue": "L2"
+				},
+				{
+					"indexname": "variables",
+					"indexlabel": "Data Rate",
+					"indexvalues": "L2",
+					"regex": ".*",
+					"indexvalue": "L2"
+				},
+				{
+					"indexname": "resolution",
+					"indexlabel": "Resolution",
+					"indexvalues": "100m|250m",
+					"regex": ".*",
+					"indexvalue": "100m"
+				}
+			]
+		},
+		{
 			"name": "BIGBANG",
 			"indexname": "platformname",
 			"indexvalue": "BIGBANG",
@@ -1367,18 +1395,16 @@
 			"selected": false,
 			"ispublic": false,
 			"userid": "return@fadeout.it",
-			"filters": [
-			]
+			"filters": []
 		},
-				{
+		{
 			"name": "Return Dams",
 			"indexname": "platformname",
 			"indexvalue": "ReturnDams",
 			"selected": false,
 			"ispublic": false,
 			"userid": "return@fadeout.it",
-			"filters": [
-			]
+			"filters": []
 		},
 		{
 			"name": "Return Metagrid",

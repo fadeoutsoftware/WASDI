@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import wasdi.shared.config.MongoConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.queryexecutors.PaginatedQuery;
+import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
@@ -31,17 +32,24 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 	
 	private static final String s_sEARTH_DATA_BASE_URL = "https://cmr.earthdata.nasa.gov/search/granules";
 	
-	private static final HashMap<String, String> as_WASDI_NASA_PRODUCT_MAPPING = new HashMap<String, String>();
+	private static final HashMap<String, String> as_TERRA_VIIRS_PRODUCT_MAPPING = new HashMap<String, String>();
 	
 	static {
-		as_WASDI_NASA_PRODUCT_MAPPING.put("MOD11A2", "C2269056084-LPCLOUD");
-		as_WASDI_NASA_PRODUCT_MAPPING.put("VNP21A1D", "C2545314555-LPCLOUD");
-		as_WASDI_NASA_PRODUCT_MAPPING.put("VNP21A1N", "C2545314559-LPCLOUD");
-		as_WASDI_NASA_PRODUCT_MAPPING.put("MCD43A4", "C2218719731-LPCLOUD");
-		as_WASDI_NASA_PRODUCT_MAPPING.put("MCD43A3", "C2278860820-LPCLOUD");
-		as_WASDI_NASA_PRODUCT_MAPPING.put("VNP15A2H", "C2545314545-LPCLOUD");
-		as_WASDI_NASA_PRODUCT_MAPPING.put("VNP43MA3", "C2545314605-LPCLOUD");
-		as_WASDI_NASA_PRODUCT_MAPPING.put("VNP43IA3", "C2545314588-LPCLOUD");
+		as_TERRA_VIIRS_PRODUCT_MAPPING.put("MOD11A2", "C2269056084-LPCLOUD");
+		as_TERRA_VIIRS_PRODUCT_MAPPING.put("VNP21A1D", "C2545314555-LPCLOUD");
+		as_TERRA_VIIRS_PRODUCT_MAPPING.put("VNP21A1N", "C2545314559-LPCLOUD");
+		as_TERRA_VIIRS_PRODUCT_MAPPING.put("MCD43A4", "C2218719731-LPCLOUD");
+		as_TERRA_VIIRS_PRODUCT_MAPPING.put("MCD43A3", "C2278860820-LPCLOUD");
+		as_TERRA_VIIRS_PRODUCT_MAPPING.put("VNP15A2H", "C2545314545-LPCLOUD");
+		as_TERRA_VIIRS_PRODUCT_MAPPING.put("VNP43MA3", "C2545314605-LPCLOUD");
+		as_TERRA_VIIRS_PRODUCT_MAPPING.put("VNP43IA3", "C2545314588-LPCLOUD");
+	}
+	
+	private static final HashMap<String, String> as_SWOT_PRODUCT_MAPPING = new HashMap<String, String>();
+	
+	static {
+		as_SWOT_PRODUCT_MAPPING.put("100m", "C3233942298-POCLOUD");
+		as_SWOT_PRODUCT_MAPPING.put("250m", "C3233942299-POCLOUD");
 	}
 	
 	public QueryExecutorLpDaac() {		
@@ -58,7 +66,8 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 				|| sProduct.toUpperCase().startsWith("VNP21A1N")
 				|| sProduct.toUpperCase().startsWith("VNP15A2H")
 				|| sProduct.toUpperCase().startsWith("VNP43MA3")
-				|| sProduct.toUpperCase().startsWith("VNP43IA3")) {
+				|| sProduct.toUpperCase().startsWith("VNP43IA3")
+				|| sProduct.toUpperCase().startsWith("SWOT_")) {
 			return sOriginalUrl;
 		}
 		return null;
@@ -72,8 +81,10 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		
 		try {
 			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
+			
+			String sPlatformName = oQueryViewModel.platformName;
 	
-			if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
+			if (!m_asSupportedPlatforms.contains(sPlatformName)) {
 				WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Unsupported platform: " + oQueryViewModel.platformName);
 				return lCount;
 			}
@@ -88,6 +99,10 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 			
 			String sProductType = oQueryViewModel.productType;
 			
+			String sResolution = oQueryViewModel.instrument != null 
+					? oQueryViewModel.instrument 
+					: "100m";
+			
 			// TODO: check where the name of the collection is coming from
 			
 			if (Utils.isNullOrEmpty(sProductType)) {
@@ -95,7 +110,13 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 				return lCount;
 			}
 			
-			String sEarthDataCollectionId = as_WASDI_NASA_PRODUCT_MAPPING.get(sProductType);
+			String sEarthDataCollectionId = null;
+			
+			if (sPlatformName.equals(Platforms.VIIRS) || sPlatformName.equals(Platforms.TERRA)) 
+				sEarthDataCollectionId = as_TERRA_VIIRS_PRODUCT_MAPPING.get(sProductType);
+			else
+				sEarthDataCollectionId = as_SWOT_PRODUCT_MAPPING.get(sResolution);
+				
 			
 			if (Utils.isNullOrEmpty(sEarthDataCollectionId)) {
 				WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Product trype " + sProductType + " not supported by WASDI" );
@@ -161,8 +182,10 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 
 			// Parse the query
 			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
+			
+			String sPlatformName = oQueryViewModel.platformName;
 	
-			if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
+			if (!m_asSupportedPlatforms.contains(sPlatformName)) {
 				WasdiLog.debugLog("QueryExecutorLpDaac.executeAndRetrieve. Unsupported platform: " + oQueryViewModel.platformName);
 				return null;
 			}
@@ -177,12 +200,21 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 			
 			String sProductType = oQueryViewModel.productType;
 			
+			String sResolution = oQueryViewModel.instrument != null 
+					? oQueryViewModel.instrument 
+					: "100m";
+			
 			if (Utils.isNullOrEmpty(sProductType)) {
 				WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product type not specified");
 				return null;
 			}
 			
-			String sEarthDataCollectionId = as_WASDI_NASA_PRODUCT_MAPPING.get(sProductType);
+			String sEarthDataCollectionId = null;
+			
+			if(sPlatformName.equals(Platforms.TERRA) || sPlatformName.equals(Platforms.VIIRS))
+				sEarthDataCollectionId = as_TERRA_VIIRS_PRODUCT_MAPPING.get(sProductType);
+			else
+				sEarthDataCollectionId = as_SWOT_PRODUCT_MAPPING.get(sResolution);
 			
 			if (Utils.isNullOrEmpty(sEarthDataCollectionId)) {
 				WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product trype " + sProductType + " not supported by WASDI" );
