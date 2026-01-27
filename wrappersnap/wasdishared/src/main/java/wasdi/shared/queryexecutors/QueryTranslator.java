@@ -168,11 +168,6 @@ public abstract class QueryTranslator {
 	 * Token of WSF platform
 	 */
 	private static final String S_SPLATFORMNAME_SWOT = "platformname:SWOT";
-
-	/**
-	 * Token of WSF platform
-	 */
-	private static final String S_SPLATFORMNAME_NASA_ALL = "platformname:NASA_ALL";
 	
 	/**
 	 * Token of TERRA platform
