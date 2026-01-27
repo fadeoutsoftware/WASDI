@@ -170,6 +170,11 @@ public abstract class QueryTranslator {
 	private static final String S_SPLATFORMNAME_SWOT = "platformname:SWOT";
 
 	/**
+	 * Token of WSF platform
+	 */
+	private static final String S_SPLATFORMNAME_NASA_ALL = "platformname:NASA_ALL";
+	
+	/**
 	 * Token of TERRA platform
 	 */
 	private static final String s_sPLATFORMNAME_BIGBANG = "platformname:BIGBANG";
@@ -670,6 +675,10 @@ public abstract class QueryTranslator {
 			if (!bFound) {
 				bFound = parseSWOT(sQuery, oResult);
 			}
+			
+			if (!bFound) {
+				bFound = parseNASAMissions(sQuery, oResult);
+			}
 						
 			if (!bFound) {
 				bFound = parseBIGBANG(sQuery, oResult); 
@@ -1163,22 +1172,43 @@ public abstract class QueryTranslator {
 	 * @param oResult the resulting Query View Model
 	 */
 	private boolean parseSWOT(String sQuery, QueryViewModel oResult) {
-		if (sQuery.contains(QueryTranslator.S_SPLATFORMNAME_WSF)) {
+		if (sQuery.contains(QueryTranslator.S_SPLATFORMNAME_SWOT)) {
 			sQuery = removePlatformToken(sQuery, QueryTranslator.S_SPLATFORMNAME_SWOT);
 
 			oResult.platformName = Platforms.SWOT;
 			
 			oResult.productLevel = extractValue(sQuery, "productlevel");
 			
-			oResult.platformName = extractValue(sQuery, "variables"); // data rate
+			oResult.polarisation = extractValue(sQuery, "variables"); // data rate
 			
-			oResult.instrument = extractValue(sQuery, "resolution");
+			oResult.productType = extractValue(sQuery, "resolution");
 			
 			return true;
 		}
 		
 		return false;
 	}
+	
+	/**
+	 * Fills the Query View Model with the info about the concept id of NASA missions
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 * @return
+	 */
+	private boolean parseNASAMissions(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.S_SPLATFORMNAME_NASA_ALL)) {
+			sQuery = removePlatformToken(sQuery, QueryTranslator.S_SPLATFORMNAME_NASA_ALL);
+
+			oResult.platformName = Platforms.NASA_all;
+			
+			oResult.productLevel = extractValue(sQuery, "productlevel"); // concept-id
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
 	
 	/**
 	 * Fills the Query View Model with STATIC TILES info

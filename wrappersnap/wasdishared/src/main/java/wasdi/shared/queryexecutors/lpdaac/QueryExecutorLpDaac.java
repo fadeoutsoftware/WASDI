@@ -32,25 +32,26 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 	
 	private static final String s_sEARTH_DATA_BASE_URL = "https://cmr.earthdata.nasa.gov/search/granules";
 	
-	private static final HashMap<String, String> as_TERRA_VIIRS_PRODUCT_MAPPING = new HashMap<String, String>();
+	private static final HashMap<String, String> as_PRODUCT_MAPPING = new HashMap<String, String>();
 	
 	static {
-		as_TERRA_VIIRS_PRODUCT_MAPPING.put("MOD11A2", "C2269056084-LPCLOUD");
-		as_TERRA_VIIRS_PRODUCT_MAPPING.put("VNP21A1D", "C2545314555-LPCLOUD");
-		as_TERRA_VIIRS_PRODUCT_MAPPING.put("VNP21A1N", "C2545314559-LPCLOUD");
-		as_TERRA_VIIRS_PRODUCT_MAPPING.put("MCD43A4", "C2218719731-LPCLOUD");
-		as_TERRA_VIIRS_PRODUCT_MAPPING.put("MCD43A3", "C2278860820-LPCLOUD");
-		as_TERRA_VIIRS_PRODUCT_MAPPING.put("VNP15A2H", "C2545314545-LPCLOUD");
-		as_TERRA_VIIRS_PRODUCT_MAPPING.put("VNP43MA3", "C2545314605-LPCLOUD");
-		as_TERRA_VIIRS_PRODUCT_MAPPING.put("VNP43IA3", "C2545314588-LPCLOUD");
+		// MODIS
+		as_PRODUCT_MAPPING.put("MOD11A2", "C2269056084-LPCLOUD");
+		as_PRODUCT_MAPPING.put("MCD43A4", "C2218719731-LPCLOUD");
+		as_PRODUCT_MAPPING.put("MCD43A3", "C2278860820-LPCLOUD");
+		
+		// VIIRS
+		as_PRODUCT_MAPPING.put("VNP21A1D", "C2545314555-LPCLOUD"); 
+		as_PRODUCT_MAPPING.put("VNP21A1N", "C2545314559-LPCLOUD");
+		as_PRODUCT_MAPPING.put("VNP15A2H", "C2545314545-LPCLOUD");
+		as_PRODUCT_MAPPING.put("VNP43MA3", "C2545314605-LPCLOUD");
+		as_PRODUCT_MAPPING.put("VNP43IA3", "C2545314588-LPCLOUD");
+		
+		// SWOT
+		as_PRODUCT_MAPPING.put("100m", "C3233942298-POCLOUD"); 
+		as_PRODUCT_MAPPING.put("250m", "C3233942299-POCLOUD"); 
 	}
-	
-	private static final HashMap<String, String> as_SWOT_PRODUCT_MAPPING = new HashMap<String, String>();
-	
-	static {
-		as_SWOT_PRODUCT_MAPPING.put("100m", "C3233942298-POCLOUD");
-		as_SWOT_PRODUCT_MAPPING.put("250m", "C3233942299-POCLOUD");
-	}
+
 	
 	public QueryExecutorLpDaac() {		
 		this.m_oQueryTranslator = new QueryTranslatorLpDaac();
@@ -79,6 +80,9 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		
 		int lCount = -1;
 		
+		String sUrlCount = s_sEARTH_DATA_BASE_URL;
+
+		
 		try {
 			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
 			
@@ -89,44 +93,37 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 				return lCount;
 			}
 			
-			Double dWest = oQueryViewModel.west;
-			Double dNorth = oQueryViewModel.north;
-			Double dEast = oQueryViewModel.east;
-			Double dSouth = oQueryViewModel.south;
-	
-			String sDateFrom = oQueryViewModel.startFromDate;
-			String sDateTo = oQueryViewModel.endToDate;
-			
-			String sProductType = oQueryViewModel.productType;
-			
-			String sResolution = oQueryViewModel.instrument != null 
-					? oQueryViewModel.instrument 
-					: "100m";
-			
-			// TODO: check where the name of the collection is coming from
-			
-			if (Utils.isNullOrEmpty(sProductType)) {
-				WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Product type not specified " + oQueryViewModel.platformName);
-				return lCount;
+			if (!Utils.isNullOrEmpty(oQueryViewModel.productName)) {
+				sUrlCount += "?readable_granule_name=" + oQueryViewModel.productName;
 			}
-			
-			String sEarthDataCollectionId = null;
-			
-			if (sPlatformName.equals(Platforms.VIIRS) || sPlatformName.equals(Platforms.TERRA)) 
-				sEarthDataCollectionId = as_TERRA_VIIRS_PRODUCT_MAPPING.get(sProductType);
-			else
-				sEarthDataCollectionId = as_SWOT_PRODUCT_MAPPING.get(sResolution);
+			else {
+				Double dWest = oQueryViewModel.west;
+				Double dNorth = oQueryViewModel.north;
+				Double dEast = oQueryViewModel.east;
+				Double dSouth = oQueryViewModel.south;
+		
+				String sDateFrom = oQueryViewModel.startFromDate;
+				String sDateTo = oQueryViewModel.endToDate;
 				
-			
-			if (Utils.isNullOrEmpty(sEarthDataCollectionId)) {
-				WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Product trype " + sProductType + " not supported by WASDI" );
-				return lCount;
+				String sProductType = oQueryViewModel.productType;
+				
+				if (Utils.isNullOrEmpty(sProductType)) {
+					WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Product type not specified " + oQueryViewModel.platformName);
+					return lCount;
+				}
+				
+				String sEarthDataCollectionId = as_PRODUCT_MAPPING.get(sProductType);
+					
+				
+				if (Utils.isNullOrEmpty(sEarthDataCollectionId)) {
+					WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Product trype " + sProductType + " not supported by WASDI" );
+					return lCount;
+				}
+				
+				// PREPARE QUERY FOR EARTHDATA (HERE WE WILL GET THE RESPONSE IN XML FORMAT SINCE WE ARE ONLY INTERESTED TO GET THE NUMBER OF HITS)
+				
+				sUrlCount += getEarthDataQueryParameters(sEarthDataCollectionId, sDateFrom, sDateTo,  dWest, dNorth, dEast, dSouth);
 			}
-			
-			// PREPARE QUERY FOR EARTHDATA (HERE WE WILL GET THE RESPONSE IN XML FORMAT SINCE WE ARE ONLY INTERESTED TO GET THE NUMBER OF HITS)
-			String sUrlCount = s_sEARTH_DATA_BASE_URL;
-			
-			sUrlCount += getEarthDataQueryParameters(sEarthDataCollectionId, sDateFrom, sDateTo,  dWest, dNorth, dEast, dSouth);
 			
 			HttpCallResponse oHttpResponse = HttpUtils.httpGet(sUrlCount);
 			
@@ -178,6 +175,9 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 
 		List<QueryResultViewModel> aoResults = new ArrayList<>();
 		
+		String sSearchUrl = s_sEARTH_DATA_BASE_URL + ".json";
+
+		
 		try {
 
 			// Parse the query
@@ -189,42 +189,38 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 				WasdiLog.debugLog("QueryExecutorLpDaac.executeAndRetrieve. Unsupported platform: " + oQueryViewModel.platformName);
 				return null;
 			}
-	
-			Double dWest = oQueryViewModel.west;
-			Double dNorth = oQueryViewModel.north;
-			Double dEast = oQueryViewModel.east;
-			Double dSouth = oQueryViewModel.south;
-	
-			String sDateFrom = oQueryViewModel.startFromDate;
-			String sDateTo = oQueryViewModel.endToDate;
 			
-			String sProductType = oQueryViewModel.productType;
-			
-			String sResolution = oQueryViewModel.instrument != null 
-					? oQueryViewModel.instrument 
-					: "100m";
-			
-			if (Utils.isNullOrEmpty(sProductType)) {
-				WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product type not specified");
-				return null;
+			if (!Utils.isNullOrEmpty(oQueryViewModel.productName)) {
+				sSearchUrl += "?readable_granule_name=" + oQueryViewModel.productName;
 			}
-			
-			String sEarthDataCollectionId = null;
-			
-			if(sPlatformName.equals(Platforms.TERRA) || sPlatformName.equals(Platforms.VIIRS))
-				sEarthDataCollectionId = as_TERRA_VIIRS_PRODUCT_MAPPING.get(sProductType);
-			else
-				sEarthDataCollectionId = as_SWOT_PRODUCT_MAPPING.get(sResolution);
-			
-			if (Utils.isNullOrEmpty(sEarthDataCollectionId)) {
-				WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product trype " + sProductType + " not supported by WASDI" );
-				return null;
+			else {
+	
+				Double dWest = oQueryViewModel.west;
+				Double dNorth = oQueryViewModel.north;
+				Double dEast = oQueryViewModel.east;
+				Double dSouth = oQueryViewModel.south;
+		
+				String sDateFrom = oQueryViewModel.startFromDate;
+				String sDateTo = oQueryViewModel.endToDate;
+				
+				String sProductType = oQueryViewModel.productType;
+				
+				if (Utils.isNullOrEmpty(sProductType)) {
+					WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product type not specified");
+					return null;
+				}
+				
+				String sEarthDataCollectionId =as_PRODUCT_MAPPING.get(sProductType);
+				
+				if (Utils.isNullOrEmpty(sEarthDataCollectionId)) {
+					WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product trype " + sProductType + " not supported by WASDI" );
+					return null;
+				}
+				
+				// PREPARE QUERY FOR EARTHDATA (HERE WE WILL GET THE RESPONSE IN JSON FORMAT SINCE WE WANT THE TO FILL THE RESULT VIEW MODELS)
+						
+				sSearchUrl += getEarthDataQueryParameters(sEarthDataCollectionId, sDateFrom, sDateTo,  dWest, dNorth, dEast, dSouth, iLimit, iOffset);
 			}
-			
-			// PREPARE QUERY FOR EARTHDATA (HERE WE WILL GET THE RESPONSE IN JSON FORMAT SINCE WE WANT THE TO FILL THE RESULT VIEW MODELS)
-			String sSearchUrl = s_sEARTH_DATA_BASE_URL + ".json";
-					
-			sSearchUrl += getEarthDataQueryParameters(sEarthDataCollectionId, sDateFrom, sDateTo,  dWest, dNorth, dEast, dSouth, iLimit, iOffset);
 			
 			HttpCallResponse oHttpResponse = HttpUtils.httpGet(sSearchUrl);
 			
