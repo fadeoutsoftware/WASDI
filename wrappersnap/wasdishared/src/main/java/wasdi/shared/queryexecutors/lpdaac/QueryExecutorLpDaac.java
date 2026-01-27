@@ -120,7 +120,7 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 			// PREPARE QUERY FOR EARTHDATA (HERE WE WILL GET THE RESPONSE IN XML FORMAT SINCE WE ARE ONLY INTERESTED TO GET THE NUMBER OF HITS)
 			
 			if (!Utils.isNullOrEmpty(oQueryViewModel.productName)) {
-				// even for the search by product name, EarthData asks for the collection concept id
+				// even for the search by product name, EarthData asks for the collection concept id. File must be provided with extension
 				sUrlCount += "?collection_concept_id=" + sEarthDataCollectionId + "&readable_granule_name=" + oQueryViewModel.productName;
 			}
 			else {
@@ -219,7 +219,7 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 			// PREPARE QUERY FOR EARTHDATA (HERE WE WILL GET THE RESPONSE IN JSON FORMAT SINCE WE WANT THE TO FILL THE RESULT VIEW MODELS)
 			
 			if (!Utils.isNullOrEmpty(oQueryViewModel.productName)) {
-				// even for the search by product name, EarthData asks for the collection concept id
+				// even for the search by product name, EarthData asks for the collection concept id. File must be provided with extension
 				sSearchUrl += "?collection_concept_id=" + sEarthDataCollectionId + "&readable_granule_name=" + oQueryViewModel.productName;
 			}
 			else {

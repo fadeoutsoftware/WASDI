@@ -675,10 +675,6 @@ public abstract class QueryTranslator {
 			if (!bFound) {
 				bFound = parseSWOT(sQuery, oResult);
 			}
-			
-			if (!bFound) {
-				bFound = parseNASAMissions(sQuery, oResult);
-			}
 						
 			if (!bFound) {
 				bFound = parseBIGBANG(sQuery, oResult); 
@@ -1182,26 +1178,6 @@ public abstract class QueryTranslator {
 			oResult.polarisation = extractValue(sQuery, "variables"); // data rate
 			
 			oResult.productType = extractValue(sQuery, "resolution");
-			
-			return true;
-		}
-		
-		return false;
-	}
-	
-	/**
-	 * Fills the Query View Model with the info about the concept id of NASA missions
-	 * @param sQuery the query
-	 * @param oResult the resulting Query View Model
-	 * @return
-	 */
-	private boolean parseNASAMissions(String sQuery, QueryViewModel oResult) {
-		if (sQuery.contains(QueryTranslator.S_SPLATFORMNAME_NASA_ALL)) {
-			sQuery = removePlatformToken(sQuery, QueryTranslator.S_SPLATFORMNAME_NASA_ALL);
-
-			oResult.platformName = Platforms.NASA_all;
-			
-			oResult.productLevel = extractValue(sQuery, "productlevel"); // concept-id
 			
 			return true;
 		}
