@@ -1000,7 +1000,7 @@
 				{
 					"indexname": "dataset",
 					"indexlabel": "Dataset",
-					"indexvalues": "EEHTES|EEHSTIC|EEHGPP|L1B_GEO|L2_CLOUD",
+					"indexvalues": "EEHTES|EEHSTIC|EEHGPP|L1B_GEO|L2_CLOUD|L1B_RAD",
 					"regex": ".*",
 					"indexvalue": "EEHTES"
 				},
@@ -1061,6 +1061,34 @@
 					"indexvalues": "WSF_2019",
 					"regex": ".*",
 					"indexvalue": "WSF_2019"
+				}
+			]
+		},
+		{
+			"name": "SWOT",
+			"indexname": "platformname",
+			"indexvalue": "SWOT",
+			"filters": [
+				{
+					"indexname": "productlevel",
+					"indexlabel": "Product Level",
+					"indexvalues": "L2",
+					"regex": ".*",
+					"indexvalue": "L2"
+				},
+				{
+					"indexname": "variables",
+					"indexlabel": "Data Rate",
+					"indexvalues": "L2",
+					"regex": ".*",
+					"indexvalue": "L2"
+				},
+				{
+					"indexname": "resolution",
+					"indexlabel": "Resolution",
+					"indexvalues": "100m|250m",
+					"regex": ".*",
+					"indexvalue": "100m"
 				}
 			]
 		},
@@ -1129,8 +1157,7 @@
 			"selected": false,
 			"ispublic": false,
 			"userid": "return@fadeout.it",
-			"filters": [
-			]
+			"filters": []
 		},
 		{
 			"name": "CIMA Variables",

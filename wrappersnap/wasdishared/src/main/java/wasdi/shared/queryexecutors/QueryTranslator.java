@@ -163,7 +163,12 @@ public abstract class QueryTranslator {
 	 * Token of WSF platform
 	 */
 	private static final String S_SPLATFORMNAME_WSF = "platformname:WSF";
-
+	
+	/**
+	 * Token of WSF platform
+	 */
+	private static final String S_SPLATFORMNAME_SWOT = "platformname:SWOT";
+	
 	/**
 	 * Token of TERRA platform
 	 */
@@ -660,7 +665,11 @@ public abstract class QueryTranslator {
 
 			if (!bFound) {
 				bFound = parseWFS(sQuery, oResult); 
-			}			
+			}	
+			
+			if (!bFound) {
+				bFound = parseSWOT(sQuery, oResult);
+			}
 						
 			if (!bFound) {
 				bFound = parseBIGBANG(sQuery, oResult); 
@@ -1145,6 +1154,32 @@ public abstract class QueryTranslator {
 		
 		return false;
 	}
+	
+	
+	/**
+	 * Fills the Query View Model with parse SWOT info
+	 * 
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 */
+	private boolean parseSWOT(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.S_SPLATFORMNAME_SWOT)) {
+			sQuery = removePlatformToken(sQuery, QueryTranslator.S_SPLATFORMNAME_SWOT);
+
+			oResult.platformName = Platforms.SWOT;
+			
+			oResult.productLevel = extractValue(sQuery, "productlevel");
+			
+			oResult.polarisation = extractValue(sQuery, "variables"); // data rate
+			
+			oResult.productType = extractValue(sQuery, "resolution");
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
 	
 	/**
 	 * Fills the Query View Model with STATIC TILES info

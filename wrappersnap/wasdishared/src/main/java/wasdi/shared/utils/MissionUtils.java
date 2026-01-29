@@ -307,8 +307,12 @@ public class MissionUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("GHS_BUILT_S_E2018_GLOBE_R2023A_54009_10_V1_0_")) {
 				return Platforms.JRC_GHSL;
-			} else if (sFileName.toUpperCase().startsWith("WSF2019_V1_")) {
+			} 
+			else if (sFileName.toUpperCase().startsWith("WSF2019_V1_")) {
 				return Platforms.WSF;
+			}
+			else if (sFileName.toUpperCase().startsWith("SWOT")) {
+				return Platforms.SWOT;
 			}
 			else if (sFileName.toUpperCase().startsWith("SPEI01_") 
 					|| sFileName.toUpperCase().startsWith("SPEI03_") 
