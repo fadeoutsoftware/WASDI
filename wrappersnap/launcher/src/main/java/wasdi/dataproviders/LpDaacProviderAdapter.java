@@ -98,14 +98,15 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 			WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. Workspace directory has been crated");
 		
 		
-		if (sFileName.toUpperCase().startsWith("VNP21A1D") 
+		if (sFileName.toUpperCase().startsWith("MCD43A4")
+				|| sFileName.toUpperCase().startsWith("MCD43A3")
+				|| sFileName.toUpperCase().startsWith("VNP21A1D") 
 				|| sFileName.toUpperCase().startsWith("VNP21A1N")
 				|| sFileName.toUpperCase().startsWith("VNP15A2H")
-				|| sFileName.toUpperCase().startsWith("MCD43A4")
-				|| sFileName.toUpperCase().startsWith("MCD43A3")
 				|| sFileName.toUpperCase().startsWith("VNP43MA3")
-				|| sFileName.toUpperCase().startsWith("VNP43IA3")) {
-			WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile: VIIRS product asked for download");
+				|| sFileName.toUpperCase().startsWith("VNP43IA3")
+				|| sFileName.toUpperCase().startsWith("SWOT_")) {
+			WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. Product asked for download " + sFileName);
 			return executeDownloadFromEarthData(sDownloadUrl, sDownloadUser, sDownloadPassword, sSavedFilePath, iMaxRetry);
 		}
 		
@@ -245,7 +246,7 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 			String[] asTokens = sFileURL.split(ResponseTranslatorLpDaac.SLINK_SEPARATOR);
 			sResult = asTokens[ResponseTranslatorLpDaac.S_IFILE_NAME_INDEX];
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("LpDaacProviderAdapter.getFileName: exception while trying to retrieve the file name." + oEx.getMessage());
+			WasdiLog.errorLog("LpDaacProviderAdapter.getFileName: exception while trying to retrieve the file name.", oEx);
 		}
 		return sResult;
 	}
@@ -266,6 +267,9 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 						|| sFileName.startsWith("VNP15A2H") 
 						|| sFileName.startsWith("VNP43MA3")
 						|| sFileName.startsWith("VNP43IA3"))) {
+			return DataProviderScores.DOWNLOAD.getValue();
+		}
+		if (sPlatformType.equals("SWOT")) {
 			return DataProviderScores.DOWNLOAD.getValue();
 		}
 

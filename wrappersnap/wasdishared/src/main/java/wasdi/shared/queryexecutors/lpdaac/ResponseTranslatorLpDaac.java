@@ -102,20 +102,15 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		}
 		
 		// title
-		String sTitle = oJsonEntry.optString("title");
+		String sTitle = getTitle(oJsonEntry);
+		
+
 		if (Utils.isNullOrEmpty(sTitle)) {
 			WasdiLog.errorLog("ResponseTranslatorLpDaac.translate: no title found for the product. It will be impossible to download it");
 			return null;
-		} else {
-			if (sTitle.startsWith("MOD11A2")) {
-				sTitle += ".hdf";
-			} else if (sTitle.startsWith("VNP21A1D") || sTitle.startsWith("VNP21A1N")) {
-				sTitle += ".h5";
-			}
-			oResult.setTitle(sTitle);
-		}
+		} 
 		
-		
+		oResult.setTitle(sTitle);
 		
 		// footprint
 		addFootprint(oJsonEntry, oResult);
@@ -132,6 +127,31 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		return oResult;
 	}
 	
+	private String getTitle(JSONObject oJsonEntry) {
+		
+		String sRes = null;
+		
+		String sTitle = oJsonEntry.optString("title");
+		
+		String sProducerGranuleId = oJsonEntry.optString("producer_granule_id");
+
+		if (Utils.isNullOrEmpty(sTitle) && Utils.isNullOrEmpty(sProducerGranuleId)) {
+			return sRes;
+		} 
+		
+		sRes = sTitle.startsWith("SWOT") ? sProducerGranuleId : sTitle;
+		
+		if (!sRes.endsWith(".hdf") && (sTitle.startsWith("MOD") || sTitle.startsWith("MCD"))) {
+			sRes += ".hdf";
+		} else if (!sRes.endsWith(".h5") && sTitle.startsWith("VNP")) {
+			sRes += ".h5";
+		} else if (!sRes.endsWith("nc") && sTitle.startsWith("SWOT")) {
+			sRes += ".nc";
+		}
+		
+		return sRes;
+	}
+	
 	/**
 	 * Read the footprint of the Json object representing a LpDaac product and translates it in the corresponding WKT coordinates
 	 * @param oJsonEntry the Json object representing a LpDaac product 
@@ -141,6 +161,31 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		
 		if (oJsonEntry == null || oResult == null) {
 			WasdiLog.warnLog("ResponseTranslatorLpDaac.addFootprint. Entry or result view model are null. Footprint won't be added");
+			return;
+		}
+		
+		// SWOT has a different way to provide the bbox
+		if (oResult.getTitle().startsWith("SWOT")) {
+			JSONArray asBoxes = oJsonEntry.optJSONArray("boxes");
+			if (asBoxes != null && asBoxes.length() > 0) {
+				String sBox = asBoxes.getString(0);
+				String[] asCoordinates = sBox.split(" "); // coordinates order: S, W, N, E
+				String sS = asCoordinates[0];
+				String sW = asCoordinates[1];
+				String sN = asCoordinates[2];
+				String sE = asCoordinates[3];
+				StringBuilder oBuilder = new StringBuilder();
+				oBuilder.append(sW + " " + sS + ",");
+				oBuilder.append(sW + " " + sN + ",");
+				oBuilder.append(sE + " " + sN + ",");
+				oBuilder.append(sE + " " + sS + ",");
+				oBuilder.append(sW + " " + sS);
+				oResult.setFootprint(oBuilder.toString());
+			}
+			else {
+				WasdiLog.warnLog("ResponseTranslatorLpDaac.addFootprint. Bbox not processed for SWOT product " + oJsonEntry.toString());
+			}
+			
 			return;
 		}
 		
@@ -314,6 +359,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 			String sHref = oLinkItem.optString("href", null);
 			String sRel = oLinkItem.optString("rel", null);
 			String sDownloadTitle = oLinkItem.optString("title", null);
+			
 			if (!Utils.isNullOrEmpty(sHref) 
 					&& !Utils.isNullOrEmpty(sRel)  
 					&& sRel.equals("http://esipfed.org/ns/fedsearch/1.1/data#")) {
