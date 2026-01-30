@@ -179,10 +179,9 @@ public abstract class QueryTranslator {
 	 */
 	private static final String s_sPLATFORMNAME_ERS = "platformname:ERS";
 	
-	/**
-	 * Token of TERRA platform
-	 */
 	private static final String s_sPLATFORMNAME_METEOCEAN = "platformname:MeteOcean";
+	
+	private static final String s_sPLATFORMNAME_GLOBATHY = "platformname:GloBathy";
 
 	/**
 	 * Token of product type
@@ -681,6 +680,10 @@ public abstract class QueryTranslator {
 			
 			if (!bFound) {
 				bFound = parseMeteOcean(sQuery, oResult); 
+			}
+			
+			if (!bFound) {
+				bFound = parseGlobathy(sQuery, oResult);
 			}
 						
 			if (Utils.isNullOrEmpty(oResult.platformName)) {
@@ -1377,6 +1380,18 @@ public abstract class QueryTranslator {
 			} else {
 				oResult.platformName = null;
 			}
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean parseGlobathy(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_GLOBATHY)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_GLOBATHY);
+			
+			oResult.platformName = Platforms.GLOBATHY;
 			
 			return true;
 		}
