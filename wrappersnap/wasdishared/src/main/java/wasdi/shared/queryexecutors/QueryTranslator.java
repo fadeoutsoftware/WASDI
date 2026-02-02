@@ -181,7 +181,7 @@ public abstract class QueryTranslator {
 	
 	private static final String s_sPLATFORMNAME_METEOCEAN = "platformname:MeteOcean";
 	
-	private static final String s_sPLATFORMNAME_GLOBATHY = "platformname:GloBathy";
+	private static final String s_sPLATFORMNAME_GLOBATHY = "platformname:GLOBATHY";
 
 	/**
 	 * Token of product type

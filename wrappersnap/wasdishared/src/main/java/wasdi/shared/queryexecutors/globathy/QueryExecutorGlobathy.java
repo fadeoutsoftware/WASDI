@@ -5,7 +5,10 @@ import org.opengis.filter.Filter;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.geotools.data.FileDataStore;
 import org.geotools.data.FileDataStoreFinder;
@@ -98,7 +101,7 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		
-		ArrayList<QueryResultViewModel> aoResults = null;
+		List<QueryResultViewModel> aoResults = null;
 		
 		try {
 			QueryViewModel oQueryVM = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
@@ -109,6 +112,23 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 			
 			// as a first approximation, we only want the lakes within a specific bounding box.
 			// Nothing else is required
+			
+			int iOffset = -1;
+			int iLimit = -1;
+			
+			try {
+		    	iOffset = Integer.parseInt(oQuery.getOffset());
+		    }
+		    catch (Exception oE) {
+		    	WasdiLog.warnLog("QueryExecutorGlobathy.executeAndRetrieve: " + oE.toString());
+			}
+		    
+		    try {
+		    	iLimit = Integer.parseInt(oQuery.getLimit());
+		    }
+		    catch (Exception oE) {
+		    	WasdiLog.warnLog("QueryExecutorGlobathy.executeAndRetrieve: " + oE.toString());
+			}
 			
 			double dNorth = oQueryVM.north;
 			double dEast = oQueryVM.east;
@@ -131,7 +151,12 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 				return aoResults;
 			}
 			
+			if (iOffset > -1 && iLimit > -1) {
+				int iStart = iOffset * iLimit;
+				aoLakes = new ArrayList<>(aoLakes.subList(iStart, iStart + iLimit));
+			}
 			
+			aoResults = aoLakes.stream().map(this::getResultVM).collect(Collectors.toList());		
 			
 		} 
 		catch (Exception oE) {
@@ -237,7 +262,7 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 		oInfo.setWshdArea(oFeature.getAttribute("Wshd_area").toString());
 		oInfo.setPourLong(oFeature.getAttribute("Pour_long").toString());
 		oInfo.setPourLat(oFeature.getAttribute("Pour_lat").toString());
-		oInfo.setGeometry(oFeature.getAttribute("geometry").toString());
+		oInfo.setGeometry(oFeature.getAttribute("the_geom").toString());
 		
 		return oInfo;
 	}
@@ -260,6 +285,46 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 		}
 		
 		return null;
+	}
+	
+	
+	private QueryResultViewModel getResultVM(LakeInfo oLakeInfo) {
+		
+		QueryResultViewModel oResVM = new QueryResultViewModel();
+		
+		oResVM.setId(oLakeInfo.getHylak());
+		oResVM.setTitle(oLakeInfo.getHylak() + "-" + oLakeInfo.getLakeName());
+		oResVM.setLink(oLakeInfo.getHylak());
+		oResVM.setSummary("");
+		oResVM.setProvider("GLOBATHY");
+		oResVM.setFootprint(oLakeInfo.getGeometry());
+		
+		HashMap<String, String> aoPropertiesMap = new HashMap<>();
+		
+		if(!Utils.isNullOrEmpty(oLakeInfo.getCountry())) aoPropertiesMap.put("country", oLakeInfo.getCountry());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getContinent())) aoPropertiesMap.put("continent", oLakeInfo.getContinent());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getPolySrc())) aoPropertiesMap.put("polySrc", oLakeInfo.getPolySrc());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getLakeType())) aoPropertiesMap.put("lakeType", oLakeInfo.getLakeType());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getGrandId())) aoPropertiesMap.put("grandId", oLakeInfo.getGrandId());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getLakeArea())) aoPropertiesMap.put("lakeArea", oLakeInfo.getLakeArea());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getShoreLen())) aoPropertiesMap.put("shoreLen", oLakeInfo.getShoreLen());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getShoreDev())) aoPropertiesMap.put("shoreDev", oLakeInfo.getShoreDev());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getVolTotal())) aoPropertiesMap.put("volTotal", oLakeInfo.getVolTotal());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getVolRes())) aoPropertiesMap.put("volRes", oLakeInfo.getVolRes());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getVolSrc())) aoPropertiesMap.put("volSrc", oLakeInfo.getVolSrc());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getDepthAvg())) aoPropertiesMap.put("depthAvg", oLakeInfo.getDepthAvg());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getDisAvg())) aoPropertiesMap.put("disAvg", oLakeInfo.getDisAvg());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getResTime())) aoPropertiesMap.put("resTime", oLakeInfo.getResTime());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getElevation())) aoPropertiesMap.put("elevation", oLakeInfo.getElevation());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getSlope100())) aoPropertiesMap.put("slope100", oLakeInfo.getSlope100());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getWshdArea())) aoPropertiesMap.put("wshdArea", oLakeInfo.getWshdArea());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getPourLong())) aoPropertiesMap.put("pourLong", oLakeInfo.getPourLong());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getPourLat())) aoPropertiesMap.put("pourLat", oLakeInfo.getPourLat());
+		
+		oResVM.setProperties(aoPropertiesMap);
+		
+		return oResVM;
+		
 	}
 
 	public static void main(String[] args) {
