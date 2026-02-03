@@ -15,6 +15,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.filter.text.ecql.ECQL;
+import org.locationtech.jts.geom.Geometry;
 import org.json.JSONObject;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
@@ -25,6 +26,9 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
+
+import org.locationtech.jts.io.WKTReader;
+import org.locationtech.jts.io.WKTWriter;
 
 public class QueryExecutorGlobathy extends QueryExecutor {
 	
@@ -151,7 +155,9 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 			
 			if (iOffset > -1 && iLimit > -1) {
 				int iStart = iOffset * iLimit;
-				aoLakes = new ArrayList<>(aoLakes.subList(iStart, iStart + iLimit));
+				int iEnd = iStart + iLimit;
+				if (iEnd > aoLakes.size()) iEnd = aoLakes.size();
+				aoLakes = new ArrayList<>(aoLakes.subList(iStart, iEnd));
 			}
 			
 			aoResults = aoLakes.stream().map(this::getResultVM).collect(Collectors.toList());		
@@ -204,27 +210,30 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 				FileDataStore oStore = FileDataStoreFinder.getDataStore(new File(m_sLakesShapeFilePath));
 				
 				try {
-					SimpleFeatureSource oFeatureSource = oStore.getFeatureSource();		
+					SimpleFeatureSource oFeatureSource = oStore.getFeatureSource();
+					
 					SimpleFeatureCollection oIntersectedFeatures = intersectBoundingBox(dNorth, dEast, dSouth, dWest, oFeatureSource);
 					
 					if (oIntersectedFeatures != null) {
-						SimpleFeatureIterator oIterator = oIntersectedFeatures.features();
+						try (SimpleFeatureIterator oIterator = oIntersectedFeatures.features()) {
 						
-						aoLakeInfo = new ArrayList<>();
-						
-						while (oIterator.hasNext()) {
-							SimpleFeature oFeature = oIterator.next();
+							aoLakeInfo = new ArrayList<>();
 							
-							LakeInfo oInfo = getLakeInfo(oFeature);
-							
-							aoLakeInfo.add(oInfo);
-							
+							while (oIterator.hasNext()) {
+								SimpleFeature oFeature = oIterator.next();
+								
+								LakeInfo oInfo = getLakeInfo(oFeature);
+								
+								aoLakeInfo.add(oInfo);
+								
+							}	
 						}
-					}			
+					}
 					
 				}
 				finally {
-					oStore.dispose();
+					if (oStore != null)
+						oStore.dispose();
 				}
 			}
 			catch (Exception oEx) {
@@ -297,11 +306,16 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 		oResVM.setLink("https://" + sTitle);
 		oResVM.setSummary("");
 		oResVM.setProvider("GLOBATHY");
-		oResVM.setFootprint(oLakeInfo.getGeometry());
+		String sFootprint = simplifyLake(oLakeInfo.getGeometry());
+		oResVM.setFootprint(sFootprint);
 		
 		HashMap<String, String> aoPropertiesMap = new HashMap<>();
 		
-		if(!Utils.isNullOrEmpty(oLakeInfo.getCountry())) aoPropertiesMap.put("country", oLakeInfo.getCountry());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getCountry())) {
+			aoPropertiesMap.put("country", oLakeInfo.getCountry());
+			oResVM.setSummary("Mode: " + oLakeInfo.getCountry());
+		}
+		
 		if(!Utils.isNullOrEmpty(oLakeInfo.getContinent())) aoPropertiesMap.put("continent", oLakeInfo.getContinent());
 		if(!Utils.isNullOrEmpty(oLakeInfo.getPolySrc())) aoPropertiesMap.put("polySrc", oLakeInfo.getPolySrc());
 		if(!Utils.isNullOrEmpty(oLakeInfo.getLakeType())) aoPropertiesMap.put("lakeType", oLakeInfo.getLakeType());
@@ -320,16 +334,36 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 		if(!Utils.isNullOrEmpty(oLakeInfo.getWshdArea())) aoPropertiesMap.put("wshdArea", oLakeInfo.getWshdArea());
 		if(!Utils.isNullOrEmpty(oLakeInfo.getPourLong())) aoPropertiesMap.put("pourLong", oLakeInfo.getPourLong());
 		if(!Utils.isNullOrEmpty(oLakeInfo.getPourLat())) aoPropertiesMap.put("pourLat", oLakeInfo.getPourLat());
+		if(!Utils.isNullOrEmpty(oLakeInfo.getGeometry())) aoPropertiesMap.put("geometry", oLakeInfo.getGeometry());
 		
 		oResVM.setProperties(aoPropertiesMap);
 		
 		return oResVM;
 		
 	}
-
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+	
+	public String simplifyLake(String sWKTGeometry) {
+	    
+		WKTReader oReader = new WKTReader();
+	    // Precision of 5 is plenty for a bounding box
+	    WKTWriter oWriter = new WKTWriter(4); 
+	    
+	    try {
+	        // 1. Parse the complex lake WKT into a Geometry object
+	        Geometry oGeom = oReader.read(sWKTGeometry); 
+	        
+	        // 2. Get the Envelope (the bounding box)
+	        // This returns a Geometry representing the rectangular extent
+	        Geometry oEnvelope = oGeom.getEnvelope();
+	        
+	        // 3. Convert back to WKT String
+	        return oWriter.write(oEnvelope);
+	    }
+	    catch (Exception oE) {
+	        WasdiLog.errorLog("Error calculating bounding box: " + oE.getMessage());
+	        return null;
+	    }
 	}
+
 
 }
