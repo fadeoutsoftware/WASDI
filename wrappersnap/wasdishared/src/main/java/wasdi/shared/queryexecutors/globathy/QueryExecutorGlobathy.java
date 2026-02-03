@@ -7,7 +7,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.geotools.data.FileDataStore;
@@ -15,7 +14,6 @@ import org.geotools.data.FileDataStoreFinder;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.filter.text.ecql.ECQL;
 import org.json.JSONObject;
 
@@ -293,8 +291,12 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 		QueryResultViewModel oResVM = new QueryResultViewModel();
 		
 		oResVM.setId(oLakeInfo.getHylak());
-		oResVM.setTitle(oLakeInfo.getHylak() + "-" + oLakeInfo.getLakeName());
-		oResVM.setLink(oLakeInfo.getHylak());
+		String sTitle = oLakeInfo.getHylak();
+		if (!Utils.isNullOrEmpty(oLakeInfo.getLakeName())) 
+			sTitle += oLakeInfo.getLakeName();
+		sTitle += ".tif";
+		oResVM.setTitle(sTitle);
+		oResVM.setLink("https://" + oLakeInfo.getHylak());
 		oResVM.setSummary("");
 		oResVM.setProvider("GLOBATHY");
 		oResVM.setFootprint(oLakeInfo.getGeometry());
