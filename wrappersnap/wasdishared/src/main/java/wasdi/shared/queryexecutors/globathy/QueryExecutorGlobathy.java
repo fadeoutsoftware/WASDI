@@ -290,13 +290,11 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 		
 		QueryResultViewModel oResVM = new QueryResultViewModel();
 		
-		oResVM.setId(oLakeInfo.getHylak());
-		String sTitle = oLakeInfo.getHylak();
-		if (!Utils.isNullOrEmpty(oLakeInfo.getLakeName())) 
-			sTitle += oLakeInfo.getLakeName();
-		sTitle += ".tif";
+		String sLakeId = oLakeInfo.getHylak();
+		String sTitle = sLakeId + "_bathymetry.tif";
+		oResVM.setId(sLakeId);
 		oResVM.setTitle(sTitle);
-		oResVM.setLink("https://" + oLakeInfo.getHylak());
+		oResVM.setLink("https://" + sTitle);
 		oResVM.setSummary("");
 		oResVM.setProvider("GLOBATHY");
 		oResVM.setFootprint(oLakeInfo.getGeometry());

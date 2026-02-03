@@ -6,9 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
 
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
@@ -19,6 +21,7 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 	private String m_sGloBathRootFolderPath = null;
 
 	public GlobathyProviderAdapter() {
+		m_sDataProviderCode = "GLOBATHY";
 	}
 
 	@Override
@@ -32,20 +35,17 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
+		
 		long lFileSize = 0L;
 		
-		String sFileName = sFileURL;
-		if (sFileName.startsWith("https://")) {
-			sFileName = sFileName.replace("https://", "");
+		String sFilePath = getFileLocation(sFileURL);
+		
+		if (Utils.isNullOrEmpty(sFilePath)) {
+			WasdiLog.warnLog("GlobathyProviderAdapter.getDownloadFileSize. Impossible to get file size " + sFileURL);
+			return lFileSize;
 		}
 		
-		String sLakeId = sFileName.replace(".tif", "");
-		int iLakeId = Integer.parseInt(sLakeId);
-		
-		String sSubFolderPath = this.getLakeFolderPath(iLakeId);
-		
-		String sFilePath = m_sGloBathRootFolderPath + File.separator + sSubFolderPath + sFileName;
-		
+		WasdiLog.debugLog("GlobathyProviderAdapter.getDownloadFileSize. Path: " + sFilePath);
 		
 		Path oPath = Paths.get(sFilePath);
 		try {
@@ -60,8 +60,44 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 	@Override
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		
+		WasdiLog.debugLog("GlobathyProviderAdapter.executeDownloadFile. Copying bathymetry file to " + sSaveDirOnServer);
+		
+		String sDownloadedFilePath = null;
+		
+		try {
+			String sFilePath = getFileLocation(sFileURL);
+			
+			if (Utils.isNullOrEmpty(sFilePath)) {
+				WasdiLog.warnLog("GlobathyProviderAdapter.executeDownloadFile. Impossible to get file size " + sFileURL);
+				return sDownloadedFilePath;
+			}
+			
+			String sFileName = this.getFileName(sFileURL);
+			String sDestinationFilePath = sSaveDirOnServer;
+			if (!sDestinationFilePath.endsWith(File.separator))
+				sDestinationFilePath += File.separator;
+			sDestinationFilePath += sFileName;
+			
+			File oSourceProduct = new File(sFilePath);
+			File oDestinationProduct = new File(sDestinationFilePath);
+			
+			if (!oSourceProduct.exists()) {
+				WasdiLog.warnLog("GlobathyProviderAdapter.executeDownloadFile. Source file do not exist");
+				return sDownloadedFilePath;
+			}
+			
+			FileUtils.copyFile(oSourceProduct, oDestinationProduct);
+			
+			sDownloadedFilePath = sDestinationFilePath;
+			
+			WasdiLog.debugLog("GlobathyProviderAdapter.executeDownloadFile. File saved at path " + sDestinationFilePath);
+		
+		} catch (Exception oE) {
+			WasdiLog.errorLog("GlobathyProviderAdapter.executeDownloadFile. Error copyting bathymetry file", oE);
+		}
+
+		return sDownloadedFilePath;
 	}
 
 	@Override
@@ -83,7 +119,28 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 		
 	}
 	
-	public String getLakeFolderPath(int iId) {
+	private String getFileLocation(String sFileUrl) {
+		
+		String sFilePath = null;
+		
+		try {
+		
+			String sLakeId = getFileName(sFileUrl, null).replace("_bathymetry.tif", "");
+			int iLakeId = Integer.parseInt(sLakeId);
+			
+			String sSubFolderPath = this.getLakeFolderPath(iLakeId);
+			
+			sFilePath = m_sGloBathRootFolderPath + File.separator + sSubFolderPath + File.separator + sLakeId + "_bathymetry.tif";
+		
+		} catch(Exception oE) {
+			WasdiLog.errorLog("GlobathyProviderAdapter.getFileLocation. Exception", oE);
+		}
+		
+		return sFilePath;
+	}	
+		
+		
+	private String getLakeFolderPath(int iId) {
 	    int iMacroLower = (iId / 100000) * 100;
 	    int iMacroUpper = iMacroLower + 100;
 	    
