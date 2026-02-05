@@ -68,4 +68,15 @@ public class HDFProductReader extends SnapProductReader {
 		return sBoundingBox;
 	}
 	
+	@Override
+	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
+		
+		WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Band: " + sBand + ", layer id: " + sLayerId + ", platform: " + sPlatform);
+		
+		WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Absolute file of the product" + m_oProductFile.getAbsolutePath());
+		
+		return null;
+	}
+	
+	
 }
