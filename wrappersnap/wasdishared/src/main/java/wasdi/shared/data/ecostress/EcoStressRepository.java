@@ -266,5 +266,33 @@ public class EcoStressRepository extends MongoRepository {
 
 		return -1;
 	}
+	
+	public EcoStressItemForReading getEcoStressByFileNamePrefix(String sFileNamePrefix) {
+	    try {
+	        final List<EcoStressItemForReading> aoReturnList = new ArrayList<>();
+	        
+	        String sRegexPattern = "^" + java.util.regex.Pattern.quote(sFileNamePrefix);
+	        
+	        // query: { "fileName": { "$regex": "^prefisso" } }
+	        BasicDBObject oQuery = new BasicDBObject("fileName", new BasicDBObject("$regex", sRegexPattern));
+	        
+	        
+	        Document oWSDocument = getCollection(m_sThisCollection)
+	                .find(oQuery).first();
+
+	        if (oWSDocument != null) {
+				String sJSON = oWSDocument.toJson();
+
+				EcoStressItemForReading oEcoStressItem = s_oMapper.readValue(sJSON, EcoStressItemForReading.class);
+
+				return oEcoStressItem;
+			}
+	        
+	    } catch (Exception oEx) {
+	        WasdiLog.errorLog("EcoStressRepository.getEcoStressByFileNamePrefix: error", oEx);
+	    }
+
+	    return null;
+	}
 
 }
