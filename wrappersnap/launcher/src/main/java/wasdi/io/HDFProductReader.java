@@ -1,15 +1,28 @@
 package wasdi.io;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 
+import wasdi.dataproviders.CloudferroProviderAdapter;
 import wasdi.shared.business.ecostress.EcoStressItemForReading;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ecostress.EcoStressRepository;
+import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
+import wasdi.shared.utils.runtime.ShellExecReturn;
 
 public class HDFProductReader extends SnapProductReader {
 
@@ -79,33 +92,170 @@ public class HDFProductReader extends SnapProductReader {
 		
 		WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Absolute file of the product" + m_oProductFile.getAbsolutePath());
 		
-		String sProductName = m_oProduct.getName();
 		
-		if (!m_oProduct.getName().toUpperCase().startsWith("EEH2TES_L2_LSTE")) {
-			return super.getFileForPublishBand(sBand, sLayerId, sPlatform);
+		try {
+			String sProductName = m_oProductFile.getName();		
+			
+			// TODO: con la getpath, posso vedere se c'e' gia' un file GEO
+			
+			if (!sProductName.toUpperCase().startsWith("EEH2TES_L2_LSTE")) {
+				return super.getFileForPublishBand(sBand, sLayerId, sPlatform);
+			}
+			
+			if (!sBand.equals("LST")) {
+				WasdiLog.warnLog("HDFProductReader.getFileForPublishBand. Band is not LST. Conversion not supported");
+				return null;
+			}
+			
+			// we need to publish the LST bands of LSTE ECOSTRESS products
+			
+			String sLSTEProductPath = m_oProductFile.getAbsolutePath();
+			
+			// first of all, we need to find the dedicated L1_GEO file
+			String sProductInfo = extractProductInfo(sProductName);
+			
+			String sGEOProductNamePrefix = "ECOv002_L1B_GEO_" + sProductInfo;
+			
+			
+			EcoStressRepository oRepo = new EcoStressRepository();
+			
+			EcoStressItemForReading oEcostressItem = oRepo.getEcoStressByFileNamePrefix(sGEOProductNamePrefix);
+			
+			if (oEcostressItem == null) {
+				WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. No GEO product found for file " + sProductName);
+				return null;
+			}
+			
+			// from here I can download the GEO product in  the temp folder
+			// WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Downloading file: " + oEcostressItem.getFileName());
+			
+			String sFileUrl = oEcostressItem.getS3Path() + ",ECOv002_L1B_GEO_37139_003_20250123T152424_0713_01.h5," + sProductName;
+			
+			String sDownloadFolder = WasdiConfig.Current.paths.wasdiTempFolder;
+			if (!sDownloadFolder.endsWith("/"))
+				sDownloadFolder += File.separator;
+			
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. File url: "+ sFileUrl);
+			
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Download folder path " + sDownloadFolder);
+			
+			CloudferroProviderAdapter oProvider = new CloudferroProviderAdapter();
+			
+			String sGEOFilePath = oProvider.executeDownloadFile(sFileUrl, null, null, sDownloadFolder, null, 0);
+			
+			if (Utils.isNullOrEmpty(sGEOFilePath)) {
+				WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. No GEO products has been downloaded");
+				return null;
+			}
+			
+			
+			String sWorkspaceDirPath = m_oProductFile.getParent();
+			
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Workspace path " + sWorkspaceDirPath);
+			
+			String sProductNameNoExtension = WasdiFileUtils.getFileNameWithoutExtensionsAndTrailingDots(sProductName);
+			
+			
+			if(!sWorkspaceDirPath.contains(File.separator))
+				sWorkspaceDirPath += File.separator;
+			
+			String sVRTFilePath = sWorkspaceDirPath + sProductNameNoExtension + "_vrt.vrt";
+			
+			String sWarpedFilePath = sWorkspaceDirPath + sProductNameNoExtension + "_warped.tif";
+			
+			String sFinalTIFPath = sWorkspaceDirPath + sProductNameNoExtension + ".tif";
+			
+			
+			// GDAL TRANSLATE
+			
+			ArrayList<String> asTranslateArgs = new ArrayList<>();
+			
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Executing gdal translate");
+			
+			String sGdalCommand = "gdal_translate";
+			sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
+			asTranslateArgs.add(sGdalCommand);
+			asTranslateArgs.add("-unscale"); 
+			asTranslateArgs.add("HDF5:\"" + sLSTEProductPath + "\"://LST");
+			asTranslateArgs.add(sVRTFilePath);
+			ShellExecReturn oTranslateReturn = RunTimeUtils.shellExec(asTranslateArgs, true, true, true, true); 
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-translate]: " + oTranslateReturn.getOperationLogs());
+			
+			fixEcostressVrt(sVRTFilePath, sGEOFilePath);
+			
+			// GDAL WARP
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Executing gdal warp");
+			ArrayList<String> asWarpArgs = new ArrayList<>();
+			sGdalCommand = "gdalwarp";
+			sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
+			asWarpArgs.add(sGdalCommand);
+			asWarpArgs.add("-geoloc");
+			asWarpArgs.add("-t_srs");
+			asWarpArgs.add("EPSG:4326");
+			asWarpArgs.add("-r");
+			asWarpArgs.add("cubicspline"); 
+			asWarpArgs.add("-wo");
+			asWarpArgs.add("SAMPLE_STEPS=1000"); 
+			asWarpArgs.add(sVRTFilePath);
+			asWarpArgs.add(sWarpedFilePath);
+			ShellExecReturn oWarpReturn = RunTimeUtils.shellExec(asWarpArgs, true, true, true, true); 
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-warp]: " + oWarpReturn.getOperationLogs());
+			
+			// gdal_fillnodata.py
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Executing gdal_fillnodata.py");
+			ArrayList<String> asFillArgs = new ArrayList<>();
+			sGdalCommand = "gdal_fillnodata.py";
+			sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
+			
+			asFillArgs.add(sGdalCommand);
+			asFillArgs.add("-md");
+			asFillArgs.add("20"); // Raggio di ricerca per il riempimento
+			asFillArgs.add(sWarpedFilePath);
+			asFillArgs.add(sFinalTIFPath);
+			ShellExecReturn oFillNoDataReturn = RunTimeUtils.shellExec(asFillArgs, true, true, true, true);
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-fillnodata]: " + oFillNoDataReturn.getOperationLogs());
+			
+			// TODO: at the end, delete the GEO file from the temp folder
+		
+		} catch (Exception oE) {
+			WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. Error ", oE);
 		}
-		
-		// we need to publish the LST bands of LSTE ECOSTRESS products
-		
-		// first of all, we need to find the dedicated L1_GEO file
-		String sProductInfo = extractProductInfo(sProductName);
-		
-		String sGEOProductNamePrefix = "ECOv002_L1B_GEO_" + sProductInfo;
-		
-		EcoStressRepository oRepo = new EcoStressRepository();
-		
-		EcoStressItemForReading oEcostressItem = oRepo.getEcoStressByFileNamePrefix(sGEOProductNamePrefix);
-		
-		if (oEcostressItem == null) {
-			WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. No GEO product found for file " + sProductName);
-		}
-		
-		// from here I can download the GEO product in  the temp folder
-		
-		
-		
+
 		
 		return null;
+	}
+	
+	public void fixEcostressVrt(String vrtPath, String geoH5Path) {
+		try {
+		    Path oPath = Paths.get(vrtPath);
+		    String sXML = new String(Files.readAllBytes(oPath), StandardCharsets.UTF_8);
+	
+		    // build the Geolocation using the driver HDF5
+		    String geoBlock = "<Metadata domain=\"GEOLOCATION\">\n" +
+		            "    <MDI key=\"X_DATASET\">HDF5:\"" + geoH5Path + "\"://Geolocation/longitude</MDI>\n" +
+		            "    <MDI key=\"Y_DATASET\">HDF5:\"" + geoH5Path + "\"://Geolocation/latitude</MDI>\n" +
+		            "    <MDI key=\"X_BAND\">1</MDI>\n" +
+		            "    <MDI key=\"Y_BAND\">1</MDI>\n" +
+		            "    <MDI key=\"PIXEL_OFFSET\">0</MDI>\n" +
+		            "    <MDI key=\"LINE_OFFSET\">0</MDI>\n" +
+		            "    <MDI key=\"PIXEL_STEP\">1</MDI>\n" +
+		            "    <MDI key=\"LINE_STEP\">1</MDI>\n" +
+		            "  </Metadata>\n  <Metadata>";
+	
+		    // insert the geoloc block, changing the type to fload and applying the scale factor 0.02
+		    sXML = sXML.replaceFirst("<Metadata>", geoBlock);
+		    sXML = sXML.replace("dataType=\"UInt16\"", "dataType=\"Float32\"");
+		    
+		    if (!sXML.contains("<ScaleRatio>")) {
+		    	sXML = sXML.replace("<SourceBand>1</SourceBand>", 
+		                "<SourceBand>1</SourceBand>\n      <ScaleRatio>0.02</ScaleRatio>\n      <ScaleOffset>0</ScaleOffset>");
+		    }
+	
+		    Files.write(oPath, sXML.getBytes(StandardCharsets.UTF_8));
+		}
+		catch (Exception oE) {
+			WasdiLog.errorLog("HDFProductReader.fixExostressVrt. Error ", oE);
+		}
 	}
 	
 	private String extractProductInfo(String sFileName) {
