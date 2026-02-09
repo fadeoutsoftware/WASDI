@@ -119,6 +119,8 @@ public class HDFProductReader extends SnapProductReader {
 			
 			EcoStressRepository oRepo = new EcoStressRepository();
 			
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Looking for GEO product " + sGEOProductNamePrefix);
+			
 			EcoStressItemForReading oEcostressItem = oRepo.getEcoStressByFileNamePrefix(sGEOProductNamePrefix);
 			
 			if (oEcostressItem == null) {
@@ -267,6 +269,16 @@ public class HDFProductReader extends SnapProductReader {
             return oMatcher.group(1);
         
         return null;
+	}
+	
+	
+	public static void main(String[]args) throws Exception {
+		
+		WasdiConfig.readConfig("C:/temp/wasdi/wasdiLocalTESTConfig_develop.json");
+		HDFProductReader oReader = new HDFProductReader(new File("C:/WASDI/datasets/ecostress/EEH2TES_L2_LSTE_37139_003_20250123T152424_0000_00.h5"));
+		oReader.getFileForPublishBand("LST", "111", Platforms.ECOSTRESS);
+		
+		
 	}
 	
 	
