@@ -1,13 +1,16 @@
 package wasdi.io;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
@@ -89,7 +92,7 @@ public class HDFProductReader extends SnapProductReader {
 	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
 		
 		
-		System.out.println("HDFProductReader.getFileForPublishBand. Band: " + sBand + ", layer id: " + sLayerId + ", platform: " + sPlatform + " v1");
+		WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Band: " + sBand + ", layer id: " + sLayerId + ", platform: " + sPlatform + " v1");
 		
 		WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Absolute file of the product" + m_oProductFile.getAbsolutePath());
 		
@@ -117,7 +120,7 @@ public class HDFProductReader extends SnapProductReader {
 			
 			String sGEOProductNamePrefix = "ECOv002_L1B_GEO_" + sProductInfo;
 			
-			
+			/*
 			EcoStressRepository oRepo = new EcoStressRepository();
 			
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Looking for GEO product " + sGEOProductNamePrefix);
@@ -128,11 +131,14 @@ public class HDFProductReader extends SnapProductReader {
 				WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. No GEO product found for file " + sProductName + "and prefix " + sGEOProductNamePrefix);
 				return null;
 			}
+			*/
 			
 			// from here I can download the GEO product in  the temp folder
 			// WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Downloading file: " + oEcostressItem.getFileName());
 			
+			/*
 			String sFileUrl = oEcostressItem.getS3Path() + "," + sProductName + ",";
+			
 			
 			String sDownloadFolder = WasdiConfig.Current.paths.wasdiTempFolder;
 			if (!sDownloadFolder.endsWith("/"))
@@ -150,8 +156,13 @@ public class HDFProductReader extends SnapProductReader {
 				WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. No GEO products has been downloaded");
 				return null;
 			}
+			*/
 			
+			String sGEOFilePath = this.getFilePathByPrefix(sLSTEProductPath, sGEOProductNamePrefix);
 			
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. " + sGEOFilePath);
+
+			 
 			String sWorkspaceDirPath = m_oProductFile.getParent();
 			
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Workspace path " + sWorkspaceDirPath);
@@ -166,7 +177,7 @@ public class HDFProductReader extends SnapProductReader {
 			
 			String sWarpedFilePath = sWorkspaceDirPath + sProductNameNoExtension + "_warped.tif";
 			
-			String sFinalTIFPath = sWorkspaceDirPath + sProductNameNoExtension + ".tif";
+			String sFinalTIFPath = sWorkspaceDirPath + sLayerId + ".tif";
 			
 			
 			// GDAL TRANSLATE
@@ -184,6 +195,7 @@ public class HDFProductReader extends SnapProductReader {
 			ShellExecReturn oTranslateReturn = RunTimeUtils.shellExec(asTranslateArgs, true, true, true, true); 
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-translate]: " + oTranslateReturn.getOperationLogs());
 			
+			// attach georeferencing
 			fixEcostressVrt(sVRTFilePath, sGEOFilePath);
 			
 			// GDAL WARP
@@ -270,6 +282,28 @@ public class HDFProductReader extends SnapProductReader {
             return oMatcher.group(1);
         
         return null;
+	}
+	
+
+
+	public String getFilePathByPrefix(String sKnownFilePath, String sPrefix) {
+	    Path pKnownFile = Paths.get(sKnownFilePath);
+	    Path pParentDir = pKnownFile.getParent();
+
+	    if (pParentDir == null) return null;
+
+	    // Use try-with-resources to ensure the stream is closed
+	    try (Stream<Path> sFiles = Files.find(pParentDir, 1, (path, attrs) -> 
+	            path.getFileName().toString().startsWith(sPrefix))) {
+	        
+	        Optional<Path> oFoundFile = sFiles.findFirst();
+	        
+	        return oFoundFile.map(Path::toString).orElse(null);
+	        
+	    } catch (IOException e) {
+	        // Log the error (e.g., WasdiLog.errorLog)
+	        return null;
+	    }
 	}
 	
 	
