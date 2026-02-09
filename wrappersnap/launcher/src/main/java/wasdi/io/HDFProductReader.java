@@ -170,7 +170,7 @@ public class HDFProductReader extends SnapProductReader {
 			String sProductNameNoExtension = WasdiFileUtils.getFileNameWithoutExtensionsAndTrailingDots(sProductName);
 			
 			
-			if(!sWorkspaceDirPath.contains(File.separator))
+			if(!sWorkspaceDirPath.endsWith(File.separator))
 				sWorkspaceDirPath += File.separator;
 			
 			String sVRTFilePath = sWorkspaceDirPath + sProductNameNoExtension + "_vrt.vrt";
@@ -192,9 +192,11 @@ public class HDFProductReader extends SnapProductReader {
 			asTranslateArgs.add("-unscale"); 
 			asTranslateArgs.add("HDF5:\"" + sLSTEProductPath + "\"://LST");
 			asTranslateArgs.add(sVRTFilePath);
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Command " + String.join(" ", asTranslateArgs));
 			ShellExecReturn oTranslateReturn = RunTimeUtils.shellExec(asTranslateArgs, true, true, true, true); 
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-translate]: " + oTranslateReturn.getOperationLogs());
-			
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-translate-return-code]: " + oTranslateReturn.getOperationReturn());
+ 
 			// attach georeferencing
 			fixEcostressVrt(sVRTFilePath, sGEOFilePath);
 			
