@@ -88,7 +88,8 @@ public class HDFProductReader extends SnapProductReader {
 	@Override
 	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
 		
-		WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Band: " + sBand + ", layer id: " + sLayerId + ", platform: " + sPlatform);
+		
+		WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Band: " + sBand + ", layer id: " + sLayerId + ", platform: " + sPlatform + " v1");
 		
 		WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Absolute file of the product" + m_oProductFile.getAbsolutePath());
 		
@@ -124,7 +125,7 @@ public class HDFProductReader extends SnapProductReader {
 			EcoStressItemForReading oEcostressItem = oRepo.getEcoStressByFileNamePrefix(sGEOProductNamePrefix);
 			
 			if (oEcostressItem == null) {
-				WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. No GEO product found for file " + sProductName);
+				WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. No GEO product found for file " + sProductName + "and prefix " + sGEOProductNamePrefix);
 				return null;
 			}
 			
