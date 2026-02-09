@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.model.Filters;
 
 import wasdi.shared.business.ecostress.EcoStressItemForReading;
 import wasdi.shared.business.ecostress.EcoStressItemForWriting;
@@ -270,12 +272,9 @@ public class EcoStressRepository extends MongoRepository {
 	public EcoStressItemForReading getEcoStressByFileNamePrefix(String sFileNamePrefix) {
 	    try {
 	        final List<EcoStressItemForReading> aoReturnList = new ArrayList<>();
-	        
-	        String sRegexPattern = "^" + java.util.regex.Pattern.quote(sFileNamePrefix);
-	        
+	        	        
 	        // query: { "fileName": { "$regex": "^prefisso" } }
-	        BasicDBObject oQuery = new BasicDBObject("fileName", new BasicDBObject("$regex", sRegexPattern));
-	        
+	        Bson oQuery = Filters.regex("fileName", "^" + java.util.regex.Pattern.quote(sFileNamePrefix));	        
 	        
 	        Document oWSDocument = getCollection(m_sThisCollection)
 	                .find(oQuery).first();

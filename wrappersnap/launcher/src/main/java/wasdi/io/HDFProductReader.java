@@ -131,7 +131,7 @@ public class HDFProductReader extends SnapProductReader {
 			// from here I can download the GEO product in  the temp folder
 			// WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Downloading file: " + oEcostressItem.getFileName());
 			
-			String sFileUrl = oEcostressItem.getS3Path() + ",ECOv002_L1B_GEO_37139_003_20250123T152424_0713_01.h5," + sProductName;
+			String sFileUrl = oEcostressItem.getS3Path() + "," + sProductName + ",";
 			
 			String sDownloadFolder = WasdiConfig.Current.paths.wasdiTempFolder;
 			if (!sDownloadFolder.endsWith("/"))
