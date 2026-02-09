@@ -89,7 +89,7 @@ public class HDFProductReader extends SnapProductReader {
 	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
 		
 		
-		WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Band: " + sBand + ", layer id: " + sLayerId + ", platform: " + sPlatform + " v1");
+		System.out.println("HDFProductReader.getFileForPublishBand. Band: " + sBand + ", layer id: " + sLayerId + ", platform: " + sPlatform + " v1");
 		
 		WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Absolute file of the product" + m_oProductFile.getAbsolutePath());
 		
