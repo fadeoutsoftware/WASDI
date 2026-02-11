@@ -206,7 +206,8 @@ public class HDFProductReader extends SnapProductReader {
 			sGdalCommand = "gdalwarp";
 			sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
 			asWarpArgs.add(sGdalCommand);
-			asWarpArgs.add("-dstnodata 0");
+			asWarpArgs.add("-dstnodata");
+			asWarpArgs.add("0");
 			asWarpArgs.add("-geoloc");
 			asWarpArgs.add("-t_srs");
 			asWarpArgs.add("EPSG:4326");
