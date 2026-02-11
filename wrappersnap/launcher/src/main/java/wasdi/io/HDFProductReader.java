@@ -215,6 +215,9 @@ public class HDFProductReader extends SnapProductReader {
 			asWarpArgs.add("cubicspline"); 
 			asWarpArgs.add("-wo");
 			asWarpArgs.add("SAMPLE_STEPS=1000"); 
+			asWarpArgs.add("-multi");
+			asWarpArgs.add("-wo");
+			asWarpArgs.add("NUM_THREADS=ALL_CPUS");
 			asWarpArgs.add(sVRTFilePath);
 			asWarpArgs.add(sWarpedFilePath);
 			ShellExecReturn oWarpReturn = RunTimeUtils.shellExec(asWarpArgs, true, true, true, true); 
@@ -228,7 +231,7 @@ public class HDFProductReader extends SnapProductReader {
 			
 			asFillArgs.add(sGdalCommand);
 			asFillArgs.add("-md");
-			asFillArgs.add("20"); // Raggio di ricerca per il riempimento
+			asFillArgs.add("100");
 			asFillArgs.add(sWarpedFilePath);
 			asFillArgs.add(sFinalTIFPath);
 			ShellExecReturn oFillNoDataReturn = RunTimeUtils.shellExec(asFillArgs, true, true, true, true);
