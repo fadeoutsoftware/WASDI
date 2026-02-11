@@ -212,9 +212,9 @@ public class HDFProductReader extends SnapProductReader {
 			asWarpArgs.add("-t_srs");
 			asWarpArgs.add("EPSG:4326");
 			asWarpArgs.add("-r");
-			asWarpArgs.add("cubicspline"); 
+			asWarpArgs.add("bilinear"); 
 			asWarpArgs.add("-wo");
-			asWarpArgs.add("SAMPLE_STEPS=1000"); 
+			asWarpArgs.add("SAMPLE_STEPS=100"); 
 			asWarpArgs.add(sVRTFilePath);
 			asWarpArgs.add(sWarpedFilePath);
 			ShellExecReturn oWarpReturn = RunTimeUtils.shellExec(asWarpArgs, true, true, true, true); 
@@ -228,14 +228,14 @@ public class HDFProductReader extends SnapProductReader {
 			
 			asFillArgs.add(sGdalCommand);
 			asFillArgs.add("-md");
-			asFillArgs.add("100");
+			asFillArgs.add("15");
 			asFillArgs.add(sWarpedFilePath);
 			asFillArgs.add(sFinalTIFPath);
 			ShellExecReturn oFillNoDataReturn = RunTimeUtils.shellExec(asFillArgs, true, true, true, true);
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-fillnodata]: " + oFillNoDataReturn.getOperationLogs());
 			
 			// TODO: at the end, delete the GEO file from the temp folder
-		
+			return new File(sFinalTIFPath);
 		} catch (Exception oE) {
 			WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. Error ", oE);
 		}
