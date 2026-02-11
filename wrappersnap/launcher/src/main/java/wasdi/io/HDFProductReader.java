@@ -215,9 +215,6 @@ public class HDFProductReader extends SnapProductReader {
 			asWarpArgs.add("cubicspline"); 
 			asWarpArgs.add("-wo");
 			asWarpArgs.add("SAMPLE_STEPS=1000"); 
-			asWarpArgs.add("-multi");
-			asWarpArgs.add("-wo");
-			asWarpArgs.add("NUM_THREADS=ALL_CPUS");
 			asWarpArgs.add(sVRTFilePath);
 			asWarpArgs.add(sWarpedFilePath);
 			ShellExecReturn oWarpReturn = RunTimeUtils.shellExec(asWarpArgs, true, true, true, true); 
