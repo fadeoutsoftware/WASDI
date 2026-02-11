@@ -244,37 +244,36 @@ public class HDFProductReader extends SnapProductReader {
 		return null;
 	}
 	
-	public void fixEcostressVrt(String vrtPath, String geoH5Path) {
-		try {
-		    Path oPath = Paths.get(vrtPath);
-		    String sXML = new String(Files.readAllBytes(oPath), StandardCharsets.UTF_8);
-	
-		    // build the Geolocation using the driver HDF5
-		    String geoBlock = "<Metadata domain=\"GEOLOCATION\">\n" +
-		            "    <MDI key=\"X_DATASET\">HDF5:\"" + geoH5Path + "\"://Geolocation/longitude</MDI>\n" +
-		            "    <MDI key=\"Y_DATASET\">HDF5:\"" + geoH5Path + "\"://Geolocation/latitude</MDI>\n" +
-		            "    <MDI key=\"X_BAND\">1</MDI>\n" +
-		            "    <MDI key=\"Y_BAND\">1</MDI>\n" +
-		            "    <MDI key=\"PIXEL_OFFSET\">0</MDI>\n" +
-		            "    <MDI key=\"LINE_OFFSET\">0</MDI>\n" +
-		            "    <MDI key=\"PIXEL_STEP\">1</MDI>\n" +
-		            "    <MDI key=\"LINE_STEP\">1</MDI>\n" +
-		            "  </Metadata>\n  <Metadata>";
-	
-		    // insert the geoloc block, changing the type to fload and applying the scale factor 0.02
-		    sXML = sXML.replaceFirst("<Metadata>", geoBlock);
-		    sXML = sXML.replace("dataType=\"UInt16\"", "dataType=\"Float32\"");
-		    
-		    if (!sXML.contains("<ScaleRatio>")) {
-		    	sXML = sXML.replace("<SourceBand>1</SourceBand>", 
-		                "<SourceBand>1</SourceBand>\n      <ScaleRatio>0.02</ScaleRatio>\n      <ScaleOffset>0</ScaleOffset>");
-		    }
-	
-		    Files.write(oPath, sXML.getBytes(StandardCharsets.UTF_8));
-		}
-		catch (Exception oE) {
-			WasdiLog.errorLog("HDFProductReader.fixExostressVrt. Error ", oE);
-		}
+	public void fixEcostressVrt(String sVrtPath, String sGeoH5Path) {
+	    try {
+	        Path oPath = Paths.get(sVrtPath);
+	        String sXML = new String(Files.readAllBytes(oPath), StandardCharsets.UTF_8);
+
+	        String sGeoBlock = "\n  <Metadata domain=\"GEOLOCATION\">\n" +
+	                "    <MDI key=\"X_DATASET\">HDF5:\"" + sGeoH5Path + "\"://Geolocation/longitude</MDI>\n" +
+	                "    <MDI key=\"Y_DATASET\">HDF5:\"" + sGeoH5Path + "\"://Geolocation/latitude</MDI>\n" +
+	                "    <MDI key=\"X_BAND\">1</MDI>\n" +
+	                "    <MDI key=\"Y_BAND\">1</MDI>\n" +
+	                "    <MDI key=\"PIXEL_OFFSET\">0</MDI>\n" +
+	                "    <MDI key=\"LINE_OFFSET\">0</MDI>\n" +
+	                "    <MDI key=\"PIXEL_STEP\">1</MDI>\n" +
+	                "    <MDI key=\"LINE_STEP\">1</MDI>\n" +
+	                "  </Metadata>";
+
+	        sXML = sXML.replaceFirst("(?i)<VRTDataset[^>]*>", "$0" + sGeoBlock);
+
+	        sXML = sXML.replace("dataType=\"UInt16\"", "dataType=\"Float32\"");
+	        
+	        if (!sXML.contains("<ScaleRatio>")) {
+	            sXML = sXML.replace("<SourceBand>1</SourceBand>", 
+	                    "<SourceBand>1</SourceBand>\n      <ScaleRatio>0.02</ScaleRatio>\n      <ScaleOffset>0</ScaleOffset>");
+	        }
+
+	        Files.write(oPath, sXML.getBytes(StandardCharsets.UTF_8));
+	    }
+	    catch (Exception oE) {
+	        WasdiLog.errorLog("HDFProductReader.fixEcostressVrt. Error ", oE);
+	    }
 	}
 	
 	private String extractProductInfo(String sFileName) {
