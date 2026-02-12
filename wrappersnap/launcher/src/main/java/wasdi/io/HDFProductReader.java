@@ -99,9 +99,7 @@ public class HDFProductReader extends SnapProductReader {
 		
 		try {
 			String sProductName = m_oProductFile.getName();		
-			
-			// TODO: con la getpath, posso vedere se c'e' gia' un file GEO
-			
+						
 			if (!sProductName.toUpperCase().startsWith("EEH2TES_L2_LSTE")) {
 				return super.getFileForPublishBand(sBand, sLayerId, sPlatform);
 			}
@@ -132,36 +130,40 @@ public class HDFProductReader extends SnapProductReader {
 				return null;
 			}
 			
+			String sGeoFileName = oEcostressItem.getFileName();
 			
-			// from here I can download the GEO product in  the temp folder
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Downloading file: " + oEcostressItem.getFileName());
+			String sWorkspaceDirPath = m_oProductFile.getParent();
+			if (!sWorkspaceDirPath.endsWith("/"))
+				sWorkspaceDirPath += File.separator;
+						
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Download folder path " + sWorkspaceDirPath);
 			
+			String sGeoFilePath = null;
 			
-			String sFileUrl = oEcostressItem.getS3Path() + "," + sProductName + ",";
+			boolean bIsGeoFileInWorkspace = new File (sWorkspaceDirPath + sGeoFileName).exists();
 			
+			if (bIsGeoFileInWorkspace) {
+				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Geo file already present in workspace");
+				sGeoFilePath = sWorkspaceDirPath + sGeoFileName;
+			}
+			else {
+				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Downloading file: " + sGeoFileName);
+				
+				String sFileUrl = oEcostressItem.getUrl()+ "," + sProductName + ",";
+				
+				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. File url: "+ sFileUrl);
+
+				CloudferroProviderAdapter oProvider = new CloudferroProviderAdapter();
+				sGeoFilePath = oProvider.executeDownloadFile(sFileUrl, null, null, sWorkspaceDirPath, null, 0);
+			}
 			
-			String sDownloadFolder = WasdiConfig.Current.paths.wasdiTempFolder;
-			if (!sDownloadFolder.endsWith("/"))
-				sDownloadFolder += File.separator;
-			
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. File url: "+ sFileUrl);
-			
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Download folder path " + sDownloadFolder);
-			
-			CloudferroProviderAdapter oProvider = new CloudferroProviderAdapter();
-			
-			String sGEOFilePath = oProvider.executeDownloadFile(sFileUrl, null, null, sDownloadFolder, null, 0);
-			
-			if (Utils.isNullOrEmpty(sGEOFilePath)) {
+			if (Utils.isNullOrEmpty(sGeoFilePath)) {
 				WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. No GEO products has been downloaded");
 				return null;
 			}
 						
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Geo file" + sGEOFilePath);
-
-			 
-			String sWorkspaceDirPath = m_oProductFile.getParent();
-			
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Geo file" + sGeoFilePath);
+		 			
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Workspace path " + sWorkspaceDirPath);
 			
 			String sProductNameNoExtension = WasdiFileUtils.getFileNameWithoutExtensionsAndTrailingDots(sProductName);
@@ -195,7 +197,7 @@ public class HDFProductReader extends SnapProductReader {
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-translate-return-code]: " + oTranslateReturn.getOperationReturn());
  
 			// attach georeferencing
-			fixEcostressVrt(sVRTFilePath, sGEOFilePath);
+			fixEcostressVrt(sVRTFilePath, sGeoFilePath);
 			
 			// GDAL WARP
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Executing gdal warp");
