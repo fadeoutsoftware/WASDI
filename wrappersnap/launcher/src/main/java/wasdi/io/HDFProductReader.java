@@ -136,7 +136,7 @@ public class HDFProductReader extends SnapProductReader {
 			// from here I can download the GEO product in  the temp folder
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Downloading file: " + oEcostressItem.getFileName());
 			
-			/*
+			
 			String sFileUrl = oEcostressItem.getS3Path() + "," + sProductName + ",";
 			
 			
@@ -156,11 +156,8 @@ public class HDFProductReader extends SnapProductReader {
 				WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. No GEO products has been downloaded");
 				return null;
 			}
-			*/
-			
-			String sGEOFilePath = this.getFilePathByPrefix(sLSTEProductPath, sGEOProductNamePrefix);
-			
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. " + sGEOFilePath);
+						
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Geo file" + sGEOFilePath);
 
 			 
 			String sWorkspaceDirPath = m_oProductFile.getParent();
