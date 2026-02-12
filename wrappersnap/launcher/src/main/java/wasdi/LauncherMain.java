@@ -393,6 +393,10 @@ public class LauncherMain  {
                 WasdiLog.debugLog("Adding local mongo config");
                 MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
             }
+            
+            if (WasdiConfig.Current.mongoEcostress != null) {
+            	MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);	
+            }
 
             // Set the java/system user home folder
             System.setProperty("user.home", WasdiConfig.Current.paths.userHomePath);
