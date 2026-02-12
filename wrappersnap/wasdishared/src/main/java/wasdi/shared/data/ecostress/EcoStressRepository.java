@@ -8,6 +8,7 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 
 import wasdi.shared.business.ecostress.EcoStressItemForReading;
@@ -271,21 +272,35 @@ public class EcoStressRepository extends MongoRepository {
 	
 	public EcoStressItemForReading getEcoStressByFileNamePrefix(String sFileNamePrefix) {
 	    try {
-	        final List<EcoStressItemForReading> aoReturnList = new ArrayList<>();
+	    	WasdiLog.infoLog("EcoStressRepository.getEcostressByFileNamePrefix. Prefix: " + sFileNamePrefix);
+	    	
 	        	        
 	        // query: { "fileName": { "$regex": "^prefisso" } }
-	        Bson oQuery = Filters.regex("fileName", "^" + java.util.regex.Pattern.quote(sFileNamePrefix));	        
+	        Bson oQuery = Filters.regex("fileName", "^" + java.util.regex.Pattern.quote(sFileNamePrefix));
 	        
-	        Document oWSDocument = getCollection(m_sThisCollection)
-	                .find(oQuery).first();
+	        MongoCollection<Document> oCollection = getCollection(m_sThisCollection);
+	        
+	        if (oCollection == null) {
+	        	WasdiLog.warnLog("EcoStressRepository.getEcostressByFileNamePrefix. No collection found");
+	        	return null;
+	        }
+	        
+	        Document oWSDocument = oCollection.find(oQuery).first();
 
 	        if (oWSDocument != null) {
 				String sJSON = oWSDocument.toJson();
 
 				EcoStressItemForReading oEcoStressItem = s_oMapper.readValue(sJSON, EcoStressItemForReading.class);
+				
+				if (oEcoStressItem == null) {
+					WasdiLog.infoLog("EcoStressRepository.getEcostressByFileNamePrefix. Ecostress item not found");
+				}
 
 				return oEcoStressItem;
 			}
+	        else {
+	        	WasdiLog.warnLog("EcoStressRepository.getEcostressByFileNamePrefix. No document found in the db");
+	        }
 	        
 	    } catch (Exception oEx) {
 	        WasdiLog.errorLog("EcoStressRepository.getEcoStressByFileNamePrefix: error", oEx);
