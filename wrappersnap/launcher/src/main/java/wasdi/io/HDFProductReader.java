@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.FileUtils;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 
@@ -91,11 +92,15 @@ public class HDFProductReader extends SnapProductReader {
 	@Override
 	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
 		
-		
 		WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Band: " + sBand + ", layer id: " + sLayerId + ", platform: " + sPlatform + " v1");
+				
+		boolean bIsGeoFileInWorkspace = false;
 		
-		WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Absolute file of the product" + m_oProductFile.getAbsolutePath());
+		String sVRTFilePath = null;
 		
+		String sWarpedFilePath = null;
+		
+		String sGeoFilePath = null;
 		
 		try {
 			String sProductName = m_oProductFile.getName();		
@@ -138,20 +143,18 @@ public class HDFProductReader extends SnapProductReader {
 						
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Download folder path " + sWorkspaceDirPath);
 			
-			String sGeoFilePath = null;
-			
-			boolean bIsGeoFileInWorkspace = new File (sWorkspaceDirPath + sGeoFileName).exists();
+			bIsGeoFileInWorkspace = new File (sWorkspaceDirPath + sGeoFileName).exists();
 			
 			if (bIsGeoFileInWorkspace) {
-				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Geo file already present in workspace");
+				WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Geo file already present in workspace");
 				sGeoFilePath = sWorkspaceDirPath + sGeoFileName;
 			}
 			else {
-				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Downloading file: " + sGeoFileName);
+				WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Downloading file: " + sGeoFileName);
 				
 				String sFileUrl = oEcostressItem.getUrl()+ "," + sProductName + ",";
 				
-				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. File url: "+ sFileUrl);
+				WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. File url: "+ sFileUrl);
 
 				CloudferroProviderAdapter oProvider = new CloudferroProviderAdapter();
 				sGeoFilePath = oProvider.executeDownloadFile(sFileUrl, null, null, sWorkspaceDirPath, null, 0);
@@ -162,9 +165,9 @@ public class HDFProductReader extends SnapProductReader {
 				return null;
 			}
 						
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Geo file" + sGeoFilePath);
+			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Geo file" + sGeoFilePath);
 		 			
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Workspace path " + sWorkspaceDirPath);
+			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Workspace path " + sWorkspaceDirPath);
 			
 			String sProductNameNoExtension = WasdiFileUtils.getFileNameWithoutExtensionsAndTrailingDots(sProductName);
 			
@@ -172,9 +175,9 @@ public class HDFProductReader extends SnapProductReader {
 			if(!sWorkspaceDirPath.endsWith(File.separator))
 				sWorkspaceDirPath += File.separator;
 			
-			String sVRTFilePath = sWorkspaceDirPath + sProductNameNoExtension + "_vrt.vrt";
+			sVRTFilePath = sWorkspaceDirPath + sProductNameNoExtension + "_vrt.vrt";
 			
-			String sWarpedFilePath = sWorkspaceDirPath + sProductNameNoExtension + "_warped.tif";
+			sWarpedFilePath = sWorkspaceDirPath + sProductNameNoExtension + "_warped.tif";
 			
 			String sFinalTIFPath = sWorkspaceDirPath + sLayerId + ".tif";
 			
@@ -183,7 +186,7 @@ public class HDFProductReader extends SnapProductReader {
 			
 			ArrayList<String> asTranslateArgs = new ArrayList<>();
 			
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Executing gdal translate");
+			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Executing gdal translate");
 			
 			String sGdalCommand = "gdal_translate";
 			sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
@@ -191,7 +194,7 @@ public class HDFProductReader extends SnapProductReader {
 			asTranslateArgs.add("-unscale"); 
 			asTranslateArgs.add("HDF5:\"" + sLSTEProductPath + "\"://LST");
 			asTranslateArgs.add(sVRTFilePath);
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Command " + String.join(" ", asTranslateArgs));
+			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Command " + String.join(" ", asTranslateArgs));
 			ShellExecReturn oTranslateReturn = RunTimeUtils.shellExec(asTranslateArgs, true, true, true, true); 
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-translate]: " + oTranslateReturn.getOperationLogs());
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-translate-return-code]: " + oTranslateReturn.getOperationReturn());
@@ -200,7 +203,7 @@ public class HDFProductReader extends SnapProductReader {
 			fixEcostressVrt(sVRTFilePath, sGeoFilePath);
 			
 			// GDAL WARP
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Executing gdal warp");
+			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Executing gdal warp");
 			ArrayList<String> asWarpArgs = new ArrayList<>();
 			sGdalCommand = "gdalwarp";
 			sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
@@ -220,7 +223,7 @@ public class HDFProductReader extends SnapProductReader {
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-warp]: " + oWarpReturn.getOperationLogs());
 			
 			// gdal_fillnodata.py
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Executing gdal_fillnodata.py");
+			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Executing gdal_fillnodata.py");
 			ArrayList<String> asFillArgs = new ArrayList<>();
 			sGdalCommand = "gdal_fillnodata.py";
 			sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
@@ -233,13 +236,25 @@ public class HDFProductReader extends SnapProductReader {
 			ShellExecReturn oFillNoDataReturn = RunTimeUtils.shellExec(asFillArgs, true, true, true, true);
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-fillnodata]: " + oFillNoDataReturn.getOperationLogs());
 			
-			// TODO: at the end, delete the GEO file from the temp folder
 			return new File(sFinalTIFPath);
 		} catch (Exception oE) {
 			WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. Error ", oE);
 		}
+		finally {
+			// delete the files generated for publishing the band
+			if (bIsGeoFileInWorkspace && sGeoFilePath != null && new File(sGeoFilePath).exists()) {
+				FileUtils.deleteQuietly(new File(sGeoFilePath));
+			}
+			
+			if (!Utils.isNullOrEmpty(sVRTFilePath) && new File(sVRTFilePath).exists()) {
+				FileUtils.deleteQuietly(new File(sVRTFilePath));
+			}
+			
+			if (!Utils.isNullOrEmpty(sWarpedFilePath) && new File(sWarpedFilePath).exists()) {
+				FileUtils.deleteQuietly(new File(sWarpedFilePath));
+			}
+		}
 
-		
 		return null;
 	}
 	
@@ -294,7 +309,6 @@ public class HDFProductReader extends SnapProductReader {
 
 	    if (pParentDir == null) return null;
 
-	    // Use try-with-resources to ensure the stream is closed
 	    try (Stream<Path> sFiles = Files.find(pParentDir, 1, (path, attrs) -> 
 	            path.getFileName().toString().startsWith(sPrefix))) {
 	        
@@ -302,21 +316,10 @@ public class HDFProductReader extends SnapProductReader {
 	        
 	        return oFoundFile.map(Path::toString).orElse(null);
 	        
-	    } catch (IOException e) {
-	        // Log the error (e.g., WasdiLog.errorLog)
-	        return null;
+	    } catch (Exception oE) {
+	        WasdiLog.errorLog("HDFProductReader.getFilePathByPrefix. Error extracting the file path ", oE);
 	    }
+	    return null;
 	}
-	
-	
-	public static void main(String[]args) throws Exception {
-		
-		WasdiConfig.readConfig("C:/temp/wasdi/wasdiLocalTESTConfig_develop.json");
-		HDFProductReader oReader = new HDFProductReader(new File("C:/WASDI/datasets/ecostress/EEH2TES_L2_LSTE_37139_003_20250123T152424_0000_00.h5"));
-		oReader.getFileForPublishBand("LST", "111", Platforms.ECOSTRESS);
-		
-		
-	}
-	
 	
 }
