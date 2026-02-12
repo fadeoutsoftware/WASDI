@@ -120,7 +120,7 @@ public class HDFProductReader extends SnapProductReader {
 			
 			String sGEOProductNamePrefix = "ECOv002_L1B_GEO_" + sProductInfo;
 			
-			/*
+			
 			EcoStressRepository oRepo = new EcoStressRepository();
 			
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Looking for GEO product " + sGEOProductNamePrefix);
@@ -131,10 +131,10 @@ public class HDFProductReader extends SnapProductReader {
 				WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. No GEO product found for file " + sProductName + "and prefix " + sGEOProductNamePrefix);
 				return null;
 			}
-			*/
+			
 			
 			// from here I can download the GEO product in  the temp folder
-			// WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Downloading file: " + oEcostressItem.getFileName());
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Downloading file: " + oEcostressItem.getFileName());
 			
 			/*
 			String sFileUrl = oEcostressItem.getS3Path() + "," + sProductName + ",";
