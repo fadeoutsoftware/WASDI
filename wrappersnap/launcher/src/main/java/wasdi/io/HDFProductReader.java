@@ -123,28 +123,28 @@ public class HDFProductReader extends SnapProductReader {
 	        boolean bIsScientific = true;
 
 	        switch (sBand) {
-	            case "LST":
-	                sHdfDataset = "//LST";
-	                dScaleFactor = 0.02;
-	                break;
-	            case "Emis2":
-	            case "Emis4":
-	            case "Emis5":
-	                sHdfDataset = "//Emissivity_" + sBand.substring(4);
-	                dScaleFactor = 0.0001;
-	                break;
-	            case "BBE":
-	                sHdfDataset = "//BBE";
-	                dScaleFactor = 0.0001;
-	                break;
-	            case "qa":
-	                sHdfDataset = "//QC";
-	                dScaleFactor = 1.0;
-	                bIsScientific = false; // quality control does not need interpolation
-	                break;
-	            default:
-	                WasdiLog.warnLog("HDFProductReader.getFileForPublishBand. Band " + sBand + " not supported.");
-	                return null;
+		        case "LST":
+		            sHdfDataset = "//LST";
+		            dScaleFactor = 0.02;
+		            break;
+		        case "Emis2":
+		        case "Emis4":
+		        case "Emis5":
+		            sHdfDataset = "//" + sBand; 
+		            dScaleFactor = 0.0001; 
+		            break;
+		        case "BBE":
+		            sHdfDataset = "//BBE";
+		            dScaleFactor = 0.0001;
+		            break;
+		        case "qa":
+		            sHdfDataset = "//qa";
+		            dScaleFactor = 1.0;
+		            bIsScientific = false;
+		            break;
+		        default:
+		            WasdiLog.warnLog("HDFProductReader.getFileForPublishBand. Band " + sBand + " not supported.");
+		            return null;
 	        }
 			
 			
@@ -182,11 +182,11 @@ public class HDFProductReader extends SnapProductReader {
 				sGeoFilePath = sWorkspaceDirPath + sGeoFileName;
 			}
 			else {
-				WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Downloading file: " + sGeoFileName);
+				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Downloading file: " + sGeoFileName);
 				
 				String sFileUrl = oEcostressItem.getUrl()+ "," + sProductName + ",";
 				
-				WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. File url: "+ sFileUrl);
+				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. File url: "+ sFileUrl);
 
 				CloudferroProviderAdapter oProvider = new CloudferroProviderAdapter();
 				sGeoFilePath = oProvider.executeDownloadFile(sFileUrl, null, null, sWorkspaceDirPath, null, 0);
@@ -197,19 +197,16 @@ public class HDFProductReader extends SnapProductReader {
 				return null;
 			}
 						
-			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Geo file" + sGeoFilePath);
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Geo file" + sGeoFilePath);
 		 			
-			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Workspace path " + sWorkspaceDirPath);
-			
-			String sProductNameNoExtension = WasdiFileUtils.getFileNameWithoutExtensionsAndTrailingDots(sProductName);
-			
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Workspace path " + sWorkspaceDirPath);			
 			
 			if(!sWorkspaceDirPath.endsWith(File.separator))
 				sWorkspaceDirPath += File.separator;
 			
-			sVRTFilePath = sWorkspaceDirPath + sProductNameNoExtension + "_vrt.vrt";
+			sVRTFilePath = sWorkspaceDirPath + sLayerId + "_vrt.vrt";
 			
-			sWarpedFilePath = sWorkspaceDirPath + sProductNameNoExtension + "_warped.tif";
+			sWarpedFilePath = sWorkspaceDirPath + sLayerId + "_warped.tif";
 			
 			String sFinalTIFPath = sWorkspaceDirPath + sLayerId + ".tif";
 			
@@ -226,7 +223,7 @@ public class HDFProductReader extends SnapProductReader {
 			asTranslateArgs.add("-unscale"); 
 			asTranslateArgs.add("HDF5:\"" + sLSTEProductPath + "\":" + sHdfDataset);
 			asTranslateArgs.add(sVRTFilePath);
-			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Command " + String.join(" ", asTranslateArgs));
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Command " + String.join(" ", asTranslateArgs));
 			ShellExecReturn oTranslateReturn = RunTimeUtils.shellExec(asTranslateArgs, true, true, true, true); 
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-translate]: " + oTranslateReturn.getOperationLogs());
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-translate-return-code]: " + oTranslateReturn.getOperationReturn());
@@ -256,7 +253,7 @@ public class HDFProductReader extends SnapProductReader {
 			
 			// gdal_fillnodata.py
 			if (bIsScientific) {
-				WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Executing gdal_fillnodata.py");
+				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Executing gdal_fillnodata.py");
 				ArrayList<String> asFillArgs = new ArrayList<>();
 				sGdalCommand = "gdal_fillnodata.py";
 				sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
