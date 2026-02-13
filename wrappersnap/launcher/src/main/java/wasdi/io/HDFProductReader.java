@@ -225,8 +225,16 @@ public class HDFProductReader extends SnapProductReader {
 			asTranslateArgs.add(sVRTFilePath);
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Command " + String.join(" ", asTranslateArgs));
 			ShellExecReturn oTranslateReturn = RunTimeUtils.shellExec(asTranslateArgs, true, true, true, true); 
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-translate]: " + oTranslateReturn.getOperationLogs());
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-translate-return-code]: " + oTranslateReturn.getOperationReturn());
+			String sGdalLogs = oTranslateReturn.getOperationLogs();
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-translate]: " + sGdalLogs);
+			
+			if (sGdalLogs.contains("ERROR")) {
+				WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. Some error occured in the gdal_traslate. Does not make sense to proceed");
+				if (!Utils.isNullOrEmpty(sVRTFilePath) && new File(sVRTFilePath).exists()) {
+					FileUtils.deleteQuietly(new File(sVRTFilePath));
+				}
+				return null;
+			}
  
 			// attach georeferencing
 			fixEcostressVrt(sVRTFilePath, sGeoFilePath, dScaleFactor);
@@ -249,7 +257,14 @@ public class HDFProductReader extends SnapProductReader {
 			asWarpArgs.add(sVRTFilePath);
 			asWarpArgs.add(sWarpedFilePath);
 			ShellExecReturn oWarpReturn = RunTimeUtils.shellExec(asWarpArgs, true, true, true, true); 
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-warp]: " + oWarpReturn.getOperationLogs());
+			sGdalLogs = oWarpReturn.getOperationLogs();
+			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-warp]: " + sGdalLogs);
+			
+			if (sGdalLogs.contains("ERROR")) {
+				WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. Some error occured in the gdalwarp. Does not make sense to proceed");
+				deleteTempFiles(bIsGeoFileInWorkspace, sGeoFilePath, sVRTFilePath, sWarpedFilePath);
+				return null;
+			}
 			
 			// gdal_fillnodata.py
 			if (bIsScientific) {
@@ -263,7 +278,13 @@ public class HDFProductReader extends SnapProductReader {
 				asFillArgs.add(sWarpedFilePath);
 				asFillArgs.add(sFinalTIFPath);
 				ShellExecReturn oFillNoDataReturn = RunTimeUtils.shellExec(asFillArgs, true, true, true, true);
-				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-fillnodata]: " + oFillNoDataReturn.getOperationLogs());
+				sGdalLogs = oFillNoDataReturn.getOperationLogs();
+				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-fillnodata]: " + sGdalLogs);
+				if (sGdalLogs.contains("ERROR")) {
+					WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. Some error occured in the gdal_fillnodata. Does not make sense to proceed");
+					deleteTempFiles(bIsGeoFileInWorkspace, sGeoFilePath, sVRTFilePath, sWarpedFilePath);
+					return null;
+				}
 			}
 			else {
 				// In the QA band, we simply rename the warped file 
@@ -275,21 +296,26 @@ public class HDFProductReader extends SnapProductReader {
 			WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. Error ", oE);
 		}
 		finally {
-			// delete the files generated for publishing the band
-			if (bIsGeoFileInWorkspace && sGeoFilePath != null && new File(sGeoFilePath).exists()) {
-				FileUtils.deleteQuietly(new File(sGeoFilePath));
-			}
-			
-			if (!Utils.isNullOrEmpty(sVRTFilePath) && new File(sVRTFilePath).exists()) {
-				FileUtils.deleteQuietly(new File(sVRTFilePath));
-			}
-			
-			if (!Utils.isNullOrEmpty(sWarpedFilePath) && new File(sWarpedFilePath).exists()) {
-				FileUtils.deleteQuietly(new File(sWarpedFilePath));
-			}
+			deleteTempFiles(bIsGeoFileInWorkspace, sGeoFilePath, sVRTFilePath, sWarpedFilePath);
 		}
 
 		return null;
+	}
+	
+	
+	public void deleteTempFiles(boolean bIsGeoFileInWorkspace, String sGeoFilePath, String sVRTFilePath, String sWarpedFilePath) {
+		// delete the files generated for publishing the band
+		if (!bIsGeoFileInWorkspace && !Utils.isNullOrEmpty(sGeoFilePath) && new File(sGeoFilePath).exists()) {
+			FileUtils.deleteQuietly(new File(sGeoFilePath));
+		}
+		
+		if (!Utils.isNullOrEmpty(sVRTFilePath) && new File(sVRTFilePath).exists()) {
+			FileUtils.deleteQuietly(new File(sVRTFilePath));
+		}
+		
+		if (!Utils.isNullOrEmpty(sWarpedFilePath) && new File(sWarpedFilePath).exists()) {
+			FileUtils.deleteQuietly(new File(sWarpedFilePath));
+		}
 	}
 	
 	public void fixEcostressVrt(String sVrtPath, String sGeoH5Path, double dScaleFactor) {
