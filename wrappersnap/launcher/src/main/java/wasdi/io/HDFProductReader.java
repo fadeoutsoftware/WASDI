@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -109,12 +110,43 @@ public class HDFProductReader extends SnapProductReader {
 				return super.getFileForPublishBand(sBand, sLayerId, sPlatform);
 			}
 			
+			/*
 			if (!sBand.equals("LST")) {
 				WasdiLog.warnLog("HDFProductReader.getFileForPublishBand. Band is not LST. Conversion not supported");
 				return null;
 			}
+			*/
 			
-			// we need to publish the LST bands of LSTE ECOSTRESS products
+			// we need to publish the bands of LSTE ECOSTRESS products
+			String sHdfDataset = "";
+	        double dScaleFactor = 1.0;
+	        boolean bIsScientific = true;
+
+	        switch (sBand) {
+	            case "LST":
+	                sHdfDataset = "//LST";
+	                dScaleFactor = 0.02;
+	                break;
+	            case "Emis2":
+	            case "Emis4":
+	            case "Emis5":
+	                sHdfDataset = "//Emissivity_" + sBand.substring(4);
+	                dScaleFactor = 0.0001;
+	                break;
+	            case "BBE":
+	                sHdfDataset = "//BBE";
+	                dScaleFactor = 0.0001;
+	                break;
+	            case "qa":
+	                sHdfDataset = "//QC";
+	                dScaleFactor = 1.0;
+	                bIsScientific = false; // quality control does not need interpolation
+	                break;
+	            default:
+	                WasdiLog.warnLog("HDFProductReader.getFileForPublishBand. Band " + sBand + " not supported.");
+	                return null;
+	        }
+			
 			
 			String sLSTEProductPath = m_oProductFile.getAbsolutePath();
 			
@@ -192,7 +224,7 @@ public class HDFProductReader extends SnapProductReader {
 			sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
 			asTranslateArgs.add(sGdalCommand);
 			asTranslateArgs.add("-unscale"); 
-			asTranslateArgs.add("HDF5:\"" + sLSTEProductPath + "\"://LST");
+			asTranslateArgs.add("HDF5:\"" + sLSTEProductPath + "\":" + sHdfDataset);
 			asTranslateArgs.add(sVRTFilePath);
 			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Command " + String.join(" ", asTranslateArgs));
 			ShellExecReturn oTranslateReturn = RunTimeUtils.shellExec(asTranslateArgs, true, true, true, true); 
@@ -200,7 +232,7 @@ public class HDFProductReader extends SnapProductReader {
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-translate-return-code]: " + oTranslateReturn.getOperationReturn());
  
 			// attach georeferencing
-			fixEcostressVrt(sVRTFilePath, sGeoFilePath);
+			fixEcostressVrt(sVRTFilePath, sGeoFilePath, dScaleFactor);
 			
 			// GDAL WARP
 			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Executing gdal warp");
@@ -214,7 +246,7 @@ public class HDFProductReader extends SnapProductReader {
 			asWarpArgs.add("-t_srs");
 			asWarpArgs.add("EPSG:4326");
 			asWarpArgs.add("-r");
-			asWarpArgs.add("bilinear"); 
+			asWarpArgs.add(bIsScientific ? "bilinear" : "near"); // we use near for the qa band
 			asWarpArgs.add("-wo");
 			asWarpArgs.add("SAMPLE_STEPS=100"); 
 			asWarpArgs.add(sVRTFilePath);
@@ -223,18 +255,23 @@ public class HDFProductReader extends SnapProductReader {
 			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-warp]: " + oWarpReturn.getOperationLogs());
 			
 			// gdal_fillnodata.py
-			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Executing gdal_fillnodata.py");
-			ArrayList<String> asFillArgs = new ArrayList<>();
-			sGdalCommand = "gdal_fillnodata.py";
-			sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
-			
-			asFillArgs.add(sGdalCommand);
-			asFillArgs.add("-md");
-			asFillArgs.add("15");
-			asFillArgs.add(sWarpedFilePath);
-			asFillArgs.add(sFinalTIFPath);
-			ShellExecReturn oFillNoDataReturn = RunTimeUtils.shellExec(asFillArgs, true, true, true, true);
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-fillnodata]: " + oFillNoDataReturn.getOperationLogs());
+			if (bIsScientific) {
+				WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Executing gdal_fillnodata.py");
+				ArrayList<String> asFillArgs = new ArrayList<>();
+				sGdalCommand = "gdal_fillnodata.py";
+				sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
+				asFillArgs.add(sGdalCommand);
+				asFillArgs.add("-md");
+				asFillArgs.add("15");
+				asFillArgs.add(sWarpedFilePath);
+				asFillArgs.add(sFinalTIFPath);
+				ShellExecReturn oFillNoDataReturn = RunTimeUtils.shellExec(asFillArgs, true, true, true, true);
+				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-fillnodata]: " + oFillNoDataReturn.getOperationLogs());
+			}
+			else {
+				// In the QA band, we simply rename the warped file 
+	            Files.move(Paths.get(sWarpedFilePath), Paths.get(sFinalTIFPath), StandardCopyOption.REPLACE_EXISTING);
+			}
 			
 			return new File(sFinalTIFPath);
 		} catch (Exception oE) {
@@ -258,7 +295,7 @@ public class HDFProductReader extends SnapProductReader {
 		return null;
 	}
 	
-	public void fixEcostressVrt(String sVrtPath, String sGeoH5Path) {
+	public void fixEcostressVrt(String sVrtPath, String sGeoH5Path, double dScaleFactor) {
 	    try {
 	        Path oPath = Paths.get(sVrtPath);
 	        String sXML = new String(Files.readAllBytes(oPath), StandardCharsets.UTF_8);
@@ -279,8 +316,8 @@ public class HDFProductReader extends SnapProductReader {
 	        sXML = sXML.replace("dataType=\"UInt16\"", "dataType=\"Float32\"");
 	        
 	        if (!sXML.contains("<ScaleRatio>")) {
-	            sXML = sXML.replace("<SourceBand>1</SourceBand>", 
-	                    "<SourceBand>1</SourceBand>\n      <ScaleRatio>0.02</ScaleRatio>\n      <ScaleOffset>0</ScaleOffset>");
+	        	sXML = sXML.replace("<SourceBand>1</SourceBand>", 
+	                    "<SourceBand>1</SourceBand>\n      <ScaleRatio>" + dScaleFactor + "</ScaleRatio>\n      <ScaleOffset>0</ScaleOffset>");
 	        }
 
 	        Files.write(oPath, sXML.getBytes(StandardCharsets.UTF_8));
