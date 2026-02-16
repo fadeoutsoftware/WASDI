@@ -93,7 +93,7 @@ public class HDFProductReader extends SnapProductReader {
 	@Override
 	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
 		
-		WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Band: " + sBand + ", layer id: " + sLayerId + ", platform: " + sPlatform + " v1");
+		WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Band: " + sBand + ", layer id: " + sLayerId + ", platform: " + sPlatform + " v1");
 				
 		boolean bIsGeoFileInWorkspace = false;
 		
@@ -109,14 +109,7 @@ public class HDFProductReader extends SnapProductReader {
 			if (!sProductName.toUpperCase().startsWith("EEH2TES_L2_LSTE")) {
 				return super.getFileForPublishBand(sBand, sLayerId, sPlatform);
 			}
-			
-			/*
-			if (!sBand.equals("LST")) {
-				WasdiLog.warnLog("HDFProductReader.getFileForPublishBand. Band is not LST. Conversion not supported");
-				return null;
-			}
-			*/
-			
+
 			// we need to publish the bands of LSTE ECOSTRESS products
 			String sHdfDataset = "";
 	        double dScaleFactor = 1.0;
@@ -158,7 +151,7 @@ public class HDFProductReader extends SnapProductReader {
 			
 			EcoStressRepository oRepo = new EcoStressRepository();
 			
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Looking for GEO product " + sGEOProductNamePrefix);
+			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Looking for GEO product " + sGEOProductNamePrefix);
 			
 			EcoStressItemForReading oEcostressItem = oRepo.getEcoStressByFileNamePrefix(sGEOProductNamePrefix);
 			
@@ -182,11 +175,11 @@ public class HDFProductReader extends SnapProductReader {
 				sGeoFilePath = sWorkspaceDirPath + sGeoFileName;
 			}
 			else {
-				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Downloading file: " + sGeoFileName);
+				WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Downloading file: " + sGeoFileName);
 				
 				String sFileUrl = oEcostressItem.getUrl()+ "," + sProductName + ",";
 				
-				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. File url: "+ sFileUrl);
+				WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. File url: "+ sFileUrl);
 
 				CloudferroProviderAdapter oProvider = new CloudferroProviderAdapter();
 				sGeoFilePath = oProvider.executeDownloadFile(sFileUrl, null, null, sWorkspaceDirPath, null, 0);
@@ -197,9 +190,9 @@ public class HDFProductReader extends SnapProductReader {
 				return null;
 			}
 						
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Geo file" + sGeoFilePath);
+			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Geo file" + sGeoFilePath);
 		 			
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Workspace path " + sWorkspaceDirPath);			
+			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Workspace path " + sWorkspaceDirPath);			
 			
 			if(!sWorkspaceDirPath.endsWith(File.separator))
 				sWorkspaceDirPath += File.separator;
@@ -258,7 +251,7 @@ public class HDFProductReader extends SnapProductReader {
 			asWarpArgs.add(sWarpedFilePath);
 			ShellExecReturn oWarpReturn = RunTimeUtils.shellExec(asWarpArgs, true, true, true, true); 
 			sGdalLogs = oWarpReturn.getOperationLogs();
-			WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-warp]: " + sGdalLogs);
+			WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. [gdal-warp]: " + sGdalLogs);
 			
 			if (sGdalLogs.contains("ERROR")) {
 				WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. Some error occured in the gdalwarp. Does not make sense to proceed");
@@ -268,7 +261,7 @@ public class HDFProductReader extends SnapProductReader {
 			
 			// gdal_fillnodata.py
 			if (bIsScientific) {
-				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. Executing gdal_fillnodata.py");
+				WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. Executing gdal_fillnodata.py");
 				ArrayList<String> asFillArgs = new ArrayList<>();
 				sGdalCommand = "gdal_fillnodata.py";
 				sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
@@ -279,7 +272,7 @@ public class HDFProductReader extends SnapProductReader {
 				asFillArgs.add(sFinalTIFPath);
 				ShellExecReturn oFillNoDataReturn = RunTimeUtils.shellExec(asFillArgs, true, true, true, true);
 				sGdalLogs = oFillNoDataReturn.getOperationLogs();
-				WasdiLog.infoLog("HDFProductReader.getFileForPublishBand. [gdal-fillnodata]: " + sGdalLogs);
+				WasdiLog.debugLog("HDFProductReader.getFileForPublishBand. [gdal-fillnodata]: " + sGdalLogs);
 				if (sGdalLogs.contains("ERROR")) {
 					WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. Some error occured in the gdal_fillnodata. Does not make sense to proceed");
 					deleteTempFiles(bIsGeoFileInWorkspace, sGeoFilePath, sVRTFilePath, sWarpedFilePath);
