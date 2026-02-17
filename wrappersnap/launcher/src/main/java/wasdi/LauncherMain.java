@@ -215,7 +215,17 @@ public class LauncherMain  {
   		}
   		catch (Exception oEx) {
   		    WasdiLog.errorLog("Disabling org.apache.commons.httpclient logging exception " + oEx.toString());
-  		}  		
+  		}  
+  		
+  		// Filter the org.apache.http (new version)
+  		try {
+  		    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.http")).setLevel(ch.qos.logback.classic.Level.WARN);
+  		    
+  		    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.http.wire")).setLevel(ch.qos.logback.classic.Level.WARN);
+  		} 
+  		catch (Exception oEx) {
+  		    WasdiLog.errorLog("Disabling org.apache.http logging exception " + oEx.toString());
+  		}
 
         // Filter the apache logs
   		try {  			
@@ -382,6 +392,10 @@ public class LauncherMain  {
             	// Configure also the local connection
                 WasdiLog.debugLog("Adding local mongo config");
                 MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
+            }
+            
+            if (WasdiConfig.Current.mongoEcostress != null) {
+            	MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);	
             }
 
             // Set the java/system user home folder
