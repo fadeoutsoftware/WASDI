@@ -223,9 +223,6 @@ public class HDFProductReader extends SnapProductReader {
 			
 			if (sGdalLogs.contains("ERROR")) {
 				WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. Some error occured in the gdal_traslate. Does not make sense to proceed");
-				if (!Utils.isNullOrEmpty(sVRTFilePath) && new File(sVRTFilePath).exists()) {
-					FileUtils.deleteQuietly(new File(sVRTFilePath));
-				}
 				return null;
 			}
  
@@ -255,7 +252,6 @@ public class HDFProductReader extends SnapProductReader {
 			
 			if (sGdalLogs.contains("ERROR")) {
 				WasdiLog.errorLog("HDFProductReader.getFileForPublishBand. Some error occured in the gdalwarp. Does not make sense to proceed");
-				deleteTempFiles(bIsGeoFileInWorkspace, sGeoFilePath, sVRTFilePath, sWarpedFilePath);
 				return null;
 			}
 			
