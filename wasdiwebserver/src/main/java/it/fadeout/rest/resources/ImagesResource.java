@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.FileInputStream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -12,9 +14,11 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -283,12 +287,31 @@ public class ImagesResource {
 			if(sImageName.contains("/") || sImageName.contains("\\") || sCollection.contains("/") || sCollection.contains("\\")|| sFolder.contains("/") || sFolder.contains("\\")) {
 				WasdiLog.warnLog("ImagesResource.getImage: Image or Collection name looks like a path" );
 				return Response.status(Status.BAD_REQUEST).build();
-			}			
+			}		
 					
 			String sPathLogoFolder = ImageResourceUtils.getImagesSubPath(sCollection, sFolder);
 			String sAbsolutePath = sPathLogoFolder + sImageName;
 			
 			WasdiLog.debugLog("ImagesResource.getImage: sAbsolutePath " + sAbsolutePath);
+			
+			
+			if (sCollection.equals(ImagesCollections.GLOBATHY.getFolder())) {
+				// for bigger files, as the globathy ones, we open directly a stream instead of taking the array of bytes
+				StreamingOutput oStream = new StreamingOutput() {
+				    @Override
+				    public void write(OutputStream oOs) throws IOException, WebApplicationException {
+				        try (InputStream oIs = new FileInputStream(sAbsolutePath)) {
+				            byte[] abBuffer = new byte[8192]; // Buffer of 8KB
+				            int iBytesRead;
+				            while ((iBytesRead = oIs.read(abBuffer)) != -1) {
+				                oOs.write(abBuffer, 0, iBytesRead);
+				            }
+				        }
+				    }
+				};
+
+				return Response.ok(oStream).build();
+			}
 			
 			ImageFile oLogo = new ImageFile(sAbsolutePath);
 			

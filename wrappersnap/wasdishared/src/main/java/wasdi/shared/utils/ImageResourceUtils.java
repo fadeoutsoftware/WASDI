@@ -131,6 +131,11 @@ public class ImageResourceUtils {
 		sPath += sCollection;
 		if (!sPath.endsWith("/")) sPath += "/";
 		
+		if (sCollection.equals(ImagesCollections.GLOBATHY.getFolder())) {
+			// for globathy dataset, there is still a parent folder to attach
+			sPath += getParentFolderName(sFolder) + "/";
+		}
+		
 		if (Utils.isNullOrEmpty(sFolder)==false) {
 			sPath += sFolder;
 			if (!sPath.endsWith("/")) sPath += "/";
@@ -139,6 +144,43 @@ public class ImageResourceUtils {
 		ImageResourceUtils.createDirectory(sPath);
 		
 		return sPath;
+	}
+	
+	/**
+	 * Given the name of the Globathy subfolder (e.g. 63001_64000), get name of the parent folder (e.g. 1_100K)
+	 * @param sSubFolderName subfolder name, based on a range of 1000 ids
+	 * @return the name of the parent folder, based on a range of 100.000 ID
+	 */
+	private static String getParentFolderName(String sSubFolderName) {
+	    
+	    if (Utils.isNullOrEmpty(sSubFolderName)) {
+	        return "";
+	    }
+
+	    try {
+	        // get the first id of the range
+	        String[] asParts = sSubFolderName.split("_");
+	        
+	        if (asParts.length < 1) return "";
+
+	        int iFirstId = Integer.parseInt(asParts[0]);
+
+	        // compute the index of the 100.000 block
+	        int iBlockIndex = iFirstId / 100000;
+
+	        // get the limits of the range K (eg. 1 and 100, or 101 and 200)
+	        int iStartK = (iBlockIndex * 100) + 1;
+	        int iEndK = (iBlockIndex + 1) * 100;
+
+	        String sParentFolder = iStartK + "_" + iEndK + "K";
+
+	        return sParentFolder;
+	        
+	    } catch (Exception oEx) {
+	        WasdiLog.errorLog("ImageResource.getParentFolderName.Exception: ", oEx);
+	    }
+
+	    return "";
 	}
 	
 	/**
