@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 
 import wasdi.shared.business.ecostress.EcoStressItemForReading;
 import wasdi.shared.business.ecostress.EcoStressItemForWriting;
@@ -265,6 +268,31 @@ public class EcoStressRepository extends MongoRepository {
 		}
 
 		return -1;
+	}
+	
+	public EcoStressItemForReading getEcoStressByFileNamePrefix(String sFileNamePrefix) {
+	    try {	    	
+	        	        
+	        // query: { "fileName": { "$regex": "^prefisso" } }
+	        Bson oQuery = Filters.regex("fileName", "^" + java.util.regex.Pattern.quote(sFileNamePrefix));
+	        
+	        MongoCollection<Document> oCollection = getCollection(m_sThisCollection);
+	        
+	        Document oWSDocument = oCollection.find(oQuery).first();
+
+	        if (oWSDocument != null) {
+				String sJSON = oWSDocument.toJson();
+
+				EcoStressItemForReading oEcoStressItem = s_oMapper.readValue(sJSON, EcoStressItemForReading.class);
+
+				return oEcoStressItem;
+			}
+	        
+	    } catch (Exception oEx) {
+	        WasdiLog.errorLog("EcoStressRepository.getEcoStressByFileNamePrefix: error", oEx);
+	    }
+
+	    return null;
 	}
 
 }
