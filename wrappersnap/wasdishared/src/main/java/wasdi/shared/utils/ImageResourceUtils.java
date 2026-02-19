@@ -158,21 +158,27 @@ public class ImageResourceUtils {
 	    }
 
 	    try {
-	        // get the first id of the range
+	        // Get the first ID of the range
 	        String[] asParts = sSubFolderName.split("_");
 	        
 	        if (asParts.length < 1) return "";
 
 	        int iFirstId = Integer.parseInt(asParts[0]);
 
-	        // compute the index of the 100.000 block
+	        // Compute the 100k block index
 	        int iBlockIndex = iFirstId / 100000;
 
-	        // get the limits of the range K (eg. 1 and 100, or 101 and 200)
-	        int iStartK = (iBlockIndex * 100) + 1;
+	        // Handle the special case for the first block (1_100K)
+	        if (iBlockIndex == 0) {
+	            return "1_100K";
+	        }
+
+	        // For all other blocks, use the rounded notation (e.g., 100K_200K)
+	        // Example for iBlockIndex 1: 1 * 100 = 100, (1+1) * 100 = 200
+	        int iStartK = iBlockIndex * 100;
 	        int iEndK = (iBlockIndex + 1) * 100;
 
-	        String sParentFolder = iStartK + "_" + iEndK + "K";
+	        String sParentFolder = iStartK + "K_" + iEndK + "K";
 
 	        return sParentFolder;
 	        
