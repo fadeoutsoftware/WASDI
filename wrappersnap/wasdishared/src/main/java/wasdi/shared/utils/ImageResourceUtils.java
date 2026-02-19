@@ -127,6 +127,9 @@ public class ImageResourceUtils {
 	 * @return
 	 */
 	public static String getImagesSubPath(String sCollection, String sFolder) {
+		
+		boolean bMakeDir = true;
+		
 		String sPath = PathsConfig.getImagesBasePath();
 		sPath += sCollection;
 		if (!sPath.endsWith("/")) sPath += "/";
@@ -134,6 +137,7 @@ public class ImageResourceUtils {
 		if (sCollection.equals(ImagesCollections.GLOBATHY.getFolder())) {
 			// for globathy dataset, there is still a parent folder to attach
 			sPath += getParentFolderName(sFolder) + "/";
+			bMakeDir = false;
 		}
 		
 		if (Utils.isNullOrEmpty(sFolder)==false) {
@@ -141,7 +145,8 @@ public class ImageResourceUtils {
 			if (!sPath.endsWith("/")) sPath += "/";
 		}
 		
-		ImageResourceUtils.createDirectory(sPath);
+		if (bMakeDir)
+			ImageResourceUtils.createDirectory(sPath);
 		
 		return sPath;
 	}
