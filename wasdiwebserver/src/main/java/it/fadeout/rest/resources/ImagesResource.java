@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -294,31 +295,18 @@ public class ImagesResource {
 			
 			WasdiLog.debugLog("ImagesResource.getImage: sAbsolutePath " + sAbsolutePath);
 			
-			
-			if (sCollection.equals(ImagesCollections.GLOBATHY.getFolder())) {
-				// for bigger files, as the globathy ones, we open directly a stream instead of taking the array of bytes
-				StreamingOutput oStream = new StreamingOutput() {
-				    @Override
-				    public void write(OutputStream oOs) throws IOException, WebApplicationException {
-				        try (InputStream oIs = new FileInputStream(sAbsolutePath)) {
-				            byte[] abBuffer = new byte[8192]; // Buffer of 8KB
-				            int iBytesRead;
-				            while ((iBytesRead = oIs.read(abBuffer)) != -1) {
-				                oOs.write(abBuffer, 0, iBytesRead);
-				            }
-				        }
-				    }
-				};
-
-				return Response.ok(oStream).build();
-			}
-			
 			ImageFile oLogo = new ImageFile(sAbsolutePath);
 			
 			//Check the logo and extension
-			if(oLogo.exists() == false){
+			if(!oLogo.exists() || !oLogo.canRead()){
 				WasdiLog.warnLog("ImagesResource.getImage: unable to find image in " + sAbsolutePath);
 				return Response.status(Status.NO_CONTENT).build();
+			}
+			
+			// for bigger files, as the globathy ones, we open directly a stream instead of taking the array of bytes
+			if (sCollection.equals(ImagesCollections.GLOBATHY.getFolder())) {
+				StreamingOutput oFileOutputStream = streamFile(sAbsolutePath);
+				return Response.ok(oFileOutputStream).build();
 			}
 			
 			//prepare buffer and send the logo to the client 
@@ -327,10 +315,40 @@ public class ImagesResource {
 		    return Response.ok(abImageLogo).build();			
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ImagesResource.getImage: exception " + oEx.toString());
+			WasdiLog.errorLog("ImagesResource.getImage: exception ", oEx);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}	
+	
+
+	
+	private StreamingOutput streamFile(String sFilePath) {
+		StreamingOutput oStream = new StreamingOutput() {
+		    @Override
+		    public void write(OutputStream oOs) {
+		        try (InputStream oIs = new FileInputStream(sFilePath)) {
+		            byte[] abBuffer = new byte[8192]; // Buffer of 8KB
+		            int iBytesRead;
+		            while ((iBytesRead = oIs.read(abBuffer)) != -1) {
+		                oOs.write(abBuffer, 0, iBytesRead);
+		            }
+		        } 
+		        catch (Exception oE) {
+		        	String sMsg = oE.getMessage() != null ? oE.getMessage().toLowerCase() : "";
+		        	if (oE.getClass().getSimpleName().equals("ClientAbortException") 
+		        			|| oE.getMessage().toLowerCase().contains("broken pipe") 
+		        			|| oE.getMessage().toLowerCase().contains("connection reset")) {	        
+		        	        // not really a server error, simply the client stopped listening
+		        		WasdiLog.warnLog("ImagesResource.getImage: Client disconnected during streaming for " + sFilePath);
+		        	} else {
+		        		WasdiLog.errorLog("ImagesResource.getImage: Streaming interrupted for " + sFilePath, oE);
+				        throw new WebApplicationException(oE, Status.INTERNAL_SERVER_ERROR);
+		        	}
+		        }
+		    }
+		};
+		return oStream;
+	}
 
 	/**
 	 * Deletes one of the gallery images of a processor
