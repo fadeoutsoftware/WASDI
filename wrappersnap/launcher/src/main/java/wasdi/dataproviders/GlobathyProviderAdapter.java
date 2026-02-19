@@ -5,13 +5,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -66,33 +67,50 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 		String sDownloadedFilePath = null;
 		
 		try {
-			String sFilePath = getFileLocation(sFileURL);
+			String sFileName = this.getFileName(sFileURL);
 			
-			if (Utils.isNullOrEmpty(sFilePath)) {
-				WasdiLog.warnLog("GlobathyProviderAdapter.executeDownloadFile. Impossible to get file size " + sFileURL);
-				return sDownloadedFilePath;
+			// get the subfolder in the 1000 repartition of files
+			String sSubfolderName = getSubFolderName(sFileName);
+			
+			if (Utils.isNullOrEmpty(sSubfolderName)) {
+				WasdiLog.warnLog("GlobathyProviderAdapter.executeDownloadFile. Could not determine subfolder name for url " + sFileURL);
+				return null;
 			}
 			
-			String sFileName = this.getFileName(sFileURL);
+			String sSessionId = this.m_sSession;
+			
+			if (Utils.isNullOrEmpty(sSessionId)) {
+				WasdiLog.warnLog("GlobathyProviderAdapter.executeDownloadFile. No session id. Impossible to call APIs");
+				return null;
+			}
+			
 			String sDestinationFilePath = sSaveDirOnServer;
 			if (!sDestinationFilePath.endsWith(File.separator))
 				sDestinationFilePath += File.separator;
 			sDestinationFilePath += sFileName;
 			
-			File oSourceProduct = new File(sFilePath);
-			File oDestinationProduct = new File(sDestinationFilePath);
+			String sHttpURL = WasdiConfig.Current.baseUrl;
+			if (!sHttpURL.endsWith(File.separator))
+				sHttpURL += File.separator;
+			sHttpURL += "images/get";
+			//parameters
+			sHttpURL += "?collection=globathy"
+					+ "&folder=" + sSubfolderName 
+					+ "&name=" + sFileName;
 			
-			if (!oSourceProduct.exists()) {
-				WasdiLog.warnLog("GlobathyProviderAdapter.executeDownloadFile. Source file do not exist");
-				return sDownloadedFilePath;
+			Map<String, String> aoHeaders = Map.of("x-session-token", sSessionId);
+				
+			sDownloadedFilePath = HttpUtils.downloadFile(sHttpURL, aoHeaders, sDestinationFilePath);
+			
+			if (Utils.isNullOrEmpty(sDownloadedFilePath)) {
+				WasdiLog.warnLog("GlobathyProviderAdapter.executeDownloadFile. Error in downloading the file");
+				return null;
 			}
 			
-			FileUtils.copyFile(oSourceProduct, oDestinationProduct);
+			WasdiLog.debugLog("GlobathyProviderAdapter.executeDownloadFile. File saved at path " + sDownloadedFilePath);
 			
-			sDownloadedFilePath = sDestinationFilePath;
+			return sDownloadedFilePath;
 			
-			WasdiLog.debugLog("GlobathyProviderAdapter.executeDownloadFile. File saved at path " + sDestinationFilePath);
-		
 		} catch (Exception oE) {
 			WasdiLog.errorLog("GlobathyProviderAdapter.executeDownloadFile. Error copyting bathymetry file", oE);
 		}
@@ -139,7 +157,7 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 		return sFilePath;
 	}	
 		
-		
+	//TODO: remove
 	private String getLakeFolderPath(int iId) {
 	    int iMacroLower = (iId / 100000) * 100;
 	    int iMacroUpper = iMacroLower + 100;
@@ -159,6 +177,55 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 	    String microFolder = iMicroLower + "_" + iMicroUpper;
 
 	    return sMacroFolder + File.separator + microFolder;
+	}
+	
+	/**
+	 * Returns the name of the subfolder (e.g., "301001_302000") given the Lake ID.
+	 * This logic handles the 1,000 elements partitioning.
+	 * @param iHylakId The unique ID of the lake (e.g., 302000)
+	 * @return String representing the subfolder name range
+	 */
+	public String getSubFolderName(String sFileName) {
+		
+		if (Utils.isNullOrEmpty(sFileName)) {
+			return null;
+		}
+		
+		try {
+			String sLakeId = sFileName.replace("_bathymetry.tif", "");
+			
+			int iLakeId = Integer.parseInt(sLakeId);
+	
+		    // Calculate the upper bound of the 1,000-unit range
+		    // Example: 302000 -> ((301999 / 1000) + 1) * 1000 = 302000
+		    // Example: 301001 -> ((301000 / 1000) + 1) * 1000 = 302000
+		    int iEndId = ((iLakeId - 1) / 1000 + 1) * 1000;
+	
+		    int iStartId = iEndId - 999;
+	
+		    String sSubFolderName = iStartId + "_" + iEndId;
+	
+		    return sSubFolderName;
+		}
+		catch (Exception oE) {
+			WasdiLog.errorLog("GlobathyProvider.getSubFolderName. Error ", oE);
+		}
+		
+		return null;
+	}
+	
+	
+	public static void main(String[]args) throws Exception {
+		String sSession = "b64fc84a-b71b-472f-9672-e2c5880d45eb";
+		
+		WasdiConfig.readConfig("C:/temp/wasdi/wasdiLocalTESTConfig_develop.json");
+		GlobathyProviderAdapter oAdapter = new GlobathyProviderAdapter();
+		oAdapter.setSessionId(sSession);
+		oAdapter.readConfig();
+		
+		String sUrl = "1_bathymetry.tif";
+		System.out.println(oAdapter.getDownloadFileSize("https://" + sUrl));
+		System.out.println(oAdapter.executeDownloadFile("https://" + sUrl, null, null, "C:/WASDI", null, 0));
 	}
 
 }
