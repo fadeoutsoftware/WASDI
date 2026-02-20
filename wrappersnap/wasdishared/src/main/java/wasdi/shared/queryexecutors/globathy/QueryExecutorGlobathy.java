@@ -33,7 +33,6 @@ import org.locationtech.jts.io.WKTWriter;
 public class QueryExecutorGlobathy extends QueryExecutor {
 	
 	private String m_sLakesShapeFilePath = "";	// path to the shp file
-	private String m_sGlobathyFolderPath = "";  // path to the root folder, containing other sub-folder
 	
 	private static final Object s_oShapeFileLock = new Object();
 
@@ -52,7 +51,6 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 		try {
 			JSONObject oAppConf = JsonUtils.loadJsonFromFile(m_sParserConfigPath);
 			m_sLakesShapeFilePath = oAppConf.getString("lakesShapeFilePath");
-			m_sGlobathyFolderPath = oAppConf.getString("globathyRootFolderPath");
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("QueryExecutorGlobathy.init. Exception reading parser config file " + m_sParserConfigPath, oEx);
 		}
@@ -154,7 +152,7 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 			}
 			
 			if (iOffset > -1 && iLimit > -1) {
-				int iStart = iOffset * iLimit;
+				int iStart = iOffset;
 				int iEnd = iStart + iLimit;
 				if (iEnd > aoLakes.size()) iEnd = aoLakes.size();
 				aoLakes = new ArrayList<>(aoLakes.subList(iStart, iEnd));
