@@ -2,6 +2,8 @@ package wasdi.shared.queryexecutors.globathy;
 
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory2;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,7 +16,10 @@ import org.geotools.data.FileDataStoreFinder;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.filter.text.ecql.ECQL;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.locationtech.jts.geom.Geometry;
 import org.json.JSONObject;
 
@@ -207,6 +212,7 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 				// Get the Data Store
 				FileDataStore oStore = FileDataStoreFinder.getDataStore(new File(m_sLakesShapeFilePath));
 				
+				
 				try {
 					SimpleFeatureSource oFeatureSource = oStore.getFeatureSource();
 					
@@ -275,13 +281,22 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 	private SimpleFeatureCollection intersectBoundingBox(double dNorth, double dEast, double dSouth, double dWest, SimpleFeatureSource oFeatureSource) {
 		try {
 			// get the actual name of the geometry
+			
 			String sGeometryName = oFeatureSource.getSchema().getGeometryDescriptor().getLocalName();
 			WasdiLog.debugLog("QueryExecutorGlobathy.intersectBoundingBox. Geometry name: " + sGeometryName);
-			
-			String sFilter = String.format("BBOX(%s, %f, %f, %f, %f)", 
-	                sGeometryName, dWest, dSouth, dEast, dNorth);
-		
-			Filter oFilter = ECQL.toFilter(sFilter);
+
+			FilterFactory2 oFilterFactory = CommonFactoryFinder.getFilterFactory2();
+
+			ReferencedEnvelope oBbox = new ReferencedEnvelope(
+			    dWest, dEast,
+			    dSouth, dNorth,
+			    DefaultGeographicCRS.WGS84
+			);
+
+			Filter oFilter = oFilterFactory.bbox(
+					oFilterFactory.property(sGeometryName),
+					oBbox
+			);
 			
 			return oFeatureSource.getFeatures(oFilter);
 			
