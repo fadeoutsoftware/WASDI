@@ -27,11 +27,7 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 
 	@Override
 	protected void internalReadConfig() {
-		if (m_oDataProviderConfig != null && !Utils.isNullOrEmpty(m_oDataProviderConfig.adapterConfig)) {
-			JSONObject oAppConf = JsonUtils.loadJsonFromFile(m_oDataProviderConfig.adapterConfig);
-			m_sGloBathRootFolderPath = oAppConf.getString("globathyRootFolderPath");
-		}
-
+	
 	}
 
 	@Override

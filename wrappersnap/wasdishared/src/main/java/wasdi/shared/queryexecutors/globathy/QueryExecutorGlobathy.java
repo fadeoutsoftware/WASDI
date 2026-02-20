@@ -27,6 +27,7 @@ import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.JsonUtils;
+import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
@@ -60,6 +61,14 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 			WasdiLog.errorLog("QueryExecutorGlobathy.init. Exception reading parser config file " + m_sParserConfigPath, oEx);
 		}
 		
+	}
+	
+	@Override
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
+		if (sProduct.toLowerCase().endsWith("_bathymetry.tif")) {
+			return sOriginalUrl;
+		}
+		return null;
 	}
 
 	
