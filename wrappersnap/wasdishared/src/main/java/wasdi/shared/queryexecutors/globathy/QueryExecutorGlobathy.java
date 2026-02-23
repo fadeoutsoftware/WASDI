@@ -3,9 +3,11 @@ package wasdi.shared.queryexecutors.globathy;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +19,6 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.locationtech.jts.geom.Geometry;
@@ -27,7 +28,6 @@ import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.JsonUtils;
-import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
@@ -325,11 +325,24 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 		String sTitle = sLakeId + "_bathymetry.tif";
 		oResVM.setId(sLakeId);
 		oResVM.setTitle(sTitle);
-		oResVM.setLink("https://" + sTitle);
+		
+		
+		// get size
+		String sFileLocation = this.getFileLocation(sTitle);
+		long lFileSize = 0L;
+		try {
+			lFileSize = Files.size(Paths.get(sFileLocation));
+		} catch (IOException oE) {
+			WasdiLog.warnLog("QueryExecutorGlobathy.getResultVM. Impossible to get file size." + oE.getMessage());
+		}
+		
+		oResVM.setLink("https://" + sTitle + "," + lFileSize);
 		oResVM.setSummary("");
 		oResVM.setProvider("GLOBATHY");
 		String sFootprint = simplifyLake(oLakeInfo.getGeometry());
 		oResVM.setFootprint(sFootprint);
+		
+		
 		
 		HashMap<String, String> aoPropertiesMap = new HashMap<>();
 		
@@ -362,6 +375,50 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 		
 		return oResVM;
 		
+	}
+	
+	private String getFileLocation(String sFileName) {
+		
+		String sFilePath = null;
+		
+		try {
+		
+			String sLakeId = sFileName.replace("_bathymetry.tif", "");
+			int iLakeId = Integer.parseInt(sLakeId);
+			
+			String sSubFolderPath = this.getLakeFolderPath(iLakeId);
+			
+			String sParentFolder = new File(m_sLakesShapeFilePath).getParent();
+			
+			sFilePath = sParentFolder + File.separator + sSubFolderPath + File.separator + sLakeId + "_bathymetry.tif";
+		
+		} catch(Exception oE) {
+			WasdiLog.errorLog("QueryExecutorGlobathy.getFileLocation. Exception", oE);
+		}
+		
+		return sFilePath;
+	}	
+		
+	
+	private String getLakeFolderPath(int iId) {
+	    int iMacroLower = (iId / 100000) * 100;
+	    int iMacroUpper = iMacroLower + 100;
+	    
+	    String sMacroFolder;
+	    if (iId <= 100000) {
+	    	sMacroFolder = "1_100K";
+	    } else if (iMacroLower >= 1400) {
+	    	sMacroFolder = "1400K_1427688";
+	    } else {
+	    	sMacroFolder = iMacroLower + "K_" + iMacroUpper + "K";
+	    }
+
+	    int iMicroLower = ((iId - 1) / 1000) * 1000 + 1;
+	    int iMicroUpper = iMicroLower + 999;
+	    
+	    String microFolder = iMicroLower + "_" + iMicroUpper;
+
+	    return sMacroFolder + File.separator + microFolder;
 	}
 	
 	public String simplifyLake(String sWKTGeometry) {
