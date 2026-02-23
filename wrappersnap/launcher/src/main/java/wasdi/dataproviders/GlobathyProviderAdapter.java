@@ -27,7 +27,8 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 
 	@Override
 	protected void internalReadConfig() {
-	
+		JSONObject oAppConf = JsonUtils.loadJsonFromFile(this.m_oDataProviderConfig.adapterConfig);
+		m_sGloBathRootFolderPath = new File(oAppConf.getString("lakesShapeFilePath")).getParent();
 	}
 
 	@Override
@@ -208,20 +209,6 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 		}
 		
 		return null;
-	}
-	
-	
-	public static void main(String[]args) throws Exception {
-		String sSession = "b64fc84a-b71b-472f-9672-e2c5880d45eb";
-		
-		WasdiConfig.readConfig("C:/temp/wasdi/wasdiLocalTESTConfig_develop.json");
-		GlobathyProviderAdapter oAdapter = new GlobathyProviderAdapter();
-		oAdapter.setSessionId(sSession);
-		oAdapter.readConfig();
-		
-		String sUrl = "1_bathymetry.tif";
-		System.out.println(oAdapter.getDownloadFileSize("https://" + sUrl));
-		System.out.println(oAdapter.executeDownloadFile("https://" + sUrl, null, null, "C:/WASDI", null, 0));
 	}
 
 }
