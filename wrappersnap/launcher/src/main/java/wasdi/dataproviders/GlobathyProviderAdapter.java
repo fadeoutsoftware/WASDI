@@ -1,5 +1,6 @@
 package wasdi.dataproviders;
 
+import java.io.File;
 import java.util.Map;
 
 import wasdi.shared.business.ProcessWorkspace;
@@ -102,8 +103,8 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 
 	@Override
 	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
-		if (sFileURL.startsWith("https://")) {
-			return sFileURL.replace("https://", "");
+		if (sFileURL.startsWith("https://") && sFileURL.contains(",")) {
+			return sFileURL.replace("https://", "").split(",")[0];
 		}
 		return sFileURL;
 	}
