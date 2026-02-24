@@ -1174,8 +1174,8 @@ public abstract class QueryTranslator {
 			oResult.productLevel = extractValue(sQuery, "productlevel");
 			
 			oResult.polarisation = extractValue(sQuery, "variables"); // data rate
-			
-			oResult.productType = extractValue(sQuery, "resolution");
+						
+			oResult.instrument = extractValue(sQuery, "resolution");
 			
 			return true;
 		}
