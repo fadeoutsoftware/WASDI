@@ -982,7 +982,11 @@ public class PermissionsUtils {
 				return false;
 			}
 			
-			if (sCollection.equals(ImagesCollections.PROCESSORS.getFolder())) {
+			if (sCollection.equals(ImagesCollections.GLOBATHY.getFolder())) {
+				// the dataset is freely accessible. No additional check is needed
+				return true;
+			}
+			else if (sCollection.equals(ImagesCollections.PROCESSORS.getFolder())) {
 				ProcessorRepository oProcessorRepository = new ProcessorRepository();
 				Processor oProcessor = oProcessorRepository.getProcessorByName(sFolder);
 				
@@ -1006,9 +1010,7 @@ public class PermissionsUtils {
 						return canUserAccessStyle(sUserId, oStyle.getStyleId());
 					}					
 				}				
-			}
-			
-			
+			}			
 			return false;
 			
 		} 

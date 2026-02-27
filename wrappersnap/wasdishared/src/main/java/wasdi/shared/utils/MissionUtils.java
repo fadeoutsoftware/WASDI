@@ -334,6 +334,9 @@ public class MissionUtils {
 			else if (sFileName.toLowerCase().endsWith(".nc")) {
 				return Platforms.CM;
 			}
+			else if (sFileName.toLowerCase().endsWith("_bathymetry.tif")) {
+				return Platforms.GLOBATHY;
+			}
 			return null;
 		}
 		catch (Exception oEx) {

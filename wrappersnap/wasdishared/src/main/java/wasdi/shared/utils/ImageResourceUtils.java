@@ -127,18 +127,71 @@ public class ImageResourceUtils {
 	 * @return
 	 */
 	public static String getImagesSubPath(String sCollection, String sFolder) {
+		
+		boolean bMakeDir = true;
+		
 		String sPath = PathsConfig.getImagesBasePath();
 		sPath += sCollection;
 		if (!sPath.endsWith("/")) sPath += "/";
+		
+		if (sCollection.equals(ImagesCollections.GLOBATHY.getFolder())) {
+			// for globathy dataset, there is still a parent folder to attach
+			sPath += getParentFolderName(sFolder) + "/";
+			bMakeDir = false;
+		}
 		
 		if (Utils.isNullOrEmpty(sFolder)==false) {
 			sPath += sFolder;
 			if (!sPath.endsWith("/")) sPath += "/";
 		}
 		
-		ImageResourceUtils.createDirectory(sPath);
+		if (bMakeDir)
+			ImageResourceUtils.createDirectory(sPath);
 		
 		return sPath;
+	}
+	
+	/**
+	 * Given the name of the Globathy subfolder (e.g. 63001_64000), get name of the parent folder (e.g. 1_100K)
+	 * @param sSubFolderName subfolder name, based on a range of 1000 ids
+	 * @return the name of the parent folder, based on a range of 100.000 ID
+	 */
+	private static String getParentFolderName(String sSubFolderName) {
+	    
+	    if (Utils.isNullOrEmpty(sSubFolderName)) {
+	        return "";
+	    }
+
+	    try {
+	        // Get the first ID of the range
+	        String[] asParts = sSubFolderName.split("_");
+	        
+	        if (asParts.length < 1) return "";
+
+	        int iFirstId = Integer.parseInt(asParts[0]);
+
+	        // Compute the 100k block index
+	        int iBlockIndex = iFirstId / 100000;
+
+	        // Handle the special case for the first block (1_100K)
+	        if (iBlockIndex == 0) {
+	            return "1_100K";
+	        }
+
+	        // For all other blocks, use the rounded notation (e.g., 100K_200K)
+	        // Example for iBlockIndex 1: 1 * 100 = 100, (1+1) * 100 = 200
+	        int iStartK = iBlockIndex * 100;
+	        int iEndK = (iBlockIndex + 1) * 100;
+
+	        String sParentFolder = iStartK + "K_" + iEndK + "K";
+
+	        return sParentFolder;
+	        
+	    } catch (Exception oEx) {
+	        WasdiLog.errorLog("ImageResource.getParentFolderName.Exception: ", oEx);
+	    }
+
+	    return "";
 	}
 	
 	/**
