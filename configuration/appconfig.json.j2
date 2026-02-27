@@ -1077,10 +1077,18 @@
 					"indexvalue": "HR"
 				},
 				{
+					"indexname": "producttype",
+					"indexlabel": "Product Type",
+					"indexvalues": "water_mask|lake",
+					"regex": ".*",
+					"indexvalue": "water_mask"
+				},
+				{
 					"indexname": "resolution",
 					"indexlabel": "Resolution",
 					"indexvalues": "100m|250m",
 					"regex": ".*",
+					"visibilityConditions": "producttype:water_mask",
 					"indexvalue": "100m"
 				}
 			]
@@ -1309,6 +1317,12 @@
 					"regex": ".*"
 				}
 			]
+		},
+		{
+			"name": "GLOBATHY",
+			"indexname": "platformname",
+			"indexvalue": "GLOBATHY",
+			"filters": []
 		},
 		{
 			"name": "Return NatFIM",
