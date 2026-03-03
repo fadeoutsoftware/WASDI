@@ -145,7 +145,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 			sRes += ".hdf";
 		} else if (!sRes.endsWith(".h5") && sTitle.startsWith("VNP")) {
 			sRes += ".h5";
-		} else if (!sRes.endsWith("nc") && sTitle.startsWith("SWOT")) {
+		} else if (!sRes.endsWith(".nc") && !sRes.endsWith(".zip") && sTitle.startsWith("SWOT")) {
 			sRes += ".nc";
 		}
 		

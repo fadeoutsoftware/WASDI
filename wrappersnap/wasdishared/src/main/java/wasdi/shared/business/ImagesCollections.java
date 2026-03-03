@@ -10,7 +10,8 @@ public enum ImagesCollections {
 	PROCESSORS("processors"),
 	USERS("users"),
 	ORGANIZATIONS("organizations"),
-	STYLES("styles");
+	STYLES("styles"),
+	GLOBATHY("globathy");
 	
 	private String m_sFolder;
 	

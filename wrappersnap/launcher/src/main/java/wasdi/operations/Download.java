@@ -91,6 +91,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
         	if (Utils.isNullOrEmpty(oParameter.getProvider())) {
         		oParameter.setProvider("AUTO");
         	}
+        	
         	        	
             m_oProcessWorkspaceLogger.log("Fetch Start - REQUESTED PROVIDER " + oParameter.getProvider());
 
@@ -116,6 +117,11 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             if (oProviderAdapter == null) {
             	m_oProcessWorkspaceLogger.log("ERROR searching a valid Data Provider. Abort.");
             	return false;
+            }
+            
+            // set up the session in the provider
+            if (!Utils.isNullOrEmpty(oParameter.getSessionID())) {
+            	oProviderAdapter.setSessionId(oParameter.getSessionID());
             }
             
             // Read the Platform Type from the parameter

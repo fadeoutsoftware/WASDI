@@ -48,8 +48,9 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		as_PRODUCT_MAPPING.put("VNP43IA3", "C2545314588-LPCLOUD");
 		
 		// SWOT
-		as_PRODUCT_MAPPING.put("100m", "C3233942298-POCLOUD"); 
-		as_PRODUCT_MAPPING.put("250m", "C3233942299-POCLOUD"); 
+		as_PRODUCT_MAPPING.put("water_mask:100m", "C3233942298-POCLOUD"); 
+		as_PRODUCT_MAPPING.put("water_mask:250m", "C3233942299-POCLOUD"); 
+		as_PRODUCT_MAPPING.put("lake:null", "C3233944983-POCLOUD");
 	}
 
 	
@@ -103,14 +104,20 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 			String sDateTo = oQueryViewModel.endToDate;
 			
 			String sProductType = oQueryViewModel.productType;
+			String sResolution = oQueryViewModel.instrument;
 			
 			if (Utils.isNullOrEmpty(sProductType)) {
 				WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Product type not specified " + oQueryViewModel.platformName);
 				return lCount;
 			}
 			
+			String sCollectionSearchKey = sProductType;
 			
-			String sEarthDataCollectionId = as_PRODUCT_MAPPING.get(sProductType);	
+			if (sPlatformName.equals(Platforms.SWOT))
+				sCollectionSearchKey += ":" + sResolution;
+			
+			
+			String sEarthDataCollectionId = as_PRODUCT_MAPPING.get(sCollectionSearchKey);	
 			
 			if (Utils.isNullOrEmpty(sEarthDataCollectionId)) {
 				WasdiLog.warnLog("QueryExecutorLpDaac.executeCount. Product trype " + sProductType + " not supported by WASDI" );
@@ -191,8 +198,6 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 				WasdiLog.debugLog("QueryExecutorLpDaac.executeAndRetrieve. Unsupported platform: " + oQueryViewModel.platformName);
 				return null;
 			}
-			
-
 	
 			Double dWest = oQueryViewModel.west;
 			Double dNorth = oQueryViewModel.north;
@@ -203,13 +208,19 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 			String sDateTo = oQueryViewModel.endToDate;
 			
 			String sProductType = oQueryViewModel.productType;
+			String sResolution = oQueryViewModel.instrument;
 			
 			if (Utils.isNullOrEmpty(sProductType)) {
 				WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product type not specified");
 				return null;
 			}
 			
-			String sEarthDataCollectionId =as_PRODUCT_MAPPING.get(sProductType);
+			String sCollectionSearchKey = sProductType;
+			
+			if (sPlatformName.equals(Platforms.SWOT))
+				sCollectionSearchKey += ":" + sResolution;
+			
+			String sEarthDataCollectionId =as_PRODUCT_MAPPING.get(sCollectionSearchKey);
 			
 			if (Utils.isNullOrEmpty(sEarthDataCollectionId)) {
 				WasdiLog.warnLog("QueryExecutorLpDaac.executeAndRetrieve. Product trype " + sProductType + " not supported by WASDI" );

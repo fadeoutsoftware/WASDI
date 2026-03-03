@@ -113,6 +113,11 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      * Multiply the std WASDI read timeout for the query of this specific Data Provider. May be useful for slow providers
      */
     protected int m_iHttpDownloadReadTimeoutMultiplier = 1;
+    
+    /**
+     * User's session id - for data providers that need to send requests to WASDI's APIs
+     */
+    protected String m_sSession;
 
     /**
      * Constructor: uses LauncerMain logger
@@ -375,6 +380,22 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	 */
 	public void setProviderPassword(String m_sProviderPassword) {
 		this.m_sProviderPassword = m_sProviderPassword;
+	}
+	
+	/**
+	 * Set the user session id
+	 * @param sSessionId the id of the session associated to an operation
+	 */
+	public void setSessionId(String sSessionId) {
+		this.m_sSession = sSessionId;
+	}
+	
+	/**
+	 * Get the session id
+	 * @return the id of the user session associated to an operation
+	 */
+	public String getSessionId() {
+		return this.m_sSession;
 	}
 	
 	/**

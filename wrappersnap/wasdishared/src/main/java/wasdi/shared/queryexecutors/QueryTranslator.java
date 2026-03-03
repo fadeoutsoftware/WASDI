@@ -179,10 +179,9 @@ public abstract class QueryTranslator {
 	 */
 	private static final String s_sPLATFORMNAME_ERS = "platformname:ERS";
 	
-	/**
-	 * Token of TERRA platform
-	 */
 	private static final String s_sPLATFORMNAME_METEOCEAN = "platformname:MeteOcean";
+	
+	private static final String s_sPLATFORMNAME_GLOBATHY = "platformname:GLOBATHY";
 
 	/**
 	 * Token of product type
@@ -682,6 +681,10 @@ public abstract class QueryTranslator {
 			if (!bFound) {
 				bFound = parseMeteOcean(sQuery, oResult); 
 			}
+			
+			if (!bFound) {
+				bFound = parseGlobathy(sQuery, oResult);
+			}
 						
 			if (Utils.isNullOrEmpty(oResult.platformName)) {
 				WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: platformName not found: try to read the generic one");
@@ -1171,8 +1174,8 @@ public abstract class QueryTranslator {
 			oResult.productLevel = extractValue(sQuery, "productlevel");
 			
 			oResult.polarisation = extractValue(sQuery, "variables"); // data rate
-			
-			oResult.productType = extractValue(sQuery, "resolution");
+						
+			oResult.instrument = extractValue(sQuery, "resolution");
 			
 			return true;
 		}
@@ -1377,6 +1380,18 @@ public abstract class QueryTranslator {
 			} else {
 				oResult.platformName = null;
 			}
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean parseGlobathy(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_GLOBATHY)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_GLOBATHY);
+			
+			oResult.platformName = Platforms.GLOBATHY;
 			
 			return true;
 		}
