@@ -255,7 +255,11 @@
 		    <artifactId>gt-referencing</artifactId>
 		    <version>${sVersionGeoTools}</version>
 		</dependency>
-				
+    	<dependency>
+      		<groupId>io.fabric8</groupId>
+      		<artifactId>kubernetes-client</artifactId>
+      		<version>6.10.0</version>
+    	</dependency>
 		<!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
 		<dependency>
 		    <groupId>org.jsoup</groupId>
