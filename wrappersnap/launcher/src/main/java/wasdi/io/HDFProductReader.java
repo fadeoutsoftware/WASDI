@@ -1,7 +1,6 @@
 package wasdi.io;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,11 +18,8 @@ import org.esa.snap.core.datamodel.Product;
 
 import wasdi.dataproviders.CloudferroProviderAdapter;
 import wasdi.shared.business.ecostress.EcoStressItemForReading;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ecostress.EcoStressRepository;
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;

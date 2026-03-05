@@ -1,19 +1,20 @@
 package wasdi.shared.data;
 
-import org.bson.Document;
-import org.bson.conversions.Bson;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.client.result.UpdateResult;
-
 import wasdi.shared.business.processors.ProcessorUI;
-import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.data.factories.DataRepositoryFactoryProvider;
+import wasdi.shared.data.interfaces.IProcessorUIRepositoryBackend;
 
-public class ProcessorUIRepository extends MongoRepository {
+public class ProcessorUIRepository {
+
+    private final IProcessorUIRepositoryBackend m_oBackend;
 	
 	public ProcessorUIRepository() {
-		m_sThisCollection = "processorsui";
+        m_oBackend = createBackend();
+    }
+
+    private IProcessorUIRepositoryBackend createBackend() {
+        // For now keep Mongo backend only. Next step will select by config.
+        return DataRepositoryFactoryProvider.getFactory().createProcessorUIRepository();
 	}
 	
 	/**
@@ -22,18 +23,7 @@ public class ProcessorUIRepository extends MongoRepository {
 	 * @return True of False in case of exception
 	 */
     public boolean insertProcessorUI(ProcessorUI oProcUI) {
-
-        try {
-            String sJSON = s_oMapper.writeValueAsString(oProcUI);
-            getCollection(m_sThisCollection).insertOne(Document.parse(sJSON));
-
-            return true;
-
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("ProcessorUIRepository.insertProcessorUI :error ", oEx);
-        }
-
-        return false;
+		return m_oBackend.insertProcessorUI(oProcUI);
     }
     
     /**
@@ -42,24 +32,7 @@ public class ProcessorUIRepository extends MongoRepository {
      * @return ProcessorUI interface of the processor
      */
     public ProcessorUI getProcessorUI(String sProcessorId) {
-
-        try {
-            Document oWSDocument = getCollection(m_sThisCollection).find(new Document("processorId", sProcessorId)).first();
-
-            if (oWSDocument == null) {
-            	return null;
-            }
-
-            String sJSON = oWSDocument.toJson();
-
-            ProcessorUI oProcessorUI = s_oMapper.readValue(sJSON,ProcessorUI.class);
-
-            return oProcessorUI;
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("ProcessorUIRepository.getProcessorUI :error ", oEx);
-        }
-
-        return  null;
+		return m_oBackend.getProcessorUI(sProcessorId);
     }
     
     /**
@@ -68,21 +41,7 @@ public class ProcessorUIRepository extends MongoRepository {
      * @return True or False in case of exception
      */
     public boolean updateProcessorUI(ProcessorUI oProcessorUI) {
-        try {
-            String sJSON = s_oMapper.writeValueAsString(oProcessorUI);
-            
-            Bson oFilter = new Document("processorId", oProcessorUI.getProcessorId());
-            Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
-            
-            UpdateResult oResult = getCollection(m_sThisCollection).updateOne(oFilter, oUpdateOperationDocument);
-
-            if (oResult.getModifiedCount()==1) return  true;
-        }
-        catch (Exception oEx) {
-        	WasdiLog.errorLog("ProcessorUIRepository.updateProcessorUI :error ", oEx);
-        }
-
-        return  false;
+		return m_oBackend.updateProcessorUI(oProcessorUI);
     }    
     
 	/**
@@ -91,12 +50,8 @@ public class ProcessorUIRepository extends MongoRepository {
 	 * @return
 	 */
     public int deleteProcessorUIByProcessorId(String sProcessorId) {
-    	if (Utils.isNullOrEmpty(sProcessorId)) return 0;
-
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("processorId", sProcessorId);
-
-        return deleteMany(oCriteria, m_sThisCollection);
+        return m_oBackend.deleteProcessorUIByProcessorId(sProcessorId);
     }
 
 }
+

@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.ResponseTranslator;
 import wasdi.shared.utils.log.WasdiLog;

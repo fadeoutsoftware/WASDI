@@ -1,36 +1,26 @@
 package wasdi.shared.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.Document;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.client.FindIterable;
-
 import wasdi.shared.business.Comment;
-import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.data.factories.DataRepositoryFactoryProvider;
+import wasdi.shared.data.interfaces.ICommentRepositoryBackend;
 
-public class CommentRepository extends MongoRepository {
+public class CommentRepository {
+
+    private final ICommentRepositoryBackend m_oBackend;
 
 	public CommentRepository() {
-		m_sThisCollection = "comments";
+        m_oBackend = createBackend();
 	}
 
+    private ICommentRepositoryBackend createBackend() {
+        // For now keep Mongo backend only. Next step will select by config.
+        return DataRepositoryFactoryProvider.getFactory().createCommentRepository();
+    }
+
     public List<Comment> getComments(String sReviewId) {
-
-        final ArrayList<Comment> aoReturnList = new ArrayList<Comment>();
-        try {
-
-            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("reviewId", sReviewId)).sort(new Document("date", 1));
-            fillList(aoReturnList, oWSDocuments, Comment.class);
-
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("CommentRepository.getComments: error", oEx);
-        }
-
-        return aoReturnList;
+        return m_oBackend.getComments(sReviewId);
     }
 
     /**
@@ -39,75 +29,27 @@ public class CommentRepository extends MongoRepository {
      * @return Entity
      */
     public Comment getComment(String sCommentId) {
-
-        try {
-            Document oWSDocument = getCollection(m_sThisCollection).find(new Document("commentId", sCommentId)).first();
-
-            if (null != oWSDocument) {
-            	String sJSON = oWSDocument.toJson();
-            	return s_oMapper.readValue(sJSON, Comment.class);
-            }
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("CommentRepository.getComment: error", oEx);
-        }
-
-        return  null;
+        return m_oBackend.getComment(sCommentId);
     }
 
 	public String addComment(Comment oComment) {
-		return add(oComment, m_sThisCollection, "CommentRepository.InsertComment");
+        return m_oBackend.addComment(oComment);
 	}
 
     public int deleteComment(String sReviewId, String sCommentId) {
-    	if (Utils.isNullOrEmpty(sReviewId)) return 0;
-    	if (Utils.isNullOrEmpty(sCommentId)) return 0;
-
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("reviewId", sReviewId);
-		oCriteria.append("commentId", sCommentId);
-
-        return delete(oCriteria, m_sThisCollection);
+        return m_oBackend.deleteComment(sReviewId, sCommentId);
     }
 
     public int deleteComments(String sReviewId) {
-    	if (Utils.isNullOrEmpty(sReviewId)) return 0;
-
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("reviewId", sReviewId);
-
-        return deleteMany(oCriteria, m_sThisCollection);
+        return m_oBackend.deleteComments(sReviewId);
     }
 
     public boolean updateComment(Comment oComment) {
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("commentId", oComment.getCommentId());
-		oCriteria.append("reviewId", oComment.getReviewId());
-
-        return  update(oCriteria, oComment, m_sThisCollection);
+        return m_oBackend.updateComment(oComment);
     }
     
 	public boolean isTheOwnerOfTheComment(String sReviewId, String sCommentId, String sUserId) {
-		boolean bIsTheOwner = false;
-
-        final ArrayList<Comment> aoReturnList = new ArrayList<Comment>();
-
-        try {
-    		BasicDBObject oCriteria = new BasicDBObject();
-    		oCriteria.append("reviewId", sReviewId);
-    		oCriteria.append("commentId", sCommentId);
-    		oCriteria.append("userId", sUserId);
-
-            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oCriteria);
-            fillList(aoReturnList, oWSDocuments, Comment.class);
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("CommentRepository.isTheOwnerOfTheComment: error", oEx);
-        }
-
-        if (aoReturnList.size() > 0) {
-        	bIsTheOwner = true;
-        }
-		
-		return bIsTheOwner;
+        return m_oBackend.isTheOwnerOfTheComment(sReviewId, sCommentId, sUserId);
 	}
 
 	/**
@@ -116,11 +58,7 @@ public class CommentRepository extends MongoRepository {
 	 * @return
 	 */
     public int deleteCommentsByUser(String sUserId) {
-    	if (Utils.isNullOrEmpty(sUserId)) return 0;
-
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("userId", sUserId);
-
-        return deleteMany(oCriteria, m_sThisCollection);
+        return m_oBackend.deleteCommentsByUser(sUserId);
     }
 }
+

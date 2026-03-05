@@ -1,103 +1,43 @@
 package wasdi.shared.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.Document;
-import org.bson.conversions.Bson;
-
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.result.UpdateResult;
-
-import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.data.factories.DataRepositoryFactoryProvider;
+import wasdi.shared.data.interfaces.IMetricsEntryRepositoryBackend;
 import wasdi.shared.viewmodels.monitoring.MetricsEntry;
 
-public class MetricsEntryRepository extends MongoRepository {
+public class MetricsEntryRepository {
+
+	private final IMetricsEntryRepositoryBackend m_oBackend;
 
 	public MetricsEntryRepository() {
-		m_sThisCollection = "metricsentries";
+		m_oBackend = createBackend();
+	}
+
+	private IMetricsEntryRepositoryBackend createBackend() {
+		// For now keep Mongo backend only. Next step will select by config.
+		return DataRepositoryFactoryProvider.getFactory().createMetricsEntryRepository();
 	}
 
 	public boolean insertMetricsEntry(MetricsEntry oMetricsEntry) {
-		try {
-			String sJSON = s_oMapper.writeValueAsString(oMetricsEntry);
-			getCollection(m_sThisCollection).insertOne(Document.parse(sJSON));
-
-			return true;
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("MetricsEntryRepository.insertMetricsEntry: error", oEx);
-		}
-
-		return false;
+		return m_oBackend.insertMetricsEntry(oMetricsEntry);
 	}
 
 	public boolean updateMetricsEntry(MetricsEntry oMetricsEntry) {
-		try {
-			Bson oFilter = new Document("node", oMetricsEntry.getNode());
-
-			String sJSON = s_oMapper.writeValueAsString(oMetricsEntry);
-			Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
-
-			UpdateResult oResult = getCollection(m_sThisCollection).updateOne(oFilter, oUpdateOperationDocument);
-
-			if (oResult.getModifiedCount() == 1) {
-				return  true;
-			} else {
-				return insertMetricsEntry(oMetricsEntry);
-			}
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("MetricsEntryRepository.updateMetricsEntry: error", oEx);
-		}
-
-		return false;
+		return m_oBackend.updateMetricsEntry(oMetricsEntry);
 	}
 
 	public List<MetricsEntry> getMetricsEntries() {
-		final List<MetricsEntry> aoReturnList = new ArrayList<>();
-
-		try {
-			FindIterable<Document> oDocuments = getCollection(m_sThisCollection).find();
-
-			fillList(aoReturnList, oDocuments, MetricsEntry.class);
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("MetricsEntryRepository.getMetricsEntries: error", oEx);
-		}
-
-		return aoReturnList;
+		return m_oBackend.getMetricsEntries();
 	}
 
 	public List<MetricsEntry> getMetricsEntryByNode(String sNode) {
-		final List<MetricsEntry> aoReturnList = new ArrayList<>();
-
-		try {
-			FindIterable<Document> oDocuments = getCollection(m_sThisCollection).find(new Document("node", sNode));
-
-			fillList(aoReturnList, oDocuments, MetricsEntry.class);
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("MetricsEntryRepository.getMetricsEntryByNode: error", oEx);
-		}
-
-		return aoReturnList;
+		return m_oBackend.getMetricsEntryByNode(sNode);
 	}
 
 	public MetricsEntry getLatestMetricsEntryByNode(String sNode) {
-		MetricsEntry oMetricsEntry = null;
-
-		try {
-			Document oDocument = getCollection(m_sThisCollection)
-					.find(new Document("node", sNode))
-					.sort(new Document("timestamp", -1))
-					.first();
-
-			if (oDocument != null) {
-				String sJSON = oDocument.toJson();
-				oMetricsEntry = s_oMapper.readValue(sJSON, MetricsEntry.class);
-			}
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("MetricsEntryRepository.getLatestMetricsEntryByNode: error", oEx);
-		}
-
-		return oMetricsEntry;
+		return m_oBackend.getLatestMetricsEntryByNode(sNode);
 	}
 
 }
+

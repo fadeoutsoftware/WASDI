@@ -1,15 +1,10 @@
 package wasdi.shared.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.Document;
-
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.result.DeleteResult;
-
 import wasdi.shared.business.AppCategory;
-import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.data.factories.DataRepositoryFactoryProvider;
+import wasdi.shared.data.interfaces.IAppsCategoriesRepositoryBackend;
 
 /**
  * AppCategory Repository
@@ -17,11 +12,18 @@ import wasdi.shared.utils.log.WasdiLog;
  * @author p.campanella
  *
  */
-public class AppsCategoriesRepository extends MongoRepository {
-	
+public class AppsCategoriesRepository {
+
+    private final IAppsCategoriesRepositoryBackend m_oBackend;
+
 	public AppsCategoriesRepository() {
-		m_sThisCollection = "appscategories";
+        m_oBackend = createBackend();
 	}
+
+    private IAppsCategoriesRepositoryBackend createBackend() {
+        // For now keep Mongo backend only. Next step will select by config.
+        return DataRepositoryFactoryProvider.getFactory().createAppsCategoriesRepository();
+    }
 
     /**
      * Get List of Process Workspaces in a Workspace
@@ -29,72 +31,21 @@ public class AppsCategoriesRepository extends MongoRepository {
      * @return
      */
     public List<AppCategory> getCategories() {
-
-        final ArrayList<AppCategory> aoReturnList = new ArrayList<AppCategory>();
-        try {
-
-            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
-            fillList(aoReturnList, oWSDocuments, AppCategory.class);
-
-        } catch (Exception oEx) {
-            WasdiLog.errorLog("AppsCategoriesRepository.getCategories: error", oEx);
-        }
-
-        return aoReturnList;
+        return m_oBackend.getCategories();
     }
     
     public AppCategory getCategoryById(String sCategoryId) {
-
-        try {
-
-        	Document oWSDocument = getCollection(m_sThisCollection).find(new Document("id", sCategoryId)).first();
-        	String sJSON = oWSDocument.toJson();
-        	
-        	AppCategory oAppCategory = s_oMapper.readValue(sJSON, AppCategory.class);
-        	
-        	return oAppCategory;
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("AppsCategoriesRepository.getCategoryById: error", oEx);
-        }
-
-        return null;
+        return m_oBackend.getCategoryById(sCategoryId);
     }
     
     public boolean insertCategory(AppCategory oCategory) {
-
-        try {
-            String sJSON = s_oMapper.writeValueAsString(oCategory);
-            getCollection(m_sThisCollection).insertOne(Document.parse(sJSON));
-
-            return true;
-
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("AppsCategoriesRepository.insertCategory: error", oEx);
-        }
-
-        return false;
+        return m_oBackend.insertCategory(oCategory);
     }
     
     public boolean deleteCategory(String sCategoryId) {
-
-        try {
-
-            DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteOne(new Document("id", sCategoryId));
-
-            if (oDeleteResult != null)
-            {
-                if (oDeleteResult.getDeletedCount() == 1 )
-                {
-                    return  true;
-                }
-            }
-
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("AppsCategoriesRepository.deleteCategory: error", oEx);
-        }
-
-        return  false;
+        return m_oBackend.deleteCategory(sCategoryId);
     }
 
 
 }
+

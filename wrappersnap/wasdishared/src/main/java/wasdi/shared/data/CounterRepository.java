@@ -1,15 +1,21 @@
 package wasdi.shared.data;
 
-import org.bson.Document;
-
 import wasdi.shared.business.Counter;
-import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.data.factories.DataRepositoryFactoryProvider;
+import wasdi.shared.data.interfaces.ICounterRepositoryBackend;
 
-public class CounterRepository extends MongoRepository {
+
+public class CounterRepository {
+
+	private final ICounterRepositoryBackend m_oBackend;
 	
 	public CounterRepository() {
-		m_sThisCollection = "counter";
+		m_oBackend = createBackend();
+	}
+
+	private ICounterRepositoryBackend createBackend() {
+		// For now keep Mongo backend only. Next step will select by config.
+		return DataRepositoryFactoryProvider.getFactory().createCounterRepository();
 	}
 	
 	/**
@@ -18,21 +24,7 @@ public class CounterRepository extends MongoRepository {
 	 * @return
 	 */
 	public int getNextValue(String sSequence) {
-		
-		Counter oCounter = getCounterBySequence(sSequence);
-		if (oCounter == null) {
-			oCounter = new Counter();
-			oCounter.setSequence(sSequence);
-			oCounter.setValue(0);
-			insertCounter(oCounter);
-			return 0;
-		}
-		else {
-			int iNext = oCounter.getValue()+1;
-			oCounter.setValue(iNext);
-			updateCounter(oCounter);
-			return iNext;
-		}
+		return m_oBackend.getNextValue(sSequence);
 	}
 
 	/**
@@ -41,19 +33,7 @@ public class CounterRepository extends MongoRepository {
 	 * @return Obj Id
 	 */
 	public String insertCounter(Counter oCounter) {
-		String sResult = "";
-		if(oCounter != null) {
-			try {
-				String sJSON = s_oMapper.writeValueAsString(oCounter);
-				Document oDocument = Document.parse(sJSON);
-				getCollection(m_sThisCollection).insertOne(oDocument);
-				sResult = oDocument.getObjectId("_id").toHexString();
-	
-			} catch (Exception oEx) {
-				WasdiLog.debugLog("CounterRepository.InsertCounter: " + oEx);
-			}
-		}
-		return sResult;
+		return m_oBackend.insertCounter(oCounter);
 	}
 
 	/**
@@ -62,17 +42,7 @@ public class CounterRepository extends MongoRepository {
 	 * @return
 	 */
 	public Counter getCounterBySequence(String sSequence) {
-		Counter oCounter = null;
-		if(!Utils.isNullOrEmpty(sSequence)) {
-			try {
-				Document oWSDocument = getCollection(m_sThisCollection).find(new Document("sequence", sSequence)).first();
-				String sJSON = oWSDocument.toJson();
-				oCounter = s_oMapper.readValue(sJSON,Counter.class);
-			} catch (Exception oEx) {
-				WasdiLog.debugLog("CounterRepository.GetCounterBySequence( " + sSequence + " ): Counter still not existing");
-			}
-		}
-		return oCounter;
+		return m_oBackend.getCounterBySequence(sSequence);
 	}
 
 	/**
@@ -81,20 +51,7 @@ public class CounterRepository extends MongoRepository {
 	 * @return
 	 */
 	public boolean updateCounter(Counter oCounter) {
-		if(oCounter!=null) {
-			try {
-	
-				String sJSON = s_oMapper.writeValueAsString(oCounter);
-				Document filter = new Document("sequence", oCounter.getSequence());
-				Document update = new Document("$set", new Document(Document.parse(sJSON)));
-				getCollection(m_sThisCollection).updateOne(filter, update);
-	
-				return true;
-	
-			} catch (Exception oEx) {
-				WasdiLog.debugLog("CounterRepository.UpdateCounter: " + oEx);
-			}
-		}
-		return false;
+		return m_oBackend.updateCounter(oCounter);
 	}
 }
+

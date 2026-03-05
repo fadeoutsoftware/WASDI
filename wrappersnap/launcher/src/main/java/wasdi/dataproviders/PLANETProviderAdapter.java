@@ -7,7 +7,7 @@ import java.util.HashMap;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;

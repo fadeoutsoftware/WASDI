@@ -1,23 +1,25 @@
 package wasdi.shared.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.Document;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.client.FindIterable;
-
 import wasdi.shared.business.OpenEOJob;
-import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.data.factories.DataRepositoryFactoryProvider;
+import wasdi.shared.data.interfaces.IOpenEOJobRepositoryBackend;
 
-public class OpenEOJobRepository extends MongoRepository  {
+public class OpenEOJobRepository {
+
+    private final IOpenEOJobRepositoryBackend m_oBackend;
+
 	/**
 	 * Initialize the collection
 	 */
 	public OpenEOJobRepository () {
-		m_sThisCollection = "openeojobs";
+        m_oBackend = createBackend();
+    }
+
+    private IOpenEOJobRepositoryBackend createBackend() {
+        // For now keep Mongo backend only. Next step will select by config.
+        return DataRepositoryFactoryProvider.getFactory().createOpenEOJobRepository();
 	}
 	
 	/**
@@ -26,7 +28,7 @@ public class OpenEOJobRepository extends MongoRepository  {
 	 * @return _id of the new object.
 	 */
 	public String insertOpenEOJob(OpenEOJob oOpenEOJob) {
-		return add(oOpenEOJob);
+        return m_oBackend.insertOpenEOJob(oOpenEOJob);
 	}
 	
 	/**
@@ -35,18 +37,7 @@ public class OpenEOJobRepository extends MongoRepository  {
 	 * @return number of elements deleted
 	 */
     public int deleteOpenEOJob(String sJobId) {
-    	if (Utils.isNullOrEmpty(sJobId)) return 0;
-    	
-    	try {
-    		BasicDBObject oCriteria = new BasicDBObject();
-    		oCriteria.append("jobId", sJobId);
-
-            return delete(oCriteria);    		
-    	}
-        catch (Exception oEx) {
-        	WasdiLog.errorLog("OpenEOJobRepository.deleteOpenEOJob: error ", oEx);
-        	return -1;
-        }
+        return m_oBackend.deleteOpenEOJob(sJobId);
     }
     
     /**
@@ -55,18 +46,7 @@ public class OpenEOJobRepository extends MongoRepository  {
      * @return number of elements deleted
      */
     public int deleteOpenEOJobsByUser(String sUserId) {
-    	if (Utils.isNullOrEmpty(sUserId)) return 0;
-    	
-    	try {
-    		BasicDBObject oCriteria = new BasicDBObject();
-    		oCriteria.append("userId", sUserId);
-
-            return deleteMany(oCriteria);
-    	}
-        catch (Exception oEx) {
-        	WasdiLog.errorLog("OpenEOJobRepository.deleteOpenEOJobsByUser: error ", oEx);
-        	return -1;
-        }
+        return m_oBackend.deleteOpenEOJobsByUser(sUserId);
     }
     
     /**
@@ -75,18 +55,7 @@ public class OpenEOJobRepository extends MongoRepository  {
      * @return number of elements deleted
      */
     public int deleteOpenEOJobsByWorkspace(String sWorkspaceId) {
-    	if (Utils.isNullOrEmpty(sWorkspaceId)) return 0;
-    	
-    	try {
-    		BasicDBObject oCriteria = new BasicDBObject();
-    		oCriteria.append("workspaceId", sWorkspaceId);
-
-            return deleteMany(oCriteria);    		
-    	}
-        catch (Exception oEx) {
-        	WasdiLog.errorLog("OpenEOJobRepository.deleteOpenEOJobsByWorkspace: error ", oEx);
-        	return -1;
-        }
+        return m_oBackend.deleteOpenEOJobsByWorkspace(sWorkspaceId);
     }
     
     /**
@@ -95,16 +64,7 @@ public class OpenEOJobRepository extends MongoRepository  {
      * @return true if updated, false if not
      */
     public boolean updateOpenEOJob(OpenEOJob oOpenEOJob) {
-    	
-    	try {
-    		BasicDBObject oCriteria = new BasicDBObject();
-    		oCriteria.append("jobId", oOpenEOJob.getJobId());
-    		return  update(oCriteria, oOpenEOJob, m_sThisCollection);	
-    	}
-        catch (Exception oEx) {
-        	WasdiLog.errorLog("OpenEOJobRepository.updateOpenEOJob: error ", oEx);
-        	return false;
-        }
+        return m_oBackend.updateOpenEOJob(oOpenEOJob);
     }
     
     /**
@@ -113,19 +73,7 @@ public class OpenEOJobRepository extends MongoRepository  {
      * @return OgcProcessesTask or null
      */
     public OpenEOJob getOpenEOJob(String sJobId) {
-        try {
-            Document oWSDocument = getCollection(m_sThisCollection).find(new Document("jobId", sJobId)).first();
-
-            if (null != oWSDocument) {
-            	String sJSON = oWSDocument.toJson();
-            	return s_oMapper.readValue(sJSON, OpenEOJob.class);
-            }
-        } catch (Exception oEx) {
-            WasdiLog.errorLog("OpenEOJobRepository.getOpenEOJob: error ", oEx);
-        }
-
-        return  null;
-    	
+        return m_oBackend.getOpenEOJob(sJobId);
     }
     
     /**
@@ -134,20 +82,7 @@ public class OpenEOJobRepository extends MongoRepository  {
      * @return OgcProcessesTask or null
      */
     public List<OpenEOJob> getOpenEOJobsByUser(String sUserId) {
-    	
-        final ArrayList<OpenEOJob> aoReturnList = new ArrayList<OpenEOJob>();
-        try {
-
-            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId));
-            
-            fillList(aoReturnList, oWSDocuments, OpenEOJob.class);
-            
-        } 
-        catch (Exception oEx) {
-        	WasdiLog.errorLog("OpenEOJobRepository.getOpenEOJobsByUser: error ", oEx);
-        }
-
-        return aoReturnList; 
-    	
-    }    
+	    return m_oBackend.getOpenEOJobsByUser(sUserId);
+    }
 }
+

@@ -12,7 +12,8 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.factories.DataLayerManager;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.LauncherOperationsUtils;
@@ -129,8 +130,8 @@ public class WasdiScheduler
 		//mongo config
 		try {
 			WasdiLog.infoLog("WasdiScheduler.main: Configuring mongo...");
-			// Init Mongo Configuration
-			MongoRepository.readConfig();	
+			// Init configured data layer (currently Mongo)
+			DataLayerManager.init();	
 		} 
 		catch (Throwable oEx) {
 			WasdiLog.errorLog("WasdiScheduler.main: Mongo configuration failed. Reason: " + oEx);

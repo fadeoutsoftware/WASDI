@@ -5,7 +5,7 @@ import org.bson.Document;
 import com.mongodb.BasicDBObject;
 
 import wasdi.shared.business.statistics.Job;
-import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**

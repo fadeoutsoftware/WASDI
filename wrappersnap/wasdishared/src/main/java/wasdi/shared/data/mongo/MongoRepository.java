@@ -1,4 +1,4 @@
-package wasdi.shared.data;
+package wasdi.shared.data.mongo;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -185,7 +185,7 @@ public class MongoRepository {
      * @param sCollection
      * @return
      */
-    public MongoCollection<Document> getCollection(String sCollection) {
+    protected MongoCollection<Document> getCollection(String sCollection) {
     	MongoDatabase oMongoDb = getMongoDatabase(m_sRepoDb);
     	
     	if (oMongoDb != null) {
@@ -235,7 +235,7 @@ public class MongoRepository {
      * @param oMongoDocuments List of the mongo documents returned by the query
      * @param oClass Class object of Type T
      */
-    public <T> void fillList(List<T> aoReturnList, MongoIterable<Document> oMongoDocuments, Class<T> oClass) {
+    protected <T> void fillList(List<T> aoReturnList, MongoIterable<Document> oMongoDocuments, Class<T> oClass) {
     	
         MongoCursor<Document> oCursor = oMongoDocuments.iterator();
         
@@ -264,7 +264,7 @@ public class MongoRepository {
      * @param oMongoDocuments List of the mongo documents returned by the query
      * @param oClass Class object of Type T
      */
-    public <T> void fillList(Set<T> aoReturnList, FindIterable<Document> oMongoDocuments, Class<T> oClass) {
+    protected <T> void fillList(Set<T> aoReturnList, FindIterable<Document> oMongoDocuments, Class<T> oClass) {
     	
         MongoCursor<Document> oCursor = oMongoDocuments.iterator();
         

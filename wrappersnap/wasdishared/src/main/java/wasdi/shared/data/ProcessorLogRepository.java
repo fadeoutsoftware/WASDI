@@ -1,32 +1,32 @@
 package wasdi.shared.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.Document;
-import org.bson.conversions.Bson;
-import org.bson.types.ObjectId;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
-
 import wasdi.shared.business.processors.ProcessorLog;
-import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.data.factories.DataRepositoryFactoryProvider;
+import wasdi.shared.data.interfaces.IProcessorLogRepositoryBackend;
 
 /**
  * User Processors Log repository
  * @author p.campanella
  *
  */
-public class ProcessorLogRepository extends MongoRepository {
+public class ProcessorLogRepository {
+
+    private final IProcessorLogRepositoryBackend m_oBackend;
 	
 	public ProcessorLogRepository() {
-		m_sThisCollection = "processorlog";
-		m_sRepoDb = "local";
+        m_oBackend = createBackend();
+    }
+
+    private IProcessorLogRepositoryBackend createBackend() {
+        // For now keep Mongo backend only. Next step will select by config.
+        return DataRepositoryFactoryProvider.getFactory().createProcessorLogRepository();
 	}
+    
+    public void setRepoDb(String sRepoDb) {
+    	m_oBackend.setRepoDb(sRepoDb);
+    }
 	
 	/**
 	 * Insert a new log row
@@ -34,25 +34,7 @@ public class ProcessorLogRepository extends MongoRepository {
 	 * @return Mongo Obj Id
 	 */
     public String insertProcessLog(ProcessorLog oProcessLog) {
-        try {
-        	if(null == oProcessLog) {
-        		WasdiLog.debugLog("ProcessorLogRepository.InsertProcessLog: oProcessorLog is null");
-        		return null;
-        	}
-        	CounterRepository oCounterRepo = new CounterRepository();
-        	
-        	oProcessLog.setRowNumber(oCounterRepo.getNextValue(oProcessLog.getProcessWorkspaceId()));
-        	
-            String sJSON = s_oMapper.writeValueAsString(oProcessLog);
-            Document oDocument = Document.parse(sJSON);
-            
-            getCollection(m_sThisCollection).insertOne(oDocument);
-            return oDocument.getObjectId("_id").toHexString();
-
-        } catch (Exception oEx) {
-            WasdiLog.errorLog("ProcessorLogRepository.InsertProcessLog: ", oEx);
-        }
-        return "";
+        return m_oBackend.insertProcessLog(oProcessLog);
     }
     
 	/**
@@ -60,25 +42,7 @@ public class ProcessorLogRepository extends MongoRepository {
 	 * @param aoProcessLogs a list of rows to add
 	 */
     public void insertProcessLogList(List<ProcessorLog> aoProcessLogs) {
-        try {
-        	if(null == aoProcessLogs) {
-        		WasdiLog.debugLog("ProcessorLogRepository.InsertProcessLogList: aoProcessorLog is null");
-        		return;
-        	}
-        	
-        	List<Document> aoDocs = new ArrayList<>();
-        	for (ProcessorLog oProcessorLog: aoProcessLogs) {
-        		if(null!=oProcessorLog) {
-        			String sJSON = s_oMapper.writeValueAsString(oProcessorLog);
-                    Document oDocument = Document.parse(sJSON);
-                    aoDocs.add(oDocument);
-        		}
-			}
-        	getCollection(m_sThisCollection).insertMany(aoDocs);
-
-        } catch (Exception oEx) {
-            WasdiLog.errorLog("ProcessorLogRepository.InsertProcessLog: ", oEx);
-        }
+        m_oBackend.insertProcessLogList(aoProcessLogs);
         return;
     }
     
@@ -88,16 +52,7 @@ public class ProcessorLogRepository extends MongoRepository {
      * @return True or False
      */
     public boolean deleteProcessorLog(String sId) {
-        try {
-            getCollection(m_sThisCollection).deleteOne(new Document("_id", new ObjectId(sId)));
-
-            return true;
-
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("ProcessorLogRepository.DeleteProcessorLog( "+sId+" )" , oEx);
-        }
-
-        return false;
+        return m_oBackend.deleteProcessorLog(sId);
     }
     
     /**
@@ -106,19 +61,7 @@ public class ProcessorLogRepository extends MongoRepository {
      * @return List of all the log rows
      */
     public List<ProcessorLog> getLogsByProcessWorkspaceId(String sProcessWorkspaceId) {
-
-        final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
-        if(!Utils.isNullOrEmpty(sProcessWorkspaceId)) {
-	        try {
-	            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("processWorkspaceId", sProcessWorkspaceId));
-	            if(oWSDocuments!=null) {
-	            	fillList(aoReturnList, oWSDocuments, ProcessorLog.class);
-	            }
-	        } catch (Exception oEx) {
-	        	WasdiLog.errorLog("ProcessorLogRepository.GetLogsByProcessWorkspaceId( " + sProcessWorkspaceId + " )", oEx);
-	        }
-        }
-        return aoReturnList;
+        return m_oBackend.getLogsByProcessWorkspaceId(sProcessWorkspaceId);
     }
     
     /**
@@ -127,20 +70,7 @@ public class ProcessorLogRepository extends MongoRepository {
      * @return
      */
     public List<ProcessorLog> getLogsByArrayProcessWorkspaceId(List<String> asProcessWorkspaceId) {
-        BasicDBObject oInQuery = new BasicDBObject("$in", asProcessWorkspaceId);
-        BasicDBObject oQuery = new BasicDBObject("processWorkspaceId", oInQuery);
-
-        final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
-        
-        try {
-            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oQuery);
-            if(oWSDocuments!=null) {
-            	fillList(aoReturnList, oWSDocuments, ProcessorLog.class);
-            }
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("ProcessorLogRepository.getLogsByArrayProcessWorkspaceId", oEx);
-        }
-        return aoReturnList;
+        return m_oBackend.getLogsByArrayProcessWorkspaceId(asProcessWorkspaceId);
     }
     
     //
@@ -151,23 +81,7 @@ public class ProcessorLogRepository extends MongoRepository {
      * @return
      */
     public boolean deleteLogsOlderThan(String sDate) {
-    	
-    	if (Utils.isNullOrEmpty(sDate)) return false;
-    	
-    	sDate = sDate + " 00:00:00";
-    	
-        BasicDBObject oLessThanQuery = new BasicDBObject("$lt", sDate);
-        BasicDBObject oQuery = new BasicDBObject("logDate", oLessThanQuery);
-
-        
-        try {
-            getCollection(m_sThisCollection).deleteMany(oQuery);
-            return true;
-            
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("ProcessorLogRepository.deleteLogsOlderThan", oEx);
-        }
-        return false;
+        return m_oBackend.deleteLogsOlderThan(sDate);
     }
     
     /**
@@ -176,17 +90,7 @@ public class ProcessorLogRepository extends MongoRepository {
      * @return True or False in case of error
      */
     public boolean deleteLogsByProcessWorkspaceId(String sProcessWorkspaceId) {
-        
-        if(!Utils.isNullOrEmpty(sProcessWorkspaceId)) {
-        	
-	        try {
-	            getCollection(m_sThisCollection).deleteMany(new Document("processWorkspaceId", sProcessWorkspaceId));
-	            return true;
-	        } catch (Exception oEx) {
-	        	WasdiLog.errorLog("ProcessorLogRepository.GetLogsByProcessWorkspaceId( " + sProcessWorkspaceId + " )", oEx);
-	        }
-        }
-        return false;
+        return m_oBackend.deleteLogsByProcessWorkspaceId(sProcessWorkspaceId);
     }
         
     /**
@@ -195,23 +99,7 @@ public class ProcessorLogRepository extends MongoRepository {
      * @return List of log rows containing the text
      */
     public List<ProcessorLog> getLogRowsByText(String sLogText) {
-
-        final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
-        if(!Utils.isNullOrEmpty(sLogText)) {
-	        try {
-	        	
-	        	BasicDBObject oRegexQuery = new BasicDBObject();
-	        	oRegexQuery.put("logRow", new BasicDBObject("$regex", sLogText));
-	        	
-	            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oRegexQuery);
-	            if(oWSDocuments!=null) {
-	            	fillList(aoReturnList, oWSDocuments, ProcessorLog.class);
-	            }
-	        } catch (Exception oEx) {
-	        	WasdiLog.errorLog("ProcessorLogRepository.GetLogRowsByText( " + sLogText + " )", oEx);
-	        }
-        }
-        return aoReturnList;
+        return m_oBackend.getLogRowsByText(sLogText);
     }
     
     /**
@@ -221,31 +109,7 @@ public class ProcessorLogRepository extends MongoRepository {
      * @return List of found rows
      */
     public List<ProcessorLog> getLogRowsByTextAndProcessId(String sLogText, String sProcessWorkspaceId) {
-
-        final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
-        if(!Utils.isNullOrEmpty(sLogText)) {
-	        try {
-	        	
-	        	BasicDBObject oRegexQuery = new BasicDBObject();
-	        	oRegexQuery.put("logRow", new BasicDBObject("$regex", sLogText));
-
-	        	List<BasicDBObject> aoFilters = new ArrayList<BasicDBObject>();
-	        	aoFilters.add(oRegexQuery);
-	        	aoFilters.add(new BasicDBObject("processWorkspaceId", sProcessWorkspaceId));
-	        	
-	        	BasicDBObject oAndQuery = new BasicDBObject();
-	        	oAndQuery.put("$and", aoFilters);
-	        	
-	        	
-	            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oAndQuery);
-	            if(oWSDocuments!=null) {
-	            	fillList(aoReturnList, oWSDocuments, ProcessorLog.class);
-	            }
-	        } catch (Exception oEx) {
-	        	WasdiLog.errorLog("ProcessorLogRepository.GetLogRowsByText( " + sLogText + " )", oEx);
-	        }
-        }
-        return aoReturnList;
+        return m_oBackend.getLogRowsByTextAndProcessId(sLogText, sProcessWorkspaceId);
     }
     
 	/**
@@ -257,31 +121,7 @@ public class ProcessorLogRepository extends MongoRepository {
 	 * @return List of Log Rows in the range
 	 */
     public List<ProcessorLog> getLogsByWorkspaceIdInRange(String sProcessWorkspaceId, Integer iLo, Integer iUp) {
-    	
-    	final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
-    	
-		if(null == sProcessWorkspaceId || iLo == null || iUp == null) {
-			WasdiLog.debugLog("ProcessorLogRepository.getLogsByWorkspaceIdInRange( " + sProcessWorkspaceId + ", " + iLo + ", " + iUp + " ): null argument passed");
-			return aoReturnList;
-		}
-		if(iLo < 0 || iLo >iUp) {
-			WasdiLog.debugLog("ProcessorLogRepository.getLogsByWorkspaceIdInRange: 0 <= "+iLo+" <= "+iUp+" range invalid or no logs available");
-			return aoReturnList;
-		}
-        
-        try {
-			//MongoDB query is:
-        	Bson oFilter = Filters.and(Filters.eq("processWorkspaceId", sProcessWorkspaceId), Filters.and(Filters.gte("rowNumber", iLo), Filters.lte("rowNumber", iUp)));
-        	MongoCollection<Document> aoProcessorLogCollection =  getCollection(m_sThisCollection);
-        	FindIterable<Document> oWSDocuments = aoProcessorLogCollection.find(oFilter);
-        	if(oWSDocuments != null) {
-        		fillList(aoReturnList, oWSDocuments, ProcessorLog.class);
-        	}
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("ProcessorLogRepository.getLogsByWorkspaceIdInRange", oEx);
-        }
-
-        return aoReturnList;
+        return m_oBackend.getLogsByWorkspaceIdInRange(sProcessWorkspaceId, iLo, iUp);
 
 	}
     
@@ -290,19 +130,10 @@ public class ProcessorLogRepository extends MongoRepository {
      * @return
      */
     public List<ProcessorLog> getList() {
-
-        final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
-        try {
-            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
-            fillList(aoReturnList, oWSDocuments, ProcessorLog.class);
-
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("ProcessorLogRepository.getList", oEx);
-        }
-
-        return aoReturnList;
+        return m_oBackend.getList();
     }
 
 	
 
 }
+

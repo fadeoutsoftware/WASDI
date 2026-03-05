@@ -62,7 +62,6 @@ import wasdi.shared.config.StorageUsageControl;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
-import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ParametersRepository;
@@ -79,6 +78,8 @@ import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.data.factories.DataLayerManager;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.data.statistics.JobsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
@@ -2810,8 +2811,8 @@ public class dbUtils {
                 System.exit(-1);            	
             }
         	
-            //this is how you read parameters:
-            MongoRepository.readConfig();
+            // Initialize configured data layer (currently Mongo)
+            DataLayerManager.init();
 
             String sNode = WasdiConfig.Current.nodeCode;
             

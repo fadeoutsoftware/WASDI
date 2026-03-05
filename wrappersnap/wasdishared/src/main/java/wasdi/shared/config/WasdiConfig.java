@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import wasdi.shared.config.openEO.OpenEO;
-import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -168,6 +168,11 @@ public class WasdiConfig {
 	 * Set true if the node has an NVIDIA GPU that we want to make available to our Apps dockers
 	 */
 	public boolean nvidiaGPUAvailable = false;
+	
+	/**
+	 * Flag to decide the db engine to use: mongo by default, it supports also NO2.
+	 */
+	public String dbEngine = "mongo";
 	
 	/**
 	 * Mongo db Configuration for the main node

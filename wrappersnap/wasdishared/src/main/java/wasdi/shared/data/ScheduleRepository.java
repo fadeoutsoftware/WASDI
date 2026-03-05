@@ -1,18 +1,20 @@
 package wasdi.shared.data;
 
-import org.bson.Document;
-import org.bson.types.ObjectId;
-
-import com.mongodb.BasicDBObject;
-
 import wasdi.shared.business.Schedule;
-import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.data.factories.DataRepositoryFactoryProvider;
+import wasdi.shared.data.interfaces.IScheduleRepositoryBackend;
 
-public class ScheduleRepository extends MongoRepository {
+public class ScheduleRepository {
+
+    private final IScheduleRepositoryBackend m_oBackend;
 	
 	public ScheduleRepository() {
-		m_sThisCollection = "schedule";
+        m_oBackend = createBackend();
+    }
+
+    private IScheduleRepositoryBackend createBackend() {
+        // For now keep Mongo backend only. Next step will select by config.
+        return DataRepositoryFactoryProvider.getFactory().createScheduleRepository();
 	}
 	
 	/**
@@ -21,20 +23,7 @@ public class ScheduleRepository extends MongoRepository {
 	 * @return Schedule Id
 	 */
     public String insertSchedule(Schedule oSchedule) {
-
-        try {
-        	
-            String sJSON = s_oMapper.writeValueAsString(oSchedule);
-            Document oDocument = Document.parse(sJSON);
-            
-            getCollection(m_sThisCollection).insertOne(oDocument);
-            return oSchedule.getScheduleId();
-
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("ScheduleRepository.insertSchedule: ", oEx);
-        }
-
-        return "";
+        return m_oBackend.insertSchedule(oSchedule);
     }
     
     /**
@@ -43,19 +32,7 @@ public class ScheduleRepository extends MongoRepository {
      * @return
      */
     public boolean deleteScheduleById(String sScheduleId) {
-    	
-    	if (Utils.isNullOrEmpty(sScheduleId)) return false;
-
-        try {
-            getCollection(m_sThisCollection).deleteOne(new Document("scheduleId", new ObjectId(sScheduleId)));
-
-            return true;
-
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("ScheduleRepository.deleteScheduleById: ", oEx);
-        }
-
-        return false;
+        return m_oBackend.deleteScheduleById(sScheduleId);
     }
 
     /**
@@ -64,21 +41,7 @@ public class ScheduleRepository extends MongoRepository {
      * @return
      */
     public Schedule getSchedule(String sScheduleId) {
-        try {
-            Document oSessionDocument = getCollection(m_sThisCollection).find(new Document("scheduleId", sScheduleId)).first();
-
-            if (oSessionDocument==null) return  null;
-
-            String sJSON = oSessionDocument.toJson();
-
-            Schedule oSchedule = s_oMapper.readValue(sJSON,Schedule.class);
-
-            return oSchedule;
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("ScheduleRepository.getSchedule: ", oEx);
-        }
-
-        return  null;
+        return m_oBackend.getSchedule(sScheduleId);
     }
     
     /**
@@ -87,18 +50,7 @@ public class ScheduleRepository extends MongoRepository {
      * @return
      */
     public int deleteScheduleByUserId(String sUserId) {
-    	
-    	if (Utils.isNullOrEmpty(sUserId)) return 0;
-
-    	try {
-    		BasicDBObject oCriteria = new BasicDBObject();
-    		oCriteria.append("userId", sUserId);
-
-            return deleteMany(oCriteria);    		
-    	}
-        catch (Exception oEx) {
-        	WasdiLog.errorLog("ScheduleRepository.deleteScheduleByUserId: error ", oEx);
-        	return -1;
-        }
+        return m_oBackend.deleteScheduleByUserId(sUserId);
     }    
 }
+

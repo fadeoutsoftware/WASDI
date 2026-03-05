@@ -42,7 +42,6 @@ import wasdi.shared.business.users.UserType;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MetricsEntryRepository;
-import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ParametersRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -50,6 +49,8 @@ import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.data.factories.DataLayerManager;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.HttpUtils;
@@ -159,7 +160,7 @@ public class Wasdi extends ResourceConfig {
 		// Read MongoDb Configuration
 		try {
 
-            MongoRepository.readConfig();
+			DataLayerManager.init();
 
 			WasdiLog.debugLog("------- Mongo db User " + MongoRepository.DB_USER);
 

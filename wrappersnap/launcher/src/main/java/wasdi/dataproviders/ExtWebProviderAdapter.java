@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.extweb.config.ExtWebConfig;
 import wasdi.shared.queryexecutors.extweb.config.ExtWebDataProviderConfig;

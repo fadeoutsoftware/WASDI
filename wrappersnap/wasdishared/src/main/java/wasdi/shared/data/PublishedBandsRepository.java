@@ -1,26 +1,25 @@
 package wasdi.shared.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.Document;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.result.DeleteResult;
-
 import wasdi.shared.business.PublishedBand;
-import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.data.factories.DataRepositoryFactoryProvider;
+import wasdi.shared.data.interfaces.IPublishedBandsRepositoryBackend;
 
 /**
  * Created by p.campanella on 17/11/2016.
  */
-public class PublishedBandsRepository extends MongoRepository {
+public class PublishedBandsRepository {
+
+    private final IPublishedBandsRepositoryBackend m_oBackend;
 	
 	public PublishedBandsRepository() {
-		m_sThisCollection = "publishedbands";
+        m_oBackend = createBackend();
+    }
+
+    private IPublishedBandsRepositoryBackend createBackend() {
+        // For now keep Mongo backend only. Next step will select by config.
+        return DataRepositoryFactoryProvider.getFactory().createPublishedBandsRepository();
 	}
 	
 	/**
@@ -29,17 +28,7 @@ public class PublishedBandsRepository extends MongoRepository {
 	 * @return
 	 */
     public boolean insertPublishedBand(PublishedBand oFile) {
-        try {
-            String sJSON = s_oMapper.writeValueAsString(oFile);
-            getCollection(m_sThisCollection).insertOne(Document.parse(sJSON));
-
-            return true;
-
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("PublishedBandsRepository.insertPublishedBand: exception ", oEx);
-        }
-
-        return false;
+		return m_oBackend.insertPublishedBand(oFile);
     }
 
     /**
@@ -49,27 +38,7 @@ public class PublishedBandsRepository extends MongoRepository {
      * @return
      */
     public PublishedBand getPublishedBand(String sProductName, String sBandName) {
-        try {
-            BasicDBObject oQuery = new BasicDBObject();
-            List<BasicDBObject> aoAndList = new ArrayList<>();
-            aoAndList.add(new BasicDBObject("productName", sProductName));
-            aoAndList.add(new BasicDBObject("bandName", sBandName));
-            oQuery.put("$and", aoAndList);
-
-            Document oSessionDocument = getCollection(m_sThisCollection).find(oQuery).first();
-
-            if (oSessionDocument==null) return  null;
-
-            String sJSON = oSessionDocument.toJson();
-
-            PublishedBand oPublishedBand = s_oMapper.readValue(sJSON,PublishedBand.class);
-
-            return oPublishedBand;
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("PublishedBandsRepository.getPublishedBand: exception ", oEx);
-        }
-
-        return  null;
+		return m_oBackend.getPublishedBand(sProductName, sBandName);
     }
     
     /**
@@ -78,19 +47,7 @@ public class PublishedBandsRepository extends MongoRepository {
      * @return
      */
     public List<PublishedBand> getPublishedBandsByProductName(String sProductName) {
-
-        final ArrayList<PublishedBand> aoReturnList = new ArrayList<PublishedBand>();
-        try {
-
-            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.eq("productName", sProductName));
-            
-            fillList(aoReturnList, oWSDocuments, PublishedBand.class);
-
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("PublishedBandsRepository.getPublishedBandsByProductName: exception ", oEx);
-        }
-
-        return  aoReturnList;
+		return m_oBackend.getPublishedBandsByProductName(sProductName);
     }
     
     /**
@@ -98,19 +55,7 @@ public class PublishedBandsRepository extends MongoRepository {
      * @return
      */
     public List<PublishedBand> getList() {
-
-        final ArrayList<PublishedBand> aoReturnList = new ArrayList<PublishedBand>();
-        try {
-
-            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
-
-            fillList(aoReturnList, oWSDocuments, PublishedBand.class);
-            
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("PublishedBandsRepository.getList: exception ", oEx);
-        }
-
-        return  aoReturnList;
+		return m_oBackend.getList();
     }
 
     /**
@@ -119,23 +64,7 @@ public class PublishedBandsRepository extends MongoRepository {
      * @return
      */
     public int deleteByProductName(String sProductName) {
-    	
-    	if (Utils.isNullOrEmpty(sProductName)) return 0;
-
-        try {
-
-            DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteMany(Filters.eq("productName", sProductName));
-
-            if (oDeleteResult != null)
-            {
-                return  (int) oDeleteResult.getDeletedCount();
-            }
-
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("PublishedBandsRepository.deleteByProductName: exception ", oEx);
-        }
-
-        return 0;
+		return m_oBackend.deleteByProductName(sProductName);
     }
     
     /**
@@ -145,25 +74,8 @@ public class PublishedBandsRepository extends MongoRepository {
      * @return
      */
     public int deleteByProductNameLayerId(String sProductName, String sLayerId) {
-    	
-    	if (Utils.isNullOrEmpty(sProductName)) return 0;
-    	if (Utils.isNullOrEmpty(sLayerId)) return 0;
-    	
-
-        try {
-
-            DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteOne(Filters.and(Filters.eq("productName", sProductName), Filters.eq("layerId", sLayerId)));
-
-            if (oDeleteResult != null)
-            {
-                return  (int) oDeleteResult.getDeletedCount();
-            }
-
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("PublishedBandsRepository.deleteByProductNameLayerId: exception ", oEx);
-        }
-
-        return 0;
+		return m_oBackend.deleteByProductNameLayerId(sProductName, sLayerId);
     }
 
 }
+

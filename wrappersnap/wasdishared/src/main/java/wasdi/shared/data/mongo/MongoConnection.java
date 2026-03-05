@@ -1,4 +1,4 @@
-package wasdi.shared.data;
+package wasdi.shared.data.mongo;
 
 import com.mongodb.client.*;
 import com.mongodb.client.MongoDatabase;

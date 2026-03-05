@@ -1,12 +1,8 @@
 package wasdi.shared.data;
 
-import org.bson.Document;
-
-import com.mongodb.BasicDBObject;
-
 import wasdi.shared.business.OgcProcessesTask;
-import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.data.factories.DataRepositoryFactoryProvider;
+import wasdi.shared.data.interfaces.IOgcProcessesTaskRepositoryBackend;
 
 /**
  * Ogc Processes Task Repository.
@@ -14,13 +10,20 @@ import wasdi.shared.utils.log.WasdiLog;
  * @author p.campanella
  *
  */
-public class OgcProcessesTaskRepository  extends MongoRepository {
+public class OgcProcessesTaskRepository {
+
+	private final IOgcProcessesTaskRepositoryBackend m_oBackend;
 
 	/**
 	 * Initialize the collection
 	 */
 	public OgcProcessesTaskRepository () {
-		m_sThisCollection = "ogcprocessestask";
+		m_oBackend = createBackend();
+	}
+
+	private IOgcProcessesTaskRepositoryBackend createBackend() {
+		// For now keep Mongo backend only. Next step will select by config.
+		return DataRepositoryFactoryProvider.getFactory().createOgcProcessesTaskRepository();
 	}
 	
 	/**
@@ -29,7 +32,7 @@ public class OgcProcessesTaskRepository  extends MongoRepository {
 	 * @return _id of the new object.
 	 */
 	public String insertOgcProcessesTask(OgcProcessesTask oOgcProcessesTask) {
-		return add(oOgcProcessesTask);
+		return m_oBackend.insertOgcProcessesTask(oOgcProcessesTask);
 	}
 	
 	/**
@@ -38,18 +41,7 @@ public class OgcProcessesTaskRepository  extends MongoRepository {
 	 * @return number of elements deleted
 	 */
     public int deleteOgcProcessesTask(String sProcessWorkspaceId) {
-    	try {
-        	if (Utils.isNullOrEmpty(sProcessWorkspaceId)) return 0;
-
-    		BasicDBObject oCriteria = new BasicDBObject();
-    		oCriteria.append("processWorkspaceId", sProcessWorkspaceId);
-
-            return delete(oCriteria);    		
-    	}
-        catch (Exception oEx) {
-        	WasdiLog.errorLog("OgcProcessesTaskRepository.deleteOgcProcessesTask: error", oEx);
-        	return -1;
-        }        	
+	    return m_oBackend.deleteOgcProcessesTask(sProcessWorkspaceId);
     }
     
     /**
@@ -58,18 +50,7 @@ public class OgcProcessesTaskRepository  extends MongoRepository {
      * @return number of elements deleted
      */
     public int deleteOgcProcessesTaskByUser(String sUserId) {
-    	try {
-        	if (Utils.isNullOrEmpty(sUserId)) return 0;
-
-    		BasicDBObject oCriteria = new BasicDBObject();
-    		oCriteria.append("userId", sUserId);
-
-            return deleteMany(oCriteria);    		
-    	}
-        catch (Exception oEx) {
-        	WasdiLog.errorLog("OgcProcessesTaskRepository.deleteOgcProcessesTaskByUser: error", oEx);
-        	return -1;
-        }       	
+	    return m_oBackend.deleteOgcProcessesTaskByUser(sUserId);
     }
     
     /**
@@ -78,18 +59,7 @@ public class OgcProcessesTaskRepository  extends MongoRepository {
      * @return number of elements deleted
      */
     public int deleteOgcProcessesTaskByWorkspace(String sWorkspaceId) {
-    	try {
-        	if (Utils.isNullOrEmpty(sWorkspaceId)) return 0;
-
-    		BasicDBObject oCriteria = new BasicDBObject();
-    		oCriteria.append("workspaceId", sWorkspaceId);
-
-            return deleteMany(oCriteria);    		
-    	}
-        catch (Exception oEx) {
-        	WasdiLog.errorLog("OgcProcessesTaskRepository.deleteOgcProcessesTaskByWorkspace: error", oEx);
-        	return -1;
-        }    	
+	    return m_oBackend.deleteOgcProcessesTaskByWorkspace(sWorkspaceId);
     }
     
     /**
@@ -98,17 +68,7 @@ public class OgcProcessesTaskRepository  extends MongoRepository {
      * @return true if updated, false if not
      */
     public boolean updateOgcProcessesTask(OgcProcessesTask oOgcProcessesTask) {
-    	try {
-			BasicDBObject oCriteria = new BasicDBObject();
-			oCriteria.append("processWorkspaceId", oOgcProcessesTask.getProcessWorkspaceId());
-	
-	        return  update(oCriteria, oOgcProcessesTask, m_sThisCollection);
-    	}
-        catch (Exception oEx) {
-        	WasdiLog.errorLog("OgcProcessesTaskRepository.updateOgcProcessesTask: error", oEx);
-        	return false;
-        }
-    	
+	    return m_oBackend.updateOgcProcessesTask(oOgcProcessesTask);
     }
     
     /**
@@ -117,20 +77,8 @@ public class OgcProcessesTaskRepository  extends MongoRepository {
      * @return OgcProcessesTask or null
      */
     public OgcProcessesTask getOgcProcessesTask(String sProcessWorkspaceId) {
-        try {
-            Document oWSDocument = getCollection(m_sThisCollection).find(new Document("processWorkspaceId", sProcessWorkspaceId)).first();
-
-            if (null != oWSDocument) {
-            	String sJSON = oWSDocument.toJson();
-            	return s_oMapper.readValue(sJSON, OgcProcessesTask.class);
-            }
-        } 
-        catch (Exception oEx) {
-        	WasdiLog.errorLog("OgcProcessesTaskRepository.getOgcProcessesTask: error", oEx);
-        }
-
-        return  null;
-    	
+		return m_oBackend.getOgcProcessesTask(sProcessWorkspaceId);
     }
 
 }
+

@@ -11,7 +11,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import wasdi.shared.business.missions.ClientConfig;
 import wasdi.shared.business.missions.Mission;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
