@@ -39,6 +39,9 @@
         <sVersionJunitJupiter>5.7.0</sVersionJunitJupiter>
         <sVersionLog4j>2.25.2</sVersionLog4j>
         <sVersionMongoDb>5.6.1</sVersionMongoDb>
+        <sVersionNitrite>4.3.2</sVersionNitrite>
+        <sVersionJavaxPersistenceApi>2.2</sVersionJavaxPersistenceApi>
+        <sVersionImmutables>2.10.1</sVersionImmutables>
         <sVersionGeoTools>28.6</sVersionGeoTools>
         <sVersionJersey2>2.43</sVersionJersey2>
         <sVersionMercurius>1.0</sVersionMercurius>
@@ -108,6 +111,28 @@
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
             <version>${sVersionMongoDb}</version>
+        </dependency>
+        <!-- NO2 (Nitrite) -->
+        <dependency>
+            <groupId>org.dizitart</groupId>
+            <artifactId>nitrite</artifactId>
+            <version>${sVersionNitrite}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.dizitart</groupId>
+            <artifactId>nitrite-mvstore-adapter</artifactId>
+            <version>${sVersionNitrite}</version>
+        </dependency>
+        <!-- Required for third-party annotation enums referenced at compile-time -->
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>javax.persistence-api</artifactId>
+            <version>${sVersionJavaxPersistenceApi}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.immutables</groupId>
+            <artifactId>value-annotations</artifactId>
+            <version>${sVersionImmutables}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
         <dependency>

@@ -1,6 +1,7 @@
 package wasdi.shared.data.factories;
 
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.no2.No2DataRepositoryFactory;
 import wasdi.shared.data.mongo.MongoDataRepositoryFactory;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -29,8 +30,8 @@ public class DataRepositoryFactoryProvider {
         }
 
         if ("no2".equals(sDbEngine)) {
-            WasdiLog.warnLog("DataRepositoryFactoryProvider.createFactoryByDbEngine: dbEngine=no2 is configured but NO2 factory is not available yet. Falling back to Mongo.");
-            return new MongoDataRepositoryFactory();
+            WasdiLog.warnLog("DataRepositoryFactoryProvider.createFactoryByDbEngine: dbEngine=no2 selected. Using transitional NO2 factory.");
+            return new No2DataRepositoryFactory();
         }
 
         if ("wasdi".equals(sDbEngine) || "mongo".equals(sDbEngine)) {

@@ -1,6 +1,7 @@
 package wasdi.shared.data.factories;
 
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.no2.No2DataLayerBootstrap;
 import wasdi.shared.data.mongo.MongoDataLayerBootstrap;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -55,8 +56,8 @@ public class DataLayerManager {
 		}
 
 		if ("no2".equals(sDbEngine)) {
-			WasdiLog.warnLog("DataLayerManager.createBootstrapByDbEngine: dbEngine=no2 is configured but NO2 bootstrap is not available yet. Falling back to Mongo.");
-			return new MongoDataLayerBootstrap();
+			WasdiLog.warnLog("DataLayerManager.createBootstrapByDbEngine: dbEngine=no2 selected. Using transitional NO2 bootstrap.");
+			return new No2DataLayerBootstrap();
 		}
 
 		if ("wasdi".equals(sDbEngine) || "mongo".equals(sDbEngine)) {
