@@ -3,6 +3,7 @@ package wasdi.shared.data.factories;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.no2.No2DataLayerBootstrap;
 import wasdi.shared.data.mongo.MongoDataLayerBootstrap;
+import wasdi.shared.data.sqlite.SqliteDataLayerBootstrap;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -49,7 +50,7 @@ public class DataLayerManager {
 	}
 
 	private static IDataLayerBootstrap createBootstrapByDbEngine() {
-		String sDbEngine = "wasdi";
+		String sDbEngine = "mongo";
 
 		if (WasdiConfig.Current != null && WasdiConfig.Current.dbEngine != null) {
 			sDbEngine = WasdiConfig.Current.dbEngine.trim().toLowerCase();
@@ -60,7 +61,13 @@ public class DataLayerManager {
 			return new No2DataLayerBootstrap();
 		}
 
-		if ("wasdi".equals(sDbEngine) || "mongo".equals(sDbEngine)) {
+		if ("sqlite".equals(sDbEngine)) {
+			WasdiLog.warnLog("DataLayerManager.createBootstrapByDbEngine: dbEngine=sqlite selected. Using SQLite bootstrap.");
+			return new SqliteDataLayerBootstrap();
+		}
+
+		if ("mongo".equals(sDbEngine)) {
+			WasdiLog.warnLog("DataLayerManager.createBootstrapByDbEngine: dbEngine=mongo selected. Using Mongo Db.");
 			return new MongoDataLayerBootstrap();
 		}
 

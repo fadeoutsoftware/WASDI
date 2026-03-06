@@ -294,6 +294,19 @@ public class Wasdi extends ResourceConfig {
 			// Check The Session with Keycloak
 			String sUserId = null;
 			
+			if (WasdiConfig.Current.disableAuthentication) {
+				WasdiLog.debugLog("Wasdi.getUserFromSession: auth is disabled, return standard user");
+				oUser = new User();
+				oUser.setName("user");
+				oUser.setUserId("user");
+				oUser.setRole(UserApplicationRole.ADMIN.getRole());
+				oUser.setSkin("wasdi");
+				oUser.setPublicNickName("user");
+				oUser.setType(UserType.PROFESSIONAL.name());
+				
+				return oUser;
+			}
+			
 			try  {
 				// Try to Introspect the token
 				String sPayload = "token=" + sSessionId;
@@ -630,11 +643,12 @@ public class Wasdi extends ResourceConfig {
 					oProcess.setWorkspaceId(oParameter.getWorkspace());
 					oProcess.setUserId(sUserId);
 					oProcess.setNotifyOwnerByMail(oParameter.isNotifyOwnerByMail());
-
-					//TODO - enforce the presence of a valid subscription and of an active project
-					if (Utils.isNullOrEmpty(oUser.getActiveProjectId())
-							|| Utils.isNullOrEmpty(oUser.getActiveSubscriptionId())) {
-						WasdiLog.warnLog("Wasdi.runProcess: Process Scheduled for Launcher. The user does not have a valid subscription and an active project");
+					
+					if (WasdiConfig.Current.activateSubscriptionChecks) {
+						if (Utils.isNullOrEmpty(oUser.getActiveProjectId())
+								|| Utils.isNullOrEmpty(oUser.getActiveSubscriptionId())) {
+							WasdiLog.warnLog("Wasdi.runProcess: Process Scheduled for Launcher. The user does not have a valid subscription and an active project");
+						}						
 					}
 
 					oProcess.setProjectId(oUser.getActiveProjectId());

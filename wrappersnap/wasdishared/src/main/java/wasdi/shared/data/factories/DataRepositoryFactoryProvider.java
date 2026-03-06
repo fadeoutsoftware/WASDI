@@ -2,6 +2,7 @@ package wasdi.shared.data.factories;
 
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.no2.No2DataRepositoryFactory;
+import wasdi.shared.data.sqlite.SqliteDataRepositoryFactory;
 import wasdi.shared.data.mongo.MongoDataRepositoryFactory;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -37,6 +38,10 @@ public class DataRepositoryFactoryProvider {
         if ("wasdi".equals(sDbEngine) || "mongo".equals(sDbEngine)) {
             return new MongoDataRepositoryFactory();
         }
+        
+        if ("sqlite".equals(sDbEngine)) {
+            return new SqliteDataRepositoryFactory();
+        }        
 
         WasdiLog.warnLog("DataRepositoryFactoryProvider.createFactoryByDbEngine: unsupported dbEngine='" + sDbEngine + "'. Falling back to Mongo.");
         return new MongoDataRepositoryFactory();

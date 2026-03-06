@@ -59,6 +59,12 @@ public class WasdiConfig {
 	public boolean activateSubscriptionChecks = true;
 	
 	/**
+	 * Flag to disable or not the user management
+	 * 
+	 */
+	public boolean disableAuthentication = false;	
+	
+	/**
 	 * System name of the wasdi user
 	 */
 	public String systemUserName = "appwasdi";

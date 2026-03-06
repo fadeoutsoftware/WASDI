@@ -33,6 +33,7 @@ import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserSession;
+import wasdi.shared.business.users.UserType;
 import wasdi.shared.config.SkinConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProjectRepository;
@@ -117,6 +118,37 @@ public class AuthResource {
 	public UserViewModel login(LoginInfo oLoginInfo) {
 
 		try {
+			if (WasdiConfig.Current.disableAuthentication) {
+				WasdiLog.warnLog("AuthResource.login: auth disabled, return default user");
+				
+				//populate view model
+				UserViewModel oUserVM = new UserViewModel();
+				oUserVM.setName("user");
+				oUserVM.setSurname("");
+				oUserVM.setUserId("user");
+				oUserVM.setAuthProvider("wasdi");
+				oUserVM.setType(UserType.PROFESSIONAL.name());
+				oUserVM.setPublicNickName("user");
+				oUserVM.setSkin("wasdi");
+				oUserVM.setRole(UserApplicationRole.ADMIN.getRole());				
+				
+				// Create a new session
+				SessionRepository oSessionRepository = new SessionRepository();
+				UserSession oSession = oSessionRepository.insertUniqueSession(oUserVM.getUserId());
+				
+				if(null==oSession || Utils.isNullOrEmpty(oSession.getSessionId())) {
+					WasdiLog.debugLog("AuthResource.login: could not insert session in DB, aborting");
+					return UserViewModel.getInvalid();
+				}
+				
+				oUserVM.setSessionId(oSession.getSessionId());
+				
+
+				WasdiLog.debugLog("AuthResource.login: access succeeded, sSessionId: "+oSession.getSessionId());
+				
+				return oUserVM;
+				
+			}			
 			// Validate inputs
 			if (oLoginInfo == null) {
 				WasdiLog.warnLog("AuthResource.login: login info null, user not authenticated");

@@ -36,7 +36,7 @@ public class WasdiScheduler
 	/**
 	 * Process Workpsace Repository
 	 */
-	private static ProcessWorkspaceRepository s_oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+	private static ProcessWorkspaceRepository s_oProcessWorkspaceRepository = null;
 		
 	/**
 	 * sleeping time between iterations
@@ -108,6 +108,8 @@ public class WasdiScheduler
   			//no log4j configuration
   			System.err.println("WasdiScheduler.main: Error Configuring log.  Reason: " + oEx );
   		}
+  		
+  		s_oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         
   		LoggerWrapper oLoggerWrapper = new LoggerWrapper(s_oLogger);
   		
@@ -130,7 +132,7 @@ public class WasdiScheduler
 		//mongo config
 		try {
 			WasdiLog.infoLog("WasdiScheduler.main: Configuring mongo...");
-			// Init configured data layer (currently Mongo)
+			// Init configured data layer
 			DataLayerManager.init();	
 		} 
 		catch (Throwable oEx) {

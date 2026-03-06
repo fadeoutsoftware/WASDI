@@ -24,6 +24,7 @@ public class ProcessorTypes {
 	public static String JAVA_17_UBUNTU_22 = "java_17_Ubuntu_22";
 	public static String PERSONALIZED_DOCKER = "personalized_docker";
 	public static String PYTHON312_UBUNTU24 = "python312";
+	public static String LOCAL_PYTHON312 = "local_python312";
 	
 	
 	/**
@@ -45,6 +46,7 @@ public class ProcessorTypes {
 		else if (sProcessorType.equals(JAVA_17_UBUNTU_22)) return "java17";
 		else if (sProcessorType.equals(PERSONALIZED_DOCKER)) return "personalized_docker";
 		else if (sProcessorType.equals(PYTHON312_UBUNTU24)) return "python312";
+		else if (sProcessorType.equals(LOCAL_PYTHON312)) return "local_python312";
 		return "";
 	}
 	

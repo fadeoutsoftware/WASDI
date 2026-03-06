@@ -125,7 +125,11 @@ public abstract class WasdiProcessorEngine {
 		else if (sType.equals(ProcessorTypes.PYTHON312_UBUNTU24)) {
 			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type PYTHON312_UBUNTU24");
 			return new Python312Ubuntu24ProcessorEngine();
-		}				
+		}
+		else if (sType.equals(ProcessorTypes.LOCAL_PYTHON312)) {
+			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type LOCAL_PYTHON312");
+			return new LocalProcessorEngine();
+		}
 		else {
 			WasdiLog.warnLog("WasdiProcessorEngine.getProcessorEngine: DEFAULT CASE (type "  + sType+ " not recognized) return processor of type UbuntuPython37ProcessorEngine");
 			return new UbuntuPython37ProcessorEngine();

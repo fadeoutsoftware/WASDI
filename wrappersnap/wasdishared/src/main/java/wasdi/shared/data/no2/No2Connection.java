@@ -48,14 +48,14 @@ public class No2Connection {
 				s_sDbPassword = "";
 			}
 
-			String sBasePath = "./data";
+			String sBasePath = "/data/wasdi/";
 
-			if (WasdiConfig.Current.paths != null && WasdiConfig.Current.paths.serializationPath != null
-					&& !WasdiConfig.Current.paths.serializationPath.isEmpty()) {
-				sBasePath = WasdiConfig.Current.paths.serializationPath;
+			if (WasdiConfig.Current.paths != null && WasdiConfig.Current.paths.downloadRootPath != null
+					&& !WasdiConfig.Current.paths.downloadRootPath.isEmpty()) {
+				sBasePath = WasdiConfig.Current.paths.downloadRootPath;
 			}
 
-			Path oNo2DirectoryPath = Paths.get(sBasePath, "no2");
+			Path oNo2DirectoryPath = Paths.get(sBasePath, "no2db");
 			Files.createDirectories(oNo2DirectoryPath);
 			s_sDbFilePath = oNo2DirectoryPath.resolve(s_sDbName + ".db").toString();
 
