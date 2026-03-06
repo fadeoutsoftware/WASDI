@@ -1,7 +1,10 @@
 package wasdi.shared.utils.kubernetes;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
@@ -11,6 +14,7 @@ import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.api.model.batch.v1.JobBuilder;
+import io.fabric8.kubernetes.api.model.batch.v1.JobStatus;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import wasdi.shared.config.DockerRegistryConfig;
@@ -78,25 +82,30 @@ public class KubernetesUtils {
 	    
 	    if (Utils.isNullOrEmpty(sImageName)) return "";
 	    
-	    String sFullImage = sImageName + (Utils.isNullOrEmpty(sImageVersion) ? ":latest" : ":" + sImageVersion);
+	    String sFullImage = sImageName;
+	    
+	    sFullImage += Utils.isNullOrEmpty(sImageVersion) 
+	    		? ":latest" 
+	    		: ":" + sImageVersion;
 	    
 	    if (!Utils.isNullOrEmpty(m_sRegistry)) sFullImage = m_sRegistry + "/" + sFullImage;
 
 	    // Sanitize Job Name
 	    String sJobName = ("wasdi-job-" + sImageName).toLowerCase().replaceAll("[^a-z0-9]", "-");
-	    if (sJobName.length() > 50) sJobName = sJobName.substring(0, 50);
+	    if (sJobName.length() > 50) 
+	    	sJobName = sJobName.substring(0, 50);
 	    sJobName += "-" + Utils.getRandomName().toLowerCase();
 
 	    try (KubernetesClient oClient = new KubernetesClientBuilder().build()) {
 
-	        // 3. Cleanup preventivo
 	        if (bAlwaysRecreateJob) {
 	            oClient.batch().v1().jobs().inNamespace(m_sNameSpace).withName(sJobName).delete();
 	        }
 
-	        // 4. Configurazione Volumi (logica identica ai Pod)
-	        List<Volume> loVolumes = buildVolumes(); // Supponiamo una funzione helper per brevità
-	        List<VolumeMount> loMounts = buildVolumeMounts(asAdditionalMountPoints);
+	        // manage the mount points
+	        
+	        List<Volume> aoVolumes = buildVolumes(asAdditionalMountPoints); 
+	        List<VolumeMount> aoMounts = buildVolumeMounts(asAdditionalMountPoints);
 
 	        // 5. Costruzione del JOB
 	        Job oJob = new JobBuilder()
@@ -112,9 +121,9 @@ public class KubernetesUtils {
 	                            .withName("worker")
 	                            .withImage(sFullImage)
 	                            .withArgs(asArg != null ? asArg : new ArrayList<>())
-	                            .withVolumeMounts(loMounts)
+	                            .withVolumeMounts(aoMounts)
 	                        .endContainer()
-	                        .withVolumes(loVolumes)
+	                        .withVolumes(aoVolumes)
 	                        .withRestartPolicy("Never") // Obbligatorio per i Job
 	                    .endSpec()
 	                .endTemplate()
@@ -134,19 +143,37 @@ public class KubernetesUtils {
 	    }
 	}
 	
-	private List<Volume> buildVolumes() {
-	    List<Volume> loVolumes = new ArrayList<>();
-
-	    // mandatory volume for wasdi
-	    String sBaseVolName = "wasdi-data-storage";
-	    loVolumes.add(new VolumeBuilder()
-	        .withName(sBaseVolName)
-	        .withNewHostPath()
-	            .withPath(PathsConfig.getWasdiBasePath()) 
-	        .endHostPath()
-	        .build());
+	private List<Volume> buildVolumes(ArrayList<String> aoMountPoints) {
+		// we assume the format "pathOfTheVolumeOnHost:pathOfTheVolumeInTheContainer"
 	    
-	    return loVolumes;
+		if (aoMountPoints.isEmpty()) {
+			WasdiLog.warnLog("KubernetesUtils.buildVolumes. Empty list of mount points");
+			return null;
+		} 
+	    
+		List<Volume> aoVolumes = new ArrayList<>();
+		
+        for (int i = 0; i < aoMountPoints.size(); i++) {
+            String sMountEntry = aoMountPoints.get(i);
+            
+            String[] asParts = sMountEntry.split(":");
+            
+            if (asParts.length >= 2) {
+            	String sHostPath = asParts[0];
+                // we create a unique name for each volume
+                String sVolName = "vol-" + i;
+
+                aoVolumes.add(new VolumeBuilder()
+                    .withName(sVolName)
+                    .withNewHostPath()
+                        .withPath(sHostPath)
+                        .withType("DirectoryOrCreate")
+                    .endHostPath()
+                    .build());
+            }
+        }
+	    
+	    return aoVolumes;
 	}
 	
 
@@ -181,11 +208,88 @@ public class KubernetesUtils {
 
 	    return loMounts;
 	}
+	
+	/*
+	public Job getJobInfoByImageName(String sProcessorName, String sVersion) {
+	    
+	    try (KubernetesClient oClient = new KubernetesClientBuilder().build()) {
+	        
+	        // 1. Ricostruzione della stringa immagine (Nexus + Nome + Versione)
+	        String sMyImage = sProcessorName + ":" + sVersion;
+	        if (!Utils.isNullOrEmpty(m_sRegistry)) {
+	            sMyImage = m_sRegistry + "/" + sMyImage;
+	        }
+	        
+	        WasdiLog.debugLog("KubernetesUtils.getJobInfoByImageName: cerco Job con immagine " + sMyImage);
+
+	        // 2. Interroghiamo le API Batch per ottenere la lista dei Job nel namespace
+	        List<Job> aoJobs = oClient.batch().v1().jobs().inNamespace(m_sNameSpace).list().getItems();
+
+	        // 3. Iteriamo sui Job per trovare quello corretto
+	        for (Job oJob : aoJobs) {
+	            // Un Job definisce i container nel suo Template Spec
+	            boolean bFound = oJob.getSpec().getTemplate().getSpec().getContainers().stream()
+	                .anyMatch(oContainer -> oContainer.getImage().endsWith(sMyImage));
+
+	            if (bFound) {
+	                WasdiLog.debugLog("KubernetesUtils.getJobInfoByImageName: trovato Job " + oJob.getMetadata().getName());
+	                return oJob;
+	            }
+	        }
+	        
+	        return null;
+	        
+	    } catch (Exception oEx) {
+	        WasdiLog.errorLog("KubernetesUtils.getJobInfoByImageName: errore ", oEx);
+	        return null;
+	    }
+	}
+	*/
+	
+	public Map<String, Integer> getJobStatus(String sJobName) {
+		
+		Map<String, Integer> oJobStatusMap = null;;
+		
+		if (Utils.isNullOrEmpty(sJobName)) {
+			WasdiLog.warnLog("KubernetesUtils.printJobStatus. No job name specified");
+			return oJobStatusMap;
+		}
+		
+		
+		try (KubernetesClient oClient = new KubernetesClientBuilder().build()) {
+		    
+		    Job oJob = oClient.batch().v1().jobs().inNamespace(m_sNameSpace).withName(sJobName).get();
+		    
+		    if (oJob != null && oJob.getStatus() != null) {
+		    	oJobStatusMap = new HashMap<>();
+		    	
+		    	JobStatus oStatus = oJob.getStatus();
+		    	
+		    	oJobStatusMap.put("active", oStatus.getActive());
+		    	oJobStatusMap.put("succeeded", oStatus.getSucceeded());
+		    	oJobStatusMap.put("failed", oStatus.getFailed());
+		    	
+		    	return oJobStatusMap;
+
+		    } else {
+		    	WasdiLog.warnLog("KubernetesUtils.printJobStatus. Job not found: " + sJobName);
+		    }
+		} catch (Exception oEx) {
+		    WasdiLog.errorLog("KubernetesUtils.printJobStatus. Error", oEx);
+		}
+		
+		return oJobStatusMap;
+	}
 
 	
 	public static void main(String[] args) throws Exception {
 		KubernetesUtils oUtils = new KubernetesUtils("default", "IfNotPresent", "");
-		oUtils.run("nginx", null, null, false, null, false);
+		// oUtils.run("nginx", null, null, false, null, false);
+		String sJobName = "wasdi-test-job";
+		Map<String, Integer> oJobStatus = oUtils.getJobStatus(sJobName);
+		for (Entry<String, Integer> oEntry : oJobStatus.entrySet()) {
+			System.out.println(oEntry.getKey() + ": " + oEntry.getValue());
+		}
 	}
 
 }
