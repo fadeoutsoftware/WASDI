@@ -2,13 +2,18 @@ package wasdi.processors;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
 
 import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.config.PathsConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
@@ -23,6 +28,15 @@ import wasdi.shared.utils.runtime.ShellExecReturn;
  * No Docker image is built or required.
  */
 public class LocalProcessorEngine extends WasdiProcessorEngine {
+	
+	public LocalProcessorEngine() {
+		super();
+		
+		// Set the folder
+		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
+		m_sDockerTemplatePath += ProcessorTypes.getTemplateFolder(ProcessorTypes.LOCAL_PYTHON312);
+	}	
+	
 
 	/**
 	 * Name of the venv subfolder created inside the processor folder.
@@ -37,7 +51,7 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 	/**
 	 * Entry-point script expected in the processor zip.
 	 */
-	private static final String MAIN_SCRIPT = "myProcessor.py";
+	private static final String MAIN_SCRIPT = "wasdiProcessorExecutor.py";
 
 	/**
 	 * Derives the Python version string (e.g. "3.12") from the processor type constant.
@@ -113,6 +127,12 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 			}
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 30);
+			
+            // Copy Docker template files in the processor folder
+            File oDockerTemplateFolder = new File(m_sDockerTemplatePath);
+            File oProcessorFolder = new File(sProcessorFolder);
+
+            FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);			
 
 			// Create the venv with uv: uv venv --python <version> <processorFolder>/venv
 			String sVenvPath = sProcessorFolder + VENV_FOLDER;
@@ -122,6 +142,7 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 			List<String> asVenvCmd = new ArrayList<>();
 			asVenvCmd.add("uv");
 			asVenvCmd.add("venv");
+			asVenvCmd.add("--seed");
 			asVenvCmd.add("--python");
 			asVenvCmd.add(sPythonVersion);
 			asVenvCmd.add(sVenvPath);
@@ -230,9 +251,17 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 			List<String> asRunCmd = new ArrayList<>();
 			asRunCmd.add(sVenvPython);
 			asRunCmd.add(sMainScript);
-			asRunCmd.add(sEncodedJson);
+			
+			Map<String, String> aoEnv = new HashMap<>();
+			aoEnv.put("WASDI_ONESHOT_ENCODED_PARAMS", sEncodedJson);
+			aoEnv.put("WASDI_USER", oParameter.getUserId());
+			aoEnv.put("WASDI_SESSION_ID", oParameter.getSessionID());
+			aoEnv.put("WASDI_PROCESS_WORKSPACE_ID", oParameter.getProcessObjId());
+			aoEnv.put("WASDI_WORKSPACE_ID", oParameter.getWorkspace());
+			aoEnv.put("WASDI_WEBSERVER_URL", WasdiConfig.Current.baseUrl);
+			aoEnv.put("WASDI_BASE_PATH", WasdiConfig.Current.paths.downloadRootPath);
 
-			ShellExecReturn oRunResult = RunTimeUtils.shellExec(asRunCmd, true, true, true);
+			ShellExecReturn oRunResult = RunTimeUtils.shellExec(asRunCmd, true, true, true, aoEnv);
 
 			WasdiLog.debugLog("LocalProcessorEngine.run: process exited with code " + oRunResult.getOperationReturn());
 			if (!Utils.isNullOrEmpty(oRunResult.getOperationLogs())) {

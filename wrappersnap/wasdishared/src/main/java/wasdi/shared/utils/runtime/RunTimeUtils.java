@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
@@ -98,6 +99,53 @@ public class RunTimeUtils {
 	}
 
 	/**
+	 * Execute a system task with additional environment variables.
+	 * Note: environment variables are applied only when executing locally.
+	 * In docker execution mode they are ignored because docker uses its own
+	 * environment configuration mechanism.
+	 * 
+	 * @param asArgs List of arguments
+	 * @param bWait True to wait the process to finish, false to not wait
+	 * @param bReadOutput True to read the output of the process
+	 * @param bRedirectError True to redirect also the error stream
+	 * @param aoEnvironmentVariables additional environment variables for local execution
+	 * @return True if the process is executed
+	 */
+	public static ShellExecReturn shellExec(List<String> asArgs, boolean bWait, boolean bReadOutput, boolean bRedirectError, Map<String, String> aoEnvironmentVariables) {
+		return shellExec(asArgs, bWait, bReadOutput, bRedirectError, false, aoEnvironmentVariables);
+	}
+
+	/**
+	 * Execute a system task with additional environment variables.
+	 * Note: environment variables are applied only when executing locally.
+	 * In docker execution mode they are ignored because docker uses its own
+	 * environment configuration mechanism.
+	 * 
+	 * @param asArgs List of arguments
+	 * @param bWait True to wait the process to finish, false to not wait
+	 * @param bReadOutput True to read the output of the process
+	 * @param bRedirectError True to redirect also the error stream
+	 * @param bLogCommandLine True to log the command line false to jump
+	 * @param aoEnvironmentVariables additional environment variables for local execution
+	 * @return True if the process is executed
+	 */
+	public static ShellExecReturn shellExec(List<String> asArgs, boolean bWait, boolean bReadOutput, boolean bRedirectError, boolean bLogCommandLine, Map<String, String> aoEnvironmentVariables) {
+		if (bLogCommandLine) {
+			logCommandLine(asArgs);
+		}
+
+		if (WasdiConfig.Current.shellExecLocally) {
+			return localShellExec(asArgs, bWait, bReadOutput, bRedirectError, bLogCommandLine, aoEnvironmentVariables);
+		}
+		else {
+			if (aoEnvironmentVariables != null && !aoEnvironmentVariables.isEmpty()) {
+				WasdiLog.debugLog("RunTimeUtils.shellExec: custom environment variables are ignored in docker execution mode");
+			}
+			return dockerShellExec(asArgs, bWait, bReadOutput, bRedirectError, bLogCommandLine);
+		}
+	}
+
+	/**
 	 * Execute a system task using the local (hosting) system
 	 * 
 	 * @param asArgs List of arguments
@@ -106,6 +154,19 @@ public class RunTimeUtils {
 	 * @return True if the process is executed
 	 */
 	private static ShellExecReturn localShellExec(List<String> asArgs, boolean bWait, boolean bReadOutput, boolean bRedirectError, boolean bLogCommandLine) {
+		return localShellExec(asArgs, bWait, bReadOutput, bRedirectError, bLogCommandLine, null);
+	}
+
+	/**
+	 * Execute a system task using the local (hosting) system
+	 * 
+	 * @param asArgs List of arguments
+	 * @param bWait True to wait the process to finish, false to not wait
+	 * @param bLogCommandLine  True to log the command line false to jump
+	 * @param aoEnvironmentVariables additional environment variables
+	 * @return True if the process is executed
+	 */
+	private static ShellExecReturn localShellExec(List<String> asArgs, boolean bWait, boolean bReadOutput, boolean bRedirectError, boolean bLogCommandLine, Map<String, String> aoEnvironmentVariables) {
 		
 		// Shell exec return object
 		ShellExecReturn oReturn = new ShellExecReturn();
@@ -155,6 +216,16 @@ public class RunTimeUtils {
 			
 			// Create the process builder
 			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
+
+			if (aoEnvironmentVariables != null && !aoEnvironmentVariables.isEmpty()) {
+				Map<String, String> aoProcessEnvironment = oProcessBuilder.environment();
+				for (Map.Entry<String, String> oEnvEntry : aoEnvironmentVariables.entrySet()) {
+					if (oEnvEntry == null) continue;
+					if (Utils.isNullOrEmpty(oEnvEntry.getKey())) continue;
+					if (oEnvEntry.getValue() == null) continue;
+					aoProcessEnvironment.put(oEnvEntry.getKey(), oEnvEntry.getValue());
+				}
+			}
 			
 			if (bRedirectError) oProcessBuilder.redirectErrorStream(true);
 			if (bReadOutput) oProcessBuilder.redirectOutput(oLogFile);

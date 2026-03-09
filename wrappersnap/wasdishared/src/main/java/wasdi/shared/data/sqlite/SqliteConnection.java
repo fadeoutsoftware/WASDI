@@ -24,6 +24,7 @@ public class SqliteConnection {
 	private static String s_sDbName;
 	private static String s_sDbFilePath;
 	private static Connection s_oConnection;
+	private static boolean s_bDriverLoaded;
 
 	private SqliteConnection() {
 	}
@@ -63,6 +64,11 @@ public class SqliteConnection {
 		try {
 			if (s_oConnection != null && !s_oConnection.isClosed()) {
 				return;
+			}
+
+			if (!s_bDriverLoaded) {
+				Class.forName("org.sqlite.JDBC");
+				s_bDriverLoaded = true;
 			}
 
 			if (s_sDbFilePath == null || s_sDbFilePath.isEmpty()) {
