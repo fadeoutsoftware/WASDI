@@ -270,7 +270,12 @@ public class ProcessorsResource  {
 			oProcessor.setUploadDate((double)oDate.getTime());
 			
 			if (iTimeout != null) {
-				oProcessor.setTimeoutMs( ((long)iTimeout)*60l*1000l);
+				if (iTimeout>0) {
+					oProcessor.setTimeoutMs( ((long)iTimeout)*60l*1000l);	
+				}
+				else {
+					oProcessor.setTimeoutMs( -1L );
+				}
 			}
 			
 			int iPlaceHolderIndex = Utils.getRandomNumber(1, 8);

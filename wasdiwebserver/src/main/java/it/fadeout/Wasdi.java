@@ -143,11 +143,26 @@ public class Wasdi extends ResourceConfig {
 			sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");
 		}
 		
+
+		try {
+			Map<String, String> aoEnviornmentVars = System.getenv();
+			
+			if (aoEnviornmentVars != null) {
+				if (aoEnviornmentVars.containsKey("WASDI_CONFIG_FILE")) {
+					sConfigFilePath = aoEnviornmentVars.get("WASDI_CONFIG_FILE");
+					WasdiLog.infoLog("Wasdi.initWasdi: found WASDI_CONFIG_FILE env variable, using it");
+				}
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("Wasdi.initWasdi: Exception searching WASDI_CONFIG_FILE env variable " + oEx.toString());
+		}		
+		
 		if (!WasdiConfig.readConfig(sConfigFilePath)) {
 			WasdiLog.warnLog("Wasdi.initWasdi: ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
 		}
 		
-		WasdiLog.initLogger(WasdiConfig.Current.logLevelServer);
+		WasdiLog.initLogger(WasdiConfig.Current.logLevelServer);	
 		
 		// set nfs properties download folder
 		String sUserHome = System.getProperty("user.home");
