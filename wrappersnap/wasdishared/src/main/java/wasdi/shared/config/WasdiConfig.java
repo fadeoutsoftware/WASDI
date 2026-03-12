@@ -153,6 +153,11 @@ public class WasdiConfig {
 	public boolean addDateTimeToLogs=false;
 	
 	/**
+	 * By default is true and apps will log on db. If false, apps will log on console
+	 */
+	public boolean logAppsOnDb = true;
+	
+	/**
 	 * Configuration of the parameters checking invalid subscriptions in WASDI and deleting the workspaces accordingly
 	 */
 	public StorageUsageControl storageUsageControl;

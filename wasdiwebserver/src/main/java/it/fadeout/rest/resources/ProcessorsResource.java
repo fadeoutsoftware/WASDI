@@ -1475,6 +1475,12 @@ public class ProcessorsResource  {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response addLog(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processworkspace") String sProcessWorkspaceId, String sLog) {
 		try {
+			
+			if (!WasdiConfig.Current.logAppsOnDb) {
+				WasdiLog.infoLog("APPLOG - " + sLog);
+				return Response.ok().build();
+			}
+			
 			// Check User 
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
