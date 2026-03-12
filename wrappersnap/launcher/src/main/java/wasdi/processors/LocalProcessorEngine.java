@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
 
@@ -56,12 +54,6 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 	private static final String MAIN_SCRIPT = "wasdiProcessorExecutor.py";
 
 	/**
-	 * uv link mode used to avoid references to the global uv cache and create
-	 * a processor-local, persistent environment layout.
-	 */
-	private static final String UV_LINK_MODE_COPY = "copy";
-
-	/**
 	 * Derives the Python version string (e.g. "3.12") from the processor type constant.
 	 * Add new mappings here when new LOCAL_PYTHON* types are introduced.
 	 *
@@ -89,50 +81,79 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 	}
 
 	/**
-	 * Environment variables for uv commands that must produce self-contained
-	 * processor assets (no symlinks to uv cache locations).
+	 * Resolves the actual Python executable in the venv. Depending on platform
+	 * and venv implementation, the interpreter can be named python, python3,
+	 * or pythonX.Y.
 	 */
-	private Map<String, String> getUvCopyEnvironment() {
-		Map<String, String> aoUvEnv = new HashMap<>();
-		aoUvEnv.put("UV_LINK_MODE", UV_LINK_MODE_COPY);
-		return aoUvEnv;
+	private String findVenvPythonExecutable(String sProcessorFolder, String sPythonVersion) {
+		boolean bWindows = System.getProperty("os.name", "").toLowerCase().contains("win");
+		List<String> asCandidates = new ArrayList<>();
+
+		if (bWindows) {
+			asCandidates.add(sProcessorFolder + VENV_FOLDER + File.separator + "Scripts" + File.separator + "python.exe");
+			asCandidates.add(sProcessorFolder + VENV_FOLDER + File.separator + "Scripts" + File.separator + "python3.exe");
+		} else {
+			String sBinFolder = sProcessorFolder + VENV_FOLDER + File.separator + "bin" + File.separator;
+			asCandidates.add(sBinFolder + "python");
+			asCandidates.add(sBinFolder + "python3");
+			if (!Utils.isNullOrEmpty(sPythonVersion)) asCandidates.add(sBinFolder + "python" + sPythonVersion);
+		}
+
+		for (String sCandidate : asCandidates) {
+			if (new File(sCandidate).exists()) return sCandidate;
+		}
+
+		return null;
 	}
 
 	/**
-	 * Rebuilds the interpreter links in-place with --copies to guarantee that
-	 * venv/bin/python (or Scripts/python.exe) is a real local executable and not
-	 * a symlink to a transient uv-managed interpreter cache.
+	 * Fallback path: create the venv with stdlib `venv` using available Python
+	 * launchers, forcing copies so the environment is self-contained.
 	 */
-	private boolean hardenVenvAsPortableCopies(String sProcessorFolder) {
-		String sVenvPath = sProcessorFolder + VENV_FOLDER;
-		String sVenvPython = getVenvPythonExecutable(sProcessorFolder);
+	private boolean createVenvWithStdlib(String sVenvPath, String sPythonVersion) {
+		boolean bWindows = System.getProperty("os.name", "").toLowerCase().contains("win");
+		List<List<String>> aoBaseCommands = new ArrayList<>();
 
-		List<String> asHardenCmd = new ArrayList<>();
-		asHardenCmd.add(sVenvPython);
-		asHardenCmd.add("-m");
-		asHardenCmd.add("venv");
-		asHardenCmd.add("--upgrade");
-		asHardenCmd.add("--copies");
-		asHardenCmd.add(sVenvPath);
-
-		ShellExecReturn oHardenResult = RunTimeUtils.shellExec(asHardenCmd, true, true, true);
-		if (!oHardenResult.isOperationOk() || oHardenResult.getOperationReturn() != 0) {
-			WasdiLog.errorLog("LocalProcessorEngine.hardenVenvAsPortableCopies: python -m venv --upgrade --copies failed. Output: " + oHardenResult.getOperationLogs());
-			return false;
+		if (bWindows) {
+			if (!Utils.isNullOrEmpty(sPythonVersion)) {
+				List<String> asPyLauncher = new ArrayList<>();
+				asPyLauncher.add("py");
+				asPyLauncher.add("-" + sPythonVersion);
+				aoBaseCommands.add(asPyLauncher);
+			}
+			List<String> asPython = new ArrayList<>();
+			asPython.add("python");
+			aoBaseCommands.add(asPython);
+		} else {
+			if (!Utils.isNullOrEmpty(sPythonVersion)) {
+				List<String> asVersioned = new ArrayList<>();
+				asVersioned.add("python" + sPythonVersion);
+				aoBaseCommands.add(asVersioned);
+			}
+			List<String> asPython3 = new ArrayList<>();
+			asPython3.add("python3");
+			aoBaseCommands.add(asPython3);
+			List<String> asPython = new ArrayList<>();
+			asPython.add("python");
+			aoBaseCommands.add(asPython);
 		}
 
-		// Final safety check: executable exists and is not a symbolic link.
-		if (!new File(sVenvPython).exists()) {
-			WasdiLog.errorLog("LocalProcessorEngine.hardenVenvAsPortableCopies: venv python does not exist after hardening: " + sVenvPython);
-			return false;
+		for (List<String> asBaseCmd : aoBaseCommands) {
+			List<String> asCmd = new ArrayList<>(asBaseCmd);
+			asCmd.add("-m");
+			asCmd.add("venv");
+			asCmd.add("--clear");
+			asCmd.add("--copies");
+			asCmd.add(sVenvPath);
+
+			ShellExecReturn oResult = RunTimeUtils.shellExec(asCmd, true, true, true);
+			if (oResult.isOperationOk() && oResult.getOperationReturn() == 0) {
+				WasdiLog.debugLog("LocalProcessorEngine.createVenvWithStdlib: created venv using command " + asBaseCmd.get(0));
+				return true;
+			}
 		}
 
-		if (Files.isSymbolicLink(Paths.get(sVenvPython))) {
-			WasdiLog.errorLog("LocalProcessorEngine.hardenVenvAsPortableCopies: venv python is still a symbolic link after hardening: " + sVenvPython);
-			return false;
-		}
-
-		return true;
+		return false;
 	}
 
 	/**
@@ -202,7 +223,7 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 			asVenvCmd.add(sPythonVersion);
 			asVenvCmd.add(sVenvPath);
 
-			ShellExecReturn oVenvResult = RunTimeUtils.shellExec(asVenvCmd, true, true, true, getUvCopyEnvironment());
+			ShellExecReturn oVenvResult = RunTimeUtils.shellExec(asVenvCmd, true, true, true);
 
 			if (!oVenvResult.isOperationOk() || oVenvResult.getOperationReturn() != 0) {
 				WasdiLog.errorLog("LocalProcessorEngine.deploy: uv venv failed. Output: " + oVenvResult.getOperationLogs());
@@ -210,11 +231,23 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 				return false;
 			}
 
-			processWorkspaceLog("Hardening virtual environment for portable redeploy...");
-			if (!hardenVenvAsPortableCopies(sProcessorFolder)) {
-				WasdiLog.errorLog("LocalProcessorEngine.deploy: could not make venv portable/self-contained");
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
-				return false;
+			String sVenvPython = findVenvPythonExecutable(sProcessorFolder, sPythonVersion);
+			if (Utils.isNullOrEmpty(sVenvPython)) {
+				WasdiLog.warnLog("LocalProcessorEngine.deploy: uv created venv without a visible interpreter. Trying stdlib venv fallback with --copies...");
+				processWorkspaceLog("Retrying virtual environment creation with stdlib venv...");
+
+				if (!createVenvWithStdlib(sVenvPath, sPythonVersion)) {
+					WasdiLog.errorLog("LocalProcessorEngine.deploy: stdlib venv fallback failed at " + sVenvPath);
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+					return false;
+				}
+
+				sVenvPython = findVenvPythonExecutable(sProcessorFolder, sPythonVersion);
+				if (Utils.isNullOrEmpty(sVenvPython)) {
+					WasdiLog.errorLog("LocalProcessorEngine.deploy: no Python interpreter found in venv even after stdlib fallback at " + sVenvPath);
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+					return false;
+				}
 			}
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 60);
@@ -226,15 +259,14 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 				processWorkspaceLog("Installing packages from pip.txt...");
 
 				List<String> asPipCmd = new ArrayList<>();
-				asPipCmd.add("uv");
+				asPipCmd.add(sVenvPython);
+				asPipCmd.add("-m");
 				asPipCmd.add("pip");
 				asPipCmd.add("install");
-				asPipCmd.add("--python");
-				asPipCmd.add(sVenvPath);
 				asPipCmd.add("-r");
 				asPipCmd.add(sPipFile);
 
-				ShellExecReturn oPipResult = RunTimeUtils.shellExec(asPipCmd, true, true, true, getUvCopyEnvironment());
+				ShellExecReturn oPipResult = RunTimeUtils.shellExec(asPipCmd, true, true, true);
 
 				if (!oPipResult.isOperationOk() || oPipResult.getOperationReturn() != 0) {
 					WasdiLog.errorLog("LocalProcessorEngine.deploy: pip install failed. Output: " + oPipResult.getOperationLogs());
@@ -296,9 +328,10 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 				return false;
 			}
 
-			String sVenvPython = getVenvPythonExecutable(sProcessorFolder);
-			if (!new File(sVenvPython).exists()) {
-				WasdiLog.errorLog("LocalProcessorEngine.run: venv python not found at " + sVenvPython + " - was the processor deployed?");
+			String sPythonVersion = getLocalPythonVersion(oParameter.getProcessorType());
+			String sVenvPython = findVenvPythonExecutable(sProcessorFolder, sPythonVersion);
+			if (Utils.isNullOrEmpty(sVenvPython) || !new File(sVenvPython).exists()) {
+				WasdiLog.errorLog("LocalProcessorEngine.run: venv python not found in " + sProcessorFolder + VENV_FOLDER + " - was the processor deployed?");
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
 				return false;
 			}
@@ -432,19 +465,25 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 			}
 
 			String sVenvPath = sProcessorFolder + VENV_FOLDER;
+			String sPythonVersion = getLocalPythonVersion(oParameter.getProcessorType());
+			String sVenvPython = findVenvPythonExecutable(sProcessorFolder, sPythonVersion);
+			if (Utils.isNullOrEmpty(sVenvPython)) {
+				WasdiLog.errorLog("LocalProcessorEngine.libraryUpdate: no Python interpreter found in venv at " + sVenvPath);
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+				return false;
+			}
 
 			processWorkspaceLog("Updating packages from pip.txt...");
 
 			List<String> asPipCmd = new ArrayList<>();
-			asPipCmd.add("uv");
+			asPipCmd.add(sVenvPython);
+			asPipCmd.add("-m");
 			asPipCmd.add("pip");
 			asPipCmd.add("install");
-			asPipCmd.add("--python");
-			asPipCmd.add(sVenvPath);
 			asPipCmd.add("-r");
 			asPipCmd.add(sPipFile);
 
-			ShellExecReturn oPipResult = RunTimeUtils.shellExec(asPipCmd, true, true, true, getUvCopyEnvironment());
+			ShellExecReturn oPipResult = RunTimeUtils.shellExec(asPipCmd, true, true, true);
 
 			if (!oPipResult.isOperationOk() || oPipResult.getOperationReturn() != 0) {
 				WasdiLog.errorLog("LocalProcessorEngine.libraryUpdate: pip install failed. Output: " + oPipResult.getOperationLogs());
