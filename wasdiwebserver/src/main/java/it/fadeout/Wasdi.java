@@ -172,15 +172,15 @@ public class Wasdi extends ResourceConfig {
 
 		WasdiLog.debugLog("------- NFS dir " + System.getProperty(Wasdi.s_SNFS_DATA_DOWNLOAD));
 		
-		// Read MongoDb Configuration
+		// Read Data Layer Configuration
 		try {
 
 			DataLayerManager.init();
 
-			WasdiLog.debugLog("------- Mongo db User " + MongoRepository.DB_USER);
+			WasdiLog.debugLog("------- Db User " + MongoRepository.DB_USER);
 
 		} catch (Throwable oEx) {
-			WasdiLog.errorLog("Wasdi.initWasdi: Read MongoDb Configuration exception " + oEx.toString());
+			WasdiLog.errorLog("Wasdi.initWasdi: Read Data Layer Configuration exception " + oEx.toString());
 		}
 		
 		// Read the code of this Node
@@ -202,7 +202,6 @@ public class Wasdi extends ResourceConfig {
 		try {
 			// If this is not the main node
 			if (!WasdiConfig.Current.isMainNode()) {
-				
 				// Configure also the local connection: by default is the "wasdi" port + 1
 				MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
 				WasdiLog.debugLog("------- Addded Mongo Configuration local for " + WasdiConfig.Current.nodeCode);
@@ -219,9 +218,11 @@ public class Wasdi extends ResourceConfig {
 		
 		// Configure Rabbit
 		try {
-			RabbitFactory.readConfig();
 			
-			WasdiLog.infoLog("------- Rabbit Initialized ");
+			if (WasdiConfig.Current.rabbit == null) {
+				RabbitFactory.readConfig();
+				WasdiLog.infoLog("------- Rabbit Initialized ");				
+			}
 		} catch (Throwable oEx) {
 			WasdiLog.errorLog("Wasdi.initWasdi: Configure Rabbit exception " + oEx.toString());
 		}

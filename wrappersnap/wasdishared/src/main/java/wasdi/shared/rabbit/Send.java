@@ -39,6 +39,7 @@ public class Send {
 	public Send(String sExchange) {
 		
 		if (sExchange == null) return;
+		if (WasdiConfig.Current.rabbit == null) return;
 		
 		//create connection to the server
         try {
@@ -54,8 +55,10 @@ public class Send {
 	 * Free the resources
 	 */
 	public void Free() {
+		
+		if (WasdiConfig.Current.rabbit == null) return;
+		
 		try {
-			
 			if (m_oChannel != null) {
 				m_oChannel.close();
 			}
@@ -89,6 +92,8 @@ public class Send {
      */
     private boolean SendMsg(String sRoutingKey, String sMessageAttribute)
     {
+    	if (WasdiConfig.Current.rabbit == null) false;
+    	
     	if (m_oConnection == null || m_oChannel == null) {
     		WasdiLog.debugLog("Send.SendMgs: impossibile to send " + sMessageAttribute + " to " + sRoutingKey);
     		return false;
@@ -116,9 +121,11 @@ public class Send {
      */
     public boolean SendUpdateProcessMessage(ProcessWorkspace oProcess) throws JsonProcessingException {  
     	
+    	if (WasdiConfig.Current.rabbit == null) return false;
     	if (oProcess==null) return false;
     	if (m_oConnection == null) return false;
     	if (m_oChannel == null) return false;
+    	
     	
         RabbitMessageViewModel oUpdateProcessMessage = new RabbitMessageViewModel();
         oUpdateProcessMessage.setMessageCode(LauncherOperations.UPDATEPROCESSES.name());
@@ -144,6 +151,7 @@ public class Send {
      */
     public boolean SendRabbitMessage(boolean bOk, String sMessageCode, String sWorkSpaceId, Object oPayload, String sExchangeId) {
     	
+    	if (WasdiConfig.Current.rabbit == null) return false;
     	if (m_oConnection == null) return false;
     	if (m_oChannel == null) return false;
 
@@ -174,6 +182,8 @@ public class Send {
      * @return true if all ok false otherwise
      */
     public boolean sendRedeployDoneMessage(ProcessorParameter oParameter, boolean bSuccess, boolean bSendToLocalNode) {
+    	
+    	if (WasdiConfig.Current.rabbit == null) return false;
     	
     	boolean bSendRet = false;
     	

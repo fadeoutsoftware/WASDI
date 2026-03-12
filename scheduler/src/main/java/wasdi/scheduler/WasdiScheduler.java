@@ -131,7 +131,7 @@ public class WasdiScheduler
 		
 		//mongo config
 		try {
-			WasdiLog.infoLog("WasdiScheduler.main: Configuring mongo...");
+			WasdiLog.infoLog("WasdiScheduler.main: Configuring data layer...");
 			// Init configured data layer
 			DataLayerManager.init();	
 		} 
@@ -139,7 +139,7 @@ public class WasdiScheduler
 			WasdiLog.errorLog("WasdiScheduler.main: Mongo configuration failed. Reason: " + oEx);
 			System.exit(-1);
 		}
-		WasdiLog.infoLog("WasdiScheduler.main: Mongo configured :-)\n");
+		WasdiLog.infoLog("WasdiScheduler.main: Data Layer configured :-)\n");
 		
 		// Computational nodes need to configure also the local dababase
 		try {
