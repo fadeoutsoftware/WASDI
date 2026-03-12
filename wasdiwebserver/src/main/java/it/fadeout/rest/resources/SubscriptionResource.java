@@ -1074,7 +1074,9 @@ public class SubscriptionResource {
 	private void sendRabbitMessage(String sWorkspaceId, StripePaymentDetail oStripePaymentDetail) {
 		try {
 			// Search for exchange name
-			String sExchange = WasdiConfig.Current.rabbit.exchange;
+            String sExchange = "";
+            
+            if (WasdiConfig.Current.rabbit!=null) sExchange = WasdiConfig.Current.rabbit.exchange;
 
 			// Set default if is empty
 			if (Utils.isNullOrEmpty(sExchange)) {

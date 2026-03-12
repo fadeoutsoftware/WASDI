@@ -987,7 +987,10 @@ public class ProcessWorkspaceResource {
 				if (sSendToRabbit.equals("1") || sSendToRabbit.equals("true")) {
 					
 					// Search for exchange name
-					String sExchange = WasdiConfig.Current.rabbit.exchange;
+		            String sExchange = "amq.topic";
+		            
+		            if (WasdiConfig.Current.rabbit!=null) sExchange = WasdiConfig.Current.rabbit.exchange;
+					
 					
 					// Set default if is empty
 					if (Utils.isNullOrEmpty(sExchange)) {

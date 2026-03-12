@@ -42,11 +42,9 @@ public class DataLayerManager {
 	 * Shutdown active data layer.
 	 */
 	public static void shutdown() {
-		if (s_oBootstrap == null) {
-			s_oBootstrap = createBootstrapByDbEngine();
+		if (s_oBootstrap != null) {
+			s_oBootstrap.shutdown();
 		}
-
-		s_oBootstrap.shutdown();
 	}
 
 	private static IDataLayerBootstrap createBootstrapByDbEngine() {

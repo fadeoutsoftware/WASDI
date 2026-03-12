@@ -701,6 +701,11 @@ public class PermissionsUtils {
 	 */
 	public static boolean canUserAccessProcessWorkspace(String sUserId, String sProcessObjId) {
 		try {
+			
+			if (WasdiConfig.Current.disableAuthentication) {
+				return true;
+			}
+			
 			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sProcessObjId)) {
 				return false;
 			}

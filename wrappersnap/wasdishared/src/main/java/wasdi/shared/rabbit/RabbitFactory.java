@@ -40,10 +40,12 @@ public class RabbitFactory {
     private static ConnectionFactory m_oConnectionFactory = null;
     
     public static void readConfig() {
-        RabbitFactory.s_sRABBIT_QUEUE_USER = WasdiConfig.Current.rabbit.user;
-        RabbitFactory.s_sRABBIT_QUEUE_PWD = WasdiConfig.Current.rabbit.password;
-        RabbitFactory.s_sRABBIT_HOST = WasdiConfig.Current.rabbit.host;
-        RabbitFactory.s_iRABBIT_QUEUE_PORT = WasdiConfig.Current.rabbit.port;    	
+    	if (WasdiConfig.Current.rabbit!=null) {
+            RabbitFactory.s_sRABBIT_QUEUE_USER = WasdiConfig.Current.rabbit.user;
+            RabbitFactory.s_sRABBIT_QUEUE_PWD = WasdiConfig.Current.rabbit.password;
+            RabbitFactory.s_sRABBIT_HOST = WasdiConfig.Current.rabbit.host;
+            RabbitFactory.s_iRABBIT_QUEUE_PORT = WasdiConfig.Current.rabbit.port;    		
+    	}
     }
     
     /**

@@ -253,10 +253,14 @@ public class LauncherMain  {
         	
             // Set the Mongo Config
             MongoRepository.readConfig();
+            
+            String sExchange = "amq.topic";
+            
+            if (WasdiConfig.Current.rabbit!=null) sExchange = WasdiConfig.Current.rabbit.exchange;
 
             // Create the Rabbit Sender Object. The object is safe: in case of any problem
             // It does not send to rabbit but only logs on console.
-            LauncherMain.s_oSendToRabbit = new Send(WasdiConfig.Current.rabbit.exchange);
+            LauncherMain.s_oSendToRabbit = new Send(sExchange);
 
             // Create Launcher Instance
             LauncherMain oLauncher = new LauncherMain();

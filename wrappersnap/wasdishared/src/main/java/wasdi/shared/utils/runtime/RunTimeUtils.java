@@ -14,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import wasdi.shared.config.ShellExecItemConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
 import wasdi.shared.utils.docker.containersViewModels.constants.ContainerStates;
@@ -660,6 +661,8 @@ public class RunTimeUtils {
 	private static File createLogFile() {
 		String sTmpFolder = WasdiConfig.Current.paths.wasdiTempFolder;
 		if (!sTmpFolder.endsWith("/")) sTmpFolder += "/";
+		
+		WasdiFileUtils.createDirectoryIfDoesNotExist(sTmpFolder);
 
 		File oLogFile = new File(sTmpFolder + Utils.getRandomName() + ".log");
 

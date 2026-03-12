@@ -323,6 +323,7 @@ public class ProcessorsResource  {
 			if (oRes.getBoolValue()) {
 				oResult.setIntValue(200);
 				oResult.setBoolValue(true);
+				oResult.setStringValue(oRes.getStringValue());
 				WasdiLog.debugLog("ProcessorsResource.uploadProcessor: done with success");
 				return oResult;
 			}

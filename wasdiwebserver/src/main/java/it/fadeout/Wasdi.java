@@ -191,10 +191,12 @@ public class Wasdi extends ResourceConfig {
 			WasdiLog.errorLog("Wasdi.initWasdi: Read the code of this Node exception " + oEx.toString());
 		}
 		
-		// Read the configuration of KeyCloak		
-		s_sKeyCloakIntrospectionUrl = WasdiConfig.Current.keycloack.introspectAddress;
-		s_sClientId = WasdiConfig.Current.keycloack.confidentialClient;
-		s_sClientSecret = WasdiConfig.Current.keycloack.clientSecret;
+		if (WasdiConfig.Current.keycloack!=null) {
+			// Read the configuration of KeyCloak		
+			s_sKeyCloakIntrospectionUrl = WasdiConfig.Current.keycloack.introspectAddress;
+			s_sClientId = WasdiConfig.Current.keycloack.confidentialClient;
+			s_sClientSecret = WasdiConfig.Current.keycloack.clientSecret;			
+		}
 		
 		// Computational nodes need to configure also the local dababase
 		try {
@@ -282,9 +284,10 @@ public class Wasdi extends ResourceConfig {
 		try {
 			WasdiLog.debugLog("------- Shutting Down WASDI");
 			
-			// Stop mongo
+			// Stop database
 			try {
-				MongoRepository.shutDownConnection();
+				//MongoRepository.shutDownConnection();
+				DataLayerManager.shutdown();
 			} catch (Exception oE) {
 				WasdiLog.debugLog("Wasdi.shutDown: could not shut down connection to DB: " + oE);
 			}
@@ -618,26 +621,27 @@ public class Wasdi extends ResourceConfig {
 			}
 			else {
 				// The Workspace is here. Just add the Parameter and the ProcessWorkspace to the database 
-				
-				SessionRepository oSessionRepo = new SessionRepository();
-				
 				if (Utils.isNullOrEmpty(sParentId)) {
 					
-					//Create a WASDI session here
-					UserSession oSession = new UserSession();
-					oSession.setUserId(sUserId);
-					
 					sSessionId = UUID.randomUUID().toString();
-					oSession.setSessionId(sSessionId);
-					oSession.setLoginDate(Utils.nowInMillis());
-					oSession.setLastTouch(Utils.nowInMillis());
 					
-					if (!oSessionRepo.insertSession(oSession)) {
-						WasdiLog.warnLog("could not insert session " + oSession.getSessionId() + " in DB, try with the old one");						
-					}
-					else {
-						// Assign this new session to the parameter
-						oParameter.setSessionID(sSessionId);
+					if (!WasdiConfig.Current.disableAuthentication) {
+						//Create a WASDI session here
+						UserSession oSession = new UserSession();
+						oSession.setUserId(sUserId);
+						oSession.setSessionId(sSessionId);
+						oSession.setLoginDate(Utils.nowInMillis());
+						oSession.setLastTouch(Utils.nowInMillis());
+						
+						SessionRepository oSessionRepo = new SessionRepository();
+						
+						if (!oSessionRepo.insertSession(oSession)) {
+							WasdiLog.warnLog("Wasdi.runProcess: could not insert session " + oSession.getSessionId() + " in DB, try with the old one");						
+						}
+						else {
+							// Assign this new session to the parameter
+							oParameter.setSessionID(sSessionId);
+						}						
 					}
 				}
 				
