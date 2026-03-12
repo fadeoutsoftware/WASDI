@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
 
@@ -54,6 +56,12 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 	private static final String MAIN_SCRIPT = "wasdiProcessorExecutor.py";
 
 	/**
+	 * uv link mode used to avoid references to the global uv cache and create
+	 * a processor-local, persistent environment layout.
+	 */
+	private static final String UV_LINK_MODE_COPY = "copy";
+
+	/**
 	 * Derives the Python version string (e.g. "3.12") from the processor type constant.
 	 * Add new mappings here when new LOCAL_PYTHON* types are introduced.
 	 *
@@ -78,6 +86,53 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 			return sProcessorFolder + VENV_FOLDER + File.separator + "Scripts" + File.separator + "python.exe";
 		}
 		return sProcessorFolder + VENV_FOLDER + File.separator + "bin" + File.separator + "python";
+	}
+
+	/**
+	 * Environment variables for uv commands that must produce self-contained
+	 * processor assets (no symlinks to uv cache locations).
+	 */
+	private Map<String, String> getUvCopyEnvironment() {
+		Map<String, String> aoUvEnv = new HashMap<>();
+		aoUvEnv.put("UV_LINK_MODE", UV_LINK_MODE_COPY);
+		return aoUvEnv;
+	}
+
+	/**
+	 * Rebuilds the interpreter links in-place with --copies to guarantee that
+	 * venv/bin/python (or Scripts/python.exe) is a real local executable and not
+	 * a symlink to a transient uv-managed interpreter cache.
+	 */
+	private boolean hardenVenvAsPortableCopies(String sProcessorFolder) {
+		String sVenvPath = sProcessorFolder + VENV_FOLDER;
+		String sVenvPython = getVenvPythonExecutable(sProcessorFolder);
+
+		List<String> asHardenCmd = new ArrayList<>();
+		asHardenCmd.add(sVenvPython);
+		asHardenCmd.add("-m");
+		asHardenCmd.add("venv");
+		asHardenCmd.add("--upgrade");
+		asHardenCmd.add("--copies");
+		asHardenCmd.add(sVenvPath);
+
+		ShellExecReturn oHardenResult = RunTimeUtils.shellExec(asHardenCmd, true, true, true);
+		if (!oHardenResult.isOperationOk() || oHardenResult.getOperationReturn() != 0) {
+			WasdiLog.errorLog("LocalProcessorEngine.hardenVenvAsPortableCopies: python -m venv --upgrade --copies failed. Output: " + oHardenResult.getOperationLogs());
+			return false;
+		}
+
+		// Final safety check: executable exists and is not a symbolic link.
+		if (!new File(sVenvPython).exists()) {
+			WasdiLog.errorLog("LocalProcessorEngine.hardenVenvAsPortableCopies: venv python does not exist after hardening: " + sVenvPython);
+			return false;
+		}
+
+		if (Files.isSymbolicLink(Paths.get(sVenvPython))) {
+			WasdiLog.errorLog("LocalProcessorEngine.hardenVenvAsPortableCopies: venv python is still a symbolic link after hardening: " + sVenvPython);
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -147,10 +202,17 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 			asVenvCmd.add(sPythonVersion);
 			asVenvCmd.add(sVenvPath);
 
-			ShellExecReturn oVenvResult = RunTimeUtils.shellExec(asVenvCmd, true, true, true);
+			ShellExecReturn oVenvResult = RunTimeUtils.shellExec(asVenvCmd, true, true, true, getUvCopyEnvironment());
 
 			if (!oVenvResult.isOperationOk() || oVenvResult.getOperationReturn() != 0) {
 				WasdiLog.errorLog("LocalProcessorEngine.deploy: uv venv failed. Output: " + oVenvResult.getOperationLogs());
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+				return false;
+			}
+
+			processWorkspaceLog("Hardening virtual environment for portable redeploy...");
+			if (!hardenVenvAsPortableCopies(sProcessorFolder)) {
+				WasdiLog.errorLog("LocalProcessorEngine.deploy: could not make venv portable/self-contained");
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
 				return false;
 			}
@@ -172,7 +234,7 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 				asPipCmd.add("-r");
 				asPipCmd.add(sPipFile);
 
-				ShellExecReturn oPipResult = RunTimeUtils.shellExec(asPipCmd, true, true, true);
+				ShellExecReturn oPipResult = RunTimeUtils.shellExec(asPipCmd, true, true, true, getUvCopyEnvironment());
 
 				if (!oPipResult.isOperationOk() || oPipResult.getOperationReturn() != 0) {
 					WasdiLog.errorLog("LocalProcessorEngine.deploy: pip install failed. Output: " + oPipResult.getOperationLogs());
@@ -382,7 +444,7 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 			asPipCmd.add("-r");
 			asPipCmd.add(sPipFile);
 
-			ShellExecReturn oPipResult = RunTimeUtils.shellExec(asPipCmd, true, true, true);
+			ShellExecReturn oPipResult = RunTimeUtils.shellExec(asPipCmd, true, true, true, getUvCopyEnvironment());
 
 			if (!oPipResult.isOperationOk() || oPipResult.getOperationReturn() != 0) {
 				WasdiLog.errorLog("LocalProcessorEngine.libraryUpdate: pip install failed. Output: " + oPipResult.getOperationLogs());
