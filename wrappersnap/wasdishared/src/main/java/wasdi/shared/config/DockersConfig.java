@@ -209,8 +209,10 @@ public class DockersConfig {
 				return shellExecCommands.get(sSimplifiedCommand);
 			}
 			else {
-				// We do not have it
-				WasdiLog.warnLog("DockersConfig.getShellExecItem: command not found " + sCommand);
+				if (!WasdiConfig.Current.shellExecLocally) {
+					// We do not have it
+					WasdiLog.warnLog("DockersConfig.getShellExecItem: command not found " + sCommand);					
+				}
 				return null;
 			}
 			

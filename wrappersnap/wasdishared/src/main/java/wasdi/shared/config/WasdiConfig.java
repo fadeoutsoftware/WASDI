@@ -379,6 +379,16 @@ public class WasdiConfig {
 		return false;
 	}
 	
+	public int getSessionExpireHours() {
+		if (WasdiConfig.Current != null) {
+			if (WasdiConfig.Current.keycloack != null) {
+				return WasdiConfig.Current.keycloack.sessionExpireHours;
+			}
+		}
+		
+		return 24;
+	}
+	
 	/**
 	 * Static reference to the Current WASDI Config
 	 */

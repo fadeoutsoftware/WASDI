@@ -115,12 +115,18 @@ public final class HttpUtils {
 			boolean bLog = true;
 			
 			if (WasdiConfig.Current.filterInternalHttpCalls) {
-				if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
-					bLog = false;
+				
+				if (WasdiConfig.Current.keycloack!=null) {
+					if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
+						bLog = false;
+					}					
 				}
-				if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
-					bLog = false;
-				}				
+				
+				if (WasdiConfig.Current.dockers != null) {
+					if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
+						bLog = false;
+					}					
+				}
 			}
 			
 			if (WasdiConfig.Current.logHttpCalls && bLog) {
@@ -284,12 +290,19 @@ public final class HttpUtils {
 			boolean bLog = true;
 			
 			if (WasdiConfig.Current.filterInternalHttpCalls) {
-				if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
-					bLog = false;
+				
+				if (WasdiConfig.Current.keycloack!=null) {
+					if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
+						bLog = false;
+					}					
 				}
-				if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
-					bLog = false;
-				}				
+				
+				if (WasdiConfig.Current.dockers!=null) {
+					if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
+						bLog = false;
+					}
+				}
+				
 			}
 			
 			if (WasdiConfig.Current.logHttpCalls && bLog) {
@@ -398,12 +411,17 @@ public final class HttpUtils {
 			boolean bLog = true;
 			
 			if (WasdiConfig.Current.filterInternalHttpCalls) {
-				if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
-					bLog = false;
+				if (WasdiConfig.Current.keycloack!=null) {
+					if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
+						bLog = false;
+					}					
 				}
-				if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
-					bLog = false;
-				}				
+				
+				if (WasdiConfig.Current.dockers!=null) {
+					if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
+						bLog = false;
+					}					
+				}
 			}
 			
 			if (WasdiConfig.Current.logHttpCalls && bLog) {
@@ -550,12 +568,18 @@ public final class HttpUtils {
 		boolean bLog = true;
 		
 		if (WasdiConfig.Current.filterInternalHttpCalls) {
-			if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
-				bLog = false;
+			
+			if (WasdiConfig.Current.keycloack!=null) {
+				if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
+					bLog = false;
+				}				
 			}
-			if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
-				bLog = false;
-			}				
+			
+			if (WasdiConfig.Current.dockers != null) {
+				if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
+					bLog = false;
+				}				
+			}
 		}
 		
 		if (WasdiConfig.Current.logHttpCalls && bLog) {
@@ -691,12 +715,18 @@ public final class HttpUtils {
 			boolean bLog = true;
 			
 			if (WasdiConfig.Current.filterInternalHttpCalls) {
-				if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
-					bLog = false;
+				
+				if (WasdiConfig.Current.keycloack!=null) {
+					if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
+						bLog = false;
+					}					
 				}
-				if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
-					bLog = false;
-				}				
+				
+				if (WasdiConfig.Current.dockers!=null) {
+					if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
+						bLog = false;
+					}					
+				}
 			}
 			
 			if (WasdiConfig.Current.logHttpCalls && bLog) {
@@ -780,12 +810,17 @@ public final class HttpUtils {
 			boolean bLog = true;
 			
 			if (WasdiConfig.Current.filterInternalHttpCalls) {
-				if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
-					bLog = false;
+				if (WasdiConfig.Current.keycloack!=null) {
+					if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
+						bLog = false;
+					}					
 				}
-				if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
-					bLog = false;
-				}				
+				
+				if (WasdiConfig.Current.dockers != null) {
+					if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
+						bLog = false;
+					}					
+				}
 			}
 			
 			if (WasdiConfig.Current.logHttpCalls && bLog) {

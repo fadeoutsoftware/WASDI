@@ -25,9 +25,9 @@ public class No2SessionRepositoryBackend extends No2Repository implements ISessi
 
 	private long getSessionExpireMillis() {
 		try {
-			if (WasdiConfig.Current != null && WasdiConfig.Current.keycloack != null) {
-				return WasdiConfig.Current.keycloack.sessionExpireHours * 60L * 60L * 1000L;
-			}
+			
+			return WasdiConfig.Current.getSessionExpireHours() * 60L * 60L * 1000L;
+			
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("No2SessionRepositoryBackend.getSessionExpireMillis: error", oEx);

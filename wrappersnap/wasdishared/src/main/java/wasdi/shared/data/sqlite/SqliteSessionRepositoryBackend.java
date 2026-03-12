@@ -88,7 +88,7 @@ public class SqliteSessionRepositoryBackend extends SqliteRepository implements 
 		final ArrayList<UserSession> aoReturnList = new ArrayList<>();
 		try {
 			long lNow = new Date().getTime();
-			long lTimespan = WasdiConfig.Current.keycloack.sessionExpireHours * 60L * 60L * 1000L;
+			long lTimespan = WasdiConfig.Current.getSessionExpireHours()  * 60L * 60L * 1000L;
 			aoReturnList.addAll(queryList(
 					"SELECT data FROM " + m_sThisCollection +
 					" WHERE json_extract(data,'$.lastTouch') >= ?" +
@@ -106,7 +106,7 @@ public class SqliteSessionRepositoryBackend extends SqliteRepository implements 
 		final ArrayList<UserSession> aoReturnList = new ArrayList<>();
 		try {
 			long lNow = new Date().getTime();
-			long lTimespan = WasdiConfig.Current.keycloack.sessionExpireHours * 60L * 60L * 1000L;
+			long lTimespan = WasdiConfig.Current.getSessionExpireHours() * 60L * 60L * 1000L;
 			aoReturnList.addAll(queryList(
 					"SELECT data FROM " + m_sThisCollection +
 					" WHERE json_extract(data,'$.lastTouch') < ?" +
@@ -186,7 +186,7 @@ public class SqliteSessionRepositoryBackend extends SqliteRepository implements 
 
 		try {
 			long lNow = new Date().getTime();
-			long lTimespan = WasdiConfig.Current.keycloack.sessionExpireHours * 60L * 60L * 1000L;
+			long lTimespan = WasdiConfig.Current.getSessionExpireHours() * 60L * 60L * 1000L;
 			long lLimit = lNow - lTimespan;
 
 			if (oSession.getLastTouch() >= lLimit) {

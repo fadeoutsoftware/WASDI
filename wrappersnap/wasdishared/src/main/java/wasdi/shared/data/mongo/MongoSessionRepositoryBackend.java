@@ -102,7 +102,7 @@ public class MongoSessionRepositoryBackend extends MongoRepository implements IS
 		final ArrayList<UserSession> aoReturnList = new ArrayList<>();
 		try {
 			long lNow = new Date().getTime();
-			long lTimespan = WasdiConfig.Current.keycloack.sessionExpireHours * 60L * 60L * 1000L;
+			long lTimespan = WasdiConfig.Current.getSessionExpireHours() * 60L * 60L * 1000L;
 			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
 					.find(Filters.and(Filters.gte("lastTouch", lNow - lTimespan), Filters.eq("userId", sUserId)));
 
@@ -119,7 +119,7 @@ public class MongoSessionRepositoryBackend extends MongoRepository implements IS
 		final ArrayList<UserSession> aoReturnList = new ArrayList<>();
 		try {
 			long lNow = new Date().getTime();
-			long lTimespan = WasdiConfig.Current.keycloack.sessionExpireHours * 60L * 60L * 1000L;
+			long lTimespan = WasdiConfig.Current.getSessionExpireHours() * 60L * 60L * 1000L;
 			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
 					.find(Filters.and(Filters.lt("lastTouch", lNow - lTimespan), Filters.eq("userId", sUserId)));
 
@@ -196,7 +196,7 @@ public class MongoSessionRepositoryBackend extends MongoRepository implements IS
 
 		try {
 			long lNow = new Date().getTime();
-			long lTimespan = WasdiConfig.Current.keycloack.sessionExpireHours * 60L * 60L * 1000L;
+			long lTimespan = WasdiConfig.Current.getSessionExpireHours() * 60L * 60L * 1000L;
 			long lLimit = lNow - lTimespan;
 
 			if (oSession.getLastTouch() >= lLimit) {
