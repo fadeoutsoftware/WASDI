@@ -265,15 +265,17 @@ public class Wasdi extends ResourceConfig {
 		WasdiLog.infoLog("--------        Welcome to space        -------");
 		WasdiLog.infoLog("-----------------------------------------------\n\n");
 		
-		try {
-			// Can be useful for debug
-			WasdiLog.debugLog("******************************Environment Vars*****************************"); 
-			Map<String, String> aoEnviorntmentVars = System.getenv();
-			for (String string : aoEnviorntmentVars.keySet()) { WasdiLog.debugLog(string + ": " + aoEnviorntmentVars.get(string)); }
-			 			
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("Environment Vars Exception " + oEx.toString());
+		if (WasdiConfig.Current.printWebEnvVariablesAtStartup) {
+			try {
+				// Can be useful for debug
+				WasdiLog.debugLog("******************************Environment Vars*****************************"); 
+				Map<String, String> aoEnviorntmentVars = System.getenv();
+				for (String sKey : aoEnviorntmentVars.keySet()) { WasdiLog.debugLog(sKey + ": " + aoEnviorntmentVars.get(sKey)); }
+				 			
+			}
+			catch (Exception oEx) {
+				WasdiLog.errorLog("Environment Vars Exception " + oEx.toString());
+			}			
 		}
 	}
 

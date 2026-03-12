@@ -176,6 +176,11 @@ public class WasdiConfig {
 	public boolean nvidiaGPUAvailable = false;
 	
 	/**
+	 * If you set true, the webserver will print env variables at startup
+	 */
+	public boolean printWebEnvVariablesAtStartup = false;
+	
+	/**
 	 * Flag to decide the db engine to use: mongo by default, it supports also NO2.
 	 */
 	public String dbEngine = "mongo";

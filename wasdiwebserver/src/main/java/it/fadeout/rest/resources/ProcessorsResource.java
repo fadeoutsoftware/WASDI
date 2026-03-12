@@ -37,6 +37,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import org.json.JSONArray;
@@ -149,7 +150,9 @@ public class ProcessorsResource  {
 											@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName,
 											@QueryParam("version") String sVersion,	@QueryParam("description") String sDescription,
 											@QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample,
-											@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout) throws Exception {
+											@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout, @QueryParam("force") Boolean bForce) throws Exception {
+		
+		if (bForce == null) bForce = Boolean.FALSE;
 		
 		WasdiLog.debugLog("ProcessorsResource.uploadProcessor( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description"
 				+ sDescription + ", Type: " + sType + ", ParamsSample: " + sParamsSample + " )");
@@ -224,11 +227,17 @@ public class ProcessorsResource  {
 				oProcessorPath.mkdirs();
 			}
 			else {
-				// If the path exists, the name of the processor is already used
-				oResult.setIntValue(500);
-				oResult.setStringValue("Processor Name Already in Use");
-				WasdiLog.warnLog("ProcessorsResource.uploadProcessor: the folder of the app already exists");
-				return oResult;
+				if (!bForce) {
+					// If the path exists, the name of the processor is already used
+					oResult.setIntValue(500);
+					oResult.setStringValue("Processor Name Already in Use");
+					WasdiLog.warnLog("ProcessorsResource.uploadProcessor: the folder of the app already exists");
+					return oResult;					
+				}
+				else {
+					WasdiLog.warnLog("ProcessorsResource.uploadProcessor: the folder of the app already exists, Force is true, we clean it");
+					FileUtils.cleanDirectory(oProcessorPath);
+				}
 			}
 			
 			// Create file
