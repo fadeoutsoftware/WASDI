@@ -126,7 +126,7 @@ public class WasdiScheduler
 		
 		WasdiLog.infoLog("WasdiScheduler.main: Logger configured :-)\n");
 				
-		WasdiLog.infoLog("WasdiScheduler.main: lastChangeDateOrderByParameter = " + WasdiConfig.Current.scheduler.lastStateChangeDateOrderBy);
+		WasdiLog.debugLog("WasdiScheduler.main: lastChangeDateOrderByParameter = " + WasdiConfig.Current.scheduler.lastStateChangeDateOrderBy);
 
 		
 		//mongo config
@@ -170,7 +170,7 @@ public class WasdiScheduler
 				long iThreadSleep = Long.parseLong(WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS);
 				if (iThreadSleep>0) {
 					s_lSleepingTimeMS = iThreadSleep;
-					WasdiLog.infoLog("WasdiScheduler.main: CatNap Ms: " + s_lSleepingTimeMS);
+					WasdiLog.debugLog("WasdiScheduler.main: CatNap Ms: " + s_lSleepingTimeMS);
 				}
 			} catch (Exception e) {
 				WasdiLog.errorLog("WasdiScheduler.main: Could not read schedulers configurations. Reason: " + e);
@@ -219,7 +219,7 @@ public class WasdiScheduler
 							oProcessScheduler.removeSupportedType(sSupportedType);							
 						}
 						else {
-							WasdiLog.infoLog("WasdiScheduler.main: Assigning to Scheduler " + sScheduler + " support type " + sSupportedType + " SubType " + oProcessScheduler.getOperationSubType());
+							WasdiLog.debugLog("WasdiScheduler.main: Assigning to Scheduler " + sScheduler + " support type " + sSupportedType + " SubType " + oProcessScheduler.getOperationSubType());
 						}
 					}
 					else {
@@ -231,7 +231,7 @@ public class WasdiScheduler
 						}
 						
 						// Yes: remove from the full list
-						WasdiLog.infoLog("WasdiScheduler.main: Assigning to Scheduler: " + sScheduler + " support type: " + sSupportedType + sSubTypeLog);
+						WasdiLog.debugLog("WasdiScheduler.main: Assigning to Scheduler: " + sScheduler + " support type: " + sSupportedType + sSubTypeLog);
 						asWasdiOperationTypes.remove(sSupportedType);
 					}
 				}
@@ -260,7 +260,7 @@ public class WasdiScheduler
 				
 				// Assign all the types
 				for (String sOtherType : asWasdiOperationTypes) {
-					WasdiLog.infoLog("WasdiScheduler.main: Assigning to Scheduler: DEFAULT support type: " + sOtherType);
+					WasdiLog.debugLog("WasdiScheduler.main: Assigning to Scheduler: DEFAULT support type: " + sOtherType);
 					oProcessScheduler.addSupportedType(sOtherType);
 				}
 				

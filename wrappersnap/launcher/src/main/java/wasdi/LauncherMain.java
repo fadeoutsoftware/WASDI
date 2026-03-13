@@ -188,63 +188,9 @@ public class LauncherMain  {
         	WasdiLog.debugLog("Launcher Main - WASDI Configured to log on console");
         	WasdiLog.initLogger(WasdiConfig.Current.logLevelLauncher);
         }
-
-        // Filter the mongodb logs
-  		try {
-  			System.setProperty("DEBUG.MONGO", "false");
-  			ch.qos.logback.classic.Logger oMongoLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.mongodb.driver");
-  			oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);  			
-  		}
-  		catch (Exception oEx) {
-  			WasdiLog.errorLog("Disabling mongo driver logging exception " + oEx.toString());
-  		} 
-  		
-        // Filter the apache logs
-  		try {
-  			ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("httpclient");
-  			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);  			  			
-  		}
-  		catch (Exception oEx) {
-  			WasdiLog.errorLog("Disabling httpclient logging exception " + oEx.toString());
-  		}   		
-  		
-  		// Filter the org.apache.commons.httpclient (old version) logs
-  		try {
-  		    ch.qos.logback.classic.Logger oOldHttpClientLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.commons.httpclient");
-  		    oOldHttpClientLogger.setLevel(ch.qos.logback.classic.Level.WARN);
-  		}
-  		catch (Exception oEx) {
-  		    WasdiLog.errorLog("Disabling org.apache.commons.httpclient logging exception " + oEx.toString());
-  		}  
-  		
-  		// Filter the org.apache.http (new version)
-  		try {
-  		    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.http")).setLevel(ch.qos.logback.classic.Level.WARN);
-  		    
-  		    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.http.wire")).setLevel(ch.qos.logback.classic.Level.WARN);
-  		} 
-  		catch (Exception oEx) {
-  		    WasdiLog.errorLog("Disabling org.apache.http logging exception " + oEx.toString());
-  		}
-
-        // Filter the apache logs
-  		try {  			
-  			ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.hc.client5.http");
-  			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);  			
-  		}
-  		catch (Exception oEx) {
-  			WasdiLog.errorLog("Disabling org.apache.hc.client5.http logging exception " + oEx.toString());
-  		}
-  		
-  		// Filter ALL ucar.nc2 (NetCDF-Java) logs
-  		try {
-  		    ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("ucar.nc2");
-  		    oLogger.setLevel(ch.qos.logback.classic.Level.WARN); // Or even ERROR
-  		}
-  		catch (Exception oEx) {
-  		    WasdiLog.errorLog("Disabling ucar.nc2 logging exception " + oEx.toString());
-  		}  		
-
+        
+        // Filter useless logs
+        LauncherMain.filterLogs();
   		
         try {
 
@@ -371,6 +317,66 @@ public class LauncherMain  {
 				WasdiLog.errorLog("main: while doing Engine.getInstance().stop(): " + oE);
 			}
         }
+    }
+    
+    /**
+     * Filters the un-wanted log flows
+     */
+    public static void filterLogs() {
+        // Filter the mongodb logs
+  		try {
+  			System.setProperty("DEBUG.MONGO", "false");
+  			ch.qos.logback.classic.Logger oMongoLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.mongodb.driver");
+  			oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);  			
+  		}
+  		catch (Exception oEx) {
+  			WasdiLog.errorLog("Disabling mongo driver logging exception " + oEx.toString());
+  		} 
+  		
+        // Filter the apache logs
+  		try {
+  			ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("httpclient");
+  			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);  			  			
+  		}
+  		catch (Exception oEx) {
+  			WasdiLog.errorLog("Disabling httpclient logging exception " + oEx.toString());
+  		}   		
+  		
+  		// Filter the org.apache.commons.httpclient (old version) logs
+  		try {
+  		    ch.qos.logback.classic.Logger oOldHttpClientLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.commons.httpclient");
+  		    oOldHttpClientLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+  		}
+  		catch (Exception oEx) {
+  		    WasdiLog.errorLog("Disabling org.apache.commons.httpclient logging exception " + oEx.toString());
+  		}  
+  		
+  		// Filter the org.apache.http (new version)
+  		try {
+  		    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.http")).setLevel(ch.qos.logback.classic.Level.WARN);
+  		    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.http.wire")).setLevel(ch.qos.logback.classic.Level.WARN);
+  		} 
+  		catch (Exception oEx) {
+  		    WasdiLog.errorLog("Disabling org.apache.http logging exception " + oEx.toString());
+  		}
+
+        // Filter the apache logs
+  		try {  			
+  			ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.hc.client5.http");
+  			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);  			
+  		}
+  		catch (Exception oEx) {
+  			WasdiLog.errorLog("Disabling org.apache.hc.client5.http logging exception " + oEx.toString());
+  		}
+  		
+  		// Filter ALL ucar.nc2 (NetCDF-Java) logs
+  		try {
+  		    ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("ucar.nc2");
+  		    oLogger.setLevel(ch.qos.logback.classic.Level.WARN); // Or even ERROR
+  		}
+  		catch (Exception oEx) {
+  		    WasdiLog.errorLog("Disabling ucar.nc2 logging exception " + oEx.toString());
+  		}
     }
 
     /**
