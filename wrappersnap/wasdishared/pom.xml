@@ -44,7 +44,7 @@
         <sVersionJavaxPersistenceApi>2.2</sVersionJavaxPersistenceApi>
         <sVersionImmutables>2.10.1</sVersionImmutables>
         <sVersionGeoTools>28.6</sVersionGeoTools>
-        <sVersionJersey2>2.43</sVersionJersey2>
+        <sVersionJersey2>2.45</sVersionJersey2>
         <sVersionMercurius>1.0</sVersionMercurius>
     </properties>
 

@@ -242,7 +242,7 @@ public class WasdiScheduler
 				
 				if (sSchedulerEnabled.equals("1")) {
 					// Start the scheduler
-					WasdiLog.infoLog("WasdiScheduler.main: Adding Scheduler: " + sScheduler);
+					WasdiLog.debugLog("WasdiScheduler.main: Adding Scheduler: " + sScheduler);
 					aoProcessSchedulers.add(oProcessScheduler);		
 				}
 				else {

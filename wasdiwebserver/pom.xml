@@ -206,6 +206,23 @@
             <artifactId>commons-net</artifactId>
             <version>${sVersionCommonsNet}</version>
         </dependency>
+        
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>9.4.53.v20231009</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>9.4.53.v20231009</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet-core</artifactId>
+			<version>${sVersionJersey2}</version>
+		</dependency>
+        
         <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
         <dependency>
             <groupId>org.nfs.orbits</groupId>

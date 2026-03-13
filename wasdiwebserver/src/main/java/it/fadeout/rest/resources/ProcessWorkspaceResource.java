@@ -973,6 +973,10 @@ public class ProcessWorkspaceResource {
 			
 			if (iPerc>=0 && iPerc<=100) {
 				oProcessWorkspace.setProgressPerc(iPerc);
+				
+				if (!WasdiConfig.Current.logAppsOnDb) {
+					WasdiLog.infoLog("APP PROGRESS UPDATE " + iPerc + " for process " + sProcessObjId);
+				}
 			}
 
 			oRepository.updateProcess(oProcessWorkspace);

@@ -119,7 +119,7 @@ public class No2Connection {
 		try {
 			if (s_oNo2Db != null && !s_oNo2Db.isClosed()) {
 				s_oNo2Db.close();
-				WasdiLog.infoLog("No2Connection.shutdown: NO2 database closed");
+				WasdiLog.debugLog("No2Connection.shutdown: NO2 database closed");
 			}
 		}
 		catch (Exception oException) {

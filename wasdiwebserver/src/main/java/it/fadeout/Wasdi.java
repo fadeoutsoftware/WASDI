@@ -126,6 +126,7 @@ public class Wasdi extends ResourceConfig {
 		register(new WasdiBinder());
 		register(JacksonFeature.class);
 		register(JerseyMapperProvider.class);
+		register(org.glassfish.jersey.media.multipart.MultiPartFeature.class);
 		packages(true, "it.fadeout.rest.resources");
 	}
 
@@ -219,7 +220,7 @@ public class Wasdi extends ResourceConfig {
 		// Configure Rabbit
 		try {
 			
-			if (WasdiConfig.Current.rabbit == null) {
+			if (WasdiConfig.Current.rabbit != null) {
 				RabbitFactory.readConfig();
 				WasdiLog.infoLog("------- Rabbit Initialized ");				
 			}

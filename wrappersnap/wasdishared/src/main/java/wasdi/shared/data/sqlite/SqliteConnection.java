@@ -116,7 +116,7 @@ public class SqliteConnection {
 		try {
 			if (s_oConnection != null && !s_oConnection.isClosed()) {
 				s_oConnection.close();
-				WasdiLog.infoLog("SqliteConnection.shutdown: SQLite connection closed");
+				WasdiLog.debugLog("SqliteConnection.shutdown: SQLite connection closed");
 			}
 		}
 		catch (Exception oException) {
