@@ -418,6 +418,7 @@ public class ProcessorsResource  {
 				oDeployedProcessorViewModel.setImgLink(ImageResourceUtils.getProcessorLogoPlaceholderPath(oProcessor));
 				oDeployedProcessorViewModel.setLogo(oProcessor.getLogo());
 				oDeployedProcessorViewModel.setDeploymentOngoing(oProcessor.isDeploymentOngoing());
+				oDeployedProcessorViewModel.setLastUpdate(oProcessor.getUpdateDate());
 				
 				oDeployedProcessorViewModel.setPublisherNickName(oDeployedProcessorViewModel.getPublisher());
 				
@@ -452,7 +453,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/getprocessor")
 	@Produces({ "application/json", "text/xml" })
-	public DeployedProcessorViewModel getSingleDeployedProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) throws Exception {
+	public DeployedProcessorViewModel getSingleDeployedProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("name") String sProcessorName) throws Exception {
 
 		DeployedProcessorViewModel oDeployedProcessorViewModel = new DeployedProcessorViewModel(); 
 		WasdiLog.debugLog("ProcessorsResource.getSingleDeployedProcessor");
@@ -467,15 +468,41 @@ public class ProcessorsResource  {
 				return oDeployedProcessorViewModel;
 			}
 			
+			// We need name or id
+			if (Utils.isNullOrEmpty(sProcessorName) && Utils.isNullOrEmpty(sProcessorId)) {
+				WasdiLog.warnLog("ProcessorsResource.getSingleDeployedProcessor: both proc name and id are null, impossible to proceed");
+				return oDeployedProcessorViewModel;				
+			}
+			
+			// Check if we can find the processor
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = null;
+			
+			if (Utils.isNullOrEmpty(sProcessorId)) {
+				// We should have a name in this case
+				oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
+				sProcessorId = oProcessor.getProcessorId();
+			}
+			else {
+				// We have the id
+				oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			}
+			
+			if (oProcessor == null) {
+				if (sProcessorId == null) sProcessorId = "";
+				if (sProcessorName == null) sProcessorName = "";
+				
+				WasdiLog.warnLog("ProcessorsResource.getSingleDeployedProcessor: processor not found Id: " + sProcessorId + " Name: " + sProcessorName);
+				return oDeployedProcessorViewModel;				
+			}
+			
 			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), sProcessorId)) {
 				WasdiLog.warnLog("ProcessorsResource.getSingleDeployedProcessor: user cannot access the processor");
 				return oDeployedProcessorViewModel;				
-			}
-						
-			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			}	
+			
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			UserRepository oUserRepository = new UserRepository();
-			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 
 			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 
@@ -501,6 +528,7 @@ public class ProcessorsResource  {
 			oDeployedProcessorViewModel.setParamsSample(oProcessor.getParameterSample());
 			oDeployedProcessorViewModel.setIsPublic(oProcessor.getIsPublic());
 			oDeployedProcessorViewModel.setType(oProcessor.getType());
+			oDeployedProcessorViewModel.setLastUpdate(oProcessor.getUpdateDate());
 			
 			int iTimeoutMinutes = 0;
 			
@@ -2268,6 +2296,9 @@ public class ProcessorsResource  {
 			@QueryParam("file") String sInputFileName) {
 
 		WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles( WS: " + sWorkspaceId + ", Processor: " + sProcessorId + " filename: " + sInputFileName + " )");
+		
+		PrimitiveResult oRes = new PrimitiveResult();
+		
 		try {
 			// Check User 
 			User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -2365,18 +2396,23 @@ public class ProcessorsResource  {
 					// In the main node: start a thread to update all the computing nodes
 					
 					try {
-						WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: this is the main node, starting Worker to update computing nodes");
-						
-						//This is the main node: forward the request to other nodes
-						UpdateProcessorFilesWorker oUpdateWorker = new UpdateProcessorFilesWorker();
-						
 						NodeRepository oNodeRepo = new NodeRepository();
 						List<Node> aoNodes = oNodeRepo.getNodesList();
 						
-						oUpdateWorker.init(aoNodes, oProcessorFile.getPath(), sSessionId, sWorkspaceId, sProcessorId);
-						oUpdateWorker.start();
+						if (aoNodes!=null) {
+							if (aoNodes.size()>0)  {
+								WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: this is the main node, starting Worker to update computing nodes");
+								
+								//This is the main node: forward the request to other nodes
+								UpdateProcessorFilesWorker oUpdateWorker = new UpdateProcessorFilesWorker();
+								
+								oUpdateWorker.init(aoNodes, oProcessorFile.getPath(), sSessionId, sWorkspaceId, sProcessorId);
+								oUpdateWorker.start();
+								
+								WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: Worker started");														
+							}
+						}
 						
-						WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: Worker started");						
 					}
 					catch (Exception oEx) {
 						WasdiLog.errorLog("ProcessorsResource.updateProcessorFiles: error starting UpdateWorker " + oEx.toString());
@@ -2432,7 +2468,7 @@ public class ProcessorsResource  {
 					}
 
 					// Trigger the library update in this node
-					PrimitiveResult oRes = Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.LIBRARYUPDATE.name(), oProcessorToUpdate.getName(), oProcessorParameter);
+					oRes = Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.LIBRARYUPDATE.name(), oProcessorToUpdate.getName(), oProcessorParameter);
 					
 					if (oRes.getBoolValue()) {
 						WasdiLog.debugLog("ProcessorResource.updateProcessorFiles: started the lib update operation");
@@ -2462,7 +2498,7 @@ public class ProcessorsResource  {
 			WasdiLog.errorLog("ProcessorsResource.updateProcessorFiles  error:" + oEx.toString());
 			return Response.serverError().build();
 		}
-		return Response.ok().build();
+		return Response.ok().entity(oRes).build();
 	}
 	
 	/**

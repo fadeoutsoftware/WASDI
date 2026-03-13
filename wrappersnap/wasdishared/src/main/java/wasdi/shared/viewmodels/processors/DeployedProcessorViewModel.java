@@ -25,6 +25,7 @@ public class DeployedProcessorViewModel {
 	private Boolean sharedWithMe = false;
 	private boolean readOnly = false;
 	private boolean isDeploymentOngoing = false;
+	private Double lastUpdate = 0.0;
 	
 	public String getParamsSample() {
 		return paramsSample;
@@ -115,5 +116,11 @@ public class DeployedProcessorViewModel {
 	}
 	public void setPublisherNickName(String publisherNickName) {
 		this.publisherNickName = publisherNickName;
+	}
+	public Double getLastUpdate() {
+		return lastUpdate;
+	}
+	public void setLastUpdate(Double lastUpdate) {
+		this.lastUpdate = lastUpdate;
 	}
 }
