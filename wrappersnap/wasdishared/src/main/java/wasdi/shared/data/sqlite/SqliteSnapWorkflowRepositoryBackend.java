@@ -46,6 +46,18 @@ public class SqliteSnapWorkflowRepositoryBackend extends SqliteRepository implem
 
 		return null;
 	}
+	
+	@Override
+	public SnapWorkflow getByName(String sWorkflowName) {
+
+		try {
+			return findOneWhere("name", sWorkflowName, SnapWorkflow.class);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("SnapWorkflowRepository.getByName : error ", oEx);
+		}
+
+		return null;
+	}
 
 	@Override
 	public List<SnapWorkflow> getSnapWorkflowPublicAndByUser(String sUserId) {

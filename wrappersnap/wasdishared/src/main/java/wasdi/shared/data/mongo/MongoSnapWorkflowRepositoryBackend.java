@@ -192,4 +192,22 @@ public class MongoSnapWorkflowRepositoryBackend extends MongoRepository implemen
 
 		return 0;
 	}
+	
+	@Override
+	public SnapWorkflow getByName(String sWorkflowName) {
+
+		try {
+			Document oWSDocument = getCollection(m_sThisCollection).find(new Document("name", sWorkflowName)).first();
+
+			String sJSON = oWSDocument.toJson();
+
+			SnapWorkflow oWorkflow = s_oMapper.readValue(sJSON, SnapWorkflow.class);
+
+			return oWorkflow;
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("SnapWorkflowRepository.getByName : error ", oEx);
+		}
+
+		return null;
+	}	
 }

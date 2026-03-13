@@ -58,6 +58,26 @@ public class No2SnapWorkflowRepositoryBackend extends No2Repository implements I
 
 		return null;
 	}
+	
+	@Override
+	public SnapWorkflow getByName(String sWorkflowName) {
+		try {
+			NitriteCollection oCollection = getCollection(s_sCollectionName);
+			if (oCollection == null) {
+				return null;
+			}
+
+			for (Document oDocument : oCollection.find(where("name").eq(sWorkflowName))) {
+				return fromDocument(oDocument, SnapWorkflow.class);
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("No2SnapWorkflowRepositoryBackend.getByName", oEx);
+		}
+
+		return null;
+	}
+
 
 	@Override
 	public List<SnapWorkflow> getSnapWorkflowPublicAndByUser(String sUserId) {

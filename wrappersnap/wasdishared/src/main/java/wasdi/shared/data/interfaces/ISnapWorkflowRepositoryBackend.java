@@ -24,4 +24,6 @@ public interface ISnapWorkflowRepositoryBackend {
 	boolean deleteSnapWorkflow(String sWorkflowId);
 
 	int deleteSnapWorkflowByUser(String sUserId);
+	
+	public SnapWorkflow getByName(String sWorkflowName);
 }

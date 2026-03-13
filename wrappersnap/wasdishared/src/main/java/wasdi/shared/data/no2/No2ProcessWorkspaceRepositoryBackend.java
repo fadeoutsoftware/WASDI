@@ -34,11 +34,9 @@ import wasdi.shared.utils.log.WasdiLog;
 public class No2ProcessWorkspaceRepositoryBackend extends No2Repository implements IProcessWorkspaceRepositoryBackend {
 
 	private static final String s_sCollectionName = "processworkpsace";
-	private String m_sRepoDb = "local";
 
 	@Override
 	public void setRepoDb(String sRepoDb) {
-		m_sRepoDb = sRepoDb;
 	}
 
 	@Override

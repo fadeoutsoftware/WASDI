@@ -94,5 +94,9 @@ public class SnapWorkflowRepository {
     public int deleteSnapWorkflowByUser(String sUserId) {
         return m_oBackend.deleteSnapWorkflowByUser(sUserId);
     }
+    
+    public SnapWorkflow getByName(String sWorkflowName) {
+    	return m_oBackend.getByName(sWorkflowName);
+    }
 }
 

@@ -459,8 +459,7 @@ public class ProcessorsResource  {
 		WasdiLog.debugLog("ProcessorsResource.getSingleDeployedProcessor");
 		
 		try {
-			// Check User 
-			if (Utils.isNullOrEmpty(sSessionId)) return oDeployedProcessorViewModel;
+			// Check User
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
@@ -481,7 +480,6 @@ public class ProcessorsResource  {
 			if (Utils.isNullOrEmpty(sProcessorId)) {
 				// We should have a name in this case
 				oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
-				sProcessorId = oProcessor.getProcessorId();
 			}
 			else {
 				// We have the id
@@ -495,6 +493,8 @@ public class ProcessorsResource  {
 				WasdiLog.warnLog("ProcessorsResource.getSingleDeployedProcessor: processor not found Id: " + sProcessorId + " Name: " + sProcessorName);
 				return oDeployedProcessorViewModel;				
 			}
+			
+			if (Utils.isNullOrEmpty(sProcessorId)) sProcessorId = oProcessor.getProcessorId();
 			
 			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), sProcessorId)) {
 				WasdiLog.warnLog("ProcessorsResource.getSingleDeployedProcessor: user cannot access the processor");
@@ -2290,6 +2290,7 @@ public class ProcessorsResource  {
 	@POST
 	@Path("/updatefiles")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces({ "application/json", "text/xml" })
 	public Response updateProcessorFiles(@FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId,

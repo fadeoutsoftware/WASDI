@@ -446,7 +446,13 @@ public class WorkflowsResource {
 				else {
 					// For now lets assume is read only
 					oWorkflowViewModel.setReadOnly(true);
-				}                
+				}
+				
+				File oWorkflowsFile = new File(PathsConfig.getWorkflowsPath() + oCurrentWorkflow.getWorkflowId() + ".xml");
+				
+				if (oWorkflowsFile.exists()) {
+					oWorkflowViewModel.setLastUpdate(oWorkflowsFile.lastModified());
+				}
                 
                 aoRetWorkflows.add(oWorkflowViewModel);
             }
@@ -1037,6 +1043,65 @@ public class WorkflowsResource {
         }
 
         return null;
+    }
+    
+    /**
+     * Obtain and returns the workflow's xml as a String
+     *
+     * @param sSessionId  current user session
+     * @param sWorkflowId Id of the workflow
+     * @return
+     */
+    @GET
+    @Path("/byname")
+    @Consumes({ "application/json", "text/xml" })
+    @Produces({ "application/json", "text/xml" })
+    public Response getWorkflowByName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sWorkflowName) {
+
+        WasdiLog.debugLog("WorkflowsResource.getWorkflowByName(  Name : " + sWorkflowName + ");");
+        
+        try {
+            // Check authorization
+            User oUser = Wasdi.getUserFromSession(sSessionId);
+
+            if (oUser == null) {
+            	WasdiLog.warnLog("WorkflowsResource.getWorkflowByName: invalid session");
+            	return Response.status(Status.UNAUTHORIZED).build();
+            }
+            
+            // Check that the workflow exists on db
+            SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+            SnapWorkflow oWorkflow = oSnapWorkflowRepository.getByName(sWorkflowName);
+            
+            if (oWorkflow == null) {
+                WasdiLog.warnLog("WorkflowsResource.getWorkflowByName: error workflow " + sWorkflowName + " not found on DB");
+                return Response.notModified("Workflow Name not found").build();
+            }            
+            
+            if (!PermissionsUtils.canUserAccessWorkflow(oUser.getUserId(), oWorkflow.getWorkflowId())) {
+            	WasdiLog.warnLog("WorkflowsResource.getWorkflowByName: user cannot access to the workflow");
+            	return Response.status(Status.FORBIDDEN).build();
+            }
+            
+            String sWorkflowId = oWorkflow.getWorkflowId();
+            
+            // Get Path
+            File oWorkflowsFile = new File(PathsConfig.getWorkflowsPath() + sWorkflowId + ".xml");
+
+            if (!oWorkflowsFile.exists()) {
+                WasdiLog.warnLog("WorkflowsResource.getWorkflowByName( Workflow Id : " + sWorkflowId + ") Error, workflow file not found;");
+                return Response.status(Status.BAD_REQUEST).build();
+            }
+            
+            SnapWorkflowViewModel oSnapWorkflowViewModel = SnapWorkflowViewModel.getFromWorkflow(oWorkflow);
+            oSnapWorkflowViewModel.setLastUpdate(oWorkflowsFile.lastModified());
+            
+            return Response.ok().entity(oSnapWorkflowViewModel).build();
+        } 
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("WorkflowsResource.getWorkflowByName error: " + oEx);
+        } 
+        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }    
 
     /**

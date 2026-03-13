@@ -71,6 +71,11 @@ public class SnapWorkflowViewModel {
 	 * Map of parameters: KEY-VALUE that will be used to fill potential parameters in the Workflow XML 
 	 */
 	private HashMap<String, String> templateParams = new HashMap<>();
+	
+	/**
+	 * Time stamp of the last update of the workflow: it is taken directly by the file xml stored
+	 */
+	private double lastUpdate = 0.0;
  
 	/**
 	 * Default constructor
@@ -199,6 +204,14 @@ public class SnapWorkflowViewModel {
 	}
 	public void setTemplateParams(HashMap<String, String> templateParams) {
 		this.templateParams = templateParams;
+	}
+
+	public double getLastUpdate() {
+		return lastUpdate;
+	}
+
+	public void setLastUpdate(double lastUpdate) {
+		this.lastUpdate = lastUpdate;
 	}
 	
 }
