@@ -219,6 +219,8 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 			asVenvCmd.add("uv");
 			asVenvCmd.add("venv");
 			asVenvCmd.add("--seed");
+			asVenvCmd.add("--link-mode");
+			asVenvCmd.add("copy");
 			asVenvCmd.add("--python");
 			asVenvCmd.add(sPythonVersion);
 			asVenvCmd.add(sVenvPath);
