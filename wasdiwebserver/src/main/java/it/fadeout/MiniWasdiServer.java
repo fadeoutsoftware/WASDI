@@ -3,7 +3,6 @@ package it.fadeout;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.glassfish.jersey.servlet.ServletContainer;
 
 public class MiniWasdiServer {
     public static void main(String[] args) throws Exception {
@@ -16,8 +15,10 @@ public class MiniWasdiServer {
         oContext.setContextPath("/");
         oServer.setHandler(oContext);
 
+        Wasdi oWasdi = new Wasdi();
+
         // 3. Attach your existing 'Wasdi' ResourceConfig to the Jersey Servlet
-        ServletHolder oJerseyServlet = new ServletHolder(new ServletContainer(new Wasdi()));
+        ServletHolder oJerseyServlet = new ServletHolder(new WasdiServletContainer(oWasdi));
         oJerseyServlet.setInitOrder(0);
         
         oContext.setContextPath("/wasdiwebserver/rest");

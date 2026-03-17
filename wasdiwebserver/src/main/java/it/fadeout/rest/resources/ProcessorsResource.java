@@ -1505,7 +1505,7 @@ public class ProcessorsResource  {
 		try {
 			
 			if (!WasdiConfig.Current.logAppsOnDb) {
-				WasdiLog.infoLog("APPLOG - " + sLog);
+				WasdiLog.infoLog("APPLOG [" + sProcessWorkspaceId + "] - "+ sLog);
 				return Response.ok().build();
 			}
 			

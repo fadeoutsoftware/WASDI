@@ -140,8 +140,10 @@ public class Wasdi extends ResourceConfig {
 
 		String sConfigFilePath = "/etc/wasdi/wasdiConfig.json";
 
-		if (Utils.isNullOrEmpty(m_oServletConfig.getInitParameter("ConfigFilePath")) == false){
-			sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");
+		if (m_oServletConfig!=null) {
+			if (Utils.isNullOrEmpty(m_oServletConfig.getInitParameter("ConfigFilePath")) == false){
+				sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");
+			}			
 		}
 		
 
