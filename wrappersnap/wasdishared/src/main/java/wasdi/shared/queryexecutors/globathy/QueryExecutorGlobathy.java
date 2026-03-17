@@ -87,18 +87,18 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 			// as a first approximation, we only want the lakes within a specific bounding box.
 			// Nothing else is required
 			
-			double dNorth = oQueryVM.north;
-			double dEast = oQueryVM.east;
-			double dSouth = oQueryVM.south;
-			double dWest = oQueryVM.west;
+			Double dNorth = oQueryVM.north;
+			Double dEast = oQueryVM.east;
+			Double dSouth = oQueryVM.south;
+			Double dWest = oQueryVM.west;
 			
-			if (Utils.isNullOrEmpty(dNorth))
+			if (dNorth == null)
 				dNorth = 90d;
-			if (Utils.isNullOrEmpty(dEast))
+			if (dEast == null)
 				dEast = 180d;
-			if (Utils.isNullOrEmpty(dSouth))
+			if (dSouth == null)
 				dSouth = -90d;
-			if (Utils.isNullOrEmpty(dWest))
+			if (dWest == null)
 				dWest = -180d;
 			
 			iCount = countFeatures(dNorth, dEast, dSouth, dWest);
@@ -144,18 +144,18 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 		    	WasdiLog.warnLog("QueryExecutorGlobathy.executeAndRetrieve: " + oE.toString());
 			}
 			
-			double dNorth = oQueryVM.north;
-			double dEast = oQueryVM.east;
-			double dSouth = oQueryVM.south;
-			double dWest = oQueryVM.west;
+			Double dNorth = oQueryVM.north;
+			Double dEast = oQueryVM.east;
+			Double dSouth = oQueryVM.south;
+			Double dWest = oQueryVM.west;
 			
-			if (Utils.isNullOrEmpty(dNorth))
+			if (dNorth == null)
 				dNorth = 90d;
-			if (Utils.isNullOrEmpty(dEast))
+			if (dEast == null)
 				dEast = 180d;
-			if (Utils.isNullOrEmpty(dSouth))
+			if (dSouth == null)
 				dSouth = -90d;
-			if (Utils.isNullOrEmpty(dWest))
+			if (dWest == null)
 				dWest = -180d;
 			
 			ArrayList<LakeInfo> aoLakes = getFeatures(dNorth, dEast, dSouth, dWest);
@@ -351,6 +351,7 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 			oResVM.setSummary("Mode: " + oLakeInfo.getCountry());
 		}
 		
+		if (!Utils.isNullOrEmpty(oLakeInfo.getLakeName())) aoPropertiesMap.put("lakeName", oLakeInfo.getLakeName());
 		if(!Utils.isNullOrEmpty(oLakeInfo.getContinent())) aoPropertiesMap.put("continent", oLakeInfo.getContinent());
 		if(!Utils.isNullOrEmpty(oLakeInfo.getPolySrc())) aoPropertiesMap.put("polySrc", oLakeInfo.getPolySrc());
 		if(!Utils.isNullOrEmpty(oLakeInfo.getLakeType())) aoPropertiesMap.put("lakeType", oLakeInfo.getLakeType());
