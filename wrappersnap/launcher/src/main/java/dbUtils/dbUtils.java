@@ -1690,6 +1690,8 @@ public class dbUtils {
             }
             else if (sInputString.equals("5")) {
             	
+            	System.out.println("This option will search/delete for Workspaces declared in the db in this node, but the folder is not existing in the node");
+            	
                 System.out.println("Please write DELETE for a real delete");
                 String sCommand = s_oScanner.nextLine();
                 
