@@ -16,6 +16,7 @@ import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -63,11 +64,13 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 			if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace))
 				WasdiLog.errorLog("Share.executeOperationFile: Error during process update with process Perc");
 
-			// send update process message
-			if (m_oSendToRabbit != null) {
-				if (!m_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-					WasdiLog.errorLog("Share.executeOperationFile: Error sending rabbitmq message to update process list");
-				}
+			if (WasdiConfig.Current.rabbit != null) {
+				// send update process message
+				if (m_oSendToRabbit != null) {
+					if (!m_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {					
+						WasdiLog.errorLog("Share.executeOperationFile: Error sending rabbitmq message to update process list");
+					}
+				}			
 			}
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("Share.executeOperationFile: Exception: " + oEx);

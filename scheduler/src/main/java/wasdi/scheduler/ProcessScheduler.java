@@ -832,14 +832,30 @@ public class ProcessScheduler {
 					" -operation " + oProcessWorkspace.getOperationType() +
 					" -parameter " + oProcessWorkspace.getProcessObjId();
 	
-			WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executing command for process " + oProcessWorkspace.getProcessObjId() + ": ");
-			WasdiLog.infoLog(sShellExString);
 			
 			ArrayList<String> asCmd = new ArrayList<>(Arrays.asList(sShellExString.split(" ")));
 			
 			if (WasdiConfig.Current.shellExecLocally == false) {
 				asCmd.add(0, "launcher");
 			}
+			
+			if (WasdiConfig.Current.scheduler.redirectLauncherOutputs && !Utils.isNullOrEmpty(WasdiConfig.Current.scheduler.launcherOutputPath)) {
+				String sPath = WasdiConfig.Current.scheduler.launcherOutputPath;
+				
+				asCmd.add(">>");
+				asCmd.add(sPath);
+				asCmd.add("2>&1");
+			}
+			
+			sShellExString = "";
+			if (asCmd != null) {
+				for (String sArg : asCmd) {
+					sShellExString += sArg + " ";
+				}			
+			}			
+			
+			WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executing command for process " + oProcessWorkspace.getProcessObjId() + ": ");
+			WasdiLog.infoLog(sShellExString);
 			
 			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asCmd, false);
 			

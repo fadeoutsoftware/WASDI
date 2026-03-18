@@ -78,6 +78,17 @@ public class SchedulerConfig {
 	public ArrayList<SchedulerQueueConfig> schedulers;
 	
 	/**
+	 * Flag to ask the launcher to redirect the output of the logs/print. If it is true, the system will check launcherOutputPath. If it is 
+	 * valorized it will redirect to that path
+	 */
+	public boolean redirectLauncherOutputs = false;
+	
+	/**
+	 * If redirectLauncherOutputs is true, this represents the path where to redirect the outputs of the launcher. 
+	 */
+	public String launcherOutputPath = "";
+	
+	/**
 	 * Get a scheduler from the queue code
 	 * @param sScheduler Code of the Queue
 	 * @return SchedulerQueueConfig

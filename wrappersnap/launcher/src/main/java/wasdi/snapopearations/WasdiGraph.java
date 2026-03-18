@@ -27,6 +27,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.config.PathsConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
@@ -398,10 +399,13 @@ public class WasdiGraph {
 		    } else {
 		    	WasdiLog.debugLog("WasdiGraph.initProcess: Updated process  " + m_oProcess.getProcessObjId());
 		    }
-	        //send update process message
-		    if (m_oRabbitSender!=null && !m_oRabbitSender.SendUpdateProcessMessage(m_oProcess)) {
-				WasdiLog.errorLog("WasdiGraph.initProcess: Error sending rabbitmq message to update process list");
-			}
+		    
+		    if (WasdiConfig.Current.rabbit != null) {
+		        //send update process message
+			    if (m_oRabbitSender!=null && !m_oRabbitSender.SendUpdateProcessMessage(m_oProcess)) {
+					WasdiLog.errorLog("WasdiGraph.initProcess: Error sending rabbitmq message to update process list");
+				}
+		    }
 		}
 		
 	}
@@ -420,10 +424,13 @@ public class WasdiGraph {
 		        if (!m_oProcessRepository.updateProcess(m_oProcess)) {
 		        	WasdiLog.errorLog("WasdiGraph: Error during process update (terminated)");
 		        }
-		        //send update process message
-				if (m_oRabbitSender!=null && !m_oRabbitSender.SendUpdateProcessMessage(m_oProcess)) {
-				    WasdiLog.debugLog("WasdiGraph: Error sending rabbitmq message to update process list");
-				}
+		        
+		        if (WasdiConfig.Current.rabbit != null) {
+			        //send update process message
+					if (m_oRabbitSender!=null && !m_oRabbitSender.SendUpdateProcessMessage(m_oProcess)) {
+					    WasdiLog.debugLog("WasdiGraph: Error sending rabbitmq message to update process list");
+					}		        	
+		        }
 			}
 		} catch (Exception e) {
 		    WasdiLog.errorLog("WasdiGraph: Exception closing process", e);

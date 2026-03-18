@@ -115,7 +115,12 @@ public class WasdiConfig {
 	 * Set to true to use the log4j configuration to configure the loggers.
 	 * If it is false, the app will just log on the standard output
 	 */
-	public boolean useLog4J = true;
+	public boolean useLog4J = false;
+	
+	/**
+	 * Set to true if the launcher should use the API logger. Works only if useLog4j Is false
+	 */
+	public boolean useLauncherApiLogger = false;
 	
 	/**
 	 * Set true to activate the logs of the http calls

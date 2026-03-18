@@ -2380,7 +2380,7 @@ public class ProcessorsResource  {
 			
 			if (sFileName.toLowerCase().endsWith(".zip")) {
 				WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: unzipping the file");
-				bOk = unzipProcessor(oProcessorFile, sSessionId, sProcessorId);
+				bOk = unzipProcessor(oProcessorFile, sSessionId, sProcessorId, oProcessorToUpdate.getType());
 			}
 			else {
 				WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: simple not zipped file");
@@ -3860,7 +3860,7 @@ public class ProcessorsResource  {
      * @param sProcessorId Processor Id
      * @return true if ok, false otherwise
      */
-	private boolean unzipProcessor(File oProcessorZipFile, String sSessionId, String sProcessorId) {
+	private boolean unzipProcessor(File oProcessorZipFile, String sSessionId, String sProcessorId, String sType) {
 		try {
 
 			//get containing dir 
@@ -3876,37 +3876,40 @@ public class ProcessorsResource  {
 				WasdiLog.errorLog("ProcessorsResource.unzipProcessor: unzip failed: " + oE);
 				return false;
 			}
-
-			//find files that need renaming
-			List<File> aoFileList = new ArrayList<>();
-			try {
-				java.nio.file.Path oFolderPath = java.nio.file.Paths.get(sProcessorFolder);
-				try(Stream<java.nio.file.Path> aoPathStream = Files.walk(oFolderPath)){
-					aoPathStream.map(java.nio.file.Path::toFile)
-					.forEach(aoFileList::add);
-				}
-			} catch (IOException | InvalidPathException | SecurityException oE) {
-				WasdiLog.errorLog("ProcessorsResource.unzipProcessor: finding files that need renaming failed: " + oE);
-				return false;
-			}
-
-			//rename those files
-			try {
-				for (File oFile: aoFileList) {
-					if (oFile.getCanonicalPath().toUpperCase().endsWith(".PRO") && !oFile.isDirectory()) {
-						String sNewPath = oFile.getCanonicalPath();
-						sNewPath = sNewPath.substring(0, sNewPath.length() - 4);
-						sNewPath += ".pro";
-						// Force extension case
-						String sOld = oFile.getCanonicalPath();
-						java.nio.file.Path oMovePath = Files.move(new File(sOld).toPath(), new File(sNewPath).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-						WasdiLog.debugLog("ProcessorsResource.unzipProcessor: renaming from " + sOld + " to " + oMovePath.toString());
+			
+			if (sType.equals(ProcessorTypes.IDL)) {
+				//find files that need renaming
+				List<File> aoFileList = new ArrayList<>();
+				try {
+					java.nio.file.Path oFolderPath = java.nio.file.Paths.get(sProcessorFolder);
+					try(Stream<java.nio.file.Path> aoPathStream = Files.walk(oFolderPath)){
+						aoPathStream.map(java.nio.file.Path::toFile)
+						.forEach(aoFileList::add);
 					}
+				} catch (IOException | InvalidPathException | SecurityException oE) {
+					WasdiLog.errorLog("ProcessorsResource.unzipProcessor: finding files that need renaming failed: " + oE);
+					return false;
 				}
-			} catch (IOException oE) {
-				WasdiLog.errorLog("ProcessorsResource.unzipProcessor: renaming failed: " + oE);
-				return false;
+
+				//rename those files
+				try {
+					for (File oFile: aoFileList) {
+						if (oFile.getCanonicalPath().toUpperCase().endsWith(".PRO") && !oFile.isDirectory()) {
+							String sNewPath = oFile.getCanonicalPath();
+							sNewPath = sNewPath.substring(0, sNewPath.length() - 4);
+							sNewPath += ".pro";
+							// Force extension case
+							String sOld = oFile.getCanonicalPath();
+							java.nio.file.Path oMovePath = Files.move(new File(sOld).toPath(), new File(sNewPath).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+							WasdiLog.debugLog("ProcessorsResource.unzipProcessor: renaming from " + sOld + " to " + oMovePath.toString());
+						}
+					}
+				} catch (IOException oE) {
+					WasdiLog.errorLog("ProcessorsResource.unzipProcessor: renaming failed: " + oE);
+					return false;
+				}				
 			}
+
 			return true;
 		} catch (Exception oE) {
 			WasdiLog.errorLog("ProcessorsResource.unzipProcessor error: " + oE);

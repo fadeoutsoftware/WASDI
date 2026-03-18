@@ -47,6 +47,7 @@ import wasdi.shared.utils.ProcessWorkspaceLogger;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.ApiLogger;
 import wasdi.shared.utils.log.LoggerWrapper;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -185,12 +186,22 @@ public class LauncherMain  {
             WasdiLog.debugLog("Launcher Main - Logger added");
         }
         else { 
-        	WasdiLog.debugLog("Launcher Main - WASDI Configured to log on console");
         	WasdiLog.initLogger(WasdiConfig.Current.logLevelLauncher);
+        	
+        	if (WasdiConfig.Current.useLauncherApiLogger) {
+        		ApiLogger oApiLogger = new ApiLogger();
+        		oApiLogger.setProcessWorkspaceId("LAUNCHER");
+        		s_oLogger = new LoggerWrapper(oApiLogger);
+        		WasdiLog.setLoggerWrapper(s_oLogger);
+        		WasdiLog.debugLog("Launcher Main - WASDI Configured to log using APIs");
+        	}
+        	else {
+        		WasdiLog.debugLog("Launcher Main - WASDI Configured to log on console");	
+        	}
         }
         
         // Filter useless logs
-        LauncherMain.filterLogs();
+        LauncherMain.filterThirdPartyLogs();
   		
         try {
 
@@ -322,7 +333,7 @@ public class LauncherMain  {
     /**
      * Filters the un-wanted log flows
      */
-    public static void filterLogs() {
+    public static void filterThirdPartyLogs() {
         // Filter the mongodb logs
   		try {
   			System.setProperty("DEBUG.MONGO", "false");
@@ -699,9 +710,12 @@ public class LauncherMain  {
             if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
                 WasdiLog.debugLog("Error during process update");
             }
-
-            if (!s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-                WasdiLog.debugLog("Error sending rabbitmq message to update process list");
+            
+            
+            if (WasdiConfig.Current.rabbit != null) {
+                if (!s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
+                    WasdiLog.debugLog("Error sending rabbitmq message to update process list");
+                }            	
             }
         }
         catch (Exception oEx) {

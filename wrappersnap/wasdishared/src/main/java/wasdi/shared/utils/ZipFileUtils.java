@@ -128,7 +128,7 @@ public class ZipFileUtils {
 	
 			Path oPath = Paths.get(sTempAbsolutePath).toAbsolutePath().normalize();
 			if (oPath.toFile().mkdirs()) {
-				WasdiLog.infoLog(m_sLoggerPrefix + "unzip: Temporary directory created: "  + sTempAbsolutePath);
+				WasdiLog.debugLog(m_sLoggerPrefix + "unzip: Temporary directory created: "  + sTempAbsolutePath);
 			} else {
 				throw new IOException("Can't create temporary dir " + sTempAbsolutePath);
 			}
@@ -147,7 +147,7 @@ public class ZipFileUtils {
 		} 
 		finally {
 			// make sure temporary directory gets deleted
-			WasdiLog.infoLog(m_sLoggerPrefix + "Copy and clean tmp dir.");
+			WasdiLog.debugLog(m_sLoggerPrefix + "Copy and clean tmp dir.");
 			if (!cleanTempDir(sTempAbsolutePath, sTempRelativeDirectory)) {
 				WasdiLog.errorLog(m_sLoggerPrefix + " cleanTempDir( " + sTempAbsolutePath + ", " + sTempRelativeDirectory + " returned false...");
 			}

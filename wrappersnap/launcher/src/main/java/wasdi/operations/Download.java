@@ -372,7 +372,9 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             // send update process message
             if (m_oSendToRabbit != null) {
                 if (!m_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-                	WasdiLog.errorLog("Download.executeOperationFile: Error sending rabbitmq message to update process list");
+                	if (WasdiConfig.Current.rabbit != null) {
+                		WasdiLog.errorLog("Download.executeOperationFile: Error sending rabbitmq message to update process list");	
+                	}
                 }
             }
         } catch (Exception oEx) {
