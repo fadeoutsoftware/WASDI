@@ -1260,9 +1260,11 @@ public class PermissionsUtils {
 				}
 				
 				// If we are in a workspace of the owner
-				if (oWorkspace.getUserId().equals(oS3Volume.getUserId())) {
-					aoOutputList.add(oS3Volume);
-					continue;					
+				if (oWorkspace.getUserId()!=null) {
+					if (oWorkspace.getUserId().equals(oS3Volume.getUserId())) {
+						aoOutputList.add(oS3Volume);
+						continue;					
+					}					
 				}
 				
 				// If the owner of the volume has the workspace shared is ok 
