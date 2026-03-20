@@ -87,7 +87,7 @@ public class SqliteConnection {
 				oStmt.execute("PRAGMA busy_timeout=5000");
 			}
 
-			WasdiLog.infoLog("SqliteConnection.init: SQLite database opened (WAL mode) at " + s_sDbFilePath);
+			WasdiLog.debugLog("SqliteConnection.init: SQLite database opened (WAL mode) at " + s_sDbFilePath);
 		}
 		catch (Exception oException) {
 			WasdiLog.errorLog("SqliteConnection.init exception", oException);
