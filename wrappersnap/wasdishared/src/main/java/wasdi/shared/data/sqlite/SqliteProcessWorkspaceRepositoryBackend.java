@@ -1205,6 +1205,19 @@ public class SqliteProcessWorkspaceRepositoryBackend extends SqliteRepository im
 
         return false;
     }
+    
+    public boolean cleanPastProcessWorkspaces() {
+        
+        try {
+            execute("DELETE FROM " + m_sThisCollection + " WHERE json_extract(data,'$.status') IN (?,?,?)",
+                    new Object[]{ProcessStatus.ERROR.name(), ProcessStatus.STOPPED.name(), ProcessStatus.DONE.name()});
+            return true;
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.cleanPastProcessWorkspaces: exception ", oEx);
+        }        
+
+        return false;    	
+    }
 
     /**
      * Check if a Process Workpsace with that pid exists

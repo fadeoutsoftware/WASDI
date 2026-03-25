@@ -603,6 +603,23 @@ public class No2ProcessWorkspaceRepositoryBackend extends No2Repository implemen
 		}
 		return false;
 	}
+	
+	public boolean cleanPastProcessWorkspaces() {
+		try {
+			NitriteCollection oCollection = getCollection(s_sCollectionName);
+			if (oCollection == null) {
+				return false;
+			}
+
+			oCollection.remove(where("status").in(ProcessStatus.ERROR.name(), ProcessStatus.STOPPED.name(), ProcessStatus.DONE.name()));
+			return true;
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("No2ProcessWorkspaceRepositoryBackend.cleanPastProcessWorkspaces: exception ", oEx);
+		}
+
+		return false;
+	}
 
 	@Override
 	public boolean existsPidProcessWorkspace(Integer iPid) {

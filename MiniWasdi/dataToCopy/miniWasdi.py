@@ -261,6 +261,8 @@ def _wait_for_server(sBaseUrl, iMaxWaitSeconds=180, iPollSeconds=3):
     raise RuntimeError("[STARTUP] Timed out waiting for WASDI readiness")
     
 def run():
+    print("[STARTUP] Welcome to MiniWasdi 1.0")
+
     # Read the config file path from the env
     sConfigFile = _getEnvironmentVariable("WASDI_CONFIG_FILE")
 
@@ -285,6 +287,37 @@ def run():
     
     # Wait for the mini server to be ready before proceeding
     _wait_for_server(sBaseUrl)
+
+    sCleanHistory = _getEnvironmentVariable("WASDI_CLEAR_HISTORY")
+
+    if sCleanHistory is not None:
+        if sCleanHistory.lower() == "true" or sCleanHistory == "1":
+            print("[STARTUP] WASDI_CLEAR_HISTORY is set to true, cleaning the history.")
+            sCleanQueueUrl = sBaseUrl + "admin/cleanProcessesQueue"
+            try:
+                oResponse = requests.delete(sCleanQueueUrl, timeout=30)
+                if oResponse.status_code == 200:
+                    print("[STARTUP] Created processes cleaned successfully.")
+                else:
+                    print(f"[STARTUP] Error cleaning created processes: {oResponse.status_code} - {oResponse.text}")
+            except Exception as oEx:
+                print(f"[STARTUP] Exception while cleaning created processes: {str(oEx)}")
+
+            sCleanPastProcessesUrl = sBaseUrl + "admin/cleanOldProcesses"
+            try:
+                oResponse = requests.delete(sCleanPastProcessesUrl, timeout=30)
+                if oResponse.status_code == 200:
+                    print("[STARTUP] History cleaned successfully.")
+                else:
+                    print(f"[STARTUP] Error cleaning history: {oResponse.status_code} - {oResponse.text}")
+            except Exception as oEx:
+                print(f"[STARTUP] Exception while cleaning history: {str(oEx)}")
+
+            print("[STARTUP] History cleaned, continuing with the startup.")
+        else:
+            print("[STARTUP] WASDI_CLEAR_HISTORY is set to not known value (" + sCleanHistory + "), not cleaning the history.")
+    else:
+        print("[STARTUP] WASDI_CLEAR_HISTORY is not set, not cleaning the history.")
 
     # Get the  base path of WASDI
     sBasePath = aoConfig["paths"]["downloadRootPath"]
@@ -410,7 +443,8 @@ def run():
         aoParams = json.loads(sParams)
     except Exception as oEx:
         print("[STARTUP] Error parsing WASDI_PARAMS, using empty params. Error: " + str(oEx))
-        print("[STARTUP] WASDI_PARAMS value: " + sParams)
+    
+    print("[STARTUP] WASDI_PARAMS value: " + sParams)
 
     bUseWorkspaceId = False
     # Sanity check the workspace, if not set use empty workspace

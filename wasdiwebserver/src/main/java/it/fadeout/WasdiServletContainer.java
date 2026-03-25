@@ -8,14 +8,14 @@ import org.glassfish.jersey.servlet.ServletContainer;
 public class WasdiServletContainer  extends ServletContainer {
     private final Wasdi wasdi;
 
-    public WasdiServletContainer(Wasdi wasdi) {
-        super(wasdi);
-        this.wasdi = wasdi;
+    public WasdiServletContainer(Wasdi oWasdi) {
+        super(oWasdi);
+        this.wasdi = oWasdi;
     }
 
     @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
+    public void init(ServletConfig oConfig) throws ServletException {
+        super.init(oConfig);
         wasdi.initWasdi();
     }    
 }

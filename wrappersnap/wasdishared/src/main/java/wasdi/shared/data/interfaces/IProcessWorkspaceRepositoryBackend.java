@@ -113,6 +113,8 @@ public interface IProcessWorkspaceRepositoryBackend {
 	boolean updateProcess(ProcessWorkspace oProcessWorkspace);
 
 	boolean cleanQueue();
+	
+	boolean cleanPastProcessWorkspaces();
 
 	boolean existsPidProcessWorkspace(Integer iPid);
 

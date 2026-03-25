@@ -344,8 +344,7 @@ public class ProcessWorkspaceRepository implements IProcessWorkspaceRepositoryBa
 	}
 
 	@Override
-	public List<ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult> getQueuesByNodeAndStatuses(
-			String sNodeCode, String... asStatuses) {
+	public List<ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult> getQueuesByNodeAndStatuses(String sNodeCode, String... asStatuses) {
 		return m_oBackend.getQueuesByNodeAndStatuses(sNodeCode, asStatuses);
 	}
 
@@ -360,15 +359,18 @@ public class ProcessWorkspaceRepository implements IProcessWorkspaceRepositoryBa
 	}
 
 	@Override
-	public List<ProcessWorkspaceAggregatorBySubscriptionAndProject> getRunningTimeInfo(
-			Collection<String> asSubscriptionIds) {
+	public List<ProcessWorkspaceAggregatorBySubscriptionAndProject> getRunningTimeInfo( Collection<String> asSubscriptionIds) {
 		return m_oBackend.getRunningTimeInfo(asSubscriptionIds);
 	}
 
 	@Override
-	public List<ProcessWorkspaceAggregatorBySubscriptionAndProject> getProjectRunningTime(String sUserId,
-			Collection<String> asSubscriptionIds) {
+	public List<ProcessWorkspaceAggregatorBySubscriptionAndProject> getProjectRunningTime(String sUserId, Collection<String> asSubscriptionIds) {
 		return m_oBackend.getProjectRunningTime(sUserId, asSubscriptionIds);
+	}
+
+	@Override
+	public boolean cleanPastProcessWorkspaces() {
+		return m_oBackend.cleanPastProcessWorkspaces();
 	}
 	
 	

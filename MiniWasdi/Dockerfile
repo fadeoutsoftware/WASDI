@@ -99,8 +99,8 @@ ENV LD_LIBRARY_PATH="/opt/wasdi/launcher/linux-x86-64/"
 
 # Entrypoint Script
 USER root
-RUN chmod +x /opt/wasdi/wasdi.sh
+RUN sed -i 's/\r$//' /opt/wasdi/wasdi.sh && chmod +x /opt/wasdi/wasdi.sh
 USER appwasdi
 
 #EXPOSE 8080
-ENTRYPOINT ["/opt/wasdi/wasdi.sh"]
+ENTRYPOINT ["/bin/bash", "/opt/wasdi/wasdi.sh"]

@@ -1436,6 +1436,19 @@ public class MongoProcessWorkspaceRepositoryBackend extends MongoRepository impl
 
         return false;
     }
+    
+    
+    public boolean cleanPastProcessWorkspaces() {
+        try {
+            getCollection(m_sThisCollection).deleteMany(
+                    Filters.in("status", ProcessStatus.ERROR.name(), ProcessStatus.STOPPED.name(), ProcessStatus.DONE.name()));
+            return true;
+        } catch (Exception oEx) {
+            WasdiLog.errorLog("ProcessWorkspaceRepository.cleanPastProcessWorkspaces: exception ", oEx);
+        }
+
+        return false;
+    }
 
     /**
      * Check if a Process Workpsace with that pid exists
