@@ -1018,3 +1018,6 @@ libraries/.vscode/
 .vscode/
 docker/containers/docker-compose-INPROD.yml
 wasdiwebserver/dependency-reduced-pom.xml
+MiniWasdi/dataToCopy/launcher-1.0.jar
+MiniWasdi/dataToCopy/scheduler-1.0.jar
+MiniWasdi/dataToCopy/wasdi-mini-server.jar

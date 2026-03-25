@@ -1,0 +1,678 @@
+{
+	"nodeCode": "wasdi",
+	"mainNodeCloud": "LOCAL",
+	"usersDefaultNode": "wasdi",
+	"systemUserName": "appwasdi",
+	"systemGroupName": "appwasdi",
+	"systemUserId": 2042,
+	"systemGroupId": 2042,
+	"baseUrl": "http://127.0.0.1:8080/wasdiwebserver/rest/",
+	"connectionTimeout": 30000,
+	"readTimeout": 30000,
+	"msWaitAfterChmod": 1000,
+	"shellExecLocally": true,
+	"useNotebooksDockerAddress": true,
+	"logHttpCalls": true,
+	"logLevel": "INFO",
+    "logLevelServer": "",
+    "logLevelLauncher": "",
+    "logLevelScheduler": "",	
+	"disableAuthentication": true,
+	"activateSubscriptionChecks": false,
+	"dbEngine": "sqlite",
+	"useLog4J": false,
+	"useLauncherApiLogger": true,	
+	"logAppsOnDb": false,
+	"mongoMain": {
+		"address": "",
+		"dbName": "wasdi",
+		"replicaName": "",
+		"user": "wasdi",
+		"password": ""
+	},
+	"paths": {
+		"downloadRootPath": "/data/wasdi",
+		"metadataPath": "/data/wasdi/metadata/",
+		"dockerTemplatePath": "/opt/wasdi/dockertemplate/",
+		"sftpRootPath": "/home/appwasdi/sftp",
+		"geoserverDataDir": "",
+		"sen2CorePath": "",
+		"userHomePath": "/data/wasdi/appwasdi.home",
+		"missionsConfigFilePath": "/etc/wasdi/appconfig.json",
+		"gdalPath": "/usr/bin/",
+		"wasdiTempFolder": "/data/wasdi/tmp/",
+		"s3VolumesBasePath": "/mnt/wasdi/users-volumes/"
+	},
+	"snap": {
+		"auxPropertiesFile": "/etc/wasdi/snap.auxdata.properties",
+		"launcherLogActive": true,
+		"webLogActive": true,
+		"launcherLogFile": "/var/log/wasdi/snaplauncher.log",
+		"webLogFile": "/var/log/wasdi/snapweb.log",
+		"launcherLogLevel": "FINER",
+		"webLogLevel": "SEVERE"
+	},
+	"loadBalancer": {
+		"includeMainClusterAsNode": true,
+		"diskOccupiedSpaceMaxPercentage": 90,
+		"metricsMaxAgeSeconds": 600,
+		"activateMetrics": false
+	},
+	"catalogues": [
+		{
+			"platform": "CAMS",
+			"catalogues": [
+				"ADS"
+			]
+		},
+		{
+			"platform": "DEM",
+			"catalogues": [
+				"TERRASCOPE"
+			]
+		},
+		{
+			"platform": "Envisat",
+			"catalogues": [
+				"CREODIAS2"
+			]
+		},
+		{
+			"platform": "ERA5",
+			"catalogues": [
+				"CDS"
+			]
+		},
+		{
+			"platform": "ERS",
+			"catalogues": [
+				"ESA"
+			]
+		},
+		{
+			"platform": "IMERG",
+			"catalogues": [
+				"GPM"
+			]
+		},
+		{
+			"platform": "Landsat-5",
+			"catalogues": [
+				"CREODIAS2"
+			]
+		},
+		{
+			"platform": "Landsat-7",
+			"catalogues": [
+				"CREODIAS2"
+			]
+		},
+		{
+			"platform": "Landsat-8",
+			"catalogues": [
+				"CREODIAS2"
+			]
+		},
+		{
+			"platform": "Sentinel-1",
+			"catalogues": [
+				"CREODIAS2",
+				"LSA"
+			]
+		},
+		{
+			"platform": "Sentinel-2",
+			"catalogues": [
+				"CREODIAS2",
+				"LSA"
+			]
+		},
+		{
+			"platform": "Sentinel-3",
+			"catalogues": [
+				"CREODIAS2"
+			]
+		},
+		{
+			"platform": "Sentinel-5P",
+			"catalogues": [
+				"CREODIAS2" 
+			]
+		},
+		{
+			"platform": "Sentinel-6",
+			"catalogues": [
+				"CREODIAS2"
+			]
+		},
+		{
+			"platform": "SMOS",
+			"catalogues": [
+				"CREODIAS2"
+			]
+		},
+		{
+			"platform": "StaticFiles",
+			"catalogues": [
+				"STATICS"
+			]
+		},
+		{
+			"platform": "StaticTiles",
+			"catalogues": [
+				"JRC"
+			]
+		},
+		{
+			"platform": "TERRA",
+			"catalogues": [
+				"LPDAAC"
+			]
+		},
+		{
+			"platform": "VIIRS",
+			"catalogues": [
+				"VIIRS",
+				"LPDAAC"
+			]
+		},
+		{
+			"platform": "WorldCover",
+			"catalogues": [
+				"TERRASCOPE"
+			]
+		},
+		{
+			"platform": "WSF",
+			"catalogues": [
+				"DLR"
+			]
+		},
+		{
+			"platform": "GFS",
+			"catalogues": [
+				"GFS_NRT"
+			]
+		}
+	],
+	"dataProviders": [
+		{
+			"name": "GFS_NRT",
+			"description": "GFS Model Near Real Time",
+			"queryExecutorClasspath": "wasdi.shared.queryexecutors.extpython.ExtPythonQueryExecutor",
+			"providerAdapterClasspath": "wasdi.dataproviders.ExtPythonProviderAdapter",
+			"pythonScript": "data_provider_gfs.py",
+			"link": "",
+			"searchListPageSize": "50",
+			"defaultProtocol": "",
+			"parserConfig": "",
+			"user": "",
+			"password": "",
+			"apiKey": "",
+			"localFilesBasePath": "",
+			"urlDomain": "",
+			"connectionTimeout": "",
+			"readTimeout": "",
+			"adapterConfig": "",
+			"cloudProvider": "Wasdi",
+			"supportedPlatforms": [
+				"GFS"
+			]
+		},
+		{
+			"name": "ADS",
+			"description": "ADS",
+			"queryExecutorClasspath": "wasdi.shared.queryexecutors.ads.QueryExecutorADS",
+			"providerAdapterClasspath": "wasdi.dataproviders.ADSProviderAdapter",
+			"pythonScript": "",
+			"link": "https://ads.atmosphere.copernicus.eu/api/v2/resources",
+			"searchListPageSize": "50",
+			"defaultProtocol": "",
+			"parserConfig": "",
+			"user": "",
+			"password": "",
+			"localFilesBasePath": "",
+			"urlDomain": "",
+			"connectionTimeout": "",
+			"readTimeout": "",
+			"adapterConfig": "",
+			"cloudProvider": "ADS",
+			"supportedPlatforms": [
+				"CAMS"
+			]
+		},
+		{
+			"name": "CDS",
+			"description": "CDS",
+			"queryExecutorClasspath": "wasdi.shared.queryexecutors.cds.QueryExecutorCDS",
+			"providerAdapterClasspath": "wasdi.dataproviders.CDS2ProviderAdapter",
+			"pythonScript": "",
+			"link": "https://cds.climate.copernicus.eu/api/v2/resources",
+			"searchListPageSize": "50",
+			"defaultProtocol": "",
+			"parserConfig": "",
+			"user": "",
+			"password": "",
+			"localFilesBasePath": "",
+			"urlDomain": "",
+			"connectionTimeout": "",
+			"readTimeout": "",
+			"adapterConfig": "",
+			"cloudProvider": "CDS",
+			"supportedPlatforms": [
+				"ERA5"
+			]
+		},
+		{
+			"name": "CREODIAS2",
+			"description": "CREODIAS2",
+			"queryExecutorClasspath": "wasdi.shared.queryexecutors.creodias2.QueryExecutorCreoDias2",
+			"providerAdapterClasspath": "wasdi.dataproviders.CreoDias2ProviderAdapter",
+			"pythonScript": "",
+			"link": "https://datahub.creodias.eu/odata/v1/Products?",
+			"searchListPageSize": "",
+			"defaultProtocol": "https://",
+			"parserConfig": "",
+			"user": "",
+			"password": "",
+			"apiKey": "",
+			"localFilesBasePath": "/eodata/",
+			"urlDomain": "",
+			"connectionTimeout": "",
+			"readTimeout": "",
+			"adapterConfig": "",
+			"cloudProvider": "CREODIAS",
+			"supportedPlatforms": [
+				"Sentinel-1",
+				"Sentinel-2",
+				"Sentinel-3",
+				"Sentinel-5P",
+				"Sentinel-6",
+				"Envisat",
+				"Landsat-5",
+				"Landsat-7",
+				"Landsat-*",
+				"SMOS"
+			]
+		},
+		{
+			"name": "DLR",
+			"description": "DLR",
+			"queryExecutorClasspath": "wasdi.shared.queryexecutors.dlr.QueryExecutorDLR",
+			"providerAdapterClasspath": "wasdi.dataproviders.DLRProviderAdapter",
+			"pythonScript": "",
+			"link": "https://download.geoservice.dlr.de/WSF2019/grid.geojson",
+			"searchListPageSize": "",
+			"defaultProtocol": "https://",
+			"parserConfig": "",
+			"user": "",
+			"password": "",
+			"apiKey": "",
+			"localFilesBasePath": "",
+			"urlDomain": "",
+			"connectionTimeout": "",
+			"readTimeout": "",
+			"adapterConfig": "",
+			"cloudProvider": "",
+			"supportedPlatforms": [
+				"WSF"
+			]
+		},
+		{
+			"name": "ESA",
+			"description": "ESA",
+			"queryExecutorClasspath": "wasdi.shared.queryexecutors.esa.QueryExecutorESA",
+			"providerAdapterClasspath": "wasdi.dataproviders.ESAProviderAdapter",
+			"pythonScript": "",
+			"link": "https://eocat.esa.int/eo-catalogue",
+			"searchListPageSize": "",
+			"defaultProtocol": "https://",
+			"parserConfig": "",
+			"user": "",
+			"password": "",
+			"apiKey": "",
+			"localFilesBasePath": "",
+			"urlDomain": "",
+			"connectionTimeout": "",
+			"readTimeout": "",
+			"adapterConfig": "/etc/wasdi/ersAdapterConfig.json",
+			"cloudProvider": "ESA",
+			"supportedPlatforms": [
+				"ERS"
+			]
+		},
+		{
+			"name": "EXT_WEB",
+			"description": "External Web Data Provider",
+			"queryExecutorClasspath": "wasdi.shared.queryexecutors.extweb.ExtWebQueryExecutor",
+			"providerAdapterClasspath": "wasdi.dataproviders.ExtWebProviderAdapter",
+			"pythonScript": "",
+			"link": "https://ads.atmosphere.copernicus.eu/api/v2/resources",
+			"searchListPageSize": "50",
+			"defaultProtocol": "",
+			"parserConfig": "/etc/wasdi/extWebAdapterConfig.json",
+			"user": "",
+			"password": "",
+			"localFilesBasePath": "",
+			"urlDomain": "",
+			"connectionTimeout": "",
+			"readTimeout": "",
+			"adapterConfig": "/etc/wasdi/extWebAdapterConfig.json",
+			"cloudProvider": "EXT",
+			"supportedPlatforms": [
+			]
+		},
+		{
+			"name": "GPM",
+			"description": "GPM",
+			"queryExecutorClasspath": "wasdi.shared.queryexecutors.gpm.QueryExecutorGPM",
+			"providerAdapterClasspath": "wasdi.dataproviders.GPMProviderAdapter",
+			"pythonScript": "",
+			"link": "https://jsimpsonhttps.pps.eosdis.nasa.gov/imerg/gis/",
+			"searchListPageSize": "",
+			"defaultProtocol": "https://",
+			"parserConfig": "",
+			"user": "",
+			"password": "",
+			"localFilesBasePath": "",
+			"urlDomain": "",
+			"connectionTimeout": "",
+			"readTimeout": "",
+			"adapterConfig": "",
+			"cloudProvider": "GPM",
+			"supportedPlatforms": [
+				"IMERG"
+			]
+		},
+		{
+			"name": "JRC",
+			"description": "JRC Open Data",
+			"queryExecutorClasspath": "wasdi.shared.queryexecutors.jrc.QueryExecutorJRC",
+			"providerAdapterClasspath": "wasdi.dataproviders.JRCProviderAdapter",
+			"pythonScript": "",
+			"link": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/",
+			"searchListPageSize": "50",
+			"defaultProtocol": "https://",
+			"parserConfig": "/etc/wasdi/jrcParserConfig.json",
+			"user": "",
+			"password": "",
+			"apiKey": "",
+			"localFilesBasePath": "",
+			"urlDomain": "",
+			"connectionTimeout": "",
+			"readTimeout": "",
+			"adapterConfig": "",
+			"cloudProvider": "JRC",
+			"supportedPlatforms": [
+				"StaticTiles"
+			]
+		},
+		{
+			"name": "LPDAAC",
+			"description": "LPDAAC Modis 11A2",
+			"queryExecutorClasspath": "wasdi.shared.queryexecutors.lpdaac.QueryExecutorLpDaac",
+			"providerAdapterClasspath": "wasdi.dataproviders.LpDaacProviderAdapter",
+			"pythonScript": "",
+			"link": "",
+			"searchListPageSize": "50",
+			"defaultProtocol": "",
+			"parserConfig": "/etc/wasdi/modisParserConfig.json",
+			"user": "",
+			"password": "",
+			"apiKey": "",
+			"localFilesBasePath": "",
+			"urlDomain": "",
+			"connectionTimeout": "",
+			"readTimeout": "",
+			"adapterConfig": "",
+			"cloudProvider": "NASA",
+			"supportedPlatforms": [
+				"TERRA",
+				"VIIRS"
+			]
+		},
+		{
+			"name": "LSA",
+			"description": "LSA DATA CENTER",
+			"queryExecutorClasspath": "wasdi.shared.queryexecutors.lsa.QueryExecutorLSA",
+			"providerAdapterClasspath": "wasdi.dataproviders.LSAProviderAdapter",
+			"pythonScript": "",
+			"link": "https://www.collgs.lu/",
+			"searchListPageSize": "50",
+			"defaultProtocol": "https://",
+			"parserConfig": "/etc/wasdi/lsaParserConfig.json",
+			"user": "",
+			"password": "",
+			"localFilesBasePath": "/mount/lucollgs/data_192/",
+			"urlDomain": "https://collgs.lu/repository/",
+			"connectionTimeout": "",
+			"readTimeout": "",
+			"adapterConfig": "",
+			"cloudProvider": "ADWAISEO",
+			"supportedPlatforms": [
+				"Sentinel-1",
+				"Sentinel-2"
+			]
+		},
+		{
+			"name": "STATICS",
+			"description": "Wasdi Hosted Files",
+			"queryExecutorClasspath": "wasdi.shared.queryexecutors.statics.QueryExecutorSTATICS",
+			"providerAdapterClasspath": "wasdi.dataproviders.STATICSProviderAdapter",
+			"pythonScript": "",
+			"link": "https://www.wasdi.cloud/",
+			"searchListPageSize": "50",
+			"defaultProtocol": "https://",
+			"parserConfig": "",
+			"user": "",
+			"password": "",
+			"localFilesBasePath": "",
+			"urlDomain": "https://test-geoserver-main01.wasdi.net/geoserver",
+			"connectionTimeout": "",
+			"readTimeout": "",
+			"adapterConfig": "",
+			"cloudProvider": "WASDI",
+			"supportedPlatforms": [
+				"StaticFiles"
+			]
+		},
+		{
+			"name": "TERRASCOPE",
+			"description": "Terrascope",
+			"queryExecutorClasspath": "wasdi.shared.queryexecutors.terrascope.QueryExecutorTerrascope",
+			"providerAdapterClasspath": "wasdi.dataproviders.TerrascopeProviderAdapter",
+			"pythonScript": "",
+			"link": "https://services.terrascope.be/catalogue/products",
+			"searchListPageSize": "",
+			"defaultProtocol": "https://",
+			"parserConfig": "",
+			"user": "",
+			"password": "",
+			"localFilesBasePath": "/data/wasdi",
+			"urlDomain": "",
+			"connectionTimeout": "",
+			"readTimeout": "",
+			"adapterConfig": "",
+			"cloudProvider": "TERRASCOPE",
+			"supportedPlatforms": [
+				"Sentinel-1",
+				"DEM",
+				"WorldCover"
+			]
+		},
+		{
+			"name": "VIIRS",
+			"description": "NOAA Global Flood Map",
+			"queryExecutorClasspath": "wasdi.shared.queryexecutors.viirs.QueryExecutorVIIRS",
+			"providerAdapterClasspath": "wasdi.dataproviders.VIIRSProviderAdapter",
+			"pythonScript": "",
+			"link": "https://www.ssec.wisc.edu/flood-map-demo/flood-products/",
+			"searchListPageSize": "50",
+			"defaultProtocol": "",
+			"parserConfig": "/etc/wasdi/viirsParserConfig.json",
+			"user": "",
+			"password": "",
+			"localFilesBasePath": "",
+			"urlDomain": "",
+			"connectionTimeout": "",
+			"readTimeout": "",
+			"adapterConfig": "",
+			"cloudProvider": "VIIRS",
+			"supportedPlatforms": [
+				"VIIRS"
+			]
+		}
+	],
+	"geoserver": {
+		"address": "http://127.0.0.1:8280/geoserver",
+		"user": "",
+		"password": "",
+		"maxGeotiffDimensionPyramid": "1024",
+		"gdalRetileCommand": "gdal_retile.py -r bilinear -levels 4 -ps 2048 2048 -co TILED=YES",
+		"localDebugPublisBand": false
+	},
+	"dockers": {
+		"extraHosts": [],
+		"dockerNetworkMode": "net-wasdi",
+		"pipInstallWasdiAddress": "",
+		"internalDockersBaseAddress": "localhost",
+		"processorsInternalPort": 5000,
+		"numberOfAttemptsToPingTheServer": 4,
+		"millisBetweenAttmpts": 5000,
+		"millisBetweenStatusPolling": 1000,
+		"millisWaitAfterDelete": 15000,
+		"millisWaitAfterDeployScriptCreated": 2000,
+		"dockerComposeCommand": "docker-compose",
+		"removeDockersAfterShellExec": true,
+		"processorTypes": [
+		],
+		"registers": [],
+		"shellExecCommands": {
+		}
+	},
+	"scheduler": {
+		"processingThreadWaitStartMS": "2000",
+		"processingThreadSleepingTimeMS": "2000",		
+		"launcherPath": "/opt/wasdi/launcher/launcher.jar --config /data/wasdi/wasdiConfig.json",
+		"javaExe": "java -Djna.library.path=/opt/wasdi/launcher/linux-x86-64 -Djava.library.path=/usr/lib/jni:/opt/wasdi/launcher/linux-x86-64 -Dsun.awt.nopixfmt=true -Dsun.java2d.dpiaware=false -Dsnap.parallelism=8 -Dsun.zip.disableMemoryMapping=true",
+		"killCommand": "kill -9",
+		"maxQueue": "5",
+		"timeoutMs": "172800000",
+		"lastStateChangeDateOrderBy": 1,
+		"redirectLauncherOutput": -1,
+		"schedulers": [
+			{
+				"name": "DOWNLOAD.LSA",
+				"maxQueue": "5",
+				"timeoutMs": "3600000",
+				"opTypes": "DOWNLOAD",
+				"opSubType": "LSA",
+				"enabled": "1"
+			},
+			{
+				"name": "DOWNLOAD.CDS",
+				"maxQueue": "2",
+				"timeoutMs": "3600000",
+				"opTypes": "DOWNLOAD",
+				"opSubType": "CDS",
+				"enabled": "1"
+			},
+			{
+				"name": "DOWNLOAD.ADS",
+				"maxQueue": "2",
+				"timeoutMs": "3600000",
+				"opTypes": "DOWNLOAD",
+				"opSubType": "ADS",
+				"enabled": "1"
+			},
+			{
+				"name": "DOWNLOAD.CREODIAS2",
+				"maxQueue": "2",
+				"timeoutMs": "3600000",
+				"opTypes": "DOWNLOAD",
+				"opSubType": "CREODIAS2",
+				"enabled": "1"
+			},
+			{
+				"name": "DOWNLOAD.VIIRS",
+				"maxQueue": "2",
+				"timeoutMs": "3600000",
+				"opTypes": "DOWNLOAD",
+				"opSubType": "VIIRS",
+				"enabled": "1"
+			},
+			{
+				"name": "DOWNLOAD.AUTO",
+				"maxQueue": "2",
+				"timeoutMs": "3600000",
+				"opTypes": "DOWNLOAD",
+				"opSubType": "AUTO",
+				"enabled": "1"
+			},
+			{
+				"name": "DOWNLOAD.TERRASCOPE",
+				"maxQueue": "2",
+				"timeoutMs": "3600000",
+				"opTypes": "DOWNLOAD",
+				"opSubType": "TERRASCOPE",
+				"enabled": "1"
+			},
+			{
+				"name": "DOWNLOAD.STATICS",
+				"maxQueue": "2",
+				"timeoutMs": "3600000",
+				"opTypes": "DOWNLOAD",
+				"opSubType": "STATICS",
+				"enabled": "1"
+			},
+			{
+				"name": "DOWNLOAD.GPM",
+				"maxQueue": "2",
+				"timeoutMs": "3600000",
+				"opTypes": "DOWNLOAD",
+				"opSubType": "GPM",
+				"enabled": "1"
+			},
+			{
+				"name": "DOWNLOAD.CLOUDFERRO",
+				"maxQueue": "2",
+				"timeoutMs": "3600000",
+				"opTypes": "DOWNLOAD",
+				"opSubType": "CLOUDFERRO",
+				"enabled": "1"
+			},
+			{
+				"name": "KILL",
+				"maxQueue": "5",
+				"timeoutMs": "600000",
+				"opTypes": "KILLPROCESSTREE",
+				"opSubType": "",
+				"enabled": "1"
+			},
+			{
+				"name": "GRAPH",
+				"maxQueue": "2",
+				"timeoutMs": "10800000",
+				"opTypes": "GRAPH",
+				"opSubType": "",
+				"enabled": "1"
+			},
+			{
+				"name": "RUNPROCESSOR",
+				"maxQueue": "5",
+				"timeoutMs": "10800000",
+				"opTypes": "RUNPROCESSOR",
+				"opSubType": "",
+				"enabled": "1"
+			},
+			{
+				"name": "PUBLISHBAND",
+				"maxQueue": "1",
+				"timeoutMs": "1800000",
+				"opTypes": "PUBLISHBAND",
+				"opSubType": "",
+				"enabled": "1"
+			}
+		]
+	}
+}
