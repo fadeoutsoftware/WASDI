@@ -43,16 +43,7 @@ public class SqliteParametersRepositoryBackend extends SqliteRepository implemen
 			ParameterEntity oParameterEntity = findOneWhere(m_sThisCollection, "processObjId", sProcessObjId, ParameterEntity.class);
 
 			if (oParameterEntity == null) {
-				// Maybe is an old one, still in the file system. Lets try
-				String sPotentialFile = PathsConfig.getParameterPath(sProcessObjId);
-
-				File oParameterFile = new File(sPotentialFile);
-
-				if (oParameterFile.exists() == false) {
-					return null;
-				} else {
-					return (BaseParameter) SerializationUtils.deserializeXMLToObject(sPotentialFile);
-				}
+				return null;
 			}
 
 			oParameter = (BaseParameter) SerializationUtils.deserializeStringXMLToObject(oParameterEntity.serializedParameter);

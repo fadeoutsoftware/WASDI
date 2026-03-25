@@ -2086,7 +2086,6 @@ public class dbUtils {
 
             System.out.println("\t1 - Delete ProcessWorkspace where Workspace does not exist");
             System.out.println("\t2 - Align Local Process Workspaces to Statistics Centralized Db");
-            System.out.println("\t3 - Import Local Process Workspaces to mongo");
             System.out.println("\tx - back");
             System.out.println("");
 
@@ -2147,73 +2146,10 @@ public class dbUtils {
             else if (sInputString.equals("2")) {
             	alignJobsToCentralDb();
             }
-            else if (sInputString.equals("3")) {
-            	importProcessWorkspacesInMongo();
-            }
 
         } 
         catch (Exception oEx) {
             System.out.println("processWorkpsaces Exception: " + oEx);
-        }
-    }
-    
-    public static void importProcessWorkspacesInMongo() {
-    	try {
-    		System.out.println("Importing all the process workspaces in mongo");
-    		
-    		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-    		List<ProcessWorkspace> aoProcessWorkspaces = oProcessWorkspaceRepository.getByNodeUnsorted(WasdiConfig.Current.nodeCode);
-    		
-    		if (aoProcessWorkspaces == null) {
-    			System.out.println("Obtained null list, not good");
-    			return;
-    		}
-    		
-    		int iSize = aoProcessWorkspaces.size();
-    		System.out.println("Analyzing " + iSize + " Process Workspaces");
-    		int iTenPercent = (int) (iSize/10);
-    		
-    		ParametersRepository oParametersRepository = new ParametersRepository();
-    		
-    		for(int iProcWs = 0; iProcWs<aoProcessWorkspaces.size(); iProcWs ++) {
-    			
-    			try {
-    				
-        			if (iProcWs>0 && iProcWs%iTenPercent == 0) {
-        				System.out.println("I'm not sleeping, just done another 10%");
-        			}    	
-        			
-        			ProcessWorkspace oProcessWorkspace = aoProcessWorkspaces.get(iProcWs);
-        			
-        			if (oProcessWorkspace == null) continue;
-        			
-        			String sParameterId = oProcessWorkspace.getProcessObjId();
-        			
-        			if (Utils.isNullOrEmpty(sParameterId)) continue;
-        			
-        			String sParamPath = PathsConfig.getParameterPath(sParameterId);
-        			
-        			File oParamFile = new File(sParamPath);
-        			
-        			if (!oParamFile.exists()) {
-        				System.out.println("Parameter file " + sParamPath + " does not exists!!");
-        				continue;
-        			}
-        			
-        			BaseParameter oParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParamPath);
-        			oParametersRepository.insertParameter(oParameter);
-    			}
-    	        catch (Exception oEx) {
-    	            System.out.println("processWorkpsaces.importProcessWorkspacesInMongo Exception in the import loop: " + oEx);
-    	        }
-    			
-    		}
-    		
-    		System.out.println("Import done!!");
-    		
-    	}
-        catch (Exception oEx) {
-            System.out.println("processWorkpsaces.importProcessWorkspacesInMongo Exception: " + oEx);
         }
     }
     

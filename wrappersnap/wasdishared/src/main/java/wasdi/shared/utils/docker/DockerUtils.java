@@ -110,12 +110,14 @@ public class DockerUtils {
     	m_oProcessor = null;
     	m_sProcessorFolder = "";
     	m_sDockerRegistry = "";
-    	m_sWasdiSystemUserName = WasdiConfig.Current.systemUserName;
-    	m_sWasdiSystemGroupName = WasdiConfig.Current.systemGroupName;
-    	m_iWasdiSystemUserId = WasdiConfig.Current.systemUserId;
-    	m_iWasdiSystemGroupId = WasdiConfig.Current.systemGroupId;
-    	if (WasdiConfig.Current != null) {
-    		m_sDockerNetworkMode = WasdiConfig.Current.dockers.dockerNetworkMode;
+    	if (WasdiConfig.Current!=null) {
+        	m_sWasdiSystemUserName = WasdiConfig.Current.systemUserName;
+        	m_sWasdiSystemGroupName = WasdiConfig.Current.systemGroupName;
+        	m_iWasdiSystemUserId = WasdiConfig.Current.systemUserId;
+        	m_iWasdiSystemGroupId = WasdiConfig.Current.systemGroupId;
+        	if (WasdiConfig.Current.dockers != null) {
+        		m_sDockerNetworkMode = WasdiConfig.Current.dockers.dockerNetworkMode;
+        	}    		
     	}
     }
     

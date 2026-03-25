@@ -494,7 +494,6 @@ public class Wasdi extends ResourceConfig {
 	 * @param sSessionId User session
 	 * @param sOperationType Id of the Launcher Operation
 	 * @param sProductName Product name associated to the Process Workspace
-	 * @param sSerializationPath Node Serialisation Path
 	 * @param oParameter Parameter associated to the operation
 	 * @return
 	 * @throws IOException
@@ -516,7 +515,6 @@ public class Wasdi extends ResourceConfig {
 	 * @param sSessionId User session
 	 * @param sOperationType Id of the Launcher Operation
 	 * @param sProductName Product name associated to the Process Workspace
-	 * @param sSerializationPath Node Serialisation Path
 	 * @param oParameter Parameter associated to the operation
 	 * @param sParentId Id the the parent process
 	 * @return Primitive Result with the output status of the operation
@@ -539,7 +537,6 @@ public class Wasdi extends ResourceConfig {
 	 * @param sOperationType Id of the Launcher Operation
 	 * @param sOperationSubId Sub Id of the Launcher Operation
 	 * @param sProductName Product name associated to the Process Workspace
-	 * @param sSerializationPath Node Serialisation Path
 	 * @param oParameter Parameter associated to the operation
 	 * @param sParentId Id the the parent process
 	 * @return Primitive Result with the output status of the operation: boolValue = true, intValue = 200, stringValue = processId if the operation is fine. 

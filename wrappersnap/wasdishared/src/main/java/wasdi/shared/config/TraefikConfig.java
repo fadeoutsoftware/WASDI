@@ -13,6 +13,6 @@ public class TraefikConfig {
 	/**
 	 * List of the local or external ip addresses white listed to access the Jupyter Lab 
 	 */
-	public ArrayList<String> firewallWhiteList;
+	public ArrayList<String> firewallWhiteList = null;
 
 }

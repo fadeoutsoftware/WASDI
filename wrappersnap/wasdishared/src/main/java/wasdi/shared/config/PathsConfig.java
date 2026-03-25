@@ -26,10 +26,6 @@ public class PathsConfig {
 	 */
 	public String downloadRootPath;
 	/**
-	 * Path where Parameters are serialized
-	 */
-	public String serializationPath;
-	/**
 	 * Metadata files path
 	 */
 	public String metadataPath;
@@ -68,14 +64,9 @@ public class PathsConfig {
 	public String wasdiTempFolder;
 		
 	/**
-	 * Full path to execute python commands (ie /usr/bin/python3)
-	 */
-	public String pythonExecPath;
-	
-	/**
 	 * Local node path of the folder that is mounted on the traefik docker to share configurations
 	 */
-	public String traefikMountedVolume;
+	public String traefikMountedVolume = "";
 
 	/**
 	 * Local path of the S3 volumes mount folder
@@ -218,25 +209,6 @@ public class PathsConfig {
         return sStylePath;
 	}
 	
-	/**
-	 * Get the full path of a parameter
-	 * @param sParameterObjId
-	 * @return
-	 */
-	public static String getParameterPath(String sParameterObjId) {
-		
-		if (Utils.isNullOrEmpty(sParameterObjId)) return "";
-		
-		String sParametersPath = WasdiConfig.Current.paths.serializationPath;
-		
-		if (!sParametersPath.endsWith(File.separator)) {
-			sParametersPath = sParametersPath + File.separator;
-		}		
-		
-		sParametersPath = sParametersPath + sParameterObjId;
-		
-		return sParametersPath;
-	}
 	
 	/**
 	 * Get the full path of a processor docker template

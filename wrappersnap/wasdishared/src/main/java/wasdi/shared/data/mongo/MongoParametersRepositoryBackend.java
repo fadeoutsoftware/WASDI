@@ -49,18 +49,7 @@ public class MongoParametersRepositoryBackend extends MongoRepository implements
 					.find(new Document("processObjId", sProcessObjId))
 					.first();
 
-			if (oWSDocument == null) {
-				// Maybe is an old one, still in the file system. Lets try
-				String sPotentialFile = PathsConfig.getParameterPath(sProcessObjId);
-
-				File oParameterFile = new File(sPotentialFile);
-
-				if (oParameterFile.exists() == false) {
-					return null;
-				} else {
-					return (BaseParameter) SerializationUtils.deserializeXMLToObject(sPotentialFile);
-				}
-			}
+			if (oWSDocument == null) return null;
 
 			String sJSON = oWSDocument.toJson();
 			try {

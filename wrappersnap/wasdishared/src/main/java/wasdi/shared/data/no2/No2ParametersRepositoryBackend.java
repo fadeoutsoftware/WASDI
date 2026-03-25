@@ -59,12 +59,6 @@ public class No2ParametersRepositoryBackend extends No2Repository implements IPa
 					}
 				}
 			}
-
-			String sPotentialFile = PathsConfig.getParameterPath(sProcessObjId);
-			File oParameterFile = new File(sPotentialFile);
-			if (oParameterFile.exists()) {
-				return (BaseParameter) SerializationUtils.deserializeXMLToObject(sPotentialFile);
-			}
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("No2ParametersRepositoryBackend.getParameterByProcessObjId: exception", oEx);
