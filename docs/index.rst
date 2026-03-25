@@ -41,6 +41,7 @@ If you're acquired the basic concepts of WASDI and you're interested in how proc
 
    GettingStarted/WasdiTutorial.rst
    GettingStarted/LibsConcepts.rst
+   GettingStarted/MiniWasdi.rst
 
 
 
