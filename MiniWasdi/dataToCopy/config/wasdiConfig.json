@@ -117,6 +117,7 @@
 			"platform": "Sentinel-1",
 			"catalogues": [
 				"CREODIAS2",
+				"COPERNICUS_DATASPACE",
 				"LSA"
 			]
 		},
@@ -124,25 +125,29 @@
 			"platform": "Sentinel-2",
 			"catalogues": [
 				"CREODIAS2",
+				"COPERNICUS_DATASPACE",
 				"LSA"
 			]
 		},
 		{
 			"platform": "Sentinel-3",
 			"catalogues": [
-				"CREODIAS2"
+				"CREODIAS2",
+				"COPERNICUS_DATASPACE"
 			]
 		},
 		{
 			"platform": "Sentinel-5P",
 			"catalogues": [
-				"CREODIAS2" 
+				"CREODIAS2",
+				"COPERNICUS_DATASPACE"
 			]
 		},
 		{
 			"platform": "Sentinel-6",
 			"catalogues": [
-				"CREODIAS2"
+				"CREODIAS2",
+				"COPERNICUS_DATASPACE"
 			]
 		},
 		{
@@ -295,6 +300,33 @@
 				"SMOS"
 			]
 		},
+        {
+            "name": "COPERNICUS_DATASPACE",
+            "description": "COPERNICUS DATA SPACE",
+            "queryExecutorClasspath": "wasdi.shared.queryexecutors.copernicusDataspace.QueryExecutorCopernicusDataspace",
+            "providerAdapterClasspath": "wasdi.dataproviders.CopernicusDataspaceProviderAdapter",
+            "pythonScript": "",
+            "link": "https://dataspace.copernicus.eu/",
+            "searchListPageSize": "",
+            "defaultProtocol": "https://",
+            "parserConfig": "",
+            "user": "",
+            "password": "",
+            "apiKey": "",
+            "localFilesBasePath": "",
+            "urlDomain": "",
+            "connectionTimeout": "",
+            "readTimeout": "",
+            "adapterConfig": "",
+            "cloudProvider": "COPERNICUS_DATASPACE",
+            "supportedPlatforms": [
+                "Sentinel-1",
+                "Sentinel-2",
+                "Sentinel-3",
+                "Sentinel-5P",
+                "Sentinel-6"
+            ]
+        },		
 		{
 			"name": "DLR",
 			"description": "DLR",
