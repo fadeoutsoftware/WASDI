@@ -35,6 +35,16 @@ Quick way to extract the sample config to your host folder (PowerShell):
      wasdi/wasdi:mwasdi `
      -lc "cp /etc/wasdi/wasdiConfig.json /data/wasdi/wasdiConfig.json"
 
+Quick way to extract the sample config to your host folder (Linux Bash):
+
+.. code-block:: bash
+
+   docker run --rm \
+     -v "/tmp/wasdi/miniwasdi:/data/wasdi" \
+     --entrypoint /bin/bash \
+     wasdi/wasdi:mwasdi \
+     -lc "cp /etc/wasdi/wasdiConfig.json /data/wasdi/wasdiConfig.json"
+
 Suggested initial structure:
 
 .. code-block:: text
@@ -88,6 +98,18 @@ PowerShell example:
      -e WASDI_CONFIG_FILE="/data/wasdi/wasdiConfig.json" `
      wasdi/wasdi:mwasdi
 
+Linux Bash example:
+
+.. code-block:: bash
+
+   docker run --rm \
+     -v "/tmp/wasdi/miniwasdi:/data/wasdi" \
+     -e WASDI_RUN_APPLICATION="hello_test" \
+     -e WASDI_PARAMS='{}' \
+     -e WASDI_WORKSPACE="Test_ws" \
+     -e WASDI_CONFIG_FILE="/data/wasdi/wasdiConfig.json" \
+     wasdi/wasdi:mwasdi
+
 4.1 Enter the container (interactive shell)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -98,6 +120,15 @@ Useful for inspection/debug and to check files such as ``/etc/wasdi/wasdiConfig.
    docker run -it --rm `
      -v "c:\temp\wasdi\miniwasdi:/data/wasdi" `
      --entrypoint /bin/bash `
+     wasdi/wasdi:mwasdi
+
+Linux Bash equivalent:
+
+.. code-block:: bash
+
+   docker run -it --rm \
+     -v "/tmp/wasdi/miniwasdi:/data/wasdi" \
+     --entrypoint /bin/bash \
      wasdi/wasdi:mwasdi
 
 Once inside the container, for example, you can copy the sample config:
@@ -341,3 +372,68 @@ Notes:
 - ``footprint`` should contain the item geometry in WKT format.
 - ``link`` should identify how the provider resolves the file during ``/download``.
 
+10. Tuning your MiniWasdi
+--------------------------
+
+WASDI applications are optimized for scientists. An app can be standalone, or it can call linked apps, run SNAP workflows, import images, and chain multiple operations.
+
+MiniWasdi can run processes one by one, but it is designed to leverage available hardware through scheduler queues. Queue behavior can be configured in the scheduler section of ``wasdiConfig.json``.
+
+Example of a dedicated queue:
+
+.. code-block:: json
+
+   "schedulers": [
+     {
+       "name": "DOWNLOAD.LSA",
+       "maxQueue": "5",
+       "timeoutMs": "3600000",
+       "opTypes": "DOWNLOAD",
+       "opSubType": "LSA",
+       "enabled": "1"
+     }
+   ]
+
+This configuration means that ``DOWNLOAD`` operations for the ``LSA`` provider run in an independent queue with size ``5``.
+
+The ``name`` field is only a label. A common convention is ``operation.suboperation`` (for example ``DOWNLOAD.LSA``), but routing is driven by ``opTypes`` and ``opSubType``.
+
+Users can add or remove queues as needed, and tune ``maxQueue`` values according to available CPU, RAM, disk, and I/O throughput.
+
+Two important queues to tune are:
+
+.. code-block:: json
+
+   {
+     "name": "GRAPH",
+     "maxQueue": "2",
+     "timeoutMs": "10800000",
+     "opTypes": "GRAPH",
+     "opSubType": "",
+     "enabled": "1"
+   },
+   {
+     "name": "RUNPROCESSOR",
+     "maxQueue": "5",
+     "timeoutMs": "10800000",
+     "opTypes": "RUNPROCESSOR",
+     "opSubType": "",
+     "enabled": "1"
+   }
+
+- ``GRAPH`` controls concurrency for SNAP graph executions.
+- ``RUNPROCESSOR`` controls concurrency for WASDI processor executions.
+
+On more powerful hardware, these queue sizes can be increased.
+
+Operations without a dedicated queue definition are handled by the default scheduler.
+
+Valid operations are:
+- ``RUNPROCESSOR``: WASDI processor execution.
+- ``GRAPH``: SNAP graph execution.
+- ``DOWNLOAD``: Data download from external providers. Can have a subType for provider-specific queues.
+- ``INGEST``: 
+- ``MOSAIC``: 
+- ``KILL``: 
+- ``MULTISUBSET``: 
+- ``DELETEPROCESSOR``: 
