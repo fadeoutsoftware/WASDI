@@ -2898,6 +2898,35 @@ public class dbUtils {
     		} catch(Exception oE) {
     			WasdiLog.errorLog("Disabling drivers for Apache and AWS logging exception " + oE.toString());
     		}
+    		
+      		// Filter the org.apache.http (new version)
+      		try {
+      		    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.http")).setLevel(ch.qos.logback.classic.Level.WARN);
+      		    
+      		    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.http.wire")).setLevel(ch.qos.logback.classic.Level.WARN);
+      		} 
+      		catch (Exception oEx) {
+      		    WasdiLog.errorLog("Disabling org.apache.http logging exception " + oEx.toString());
+      		}
+
+            // Filter the apache logs
+      		try {  			
+      			ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.hc.client5.http");
+      			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);  			
+      		}
+      		catch (Exception oEx) {
+      			WasdiLog.errorLog("Disabling org.apache.hc.client5.http logging exception " + oEx.toString());
+      		}
+      		
+      		// Filter ALL ucar.nc2 (NetCDF-Java) logs
+      		try {
+      		    ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("ucar.nc2");
+      		    oLogger.setLevel(ch.qos.logback.classic.Level.WARN); // Or even ERROR
+      		}
+      		catch (Exception oEx) {
+      		    WasdiLog.errorLog("Disabling ucar.nc2 logging exception " + oEx.toString());
+      		}  		
+    		
 
             // If this is not the main node
             if (!s_sMyNodeCode.equals("wasdi")) {
