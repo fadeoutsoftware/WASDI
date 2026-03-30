@@ -2863,6 +2863,11 @@ public class dbUtils {
                 s_sMyNodeCode = sNode;
             }
             
+            if (!WasdiConfig.Current.useLog4J) {
+            	WasdiLog.debugLog("Launcher Main - WASDI Configured to log on console");
+            	WasdiLog.initLogger(WasdiConfig.Current.logLevelLauncher);
+            }            
+            
             try {
                 // get jar directory
                 File oCurrentFile = new File(dbUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
