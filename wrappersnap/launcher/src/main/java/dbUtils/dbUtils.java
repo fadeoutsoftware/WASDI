@@ -677,13 +677,6 @@ public class dbUtils {
     	        ProcessWorkspaceLogger oPsLogger = new ProcessWorkspaceLogger(null);
     	        Send oSendToRabbit = new Send(null);
     	        
-    	        oEngine.setSendToRabbit(oSendToRabbit);
-    	        oEngine.setParameter(oParameter);
-    	        oEngine.setProcessWorkspaceLogger(oPsLogger);
-    	        oEngine.setProcessWorkspace(oProcessWorkspace);
-    	        boolean bRet = oEngine.delete(oParameter);
-    	        System.out.println("Engine.delete return " + bRet);
-    	        
     	        if (!Utils.isNullOrEmpty(sAdminId)) {
     	        	UserRepository oUserRepository = new UserRepository();
     	        	User oAdmin = oUserRepository.getUser(sAdminId);
@@ -721,7 +714,14 @@ public class dbUtils {
         			
         			// All nodes updated
         			System.out.println("distribuited delete done");    	        	
-    	        }
+    	        }    	        
+    	        
+    	        oEngine.setSendToRabbit(oSendToRabbit);
+    	        oEngine.setParameter(oParameter);
+    	        oEngine.setProcessWorkspaceLogger(oPsLogger);
+    	        oEngine.setProcessWorkspace(oProcessWorkspace);
+    	        boolean bRet = oEngine.delete(oParameter);
+    	        System.out.println("Engine.delete return " + bRet);
     		}
       
         } catch (Exception oEx) {
