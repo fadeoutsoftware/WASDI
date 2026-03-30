@@ -96,6 +96,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.modis.MODISUtils;
+import wasdi.shared.utils.wasdiAPI.ProcessorAPIClient;
 import wasdi.shared.utils.wasdiAPI.WorkspaceAPIClient;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
@@ -646,6 +647,9 @@ public class dbUtils {
             else if (sInputString.equals("8")) {
                 System.out.println("Please input Processor Name to Delete:");
                 String sProcessorName = s_oScanner.nextLine();
+                
+                System.out.println("If you want to call also the node delete, insert the user id of an admin:");
+                String sAdminId = s_oScanner.nextLine();                
 
                 ProcessorRepository oProcessorRepository = new ProcessorRepository();
                 Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
@@ -678,7 +682,45 @@ public class dbUtils {
     	        oEngine.setProcessWorkspace(oProcessWorkspace);
     	        boolean bRet = oEngine.delete(oParameter);
     	        System.out.println("Engine.delete return " + bRet);
-            }
+    	        
+    	        if (!Utils.isNullOrEmpty(sAdminId)) {
+    	        	UserRepository oUserRepository = new UserRepository();
+    	        	User oAdmin = oUserRepository.getUser(sAdminId);
+    	        	
+    	        	if (oAdmin == null) {
+    	        		System.out.println("User " + sAdminId + " not found. we stop here");
+    	        		return;
+    	        	}
+    	        	
+    	        	SessionRepository oSessionRepository = new SessionRepository();
+    	        	UserSession oSession = oSessionRepository.createUniqueSession(sAdminId);
+    	        	
+    	        	System.out.println("Call nodes to force delete also there");
+    	        	
+        	        NodeRepository oNodeRepository = new NodeRepository();
+        	        List<Node> aoNodes = oNodeRepository.getNodesList();
+        	        
+        			for (Node oNode : aoNodes) {
+        				
+        				// Jump the main one that is the only one that has to start this thread
+        				if (oNode.getNodeCode().equals("wasdi")) continue;
+        				
+        				// The node must be active
+        				if (oNode.getActive() == false) continue;
+        				
+        				try {
+        					ProcessorAPIClient.nodeDelete(oNode, oSession.getSessionId(), oProcessor.getProcessorId(), "", oProcessor.getName(), oProcessor.getType(), oProcessor.getVersion());				
+        					System.out.println("deleted on node " + oNode.getNodeCode());
+        				}
+        				catch (Exception oEx) {
+        					System.out.println("Exception " + oEx.toString());
+        				}
+        			}
+        			
+        			// All nodes updated
+        			System.out.println("distribuited delete done");    	        	
+    	        }
+    		}
       
         } catch (Exception oEx) {
             System.out.println("processors redeploying Exception: " + oEx);
