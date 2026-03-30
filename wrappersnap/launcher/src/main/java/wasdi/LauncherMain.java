@@ -571,9 +571,16 @@ public class LauncherMain  {
             // Read Workspace and Exchange for Rabbit
             sWorkspace = oBaseParameter.getWorkspace();
             sExchange = oBaseParameter.getExchange();
+            
+            if (WasdiConfig.Current.logAppsOnDb==false && WasdiConfig.Current.useLauncherApiLogger == true) {
+            	// Mini-Wasdi Condition: we do not use the process workspace logger in this case!
+            	m_oProcessWorkspaceLogger = null;
+            }
+            else {
+                // Create the process workspace logger
+                m_oProcessWorkspaceLogger = new ProcessWorkspaceLogger(oBaseParameter.getProcessObjId());            	
+            }
 
-            // Create the process workspace logger
-            m_oProcessWorkspaceLogger = new ProcessWorkspaceLogger(oBaseParameter.getProcessObjId());
 
             // Create the operation class
         	Operation oOperation = (Operation) Class.forName(sClassName).getDeclaredConstructor().newInstance();
