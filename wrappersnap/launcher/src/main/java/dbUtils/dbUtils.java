@@ -695,6 +695,7 @@ public class dbUtils {
     	        	
     	        	SessionRepository oSessionRepository = new SessionRepository();
     	        	UserSession oSession = oSessionRepository.createUniqueSession(sAdminId);
+    	        	oSessionRepository.insertSession(oSession);
     	        	
     	        	System.out.println("Call nodes to force delete also there");
     	        	
