@@ -664,6 +664,7 @@ public class dbUtils {
                 oParameter.setUserId(oProcessor.getUserId());
                 oParameter.setProcessorID(oProcessor.getProcessorId());
                 oParameter.setProcessorType(oProcessor.getType());
+                oParameter.setVersion(oProcessor.getVersion());
                 
                 ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
                 
