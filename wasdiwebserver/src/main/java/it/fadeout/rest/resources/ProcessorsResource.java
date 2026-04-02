@@ -1694,8 +1694,13 @@ public class ProcessorsResource  {
 			}
 			
 			if (!oProcessor.getUserId().equals(oUser.getUserId())) {
-				WasdiLog.warnLog("ProcessorResources.nodeDeleteProcessor: this is not the owner!");
-				return Response.status(Status.UNAUTHORIZED).build();				
+				if (oUser.getRole().equals(UserApplicationRole.ADMIN.getRole()) == false) {
+					WasdiLog.warnLog("ProcessorResources.nodeDeleteProcessor: this is not the owner!");
+					return Response.status(Status.UNAUTHORIZED).build();									
+				}
+				else {
+					WasdiLog.infoLog("ProcessorResources.nodeDeleteProcessor: user is not the owner but is an admin");
+				}
 			}
 			
 			// This API is allowed ONLY on computing nodes

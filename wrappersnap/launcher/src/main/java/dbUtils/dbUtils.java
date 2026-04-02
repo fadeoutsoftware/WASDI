@@ -97,6 +97,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.modis.MODISUtils;
+import wasdi.shared.utils.wasdiAPI.ProcessorAPIClient;
 import wasdi.shared.utils.wasdiAPI.WorkspaceAPIClient;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
@@ -647,6 +648,9 @@ public class dbUtils {
             else if (sInputString.equals("8")) {
                 System.out.println("Please input Processor Name to Delete:");
                 String sProcessorName = s_oScanner.nextLine();
+                
+                System.out.println("If you want to call also the node delete, insert the user id of an admin:");
+                String sAdminId = s_oScanner.nextLine();                
 
                 ProcessorRepository oProcessorRepository = new ProcessorRepository();
                 Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
@@ -661,6 +665,7 @@ public class dbUtils {
                 oParameter.setUserId(oProcessor.getUserId());
                 oParameter.setProcessorID(oProcessor.getProcessorId());
                 oParameter.setProcessorType(oProcessor.getType());
+                oParameter.setVersion(oProcessor.getVersion());
                 
                 ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
                 
@@ -673,13 +678,52 @@ public class dbUtils {
     	        ProcessWorkspaceLogger oPsLogger = new ProcessWorkspaceLogger(null);
     	        Send oSendToRabbit = new Send(null);
     	        
+    	        if (!Utils.isNullOrEmpty(sAdminId)) {
+    	        	UserRepository oUserRepository = new UserRepository();
+    	        	User oAdmin = oUserRepository.getUser(sAdminId);
+    	        	
+    	        	if (oAdmin == null) {
+    	        		System.out.println("User " + sAdminId + " not found. we stop here");
+    	        		return;
+    	        	}
+    	        	
+    	        	SessionRepository oSessionRepository = new SessionRepository();
+    	        	UserSession oSession = oSessionRepository.createUniqueSession(sAdminId);
+    	        	oSessionRepository.insertSession(oSession);
+    	        	
+    	        	System.out.println("Call nodes to force delete also there");
+    	        	
+        	        NodeRepository oNodeRepository = new NodeRepository();
+        	        List<Node> aoNodes = oNodeRepository.getNodesList();
+        	        
+        			for (Node oNode : aoNodes) {
+        				
+        				// Jump the main one that is the only one that has to start this thread
+        				if (oNode.getNodeCode().equals("wasdi")) continue;
+        				
+        				// The node must be active
+        				if (oNode.getActive() == false) continue;
+        				
+        				try {
+        					ProcessorAPIClient.nodeDelete(oNode, oSession.getSessionId(), oProcessor.getProcessorId(), "", oProcessor.getName(), oProcessor.getType(), oProcessor.getVersion());				
+        					System.out.println("deleted on node " + oNode.getNodeCode());
+        				}
+        				catch (Exception oEx) {
+        					System.out.println("Exception " + oEx.toString());
+        				}
+        			}
+        			
+        			// All nodes updated
+        			System.out.println("distribuited delete done");    	        	
+    	        }    	        
+    	        
     	        oEngine.setSendToRabbit(oSendToRabbit);
     	        oEngine.setParameter(oParameter);
     	        oEngine.setProcessWorkspaceLogger(oPsLogger);
     	        oEngine.setProcessWorkspace(oProcessWorkspace);
     	        boolean bRet = oEngine.delete(oParameter);
     	        System.out.println("Engine.delete return " + bRet);
-            }
+    		}
       
         } catch (Exception oEx) {
             System.out.println("processors redeploying Exception: " + oEx);
@@ -2758,6 +2802,11 @@ public class dbUtils {
                 s_sMyNodeCode = sNode;
             }
             
+            if (!WasdiConfig.Current.useLog4J) {
+            	WasdiLog.debugLog("Launcher Main - WASDI Configured to log on console");
+            	WasdiLog.initLogger(WasdiConfig.Current.logLevelLauncher);
+            }            
+            
             try {
                 // get jar directory
                 File oCurrentFile = new File(dbUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
@@ -2793,6 +2842,35 @@ public class dbUtils {
     		} catch(Exception oE) {
     			WasdiLog.errorLog("Disabling drivers for Apache and AWS logging exception " + oE.toString());
     		}
+    		
+      		// Filter the org.apache.http (new version)
+      		try {
+      		    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.http")).setLevel(ch.qos.logback.classic.Level.WARN);
+      		    
+      		    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.http.wire")).setLevel(ch.qos.logback.classic.Level.WARN);
+      		} 
+      		catch (Exception oEx) {
+      		    WasdiLog.errorLog("Disabling org.apache.http logging exception " + oEx.toString());
+      		}
+
+            // Filter the apache logs
+      		try {  			
+      			ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.apache.hc.client5.http");
+      			oLogger.setLevel(ch.qos.logback.classic.Level.WARN);  			
+      		}
+      		catch (Exception oEx) {
+      			WasdiLog.errorLog("Disabling org.apache.hc.client5.http logging exception " + oEx.toString());
+      		}
+      		
+      		// Filter ALL ucar.nc2 (NetCDF-Java) logs
+      		try {
+      		    ch.qos.logback.classic.Logger oLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("ucar.nc2");
+      		    oLogger.setLevel(ch.qos.logback.classic.Level.WARN); // Or even ERROR
+      		}
+      		catch (Exception oEx) {
+      		    WasdiLog.errorLog("Disabling ucar.nc2 logging exception " + oEx.toString());
+      		}  		
+    		
 
             // If this is not the main node
             if (!s_sMyNodeCode.equals("wasdi")) {
