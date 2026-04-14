@@ -251,10 +251,39 @@ ENV PATH="{{ sWasdiNodeJs18RootDirectoryPath }}/latest/bin:${PATH}"
 {% if ( aWasdiNodeJs18Modules | default([]) | length ) > 0 %}
 
 
-# RUN specific to install modules for NodeJS 18
-RUN npm install --global --prefix {{ sWasdiNodeJs18RootDirectoryPath }}/{{ sWasdiNodeJs18Version }} \
-{% for sWasdiNodeJs18CurrentModule in aWasdiNodeJs18Modules %}
-    {{ sWasdiNodeJs18CurrentModule }}{%- if not loop.last -%} \{% endif %}
+# RUN specific to install NodeJS 22
+RUN mkdir --parents \
+        {{ sWasdiNodeJs22RootDirectoryPath }} \
+        {{ sWasdiNodeJs22RootDirectoryPath }}/{{ sWasdiNodeJs22Version }} && \
+    chown {{ sWasdiNodeJs22RootDirectoryOwner }}:{{ sWasdiNodeJs22RootDirectoryGroup }} \
+        {{ sWasdiNodeJs22RootDirectoryPath }} \
+        {{ sWasdiNodeJs22RootDirectoryPath }}/{{ sWasdiNodeJs22Version }} && \
+    chmod {{ sWasdiNodeJs22RootDirectoryMode }} \
+        {{ sWasdiNodeJs22RootDirectoryPath }} \
+        {{ sWasdiNodeJs22RootDirectoryPath }}/{{ sWasdiNodeJs22Version }} && \
+    wget \
+        --no-verbose \
+        --output-document /tmp/{{ sWasdiNodeJs22SourceUrl | basename }} \
+        --progress=bar:force:noscroll \
+        --show-progress \
+        {{ sWasdiNodeJs22SourceUrl }} --output-document /tmp/{{ sWasdiNodeJs22SourceUrl | basename }} && \
+    tar \
+        --directory {{ sWasdiNodeJs22RootDirectoryPath }}/{{ sWasdiNodeJs22Version }} \
+        --extract \
+        --file /tmp/{{ sWasdiNodeJs22SourceUrl | basename }} \
+        --strip-components=1 && \
+    ln --symbolic {{ sWasdiNodeJs22RootDirectoryPath }}/{{ sWasdiNodeJs22Version }} {{ sWasdiNodeJs22RootDirectoryPath }}/latest && \
+    rm --force \
+        /tmp/{{ sWasdiNodeJs22SourceUrl | basename }}
+
+ENV PATH="{{ sWasdiNodeJs22RootDirectoryPath }}/latest/bin:${PATH}"
+{% if ( aWasdiNodeJs22Modules | default([]) | length ) > 0 %}
+
+
+# RUN specific to install modules for NodeJS 22
+RUN npm install --global --prefix {{ sWasdiNodeJs22RootDirectoryPath }}/{{ sWasdiNodeJs22Version }} \
+{% for sWasdiNodeJs22CurrentModule in aWasdiNodeJs22Modules %}
+    {{ sWasdiNodeJs22CurrentModule }}{%- if not loop.last -%} \{% endif %}
 {% endfor %}
 {% endif %}
 
