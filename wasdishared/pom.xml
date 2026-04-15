@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+          https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>fadeout.software.wasdi</groupId>
+        <artifactId>wasdi-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>wasdishared</artifactId>
+    <name>wasdishared</name>
+    <version>${revision}</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <revision>1.0</revision>
+        <sVersionAmqpClient>5.29.0</sVersionAmqpClient>
+        <sVersionAssertjCore>3.27.7</sVersionAssertjCore>
+        <sVersionAwsJavaSdkS3>1.12.797</sVersionAwsJavaSdkS3>
+        <sVersionCommonsCompress>1.28.0</sVersionCommonsCompress>
+        <sVersionCommonsLang3>3.20.0</sVersionCommonsLang3>
+        <sVersionCommonsNet>3.13.0</sVersionCommonsNet>
+        <sVersionCommonsValidator>1.10.1</sVersionCommonsValidator>
+        <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
+        <sVersionGeoserverManager>1.7.0</sVersionGeoserverManager>
+        <!--sVersionGson>2.12.1</sVersionGson-->
+        <sVersionGuava>33.5.0-jre</sVersionGuava>
+        <sVersionJackson>2.21.2</sVersionJackson>
+        <sVersionJson>20251224</sVersionJson>
+        <sVersionJunit>4.13.1</sVersionJunit>
+        <sVersionJunitJupiter>5.7.0</sVersionJunitJupiter>
+        <sVersionLog4j>2.25.2</sVersionLog4j>
+        <sVersionMongoDb>5.6.1</sVersionMongoDb>
+        <sVersionNitrite>4.3.2</sVersionNitrite>
+        <sVersionSqliteJdbc>3.47.1.0</sVersionSqliteJdbc>
+        <sVersionJavaxPersistenceApi>2.2</sVersionJavaxPersistenceApi>
+        <sVersionImmutables>2.10.1</sVersionImmutables>
+        <sVersionGeoTools>28.6</sVersionGeoTools>
+        <sVersionJersey2>2.45</sVersionJersey2>
+        <sVersionMercurius>1.0</sVersionMercurius>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>${sVersionFlattenMavenPlugin}</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>	
+		<!-- https://mvnrepository.com/artifact/com.github.docker-java/docker-java -->
+		<dependency>
+		    <groupId>com.github.docker-java</groupId>
+		    <artifactId>docker-java</artifactId>
+		    <version>3.4.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.github.docker-java/docker-java-transport-httpclient5 -->
+		<dependency>
+		    <groupId>com.github.docker-java</groupId>
+		    <artifactId>docker-java-transport-httpclient5</artifactId>
+		    <version>3.4.0</version>
+		</dependency>
+        <!-- https://mvnrepository.com/artifact/org.mongodb/mongodb-driver-sync -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>${sVersionMongoDb}</version>
+        </dependency>
+        <!-- NO2 (Nitrite) -->
+        <dependency>
+            <groupId>org.dizitart</groupId>
+            <artifactId>nitrite</artifactId>
+            <version>${sVersionNitrite}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.dizitart</groupId>
+            <artifactId>nitrite-mvstore-adapter</artifactId>
+            <version>${sVersionNitrite}</version>
+        </dependency>
+        <!-- SQLite JDBC (WAL-mode embedded DB for mini-WASDI) -->
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>${sVersionSqliteJdbc}</version>
+        </dependency>
+        <!-- Required for third-party annotation enums referenced at compile-time -->
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>javax.persistence-api</artifactId>
+            <version>${sVersionJavaxPersistenceApi}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.immutables</groupId>
+            <artifactId>value-annotations</artifactId>
+            <version>${sVersionImmutables}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${sVersionJackson}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${sVersionLog4j}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${sVersionLog4j}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.rabbitmq/amqp-client -->
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>${sVersionAmqpClient}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${sVersionGuava}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/it.geosolutions/geoserver-manager -->
+        <dependency>
+            <groupId>it.geosolutions</groupId>
+            <artifactId>geoserver-manager</artifactId>
+            <version>${sVersionGeoserverManager}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.json/json -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>${sVersionJson}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+        <!--dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${sVersionGson}</version>
+        <dependency-->
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>${sVersionCommonsCompress}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-validator/commons-validator -->
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+            <version>${sVersionCommonsValidator}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-net/commons-net -->
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>${sVersionCommonsNet}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/junit/junit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${sVersionJunit}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${sVersionJunitJupiter}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-params -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${sVersionJunitJupiter}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${sVersionAssertjCore}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${sVersionCommonsLang3}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3 -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>${sVersionAwsJavaSdkS3}</version>
+        </dependency>
+        
+        <!-- GEO TOOLS https://mvnrepository.com/artifact/org.geotools -->
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-main</artifactId>
+            <version>${sVersionGeoTools}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-shapefile</artifactId>
+            <version>${sVersionGeoTools}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-cql</artifactId>
+            <version>${sVersionGeoTools}</version>
+        </dependency>
+		<dependency>
+		   <groupId>org.geotools</groupId>
+		   <artifactId>gt-geopkg</artifactId>
+		   <version>${sVersionGeoTools}</version>
+		</dependency>        
+		
+		<dependency>
+		    <groupId>org.geotools</groupId>
+		    <artifactId>gt-geotiff</artifactId>
+		    <version>${sVersionGeoTools}</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.geotools</groupId>
+		    <artifactId>gt-coverage</artifactId>
+		    <version>${sVersionGeoTools}</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.geotools</groupId>
+		    <artifactId>gt-referencing</artifactId>
+		    <version>${sVersionGeoTools}</version>
+		</dependency>
+				
+		<!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+		<dependency>
+		    <groupId>org.jsoup</groupId>
+		    <artifactId>jsoup</artifactId>
+		    <version>1.18.3</version>
+		</dependency>        
+		<!-- https://mvnrepository.com/artifact/com.hubspot.jinjava/jinjava -->
+		<dependency>
+		    <groupId>com.hubspot.jinjava</groupId>
+		    <artifactId>jinjava</artifactId>
+		    <version>2.7.6</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-client -->
+		<dependency>
+		    <groupId>org.glassfish.jersey.core</groupId>
+		    <artifactId>jersey-client</artifactId>
+		    <version>${sVersionJersey2}</version>
+		</dependency>		  
+        <!-- https://mvnrepository.com/artifact/org.glassfish.jersey.media/jersey-media-jaxb -->
+		<dependency>
+		    <groupId>org.glassfish.jersey.media</groupId>
+		    <artifactId>jersey-media-jaxb</artifactId>
+		    <version>${sVersionJersey2}</version>
+		</dependency>		  
+        <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
+        <dependency>
+            <groupId>it.fadeout</groupId>
+            <artifactId>mercurius</artifactId>
+            <version>${sVersionMercurius}</version>
+        </dependency>		  
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>GeoSolutions</id>
+            <url>http://maven.geo-solutions.it/</url>
+        </repository>
+        <repository>
+            <id>snap-repo-public</id>
+            <name>Public Maven Repository for SNAP</name>
+            <url>https://nexus.snap-ci.ovh/repository/snap-maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+</project>

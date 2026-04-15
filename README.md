@@ -1,86 +1,71 @@
 # WASDI
 
-Web Advanced Space Developer Interface
+**Web Advanced Space Developer Interface**
 
-----
 [![Documentation Status](https://readthedocs.org/projects/wasdi/badge/?version=latest)](https://wasdi.readthedocs.io/en/latest/?badge=latest)
-## Develop
 
-### Prerequisites
+> Full documentation: https://wasdi.readthedocs.io/en/latest/
 
-#### Git
+---
 
-[Download](https://git-scm.com/downloads) and install [git](https://git-scm.com/)
+## What is WASDI?
 
-#### Java
+WASDI is an **Earth Observation (EO) Platform** designed to let scientists concentrate on science — not on IT infrastructure. It provides a cloud environment where EO processing algorithms can be developed locally and then deployed as scalable cloud services with minimal effort.
 
-Install [Java SE Development kit 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+- Getting started tutorial: [WASDI Tutorial](https://wasdi.readthedocs.io/en/latest/GettingStarted/WasdiTutorial.html)
+- User manual: [Signing Up and Signing In](https://wasdi.readthedocs.io/en/latest/UserManual/SigningUpAndSigningIn.html)
 
-#### Maven
+---
 
-- [Download](https://maven.apache.org/download.html) and [install](http://maven.apache.org/install.html) Maven
-  - *Optional* (yet suggested): [get familiar with Maven (in 5 minutes)](https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html)
+## WASDI Libraries
 
-#### Tomcat
+WASDI provides client libraries for the most common scientific and development languages:
 
-- Download and Install [Tomcat](http://tomcat.apache.org/) **[version 8.5](https://tomcat.apache.org/download-80.cgi)**
+| Language | Library |
+|----------|---------|
+| Python   | `wasdi` |
+| JavaScript | `wasdi-js` |
+| TypeScript | `wasdi-ts` |
+| Java | `wasdi-java` |
+| C# | `wasdi-csharp` |
+| Octave | `wasdi-octave` |
 
-  
-#### Eclipse
+### The key concept: `getPath()`
 
-- [Download](https://www.eclipse.org/downloads/) and install [Eclipse](https://www.eclipse.org/). Choose the Eclipse IDE for **Java EE** Developers.
-- Setup Eclipse for Maven using the [M2Eclipse plugin](http://www.eclipse.org/m2e/). Here's an [unofficial guide](http://www.vogella.com/tutorials/EclipseMaven/article.html)
-- Install the [Eclipse Web Tools Platform SDK](https://www.eclipse.org/webtools/). Later, you will be able to configure Eclipse for working with Tomcat: here's a [unofficial (yet useful) guide](https://www.mulesoft.com/tcat/tomcat-eclipse) with an example
-- *optional* Setup Eclipse for git using [egit](https://www.eclipse.org/egit/). [Unofficial guide](http://www.vogella.com/tutorials/EclipseGit/article.html)
+The only adaptation needed to make existing code run on WASDI is to **never use hard-coded file paths**. Instead, always resolve paths through the library:
 
-#### Mongo DB
-
-WASDI relies on mongo DB. Here you are two possibilities:
-
-1. connect the local version of WASDI to an existing DB server. In this case you would just need a client (suggested: [robo3t](https://robomongo.org/download)) to perform ordinary maintenance
-1. install a full fledged MongoDB **TODO** *how to configure Mongo DB*
-
-#### snap
-
-Install [snap](./snap.md)
-
-----
-
-### configure your setup for working with the project
-
-clone the repo:
-
-```
-git clone https://github.com/fadeoutsoftware/WASDI.git
+```python
+# Python example
+import wasdi
+file_path = wasdi.getPath("myfile.tif")
 ```
 
-Then you can build the project.
+This single change is all that is required. The code will continue to work on your local machine exactly as before — and once dragged and dropped into WASDI, it automatically becomes a **scalable cloud service**.
 
-#### Build with Maven:
+### Advanced library features
 
+Beyond path resolution, the WASDI libraries offer a rich set of features:
+
+- **Search EO and non-EO images** — query satellite data catalogues
+- **Ingest images into the workspace** — download and stage data for processing
+- **Run another application** — chain WASDI apps together via `wasdi.executeProcessor()`
+- **Run a SNAP workflow** — execute ESA SNAP graph processing tool chains
+- **Mosaic / subset images** — spatial operations on raster data
+
+---
+
+## WASDI Applications
+
+Every WASDI application, regardless of the language it is written in:
+
+- **Takes a JSON file as input** — parameters are passed as a structured JSON object
+- **Produces output files** in the workspace — typically geospatial files such as GeoTIFF, GeoPackage, or Shapefile
+- **Can optionally store a JSON payload** in the database — a structured result object accessible after execution
+
+All apps, in all supported languages, can interoperate with each other using:
+
+```python
+wasdi.executeProcessor("another-app-id", oParameters)
 ```
-cd WASDI
-cd wrappersnap
-cd wasdishared
-mvn clean install
-cd ../launcher
-mvn clean install
-cd ../../wasdiwebserver
-mvn clean install
-```
 
-#### Build with Eclipse:
-
-1. import wrappersnap\wasdishared as a maven project
-1. import wrappersnap\launcher as a maven project
-1. import wasdiwebserver as a maven project
-
-**TODO** *how to configure* - attach images of the config
-
-make sure Elicpse uses the jre within the jdk and not another one installed separately: Windows -> Preferences -> Java -> installed JREs
- 
-----
-
-## Deploy
-
-- **TODO** how to deploy
+This makes it straightforward to build complex multi-step pipelines by composing independent applications.
