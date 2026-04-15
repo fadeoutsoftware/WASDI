@@ -21,14 +21,14 @@ WASDI is an **Earth Observation (EO) Platform** designed to let scientists conce
 
 WASDI provides client libraries for the most common scientific and development languages:
 
-| Language | Library |
-|----------|---------|
-| Python   | `wasdi` | 
-| JavaScript | `wasdi-js` |
-| TypeScript | `wasdi-ts` |
-| Java | `wasdi-java` |
-| C# | `wasdi-csharp` |
-| Octave | `wasdi-octave` |
+| Language | Install | Documentation | Tutorial |
+|----------|---------|---------------|----------|
+| Python | `pip install wasdi` | [waspy](https://wasdi.readthedocs.io/en/latest/Libraries/python/waspy.html) | [Python Tutorial](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/PythonTutorial.html) |
+| JavaScript | `npm install wasdi` | [wasdi-js](https://wasdi.readthedocs.io/en/latest/Libraries/typescript/wasdi.html) | [JavaScript Tutorial](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/JavascriptTutorialHtml.html) |
+| TypeScript | `npm i wasdi` | [wasdi-ts](https://wasdi.readthedocs.io/en/latest/Libraries/typescript/wasdi.html) | [TypeScript Tutorial](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/JavascriptTutorial.html) |
+| Java | [Download ZIP](https://www.wasdi.net/javawasdilib.zip) | [WasdiLib](https://wasdi.readthedocs.io/en/latest/Libraries/java/WasdiLib.html) | [Getting Started](https://wasdi.readthedocs.io/en/latest/GettingStarted/LibsConcepts.html) |
+| C# | `Install-Package WasdiLib -Version 0.0.3.5` | [C# Docs](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/C%23Tutorial.html) | [C# Tutorial](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/C%23Tutorial.html) |
+| Octave | — | — | — |
 
 ### The key concept: `getPath()`
 
@@ -285,4 +285,43 @@ WasdiProcessorEngine  (abstract — launcher)
                         own full Docker image definition.
                         Type: personalized_docker
 ```
+
+### Deploy flow
+
+When a user uploads a ZIP file, the deploy procedure follows these steps:
+
+1. **Check existence** — verify that no processor with the same name exists yet for this user
+2. **Create processor folder** — create `<basePath>/processors/<appName>/` on the node filesystem
+3. **Unzip user code** — extract the uploaded ZIP into the processor folder
+4. **Copy template files** — copy the contents of `<basePath>/dockertemplate/<processorType>/` into the processor folder (Dockerfile, executor scripts, bundled libraries, etc.)
+5. **Build Docker image** — trigger `docker build` in the processor folder, producing a tagged image
+6. **Push to registry** — push the resulting image to one or more configured registries (typically the WASDI Nexus instance)
+7. **Register** — record the processor metadata and image reference in the database
+
+On subsequent nodes (for `DockerBuildOnceEngine`-based engines), the build step is skipped: the node pulls the pre-built image directly from the registry.
+
+### Processor type templates (`processorTypes/`)
+
+Each processor type has a dedicated template folder under `processorTypes/`. Its contents are copied into the new processor folder at deploy time.
+
+| Template folder | Processor type | Key template files |
+|-----------------|----------------|--------------------|
+| `python312/` | `python312` | `Dockerfile`, `wasdiProcessorExecutor.py` |
+| `pipOneShotDocker/` | `pip_oneshot` | `Dockerfile`, `wasdiProcessorExecutor.py` |
+| `wasdiPythonPip2/` | `python_pip_2` | `Dockerfile`, `wasdiProcessorExecutor.py`, `wasdiProcessorServer.py` |
+| `wasdiUbuntuFocalPython/` | `python_pip_2_ubuntu_20` | `Dockerfile`, `wasdiProcessorExecutor.py` |
+| `wasdiPython37Docker/` | `ubuntu_python37_snap` | `Dockerfile`, executor scripts |
+| `wasdiCondaDocker/` | `conda` | `Dockerfile`, `wasdiProcessorExecutor.py`, `wasdiProcessorServer.py`, `myProcessor.py` |
+| `wasdiJava17Docker/` | `java_17_Ubuntu_22` | `Dockerfile`, `jwasdilib-0.7.4.jar`, `wasdiProcessorServer.py` |
+| `wasdiCSharpDocker/` | `csharp` | `Dockerfile`, `WasdiLib.dll`, `WasdiRunner.dll`, `wasdiProcessorServer.py` |
+| `wasdiIDLDocker/` | `ubuntu_idl372` | `Dockerfile`, `wasdiProcessorServer.py`, `runProcessor.sh`, `docker-entrypoint.sh` |
+| `wasdiOctaveDocker/` | `octave` | `Dockerfile`, `jwasdilib-0.7.4.jar`, `wasdiProcessorServer.py` |
+| `wasdiJupyterNotebookDocker/` | `jupyter-notebook` | `Dockerfile`, `traefik_notebook.yml.j2` |
+| `eoepcaDocker/` | `eoepca` | `Dockerfile`, `appDeployBody.json.j2`, `wasdi-processor.cwl.j2`, `eoepcaProcessorExecutor.py` |
+| `local_python312/` | `local_python312` | `wasdiProcessorExecutor.py` (no Docker build) |
+
+The two recurring scripts are:
+
+- **`wasdiProcessorServer.py`** — a small HTTP server (Flask/Gunicorn) that wraps the user code and exposes a `/run` endpoint; used by container-based types where the container stays alive across calls
+- **`wasdiProcessorExecutor.py`** — a one-shot runner that launches the user code directly and exits; used by one-shot types where a fresh container is started per execution
 
