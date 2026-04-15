@@ -16,7 +16,7 @@ import wasdi.shared.business.Schedule;
 import wasdi.shared.business.users.UserSession;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.factories.DataLayerManager;
 import wasdi.shared.data.ScheduleRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.utils.EndMessageProvider;
@@ -35,8 +35,8 @@ public class Trigger {
 	
 	public Trigger() {
 		try {
-			// Read Mongo configuration
-			MongoRepository.readConfig();
+			// Initialize configured data layer (currently Mongo)
+			DataLayerManager.init();
 		} 
 		catch (Throwable oEx) {
 			System.out.println("TRIGGER ERROR " + oEx.toString());

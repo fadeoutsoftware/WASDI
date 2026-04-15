@@ -984,12 +984,24 @@ public class ProductResource {
                             }
                         }
                         
+                        // ESRI ASCII raster files
                         if (sName.endsWith(".prj") && sProductName.endsWith(".asc") && sName.equals(sProductName.replace(".asc", ".prj"))) {
                         	return true;
                         }
                         
                         if (sProductName.endsWith(".grib") && (sName.equals(sProductName + ".gbx9") || sName.equals(sProductName + ".ncx4"))) {
                         	return true;
+                        }
+                        
+                        // shape files
+                        if (sProductName.endsWith(".shp")) {
+                        	String sProductNameNoExtension = sProductName.replace(".shp", "");
+                        	if (sName.equals(sProductNameNoExtension + ".dbf") 
+                        			|| sName.equals(sProductNameNoExtension + ".prj") 
+                        			|| sName.equals(sProductNameNoExtension + ".shp.xml") 
+                        			|| sName.equals(sProductNameNoExtension + ".shx")) {
+                        		return true;
+                        	}
                         }
 
                         return false;
@@ -1007,9 +1019,9 @@ public class ProductResource {
                         WasdiLog.debugLog("ProductResource.deleteProduct: deleting file product " + oFile.getAbsolutePath() + "...");
                                                 
                         if (!FileUtils.deleteQuietly(oFile)) {
-                            WasdiLog.debugLog("    ERROR");
+                            WasdiLog.debugLog("ProductResource.deleteProduct: ERROR");
                         } else {
-                            WasdiLog.debugLog("    OK");
+                            WasdiLog.debugLog("ProductResource.deleteProduct: OK");
                         }
                     }
                 } else {
@@ -1116,7 +1128,9 @@ public class ProductResource {
 
             try {
                 // Search for exchange name
-                String sExchange = WasdiConfig.Current.rabbit.exchange;
+                String sExchange = "";
+                
+                if (WasdiConfig.Current.rabbit!=null) sExchange = WasdiConfig.Current.rabbit.exchange;                
 
                 // Set default if is empty
                 if (Utils.isNullOrEmpty(sExchange)) {

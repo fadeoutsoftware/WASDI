@@ -18,8 +18,8 @@
     <packaging>war</packaging>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
         <sVersionCommonsIo>2.21.0</sVersionCommonsIo>
@@ -206,6 +206,23 @@
             <artifactId>commons-net</artifactId>
             <version>${sVersionCommonsNet}</version>
         </dependency>
+        
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>9.4.57.v20241219</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>9.4.57.v20241219</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet-core</artifactId>
+			<version>${sVersionJersey2}</version>
+		</dependency>
+        
         <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
         <dependency>
             <groupId>org.nfs.orbits</groupId>

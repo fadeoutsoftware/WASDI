@@ -120,7 +120,7 @@ public class ProcessScheduler {
 						int iMaxConcurrents = Integer.parseInt(oSchedulerQueueConfig.maxQueue);
 						if (iMaxConcurrents>0) {
 							m_iNumberOfConcurrentProcess = iMaxConcurrents;
-							WasdiLog.infoLog(m_sLogPrefix + ".init: Max Concurrent Processes: " + m_iNumberOfConcurrentProcess);
+							WasdiLog.debugLog(m_sLogPrefix + ".init: Max Concurrent Processes: " + m_iNumberOfConcurrentProcess);
 						}					
 					}
 				} catch (Exception e) {
@@ -133,7 +133,7 @@ public class ProcessScheduler {
 						long lTimeout = Long.parseLong(oSchedulerQueueConfig.timeoutMs);
 						if (lTimeout>0) {
 							m_lTimeOutMs = lTimeout;
-							WasdiLog.infoLog(m_sLogPrefix + ".init:  TimeOut Ms: " + m_lTimeOutMs);
+							WasdiLog.debugLog(m_sLogPrefix + ".init:  TimeOut Ms: " + m_lTimeOutMs);
 						}
 					}
 				} catch (Exception e) {
@@ -179,7 +179,7 @@ public class ProcessScheduler {
 				m_iMaxWaitingQueue = oSchedulerQueueConfig.maxWaitingQueue;
 			}
 			else if (sSchedulerKey.equals("DEFAULT")) {
-				WasdiLog.infoLog(m_sLogPrefix + ".init: this is the default scheduler");
+				WasdiLog.debugLog(m_sLogPrefix + ".init: this is the default scheduler");
 				
 				// Read Max Size of Concurrent Processes of this scheduler 
 				try {
@@ -188,7 +188,7 @@ public class ProcessScheduler {
 						int iMaxConcurrents = Integer.parseInt(WasdiConfig.Current.scheduler.maxQueue);
 						if (iMaxConcurrents>0) {
 							m_iNumberOfConcurrentProcess = iMaxConcurrents;
-							WasdiLog.infoLog(m_sLogPrefix + ".init: Max Concurrent Processes: " + m_iNumberOfConcurrentProcess);
+							WasdiLog.debugLog(m_sLogPrefix + ".init: Max Concurrent Processes: " + m_iNumberOfConcurrentProcess);
 						}					
 					}
 				} catch (Exception e) {
@@ -201,7 +201,7 @@ public class ProcessScheduler {
 						long lTimeout = Long.parseLong(WasdiConfig.Current.scheduler.timeoutMs);
 						if (lTimeout>0) {
 							m_lTimeOutMs = lTimeout;
-							WasdiLog.infoLog(m_sLogPrefix + ".init:  TimeOut Ms: " + m_lTimeOutMs);
+							WasdiLog.debugLog(m_sLogPrefix + ".init:  TimeOut Ms: " + m_lTimeOutMs);
 						}
 					}
 				} catch (Exception e) {
@@ -220,7 +220,7 @@ public class ProcessScheduler {
 					long iStartWaitSleep = Long.parseLong( WasdiConfig.Current.scheduler.processingThreadWaitStartMS);
 					if (iStartWaitSleep>0) {
 						m_lWaitProcessStartMS = iStartWaitSleep;
-						WasdiLog.infoLog(m_sLogPrefix + ".init: Wait Proc Start Ms: " + m_lWaitProcessStartMS);
+						WasdiLog.debugLog(m_sLogPrefix + ".init: Wait Proc Start Ms: " + m_lWaitProcessStartMS);
 					}
 				}
 			} catch (Exception e) {
@@ -244,7 +244,7 @@ public class ProcessScheduler {
 			return false;
 		}
 		
-		WasdiLog.infoLog(m_sLogPrefix + ".init: good to go :-)\n");
+		WasdiLog.debugLog(m_sLogPrefix + ".init: good to go :-)\n");
 		return true;
 	}
 	
@@ -832,8 +832,6 @@ public class ProcessScheduler {
 					" -operation " + oProcessWorkspace.getOperationType() +
 					" -parameter " + oProcessWorkspace.getProcessObjId();
 	
-			WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executing command for process " + oProcessWorkspace.getProcessObjId() + ": ");
-			WasdiLog.infoLog(sShellExString);
 			
 			ArrayList<String> asCmd = new ArrayList<>(Arrays.asList(sShellExString.split(" ")));
 			
@@ -841,10 +839,28 @@ public class ProcessScheduler {
 				asCmd.add(0, "launcher");
 			}
 			
+			if (WasdiConfig.Current.scheduler.redirectLauncherOutputs && !Utils.isNullOrEmpty(WasdiConfig.Current.scheduler.launcherOutputPath)) {
+				String sPath = WasdiConfig.Current.scheduler.launcherOutputPath;
+				
+				asCmd.add(">>");
+				asCmd.add(sPath);
+				asCmd.add("2>&1");
+			}
+			
+			sShellExString = "";
+			if (asCmd != null) {
+				for (String sArg : asCmd) {
+					sShellExString += sArg + " ";
+				}			
+			}			
+			
+			WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executing command for process " + oProcessWorkspace.getProcessObjId() + ": ");
+			WasdiLog.infoLog(sShellExString);
+			
 			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asCmd, false);
 			
 			if (oShellExecReturn.isOperationOk()) {
-				WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executed " + oProcessWorkspace.getProcessObjId() + " !!!");
+				WasdiLog.debugLog(m_sLogPrefix + "executeProcess: executed " + oProcessWorkspace.getProcessObjId() + " !!!");
 				
 				if (!Utils.isNullOrEmpty(oShellExecReturn.getContainerId())) {
 					ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();

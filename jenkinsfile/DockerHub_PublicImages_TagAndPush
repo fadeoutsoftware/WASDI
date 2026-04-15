@@ -1,0 +1,77 @@
+pipeline {
+  agent any
+
+  environment {
+    sCurrentRevision = "${env.BUILD_ID}"
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '365'))
+    disableConcurrentBuilds()
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        echo "env.GIT_BRANCH       = " + env.GIT_BRANCH
+        echo "env.sCurrentRevision = " + env.sCurrentRevision
+        echo "env.NODE_NAME        = " + env.NODE_NAME
+        echo "env.WORKSPACE        = " + env.WORKSPACE
+
+        sh script: "pwd", label: "Current location"
+        sh script: "docker --version", label: "Tool > docker > current version"
+        sh script: "docker images --filter 'reference=wasdi-*' --format 'table {{.Repository}}\\t{{.Tag}}\\t{{.ID}}\\t{{.Size}}'", label: "Available WASDI Docker images on this node"
+      }
+    }
+
+    stage('LOGIN TO DOCKER HUB') {
+      steps {
+        withCredentials([
+          usernamePassword(credentialsId: 'sWasdiDockerHubCredentials', usernameVariable: 'sDockerHubUsername', passwordVariable: 'sDockerHubPassword')
+        ]) {
+          sh script: '''
+            echo "${sDockerHubPassword}" | docker login --username "${sDockerHubUsername}" --password-stdin
+          ''',
+          label: "Login to Docker Hub"
+        }
+      }
+    }
+
+    stage('TAG AND PUSH THE IMAGES') {
+      steps {
+        sh script: '''
+          set -e
+
+          tag_and_push() {
+            local sLocalImage="$1"
+            local sRemoteImage="$2"
+            echo ""
+            echo ">>> ${sLocalImage}:latest  -->  ${sRemoteImage}"
+            docker tag "${sLocalImage}:latest" "${sRemoteImage}"
+            docker image push "${sRemoteImage}"
+          }
+
+          tag_and_push "wasdi-launcher"                       "wasdi/wasdi:wasdi-launcher"
+          tag_and_push "wasdi-toolbox"                        "wasdi/wasdi:wasdi-toolbox"
+          tag_and_push "wasdi-gdal"                           "wasdi/wasdi:wasdi-gdal"
+          tag_and_push "wasdi-snaphu"                         "wasdi/wasdi:wasdi-snaphu"
+          tag_and_push "wasdi-sen2cor"                        "wasdi/wasdi:wasdi-sen2cor"
+          tag_and_push "wasdi-utils"                          "wasdi/wasdi:wasdi-utils"
+          tag_and_push "wasdi-trigger"                        "wasdi/wasdi:wasdi-trigger"
+          tag_and_push "wasdi-dataprovider-copernicusmarine"  "wasdi/wasdi:wasdi-dataprovider-copernicusmarine"
+          tag_and_push "wasdi-dataprovider-cds"               "wasdi/wasdi:wasdi-dataprovider-cds"
+          tag_and_push "wasdi-dataprovider-ers"               "wasdi/wasdi:wasdi-dataprovider-ers"
+          tag_and_push "wasdi-dataprovider-extpython"         "wasdi/wasdi:wasdi-dataprovider-extpython"
+        ''',
+        label: "Tag and push all WASDI public images to Docker Hub"
+      }
+    }
+  }
+
+  post {
+    always {
+      sh script: "docker logout || true", label: "Logout from Docker Hub"
+      cleanWs()
+    }
+  }
+}

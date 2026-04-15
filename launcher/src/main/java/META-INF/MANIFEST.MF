@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: wasdi.LauncherMain
+OpenIDE-Module-Specification-Version: 11.0.0
+

@@ -731,7 +731,7 @@ def init(sConfigFilePath=None):
     if not m_sMyProcId or m_sMyProcId == '':
         m_sMyProcId = _getEnvironmentVariable("WASDI_PROCESS_WORKSPACE_ID")
         if m_sMyProcId is not None:
-            print('[INFO] waspy.init: process workspace id read in the env WASDI_SESSION_ID variable')
+            print('[INFO] waspy.init: process workspace id read in the env WASDI_PROCESS_WORKSPACE_ID variable')
         if m_sMyProcId is None:
             m_sMyProcId = ""
 

@@ -23,14 +23,14 @@ The following code snippet provides an example of how to set the HTTP request ti
 
 .. code-block:: python
 
-    wasdi.wasdiLog(f"Default timeout value: {wasdi.geRequestsTimeout()}")
+    wasdi.wasdiLog(f"Default timeout value: {wasdi.getRequestsTimeout()}")
 
     iNewTimeOut = wasdi.getParameter("REQUEST_TIMEOUT", 240)
 
     if iNewTimeOut is not None:
         wasdi.setRequestsTimeout(iNewTimeOut)
 
-    wasdi.wasdiLog(f"New timeout value: {wasdi.geRequestsTimeout()}")
+    wasdi.wasdiLog(f"New timeout value: {wasdi.getRequestsTimeout()}")
            
 
 **What it does:**

@@ -37,13 +37,13 @@ import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ParametersRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.rabbit.Send;
@@ -973,6 +973,10 @@ public class ProcessWorkspaceResource {
 			
 			if (iPerc>=0 && iPerc<=100) {
 				oProcessWorkspace.setProgressPerc(iPerc);
+				
+				if (!WasdiConfig.Current.logAppsOnDb) {
+					WasdiLog.infoLog("APP PROGRESS UPDATE " + iPerc + " for process " + sProcessObjId);
+				}
 			}
 
 			oRepository.updateProcess(oProcessWorkspace);
@@ -987,7 +991,10 @@ public class ProcessWorkspaceResource {
 				if (sSendToRabbit.equals("1") || sSendToRabbit.equals("true")) {
 					
 					// Search for exchange name
-					String sExchange = WasdiConfig.Current.rabbit.exchange;
+		            String sExchange = "amq.topic";
+		            
+		            if (WasdiConfig.Current.rabbit!=null) sExchange = WasdiConfig.Current.rabbit.exchange;
+					
 					
 					// Set default if is empty
 					if (Utils.isNullOrEmpty(sExchange)) {
