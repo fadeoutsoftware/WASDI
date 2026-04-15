@@ -70,7 +70,7 @@ pipeline {
             --define revision=${env.sCurrentRevision} \
             --define skipTests \
             --update-snapshots \
-            --projects wrappersnap/wasdishared,wrappersnap/launcher,scheduler,wasdiwebserver,libraries/jwasdilib/jwasdilib,wasditrigger,ogcprocesses/processes,openeo-java-server \
+            --projects wasdishared,launcher,scheduler,wasdiwebserver,libraries/jwasdilib/jwasdilib,wasditrigger,ogcprocesses/processes,openeo-java-server \
             --also-make \
             clean package
         """,

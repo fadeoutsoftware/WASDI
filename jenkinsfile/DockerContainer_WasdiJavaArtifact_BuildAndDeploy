@@ -22,39 +22,39 @@ def getMavenBuildProject() {
   def aMavenBuildProject = []
 
   if ( env.sWasdiLauncher.toBoolean() ) {
-    aMavenBuildProject.add('wrappersnap/wasdishared')
-    aMavenBuildProject.add('wrappersnap/launcher')
+    aMavenBuildProject.add('wasdishared')
+    aMavenBuildProject.add('launcher')
   }
 
   if ( env.sWasdiScheduler.toBoolean() ) {
-    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('wasdishared')
     aMavenBuildProject.add('scheduler')
   }
 
   if ( env.sWasdiTomcatOgcProcessesServer.toBoolean() ) {
-    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('wasdishared')
     aMavenBuildProject.add('ogcprocesses/processes')
   }
 
   if ( env.sWasdiTomcatOpenEoServer.toBoolean() ) {
-    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('wasdishared')
     aMavenBuildProject.add('openeo-java-server')
   }
 
   if ( env.sWasdiTomcatWasdiWebServer.toBoolean() ) {
-    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('wasdishared')
     aMavenBuildProject.add('wasdiwebserver')
   }
 
   if ( env.sWasdiTrigger.toBoolean() ) {
-    aMavenBuildProject.add('wrappersnap/wasdishared')
+    aMavenBuildProject.add('wasdishared')
     aMavenBuildProject.add('libraries/jwasdilib/jwasdilib')
     aMavenBuildProject.add('wasditrigger')
   }
 
   if ( env.sWasdiUtils.toBoolean() ) {
-    aMavenBuildProject.add('wrappersnap/wasdishared')
-    aMavenBuildProject.add('wrappersnap/utils')
+    aMavenBuildProject.add('wasdishared')
+    aMavenBuildProject.add('utils')
   }
 
   aMavenBuildProject.unique()
