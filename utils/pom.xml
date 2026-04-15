@@ -42,7 +42,7 @@
         <sVersionSMOSTbx>11.0.0</sVersionSMOSTbx>		
         <sVersionSshj>0.39.0</sVersionSshj>
         <sVersionXercesImpl>2.12.2</sVersionXercesImpl>
-		<sVersionLogback>1.5.16</sVersionLogback>
+		<sVersionLogback>1.5.25</sVersionLogback>
     </properties>
 	
     <build>
