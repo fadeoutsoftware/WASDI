@@ -67,6 +67,24 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
+# RUN specific to install Docker CLI (binary only - daemon runs on the host via mounted socket)
+RUN apt-get update && \
+    apt-get install \
+        ca-certificates \
+        curl && \
+    install -m 0755 -d /etc/apt/keyrings && \
+    curl --fail --silent --show-error --location https://download.docker.com/linux/ubuntu/gpg \
+        --output /etc/apt/keyrings/docker.asc && \
+    chmod a+r /etc/apt/keyrings/docker.asc && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu jammy stable" \
+        > /etc/apt/sources.list.d/docker.list && \
+    apt-get update && \
+    apt-get install \
+        docker-ce-cli && \
+    rm --recursive --force /var/lib/apt/lists/* && \
+    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
+
+
 # RUN specific to install Jenkins
 RUN apt-get update && \
     apt-get install \
