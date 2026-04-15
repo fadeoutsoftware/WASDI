@@ -91,7 +91,7 @@ pipeline {
                 mvn \
                   --batch-mode \
                   --activate-profiles ${env.sMavenProfile} \
-                  --projects wrappersnap/wasdishared,wrappersnap/launcher,scheduler,wasdiwebserver,libraries/jwasdilib/jwasdilib,wasditrigger,ogcprocesses/processes,openeo-java-server \
+                  --projects wasdishared,launcher,scheduler,wasdiwebserver,libraries/jwasdilib/jwasdilib,wasditrigger,ogcprocesses/processes,openeo-java-server \
                   --also-make \
                   sonar:sonar \
                   --define revision=${env.sCurrentRevision} \
