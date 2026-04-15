@@ -13,9 +13,9 @@
 
     <!-- sub modules -->
     <modules>
-        <module>wrappersnap/wasdishared</module>
-        <module>wrappersnap/launcher</module>
-        <module>wrappersnap/utils</module>
+        <module>wasdishared</module>
+        <module>launcher</module>
+        <module>utils</module>
         <module>scheduler</module>
         <module>wasdiwebserver</module>
         <module>libraries/jwasdilib/jwasdilib</module>
