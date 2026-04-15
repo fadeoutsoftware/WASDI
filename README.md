@@ -325,3 +325,330 @@ The two recurring scripts are:
 - **`wasdiProcessorServer.py`** — a small HTTP server (Flask/Gunicorn) that wraps the user code and exposes a `/run` endpoint; used by container-based types where the container stays alive across calls
 - **`wasdiProcessorExecutor.py`** — a one-shot runner that launches the user code directly and exits; used by one-shot types where a fresh container is started per execution
 
+---
+
+## Launcher Operations
+
+### Startup arguments
+
+The Launcher is a Java process started by the Scheduler. It accepts three arguments:
+
+| Argument | Description |
+|----------|-------------|
+| `-o <OPERATION>` | Uppercase operation code (e.g. `RUNPROCESSOR`, `DOWNLOAD`) — must match a value in `wasdi.shared.LauncherOperations` |
+| `-p <guid>` | GUID of the `ProcessWorkspace` record created by the Server. The parameters for the operation are read from the database by this GUID |
+| `-c <path>` | Path to the WASDI JSON configuration file (e.g. `/etc/wasdi/config.json`) |
+
+### Startup sequence
+
+1. The **Server** receives a user request, creates a `ProcessWorkspace` record in the database with state `CREATED`, and stores the operation parameters there
+2. The **Scheduler** detects the `CREATED` record, picks a node, and spawns the Launcher process passing `-o`, `-p`, and `-c`
+3. The Launcher reads its arguments, loads the config, and fetches the `ProcessWorkspace` from the database
+4. It sets the `ProcessWorkspace` state to `RUNNING`
+5. It instantiates the correct `Operation` subclass using **reflection** — the class name is derived from the operation code (first letter uppercased, rest lowercase) under the package `wasdi.operations`
+6. It calls `operation.executeOperation(parameter, processWorkspace)`
+7. On success the state transitions to `DONE`; on failure to `ERROR`
+
+### Operations
+
+All operation classes live in `wasdi.operations`, extend `Operation`, and their names match the `LauncherOperations` enum value with only the first letter capitalised.
+
+| Operation code | Class | Description |
+|----------------|-------|-------------|
+| `DOWNLOAD` | `Download` | Downloads an EO product from a data provider. Checks for an existing local copy first, then delegates to the appropriate `DataProvider` implementation. Registers the file in the database and adds it to the workspace |
+| `INGEST` | `Ingest` | Ingests a file already present on the node into a WASDI workspace |
+| `SHARE` | `Share` | Copies a product from one workspace to another on the same node. Adds the file to the target workspace in the database |
+| `PUBLISHBAND` | `Publishband` | Publishes a file (or a specific band) to GeoServer so it can be visualised on the map via WMS/WCS |
+| `GRAPH` | `Graph` | Executes an ESA SNAP graph processing workflow (XML) on one or more input products |
+| `MOSAIC` | `Mosaic` | Creates a mosaic from multiple input raster files |
+| `SUBSET` | `Subset` | Extracts a spatial subset from a raster product |
+| `MULTISUBSET` | `Multisubset` | Applies a subset operation to multiple input products in one task |
+| `REGRID` | `Regrid` | Reprojects or resamples a raster product to a target grid |
+| `DEPLOYPROCESSOR` | `Deployprocessor` | Deploys a user-uploaded application on the local node using the appropriate `WasdiProcessorEngine` |
+| `RUNPROCESSOR` | `Runprocessor` | Executes a deployed processor (user application) on the node |
+| `RUNIDL` | `Runidl` | Runs an IDL application; extends `Runprocessor` with IDL-specific handling |
+| `REDEPLOYPROCESSOR` | `Redeployprocessor` | Re-deploys a processor (update) on the local node |
+| `DELETEPROCESSOR` | `Deleteprocessor` | Removes a processor and its associated files/image from the local node |
+| `LIBRARYUPDATE` | `Libraryupdate` | Updates only the WASDI client library inside a running processor container |
+| `ENVIRONMENTUPDATE` | `Environmentupdate` | Triggers a full environment update inside a processor container (OS packages, runtime dependencies, etc.) |
+| `FTPUPLOAD` | `Ftpupload` | Uploads a workspace file to a remote FTP server |
+| `COPYTOSFTP` | `Copytosftp` | Copies a workspace file to the user's SFTP folder on the local node. Supports a `user;path` syntax to target another user's account |
+| `LAUNCHJUPYTERNOTEBOOK` | `Launchjupyternotebook` | Starts a Jupyter Notebook container for interactive use |
+| `TERMINATEJUPYTERNOTEBOOK` | `Terminatejupyternotebook` | Stops and removes a running Jupyter Notebook container |
+| `KILLPROCESSTREE` | `Killprocesstree` | Forcefully kills a running process and its entire child process tree |
+| `READMETADATA` | `Readmetadata` | Reads and stores metadata from a product file |
+| `SEN2COR` | `Sen2cor` | Runs the ESA Sen2Cor atmospheric correction processor on a Sentinel-2 product |
+
+---
+
+## High-Level Code Architecture
+
+WASDI follows a **Model → ViewModel → View / Controller** pattern across its Java codebase. The shared library (`wasdishared`) provides the model, data layer, and view models; the web server (`wasdiwebserver`) provides the controllers (REST resources); the Angular client is the view.
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                      wasdishared                         │
+│                                                          │
+│  business/       ← Entities (Model)                      │
+│  data/           ← Repositories (Data Layer)             │
+│  viewmodels/     ← View Models                           │
+│  config/         ← Configuration classes                 │
+│  parameters/     ← Launcher operation parameters         │
+│  payloads/       ← Launcher operation payloads           │
+│  queryexecutors/ ← EO catalogue query adapters           │
+│  packagemanagers/← Pip / Conda package manager impls     │
+│  geoserver/      ← GeoServer utilities                   │
+│  rabbit/         ← RabbitMQ utilities                    │
+│  utils/          ← General-purpose utilities             │
+└──────────────────────────────────────────────────────────┘
+         ▲                        ▲
+         │                        │
+┌────────┴──────────┐   ┌─────────┴──────────┐
+│   wasdiwebserver  │   │      launcher       │
+│  it.fadeout.rest  │   │   wasdi.operations  │
+│    .resources/    │   │                     │
+│  (Controllers)    │   │  (Operation classes)│
+└───────────────────┘   └─────────────────────┘
+```
+
+### Model — `wasdi.shared.business`
+
+Entities are plain Java classes serialised to and from the database. Key entities:
+
+| Entity class | Description |
+|--------------|-------------|
+| `users/` | User accounts and authentication data |
+| `Workspace` | An isolated working environment per user |
+| `processors/` | Processor (application) metadata |
+| `ProcessWorkspace` | A task instance — any operation executed in a workspace |
+| `ProductWorkspace` | A product (file) registered in a workspace |
+| `SnapWorkflow` | An ESA SNAP graph processing workflow |
+| `Style` | An SLD style file for map rendering |
+| `Schedule` | A cron-based scheduled app execution |
+| `Node` | A WASDI computing node |
+| `Organization`, `Project`, `Subscription` | Multi-tenancy and billing entities |
+
+### Data Layer — `wasdi.shared.data`
+
+Each entity has a corresponding `*Repository` class. The repository hierarchy is:
+
+```
+*Repository          ← public API (one per entity)
+    │
+    ├── interfaces/I*RepositoryBackend   ← interface defining backend operations
+    │
+    ├── mongo/       ← MongoDB implementation
+    ├── no2/         ← Nitrite (no2) implementation
+    └── sqlite/      ← SQLite implementation
+```
+
+The active backend is selected via the `dbProvider` field in `WasdiConfig`. All higher-level code depends only on the public `*Repository` class, never on a specific backend.
+
+### View Models — `wasdi.shared.viewmodels`
+
+View models are the data structures exchanged between the Server and its clients (web UI, libraries). Each view model is designed to match exactly what a particular client screen or library method needs. A single entity may have multiple view models (e.g. a full detail VM and a compact list VM), and a single VM may aggregate data from several entities.
+
+### Configuration — `wasdi.shared.config`
+
+All configuration is read from a single JSON file (path passed as `-c` to the Launcher, or configured in Tomcat for the Server). The JSON is deserialised directly into strongly-typed configuration classes. The resulting object is available globally as `WasdiConfig.Current`.
+
+### Parameters and Payloads — `wasdi.shared.parameters` / `wasdi.shared.payloads`
+
+- **`parameters/`** — one parameter class per Launcher operation. The web server serialises the parameters to the database when creating a `ProcessWorkspace`; the Launcher reads them back before executing the operation
+- **`payloads/`** — payload classes for the result of each operation. After execution, the Launcher can write a structured JSON payload back to the `ProcessWorkspace` record, queryable by the client
+
+### Query Executors — `wasdi.shared.queryexecutors`
+
+Each supported EO data catalogue has its own `QueryExecutor` sub-package. The factory (`QueryExecutorFactory`) instantiates the correct executor based on the requested data provider. Currently supported catalogues include:
+
+`Copernicus Dataspace` · `CREODIAS 2` · `CDS (Copernicus Climate)` · `ADS` · `DLR` · `EODC` · `ESA` · `Globathy` · `GPM` · `JRC` · `LP DAAC` · `LSA Data Center` · `ONDA` · `Planet` · `ProbaV` · `SINA` · `SkyWatch` · `Sobloo` · `Terrascope` · `VIIRS` · `web plugin`
+
+### Utils — `wasdi.shared.utils`
+
+| Sub-package / class | Purpose |
+|---------------------|---------|
+| `runtime/RunTimeUtils` | Abstracts execution of external processes. Depending on configuration can issue host shell calls or Docker API calls — the rest of the codebase calls this without caring about the actual runner |
+| `docker/` | Docker Java client wrappers (build, push, run, stop, inspect) |
+| `log/` | Logging utilities (wraps Log4j) |
+| `gis/` | GIS / raster helper functions |
+| `jinja/` | Jinja2-style template rendering (used for Dockerfiles and config templates) |
+| `HttpUtils` | HTTP client helpers |
+| `MailUtils` | Email notification helpers |
+| `JsonUtils` | JSON serialisation/deserialisation helpers |
+| `WasdiFileUtils` / `ZipFileUtils` / `TarUtils` | File and archive utilities |
+
+### REST Controllers — `it.fadeout.rest.resources`
+
+The web server exposes a JAX-RS REST API. Each resource class handles one area of the API:
+
+| Resource class | Base path | Responsibility |
+|----------------|-----------|----------------|
+| `AuthResource` | `/auth` | Login, logout, session management |
+| `WorkspaceResource` | `/ws` | Workspace CRUD and sharing |
+| `ProductResource` | `/product` | Product (file) management within a workspace |
+| `ProcessorsResource` | `/processors` | Processor (app) registration, deploy, run, search |
+| `ProcessWorkspaceResource` | `/process` | Query and manage `ProcessWorkspace` task records |
+| `ProcessingResources` | `/processing` | Trigger built-in processing operations (mosaic, subset, etc.) |
+| `CatalogResources` | `/catalog` | EO catalogue search (proxies to `QueryExecutors`) |
+| `OpenSearchResource` | `/search` | OpenSearch catalogue interface |
+| `OpportunitySearchResource` | `/searchorbit` | Orbit-based opportunity search |
+| `WorkflowsResource` | `/workflows` | SNAP workflow upload and execution |
+| `StyleResource` | `/styles` | SLD style upload and management |
+| `ImagesResource` | `/images` | Published band / image layer management |
+| `NodeResource` | `/node` | Computing node management |
+| `PackageManagerResource` | `/packageManager` | Remote package manager operations on processors |
+| `ProcessorsMediaResource` | `/processormedia` | Processor logo / media management |
+| `ProcessorParametersTemplateResource` | `/processorParamTempl` | Saved parameter templates for processors |
+| `OrganizationResource` | `/organizations` | Organisation management |
+| `ProjectResource` | `/projects` | Project management |
+| `SubscriptionResource` | `/subscriptions` | Subscription and billing |
+| `CreditsPackageResource` | `/credits` | Credits package management |
+| `ConsoleResource` | `/console` | Real-time process log streaming |
+| `FileBufferResource` | `/filebuffer` | Chunked file upload/download buffer |
+| `PrinterResource` | `/print` | Map printing utilities |
+| `AdminDashboardResource` | `/admin` | Admin-only operations (user management, metrics, queue management) |
+| `WasdiResource` | `/wasdi` | General WASDI info and health check endpoints |
+
+---
+
+## Developer Instructions
+
+### Prerequisites
+
+- **Java 21** (JDK)
+- **Maven 3.x**
+- A running database — MongoDB locally, a cloud-hosted instance, a Docker container (`docker run -p 27017:27017 mongo`), or SQLite for the simplest setup
+- *(Optional)* Eclipse IDE for Java EE Developers or VS Code with the Extension Pack for Java
+
+---
+
+### Building
+
+All server-side projects are Maven modules declared in the root `pom.xml`. Each module's `pom.xml` uses the `${revision}` property inherited from the parent. You must set this variable when running Maven — either on the command line or in your IDE run configuration.
+
+**Build the full project from the repo root:**
+
+```bash
+mvn clean install -Drevision=1.0
+```
+
+**Build a single module (e.g. `wasdiwebserver`):**
+
+```bash
+cd wasdiwebserver
+mvn clean install -Drevision=1.0
+```
+
+The modules must be built in dependency order. The parent pom declares them in the correct order, so a full build from the root always works. If you need to build only a subset, the dependency order is:
+
+```
+wasdishared → launcher / wasdiwebserver / scheduler / wasditrigger / ogcprocesses / openeo-java-server
+```
+
+---
+
+### Configuration
+
+The server reads a single JSON configuration file at startup. A template is provided at `configuration/wasdiConfig.json.j2`.
+
+Create your own `wasdiConfig.json` by filling in:
+
+```json
+{
+  "dbEngine": "mongo",
+  "mongoMain": {
+    "address": "localhost",
+    "port": 27017,
+    "dbName": "wasdi",
+    "user": "",
+    "password": ""
+  },
+  "mongoLocal": {
+    "address": "localhost",
+    "port": 27017,
+    "dbName": "wasdi",
+    "user": "",
+    "password": ""
+  }
+}
+```
+
+To use SQLite instead of MongoDB, set `"dbEngine": "sqlite"` — no external process is required and the database file is created automatically on first run.
+
+The full list of configuration fields is documented in `wasdishared/src/main/java/wasdi/shared/config/WasdiConfig.java` and in the [Configuration reference](https://wasdi.readthedocs.io/en/latest/InsideWasdi/Configuration.html).
+
+---
+
+### IDE Setup
+
+#### Eclipse
+
+1. Install **Eclipse IDE for Java EE Developers** and the **M2Eclipse** Maven plugin (usually bundled)
+2. Clone the repository
+3. **File → Import → Maven → Existing Maven Projects** — select the repo root; Eclipse will discover all modules
+4. In the build/run configuration set the environment variable or system property `-Drevision=1.0`
+5. Make sure Eclipse uses the JRE inside the JDK: **Window → Preferences → Java → Installed JREs** — add the JDK and set it as default
+
+#### VS Code
+
+1. Install the **Extension Pack for Java** (Microsoft)
+2. Open the repo root folder
+3. VS Code will detect the Maven projects automatically via the Java extension
+4. Add `"revision": "1.0"` to your Maven runner settings, or pass `-Drevision=1.0` in the terminal build command
+5. Use the **Maven** side panel to run `clean install` on individual modules
+
+---
+
+### Running the Server
+
+**Option 1 — Standalone (recommended for development):**
+
+Run `it.fadeout.MiniWasdiServer` as a plain Java application. The embedded Jetty server starts on port `8080` and exposes the API at:
+
+```
+http://localhost:8080/wasdiwebserver/rest/
+```
+
+Pass the config file path as a VM argument:
+
+```
+-DwasdiConfigFilePath=/path/to/wasdiConfig.json
+```
+
+**Option 2 — Tomcat:**
+
+Deploy the `wasdiwebserver` WAR to a local Tomcat instance and configure the config file path in Tomcat's `context.xml` or as a JNDI resource.
+
+---
+
+### Connecting a Client
+
+Once the server is running, connect one of:
+
+- **WASDI Web Client** — clone [wasdi-cloud/wasdiClient2](https://github.com/wasdi-cloud/wasdiClient2) and point it to your local server URL
+- **WASDI Python Library** — configure `wasdi.init("/path/to/wasdi_config.json")` pointing to `http://localhost:8080/wasdiwebserver/rest/`
+- **Any WASDI library** — set the base URL to the local server in the library configuration
+
+---
+
+### Debugging the Launcher
+
+When you trigger an operation from the client or library, the server stores a `ProcessWorkspace` record in the database and logs its GUID. You can then run or debug the Launcher directly in your IDE:
+
+1. Find the GUID in the server logs (look for `ProcessWorkspace guid:` or similar)
+2. Create a run/debug configuration for `wasdi.LauncherMain` with arguments:
+
+```
+-o <OPERATION_CODE> -p <process_workspace_guid> -c /path/to/wasdiConfig.json
+```
+
+For example, to debug a processor execution:
+
+```
+-o RUNPROCESSOR -p fab5028a-341b-4bd3-ba7e-a321d6eb54ca -c /etc/wasdi/wasdiConfig.json
+```
+
+3. Set breakpoints in the relevant operation class under `wasdi.operations` or in the processor engine under `wasdi.processors`
+4. Start the debug session — the Launcher will pick up the `ProcessWorkspace`, set its state to `RUNNING`, and execute the operation
+
+
