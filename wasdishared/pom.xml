@@ -38,7 +38,7 @@
         <sVersionJson>20251224</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionJunitJupiter>5.7.0</sVersionJunitJupiter>
-        <sVersionLog4j>2.25.2</sVersionLog4j>
+        <sVersionLog4j>2.25.4</sVersionLog4j>
         <sVersionMongoDb>5.6.1</sVersionMongoDb>
         <sVersionNitrite>4.3.2</sVersionNitrite>
         <sVersionSqliteJdbc>3.47.1.0</sVersionSqliteJdbc>
