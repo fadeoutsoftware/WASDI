@@ -26,6 +26,7 @@
         <sVersionAssertjCore>3.27.7</sVersionAssertjCore>
         <sVersionAwsJavaSdkS3>1.12.797</sVersionAwsJavaSdkS3>
         <sVersionCommonsCompress>1.28.0</sVersionCommonsCompress>
+        <sVersionCommonsIo>2.18.0</sVersionCommonsIo>
         <sVersionCommonsLang3>3.20.0</sVersionCommonsLang3>
         <sVersionCommonsNet>3.13.0</sVersionCommonsNet>
         <sVersionCommonsValidator>1.10.1</sVersionCommonsValidator>
@@ -189,6 +190,13 @@
             <artifactId>gson</artifactId>
             <version>${sVersionGson}</version>
         <dependency-->
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <!-- Override the old 2.0.1 pulled transitively by geoserver-manager; docker-java requires >= 2.2 -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${sVersionCommonsIo}</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
         <dependency>
             <groupId>org.apache.commons</groupId>
