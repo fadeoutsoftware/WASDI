@@ -3,6 +3,7 @@ pipeline {
 
   environment {
     sCurrentRevision = "${env.BUILD_ID}"
+    PATH             = "/usr/local/bin:/usr/bin:${env.PATH}"
   }
 
   options {
@@ -19,6 +20,8 @@ pipeline {
         echo "env.WORKSPACE        = " + env.WORKSPACE
 
         sh script: "pwd", label: "Current location"
+        sh script: "echo PATH=\$PATH", label: "Current PATH"
+        sh script: "find /usr /usr/local /snap -name docker -type f 2>/dev/null || true", label: "Find docker binary"
         sh script: "docker --version", label: "Tool > docker > current version"
         sh script: "docker images --filter 'reference=wasdi-*' --format 'table {{.Repository}}\\t{{.Tag}}\\t{{.ID}}\\t{{.Size}}'", label: "Available WASDI Docker images on this node"
       }
