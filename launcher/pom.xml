@@ -28,7 +28,7 @@
         <sVersionJson>20251224</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionJUniversalChardet>2.5.0</sVersionJUniversalChardet>
-        <sVersionLog4j>2.25.2</sVersionLog4j>
+        <sVersionLog4j>2.25.4</sVersionLog4j>
         <sVersionMavenJarPlugin>3.3.0</sVersionMavenJarPlugin>
         <sVersionMavenShadePlugin>3.5.0</sVersionMavenShadePlugin>
         <sVersionNetcdfAll>5.5.2</sVersionNetcdfAll>
