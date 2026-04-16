@@ -3,6 +3,7 @@ pipeline {
 
   environment {
     sCurrentRevision = "${env.BUILD_ID}"
+    sMavenProfile    = "wasdi-prod"
   }
 
   options {
@@ -35,6 +36,7 @@ pipeline {
         sh script: """
           mvn \
             --batch-mode \
+            --activate-profiles ${env.sMavenProfile} \
             --define revision=${env.sCurrentRevision} \
             --define skipTests \
             --file wasdishared/pom.xml \
@@ -49,6 +51,7 @@ pipeline {
         sh script: """
           mvn \
             --batch-mode \
+            --activate-profiles ${env.sMavenProfile} \
             --define revision=${env.sCurrentRevision} \
             --define skipTests \
             --file launcher/pom.xml \
@@ -63,6 +66,7 @@ pipeline {
         sh script: """
           mvn \
             --batch-mode \
+            --activate-profiles ${env.sMavenProfile} \
             --define revision=${env.sCurrentRevision} \
             --define skipTests \
             --file scheduler/pom.xml \
@@ -77,6 +81,7 @@ pipeline {
         sh script: """
           mvn \
             --batch-mode \
+            --activate-profiles ${env.sMavenProfile} \
             --define revision=${env.sCurrentRevision} \
             --define skipTests \
             --file wasdiwebserver/pom-mini.xml \
