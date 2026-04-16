@@ -111,14 +111,17 @@ pipeline {
         sh script: """
           set -e
 
-          MAVEN_REPO="\${HOME}/.m2/repository/fadeout/software/wasdi"
           DATA_TO_COPY="\${WORKSPACE}/MiniWasdi/dataToCopy"
 
           echo "Copying launcher..."
-          cp \${MAVEN_REPO}/launcher/${env.sCurrentRevision}/launcher-${env.sCurrentRevision}.jar \${DATA_TO_COPY}/launcher-1.0.jar
+          LAUNCHER_JAR=\$(find \${WORKSPACE}/launcher/target -maxdepth 1 -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+          echo "  found: \${LAUNCHER_JAR}"
+          cp "\${LAUNCHER_JAR}" "\${DATA_TO_COPY}/launcher-1.0.jar"
 
           echo "Copying scheduler..."
-          cp \${MAVEN_REPO}/scheduler/${env.sCurrentRevision}/scheduler-${env.sCurrentRevision}.jar \${DATA_TO_COPY}/scheduler-1.0.jar
+          SCHEDULER_JAR=\$(find \${WORKSPACE}/scheduler/target -maxdepth 1 -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+          echo "  found: \${SCHEDULER_JAR}"
+          cp "\${SCHEDULER_JAR}" "\${DATA_TO_COPY}/scheduler-1.0.jar"
 
           echo "Copying wasdi-mini-server..."
           cp \${WORKSPACE}/wasdiwebserver/target/wasdi-mini-server.jar \${DATA_TO_COPY}/wasdi-mini-server.jar
