@@ -179,12 +179,21 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
 .. toctree::
    :maxdepth: 2
    :hidden:
+   :caption: API Documentation
+
+   Api/index.rst
+
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
    :caption: Inside wasdi
 
    InsideWasdi/AddDataProvider.rst
    InsideWasdi/AddAppUIControl.rst
    InsideWasdi/AddProcessor.rst
    InsideWasdi/Configuration.rst
+   
 
 
 Terms and Conditions

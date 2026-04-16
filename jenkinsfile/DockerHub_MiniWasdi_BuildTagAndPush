@@ -31,6 +31,21 @@ pipeline {
       }
     }
 
+    stage('MAVEN - INSTALL PARENT POM') {
+      steps {
+        sh script: """
+          mvn \
+            --batch-mode \
+            --activate-profiles ${env.sMavenProfile} \
+            --define revision=${env.sCurrentRevision} \
+            --non-recursive \
+            --file pom.xml \
+            clean install
+        """,
+        label: "Install wasdi-parent POM to local repository"
+      }
+    }
+
     stage('MAVEN - BUILD WASDISHARED') {
       steps {
         sh script: """
