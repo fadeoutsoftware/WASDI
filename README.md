@@ -15,6 +15,52 @@ WASDI is an **Earth Observation (EO) Platform** designed to let scientists conce
 - Getting started tutorial: [WASDI Tutorial](https://wasdi.readthedocs.io/en/latest/GettingStarted/WasdiTutorial.html)
 - User manual: [Signing Up and Signing In](https://wasdi.readthedocs.io/en/latest/UserManual/SigningUpAndSigningIn.html)
 
+The idea is that the application Developer can work using the same language and tool as is used to, integrating in the code the appropriate WASDI library. Once the code is ready to be tested, it can be zipped and uploaded in WASDI that will turn it in a scalable cloud service, with fast access to all the relevant Satellite data archives.
+
+The application owner can alwasy decide if the app is private, if share it with specific user or make it public. The ownwer can also decide if the application is avaiable for free or if the users have to pay for it. 
+
+The WASDI web-application it self is where the users can search and execute the EO applications that has been pubished. It offers also funcionalities to:
+ - Search Space and not Space Data Catalogues
+ - Import images in a workspace of the platform
+ - Search for future image acquisitions
+ - Browse a workspace, visualize the products in 2D or 3D maps, view the processing history of the workspace with all the operations executed and logs of the applications ran
+ - Export the results downloading, or sharing WxS addresses or push in an external (s)ftp server
+ - Upload and run SNAP graphs (often called Worflows in WASDI)
+ - Upload and apply your own SLD styles for visualization
+ - Share with other users applications, workflows, styles, workspaces
+ - Save pre-defined set of parameters to run specific applications
+ - Run a Jupyter Notebook directly in your Workspace in the cloud
+
+WASDI supports a huge set of Data, including:
+ - Sentinel-1
+ - Sentinel-2
+ - Sentinel-3
+ - Sentinel-5P
+ - Sentinel-6
+ - Landsat-5
+ - Landsat-7
+ - Landsat-8
+ - Envisat
+ - VIIRS
+ - ERA5
+ - Copernicus Athomsphere Services
+ - Copernicus Data Store
+ - Copernicus DEM
+ - ESA Land Use / Land Cover
+ - JRC GHSL
+ - Ecostress
+ - Copernicus Marine
+ - SWOT
+ - GFS
+ - Globathy
+
+The system supports also custom and private Data Providers.
+
+> [User Manual for searching data in WASDI](https://wasdi.readthedocs.io/en/latest/UserManual/SearchingForProducts.html)
+> [Application Developers guide to search and ingest data by code](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/SearchImport.html)
+> [Instructions to add a new data provider in WASDI](https://wasdi.readthedocs.io/en/latest/InsideWasdi/AddDataProvider.html)
+
+
 ---
 
 ## WASDI Libraries
@@ -41,6 +87,8 @@ file_path = wasdi.getPath("myfile.tif")
 ```
 
 This single change is all that is required. The code will continue to work on your local machine exactly as before — and once dragged and dropped into WASDI, it automatically becomes a **scalable cloud service**.
+
+> [Introduction to the libraries](https://wasdi.readthedocs.io/en/latest/GettingStarted/LibsConcepts.html)
 
 ### Advanced library features
 
@@ -69,6 +117,8 @@ wasdi.executeProcessor("another-app-id", oParameters)
 ```
 
 This makes it straightforward to build complex multi-step pipelines by composing independent applications.
+
+Please refer to the documentation center for the tutorials for different languages and also look our Python Cookbook section, with many ready-to-use code snippets for common operations.
 
 ---
 
@@ -479,7 +529,11 @@ Each supported EO data catalogue has its own `QueryExecutor` sub-package. The fa
 
 ### REST Controllers — `it.fadeout.rest.resources`
 
-The web server exposes a JAX-RS REST API. Each resource class handles one area of the API:
+The web server exposes a JAX-RS REST API.  
+
+> The API are documented here https://wasdi.readthedocs.io/en/latest/Api/index.html  
+
+Each resource class handles one area of the API:
 
 | Resource class | Base path | Responsibility |
 |----------------|-----------|----------------|
