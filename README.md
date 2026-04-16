@@ -8,6 +8,21 @@
 
 ---
 
+## Index
+
+- [What is WASDI?](#what-is-wasdi)
+- [WASDI Libraries](#wasdi-libraries)
+- [WASDI Applications](#wasdi-applications)
+- [Software Architecture](#software-architecture)
+- [Processor Engines](#processor-engines)
+- [Launcher Operations](#launcher-operations)
+- [High-Level Code Architecture](#high-level-code-architecture)
+- [Repository Structure](#repository-structure)
+- [Developer Instructions](#developer-instructions)
+- [Mini-WASDI](#mini-wasdi)
+
+---
+
 ## What is WASDI?
 
 WASDI is an **Earth Observation (EO) Platform** designed to let scientists concentrate on science — not on IT infrastructure. It provides a cloud environment where EO processing algorithms can be developed locally and then deployed as scalable cloud services with minimal effort.
@@ -57,7 +72,9 @@ WASDI supports a huge set of Data, including:
 The system supports also custom and private Data Providers.
 
 > [User Manual for searching data in WASDI](https://wasdi.readthedocs.io/en/latest/UserManual/SearchingForProducts.html)
+
 > [Application Developers guide to search and ingest data by code](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/SearchImport.html)
+
 > [Instructions to add a new data provider in WASDI](https://wasdi.readthedocs.io/en/latest/InsideWasdi/AddDataProvider.html)
 
 
@@ -155,6 +172,8 @@ Possible states:
 | `DONE` | The task completed successfully |
 | `ERROR` | The task terminated with an error |
 | `STOPPED` | The task was explicitly stopped by the user |
+
+<img src="https://wasdi.readthedocs.io/en/latest/_images/states.png" alt="ProcessWorkspace state transition diagram" width="600"/>
 
 > See the [Synchronous and Asynchronous operations](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/SynchAsynch.html) documentation for details on how to work with process states from your application code.
 
@@ -565,6 +584,45 @@ Each resource class handles one area of the API:
 
 ---
 
+## Repository Structure
+
+A quick reference to every top-level folder in this repository.
+
+| Folder | Description |
+|--------|-------------|
+| `MiniWasdi` | Dockerfile and seed data for the MiniWASDI all-in-one container. **Not built locally** — copy the pre-built JARs `wasdi-mini-server.jar`, `launcher-1.0.jar`, and `scheduler-1.0.jar` into `MiniWasdi/dataToCopy/` before building the image. |
+| `configuration` | Ansible-compatible Jinja2 templates (`.j2`) for all service configuration files. Used by the CI/CD chain to generate environment-specific configs at deploy time. |
+| `docker` | Docker images used in the WASDI CI/CD chain, with heavy use of templates. Covers base images and per-service containers. |
+| `docs` | Source of the Read the Docs documentation centre — available at [wasdi.readthedocs.io](https://wasdi.readthedocs.io). |
+| `jenkinsfile` | Jenkins declarative pipeline definitions for building, testing, and deploying every WASDI component. |
+| `keycloak` | Customised Keycloak login/account theme used by WASDI deployments. |
+| `launcher` | Java source code for the **Launcher** micro-service, which pulls tasks from the queue and executes them inside processor containers. |
+| `libraries` | One subfolder per WASDI client library: |
+| | • `c#wasdilib` — .NET / C# library |
+| | • `idlwasdilib` — IDL library |
+| | • `jswasdilib` — JavaScript library |
+| | • `jwasdilib` — Java client library |
+| | • `matlabwasdilib` — MATLAB library |
+| | • `octavewasdilib` — GNU Octave library |
+| | • `waspy` — Python library (main) |
+| | • `waspyTEST` — test suite for the Python library |
+| | • `wpasdi` — WordPress plugin |
+| | • `wpsclient` — WPS client library |
+| `ogcprocesses` | Optional server implementing the [OGC Processes API 2.0](https://ogcapi.ogc.org/processes/) on top of WASDI. |
+| `openeo-java-server` | Optional server that lets users run [openEO](https://openeo.org/) scripts inside WASDI. |
+| `processorCommon` | Shared files (base scripts, entrypoints, utilities) included in every processor engine template. |
+| `processorTypes` | One subfolder per supported processor type. Each contains the files the engine uses to auto-generate the application Docker image (or equivalent artefact). |
+| `scheduler` | Java source code for the **Scheduler** micro-service, which monitors the database, assigns tasks to nodes, and manages capacity. |
+| `scripts` | Utility shell scripts for maintenance, deployment, and development tasks. |
+| `service/updateMetric` | Service used in federated WASDI installations to probe the health and metrics of remote nodes. |
+| `test` | JMeter test plans for end-to-end API and operation testing. |
+| `utils` | Maven POM for the optional `dbUtils` command-line tool (database inspection and maintenance). |
+| `wasdishared` | Java library (`wasdishared`) shared by the Launcher, Scheduler, and Web Server. Contains domain model, data-access layer, query executors, and business logic. |
+| `wasditrigger` | Code for the WASDI Trigger service, which lets users schedule WASDI applications on a time or event basis. |
+| `wasdiwebserver` | Main WASDI REST server source code. |
+
+---
+
 ## Developer Instructions
 
 ### Prerequisites
@@ -652,6 +710,12 @@ Computational nodes typically keep only a subset of tables locally (for distribu
 - `processworkspace`
 - `params`
 - `processorLogs`
+
+To configure the database engine to use 
+
+- `processorLogs` = ["mongo"|"sqlite"|"no2"]
+
+In any case WASDI will read mongoMain. For sqlite and no2 just keep the dbName="wasdi". For mongo instead add also your credentials. It supports eventually also a Mongo replica.
 
 #### `paths`
 
