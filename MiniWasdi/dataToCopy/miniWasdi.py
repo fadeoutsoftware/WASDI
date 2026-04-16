@@ -424,6 +424,17 @@ def run():
                     print("[STARTUP] Upload workflow: " + sWorkflow)
                     _upload_workflow(sNewWorkflowUrl, sWorkflowPath, sWorkflow)
 
+    # Check if the user wants to run in server mode
+    sServerMode = _getEnvironmentVariable("WASDI_SERVER_MODE")
+    bServerMode = sServerMode is not None and sServerMode.lower() in {"1", "true"}
+
+    if bServerMode:
+        print("[STARTUP] Server mode enabled. WASDI is running as a local server.")
+        print("[STARTUP] API available at: " + sBaseUrl)
+        print("[STARTUP] Startup complete. Waiting for requests — stop the container to shut down.")
+        # wasdi.sh will block on the Java PIDs; python just returns cleanly here.
+        return
+
     # Now the start up is done: read what the user wants to start and start it
     sApplicationToStart = _getEnvironmentVariable("WASDI_RUN_APPLICATION")
     sParams = _getEnvironmentVariable("WASDI_PARAMS")

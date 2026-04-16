@@ -101,7 +101,49 @@ docker run --rm \
   wasdi/wasdi:mwasdi
 ```
 
-### 4.1 Enter the container (interactive shell)
+### 4.1 Server mode — run Mini-WASDI as a persistent local server
+
+Set `WASDI_SERVER_MODE=1` to keep the container alive after startup.
+In this mode the processor/workflow installs still run at startup, but no application is executed.
+The WASDI REST API stays available on **port 8080** for as long as the container runs.
+
+PowerShell example:
+
+```powershell
+docker run -d --rm `
+  -v "c:\temp\wasdi\miniwasdi:/data/wasdi" `
+  -p 8080:8080 `
+  -e WASDI_SERVER_MODE=1 `
+  -e WASDI_CONFIG_FILE="/data/wasdi/wasdiConfig.json" `
+  --name miniwasdi `
+  wasdi/wasdi:mwasdi
+```
+
+Linux Bash example:
+
+```bash
+docker run -d --rm \
+  -v "/tmp/wasdi/miniwasdi:/data/wasdi" \
+  -p 8080:8080 \
+  -e WASDI_SERVER_MODE=1 \
+  -e WASDI_CONFIG_FILE="/data/wasdi/wasdiConfig.json" \
+  --name miniwasdi \
+  wasdi/wasdi:mwasdi
+```
+
+Once the server is up you can reach it from the host:
+
+```
+http://localhost:8080/wasdiwebserver/rest/wasdi/hello
+```
+
+To stop the server:
+
+```bash
+docker stop miniwasdi
+```
+
+### 4.2 Enter the container (interactive shell)
 
 Useful for inspection/debug and to check files such as `/etc/wasdi/wasdiConfig.json` from inside the image.
 
@@ -148,6 +190,13 @@ cp /etc/wasdi/wasdiConfig.json /data/wasdi/wasdiConfig.json
 - `WASDI_CONFIG_FILE`
   - Path to the config file inside the container.
   - Typical value: `/data/wasdi/wasdiConfig.json`
+
+- `WASDI_SERVER_MODE`
+  - When set to `1` or `true`, Mini-WASDI runs as a persistent local server.
+  - Processor and workflow installs still happen at startup.
+  - No application is executed.
+  - The container stays alive; the WASDI REST API is available on port 8080.
+  - Publish the port with `-p 8080:8080` when starting the container.
 
 - `WASDI_CLEAR_HISTORY`
   - Optional flag to clear past process workspaces at startup. By default, the system keeps all past process workspaces, which can be useful for debugging and historical reference. Setting this flag to `true` will delete all past process workspaces and allow also to start processes marked as CREATED from a previous run. If this flag is set, the system will clean the CREATED queue and delete all the processes that have been already executed.
