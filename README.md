@@ -27,6 +27,9 @@
 
 WASDI is an **Earth Observation (EO) Platform** designed to let scientists concentrate on science — not on IT infrastructure. It provides a cloud environment where EO processing algorithms can be developed locally and then deployed as scalable cloud services with minimal effort.
 
+<img src="https://wasdi.readthedocs.io/en/latest/_images/8-overview-edit.png" alt="WASDI in action" width="600"/>
+
+
 - Getting started tutorial: [WASDI Tutorial](https://wasdi.readthedocs.io/en/latest/GettingStarted/WasdiTutorial.html)
 - User manual: [Signing Up and Signing In](https://wasdi.readthedocs.io/en/latest/UserManual/SigningUpAndSigningIn.html)
 
