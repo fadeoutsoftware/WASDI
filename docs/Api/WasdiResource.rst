@@ -1,0 +1,4 @@
+WasdiResource
+=============
+
+TBD.

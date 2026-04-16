@@ -28,7 +28,7 @@ WASDI provides client libraries for the most common scientific and development l
 | TypeScript | `npm i wasdi` | [wasdi-ts](https://wasdi.readthedocs.io/en/latest/Libraries/typescript/wasdi.html) | [TypeScript Tutorial](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/JavascriptTutorial.html) |
 | Java | [Download ZIP](https://www.wasdi.net/javawasdilib.zip) | [WasdiLib](https://wasdi.readthedocs.io/en/latest/Libraries/java/WasdiLib.html) | [Getting Started](https://wasdi.readthedocs.io/en/latest/GettingStarted/LibsConcepts.html) |
 | C# | `Install-Package WasdiLib -Version 0.0.3.5` | [C# Docs](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/C%23Tutorial.html) | [C# Tutorial](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/C%23Tutorial.html) |
-| Octave | — | — | — |
+| Octave | [Download ZIP](https://github.com/fadeoutsoftware/WASDI/blob/master/libraries/matlabwasdilib/matlabwasdilib.zip) | [Octave Docs](https://wasdi.readthedocs.io/en/latest/Libraries/octave/octave.html) | [Octave Tutorial](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/OctaveTutorial.html) |
 
 ### The key concept: `getPath()`
 

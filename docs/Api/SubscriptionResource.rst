@@ -1,0 +1,4 @@
+SubscriptionResource
+====================
+
+TBD.

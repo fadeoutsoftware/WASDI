@@ -1,0 +1,4 @@
+PackageManagerResource
+======================
+
+TBD.

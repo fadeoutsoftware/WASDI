@@ -1,0 +1,4 @@
+ProductResource
+===============
+
+TBD.

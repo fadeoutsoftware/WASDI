@@ -137,6 +137,13 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    Libraries/octave/octave.rst
    Libraries/python/waspy.rst
    Libraries/typescript/wasdi.rst
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: API references
+
+   Api/index.rst
    
 .. toctree::
    :maxdepth: 2
