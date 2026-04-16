@@ -38,7 +38,7 @@
         <sVersionSnap>13.0.0</sVersionSnap>
         <sVersionSMOSTbx>11.0.0</sVersionSMOSTbx>
         <sVersionSshj>0.40.0</sVersionSshj>
-        <sVersionLogback>1.5.21</sVersionLogback>
+        <sVersionLogback>1.5.25</sVersionLogback>
     </properties>
 
     <build>
