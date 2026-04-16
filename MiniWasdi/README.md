@@ -1,4 +1,32 @@
 # Mini-WASDI Docker Image Usage
+Mini-WASDI is an alternative WASDI deployment based on a **single container** that hosts the full core system.
+
+It is called *Mini-WASDI* because it includes only the essential services needed to run WASDI locally or as a small internal service.
+
+### What Mini-WASDI includes
+
+- **Server**
+- **Scheduler**
+- **Launcher**
+- **SQLite** as embedded database
+
+### What Mini-WASDI does not include
+
+- **Client**
+- **RabbitMQ**
+- **MongoDB**
+- **Keycloak**
+- **Nexus**
+
+In Mini-WASDI, **subscriptions** and **user authentication** are disabled.
+
+This makes it useful when you want to:
+
+- run WASDI applications locally
+- run workflows locally
+- expose a lightweight internal WASDI service without deploying the full platform
+
+With Mini-WASDI you can run any WASDI application directly on your computer, on your server or in your cloud infrastructure. You can also use it to have a mini WASDI instance locally. The only thing to do is to provide your applications, SNAP workflows and configuration.
 
 This document explains how to run Mini-WASDI using the Docker Hub image:
 
