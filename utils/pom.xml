@@ -23,7 +23,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
         <sVersionAssertjCore>3.27.7</sVersionAssertjCore>
-        <sVersionBcpkixJdk15on>1.79</sVersionBcpkixJdk15on>
+        <sVersionBcpkixJdk15on>1.84</sVersionBcpkixJdk15on>
         <sVersionCommonsCli>1.9.0</sVersionCommonsCli>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionJson>20240303</sVersionJson>
