@@ -35,15 +35,15 @@ WASDI is an **Earth Observation (EO) Platform** designed to let scientists conce
 
 The idea is that the application Developer can work using the same language and tool as is used to, integrating in the code the appropriate WASDI library. Once the code is ready to be tested, it can be zipped and uploaded in WASDI that will turn it in a scalable cloud service, with fast access to all the relevant Satellite data archives.
 
-The application owner can alwasy decide if the app is private, if share it with specific user or make it public. The ownwer can also decide if the application is avaiable for free or if the users have to pay for it. 
+The application owner can always decide if the app is private, if share it with specific user or make it public. The owner can also decide if the application is available for free or if the users have to pay for it. 
 
-The WASDI web-application it self is where the users can search and execute the EO applications that has been pubished. It offers also funcionalities to:
+The WASDI web-application itself is where the users can search and execute the EO applications that has been published. It offers also functionalities to:
  - Search Space and not Space Data Catalogues
  - Import images in a workspace of the platform
  - Search for future image acquisitions
  - Browse a workspace, visualize the products in 2D or 3D maps, view the processing history of the workspace with all the operations executed and logs of the applications ran
  - Export the results downloading, or sharing WxS addresses or push in an external (s)ftp server
- - Upload and run SNAP graphs (often called Worflows in WASDI)
+ - Upload and run SNAP graphs (often called Workflows in WASDI)
  - Upload and apply your own SLD styles for visualization
  - Share with other users applications, workflows, styles, workspaces
  - Save pre-defined set of parameters to run specific applications
@@ -61,7 +61,7 @@ WASDI supports a huge set of Data, including:
  - Envisat
  - VIIRS
  - ERA5
- - Copernicus Athomsphere Services
+ - Copernicus Atmosphere Services
  - Copernicus Data Store
  - Copernicus DEM
  - ESA Land Use / Land Cover
@@ -526,7 +526,7 @@ All configuration is read from a single JSON file (path passed as `-c` to the La
 
 ### Parameters and Payloads — `wasdi.shared.parameters` / `wasdi.shared.payloads`
 
-- **`parameters/`** — one parameter class per Launcher operation. The web server serialises the parameters to the database when creating a `ProcessWorkspace`; the Launcher reads them back before executing the operation
+- **`parameters/`** — one parameter class per Launcher operation. The web server serialises the parameters to the database when creating a `ProcessWorkspace`; the Launcher reads them back before executing the operation.
 - **`payloads/`** — payload classes for the result of each operation. After execution, the Launcher can write a structured JSON payload back to the `ProcessWorkspace` record, queryable by the client
 
 ### Query Executors — `wasdi.shared.queryexecutors`
