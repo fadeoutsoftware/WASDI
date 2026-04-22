@@ -673,6 +673,14 @@
 				"opSubType": "CLOUDFERRO",
 				"enabled": "1"
 			},
+            {
+                "name": "DOWNLOAD.COPERNICUS_DATASPACE",
+                "maxQueue": "2",
+                "timeoutMs": "3600000",
+                "opTypes": "DOWNLOAD",
+                "opSubType": "COPERNICUS_DATASPACE",
+                "enabled": "1"
+            },			
 			{
 				"name": "KILL",
 				"maxQueue": "5",
