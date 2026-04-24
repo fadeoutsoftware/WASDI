@@ -34,4 +34,15 @@ public class SnapConfig {
 	 * SNAP web server log level
 	 */
 	public String webLogLevel="SEVERE";
+	
+	/**
+	 * Ask WASDI to wait a little bit before opening a file after an operation
+	 */
+	public boolean waitBeforeOpeningFiles = false;
+	
+	/**
+	 * if waitBeforeOpeningFiles, WASDI will sleep msSleepBeforeOpeningFiles after a download, graph, mosaic, multisubet operation 
+	 * before opening the file.
+	 */
+	public int msSleepBeforeOpeningFiles = 5;
 }

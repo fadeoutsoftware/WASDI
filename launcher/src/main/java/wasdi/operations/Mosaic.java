@@ -113,6 +113,8 @@ public class Mosaic extends Operation {
                 // Log here and to the user
                 WasdiLog.debugLog("Mosaic.executeOperation adding product to Workspace");
                 m_oProcessWorkspaceLogger.log("Adding output file to the workspace");
+                
+                waitBeforeRead();
 
                 // Get the full path of the output
                 String sFileOutputFullPath = PathsConfig.getWorkspacePath(oParameter) + oParameter.getDestinationProductName();

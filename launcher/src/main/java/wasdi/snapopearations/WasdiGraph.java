@@ -322,6 +322,8 @@ public class WasdiGraph {
 				aoOutputs = new Product[0]; 
 			}
 			
+			waitBeforeRead();
+			
 			for (int iOutputs = 0; iOutputs<aoOutputs.length; iOutputs++) {
 				Product oProduct = aoOutputs[iOutputs];
 				

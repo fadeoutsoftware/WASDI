@@ -202,6 +202,8 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                         	try {
                                 // Control Check for the file Name
                                 sFileName = WasdiFileUtils.fixPathSeparator(sFileName);
+                                
+                                waitBeforeRead();
 
                                 // Get The product view Model
                 				WasdiProductReader oProductReader = WasdiProductReaderFactory.getProductReader(new File(sFileName));

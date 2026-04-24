@@ -15,6 +15,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
@@ -472,6 +473,18 @@ public abstract class Operation {
 	protected void processWorkspaceLog(String sLog) {
 		if (m_oProcessWorkspaceLogger!=null) {
 			m_oProcessWorkspaceLogger.log(sLog);
+		}
+	}
+	
+	protected void waitBeforeRead() {
+		if (WasdiConfig.Current.snap.waitBeforeOpeningFiles) {
+			WasdiLog.debugLog("Operation.waitBeforeRead: we will wait for " + WasdiConfig.Current.snap.msSleepBeforeOpeningFiles + " ms before reading the next file");
+			
+			try {
+				Thread.sleep(WasdiConfig.Current.snap.msSleepBeforeOpeningFiles);
+			} catch (InterruptedException oEx) {
+				Thread.currentThread().interrupt();
+			}			
 		}
 	}
 

@@ -140,6 +140,8 @@ public class Multisubset extends Operation {
                     WasdiLog.debugLog("Multisubset.executeOperation done for index " + iTiles);
 
                     m_oProcessWorkspaceLogger.log("adding output to the workspace");
+                    
+                    waitBeforeRead();
 
                     addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath, oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.MULTISUBSET.toString(), null, false, false);
 
