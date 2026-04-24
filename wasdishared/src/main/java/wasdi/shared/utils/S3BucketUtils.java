@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -86,6 +87,7 @@ public final class S3BucketUtils {
 		System.out.println("parseFolder | bucketName: " + sBucketName + " | folderPath: " + sFolderPath);
 
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
+		Set<String> asEcostressExistingFiles = oEcoStressRepository.getEcoStressFileNameSet();
 
 		Date oStartDate = new Date();
 
@@ -99,19 +101,23 @@ public final class S3BucketUtils {
 				
 				String sEntryKey = oS3ObjectSummary.getKey();
 				String sFileName = sEntryKey.substring(sEntryKey.lastIndexOf("/") + 1);
-				if (sFolderPath.contains("EEH2/EEHGPP-DEBUG") || oEcoStressRepository.getEcoStressItem(sFileName) == null) {
 				
-					EcoStressItemForWriting oItem = parseEntry(sBucketName, sEntryKey);
+				if (sFolderPath.contains("EEH2/EEHGPP-DEBUG") || sFileName.endsWith(".xml")) {
+					String sH5FileName = sFileName.substring(0, sFileName.length() - 4); 
 					
-					if (oItem != null) {
-						oEcoStressRepository.insertEcoStressItem(oItem);
-						iInsertionCounter++;
+					if (!asEcostressExistingFiles.contains(sH5FileName)) {
+						EcoStressItemForWriting oItem = parseEntry(sBucketName, sEntryKey);
+					
+						if (oItem != null) {
+							oEcoStressRepository.insertEcoStressItem(oItem);
+							iInsertionCounter++;
+						}
 					}
-					
-					iOverallCounter++;
-					if (iOverallCounter % 1000 == 0)
-						out.println("Reading status: " + iOverallCounter);
 				}
+				
+				iOverallCounter++;
+				if (iOverallCounter % 1000 == 0)
+					out.println("Reading status: " + iOverallCounter);
 				
 			}
 			oObjectListing = m_oConn.listNextBatchOfObjects(oObjectListing);
@@ -139,6 +145,8 @@ public final class S3BucketUtils {
 				
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 		
+		Set<String> asEcostressExistingFiles = oEcoStressRepository.getEcoStressFileNameSet();
+		
 		long lMinMissingDate = Long.MAX_VALUE;
 		long lMaxMissingDate = Long.MIN_VALUE;
 		int iMissingDocuments = 0;
@@ -156,7 +164,7 @@ public final class S3BucketUtils {
 					iTotFiles++;
 					// this will be the file name to look into the db
 					String sFileName = sEntryKey.substring(sEntryKey.lastIndexOf("/") + 1);
-					if (sFolderPath.contains("EEHGPP-DEBUG") || oEcoStressRepository.getEcoStressItem(sFileName) == null) {
+					if (sFolderPath.contains("EEHGPP-DEBUG") || !asEcostressExistingFiles.contains(sFileName)) {
 						// get the date
 						Long lDateTimestamp = parseDate(sEntryKey);
 						if (lDateTimestamp != null) {
