@@ -44,5 +44,5 @@ public class SnapConfig {
 	 * if waitBeforeOpeningFiles, WASDI will sleep msSleepBeforeOpeningFiles after a download, graph, mosaic, multisubet operation 
 	 * before opening the file.
 	 */
-	public int msSleepBeforeOpeningFiles = 5;
+	public int msSleepBeforeOpeningFiles = 5000;
 }
