@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +34,7 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.util.AwsHostNameUtils;
 
+import wasdi.shared.business.ecostress.EcoStressItemForReading;
 import wasdi.shared.business.ecostress.EcoStressItemForWriting;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ecostress.EcoStressRepository;
@@ -85,29 +87,48 @@ public final class S3BucketUtils {
 		System.out.println("parseFolder | bucketName: " + sBucketName + " | folderPath: " + sFolderPath);
 
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
+		Set<String> asEcostressExistingFiles = oEcoStressRepository.getEcoStressFileNameSet();
 
 		Date oStartDate = new Date();
 
 		ObjectListing oObjectListing = m_oConn.listObjects(sBucketName, sFolderPath);
-		int iCounter = -1;
+		int iInsertionCounter = 0;
+		int iOverallCounter = 0;
 
 		do {
+			
 			for (S3ObjectSummary oS3ObjectSummary : oObjectListing.getObjectSummaries()) {
-				EcoStressItemForWriting oItem = parseEntry(sBucketName, oS3ObjectSummary.getKey());
 				
-				if (oItem != null) {
-					oEcoStressRepository.insertEcoStressItem(oItem);
-					iCounter++;					
+				String sEntryKey = oS3ObjectSummary.getKey();
+				String sFileName = sEntryKey.substring(sEntryKey.lastIndexOf("/") + 1);
+				
+				if (sFolderPath.contains("EEH2/EEHGPP-DEBUG") || sFileName.endsWith(".xml")) {
+					String sH5FileName = sFileName.substring(0, sFileName.length() - 4); 
+					
+					if (!asEcostressExistingFiles.contains(sH5FileName)) {
+						EcoStressItemForWriting oItem = parseEntry(sBucketName, sEntryKey);
+					
+						if (oItem != null) {
+							oEcoStressRepository.insertEcoStressItem(oItem);
+							iInsertionCounter++;
+						}
+					}
 				}
+				
+				iOverallCounter++;
+				if (iOverallCounter % 1000 == 0)
+					out.println("Reading status: " + iOverallCounter);
+				
 			}
 			oObjectListing = m_oConn.listNextBatchOfObjects(oObjectListing);
 		} while (oObjectListing.getObjectSummaries().size() != 0);
 
 		Date oEndDate = new Date();
 		long lMillis = oEndDate.getTime() - oStartDate.getTime();
-		System.out.println("seconds: " + (lMillis / 1_000) + " (millis: " + lMillis + ")");
+		out.println("seconds: " + (lMillis / 1_000) + " (millis: " + lMillis + ")");
 
-		System.out.println("counter: " + iCounter);
+		out.println("number of products read from the folder: " + iOverallCounter);
+		out.println("number of new products added: " + iInsertionCounter);
 	}
 	
 	
@@ -121,6 +142,16 @@ public final class S3BucketUtils {
 		int iH5Files = 0;
 		int iDMRPPFiles = 0;
 		int iAnomalies = 0;
+				
+		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
+		
+		Set<String> asEcostressExistingFiles = oEcoStressRepository.getEcoStressFileNameSet();
+		
+		long lMinMissingDate = Long.MAX_VALUE;
+		long lMaxMissingDate = Long.MIN_VALUE;
+		int iMissingDocuments = 0;
+		
+		Date oStartDate = new Date();
 		
 		do {
 			for (S3ObjectSummary oS3ObjectSummary : oObjectListing.getObjectSummaries()) {
@@ -131,26 +162,49 @@ public final class S3BucketUtils {
 				} else if (sEntryKey.endsWith(".h5")) {
 					iH5Files++;
 					iTotFiles++;
+					// this will be the file name to look into the db
+					String sFileName = sEntryKey.substring(sEntryKey.lastIndexOf("/") + 1);
+					if (sFolderPath.contains("EEHGPP-DEBUG") || !asEcostressExistingFiles.contains(sFileName)) {
+						// get the date
+						Long lDateTimestamp = parseDate(sEntryKey);
+						if (lDateTimestamp != null) {
+							if (lDateTimestamp < lMinMissingDate) 
+								lMinMissingDate = lDateTimestamp.longValue();
+							if (lDateTimestamp > lMaxMissingDate)
+								lMaxMissingDate = lDateTimestamp.longValue();
+						}
+						iMissingDocuments++;
+					}
 				} else if (sEntryKey.endsWith(".dmrpp")) {
 					iDMRPPFiles++;
 				} else if (sEntryKey.endsWith(".cmr.xml")) {
 					iCMRXMLFiles++;
 				}
 				else {
-					System.out.println("Found unknown file: " + sEntryKey);
+					out.println("Found unknown file: " + sEntryKey);
 					iAnomalies++;
+				}
+				if (iTotFiles % 1000 == 0) {
+					out.println("Reading status: " + iTotFiles);
 				}
 			}
 			oObjectListing = m_oConn.listNextBatchOfObjects(oObjectListing);
 		} while (oObjectListing.getObjectSummaries().size() != 0);
+		
+		Date oEndDate = new Date();
+		long lMillis = oEndDate.getTime() - oStartDate.getTime();
 
 		out.println("Stats for folder: " + sFolderPath);
+		out.println("seconds: " + (lMillis / 1_000) + " (millis: " + lMillis + ")");
 		out.println("Total number of XML and H5 files: " + iTotFiles);
 		out.println("Total number of H5.XML files: " + iH5XMLFiles);
 		out.println("Total number of H5 files: " + iH5Files);
 		out.println("Total number of DMRPP files: " + iDMRPPFiles);
 		out.println("Total number of CMR.XML files: " + iCMRXMLFiles);
-		out.println("Total number of unrecognised files: " + iAnomalies);	
+		out.println("Total number of unrecognised files: " + iAnomalies);
+		out.println("Missing files: " + iMissingDocuments);
+		out.println("- first missing timestamp: " + lMinMissingDate);
+		out.println("- last missing timestamp: " + lMaxMissingDate);
 	}
 
 	private static EcoStressItemForWriting parseEntry(String sBucketName, String sEntryKey) {
