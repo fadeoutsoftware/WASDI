@@ -1,0 +1,183 @@
+pipeline {
+  agent any
+
+  environment {
+    sCurrentRevision = "${env.BUILD_ID}"
+    sMavenProfile    = "wasdi-prod"
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '365'))
+    disableConcurrentBuilds()
+  }
+
+  tools {
+    jdk   "WASDI_JDK_21"
+    maven "WASDI_MAVEN"
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        echo "env.GIT_BRANCH       = " + env.GIT_BRANCH
+        echo "env.sCurrentRevision = " + env.sCurrentRevision
+        echo "env.NODE_NAME        = " + env.NODE_NAME
+        echo "env.WORKSPACE        = " + env.WORKSPACE
+
+        sh script: "pwd",          label: "Current location"
+        sh script: "java -version", label: "Tool > java > current version"
+        sh script: "mvn --version", label: "Tool > mvn > current version"
+        sh script: "docker --version", label: "Tool > docker > current version"
+      }
+    }
+
+    stage('MAVEN - INSTALL PARENT POM') {
+      steps {
+        sh script: """
+          mvn \
+            --batch-mode \
+            --activate-profiles ${env.sMavenProfile} \
+            --define revision=${env.sCurrentRevision} \
+            --non-recursive \
+            --file pom.xml \
+            clean install
+        """,
+        label: "Install wasdi-parent POM to local repository"
+      }
+    }
+
+    stage('MAVEN - BUILD WASDISHARED') {
+      steps {
+        sh script: """
+          mvn \
+            --batch-mode \
+            --activate-profiles ${env.sMavenProfile} \
+            --define revision=${env.sCurrentRevision} \
+            --define skipTests \
+            --file wasdishared/pom.xml \
+            clean install
+        """,
+        label: "Build and install wasdishared"
+      }
+    }
+
+    stage('MAVEN - BUILD LAUNCHER') {
+      steps {
+        sh script: """
+          mvn \
+            --batch-mode \
+            --activate-profiles ${env.sMavenProfile} \
+            --define revision=${env.sCurrentRevision} \
+            --define skipTests \
+            --file launcher/pom.xml \
+            clean install
+        """,
+        label: "Build and install launcher"
+      }
+    }
+
+    stage('MAVEN - BUILD SCHEDULER') {
+      steps {
+        sh script: """
+          mvn \
+            --batch-mode \
+            --activate-profiles ${env.sMavenProfile} \
+            --define revision=${env.sCurrentRevision} \
+            --define skipTests \
+            --file scheduler/pom.xml \
+            clean install
+        """,
+        label: "Build and install scheduler"
+      }
+    }
+
+    stage('MAVEN - BUILD WASDI MINI SERVER') {
+      steps {
+        sh script: """
+          mvn \
+            --batch-mode \
+            --activate-profiles ${env.sMavenProfile} \
+            --define revision=${env.sCurrentRevision} \
+            --define skipTests \
+            --file wasdiwebserver/pom-mini.xml \
+            clean package
+        """,
+        label: "Build wasdi-mini-server"
+      }
+    }
+
+    stage('COPY ARTIFACTS INTO DOCKER BUILD CONTEXT') {
+      steps {
+        sh script: """
+          set -e
+
+          DATA_TO_COPY="\${WORKSPACE}/MiniWasdi/dataToCopy"
+
+          echo "Copying launcher..."
+          LAUNCHER_JAR=\$(find \${WORKSPACE}/launcher/target -maxdepth 1 -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+          echo "  found: \${LAUNCHER_JAR}"
+          cp "\${LAUNCHER_JAR}" "\${DATA_TO_COPY}/launcher-1.0.jar"
+
+          echo "Copying scheduler..."
+          SCHEDULER_JAR=\$(find \${WORKSPACE}/scheduler/target -maxdepth 1 -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+          echo "  found: \${SCHEDULER_JAR}"
+          cp "\${SCHEDULER_JAR}" "\${DATA_TO_COPY}/scheduler-1.0.jar"
+
+          echo "Copying wasdi-mini-server..."
+          cp \${WORKSPACE}/wasdiwebserver/target/wasdi-mini-server.jar \${DATA_TO_COPY}/wasdi-mini-server.jar
+
+          echo "Artifacts ready:"
+          ls -lah \${DATA_TO_COPY}/
+        """,
+        label: "Copy build artifacts into MiniWasdi/dataToCopy"
+      }
+    }
+
+    stage('DOCKER - BUILD THE IMAGE') {
+      steps {
+        sh script: """
+          docker build \
+            --tag mwasdi:${env.sCurrentRevision} \
+            --tag mwasdi:latest \
+            \${WORKSPACE}/MiniWasdi
+        """,
+        label: "Build mwasdi Docker image"
+      }
+    }
+
+    stage('LOGIN TO DOCKER HUB') {
+      steps {
+        withCredentials([
+          usernamePassword(credentialsId: 'sWasdiDockerHubCredentials', usernameVariable: 'sDockerHubUsername', passwordVariable: 'sDockerHubPassword')
+        ]) {
+          sh script: '''
+            echo "${sDockerHubPassword}" | docker login --username "${sDockerHubUsername}" --password-stdin
+          ''',
+          label: "Login to Docker Hub"
+        }
+      }
+    }
+
+    stage('DOCKER - TAG AND PUSH TO DOCKER HUB') {
+      steps {
+        sh script: """
+          set -e
+
+          echo "Tagging mwasdi:${env.sCurrentRevision} as wasdi/wasdi:mwasdi..."
+          docker tag mwasdi:${env.sCurrentRevision} wasdi/wasdi:mwasdi
+
+          echo "Pushing wasdi/wasdi:mwasdi..."
+          docker image push wasdi/wasdi:mwasdi
+        """,
+        label: "Tag and push mwasdi to Docker Hub"
+      }
+    }
+  }
+
+  post {
+    always {
+      sh script: "docker logout || true", label: "Logout from Docker Hub"
+      cleanWs()
+    }
+  }
+}

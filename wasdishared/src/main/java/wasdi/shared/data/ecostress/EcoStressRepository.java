@@ -1,7 +1,9 @@
 package wasdi.shared.data.ecostress;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -71,6 +73,32 @@ public class EcoStressRepository extends MongoRepository {
 		}
 
 		return aoReturnList;
+	}
+	
+	
+	public Set<String> getEcoStressFileNameSet() {
+	    
+	    final Set<String> aoReturnSet = new HashSet<>(550000); 
+
+	    try {
+	        BasicDBObject oProjection = new BasicDBObject("fileName", 1).append("_id", 0);
+	        
+	        FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+	                                                .find()
+	                                                .projection(oProjection);
+	        
+	        for (Document oDoc : oWSDocuments) {
+	            String sName = oDoc.getString("fileName");
+	            if (sName != null) {
+	                aoReturnSet.add(sName);
+	            }
+	        }
+	        
+	    } catch (Exception oEx) {
+	        WasdiLog.errorLog("EcoStressRepository.getEcoStressFileNameSet: error", oEx);
+	    }
+
+	    return aoReturnSet;
 	}
 	
 	private String wasdiQueryToMongo(Double dWest, Double dNorth, Double dEast, Double dSouth, String sService,

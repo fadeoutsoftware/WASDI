@@ -54,4 +54,12 @@ python3 "$SCRIPT_DIR/miniWasdi.py"
 PYTHON_EXIT_CODE=$?
 set -e
 
+# In server mode keep the container alive: block on the Java processes
+# so the WASDI REST API stays reachable until the container is stopped.
+if [ "${WASDI_SERVER_MODE:-}" = "1" ] || [ "${WASDI_SERVER_MODE:-}" = "true" ]; then
+	echo "[SERVER] MiniWasdi server is running. WASDI API available at port 8080."
+	echo "[SERVER] Send SIGTERM or stop the container to shut down."
+	wait "${SERVER_PID}" 2>/dev/null || true
+fi
+
 exit $PYTHON_EXIT_CODE

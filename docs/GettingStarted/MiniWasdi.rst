@@ -110,7 +110,51 @@ Linux Bash example:
      -e WASDI_CONFIG_FILE="/data/wasdi/wasdiConfig.json" \
      wasdi/wasdi:mwasdi
 
-4.1 Enter the container (interactive shell)
+4.1 Server mode - run Mini-WASDI as a persistent local server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Set ``WASDI_SERVER_MODE=1`` to keep the container alive after startup.
+
+In this mode, processor/workflow installs still run at startup, but no application is executed.
+The WASDI REST API remains available on **port 8080** while the container is running.
+
+PowerShell example:
+
+.. code-block:: powershell
+
+   docker run -d --rm `
+     -v "c:\temp\wasdi\miniwasdi:/data/wasdi" `
+     -p 8080:8080 `
+     -e WASDI_SERVER_MODE=1 `
+     -e WASDI_CONFIG_FILE="/data/wasdi/wasdiConfig.json" `
+     --name miniwasdi `
+     wasdi/wasdi:mwasdi
+
+Linux Bash example:
+
+.. code-block:: bash
+
+   docker run -d --rm \
+     -v "/tmp/wasdi/miniwasdi:/data/wasdi" \
+     -p 8080:8080 \
+     -e WASDI_SERVER_MODE=1 \
+     -e WASDI_CONFIG_FILE="/data/wasdi/wasdiConfig.json" \
+     --name miniwasdi \
+     wasdi/wasdi:mwasdi
+
+Once the server is up, you can reach it from the host:
+
+.. code-block:: text
+
+  http://localhost:8080/wasdiwebserver/rest/wasdi/hello
+
+To stop the server:
+
+.. code-block:: bash
+
+  docker stop miniwasdi
+
+4.2 Enter the container (interactive shell)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Useful for inspection/debug and to check files such as ``/etc/wasdi/wasdiConfig.json`` from inside the image.
@@ -165,6 +209,14 @@ Once inside the container, for example, you can copy the sample config:
   - Path to the config file inside the container.
   - Typical value: ``/data/wasdi/wasdiConfig.json``
 
+- ``WASDI_SERVER_MODE``
+
+  - Enables server mode when set to ``1`` or ``true``.
+  - Typical value: ``1`` or ``true``. If it is not set or have any other value is considered false.
+  - Processor and workflow installs still happen at startup.
+  - No application is executed.
+  - The container stays alive; the WASDI REST API is available on port 8080.
+  - Publish the port with ``-p 8080:8080`` when starting the container.
 
 - ``WASDI_CLEAR_HISTORY``
 

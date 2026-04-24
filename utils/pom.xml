@@ -22,7 +22,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionAssertjCore>3.26.3</sVersionAssertjCore>
+        <sVersionAssertjCore>3.27.7</sVersionAssertjCore>
         <sVersionBcpkixJdk15on>1.79</sVersionBcpkixJdk15on>
         <sVersionCommonsCli>1.9.0</sVersionCommonsCli>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
@@ -30,7 +30,6 @@
         <sVersionJts>1.13</sVersionJts>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionJUniversalChardet>2.5.0</sVersionJUniversalChardet>
-        <sVersionLog4j>2.23.1</sVersionLog4j>
         <sVersionMavenJarPlugin>3.3.0</sVersionMavenJarPlugin>
         <sVersionMavenShadePlugin>3.5.0</sVersionMavenShadePlugin>
         <sVersionMockFtpServer>2.7.1</sVersionMockFtpServer>
@@ -42,7 +41,7 @@
         <sVersionSMOSTbx>11.0.0</sVersionSMOSTbx>		
         <sVersionSshj>0.39.0</sVersionSshj>
         <sVersionXercesImpl>2.12.2</sVersionXercesImpl>
-		<sVersionLogback>1.5.16</sVersionLogback>
+		<sVersionLogback>1.5.25</sVersionLogback>
     </properties>
 	
     <build>
@@ -129,18 +128,6 @@
     </build>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${sVersionLog4j}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${sVersionLog4j}</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>

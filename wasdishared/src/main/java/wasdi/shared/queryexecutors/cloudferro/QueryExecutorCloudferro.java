@@ -81,7 +81,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
 		
 		if (sDataset.equals("EEHGPP")) {
-			sDataset = "EEHGPP-final";
+			sDataset = "EEHGPP-DEBUG";
 		}
 		
 		long lCount = 0;

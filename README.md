@@ -8,12 +8,78 @@
 
 ---
 
+## Index
+
+- [What is WASDI?](#what-is-wasdi)
+- [WASDI Libraries](#wasdi-libraries)
+- [WASDI Applications](#wasdi-applications)
+- [Software Architecture](#software-architecture)
+- [Processor Engines](#processor-engines)
+- [Launcher Operations](#launcher-operations)
+- [High-Level Code Architecture](#high-level-code-architecture)
+- [Repository Structure](#repository-structure)
+- [Developer Instructions](#developer-instructions)
+- [Mini-WASDI](#mini-wasdi)
+
+---
+
 ## What is WASDI?
 
 WASDI is an **Earth Observation (EO) Platform** designed to let scientists concentrate on science — not on IT infrastructure. It provides a cloud environment where EO processing algorithms can be developed locally and then deployed as scalable cloud services with minimal effort.
 
+<img src="https://wasdi.readthedocs.io/en/latest/_images/8-overview-edit.png" alt="WASDI in action" width="600"/>
+
+
 - Getting started tutorial: [WASDI Tutorial](https://wasdi.readthedocs.io/en/latest/GettingStarted/WasdiTutorial.html)
 - User manual: [Signing Up and Signing In](https://wasdi.readthedocs.io/en/latest/UserManual/SigningUpAndSigningIn.html)
+
+The idea is that the application Developer can work using the same language and tool as is used to, integrating in the code the appropriate WASDI library. Once the code is ready to be tested, it can be zipped and uploaded in WASDI that will turn it in a scalable cloud service, with fast access to all the relevant Satellite data archives.
+
+The application owner can always decide if the app is private, if share it with specific user or make it public. The owner can also decide if the application is available for free or if the users have to pay for it. 
+
+The WASDI web-application itself is where the users can search and execute the EO applications that has been published. It offers also functionalities to:
+ - Search Space and not Space Data Catalogues
+ - Import images in a workspace of the platform
+ - Search for future image acquisitions
+ - Browse a workspace, visualize the products in 2D or 3D maps, view the processing history of the workspace with all the operations executed and logs of the applications ran
+ - Export the results downloading, or sharing WxS addresses or push in an external (s)ftp server
+ - Upload and run SNAP graphs (often called Workflows in WASDI)
+ - Upload and apply your own SLD styles for visualization
+ - Share with other users applications, workflows, styles, workspaces
+ - Save pre-defined set of parameters to run specific applications
+ - Run a Jupyter Notebook directly in your Workspace in the cloud
+
+WASDI supports a huge set of Data, including:
+ - Sentinel-1
+ - Sentinel-2
+ - Sentinel-3
+ - Sentinel-5P
+ - Sentinel-6
+ - Landsat-5
+ - Landsat-7
+ - Landsat-8
+ - Envisat
+ - VIIRS
+ - ERA5
+ - Copernicus Atmosphere Services
+ - Copernicus Data Store
+ - Copernicus DEM
+ - ESA Land Use / Land Cover
+ - JRC GHSL
+ - Ecostress
+ - Copernicus Marine
+ - SWOT
+ - GFS
+ - Globathy
+
+The system supports also custom and private Data Providers.
+
+> [User Manual for searching data in WASDI](https://wasdi.readthedocs.io/en/latest/UserManual/SearchingForProducts.html)
+
+> [Application Developers guide to search and ingest data by code](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/SearchImport.html)
+
+> [Instructions to add a new data provider in WASDI](https://wasdi.readthedocs.io/en/latest/InsideWasdi/AddDataProvider.html)
+
 
 ---
 
@@ -28,7 +94,7 @@ WASDI provides client libraries for the most common scientific and development l
 | TypeScript | `npm i wasdi` | [wasdi-ts](https://wasdi.readthedocs.io/en/latest/Libraries/typescript/wasdi.html) | [TypeScript Tutorial](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/JavascriptTutorial.html) |
 | Java | [Download ZIP](https://www.wasdi.net/javawasdilib.zip) | [WasdiLib](https://wasdi.readthedocs.io/en/latest/Libraries/java/WasdiLib.html) | [Getting Started](https://wasdi.readthedocs.io/en/latest/GettingStarted/LibsConcepts.html) |
 | C# | `Install-Package WasdiLib -Version 0.0.3.5` | [C# Docs](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/C%23Tutorial.html) | [C# Tutorial](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/C%23Tutorial.html) |
-| Octave | — | — | — |
+| Octave | [Download ZIP](https://github.com/fadeoutsoftware/WASDI/blob/master/libraries/matlabwasdilib/matlabwasdilib.zip) | [Octave Docs](https://wasdi.readthedocs.io/en/latest/Libraries/octave/octave.html) | [Octave Tutorial](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/OctaveTutorial.html) |
 
 ### The key concept: `getPath()`
 
@@ -41,6 +107,8 @@ file_path = wasdi.getPath("myfile.tif")
 ```
 
 This single change is all that is required. The code will continue to work on your local machine exactly as before — and once dragged and dropped into WASDI, it automatically becomes a **scalable cloud service**.
+
+> [Introduction to the libraries](https://wasdi.readthedocs.io/en/latest/GettingStarted/LibsConcepts.html)
 
 ### Advanced library features
 
@@ -69,6 +137,8 @@ wasdi.executeProcessor("another-app-id", oParameters)
 ```
 
 This makes it straightforward to build complex multi-step pipelines by composing independent applications.
+
+Please refer to the documentation center for the tutorials for different languages and also look our Python Cookbook section, with many ready-to-use code snippets for common operations.
 
 ---
 
@@ -105,6 +175,8 @@ Possible states:
 | `DONE` | The task completed successfully |
 | `ERROR` | The task terminated with an error |
 | `STOPPED` | The task was explicitly stopped by the user |
+
+<img src="https://wasdi.readthedocs.io/en/latest/_images/states.png" alt="ProcessWorkspace state transition diagram" width="600"/>
 
 > See the [Synchronous and Asynchronous operations](https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/SynchAsynch.html) documentation for details on how to work with process states from your application code.
 
@@ -454,7 +526,7 @@ All configuration is read from a single JSON file (path passed as `-c` to the La
 
 ### Parameters and Payloads — `wasdi.shared.parameters` / `wasdi.shared.payloads`
 
-- **`parameters/`** — one parameter class per Launcher operation. The web server serialises the parameters to the database when creating a `ProcessWorkspace`; the Launcher reads them back before executing the operation
+- **`parameters/`** — one parameter class per Launcher operation. The web server serialises the parameters to the database when creating a `ProcessWorkspace`; the Launcher reads them back before executing the operation.
 - **`payloads/`** — payload classes for the result of each operation. After execution, the Launcher can write a structured JSON payload back to the `ProcessWorkspace` record, queryable by the client
 
 ### Query Executors — `wasdi.shared.queryexecutors`
@@ -479,7 +551,11 @@ Each supported EO data catalogue has its own `QueryExecutor` sub-package. The fa
 
 ### REST Controllers — `it.fadeout.rest.resources`
 
-The web server exposes a JAX-RS REST API. Each resource class handles one area of the API:
+The web server exposes a JAX-RS REST API.  
+
+> The API are documented here https://wasdi.readthedocs.io/en/latest/Api/index.html  
+
+Each resource class handles one area of the API:
 
 | Resource class | Base path | Responsibility |
 |----------------|-----------|----------------|
@@ -508,6 +584,45 @@ The web server exposes a JAX-RS REST API. Each resource class handles one area o
 | `PrinterResource` | `/print` | Map printing utilities |
 | `AdminDashboardResource` | `/admin` | Admin-only operations (user management, metrics, queue management) |
 | `WasdiResource` | `/wasdi` | General WASDI info and health check endpoints |
+
+---
+
+## Repository Structure
+
+A quick reference to every top-level folder in this repository.
+
+| Folder | Description |
+|--------|-------------|
+| `MiniWasdi` | Dockerfile and seed data for the MiniWASDI all-in-one container. **Not built locally** — copy the pre-built JARs `wasdi-mini-server.jar`, `launcher-1.0.jar`, and `scheduler-1.0.jar` into `MiniWasdi/dataToCopy/` before building the image. |
+| `configuration` | Ansible-compatible Jinja2 templates (`.j2`) for all service configuration files. Used by the CI/CD chain to generate environment-specific configs at deploy time. |
+| `docker` | Docker images used in the WASDI CI/CD chain, with heavy use of templates. Covers base images and per-service containers. |
+| `docs` | Source of the Read the Docs documentation centre — available at [wasdi.readthedocs.io](https://wasdi.readthedocs.io). |
+| `jenkinsfile` | Jenkins declarative pipeline definitions for building, testing, and deploying every WASDI component. |
+| `keycloak` | Customised Keycloak login/account theme used by WASDI deployments. |
+| `launcher` | Java source code for the **Launcher** micro-service, which pulls tasks from the queue and executes them inside processor containers. |
+| `libraries` | One subfolder per WASDI client library: |
+| | • `c#wasdilib` — .NET / C# library |
+| | • `idlwasdilib` — IDL library |
+| | • `jswasdilib` — JavaScript library |
+| | • `jwasdilib` — Java client library |
+| | • `matlabwasdilib` — MATLAB library |
+| | • `octavewasdilib` — GNU Octave library |
+| | • `waspy` — Python library (main) |
+| | • `waspyTEST` — test suite for the Python library |
+| | • `wpasdi` — WordPress plugin |
+| | • `wpsclient` — WPS client library |
+| `ogcprocesses` | Optional server implementing the [OGC Processes API 2.0](https://ogcapi.ogc.org/processes/) on top of WASDI. |
+| `openeo-java-server` | Optional server that lets users run [openEO](https://openeo.org/) scripts inside WASDI. |
+| `processorCommon` | Shared files (base scripts, entrypoints, utilities) included in every processor engine template. |
+| `processorTypes` | One subfolder per supported processor type. Each contains the files the engine uses to auto-generate the application Docker image (or equivalent artefact). |
+| `scheduler` | Java source code for the **Scheduler** micro-service, which monitors the database, assigns tasks to nodes, and manages capacity. |
+| `scripts` | Utility shell scripts for maintenance, deployment, and development tasks. |
+| `service/updateMetric` | Service used in federated WASDI installations to probe the health and metrics of remote nodes. |
+| `test` | JMeter test plans for end-to-end API and operation testing. |
+| `utils` | Maven POM for the optional `dbUtils` command-line tool (database inspection and maintenance). |
+| `wasdishared` | Java library (`wasdishared`) shared by the Launcher, Scheduler, and Web Server. Contains domain model, data-access layer, query executors, and business logic. |
+| `wasditrigger` | Code for the WASDI Trigger service, which lets users schedule WASDI applications on a time or event basis. |
+| `wasdiwebserver` | Main WASDI REST server source code. |
 
 ---
 
@@ -549,33 +664,210 @@ wasdishared → launcher / wasdiwebserver / scheduler / wasditrigger / ogcproces
 
 ### Configuration
 
-The server reads a single JSON configuration file at startup. A template is provided at `configuration/wasdiConfig.json.j2`.
+WASDI is configured through a single main file: `wasdiConfig.json`.
 
-Create your own `wasdiConfig.json` by filling in:
+For a ready-to-use starting point, use the Mini-WASDI config templates in this repository:
+
+- <https://github.com/fadeoutsoftware/WASDI/tree/master/MiniWasdi/dataToCopy/config>
+
+These templates are intentionally provided **without credentials** (no passwords/API keys), so they are safe to copy and customize.
+
+You can also use `configuration/wasdiConfig.json.j2` as an additional reference.
+
+#### Single-node vs federated multi-node
+
+WASDI can run:
+
+- on a **single machine**, or
+- in a **federated multi-node** environment.
+
+In federated mode:
+
+- the **main node must be named `wasdi`**
+- computational nodes can have any name
+- each computational node must be installed and able to reach the **main MongoDB** (directly or through an SSH tunnel)
+- each node must be inserted in the `nodes` table in DB
+
+Node entries should include fields such as:
+
+- `nodeCode` (unique node id)
+- `nodeBaseAddress` (base URL)
+- `nodeDescription`
+- `nodeGeoserverAddress`
+- `defaultProvider`
+- `active`
+- `cloudProvider`
+- `shared`
+
+#### `mongoMain` and `mongoLocal`
+
+The config always contains a `mongoMain` section.
+
+- On the **main node**, `mongoMain` points to the main DB.
+- On a **computational node**, define both:
+  - `mongoMain`: address/credentials of the main node DB
+  - `mongoLocal`: local MongoDB used for node-local optimized tables
+
+Computational nodes typically keep only a subset of tables locally (for distributed performance), for example:
+
+- `processworkspace`
+- `params`
+- `processorLogs`
+
+To configure the database engine to use 
+
+- `processorLogs` = ["mongo"|"sqlite"|"no2"]
+
+In any case WASDI will read mongoMain. For sqlite and no2 just keep the dbName="wasdi". For mongo instead add also your credentials. It supports eventually also a Mongo replica.
+
+#### `paths`
+
+`paths` defines the base filesystem layout.
+
+`downloadRootPath` is the main WASDI folder where the system creates:
+
+- one subfolder per user
+- one subfolder per workspace inside each user folder
+
+#### `loadBalancer`
+
+`loadBalancer` is used in more complex multi-node installations.
+
+#### `catalogues` and `dataProviders`
+
+`catalogues` defines which external catalogues can be queried for each platform (mission/data type) and in which order.
+
+- WASDI tries the first provider for a query
+- if it fails, it falls back to the next configured provider(s)
+
+`dataProviders` declares and configures provider definitions.
+
+- each provider has a unique code (used by `catalogues`)
+- providers are instantiated via reflection
+- for this reason each provider specifies:
+  - `queryExecutorClasspath`
+  - `providerAdapterClasspath`
+
+Roles:
+
+- **Query executors** are used by the server to query external catalogues
+- **Provider adapters** are used by the launcher to download files
+
+Each provider can reference additional sub-config files:
+
+- `parserConfig` (query side)
+- `adapterConfig` (download side)
+
+Depending on provider, credentials may include `user`, `password`, and/or `apiKey`.
+Template files are provided with no credentials. We will come back to provider credentials in a dedicated section.
+
+#### `geoserver`
+
+`geoserver` config is optional.
+
+It is required only if you use image publication operations (for example `publishBand`).
+
+#### `dockers` and processor engines
+
+The `dockers` section configures container execution and processor types.
+
+As described in the Processor Engines section, WASDI can run processors locally, in Docker, or in Kubernetes.
+
+In Mini-WASDI, the usual engine is `LocalProcessorEngine`.
+In full WASDI installations, this section should include the processor templates and runtime variables for the enabled engines.
+
+Example processor type entry:
 
 ```json
 {
-  "dbEngine": "mongo",
-  "mongoMain": {
-    "address": "localhost",
-    "port": 27017,
-    "dbName": "wasdi",
-    "user": "",
-    "password": ""
-  },
-  "mongoLocal": {
-    "address": "localhost",
-    "port": 27017,
-    "dbName": "wasdi",
-    "user": "",
-    "password": ""
-  }
+  "processorType": "pip_oneshot",
+  "additionalMountPoints": [],
+  "commands": [],
+  "environmentVariables": [
+    {
+      "key": "WASDI_ONLY_WS_FOLDER",
+      "value": "1"
+    },
+    {
+      "key": "WASDI_WEBSERVER_URL",
+      "value": "https://YOURWASDI/wasdiwebserver/rest"
+    }
+  ],
+  "image": "",
+  "mountOnlyWorkspaceFolder": true,
+  "templateFilesToExcludeFromDownload": [
+    "installUserPackage.sh",
+    "pip_original.txt"
+  ],
+  "version": ""
 }
 ```
 
-To use SQLite instead of MongoDB, set `"dbEngine": "sqlite"` — no external process is required and the database file is created automatically on first run.
+#### `scheduler`
+
+The scheduler behavior is fully configuration-driven.
+
+- without explicit queue configuration, operations go through a single queue
+- the template contains a reasonable default, but queue sizing depends on available hardware
+
+To add a dedicated queue, add one element in `schedulers`, for example:
+
+```json
+{
+  "name": "DOWNLOAD.LSA",
+  "maxQueue": "5",
+  "timeoutMs": "3600000",
+  "opTypes": "DOWNLOAD",
+  "opSubType": "LSA",
+  "enabled": "1"
+}
+```
+
+This creates a dedicated queue for `DOWNLOAD` operations with `LSA` subtype, allowing up to 5 parallel items.
+
+Increasing parallelism can improve throughput, but tune carefully against CPU and RAM.
+In most installations, calibrating `GRAPH` and `RUNPROCESSOR` queues is especially important.
 
 The full list of configuration fields is documented in `wasdishared/src/main/java/wasdi/shared/config/WasdiConfig.java` and in the [Configuration reference](https://wasdi.readthedocs.io/en/latest/InsideWasdi/Configuration.html).
+
+#### Available data providers (credentials guide)
+
+The providers below are backed by query executors in `wasdishared/src/main/java/wasdi/shared/queryexecutors` and represented in the Mini-WASDI template config.
+
+Legacy providers intentionally excluded from this list: **EODC**, **ONDA**, **SOBLOO**.
+
+Some additional executors (for example custom/external providers such as `EXT_WEB` or `CLOUDFERRO`) exist in code but are not pre-enabled in the default Mini-WASDI template.
+
+| Provider | Catalogue/API link | Description | Typical credentials in `dataProviders` |
+| --- | --- | --- | --- |
+| COPERNICUS_DATASPACE | <https://dataspace.copernicus.eu/> | Copernicus Data Space Ecosystem catalogue for Sentinel missions via OData search/download. | `user`, `password` |
+| CREODIAS2 | <https://datahub.creodias.eu/odata/v1/Products?> | CREODIAS OData catalogue, widely used for Sentinel and other EO products. | `user`, `password` |
+| LSA | <https://www.collgs.lu/> | LSA Data Center catalogue for Sentinel-1/Sentinel-2 and dedicated products. | `user`, `password` |
+| TERRASCOPE | <https://services.terrascope.be/catalogue/products> | Terrascope catalogue used for DEM and WorldCover access. | `user`, `password` |
+| CDS | <https://cds.climate.copernicus.eu/api/v2/resources> | Copernicus Climate Data Store access (e.g. ERA5 workflows). | `apiKey` (and/or CDS account credentials, depending on adapter) |
+| ADS | <https://ads.atmosphere.copernicus.eu/api/v2/resources> | Copernicus Atmosphere Data Store access (CAMS datasets). | `apiKey` (and/or ADS account credentials, depending on adapter) |
+| LPDAAC | <https://cmr.earthdata.nasa.gov/search/granules> | NASA LP DAAC catalogue for MODIS/TERRA and related products. | `user`, `password` or token-based credential |
+| ESA | <https://eocat.esa.int/eo-catalogue> | ESA EO-CAT integration (e.g. ERS datasets). | `user`, `password` |
+| DLR | <https://download.geoservice.dlr.de/WSF2019/grid.geojson> | DLR provider integration for WSF products. | usually none |
+| JRC | <https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/> | JRC open-data tiles integration (static products). | usually none |
+| VIIRS | <https://www.ssec.wisc.edu/flood-map-demo/flood-products/> | VIIRS flood map integration and related flood products. | usually none |
+| GPM | <https://jsimpsonhttps.pps.eosdis.nasa.gov/imerg/gis/> | GPM IMERG precipitation products integration. | usually none |
+| STATICS | <https://www.wasdi.cloud/> | WASDI-hosted static files provider. | usually none |
+| GFS_NRT | (custom script provider) | Near real-time GFS provider implemented via external Python executor. | depends on custom script/config |
+
+Credential and provider selection recommendations:
+
+- For **Sentinel** data, strongly configure at least one (preferably two or more) among:
+  - **COPERNICUS_DATASPACE** (Copernicus Data Space Ecosystem)
+  - **CREODIAS2**
+  - **LSA**
+- For **DEM** and **WorldCover**, configure **TERRASCOPE**.
+- For Copernicus climate/atmosphere datasets, configure the corresponding credentials:
+  - **CDS** credentials/key for CDS datasets
+  - **ADS** credentials/key for ADS datasets
+- Keep credentials out of version control; inject them via environment-specific config files or deployment secrets.
+
+
 
 ---
 
@@ -651,4 +943,40 @@ For example, to debug a processor execution:
 3. Set breakpoints in the relevant operation class under `wasdi.operations` or in the processor engine under `wasdi.processors`
 4. Start the debug session — the Launcher will pick up the `ProcessWorkspace`, set its state to `RUNNING`, and execute the operation
 
+---
 
+## Mini-WASDI
+
+Mini-WASDI is an alternative WASDI deployment based on a **single container** that hosts the full core system.
+
+It is called *Mini-WASDI* because it includes only the essential services needed to run WASDI locally or as a small internal service.
+
+### What Mini-WASDI includes
+
+- **Server**
+- **Scheduler**
+- **Launcher**
+- **SQLite** as embedded database
+
+### What Mini-WASDI does not include
+
+- **Client**
+- **RabbitMQ**
+- **MongoDB**
+- **Keycloak**
+- **Nexus**
+
+In Mini-WASDI, **subscriptions** and **user authentication** are disabled.
+
+This makes it useful when you want to:
+
+- run WASDI applications locally
+- run workflows locally
+- expose a lightweight internal WASDI service without deploying the full platform
+
+Full Mini-WASDI documentation is available in this repository:
+
+- [MiniWasdi/README.md](MiniWasdi/README.md)
+
+And in the documentation Center:
+ - [MiniWasdi Docs](https://wasdi.readthedocs.io/en/latest/GettingStarted/MiniWasdi.html)

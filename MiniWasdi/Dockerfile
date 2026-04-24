@@ -18,6 +18,7 @@ ENV WASDI_RUN_APPLICATION=""
 ENV WASDI_PARAMS=""
 ENV WASDI_WORKSPACE=""
 ENV WASDI_WORKSPACE_ID=""
+ENV WASDI_SERVER_MODE=""
 
 # RUN generic to create user, group, directories, etc
 RUN groupadd --gid 2042 --non-unique appwasdi && \
@@ -102,5 +103,6 @@ USER root
 RUN sed -i 's/\r$//' /opt/wasdi/wasdi.sh && chmod +x /opt/wasdi/wasdi.sh
 USER appwasdi
 
-#EXPOSE 8080
+# Port 8080 is the WASDI REST API — publish it when running in server mode (-p 8080:8080)
+EXPOSE 8080
 ENTRYPOINT ["/bin/bash", "/opt/wasdi/wasdi.sh"]
