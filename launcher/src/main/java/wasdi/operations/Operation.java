@@ -398,7 +398,7 @@ public abstract class Operation {
                 m_oSendToRabbit.SendRabbitMessage(true, sOperation, sWorkspace, oProductViewModel, sExchange);
         }
 
-        if (oReadProduct.getSnapProduct() != null) {
+        if (!oReadProduct.isSnapProductNull()) {
             oReadProduct.getSnapProduct().dispose();
         }
 
