@@ -322,7 +322,15 @@ public class WasdiGraph {
 				aoOutputs = new Product[0]; 
 			}
 			
-			waitBeforeRead();
+			if (WasdiConfig.Current.snap.waitBeforeOpeningFiles) {
+				WasdiLog.debugLog("WasdiGraph.execute: we will wait for " + WasdiConfig.Current.snap.msSleepBeforeOpeningFiles + " ms before reading the next file");
+				
+				try {
+					Thread.sleep(WasdiConfig.Current.snap.msSleepBeforeOpeningFiles);
+				} catch (InterruptedException oEx) {
+					Thread.currentThread().interrupt();
+				}			
+			}
 			
 			for (int iOutputs = 0; iOutputs<aoOutputs.length; iOutputs++) {
 				Product oProduct = aoOutputs[iOutputs];
