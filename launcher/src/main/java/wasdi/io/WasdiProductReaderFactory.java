@@ -84,6 +84,11 @@ public class WasdiProductReaderFactory {
 			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating S1 File Reader for " + oFile.getName());
 			return new Sentinel1ProductReader(oFile);
 		}
+
+		if (isSentinel2Product(oFile)) {
+			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating S2 File Reader for " + oFile.getName());
+			return new Sentinel2ProductReader(oFile);
+		}
 		
 		if (MissionUtils.isSentinel6File(oFile)) {
 			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating S6 File Reader for " + oFile.getName());
@@ -154,6 +159,27 @@ public class WasdiProductReaderFactory {
 		WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating SNAP File Reader for " + oFile.getName());
 
 		return new SnapProductReader(oFile);
+	}
+
+	private static boolean isSentinel2Product(File oFile) {
+		if (oFile == null) {
+			return false;
+		}
+
+		String sFileName = oFile.getName();
+		String sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(sFileName);
+
+		if ("SENTINEL-2".equals(sPlatform)) {
+			return true;
+		}
+
+		String sNameUpper = sFileName.toUpperCase();
+		if ((sNameUpper.startsWith("S2A_") || sNameUpper.startsWith("S2B_") || sNameUpper.startsWith("S2C_"))
+				&& (sNameUpper.endsWith(".ZIP") || sNameUpper.endsWith(".SAFE") || oFile.isDirectory())) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private static boolean isSentinel1Product(File oFile) {

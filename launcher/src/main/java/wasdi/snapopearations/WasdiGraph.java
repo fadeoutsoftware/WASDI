@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
+import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.graph.Graph;
 import org.esa.snap.core.gpf.graph.GraphContext;
@@ -40,6 +41,8 @@ import wasdi.shared.utils.ProcessWorkspaceLogger;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.products.BandViewModel;
+import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
 
@@ -336,7 +339,6 @@ public class WasdiGraph {
 				Product oProduct = aoOutputs[iOutputs];
 				
 				WasdiLog.debugLog("WasdiGraph.execute: managing output product ["+ iOutputs+"]: " + oProduct.getName());
-				
 				m_oProcessWorkspaceLogger.log("Ingesting " + oProduct.getName());
 				
 	            // Get the original Bounding Box
@@ -358,6 +360,10 @@ public class WasdiGraph {
 	            		addProductToDb(oProduct, sBbox, aoOutputFiles.get(iOutputs));
 	            	}
 	            	
+	            }
+	            
+	            if (oProduct != null) {
+	            	oProduct.dispose();
 	            }
 			}
 						
@@ -474,7 +480,7 @@ public class WasdiGraph {
                 
                 // Find the one starting with the exact name
                 if (oFileInFolder.getName().startsWith(sName)) {
-                	// Check that is not o folder
+                	// Check that is not a folder
                 	if (oFileInFolder.isFile()) {
                 		// Should be the entry point
                 		oProductFile = oFileInFolder;
@@ -497,14 +503,25 @@ public class WasdiGraph {
         }
         
         // Read the View Model
-        WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oProductFile);
-		ProductViewModel oVM = oReadProduct.getProductViewModel();
+		ProductViewModel oProductViewModel = new ProductViewModel();
+        // Initialize band group
+        oProductViewModel.setBandsGroups(new NodeGroupViewModel("Bands"));
+        oProductViewModel.getBandsGroups().setBands(new ArrayList<>());
+        
+        if (oProduct != null) {
+            for (Band oBand : oProduct.getBands()) {
+            	
+                BandViewModel oViewModel = new BandViewModel(oBand.getName());
+                oViewModel.setWidth(oBand.getRasterWidth());
+                oViewModel.setHeight(oBand.getRasterHeight());
+                oProductViewModel.getBandsGroups().getBands().add(oViewModel);
+            }
+        }
+		
         
         // P.Campanella 12/05/2017: it looks it is done before. Let leave here a check
         DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
         DownloadedFile oCheck = oDownloadedRepo.getDownloadedFileByPath(oProductFile.getAbsolutePath());
-        
-        //boolean bAddProductToWS = true;
         
         if (oCheck == null) {
         	WasdiLog.debugLog("Insert in db");
@@ -514,7 +531,7 @@ public class WasdiGraph {
             
             oOutputProduct.setFileName(oProductFile.getName());
             oOutputProduct.setFilePath(oProductFile.getAbsolutePath());
-            oOutputProduct.setProductViewModel(oVM);
+            oOutputProduct.setProductViewModel(oProductViewModel);
             oOutputProduct.setBoundingBox(sBBox);
             oOutputProduct.getProductViewModel().setMetadataFileReference(null);
 
@@ -532,7 +549,7 @@ public class WasdiGraph {
         
         WasdiLog.debugLog("OK DONE");
 
-        if (m_oRabbitSender!=null) m_oRabbitSender.SendRabbitMessage(true, LauncherOperations.GRAPH.name(), m_oParams.getWorkspace(), oVM, m_oParams.getExchange());
+        if (m_oRabbitSender!=null) m_oRabbitSender.SendRabbitMessage(true, LauncherOperations.GRAPH.name(), m_oParams.getWorkspace(), oProductViewModel, m_oParams.getExchange());
     }
 	
 	

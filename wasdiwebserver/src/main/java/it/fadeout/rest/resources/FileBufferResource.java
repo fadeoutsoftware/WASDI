@@ -187,10 +187,7 @@ public class FileBufferResource {
 
 				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
 			}
-			
-			// Check the product
-			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-			
+						
 			// Must have a valid name
 			if (Utils.isNullOrEmpty(sProductName)) {
 				WasdiLog.warnLog("FileBufferResource.share: invalid product name");
@@ -215,6 +212,9 @@ public class FileBufferResource {
 			String sDestinationWorkspaceNode = oDestinationWorkspace.getNodeCode();
 			String sDestinationWorkspaceUserId = oDestinationWorkspace.getUserId();
 
+			// Check the product
+			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+			
 			String sOriginFilePath = WasdiFileUtils.fixPathSeparator(PathsConfig.getWorkspacePath(sOriginWorkspaceUserId, sOriginWorkspaceId) + sProductName);
 			ProductWorkspace oProductOriginWorkspace = oProductWorkspaceRepository.getProductWorkspace(sOriginFilePath, sOriginWorkspaceId);
 

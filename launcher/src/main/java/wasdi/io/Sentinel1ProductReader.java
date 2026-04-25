@@ -19,9 +19,9 @@ import java.util.regex.Pattern;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
@@ -310,15 +310,9 @@ public class Sentinel1ProductReader extends WasdiProductReader {
 
     private int[] getRasterSize(String sDatasetPath) {
         try {
-            Map<String, Object> oInfoMap = getGdalInfoAsMap(sDatasetPath);
-            if (oInfoMap != null && oInfoMap.containsKey("size")) {
-                @SuppressWarnings("unchecked")
-                List<Object> aoSize = (List<Object>) oInfoMap.get("size");
-                if (aoSize != null && aoSize.size() >= 2) {
-                    int iWidth = ((Number) aoSize.get(0)).intValue();
-                    int iHeight = ((Number) aoSize.get(1)).intValue();
-                    return new int[] { iWidth, iHeight };
-                }
+            GdalInfoResult oInfo = GdalUtils.getGdalInfoResult(sDatasetPath, false);
+            if (oInfo != null && oInfo.size != null && oInfo.size.size() >= 2) {
+                return new int[] { oInfo.size.get(0), oInfo.size.get(1) };
             }
         } catch (Exception oEx) {
             WasdiLog.errorLog("Sentinel1ProductReader.getRasterSize: error ", oEx);
@@ -329,45 +323,14 @@ public class Sentinel1ProductReader extends WasdiProductReader {
 
     private String getBoundingBoxFromGdal(String sDatasetPath) {
         try {
-            Map<String, Object> oInfoMap = getGdalInfoAsMap(sDatasetPath);
-
-            if (oInfoMap != null && oInfoMap.containsKey("wgs84Extent")) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> oExtent = (Map<String, Object>) oInfoMap.get("wgs84Extent");
-
-                if (oExtent != null && oExtent.containsKey("coordinates")) {
-                    @SuppressWarnings("unchecked")
-                    List<List<List<Number>>> aoCoordinates = (List<List<List<Number>>>) oExtent.get("coordinates");
-                    if (aoCoordinates != null && !aoCoordinates.isEmpty() && aoCoordinates.get(0) != null) {
-                        double dMinX = Double.MAX_VALUE;
-                        double dMaxX = -Double.MAX_VALUE;
-                        double dMinY = Double.MAX_VALUE;
-                        double dMaxY = -Double.MAX_VALUE;
-
-                        for (List<Number> aoPoint : aoCoordinates.get(0)) {
-                            if (aoPoint == null || aoPoint.size() < 2) {
-                                continue;
-                            }
-
-                            double dX = aoPoint.get(0).doubleValue();
-                            double dY = aoPoint.get(1).doubleValue();
-
-                            if (dX < dMinX) dMinX = dX;
-                            if (dX > dMaxX) dMaxX = dX;
-                            if (dY < dMinY) dMinY = dY;
-                            if (dY > dMaxY) dMaxY = dY;
-                        }
-
-                        if (dMinX < Double.MAX_VALUE) {
-                            return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
-                                    (float) dMinY, (float) dMinX,
-                                    (float) dMinY, (float) dMaxX,
-                                    (float) dMaxY, (float) dMaxX,
-                                    (float) dMaxY, (float) dMinX,
-                                    (float) dMinY, (float) dMinX);
-                        }
-                    }
-                }
+            GdalInfoResult oInfo = GdalUtils.getGdalInfoResult(sDatasetPath, false);
+            if (oInfo != null && oInfo.wgs84East != 0.0) {
+                return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
+                        (float) oInfo.wgs84South, (float) oInfo.wgs84West,
+                        (float) oInfo.wgs84South, (float) oInfo.wgs84East,
+                        (float) oInfo.wgs84North, (float) oInfo.wgs84East,
+                        (float) oInfo.wgs84North, (float) oInfo.wgs84West,
+                        (float) oInfo.wgs84South, (float) oInfo.wgs84West);
             }
         } catch (Exception oEx) {
             WasdiLog.errorLog("Sentinel1ProductReader.getBoundingBoxFromGdal: error ", oEx);
@@ -467,48 +430,15 @@ public class Sentinel1ProductReader extends WasdiProductReader {
 
     private String getCoordinateSystemWktFromGdal(String sDatasetPath) {
         try {
-            Map<String, Object> oInfoMap = getGdalInfoAsMap(sDatasetPath);
-            if (oInfoMap != null && oInfoMap.containsKey("coordinateSystem")) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> oCoordinateSystem = (Map<String, Object>) oInfoMap.get("coordinateSystem");
-                if (oCoordinateSystem != null && oCoordinateSystem.containsKey("wkt")) {
-                    return (String) oCoordinateSystem.get("wkt");
-                }
+            GdalInfoResult oInfo = GdalUtils.getGdalInfoResult(sDatasetPath, false);
+            if (oInfo != null) {
+                return oInfo.coordinateSystemWKT;
             }
         } catch (Exception oEx) {
             WasdiLog.errorLog("Sentinel1ProductReader.getCoordinateSystemWktFromGdal: error ", oEx);
         }
 
         return null;
-    }
-
-    private Map<String, Object> getGdalInfoAsMap(String sDatasetPath) {
-        try {
-            String sGdalCommand = GdalUtils.adjustGdalFolder("gdalinfo");
-            ArrayList<String> asArgs = new ArrayList<String>();
-            asArgs.add(sGdalCommand);
-            asArgs.add("-json");
-            asArgs.add(sDatasetPath);
-            asArgs.add("-wkt_format");
-            asArgs.add("WKT1");
-
-            ShellExecReturn oReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
-            String sOutput = oReturn.getOperationLogs();
-
-            if (Utils.isNullOrEmpty(sOutput)) {
-                return null;
-            }
-
-            int iJsonStart = sOutput.indexOf("{");
-            if (iJsonStart > 0) {
-                sOutput = sOutput.substring(iJsonStart);
-            }
-
-            return JsonUtils.jsonToMapOfObjects(sOutput);
-        } catch (Exception oEx) {
-            WasdiLog.errorLog("Sentinel1ProductReader.getGdalInfoAsMap: error ", oEx);
-            return null;
-        }
     }
 
     private String buildVsiZipPath(String sInternalPath) {

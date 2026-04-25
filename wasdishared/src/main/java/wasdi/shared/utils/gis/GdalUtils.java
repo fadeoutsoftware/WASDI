@@ -59,6 +59,15 @@ public class GdalUtils {
     public static GdalInfoResult getGdalInfoResult(String sFilePath) {
     	return getGdalInfoResult(new File(sFilePath));
     }
+
+	public static GdalInfoResult getGdalInfoResult(String sFilePath, boolean bCheckFileExists) {
+		return getGdalInfoResult(new File(sFilePath), bCheckFileExists);
+	}
+
+	public static GdalInfoResult getGdalInfoResult(File oFile) { 
+		return getGdalInfoResult(oFile,true);
+	}
+
     
     /**
      * Get the output of GDALInfo on the file
@@ -66,7 +75,7 @@ public class GdalUtils {
      * @return GdalInfoResult filled or null in case of problems
      */
     @SuppressWarnings("unchecked")
-	public static GdalInfoResult getGdalInfoResult(File oFile) {
+	public static GdalInfoResult getGdalInfoResult(File oFile, boolean bCheckFileExists) {
     	try {
     		
     		// Domain check
@@ -75,10 +84,12 @@ public class GdalUtils {
     			return null;
     		}
 
-    		if (oFile.exists()==false) {
-    			WasdiLog.debugLog("GdalUtils.getGdalInfoResult: File " + oFile.getPath() + " does not exists, return null");
-    			return null;
-    		}
+			if (bCheckFileExists) {
+				if (oFile.exists()==false) {
+					WasdiLog.debugLog("GdalUtils.getGdalInfoResult: File " + oFile.getPath() + " does not exists, return null");
+					return null;
+				}
+			}
     		
     		// We need to call gdalinfo
 			String sGdalCommand = "gdalinfo";
