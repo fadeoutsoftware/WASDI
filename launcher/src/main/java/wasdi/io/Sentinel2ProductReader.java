@@ -164,9 +164,14 @@ public class Sentinel2ProductReader extends WasdiProductReader {
 
             String sOutputPath = m_oProductFile.getParentFile().getAbsolutePath() + File.separator + sLayerId + ".tif";
 
-            String sGdalCommand = GdalUtils.adjustGdalFolder("gdal_translate");
+            // Use gdalwarp to reproject to EPSG:4326. This ensures the output is in WGS84
+            // (which GeoServer expects and the EPSG fallback in Publishband uses), and avoids
+            // SNAP failing on uint16/12-bit S2 data when it tries to read the output .tif for EPSG detection.
+            String sGdalCommand = GdalUtils.adjustGdalFolder("gdalwarp");
             ArrayList<String> asArgs = new ArrayList<String>();
             asArgs.add(sGdalCommand);
+            asArgs.add("-t_srs");
+            asArgs.add("EPSG:4326");
             asArgs.add("-of");
             asArgs.add("GTiff");
             asArgs.add(oSource.sDatasetPath);
