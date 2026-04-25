@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.esa.snap.core.datamodel.Product;
 
 import wasdi.ProcessWorkspaceUpdateSubscriber;
 import wasdi.io.WasdiProductReader;

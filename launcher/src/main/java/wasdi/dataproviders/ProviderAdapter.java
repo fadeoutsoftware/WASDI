@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.esa.snap.core.datamodel.Product;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;

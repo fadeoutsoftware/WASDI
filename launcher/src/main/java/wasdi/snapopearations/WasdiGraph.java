@@ -19,8 +19,6 @@ import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.XppDomElement;
 
 import wasdi.LauncherMain;
-import wasdi.io.WasdiProductReader;
-import wasdi.io.WasdiProductReaderFactory;
 import wasdi.operations.Operation;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
