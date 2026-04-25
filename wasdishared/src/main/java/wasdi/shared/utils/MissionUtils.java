@@ -7,6 +7,50 @@ import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class MissionUtils {
+	
+	public static boolean isSentinel2Product(File oFile) {
+		if (oFile == null) {
+			return false;
+		}
+
+		String sFileName = oFile.getName();
+		String sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(sFileName);
+
+		if ("SENTINEL-2".equals(sPlatform)) {
+			return true;
+		}
+
+		String sNameUpper = sFileName.toUpperCase();
+		if ((sNameUpper.startsWith("S2A_") || sNameUpper.startsWith("S2B_") || sNameUpper.startsWith("S2C_"))
+				&& (sNameUpper.endsWith(".ZIP") || sNameUpper.endsWith(".SAFE") || oFile.isDirectory())) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public static boolean isSentinel1Product(File oFile) {
+		if (oFile == null) {
+			return false;
+		}
+
+		String sFileName = oFile.getName();
+		String sPlatform = MissionUtils.getPlatformFromSatelliteImageFileName(sFileName);
+
+		if ("SENTINEL-1".equals(sPlatform)) {
+			return true;
+		}
+
+		String sNameUpper = sFileName.toUpperCase();
+		if ((sNameUpper.startsWith("S1A_") || sNameUpper.startsWith("S1B_") || sNameUpper.startsWith("S1C_"))
+				&& (sNameUpper.endsWith(".ZIP") || sNameUpper.endsWith(".SAFE") || oFile.isDirectory())) {
+			return true;
+		}
+
+		return false;
+	}
+	
+	
 	public static boolean isSentinel5PFile(File oFile) {
 		try {
 			if(null==oFile) {
