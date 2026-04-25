@@ -75,7 +75,7 @@ public class WasdiProductReaderFactory {
 			}
 		}
 		
-		if(MissionUtils.isSentinel3Name(oFile)) {
+		if(MissionUtils.isSentinel3Product(oFile)) {
 			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating S3 File Reader for " + oFile.getName());
 			return new Sentinel3ProductReader(oFile);
 		}

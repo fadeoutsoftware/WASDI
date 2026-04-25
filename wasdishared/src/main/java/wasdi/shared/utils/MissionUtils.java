@@ -21,7 +21,7 @@ public class MissionUtils {
 		}
 
 		String sNameUpper = sFileName.toUpperCase();
-		if ((sNameUpper.startsWith("S2A_") || sNameUpper.startsWith("S2B_") || sNameUpper.startsWith("S2C_"))
+		if (sNameUpper.matches("S2[A-Z]_.*")
 				&& (sNameUpper.endsWith(".ZIP") || sNameUpper.endsWith(".SAFE") || oFile.isDirectory())) {
 			return true;
 		}
@@ -42,8 +42,7 @@ public class MissionUtils {
 		}
 
 		String sNameUpper = sFileName.toUpperCase();
-		if ((sNameUpper.startsWith("S1A_") || sNameUpper.startsWith("S1B_") || sNameUpper.startsWith("S1C_"))
-				&& (sNameUpper.endsWith(".ZIP") || sNameUpper.endsWith(".SAFE") || oFile.isDirectory())) {
+		if (sNameUpper.matches("S1[A-Z]_.*") && (sNameUpper.endsWith(".ZIP") || sNameUpper.endsWith(".SAFE") || oFile.isDirectory())) {
 			return true;
 		}
 
@@ -185,7 +184,7 @@ public class MissionUtils {
 		return false;
 	}
 	
-	public static boolean isSentinel3Name(File oFile) {
+	public static boolean isSentinel3Product(File oFile) {
 		try {
 			if(null==oFile) {
 				return false;
@@ -277,10 +276,10 @@ public class MissionUtils {
 		try {
 			if (Utils.isNullOrEmpty(sFileName)) return null;
 
-			if (sFileName.toUpperCase().startsWith("S1A_") || sFileName.toUpperCase().startsWith("S1B_") || sFileName.toUpperCase().startsWith("S1C_")) {
+			if (sFileName.toUpperCase().matches("S1[A-Z]_.*")) {
 				return Platforms.SENTINEL1;
 			}
-			else if (sFileName.toUpperCase().startsWith("S2A_") || sFileName.toUpperCase().startsWith("S2B_") || sFileName.toUpperCase().startsWith("S2C_")) {
+			else if (sFileName.toUpperCase().matches("S2[A-Z]_.*")) {
 				return Platforms.SENTINEL2;
 			}
 			else if (sFileName.toUpperCase().startsWith("S3A_") || sFileName.toUpperCase().startsWith("S3B_") || sFileName.toUpperCase().startsWith("S3__")) {
