@@ -155,7 +155,12 @@ public class WasdiProductReaderFactory {
 			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating GPKG File Reader for " + oFile.getName());
 			return new GpkgProductReader(oFile);			
 		}
-		
+
+		if (oFile.getName().toLowerCase().endsWith(".tif") || oFile.getName().toLowerCase().endsWith(".tiff")) {
+			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating GeoTIFF File Reader for " + oFile.getName());
+			return new GeoTiffProductReader(oFile);
+		}
+
 		WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating SNAP File Reader for " + oFile.getName());
 
 		return new SnapProductReader(oFile);
