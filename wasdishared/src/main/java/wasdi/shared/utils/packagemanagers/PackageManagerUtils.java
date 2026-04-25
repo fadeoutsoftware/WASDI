@@ -38,6 +38,14 @@ public class PackageManagerUtils {
 			if (sPackage.contains("==")) {
 				sPackage = sPackage.split("==")[0];
 			}
+
+			if (sPackage.contains(">=")) {
+				sPackage = sPackage.split(">=")[0];
+			}
+			
+			if (sPackage.contains("<=")) {
+				sPackage = sPackage.split("<=")[0];
+			}			
 			
 			if (sPackage.startsWith("git+")) {
 				WasdiLog.infoLog("PackageManagerUtils.checkPipPackage: line [" + sPackage + "] looks a git package, try to keep it");

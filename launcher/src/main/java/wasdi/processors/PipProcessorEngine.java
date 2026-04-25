@@ -89,8 +89,8 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 					String sPackage = asUserPackages.get(iPackages);
 
 					if (!PackageManagerUtils.checkPipPackage(sPackage)) {
-						m_oProcessWorkspaceLogger.log("We did not find PIP package [" + sPackage + "], are you sure is correct?");
-						WasdiLog.infoLog("We did not find PIP package [" + sPackage + "], jump it");
+						m_oProcessWorkspaceLogger.log("We did not found PIP package [" + sPackage + "], are you sure is correct?");
+						WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: We did not found PIP package [" + sPackage + "], jump it");
 						continue;
 					}
 					else {
