@@ -591,7 +591,6 @@
 		"maxQueue": "5",
 		"timeoutMs": "172800000",
 		"lastStateChangeDateOrderBy": 1,
-		"redirectLauncherOutput": -1,
 		"schedulers": [
 			{
 				"name": "DOWNLOAD.LSA",

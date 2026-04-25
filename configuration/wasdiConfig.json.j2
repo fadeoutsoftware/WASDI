@@ -501,7 +501,6 @@
     "dockers": {
         "dockerComposeCommand": "{{ aoWasdiConfiguration['dockers']['dockerComposeCommand'] }}",
         "dockerNetworkMode": "{{ aoWasdiConfiguration['dockers']['dockerNetworkMode'] }}",
-        "dockersDeployLogFilePath": "{{ aoWasdiConfiguration['dockers']['dockersDeployLogFilePath'] }}",
         "eoepca": {
             "dockerWriteFolder": "{{ aoWasdiConfiguration['dockers']['eoepca']['dockerWriteFolder'] }}",
             "adesServerAddress": "{{ aoWasdiConfiguration['dockers']['eoepca']['adesServerAddress'] }}",
@@ -667,7 +666,6 @@
         "maxQueue": "{{ aoWasdiConfiguration['scheduler']['maxQueue'] }}",
         "processingThreadSleepingTimeMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadSleepingTimeMS'] }}",
         "processingThreadWaitStartMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadWaitStartMS'] }}",
-        "redirectLauncherOutput": {{ aoWasdiConfiguration['scheduler']['redirectLauncherOutput'] }},
         "sometimesCheckCounter":  {{ aoWasdiConfiguration['scheduler']['sometimesCheckCounter'] }},
         "watchDogCounter": {{ aoWasdiConfiguration['scheduler']['watchDogCounter'] }},
         "activateWatchDog":  {{ aoWasdiConfiguration['scheduler']['activateWatchDog'] | lower }},
