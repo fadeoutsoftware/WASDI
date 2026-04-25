@@ -69,7 +69,15 @@ public class Sentinel2ProductReader extends WasdiProductReader {
 
         List<MeasurementSource> aoSources = getMeasurementSources();
 
+        // L2A products have the same band at multiple resolutions (R10m/R20m/R60m).
+        // Sources are sorted highest-res first, so the first occurrence of each band
+        // name is always the best resolution — skip subsequent duplicates.
+        java.util.Set<String> aoSeenBands = new java.util.LinkedHashSet<>();
         for (MeasurementSource oSource : aoSources) {
+            if (!aoSeenBands.add(oSource.sBandName)) {
+                continue; // duplicate band name at lower resolution
+            }
+
             BandViewModel oBand = new BandViewModel(oSource.sBandName);
 
             GdalInfoResult oInfo = GdalUtils.getGdalInfoResult(oSource.sDatasetPath, false);
@@ -284,15 +292,27 @@ public class Sentinel2ProductReader extends WasdiProductReader {
         String sNormalized = sFileName.replaceAll("(?i)_(10m|20m|60m)\\.jp2$", ".jp2");
         Matcher oMatcher = s_oBandTokenPattern.matcher(sNormalized);
         if (oMatcher.find()) {
-            return oMatcher.group(1).toUpperCase();
+            return normalizeBandName(oMatcher.group(1).toUpperCase());
         }
         return null;
     }
 
+    /**
+     * Strips leading zeros from the digit suffix of a band token so that
+     * B06 and B6 both normalise to B6.  Purely alphabetic tokens (TCI, SCL)
+     * and mixed tokens (B8A) are returned unchanged.
+     */
+    private String normalizeBandName(String sBandName) {
+        if (Utils.isNullOrEmpty(sBandName)) return sBandName;
+        // Replace e.g. B06 -> B6, B02 -> B2; leaves B8A, TCI, SCL untouched
+        return sBandName.replaceAll("([A-Z]+)0+([0-9])", "$1$2");
+    }
+
     private MeasurementSource findSourceForBand(String sBand) {
+        String sNormalized = normalizeBandName(sBand.toUpperCase());
         List<MeasurementSource> aoSources = getMeasurementSources();
         for (MeasurementSource oSource : aoSources) {
-            if (oSource.sBandName.equalsIgnoreCase(sBand)) {
+            if (oSource.sBandName.equalsIgnoreCase(sNormalized)) {
                 return oSource;
             }
         }
