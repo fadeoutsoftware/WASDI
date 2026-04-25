@@ -91,7 +91,6 @@ import wasdi.shared.utils.OgcProcessesClient;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.ProcessWorkspaceLogger;
 import wasdi.shared.utils.S3BucketUtils;
-import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;

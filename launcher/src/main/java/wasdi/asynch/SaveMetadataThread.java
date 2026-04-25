@@ -33,9 +33,6 @@ public class SaveMetadataThread extends Thread {
 				SerializationUtils.serializeObjectToXML(m_sMetadataFilePath, oMetadataViewModel);
 			}
 			
-			if (!m_oReadProduct.isSnapProductNull()) {
-				m_oReadProduct.getSnapProduct().dispose();
-			}
 		} 
 		catch (Exception oEx) {
 			WasdiLog.errorLog("SaveMetadataThread.run: exception " + oEx.toString());

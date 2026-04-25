@@ -7,14 +7,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Logger;
-import org.geotools.data.shapefile.ShapefileDataStore;
-import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.feature.type.AttributeDescriptor;
-import org.opengis.feature.type.AttributeType;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher.Purge;
@@ -614,94 +606,4 @@ public class GeoServerManager {
         return layerEncoder;
     }
 
-    /**
-     * Get the featureType xml that is the body to send to geoserver to create the shapefile layer
-     * @param sShapeFile Full path of the shapefile NOT zipped
-     * @param sEPSG
-     * @return
-     */
-    private String getFeatureTypeFromShapeFile(String sShapeFile, String sStoreName, String sEPSG) {
-    	String sXML = "<featureType>\n";
-    	
-    	try {
-    		
-    		// This code needs the real shp, not the zipped. It is in the same folder so no problem
-    		if (sShapeFile.endsWith(".zip")) {
-    			sShapeFile = sShapeFile.replace(".zip", ".shp");
-    		}
-    		
-    		File oShapeFile = new File(sShapeFile);
-    		
-    		// Try to read the shape
-            ShapefileDataStore oShapefileDataStore = new ShapefileDataStore(oShapeFile.toURI().toURL());
-            
-			// Check the coordinate system
-            SimpleFeatureCollection oFeatColl = oShapefileDataStore.getFeatureSource().getFeatures();
-			CoordinateReferenceSystem oCrs = oFeatColl.getSchema().getGeometryDescriptor().getCoordinateReferenceSystem();
-			
-		    if (oCrs == null) {
-		        oCrs = DefaultGeographicCRS.WGS84;
-		    }
-		    
-		    // Get the envelope
-			ReferencedEnvelope oBbox = oFeatColl.getBounds();
-			double dMinY = oBbox.getMinY();
-			double dMinX = oBbox.getMinX();
-			double dMaxY = oBbox.getMaxY();
-			double dMaxX = oBbox.getMaxX();            
-            
-            SimpleFeatureType oSimpleFeatureType = oShapefileDataStore.getSchema();
-                        
-            sXML +="<name>" + sStoreName + "</name>\r\n<nativeName>" + sStoreName + "</nativeName>\r\n";
-            sXML += "<namespace>\r\n" + "<name>wasdi</name>\r\n";
-            sXML += "<atom:link xmlns:atom=\"http://www.w3.org/2005/Atom\" rel=\"alternate\" href=\"" + WasdiConfig.Current.geoserver.address + "/rest/namespaces/wasdi.xml\" type=\"application/xml\"/>\r\n";
-            sXML += "</namespace>\r\n";
-            sXML += "<title>"+ sStoreName + "</title>\r\n";
-            sXML += "<keywords></keywords>\r\n";
-            sXML += "<projectionPolicy>FORCE_DECLARED</projectionPolicy>\r\n";
-            sXML += "<enabled>true</enabled>\r\n";
-            sXML += "<store class=\"dataStore\">\r\n"
-            		+ "<name>wasdi:" + sStoreName + "</name>\r\n"
-            		+ "<atom:link xmlns:atom=\"http://www.w3.org/2005/Atom\" rel=\"alternate\" href=\"" + WasdiConfig.Current.geoserver.address + "/rest/workspaces/wasdi/datastores/" + sStoreName + ".xml\" type=\"application/xml\"/>\r\n"
-            		+ "</store>";
-            
-            sXML += "<srs>" + sEPSG + "</srs>";
-            
-            String sBbox = "<minx>" + dMinX + "</minx>" + "<maxx>" + dMaxX + "</maxx>" + "<miny>" + dMinY + "</miny>" + "<maxy>" + dMaxY + "</maxy>";
-            sBbox += "<crs>" + sEPSG + "</crs>";
-            
-            sXML += "<nativeBoundingBox>" + sBbox + "</nativeBoundingBox>";
-            sXML += "<latLonBoundingBox>" + sBbox + "</latLonBoundingBox>";
-            //sXML += "<nativeCRS>" +  StringEscapeUtils.escapeXml(oCrs.toWKT()) + "</nativeCRS>";
-            sXML += "<nativeCRS>" +  "GEOGCS[\"WGS 84\", DATUM[\"World Geodetic System 1984\", SPHEROID[\"WGS 84\", 6378137.0, 298.257223563, AUTHORITY[\"EPSG\",\"7030\"]], AUTHORITY[\"EPSG\",\"6326\"]], PRIMEM[\"Greenwich\", 0.0, AUTHORITY[\"EPSG\",\"8901\"]], UNIT[\"degree\", 0.017453292519943295], AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH], AUTHORITY[\"EPSG\",\"4326\"]]" + "</nativeCRS>";
-            
-            sXML += "<simpleConversionEnabled>false</simpleConversionEnabled>";
-            sXML += "<attributes>";
-            for (int iAttributes=0; iAttributes<oSimpleFeatureType.getAttributeCount(); iAttributes++) 
-            {
-            	sXML += "<attribute>";
-            	AttributeDescriptor oDescriptor = oSimpleFeatureType.getDescriptor(iAttributes);
-            	String sAttributeName = (String) oDescriptor.getLocalName();
-            	AttributeType oType = oDescriptor.getType();
-            	
-            	String sType = oType.getBinding().getName();
-            	sXML += "<name>" + sAttributeName + "</name>";
-            	sXML += "<binding>" + sType + "</binding>";
-            	sXML += "<nillable>" + oDescriptor.isNillable() + "</nillable>";
-            	sXML += "<minOccurs>" + oDescriptor.getMinOccurs() + "</minOccurs>";
-            	sXML += "<maxOccurs>" + oDescriptor.getMaxOccurs() + "</maxOccurs>";
-            	sXML += "</attribute>";
-            }
-            
-            sXML += "</attributes>";
-            sXML += "</featureType>";
-            
-            // Clean
-            oShapefileDataStore.dispose();        		
-    	}
-    	catch (Exception oEx) {
-    		WasdiLog.debugLog("GeoServerManager.getFeatureTypeFromShapeFile: " + oEx.toString());
-		}
-    	return sXML;
-    }
 }

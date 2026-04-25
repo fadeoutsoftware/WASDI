@@ -1,18 +1,9 @@
 package wasdi.shared.queryexecutors.probav;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.opensearch.QueryExecutorOpenSearch;
@@ -233,138 +224,9 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 		
 		ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
 		
-//		//int iStreamSize = 1000000;
-//		Feed oFeed = (Feed) oDocument.getRoot();
-//
-//		Map<String, String> oMap = getFootprint(sXml);
-//
-//		//set new connction timeout
-//		oClient.setConnectionTimeout(2000);
-//		//oClient.setSocketTimeout(2000);
-//		oClient.setConnectionManagerTimeout(2000);
-//		
-//
-//		for (Entry oEntry : oFeed.getEntries()) {
-//
-//			QueryResultViewModel oResult = new QueryResultViewModel();
-//			oResult.setProvider(m_sProvider);
-//			
-//			String sTitle = extractTitle(oEntry.getTitle());
-//						
-//			//retrive the title
-//			oResult.setTitle(sTitle);			
-//
-//			//retrive the summary
-//			oResult.setSummary(oEntry.getSummary());
-//
-//			//retrieve the id
-//			oResult.setId(oEntry.getId().toString());
-//
-//			//retrieve the link
-//			//			List<Link> aoLinks = oEntry.getLinks();
-//			Link oLink = oEntry.getEnclosureLink();
-//			if (oLink != null)oResult.setLink(oLink.getHref().toString()); //TODO
-//
-//			//retrieve the footprint and all others properties
-//			oResult.setFootprint(oMap.get(oResult.getId()));
-//
-//			//retrieve the icon
-//			oLink = oEntry.getLink("icon");			
-//			if (oLink != null) {
-//				//				WasdiLog.debugLog("Icon Link: " + oLink.getHref().toString());
-//
-//				try {
-//					IRI oIri = oLink.getHref();
-//					String sHref = oIri.toString();
-//					ClientResponse oImageResponse = oClient.get(sHref, oOptions);
-//					//					WasdiLog.debugLog("Response Got from the client");
-//					if (oImageResponse.getType() == ResponseType.SUCCESS)
-//					{
-//						//						WasdiLog.debugLog("Success: saving image preview");
-//						InputStream oInputStreamImage = oImageResponse.getInputStream();
-//						BufferedImage  oImage = ImageIO.read(oInputStreamImage);
-//						ByteArrayOutputStream bas = new ByteArrayOutputStream();
-//						ImageIO.write(oImage, "png", bas);
-//						oResult.setPreview("data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
-//						//						WasdiLog.debugLog("Image Saved");
-//					}				
-//				}
-//				catch (Exception e) {
-//					WasdiLog.debugLog("Image Preview Cycle Exception " + e.toString());
-//				}					
-//			}
-//
-//			aoResults.add(oResult);
-//		} 
-
 		WasdiLog.debugLog("Search Done: found " + aoResults.size() + " results");
 
 		return aoResults;
-	}
-
-	private Map<String, String> getFootprint(String sXml){
-		WasdiLog.debugLog("QueryExecutorPROBAV.getFootprint");
-		Map<String, String> oMap = new HashMap<String, String>();
-		
-		InputStream oInputStreamReader = new ByteArrayInputStream(sXml.getBytes());
-		DocumentBuilderFactory oDocBuildFactory = DocumentBuilderFactory.newInstance();
-		
-		DocumentBuilder oDocBuilder;
-		try {
-			oDocBuilder = oDocBuildFactory.newDocumentBuilder();
-			org.w3c.dom.Document doc = oDocBuilder.parse(oInputStreamReader);
-			doc.getDocumentElement().normalize();
-			WasdiLog.debugLog("Root element: " + doc.getDocumentElement().getNodeName());
-			// loop through each item
-			doc.getDocumentElement().toString();
-			NodeList items = doc.getChildNodes().item(0).getChildNodes();
-			for (int i = 0; i < items.getLength(); i++)
-			{
-				if (items.item(i).getNodeName().equals("atom:entry"))
-				{
-					String sEntryId = "";
-					String sFootprint = "";
-					for (int k = 0; k < items.item(i).getChildNodes().getLength(); k++)
-					{
-
-						Node oPolygon = items.item(i).getChildNodes().item(k);
-
-						if (oPolygon.getNodeName().equals("atom:id"))
-						{
-							sEntryId = oPolygon.getChildNodes().item(0).getNodeValue();
-							oMap.put(sEntryId, null);
-						}
-						if (oPolygon.getNodeName().equals("georss:polygon"))
-						{
-							String points = oPolygon.getChildNodes().item(0).getNodeValue();
-							String[] asPoints = points.split(" ");
-							for(int iPointCount = 0;iPointCount < asPoints.length;iPointCount=iPointCount+2)
-							{
-								if (iPointCount + 1 < asPoints.length)
-								{
-									sFootprint += String.format("%s %s", asPoints[iPointCount], asPoints[iPointCount+1]);
-
-									if (iPointCount + 2 < asPoints.length)
-										sFootprint += ",";
-								}
-							}
-
-							sFootprint = String.format("POLYGON ((%s))", sFootprint);
-						}
-					}
-
-					if (sEntryId != null)
-					{
-						oMap.put(sEntryId, sFootprint);
-					}
-
-				}
-			}
-
-		} catch (Exception oE1) {
-			WasdiLog.debugLog("QueryExecutorPROBAV.getFootprint( " + sXml + " ): " + oE1);
-		}
-		return oMap;
 	}
 
 	public String extractTitle(String sTitle) {

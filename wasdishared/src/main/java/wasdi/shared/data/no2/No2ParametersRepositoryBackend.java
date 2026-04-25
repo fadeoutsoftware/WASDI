@@ -2,13 +2,10 @@ package wasdi.shared.data.no2;
 
 import static org.dizitart.no2.filters.FluentFilter.where;
 
-import java.io.File;
-
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 
 import wasdi.shared.business.ParameterEntity;
-import wasdi.shared.config.PathsConfig;
 import wasdi.shared.data.interfaces.IParametersRepositoryBackend;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.utils.SerializationUtils;

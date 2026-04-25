@@ -108,11 +108,9 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 			
 			WasdiLog.debugLog("Share.executeOperation: move " + oParameter.getProductName() + " from Workspace " + oParameter.getOriginWorkspaceId() + " to Workspace " + oParameter.getWorkspace());
 			
-			Product oProduct = null;
-			
 			// Are we in the same Node?
 			if (oParameter.getDestinationWorkspaceNode().equals(oParameter.getOriginWorkspaceNode())) {
-				WasdiLog.debugLog("Share.executeOperation: File to share available on same node:  make a copy");
+				WasdiLog.debugLog("Share.executeOperation: File to share on same node:  make a copy");
 				m_oProcessWorkspaceLogger.log("File on the same node, make a copy");
 
 				// get file size
@@ -178,45 +176,31 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 				File oProductFile = new File(sFileName);
 
 				sFileNameWithoutPath = oProductFile.getName();
-				oProduct = oProductReader.getSnapProduct();
 
 				try {
 					oVM = oProductReader.getProductViewModel();
 				} catch (Exception oVMEx) {
 					WasdiLog.warnLog("Share.executeOperation: exception reading Product View Model " + oVMEx.toString());
 				}
-
-				if (oVM == null) {
-					// Reset the cycle to search a better solution
-					sFileName = "";
-				}
-
-				m_oProcessWorkspaceLogger.log("Got File, try to read");
-
+				
 				// Save it in the register
-				DownloadedFile oAlreadyDownloaded = new DownloadedFile();
-				oAlreadyDownloaded.setFileName(sFileNameWithoutPath);
-				oAlreadyDownloaded.setFilePath(sFileName);
-				oAlreadyDownloaded.setProductViewModel(oVM);
+				DownloadedFile oNewDownloadedFile = new DownloadedFile();
+				oNewDownloadedFile.setFileName(sFileNameWithoutPath);
+				oNewDownloadedFile.setFilePath(sFileName);
+				oNewDownloadedFile.setProductViewModel(oVM);
 
 				String sBoundingBox = oParameter.getBoundingBox();
 
 				if (!Utils.isNullOrEmpty(sBoundingBox)) {
-					oAlreadyDownloaded.setBoundingBox(sBoundingBox);
+					oNewDownloadedFile.setBoundingBox(sBoundingBox);
 				} else {
 					WasdiLog.debugLog("Share.executeOperation: bounding box not available in the parameter");
 				}
-
-				if (oProduct != null) {
-					if (oProduct.getStartTime()!=null) {
-						oAlreadyDownloaded.setRefDate(oProduct.getStartTime().getAsDate());
-					}
-				}
-
-				oAlreadyDownloaded.setCategory(DownloadedFileCategory.SHARED.name());
+				
+				oNewDownloadedFile.setCategory(DownloadedFileCategory.SHARED.name());
 
 				DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
-				oDownloadedRepo.insertDownloadedFile(oAlreadyDownloaded);
+				oDownloadedRepo.insertDownloadedFile(oNewDownloadedFile);
 			} else {
 				String sError = "There was an error when copying the file";
 				m_oProcessWorkspaceLogger.log(sError);

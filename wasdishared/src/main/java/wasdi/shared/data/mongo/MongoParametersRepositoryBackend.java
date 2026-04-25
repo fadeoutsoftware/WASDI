@@ -1,12 +1,10 @@
 package wasdi.shared.data.mongo;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.bson.Document;
 
 import wasdi.shared.business.ParameterEntity;
-import wasdi.shared.config.PathsConfig;
 import wasdi.shared.data.interfaces.IParametersRepositoryBackend;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.utils.SerializationUtils;

@@ -1,9 +1,6 @@
 package wasdi.shared.data.sqlite;
 
-import java.io.File;
-
 import wasdi.shared.business.ParameterEntity;
-import wasdi.shared.config.PathsConfig;
 import wasdi.shared.data.interfaces.IParametersRepositoryBackend;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.utils.SerializationUtils;

@@ -19,7 +19,6 @@ public enum LauncherOperations {
     RUNIDL,
     RUNMATLAB,
     MOSAIC,
-    SUBSET,
     MULTISUBSET,
     REGRID,
     DELETEPROCESSOR,

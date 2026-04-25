@@ -300,8 +300,10 @@ public abstract class Operation {
         // Get the Bounding Box
         if (Utils.isNullOrEmpty(sBBox)) {
             try {
-                GeorefProductViewModel oGeorefProductViewModel = (GeorefProductViewModel) oProductViewModel;
-                sBBox = oGeorefProductViewModel.getBbox();
+            	if (oProductViewModel instanceof GeorefProductViewModel) {
+                    GeorefProductViewModel oGeorefProductViewModel = (GeorefProductViewModel) oProductViewModel;
+                    sBBox = oGeorefProductViewModel.getBbox();            		
+            	}
             } catch (Exception oE) {
                 WasdiLog.warnLog("LauncherMain.AddProductToDbAndSendToRabbit: could not extract BBox from GeorefProductViewModel due to: " + oE);
             }
@@ -310,8 +312,6 @@ public abstract class Operation {
             WasdiLog.debugLog("LauncherMain.AddProductToDbAndSendToRabbit: bbox not set. Try to auto get it ");
             sBBox = oReadProduct.getProductBoundingBox();
         }
-        
-        
 
         if (oCheckAlreadyExists == null) {
 
@@ -398,11 +398,7 @@ public abstract class Operation {
             if (m_oSendToRabbit != null)
                 m_oSendToRabbit.SendRabbitMessage(true, sOperation, sWorkspace, oProductViewModel, sExchange);
         }
-
-        if (!oReadProduct.isSnapProductNull()) {
-            oReadProduct.getSnapProduct().dispose();
-        }
-
+        
         WasdiLog.debugLog("LauncherMain.AddProductToDbAndSendToRabbit: Method finished");
     }
     

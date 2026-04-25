@@ -41,6 +41,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 /**
  * Base Download Utility Class 
@@ -1142,10 +1143,9 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 						try {
 							// Product Reader will be used to test if the image has been downloaded with success.
 							WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oDestionationFile);
+							ProductViewModel oTestVM = oReadProduct.getProductViewModel();
 							
-							Product oProduct = oReadProduct.getSnapProduct();
-							
-							if (oProduct != null)  {
+							if (oTestVM != null)  {
 								// Break the retry attempt cycle
 								break;							
 							}

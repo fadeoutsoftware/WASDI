@@ -1169,19 +1169,7 @@ public class SubscriptionResource {
 
 		return aoSubscriptions.stream().map(Subscription::getSubscriptionId).collect(Collectors.toSet());
 	}
-
-	private List<Subscription> getSubscriptionsSharedWithUser(String sUserId) {
-		List<String> aoSubscriptionIds = getIdsOfSubscriptionsSharedWithUser(sUserId);
-
-		if (aoSubscriptionIds.isEmpty()) {
-			return Collections.emptyList();
-		}
-
-		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-
-		return oSubscriptionRepository.getSubscriptionsBySubscriptionIds(aoSubscriptionIds);
-	}
-
+	
 	private List<String> getIdsOfSubscriptionsSharedWithUser(String sUserId) {
 		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 		List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository.getSubscriptionSharingsByUserId(sUserId);

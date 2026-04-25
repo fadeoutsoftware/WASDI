@@ -19,7 +19,6 @@ import wasdi.shared.parameters.MultiSubsetParameter;
 import wasdi.shared.parameters.OperatorParameter;
 import wasdi.shared.parameters.RegridParameter;
 import wasdi.shared.parameters.Sen2CorParameter;
-import wasdi.shared.parameters.SubsetParameter;
 import wasdi.shared.parameters.settings.ISetting;
 import wasdi.shared.parameters.settings.MosaicSetting;
 import wasdi.shared.parameters.settings.MultiSubsetSetting;
@@ -112,7 +111,16 @@ public class ProcessingResources {
                                   @QueryParam("workspace") String sWorkspaceId,
                                   @QueryParam("parent") String sParentId, SubsetSetting oSetting) throws IOException {
         WasdiLog.debugLog("ProcessingResources.subset( Source: " + sSourceProductName + ", Dest:" + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
-        return callExecuteSNAPOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.SUBSET, sParentId);
+        WasdiLog.debugLog("ProcessingResources.subset: the operation is now calling MultiSubset automatically");
+        
+        MultiSubsetSetting oMultiSubsetSetting = new MultiSubsetSetting();
+        oMultiSubsetSetting.getLatNList().add(oSetting.getLatN());
+        oMultiSubsetSetting.getLatSList().add(oSetting.getLatS());
+        oMultiSubsetSetting.getLonEList().add(oSetting.getLonE());
+        oMultiSubsetSetting.getLonWList().add(oSetting.getLonW());
+        oMultiSubsetSetting.getOutputNames().add(sDestinationProductName);
+        
+        return callExecuteSNAPOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oMultiSubsetSetting, LauncherOperations.MULTISUBSET, sParentId);
     }
 
     /**
@@ -433,8 +441,6 @@ public class ProcessingResources {
         switch (oOperation) {
             case MOSAIC:
                 return new MosaicParameter();
-            case SUBSET:
-                return new SubsetParameter();
             case MULTISUBSET:
                 return new MultiSubsetParameter();
             case REGRID:

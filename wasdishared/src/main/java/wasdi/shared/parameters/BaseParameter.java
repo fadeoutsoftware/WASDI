@@ -138,9 +138,6 @@ public class BaseParameter {
 		else if (sOperationType.equals(LauncherOperations.RUNPROCESSOR.name())) {
 			oParam = new ProcessorParameter();
 		}
-		else if (sOperationType.equals(LauncherOperations.SUBSET.name())) {
-			oParam = new SubsetParameter();
-		}
 		else if (sOperationType.equals(LauncherOperations.UPDATEPROCESSES.name())) {
 			oParam = new ProcessorParameter();
 		}

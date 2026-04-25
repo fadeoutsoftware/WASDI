@@ -39,6 +39,7 @@ import wasdi.shared.utils.MissionUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 /**
  * @author c.nattero
@@ -225,10 +226,9 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 							try {
 								// Product Reader will be used to test if the image has been downloaded with success.
 								WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oProductFile);
+								ProductViewModel oTestVM = oReadProduct.getProductViewModel();
 								
-								Product oProduct = oReadProduct.getSnapProduct();
-								
-								if (oProduct != null)  {
+								if (oTestVM != null)  {
 									WasdiLog.debugLog("ONDAProviderAdapter.ExecuteDownloadFile: download method finished result [attemp#" + (iMaxRetry-iAttempts+1) + "]: " + sResult);
 									// Break the retry attempt cycle
 									break;							

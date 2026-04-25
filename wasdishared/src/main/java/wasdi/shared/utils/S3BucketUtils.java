@@ -1,5 +1,7 @@
 package wasdi.shared.utils;
 
+import static java.lang.System.out;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,13 +36,10 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.util.AwsHostNameUtils;
 
-import wasdi.shared.business.ecostress.EcoStressItemForReading;
 import wasdi.shared.business.ecostress.EcoStressItemForWriting;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ecostress.EcoStressRepository;
 import wasdi.shared.utils.log.WasdiLog;
-
-import static java.lang.System.out;
 
 public final class S3BucketUtils {
 
