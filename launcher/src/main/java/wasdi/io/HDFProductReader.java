@@ -7,83 +7,99 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.Product;
 
 import wasdi.dataproviders.CloudferroProviderAdapter;
 import wasdi.shared.business.ecostress.EcoStressItemForReading;
 import wasdi.shared.data.ecostress.EcoStressRepository;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.gis.GdalBandInfo;
+import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
 import wasdi.shared.utils.runtime.ShellExecReturn;
+import wasdi.shared.viewmodels.products.BandViewModel;
+import wasdi.shared.viewmodels.products.MetadataViewModel;
+import wasdi.shared.viewmodels.products.NodeGroupViewModel;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class HDFProductReader extends SnapProductReader {
 
 	public HDFProductReader(File oProductFile) {
 		super(oProductFile);
 	}
+
+	@Override
+	public ProductViewModel getProductViewModel() {
+		ProductViewModel oViewModel = new ProductViewModel();
+		oViewModel.setFileName(m_oProductFile.getName());
+		oViewModel.setName(WasdiFileUtils.getFileNameWithoutLastExtension(m_oProductFile.getName()));
+
+		NodeGroupViewModel oBandsGroup = new NodeGroupViewModel("Bands");
+		oBandsGroup.setBands(new ArrayList<BandViewModel>());
+
+		GdalInfoResult oInfo = GdalUtils.getGdalInfoResult(m_oProductFile);
+		if (oInfo != null && oInfo.bands != null && !oInfo.bands.isEmpty()) {
+			int iWidth = (oInfo.size != null && oInfo.size.size() >= 2) ? oInfo.size.get(0) : 0;
+			int iHeight = (oInfo.size != null && oInfo.size.size() >= 2) ? oInfo.size.get(1) : 0;
+			int iBandIndex = 1;
+			for (GdalBandInfo oGdalBand : oInfo.bands) {
+				String sBandName = Utils.isNullOrEmpty(oGdalBand.description)
+						? "Band_" + iBandIndex
+						: oGdalBand.description;
+				BandViewModel oBand = new BandViewModel(sBandName);
+				oBand.setWidth(iWidth);
+				oBand.setHeight(iHeight);
+				oBandsGroup.getBands().add(oBand);
+				iBandIndex++;
+			}
+		}
+		else if (m_oProductFile.getName().toUpperCase().startsWith("EEH2TES_L2_LSTE")) {
+			for (String sBand : Arrays.asList("LST", "Emis2", "Emis4", "Emis5", "BBE", "qa")) {
+				oBandsGroup.getBands().add(new BandViewModel(sBand));
+			}
+		}
+
+		oViewModel.setBandsGroups(oBandsGroup);
+		return oViewModel;
+	}
 	
 	@Override
 	public String getProductBoundingBox() {
-		
-		String sBoundingBox = "";
-		
-		try { 
-			Product oProduct = getSnapProduct();
-			
-			if (oProduct == null) {
-				WasdiLog.infoLog("HDFProductReader.getProductBoundingBox: snap product is null");
-				return sBoundingBox;
+		try {
+			GdalInfoResult oInfo = GdalUtils.getGdalInfoResult(m_oProductFile);
+			if (oInfo != null && oInfo.wgs84East != 0.0) {
+				return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
+						(float) oInfo.wgs84South, (float) oInfo.wgs84West,
+						(float) oInfo.wgs84South, (float) oInfo.wgs84East,
+						(float) oInfo.wgs84North, (float) oInfo.wgs84East,
+						(float) oInfo.wgs84North, (float) oInfo.wgs84West,
+						(float) oInfo.wgs84South, (float) oInfo.wgs84West);
 			}
-			
-			// y is the latitude, x is the longitude
-			double dMinY = Double.NaN;
-			double dMaxY = Double.NaN;
-			double dMinX = Double.NaN;
-			double dMaxX = Double.NaN;
-			
-			MetadataElement oMetadataRoot = oProduct.getMetadataRoot();
-	        MetadataElement[] aoElements = oMetadataRoot.getElements();
-	        
-	        for (MetadataElement oMetadataElement : aoElements) {
-	        	
-	        	// maxX : EAST
-	        	if (!Double.isNaN(oMetadataElement.getAttributeDouble("EastBoundingCoord", Double.NaN))) 
-	        		dMaxX = oMetadataElement.getAttributeDouble("EastBoundingCoord");
-	        	
-	        	// minX: WEST
-	        	if (!Double.isNaN(oMetadataElement.getAttributeDouble("WestBoundingCoord", Double.NaN))) 
-	        		dMinX = oMetadataElement.getAttributeDouble("WestBoundingCoord");
-	        	
-	          	// maxY: NORTH
-	        	if (!Double.isNaN(oMetadataElement.getAttributeDouble("NorthBoundingCoord", Double.NaN))) 
-	        		dMaxY = oMetadataElement.getAttributeDouble("NorthBoundingCoord");
-	        		
-	        	// minY: SOUTH
-	        	if (!Double.isNaN(oMetadataElement.getAttributeDouble("SouthBoundingCoord", Double.NaN))) 
-	        		dMinY = oMetadataElement.getAttributeDouble("SouthBoundingCoord");
-	        	
-	        }
-			
-	        if (Double.isNaN(dMaxX) || Double.isNaN(dMinX) || Double.isNaN(dMaxY) || Double.isNaN(dMinY))
-	        	return sBoundingBox;
-	        
-	        sBoundingBox = String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", 
-					(float) dMinY, (float) dMinX, (float) dMinY, (float) dMaxX, (float) dMaxY, (float) dMaxX, (float) dMaxY, (float) dMinX, (float) dMinY, (float) dMinX);	
-		
-		} catch (Exception oEx) {
+		}
+		catch (Exception oEx) {
 			WasdiLog.errorLog("HDFProductReader.getProductBoundingBox. Error", oEx);
 		}
-        
-		return sBoundingBox;
+
+		return "";
+	}
+
+	@Override
+	public MetadataViewModel getProductMetadataViewModel() {
+		return new MetadataViewModel("Metadata");
+	}
+
+	@Override
+	public String getEPSG() {
+		return super.getEPSG();
 	}
 	
 	@Override

@@ -59,30 +59,6 @@ public abstract class WasdiProductReader {
 	public WasdiProductReader(File oProductFile) {
 		m_oProductFile = oProductFile;		
 	}
-
-	/**
-	 * Get the SNAP product or null if this is not a product readable by Snap
-	 * 
-	 * @return
-	 */
-	public Product getSnapProduct() {
-		
-		if (m_bSnapReadAlreadyDone == false) {
-			m_oProduct = readSnapProduct();
-		}
-		
-		return m_oProduct;
-	}
-	
-	/**
-	 * Cheeck if the SNAP product is null: if you use getSnapProduct, it will never be null since
-	 * it is designed to read it at the first call
-	 * @return
-	 */
-	public boolean isSnapProductNull() {
-		if (m_oProduct == null) return true;
-		else return false;
-	}
 	
 	/**
 	 * Get the product File Java Object

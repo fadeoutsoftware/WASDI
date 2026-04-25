@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
 
 import ucar.ma2.Array;
 import ucar.nc2.Group;
@@ -282,14 +281,8 @@ public class CmNcProductReader extends WasdiProductReader {
 
 
 	@Override
-	public Product getSnapProduct() {
-		Product oProduct = super.getSnapProduct();
-
-		if (oProduct != null && oProduct.getStartTime() == null) {
-			oProduct.setStartTime(ProductData.UTC.create(new java.util.Date(), 0));
-		}
-
-		return oProduct;
+	public String getEPSG() {
+		return super.getEPSG();
 	}
 	
 	@Override

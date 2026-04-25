@@ -555,4 +555,27 @@ public class SnapProductReader extends WasdiProductReader {
 	
 	}
 
+	/**
+	 * Get the SNAP product or null if this is not a product readable by Snap
+	 * 
+	 * @return
+	 */
+	public Product getSnapProduct() {
+		
+		if (m_bSnapReadAlreadyDone == false) {
+			m_oProduct = readSnapProduct();
+		}
+		
+		return m_oProduct;
+	}
+	
+	/**
+	 * Cheeck if the SNAP product is null: if you use getSnapProduct, it will never be null since
+	 * it is designed to read it at the first call
+	 * @return
+	 */
+	protected boolean isSnapProductNull() {
+		if (m_oProduct == null) return true;
+		else return false;
+	}
 }

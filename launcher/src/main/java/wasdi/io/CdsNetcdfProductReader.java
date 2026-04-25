@@ -2,17 +2,16 @@ package wasdi.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
 
 import ucar.ma2.Array;
 import ucar.nc2.Group;
@@ -271,14 +270,8 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 	}
 
 	@Override
-	public Product getSnapProduct() {
-		Product oProduct = super.getSnapProduct();
-
-		if (oProduct != null && oProduct.getStartTime() == null) {
-			oProduct.setStartTime(ProductData.UTC.create(new java.util.Date(), 0));
-		}
-
-		return oProduct;
+	public String getEPSG() {
+		return super.getEPSG();
 	}
 	
 	@Override
