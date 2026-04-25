@@ -252,17 +252,6 @@ public class GeoTiffProductReader extends WasdiProductReader {
     }
 
     private File warpToEpsg4326(String sInputPath, String sOutputPath) {
-                    ? oGdalBand.description
-                    : "Band_" + iBandIndex;
-            if (sStoredName.equalsIgnoreCase(sBand)) {
-                return iBandIndex;
-            }
-            iBandIndex++;
-        }
-        return -1;
-    }
-
-    private File warpToEpsg4326(String sInputPath, String sOutputPath) {
         String sGdalWarp = GdalUtils.adjustGdalFolder("gdalwarp");
         ArrayList<String> asWarpArgs = new ArrayList<>();
         asWarpArgs.add(sGdalWarp);
