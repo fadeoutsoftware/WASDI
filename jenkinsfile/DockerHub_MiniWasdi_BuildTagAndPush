@@ -114,12 +114,12 @@ pipeline {
           DATA_TO_COPY="\${WORKSPACE}/MiniWasdi/dataToCopy"
 
           echo "Copying launcher..."
-          LAUNCHER_JAR=\$(find \${WORKSPACE}/launcher/target -maxdepth 1 -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+          LAUNCHER_JAR=\$(find \${WORKSPACE}/launcher/target -maxdepth 1 -type f -name "launcher-*.jar" ! -name "original-*" ! -name "*sources*" ! -name "*javadoc*" | sort | head -1)
           echo "  found: \${LAUNCHER_JAR}"
           cp "\${LAUNCHER_JAR}" "\${DATA_TO_COPY}/launcher-1.0.jar"
 
           echo "Copying scheduler..."
-          SCHEDULER_JAR=\$(find \${WORKSPACE}/scheduler/target -maxdepth 1 -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+          SCHEDULER_JAR=\$(find \${WORKSPACE}/scheduler/target -maxdepth 1 -type f -name "scheduler-*.jar" ! -name "original-*" ! -name "*sources*" ! -name "*javadoc*" | sort | head -1)
           echo "  found: \${SCHEDULER_JAR}"
           cp "\${SCHEDULER_JAR}" "\${DATA_TO_COPY}/scheduler-1.0.jar"
 
