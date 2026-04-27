@@ -31,7 +31,7 @@ import wasdi.shared.viewmodels.products.MetadataViewModel;
 import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
-public class HDFProductReader extends SnapProductReader {
+public class HDFProductReader extends WasdiProductReader {
 
 	public HDFProductReader(File oProductFile) {
 		super(oProductFile);

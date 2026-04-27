@@ -34,7 +34,7 @@ import wasdi.shared.viewmodels.products.ProductViewModel;
 
 
 
-public class Sentinel6ProductReader extends SnapProductReader {
+public class Sentinel6ProductReader extends WasdiProductReader {
 
 	public Sentinel6ProductReader(File oProductFile) {
 		super(oProductFile);

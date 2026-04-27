@@ -162,7 +162,18 @@ public class WasdiProductReaderFactory {
 		}
 
 		WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating SNAP File Reader for " + oFile.getName());
+		SnapProductReader oSnapReader = new SnapProductReader(oFile);
 
-		return new SnapProductReader(oFile);
+		try {
+			if (oSnapReader.getProductViewModel() != null) {
+				return oSnapReader;
+			}
+		}
+		catch (Throwable oEx) {
+			WasdiLog.warnLog("WasdiProductReaderFactory.getProductReader: SNAP fallback failed for " + oFile.getName() + ", using UnknownProductReader");
+		}
+
+		WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating Unknown File Reader for " + oFile.getName());
+		return new UnknownProductReader(oFile);
 	}
 }

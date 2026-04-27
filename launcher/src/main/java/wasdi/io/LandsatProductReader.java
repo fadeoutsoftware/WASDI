@@ -5,15 +5,23 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.datamodel.Product;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.json.JSONObject;
 
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.gis.GdalInfoResult;
+import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
 import wasdi.shared.viewmodels.products.NodeGroupViewModel;
@@ -24,7 +32,7 @@ import wasdi.shared.viewmodels.products.ProductViewModel;
  * @author valentina.leone
  *
  */
-public class LandsatProductReader extends SnapProductReader {
+public class LandsatProductReader extends WasdiProductReader {
 
 	public LandsatProductReader(File oProductFile) {
 		super(oProductFile);	
@@ -32,20 +40,110 @@ public class LandsatProductReader extends SnapProductReader {
 	
 	@Override
 	public ProductViewModel getProductViewModel() {
+		if (m_oProductFile == null) {
+			WasdiLog.warnLog("LandsatProductReader.getProductViewModel: product file is null");
+			return null;
+		}
+
 		WasdiLog.debugLog("LandsatProductReader.getProductViewModel. Product file path " + m_oProductFile.getAbsolutePath());
-		
+
 		ProductViewModel oViewModel = new ProductViewModel();
+		oViewModel.setFileName(m_oProductFile.getName());
+		oViewModel.setName(m_oProductFile.getName());
 
-        // Get Bands
-        this.getSnapProductBandsViewModel(oViewModel, getSnapProduct());
-        
-        if (m_oProductFile != null) {
-        	oViewModel.setFileName(m_oProductFile.getName());
-        	oViewModel.setName(m_oProductFile.getName());
-        }
+		NodeGroupViewModel oBandsGroup = new NodeGroupViewModel("Bands");
+		oBandsGroup.setBands(new ArrayList<BandViewModel>());
 
-        WasdiLog.debugLog("LandsatProductReader.getProductViewModel: done");
+		List<File> aoBandFiles = getLandsatBandFiles();
+		LinkedHashSet<String> aoSeenBands = new LinkedHashSet<>();
+
+		for (File oBandFile : aoBandFiles) {
+			String sBandName = inferBandNameFromFileName(oBandFile.getName());
+			if (Utils.isNullOrEmpty(sBandName) || aoSeenBands.contains(sBandName)) {
+				continue;
+			}
+
+			BandViewModel oBand = new BandViewModel(sBandName);
+			try {
+				GdalInfoResult oInfo = GdalUtils.getGdalInfoResult(oBandFile);
+				if (oInfo != null && oInfo.size != null && oInfo.size.size() >= 2) {
+					oBand.setWidth(oInfo.size.get(0));
+					oBand.setHeight(oInfo.size.get(1));
+				}
+			}
+			catch (Exception oEx) {
+				WasdiLog.warnLog("LandsatProductReader.getProductViewModel: cannot read raster size for " + oBandFile.getName());
+			}
+
+			oBandsGroup.getBands().add(oBand);
+			aoSeenBands.add(sBandName);
+		}
+
+		oViewModel.setBandsGroups(oBandsGroup);
+
+		WasdiLog.debugLog("LandsatProductReader.getProductViewModel: done");
 		return oViewModel;
+	}
+
+	private List<File> getLandsatBandFiles() {
+		List<File> aoBandFiles = new ArrayList<>();
+
+		if (m_oProductFile == null) return aoBandFiles;
+
+		if (m_oProductFile.isFile()) {
+			if (isTiffFile(m_oProductFile)) {
+				aoBandFiles.add(m_oProductFile);
+			}
+		}
+		else if (m_oProductFile.isDirectory()) {
+			File[] aoChildren = m_oProductFile.listFiles();
+			if (aoChildren != null) {
+				for (File oChild : aoChildren) {
+					if (oChild.isFile() && isTiffFile(oChild)) {
+						aoBandFiles.add(oChild);
+					}
+					else if (oChild.isDirectory() && oChild.getName().toUpperCase().endsWith(".TIFF")) {
+						File[] aoTiffFolderFiles = oChild.listFiles();
+						if (aoTiffFolderFiles != null) {
+							for (File oFile : aoTiffFolderFiles) {
+								if (oFile.isFile() && isTiffFile(oFile)) {
+									aoBandFiles.add(oFile);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		Collections.sort(aoBandFiles, Comparator.comparing(File::getName));
+		return aoBandFiles;
+	}
+
+	private boolean isTiffFile(File oFile) {
+		String sName = oFile.getName().toLowerCase();
+		return sName.endsWith(".tif") || sName.endsWith(".tiff");
+	}
+
+	private String inferBandNameFromFileName(String sFileName) {
+		if (Utils.isNullOrEmpty(sFileName)) return null;
+
+		String sBaseName = sFileName;
+		int iDot = sBaseName.lastIndexOf('.');
+		if (iDot > 0) sBaseName = sBaseName.substring(0, iDot);
+
+		Pattern oPattern = Pattern.compile("(?:^|_)(SR_B\\d+|ST_B\\d+|B\\d+|B\\d+_VCID_\\d+|BQA|QA_PIXEL|QA_RADSAT|QA_AEROSOL|AEROSOL)$", Pattern.CASE_INSENSITIVE);
+		Matcher oMatcher = oPattern.matcher(sBaseName);
+		if (oMatcher.find()) {
+			return oMatcher.group(1).toUpperCase();
+		}
+
+		int iUnderscore = sBaseName.lastIndexOf('_');
+		if (iUnderscore >= 0 && iUnderscore < sBaseName.length() - 1) {
+			return sBaseName.substring(iUnderscore + 1).toUpperCase();
+		}
+
+		return sBaseName;
 	}
 	
 	@Override
@@ -108,85 +206,26 @@ public class LandsatProductReader extends SnapProductReader {
 				
 			}
 			
-			return super.getProductBoundingBox();
+			File oFirstBandFile = getFirstBandFile();
+			if (oFirstBandFile != null) {
+				GdalInfoResult oInfo = GdalUtils.getGdalInfoResult(oFirstBandFile);
+				if (oInfo != null && oInfo.wgs84East != 0.0) {
+					return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
+							(float) oInfo.wgs84South, (float) oInfo.wgs84West,
+							(float) oInfo.wgs84South, (float) oInfo.wgs84East,
+							(float) oInfo.wgs84North, (float) oInfo.wgs84East,
+							(float) oInfo.wgs84North, (float) oInfo.wgs84West,
+							(float) oInfo.wgs84South, (float) oInfo.wgs84West);
+				}
+			}
 		
 		} catch (IOException oEx) {
 			WasdiLog.errorLog("LandsatProductReader.getProductBoundingBox. Exception when trying to read the bounding box ", oEx);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("LandsatProductReader.getProductBoundingBox. Unexpected exception ", oEx);
 		}
 		
 		return ""; 
-	}
-	
-	@Override
-    protected Product readSnapProduct() {
-		
-		if (m_oProductFile.getName().startsWith("LC08_L2SP_")) {
-        	WasdiLog.debugLog("LandsatProductReader.readSnapProduct: file is a Landsat-8 L2 product. Snap cannot read it");
-        	return null;
-		}
-		
-		m_bSnapReadAlreadyDone = true;
-    	
-        Product oSNAPProduct = null;
-        
-        if (m_oProductFile == null) {
-        	WasdiLog.debugLog("LandsatProductReader.readSnapProduct: file to read is null, return null ");
-        	return oSNAPProduct;
-        }
-        
-        if (!m_oProductFile.isDirectory()) {
-        	WasdiLog.debugLog("LandsatProductReader.readSnapProduct: the referenced product is a file, but it should be a folder");
-        	return oSNAPProduct;
-        }
-        
-        // look for the ".TIFF" folder
-    	File oTIFFolder = null;
-    	for (File oFile : m_oProductFile.listFiles()) {
-    		if (oFile.isDirectory() && oFile.getName().endsWith(".TIFF")) {
-    			oTIFFolder = oFile;
-    			break;
-    		}
-    	}
-    	
-    	if (oTIFFolder == null) {
-    		WasdiLog.warnLog("LandsatProductReader.readSnapProduct: TIFF folder with Landsat files not found. Will try to look for MTL file in the main product folder.");
-    		 return oSNAPProduct;
-    	}
-    	
-    	// if we found the TIF folder, then we can access the "MTL" file
-    	File oMTLFile = null;
-    	for (File oFile : oTIFFolder.listFiles()) {
-    		if (oFile.getName().endsWith("_MTL.txt")) {
-    			oMTLFile = oFile;
-    			break;
-    		}
-     	}
-    	
-    	if (oMTLFile == null) {
-    		WasdiLog.warnLog("LandsatProductReader.readSnapProduct: no MTL file that can be read by SNAP");
-    		return oSNAPProduct;
-    	}
-    	        
-        try {
-            WasdiLog.debugLog(".readSnapProduct: begin read " + oMTLFile.getAbsolutePath());
-            
-            long lStartTime = System.currentTimeMillis();
-            oSNAPProduct = ProductIO.readProduct(oMTLFile);  
-            long lEndTime = System.currentTimeMillis();
-            
-            WasdiLog.debugLog("LandsatProductReader.readSnapProduct: read done in " + (lEndTime - lStartTime) + "ms");
-
-            if(oSNAPProduct == null) {
-            	WasdiLog.errorLog("LandsatProductReader.readSnapProduct: SNAP could not read the MTL file, the returned product is null");
-            }
-            
-            return oSNAPProduct;
-        } 
-        catch (Throwable oEx) {
-            WasdiLog.errorLog("LandsatProductReader.readSnapProduct: exception " + oEx.toString());
-        }        
-        
-		return oSNAPProduct;
 	}
 
 	@Override
@@ -229,44 +268,70 @@ public class LandsatProductReader extends SnapProductReader {
 	}
 	
 	@Override
-    protected void getSnapProductBandsViewModel(ProductViewModel oProductViewModel, Product oProduct) {
-    	
-		if (oProductViewModel == null) {
-            WasdiLog.debugLog("LandsatProductReader.getSnapProductBandsViewModel: ViewModel null, return");
-            return;
-        }
-		
-		if (m_oProductFile.getName().startsWith("LC08_L2SP_")) {
-            WasdiLog.debugLog("LandsatProductReader.getSnapProductBandsViewModel: Landsat-8 L2 product. Skipping reading of the bands");
-			NodeGroupViewModel oNodeGroupViewModel = new NodeGroupViewModel();
-	    	oNodeGroupViewModel.setNodeName("Bands");
-	    	List<BandViewModel> oBands = new ArrayList<>();
-	    	oNodeGroupViewModel.setBands(oBands);
-	    	oProductViewModel.setBandsGroups(oNodeGroupViewModel);
-	    	return;
-		}
-		
-		super.getSnapProductBandsViewModel(oProductViewModel, oProduct);
-    }
-	
-	
-	@Override
 	public MetadataViewModel getProductMetadataViewModel() {
-		if (m_oProductFile.getName().startsWith("LC08_L2SP_")) {
-            WasdiLog.debugLog("LandsatProductReader.getProductMetadataViewModel: Landsat-8 L2 product. Skipping reading of the metadata");
-            return new MetadataViewModel("Metadata");
-		}
-		return super.getProductMetadataViewModel();
+		return new MetadataViewModel("Metadata");
 	}
 	
 	
 	@Override
 	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
-		if (m_oProductFile.getName().startsWith("LC08_L2SP_")) {
-            WasdiLog.debugLog("LandsatProductReader.getFileForPublishBand: Landsat-8 L2 product. Skipping publishing of bands");
-            return null;
+		try {
+			if (Utils.isNullOrEmpty(sBand)) {
+				WasdiLog.warnLog("LandsatProductReader.getFileForPublishBand: band is null/empty");
+				return null;
+			}
+
+			File oBandFile = findBandFileByBandName(sBand);
+			if (oBandFile == null) {
+				WasdiLog.warnLog("LandsatProductReader.getFileForPublishBand: band not found: " + sBand);
+				return null;
+			}
+
+			if (isFileAlready4326(oBandFile)) {
+				return oBandFile;
+			}
+
+			String sOutputPath = m_oProductFile.getParentFile().getAbsolutePath() + File.separator + sLayerId + ".tif";
+			String sGdalWarp = GdalUtils.adjustGdalFolder("gdalwarp");
+			ArrayList<String> asWarpArgs = new ArrayList<>();
+			asWarpArgs.add(sGdalWarp);
+			asWarpArgs.add("-t_srs");
+			asWarpArgs.add("EPSG:4326");
+			asWarpArgs.add("-of");
+			asWarpArgs.add("GTiff");
+			asWarpArgs.add(oBandFile.getAbsolutePath());
+			asWarpArgs.add(sOutputPath);
+
+			RunTimeUtils.shellExec(asWarpArgs, true, true, true, true);
+
+			File oOutput = new File(sOutputPath);
+			if (oOutput.exists()) {
+				return oOutput;
+			}
 		}
-		return super.getFileForPublishBand(sBand, sLayerId, sPlatform);
+		catch (Exception oEx) {
+			WasdiLog.errorLog("LandsatProductReader.getFileForPublishBand: error ", oEx);
+		}
+
+		return null;
+	}
+
+	@Override
+	public String getEPSG() {
+		try {
+			File oFirstBandFile = getFirstBandFile();
+			if (oFirstBandFile == null) return null;
+
+			GdalInfoResult oInfo = GdalUtils.getGdalInfoResult(oFirstBandFile);
+			if (oInfo != null && !Utils.isNullOrEmpty(oInfo.coordinateSystemWKT)) {
+				CoordinateReferenceSystem oCRS = CRS.parseWKT(oInfo.coordinateSystemWKT);
+				return CRS.lookupIdentifier(oCRS, true);
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("LandsatProductReader.getEPSG: exception ", oEx);
+		}
+		return null;
 	}
 
 	
@@ -284,6 +349,47 @@ public class LandsatProductReader extends SnapProductReader {
 			}
 		} catch (Exception oE) {
 			WasdiLog.errorLog("LandsatProductReader.deleteZipFile: exception while trying to delete zip file: " + oE ); 
+		}
+	}
+
+	private File findBandFileByBandName(String sBand) {
+		List<File> aoBandFiles = getLandsatBandFiles();
+		String sRequestedBand = sBand.toUpperCase();
+
+		for (File oBandFile : aoBandFiles) {
+			String sCandidate = inferBandNameFromFileName(oBandFile.getName());
+			if (!Utils.isNullOrEmpty(sCandidate) && sCandidate.equalsIgnoreCase(sRequestedBand)) {
+				return oBandFile;
+			}
+		}
+
+		for (File oBandFile : aoBandFiles) {
+			if (oBandFile.getName().toUpperCase().contains("_" + sRequestedBand + ".")) {
+				return oBandFile;
+			}
+		}
+
+		return null;
+	}
+
+	private File getFirstBandFile() {
+		List<File> aoBandFiles = getLandsatBandFiles();
+		if (aoBandFiles.isEmpty()) return null;
+		return aoBandFiles.get(0);
+	}
+
+	private boolean isFileAlready4326(File oBandFile) {
+		try {
+			GdalInfoResult oInfo = GdalUtils.getGdalInfoResult(oBandFile);
+			if (oInfo == null || Utils.isNullOrEmpty(oInfo.coordinateSystemWKT)) return false;
+
+			CoordinateReferenceSystem oCRS = CRS.parseWKT(oInfo.coordinateSystemWKT);
+			String sEpsg = CRS.lookupIdentifier(oCRS, true);
+			return !Utils.isNullOrEmpty(sEpsg) && sEpsg.contains("4326");
+		}
+		catch (Exception oEx) {
+			WasdiLog.warnLog("LandsatProductReader.isFileAlready4326: cannot detect EPSG for " + oBandFile.getName());
+			return false;
 		}
 	}
 	
@@ -304,13 +410,6 @@ public class LandsatProductReader extends SnapProductReader {
 		oViewModel.getBandsGroups().getBands().forEach(oBand -> System.out.println(oBand.getName()));
 		
 		System.out.println(oReader.getProductBoundingBox());
-		*/
-		
-		/*
-		Product oSNAPProduct = ProductIO.readProduct("C:/Users/valentina.leone/Desktop/WORK/Landsat-8/LC08_L2SP_196028_20150704_20200909_02_T1/LC08_L2SP_196028_20150704_20200909_02_T1_MTL.txt"); 
-		for (Band oBand : oSNAPProduct.getBands()) {
-			System.out.println("Name: " + oBand.getName());
-		}
 		*/
 		
 	}
