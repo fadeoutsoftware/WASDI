@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
@@ -578,4 +579,65 @@ public class SnapProductReader extends WasdiProductReader {
 		if (m_oProduct == null) return true;
 		else return false;
 	}
+	
+    /**
+     * Read a SNAP Product: this is supported directly in the main class
+     * 
+     * @param oFile File to open
+     * @param sFormatName Format, if known.
+     * @return Product object
+     */
+    protected Product readSnapProduct() {
+    	
+    	m_bSnapReadAlreadyDone = true;
+    	
+        Product oProduct = null;
+
+        // P.Campanella 2019/04/16: deleted the static cache. There is a new instance of this class every time is used
+        // so the cache was useless and could have memory problems
+        
+        if (m_oProductFile == null) {
+        	WasdiLog.debugLog("WasdiProductReader.readSnapProduct: file to read is null, return null ");
+        	return null;
+        }
+        
+        if (MissionUtils.isSentinel5PFile(m_oProductFile)) {
+        	WasdiLog.debugLog("WasdiProductReader.readSnapProduct: we do not want SNAP to read S5P, return null ");
+        	return null;        	
+        }
+        
+        if (MissionUtils.isSentinel6File(m_oProductFile)) {
+           	WasdiLog.debugLog("WasdiProductReader.readSnapProduct: we do not want SNAP to read S6, return null ");
+        	return null;        	
+        }
+        
+        if (m_oProductFile.getName().toUpperCase().endsWith(".ZIP")) {
+        	if (!ZipFileUtils.isValidZipFile(m_oProductFile)) {
+            	WasdiLog.debugLog("WasdiProductReader.readSnapProduct: not valid zip file, return null");
+            	return null;        	        		
+        	}
+        }
+        
+        try {
+            WasdiLog.debugLog("WasdiProductReader.readSnapProduct: begin read " + m_oProductFile.getAbsolutePath());
+            
+            long lStartTime = System.currentTimeMillis();
+            oProduct = ProductIO.readProduct(m_oProductFile);  
+            long lEndTime = System.currentTimeMillis();
+            
+            WasdiLog.debugLog("WasdiProductReader.readSnapProduct: read done in " + (lEndTime - lStartTime) + "ms");
+
+            if(null== oProduct) {
+            	WasdiLog.errorLog("WasdiProductReader.readSnapProduct: apparently SNAP could not read it, the returned product is null");
+            }
+            
+            return oProduct;
+            
+        } 
+        catch (Throwable oEx) {
+            WasdiLog.errorLog("WasdiProductReader.readSnapProduct: exception: " + oEx.toString());
+        }
+
+        return null;
+    }	
 }

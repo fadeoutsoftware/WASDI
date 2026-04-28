@@ -47,9 +47,4 @@ public class ImagesProductReader extends WasdiProductReader {
 		return null;
 	}
 
-	
-	@Override
-	protected Product readSnapProduct() {
-		return null;
-	}
 }

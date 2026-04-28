@@ -92,13 +92,4 @@ public class ModisProductReader extends WasdiProductReader {
 	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
 		return null;
 	}
-	
-	
-	@Override
-	protected Product readSnapProduct() {
-    	WasdiLog.debugLog("ModisProductReader.readSnapProduct: we do not want SNAP to read MODIS products, return null ");
-    	return null;        	
-	}
-	
-
 }

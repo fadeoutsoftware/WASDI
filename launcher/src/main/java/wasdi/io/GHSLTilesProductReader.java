@@ -184,11 +184,5 @@ public class GHSLTilesProductReader extends WasdiProductReader {
     	WasdiLog.debugLog("GHSLTilesProductReader.readSnapProduct: publishing of bands is not yet supported");
 		return null;
 	}
-	
-	@Override
-	protected Product readSnapProduct() {
-    	WasdiLog.debugLog("GHSLTilesProductReader.readSnapProduct: we do not want SNAP to read GHS products, return null ");
-    	return null;        	
-	}
 
 }

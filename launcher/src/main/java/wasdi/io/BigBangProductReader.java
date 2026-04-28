@@ -63,11 +63,5 @@ public class BigBangProductReader extends WasdiProductReader {
     	WasdiLog.debugLog("BigBangProductReader.getFileForPublishBand: no bands for BigBang products");
 		return null;
 	}
-	
-	@Override
-	protected Product readSnapProduct() {
-    	WasdiLog.debugLog("BigBangProductReader.readSnapProduct: we do not want SNAP to read BigBang products, return null ");
-    	return null;        	
-	}
 
 }

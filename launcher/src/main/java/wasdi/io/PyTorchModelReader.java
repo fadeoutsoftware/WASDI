@@ -46,10 +46,5 @@ public class PyTorchModelReader extends WasdiProductReader {
 	public File getFileForPublishBand(String sBand, String sLayerId, String sPlatform) {
 		return null;
 	}
-	
-	@Override
-	protected Product readSnapProduct() {
-		return null;
-	}	
 
 }
