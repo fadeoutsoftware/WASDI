@@ -102,7 +102,7 @@ public class QueryTranslatorOData extends QueryTranslator {
 		if (!Utils.isNullOrEmpty(sPlatform)) {
 			
 			if (sPlatform.equals(Platforms.LANDSAT8)) {
-				sPlatform = "LANDSAT-8-ESA";
+				sPlatform = "LANDSAT-8";
 			}
 			
 			asQueryElements.add(createCollectionNameEqFilter(sPlatform));

@@ -53,8 +53,7 @@ public class Sentinel3ProductReader extends WasdiProductReader {
 
 		String sFileName = (m_oProductFile != null) ? m_oProductFile.getName() : "s3-product";
 		oProductVM.setFileName(sFileName);
-		oProductVM.setName(WasdiFileUtils.getFileNameWithoutLastExtension(sFileName));
-		oProductVM.setProductFriendlyName(WasdiFileUtils.getFileNameWithoutLastExtension(sFileName));
+		oProductVM.setName(sFileName);
 
 		NodeGroupViewModel oBandsGroup = new NodeGroupViewModel("Bands");
 		oBandsGroup.setBands(new ArrayList<BandViewModel>());
