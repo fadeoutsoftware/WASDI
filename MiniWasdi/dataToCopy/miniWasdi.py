@@ -4,6 +4,41 @@ import time
 import wasdi
 import requests
 
+
+s_sLogLevel = "INFO"
+
+def getLogLevelInt(sLogLevel):
+    sLogLevel = sLogLevel.upper()
+    if sLogLevel == "DEBUG":
+        return 10
+    elif sLogLevel == "INFO":
+        return 20
+    elif sLogLevel == "WARNING":
+        return 30
+    elif sLogLevel == "ERROR":
+        return 40
+    else:
+        return 20
+    
+def debugLog(sMessage):
+    log(sMessage, "DEBUG")
+
+def infoLog(sMessage):
+    log(sMessage, "INFO")
+
+def warningLog(sMessage):
+    log(sMessage, "WARNING")
+
+def errorLog(sMessage):
+    log(sMessage, "ERROR")
+
+def log(sMessage, sLevel="INFO"):
+
+    if getLogLevelInt(sLevel) < getLogLevelInt(s_sLogLevel):
+        return
+    
+    print(f"[{sLevel}] [STARTUP] {sMessage}")
+
 def _getEnvironmentVariable(sVariable):
     try:
         sValue = os.environ[sVariable]
@@ -40,9 +75,9 @@ def waitProcess(sProcessId):
 
                 time.sleep(5)
             except Exception as oInnerEx:
-                print("[STARTUP] Exception in the waitProcess loop " + str(oInnerEx))
+                errorLog("Exception in the waitProcess loop " + str(oInnerEx))
     except:
-        print("[STARTUP] Exception in the waitProcess")
+        errorLog("Exception in the waitProcess")
     
     return sStatus
 
@@ -81,22 +116,22 @@ def _upload_processor(sApiUrl, sZipPath, sZipFileName):
             timeout=120,
         )
 
-    print(f"[STARTUP] Upload status for {sZipFileName}: {oResponse.status_code}")
-    print(oResponse.text)
+    infoLog(f"Upload status for {sZipFileName}: {oResponse.status_code}")
+    infoLog(oResponse.text)
 
     if oResponse.status_code != 200:
-        print(f"[STARTUP] Error uploading processor {sZipFileName}: {oResponse.status_code} - {oResponse.text}")
+        errorLog(f"Error uploading processor {sZipFileName}: {oResponse.status_code} - {oResponse.text}")
     else:
         sResponseJson = oResponse.json()
         bOk = sResponseJson.get("boolValue", False)
         sProcessObjId = sResponseJson.get("stringValue", "")
 
         if bOk:
-            print(f"[STARTUP] Processor {sZipFileName} uploaded successfully waiting for deployment.")
+            infoLog(f"Processor {sZipFileName} uploaded successfully waiting for deployment.")
             waitProcess(sProcessObjId)
-            print(f"[STARTUP] Processor {sZipFileName} deployed successfully.")
+            infoLog(f"Processor {sZipFileName} deployed successfully.")
         else:
-            print(f"[STARTUP] Error deploying processor {sZipFileName}: {sProcessObjId}")
+            errorLog(f"Error deploying processor {sZipFileName}: {sProcessObjId}")
 
 def _update_processor(sBaseUrl, sZipPath, sZipFileName):
     
@@ -123,7 +158,7 @@ def _update_processor(sBaseUrl, sZipPath, sZipFileName):
     )
 
     if (oResponse.status_code != 200):
-        print(f"[STARTUP] Error fetching processor {sZipFileName} for update: {oResponse.status_code} - {oResponse.text}")
+        errorLog(f"Error fetching processor {sZipFileName} for update: {oResponse.status_code} - {oResponse.text}")
         return
     
     sResponseJson = oResponse.json()
@@ -132,7 +167,7 @@ def _update_processor(sBaseUrl, sZipPath, sZipFileName):
     dProcessorUpdate = sResponseJson.get("lastUpdate", 0)
 
     if dLastZipFileUpdate > dProcessorUpdate:
-        print(f"[STARTUP] Processor {sZipFileName} is outdated, updating it.")
+        infoLog(f"Processor {sZipFileName} is outdated, updating it.")
 
         sUrl = sBaseUrl + "processors/updatefiles"
 
@@ -154,24 +189,24 @@ def _update_processor(sBaseUrl, sZipPath, sZipFileName):
                 timeout=120,
             )
 
-        print(f"[STARTUP] Update status for {sZipFileName}: {oResponse.status_code}")
-        print(oResponse.text)
+        infoLog(f"Update status for {sZipFileName}: {oResponse.status_code}")
+        infoLog(oResponse.text)
 
         if oResponse.status_code != 200:
-            print(f"[STARTUP] Error updating processor {sZipFileName}: {oResponse.status_code} - {oResponse.text}")
+            errorLog(f"Error updating processor {sZipFileName}: {oResponse.status_code} - {oResponse.text}")
         else:
             sResponseJson = oResponse.json()
             bOk = sResponseJson.get("boolValue", False)
             sProcessObjId = sResponseJson.get("stringValue", "")
 
             if bOk:
-                print(f"[STARTUP] Processor {sZipFileName} updated successfully waiting for deployment.")
+                infoLog(f"Processor {sZipFileName} updated successfully waiting for deployment.")
                 waitProcess(sProcessObjId)
-                print(f"[STARTUP] Processor {sZipFileName} updated successfully.")
+                infoLog(f"Processor {sZipFileName} updated successfully.")
             else:
-                print(f"[STARTUP] Error updating processor {sZipFileName}: {sProcessObjId}")
+                errorLog(f"Error updating processor {sZipFileName}: {sProcessObjId}")
     else:
-        print(f"[STARTUP] Processor {sZipFileName} is up to date, no need to update.")
+        debugLog(f"Processor {sZipFileName} is up to date, no need to update.")
 
 
 def _upload_workflow(sApiUrl, sXmlPath, sXmlFileName):
@@ -200,8 +235,8 @@ def _upload_workflow(sApiUrl, sXmlPath, sXmlFileName):
             timeout=120,
         )
 
-    print(f"[STARTUP] Upload status for {sXmlFileName}: {oResponse.status_code}")
-    print(f"[STARTUP] {oResponse.text}")
+    infoLog(f"Upload status for {sXmlFileName}: {oResponse.status_code}")
+    infoLog(f"{oResponse.text}")
 
 
 def _update_workflow(sBaseUrl, sXmlPath, sXmlFileName, dLastUpdate, sWorkflowId):
@@ -209,7 +244,7 @@ def _update_workflow(sBaseUrl, sXmlPath, sXmlFileName, dLastUpdate, sWorkflowId)
     dLastXmlFileUpdate = os.path.getmtime(sXmlPath)*1000.0
 
     if dLastXmlFileUpdate > dLastUpdate:
-        print(f"[STARTUP] Workflow {sXmlFileName} is outdated, updating it.")
+        infoLog(f"Workflow {sXmlFileName} is outdated, updating it.")
 
         sUrl = sBaseUrl + "workflows/updatefile"
 
@@ -234,32 +269,33 @@ def _update_workflow(sBaseUrl, sXmlPath, sXmlFileName, dLastUpdate, sWorkflowId)
                 timeout=120,
             )
 
-        print(f"[STARTUP] Update status for {sXmlFileName}: {oResponse.status_code}")
-        print(f"[STARTUP] {oResponse.text}")
+        infoLog(f"Update status for {sXmlFileName}: {oResponse.status_code}")
+        infoLog(f"{oResponse.text}")
     else:
-        print(f"[STARTUP] Workflow {sXmlFileName} is up to date, no need to update.")
+        debugLog(f"Workflow {sXmlFileName} is up to date, no need to update.")
 
 
 def _wait_for_server(sBaseUrl, iMaxWaitSeconds=180, iPollSeconds=3):
     sHelloUrl = sBaseUrl.rstrip("/") + "/wasdi/hello"
     iDeadline = time.time() + iMaxWaitSeconds
 
-    print("[STARTUP] Waiting for WASDI to start")
+    infoLog("Waiting for WASDI to start")
 
     while time.time() < iDeadline:
         try:
             oResponse = requests.get(sHelloUrl, timeout=5)
             if oResponse.status_code == 200:
-                print("[STARTUP] WASDI is ready.")
+                infoLog("WASDI is ready.")
                 return
-            print("[STARTUP] WASDI not ready yet. ")
+            debugLog("WASDI not ready yet. ")
         except requests.RequestException as oEx:
-            print("[STARTUP] WASDI not reachable yet. ")
+            debugLog("WASDI not reachable yet. ")
 
         time.sleep(iPollSeconds)
 
-    raise RuntimeError("[STARTUP] Timed out waiting for WASDI readiness")
-    
+    raise RuntimeError("Timed out waiting for WASDI readiness")
+
+
 def run():
     print("[STARTUP] Welcome to MiniWasdi 1.0")
 
@@ -275,11 +311,14 @@ def run():
     # Initialize the base Url
     sBaseUrl = "http://127.0.0.1:8080/wasdiwebserver/rest/"
 
+    global s_sLogLevel
+
     # Read the config file
     with open(sConfigFile) as oJsonFile:
         aoConfig = json.load(oJsonFile)
         # Update the base Url if specified in the config
         sBaseUrl = aoConfig.get("baseUrl", sBaseUrl)
+        s_sLogLevel = aoConfig.get("logLevel", s_sLogLevel)
     
     # Ensure the base Url ends with a slash
     if not sBaseUrl.endswith("/"):
@@ -292,32 +331,32 @@ def run():
 
     if sCleanHistory is not None:
         if sCleanHistory.lower() == "true" or sCleanHistory == "1":
-            print("[STARTUP] WASDI_CLEAR_HISTORY is set to true, cleaning the history.")
+            infoLog("WASDI_CLEAR_HISTORY is set to true, cleaning the history.")
             sCleanQueueUrl = sBaseUrl + "admin/cleanProcessesQueue"
             try:
                 oResponse = requests.delete(sCleanQueueUrl, timeout=30)
                 if oResponse.status_code == 200:
-                    print("[STARTUP] Created processes cleaned successfully.")
+                    infoLog("Created processes cleaned successfully.")
                 else:
-                    print(f"[STARTUP] Error cleaning created processes: {oResponse.status_code} - {oResponse.text}")
+                    errorLog(f"Error cleaning created processes: {oResponse.status_code} - {oResponse.text}")
             except Exception as oEx:
-                print(f"[STARTUP] Exception while cleaning created processes: {str(oEx)}")
+                errorLog(f"Exception while cleaning created processes: {str(oEx)}")
 
             sCleanPastProcessesUrl = sBaseUrl + "admin/cleanOldProcesses"
             try:
                 oResponse = requests.delete(sCleanPastProcessesUrl, timeout=30)
                 if oResponse.status_code == 200:
-                    print("[STARTUP] History cleaned successfully.")
+                    infoLog("History cleaned successfully.")
                 else:
-                    print(f"[STARTUP] Error cleaning history: {oResponse.status_code} - {oResponse.text}")
+                    errorLog(f"Error cleaning history: {oResponse.status_code} - {oResponse.text}")
             except Exception as oEx:
-                print(f"[STARTUP] Exception while cleaning history: {str(oEx)}")
+                errorLog(f"Exception while cleaning history: {str(oEx)}")
 
-            print("[STARTUP] History cleaned, continuing with the startup.")
+            debugLog("History cleaned, continuing with the startup.")
         else:
-            print("[STARTUP] WASDI_CLEAR_HISTORY is set to not known value (" + sCleanHistory + "), not cleaning the history.")
+            warningLog("WASDI_CLEAR_HISTORY is set to not known value (" + sCleanHistory + "), not cleaning the history.")
     else:
-        print("[STARTUP] WASDI_CLEAR_HISTORY is not set, not cleaning the history.")
+        debugLog("WASDI_CLEAR_HISTORY is not set, not cleaning the history.")
 
     # Get the  base path of WASDI
     sBasePath = aoConfig["paths"]["downloadRootPath"]
@@ -399,7 +438,7 @@ def run():
         # Get the existing workflows to avoid duplicates
         aoExistingWorkflows = wasdi.getWorkflows()
     except Exception as oEx:
-        print("[STARTUP] Error fetching existing workflows, will not check for duplicates. Error: " + str(oEx))
+        errorLog("Error fetching existing workflows, will not check for duplicates. Error: " + str(oEx))
 
     # For all the workflows to be deployed
     for sWorkflow in asWorkflows:
@@ -421,7 +460,7 @@ def run():
                     _update_workflow(sBaseUrl, sWorkflowPath, sWorkflow, oExistingWorkflow.get("lastUpdate", 0), oExistingWorkflow.get("workflowId", ""))
                 else:
                     # If it is not already deployed, let's upload it
-                    print("[STARTUP] Upload workflow: " + sWorkflow)
+                    infoLog("Upload workflow: " + sWorkflow)
                     _upload_workflow(sNewWorkflowUrl, sWorkflowPath, sWorkflow)
 
     # Check if the user wants to run in server mode
@@ -429,9 +468,9 @@ def run():
     bServerMode = sServerMode is not None and sServerMode.lower() in {"1", "true"}
 
     if bServerMode:
-        print("[STARTUP] Server mode enabled. WASDI is running as a local server.")
-        print("[STARTUP] API available at: " + sBaseUrl)
-        print("[STARTUP] Startup complete. Waiting for requests — stop the container to shut down.")
+        infoLog("Server mode enabled. WASDI is running as a local server.")
+        infoLog("API available at: " + sBaseUrl)
+        infoLog("Startup complete. Waiting for requests — stop the container to shut down.")
         # wasdi.sh will block on the Java PIDs; python just returns cleanly here.
         return
 
@@ -453,9 +492,9 @@ def run():
     try:
         aoParams = json.loads(sParams)
     except Exception as oEx:
-        print("[STARTUP] Error parsing WASDI_PARAMS, using empty params. Error: " + str(oEx))
+        errorLog("Error parsing WASDI_PARAMS, using empty params. Error: " + str(oEx))
     
-    print("[STARTUP] WASDI_PARAMS value: " + sParams)
+    debugLog("WASDI_PARAMS value: " + sParams)
 
     bUseWorkspaceId = False
     # Sanity check the workspace, if not set use empty workspace
@@ -494,10 +533,10 @@ def run():
 
     if sApplicationToStart is not None:
         sProcId =  wasdi.executeProcessor(sApplicationToStart, aoParams)
-        print("[STARTUP] Started Application with Id = " + sProcId)
+        infoLog("Started Application with Id = " + sProcId)
         waitProcess(sProcId)
     else:
-        print("[STARTUP] No application specified to start, startup complete.")
+        infoLog("No application specified to start, startup complete. MiniWasdi will exit now. Use WASDI_SERVER_MODE=1 to keep the server running after startup.")
 
 
 if __name__ == '__main__':
