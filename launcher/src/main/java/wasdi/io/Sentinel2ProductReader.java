@@ -457,7 +457,16 @@ public class Sentinel2ProductReader extends WasdiProductReader {
 
     private String buildVsiZipPath(String sInternalPath) {
         String sZipPath = m_oProductFile.getAbsolutePath().replace('\\', '/');
-        return "/vsizip/" + sZipPath + "/" + sInternalPath;
+        while (sZipPath.startsWith("/")) {
+            sZipPath = sZipPath.substring(1);
+        }
+
+        String sNormalizedInternalPath = sInternalPath;
+        while (sNormalizedInternalPath.startsWith("/")) {
+            sNormalizedInternalPath = sNormalizedInternalPath.substring(1);
+        }
+
+        return "/vsizip//" + sZipPath + "/" + sNormalizedInternalPath;
     }
 
     private boolean isZipProduct() {
