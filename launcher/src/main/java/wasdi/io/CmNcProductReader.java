@@ -11,8 +11,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.esa.snap.core.datamodel.Product;
-
 import ucar.ma2.Array;
 import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;

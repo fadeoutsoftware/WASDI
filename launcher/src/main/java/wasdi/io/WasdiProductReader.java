@@ -3,13 +3,10 @@ package wasdi.io;
 import java.io.File;
 import java.io.IOException;
 
-import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import wasdi.shared.utils.MissionUtils;
-import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
