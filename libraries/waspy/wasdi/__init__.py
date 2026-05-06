@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.7.7
+Version 0.8.7.8
 
-Last Update: 06/05/2025
+Last Update: 06/05/2026
 
 Tested with: Python 3.7 - Python 3.13 
 
@@ -1361,19 +1361,20 @@ def getFullProductPath(sProductName):
     # Do we need to download it?
     bDownloadFileFromServer = False
 
-    if os.path.isfile(sFullPath):
-        # There is a local file: do we need to look the checksum?
-        if getEnableChecksum():
-            # Yes
-            aoProperties = getProductProperties(sProductName)
-            if aoProperties is not None:
-                if "checksum" in aoProperties:
-                    sLocalChecksum = getMD5Checksum(sFullPath)
-                    sRemoteChecksum = aoProperties["checksum"]
-                    if sLocalChecksum != sRemoteChecksum:
-                        wasdiLog(
-                            '[INFO] waspy.getFullProductPath: Local file exists but looks different from the on in the server')
-                        bDownloadFileFromServer = True
+    if os.path.exists(sFullPath):
+        if os.path.isfile(sFullPath):
+            # There is a local file: do we need to look the checksum?
+            if getEnableChecksum():
+                # Yes
+                aoProperties = getProductProperties(sProductName)
+                if aoProperties is not None:
+                    if "checksum" in aoProperties:
+                        sLocalChecksum = getMD5Checksum(sFullPath)
+                        sRemoteChecksum = aoProperties["checksum"]
+                        if sLocalChecksum != sRemoteChecksum:
+                            wasdiLog(
+                                '[INFO] waspy.getFullProductPath: Local file exists but looks different from the on in the server')
+                            bDownloadFileFromServer = True
     else:
         # If we are on the local PC
         if getIsOnServer() is False:
