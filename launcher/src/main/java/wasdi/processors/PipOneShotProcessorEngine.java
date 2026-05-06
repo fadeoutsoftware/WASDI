@@ -549,7 +549,13 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 	        
 	        addEnvironmentVariablesToProcessorType(oProcessorTypeConfig, "", oParameter, true, sRandomName);
 	        
-	        String sContainerName = oDockerUtils.start("", oProcessor.getPort(), true);
+	        boolean bAutoRemove = true;
+	        
+	        if (WasdiConfig.Current.dockers != null) {
+	        	bAutoRemove = WasdiConfig.Current.dockers.removeDockersAfterShellExec;
+	        }
+	        
+	        String sContainerName = oDockerUtils.start("", oProcessor.getPort(), bAutoRemove);
 	        
 	        // Try to start Again the docker
 	        if (Utils.isNullOrEmpty(sContainerName)) {
