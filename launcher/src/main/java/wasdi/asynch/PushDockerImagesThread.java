@@ -60,6 +60,9 @@ public class PushDockerImagesThread extends Thread {
 					if (Utils.isNullOrEmpty(sPushedImageAddress)) {
 						WasdiLog.debugLog("PushDockerImagesThread.run: error in the push");
 					}
+					else {
+						WasdiLog.debugLog("PushDockerImagesThread.run: image pushed to " + oDockerRegistryConfig.id);
+					}
 				}
 			}
 			catch (Exception oEx) {
