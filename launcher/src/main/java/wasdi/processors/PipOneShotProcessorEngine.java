@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONObject;
 
@@ -23,12 +25,14 @@ import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.packagemanagers.PipOneShotPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
 import wasdi.shared.utils.docker.containersViewModels.constants.ContainerStates;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 
 public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 	
@@ -611,4 +615,54 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 		}
 	}
 	
+	
+    @Override
+    public boolean stopApplication(ProcessorParameter oParameter) {
+    	
+    	try {
+    		String sProcessorName = m_oProcessWorkspace.getProductName();
+    		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+    		Processor oProcessorToKill = oProcessorRepository.getProcessorByName(sProcessorName);
+    		
+    		DockerUtils oDockerUtils = new DockerUtils(oProcessorToKill, m_oParameter, sProcessorName);
+    		oDockerUtils.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
+    		ContainerInfo oContainer = oDockerUtils.getContainerInfoByImageName(sProcessorName, oProcessorToKill.getVersion());
+    		
+    		if (oContainer == null) {
+    			WasdiLog.warnLog("PipOneShotProcessorEngine.stopApplication: error retriving the container info for the app "+ sProcessorName);
+    			return false;
+    		}
+    		
+    		if (oContainer.Names == null) {
+    			WasdiLog.warnLog("PipOneShotProcessorEngine.stopApplication: cannot find names for container of app "+ sProcessorName);
+    			return false;    			
+    		}
+    		
+    		if (oContainer.Names.size()<=0) {
+    			WasdiLog.warnLog("PipOneShotProcessorEngine.stopApplication: cannot find names for container of app "+ sProcessorName);
+    			return false;    			
+    		}
+
+    		String sContainerName = oContainer.Names.get(0);
+    		
+    		if (sContainerName.startsWith("/")) {
+    			sContainerName=sContainerName.substring(1);
+    		}
+    		
+    		WasdiLog.debugLog("PipOneShotProcessorEngine.stopApplication: Found Container named: " + sContainerName);
+    		
+    		if (oDockerUtils.stop(oProcessorToKill)) {
+    			WasdiLog.infoLog("PipOneShotProcessorEngine.stopApplication: container " + sContainerName + " stopped");
+    		}
+    		else {
+    			WasdiLog.infoLog("PipOneShotProcessorEngine.stopApplication: there was an error stopping " + sContainerName);
+    		}
+    		
+    		return true;
+    	}
+    	catch (Exception oEx) {
+			WasdiLog.errorLog("PipOneShotProcessorEngine.stopApplication: error");
+			return false;
+		}
+    }	
 }

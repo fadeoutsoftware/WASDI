@@ -683,6 +683,9 @@ public class DockerUtils {
             			WasdiLog.debugLog("DockerUtils.start: mounting only workspace folder in " + sOnContainerDataFolder);
             		}
             		
+            		// Lets create the folder
+            		WasdiFileUtils.createDirectoryIfDoesNotExist(sMountWorkspaceFolder);
+            		
             		// Mount the data folder
             		oContainerCreateParams.HostConfig.Binds.add(sMountWorkspaceFolder+":"+ sOnContainerDataFolder);            		
             		
