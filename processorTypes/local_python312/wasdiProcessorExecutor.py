@@ -146,9 +146,12 @@ def pm_manager_version():
         asVersion: list = sVersionFromOutput.split('.')
 
         oVersion["version"] = sVersionFromOutput
-        oVersion["major"] = asVersion[0]
-        oVersion["minor"] = asVersion[1]
-        oVersion["patch"] = asVersion[2]
+        if len(asVersion) > 0:
+            oVersion["major"] = asVersion[0]
+        if len(asVersion) > 1:
+            oVersion["minor"] = asVersion[1]
+        if len(asVersion) > 2:
+            oVersion["patch"] = asVersion[2]
     except Exception as oEx:
         log("Error getting pip version: " + repr(oEx))
 

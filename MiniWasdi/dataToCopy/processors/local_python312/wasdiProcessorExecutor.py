@@ -125,6 +125,12 @@ def pm_list_packages(sFlag: str):
 
 def pm_manager_version():
     oVersion = {}
+    oVersion["name"] = "pip"
+    oVersion["version"] = ""
+    oVersion["major"] = ""
+    oVersion["minor"] = ""
+    oVersion["patch"] = ""
+
     try:
         log('/packageManager/managerVersion/')
 
@@ -139,11 +145,13 @@ def pm_manager_version():
 
         asVersion: list = sVersionFromOutput.split('.')
 
-        oVersion["name"] = "pip"
         oVersion["version"] = sVersionFromOutput
-        oVersion["major"] = asVersion[0]
-        oVersion["minor"] = asVersion[1]
-        oVersion["patch"] = asVersion[2]
+        if len(asVersion) > 0:
+            oVersion["major"] = asVersion[0]
+        if len(asVersion) > 1:
+            oVersion["minor"] = asVersion[1]
+        if len(asVersion) > 2:
+            oVersion["patch"] = asVersion[2]
     except Exception as oEx:
         log("Error getting pip version: " + repr(oEx))
 
