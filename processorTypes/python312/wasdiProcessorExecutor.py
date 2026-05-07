@@ -123,25 +123,33 @@ def pm_list_packages(sFlag: str):
     return  aoDependencies
 
 def pm_manager_version():
-    log('/packageManager/managerVersion/')
-
-    command: str = 'pip -V'
-
-    sCommandOutput: str = __execute_pip_command_and_get_output(command)
-
-    start: str = 'pip '
-    end: str = ' from '
-
-    sVersionFromOutput = re.search('%s(.*)%s' % (start, end), sCommandOutput).group(1)
-
-    asVersion: list = sVersionFromOutput.split('.')
-
     oVersion = {}
     oVersion["name"] = "pip"
-    oVersion["version"] = sVersionFromOutput
-    oVersion["major"] = asVersion[0]
-    oVersion["minor"] = asVersion[1]
-    oVersion["patch"] = asVersion[2]
+    oVersion["version"] = ""
+    oVersion["major"] = ""
+    oVersion["minor"] = ""
+    oVersion["patch"] = ""
+
+    try:
+        log('/packageManager/managerVersion/')
+
+        command: str = 'pip -V'
+
+        sCommandOutput: str = __execute_pip_command_and_get_output(command)
+
+        start: str = 'pip '
+        end: str = ' from '
+
+        sVersionFromOutput = re.search('%s(.*)%s' % (start, end), sCommandOutput).group(1)
+
+        asVersion: list = sVersionFromOutput.split('.')
+
+        oVersion["version"] = sVersionFromOutput
+        oVersion["major"] = asVersion[0]
+        oVersion["minor"] = asVersion[1]
+        oVersion["patch"] = asVersion[2]
+    except Exception as oEx:
+        log("Error getting pip version: " + repr(oEx))
 
     return oVersion
 
