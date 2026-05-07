@@ -1,5 +1,6 @@
 package wasdi.processors;
 
+import wasdi.asynch.DeleteOldDockerImagesThread;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
@@ -125,11 +126,23 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 			return false;
 		}
 		else {
-			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: super class deploy returned true lets proceed to clean and push");
+			WasdiLog.infoLog("DockerBuildOnceEngine.redeploy: super class deploy returned true lets proceed to clean and push");
 		}
-				
+		
+		WasdiLog.infoLog("DockerBuildOnceEngine.redeploy: start thread to delete old versions");
+		
+		DeleteOldDockerImagesThread oDeleteOldDockerImagesThread = new DeleteOldDockerImagesThread();
+		
+		oDeleteOldDockerImagesThread.setDockerRegistry(m_sDockerRegistry);
+		oDeleteOldDockerImagesThread.setNewVersion(sNewVersion);
+		oDeleteOldDockerImagesThread.setParameter(m_oParameter);
+		oDeleteOldDockerImagesThread.setProcessor(oProcessor);
+		
+		oDeleteOldDockerImagesThread.start();
+			
+		/*
 		try {
-			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: try to clean old images. Last valid version is " + sNewVersion);
+			WasdiLog.infoLog("DockerBuildOnceEngine.redeploy: try to clean old images. Last valid version is " + sNewVersion);
 			
 			String sVersion = oProcessor.getVersion();
 			Integer iVersion = Integer.parseInt(sVersion);
@@ -142,6 +155,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		catch (Exception oEx) {
 			WasdiLog.errorLog("DockerBuildOnceEngine.run error searching old versions: ", oEx);
 		}
+		*/
 		
 		// Here we save the address of the image
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
