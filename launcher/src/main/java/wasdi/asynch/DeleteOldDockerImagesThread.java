@@ -19,7 +19,7 @@ public class DeleteOldDockerImagesThread extends Thread {
 		try {
 			DockerUtils oDockerUtils = new DockerUtils(m_oProcessor, m_oParameter, PathsConfig.getProcessorFolder(m_oProcessor), m_sDockerRegistry, null);
 			
-			WasdiLog.infoLog("DockerBuildOnceEngine.redeploy: try to clean old images. Last valid version is " + m_sNewVersion);
+			WasdiLog.infoLog("DeleteOldDockerImagesThread.redeploy: try to clean old images. Last valid version is " + m_sNewVersion);
 			
 			String sVersion = m_oProcessor.getVersion();
 			Integer iVersion = Integer.parseInt(sVersion);
