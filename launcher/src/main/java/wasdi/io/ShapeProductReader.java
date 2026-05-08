@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.commons.io.FileUtils;
+
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -35,6 +37,16 @@ public class ShapeProductReader extends WasdiProductReader{
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ShapeProductReader.ShapeProductReader: error " + oEx.toString());
 		}
+	}
+	
+	@Override
+	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
+		if (sDownloadedFileFullPath.endsWith(".zip")) {
+			if (!FileUtils.deleteQuietly(new File(sDownloadedFileFullPath))) {
+				WasdiLog.warnLog("ShapeProductReader.adjustFileAfterDownload. Zip file " + sDownloadedFileFullPath + " not deleted correctly");
+			}
+		}
+		return m_oProductFile.getAbsolutePath();
 	}
 
 	@Override

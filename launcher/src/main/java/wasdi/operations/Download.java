@@ -82,7 +82,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 			return false;
 		}
 
-        String sFileName = "";
+        String sFilePath = "";
 
         try {
         	
@@ -129,7 +129,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
     		
     		// If not, try to autodetect it
     		if (Utils.isNullOrEmpty(sPlatformType)) {
-    			sPlatformType = MissionUtils.getPlatformFromSatelliteImageFileName(sFileName);
+    			sPlatformType = MissionUtils.getPlatformFromSatelliteImageFileName(sFilePath);
     		}            
             
             // get file size
@@ -173,21 +173,21 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 oProviderAdapter.subscribe(this);
                 
                 // Until we cannot fetch the file                
-                while (Utils.isNullOrEmpty(sFileName)) {
+                while (Utils.isNullOrEmpty(sFilePath)) {
                 	
                 	DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode());
                 	
                 	if (oDataProviderConfig != null) {
                         // Download the File
                 		try {
-                			sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oDataProviderConfig.user, oDataProviderConfig.password, sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());	
+                			sFilePath = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oDataProviderConfig.user, oDataProviderConfig.password, sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());	
                 		}
                 		catch (Exception oEx) {
 							WasdiLog.errorLog("Download.executeOperation: exception in oProviderAdapter.executeDownloadFile", oEx );
 						}
                         
                         // Is it null?!?
-                        if (Utils.isNullOrEmpty(sFileName)) {
+                        if (Utils.isNullOrEmpty(sFilePath)) {
 
                             int iLastError = oProviderAdapter.getLastServerError();
                             String sError = "There was an error contacting the provider";
@@ -201,14 +201,14 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                         else {
                         	try {
                                 // Control Check for the file Name
-                                sFileName = WasdiFileUtils.fixPathSeparator(sFileName);
+                        		sFilePath = WasdiFileUtils.fixPathSeparator(sFilePath);
                                 
                                 waitBeforeRead();
 
                                 // Get The product view Model
-                				WasdiProductReader oProductReader = WasdiProductReaderFactory.getProductReader(new File(sFileName));
-                				sFileName = oProductReader.adjustFileAfterDownload(sFileName, sFileNameWithoutPath);
-                				File oProductFile = new File(sFileName);
+                				WasdiProductReader oProductReader = WasdiProductReaderFactory.getProductReader(new File(sFilePath));
+                				sFilePath = oProductReader.adjustFileAfterDownload(sFilePath, sFileNameWithoutPath);
+                				File oProductFile = new File(sFilePath);
                 				
                 				sFileNameWithoutPath = oProductFile.getName(); 
                 				
@@ -221,12 +221,12 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 				
                 				if (oVM == null) {
                     				// Reset the cycle to search a better solution
-                    				sFileName = "";        					
+                    				sFilePath = "";        					
                 				}                        		
                         	}
                         	catch (Exception oReadFileEx) {
 								WasdiLog.errorLog("Download.executeOperation: exception trying to read the downloaded file, reset FileName to try with other data providers", oReadFileEx);
-								sFileName = "";
+								sFilePath = "";
 							}
                         }                		
                 	}
@@ -235,7 +235,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 	}
                     
                     
-                    if (Utils.isNullOrEmpty(sFileName)) {
+                    if (Utils.isNullOrEmpty(sFilePath)) {
                         oProviderAdapter.unsubscribe(this);
                         oProviderAdapter.closeConnections();
                         
@@ -264,7 +264,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 // Save it in the register
                 oAlreadyDownloaded = new DownloadedFile();
                 oAlreadyDownloaded.setFileName(sFileNameWithoutPath);
-                oAlreadyDownloaded.setFilePath(sFileName);
+                oAlreadyDownloaded.setFilePath(sFilePath);
                 oAlreadyDownloaded.setProductViewModel(oVM);
                 oAlreadyDownloaded.setPlatform(sPlatformType);
 
@@ -287,7 +287,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 WasdiLog.debugLog("Download.executeOperation: File already downloaded: make a copy");
 
                 // Yes!! Here we have the path
-                sFileName = oAlreadyDownloaded.getFilePath();
+                sFilePath = oAlreadyDownloaded.getFilePath();
 
                 WasdiLog.debugLog("Download.executeOperation: Check if file exists");
 
@@ -295,23 +295,23 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 String sDestinationFileWithPath = sDownloadPath + sFileNameWithoutPath;
 
                 // Is it different?
-                if (sDestinationFileWithPath.equals(sFileName) == false) {
+                if (sDestinationFileWithPath.equals(sFilePath) == false) {
                     // if file doesn't exist
                     if (!new File(sDestinationFileWithPath).exists()) {
                         // Yes, make a copy
-                        FileUtils.copyFile(new File(sFileName), new File(sDestinationFileWithPath));
+                        FileUtils.copyFile(new File(sFilePath), new File(sDestinationFileWithPath));
                         // Files.createLink(link, existing)
-                        sFileName = sDestinationFileWithPath;
+                        sFilePath = sDestinationFileWithPath;
                     } else {
                         // If it exists...
-                        sFileName = sDestinationFileWithPath;
+                        sFilePath = sDestinationFileWithPath;
                     }
                 }
 
             } 
             
             // Final Check: do we have at the end a valid file name?
-            if (Utils.isNullOrEmpty(sFileName)) {
+            if (Utils.isNullOrEmpty(sFilePath)) {
             	
             	// No, we are in error
                 WasdiLog.warnLog("Download.executeOperation: file is null there must be an error");
@@ -324,13 +324,13 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             } 
             
             // Ok, add the product to the db
-            addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oParameter.getBoundingBox());
+            addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFilePath, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oParameter.getBoundingBox());
 
             m_oProcessWorkspaceLogger.log("Operation Completed");
             m_oProcessWorkspaceLogger.log(new EndMessageProvider().getGood());
 
             DownloadPayload oDownloadPayload = new DownloadPayload();
-            oDownloadPayload.setFileName(WasdiFileUtils.getFileNameWithoutLastExtension(sFileName));
+            oDownloadPayload.setFileName(WasdiFileUtils.getFileNameWithoutLastExtension(sFilePath));
             oDownloadPayload.setProvider(oParameter.getProvider());
             if (oProviderAdapter != null) {
             	oDownloadPayload.setSelectedProvider(oProviderAdapter.getCode());
@@ -353,7 +353,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.DOWNLOAD.name(), oParam.getWorkspace(), sError, oParam.getExchange());
         }
 
-        WasdiLog.debugLog("Download.executeOperation: return file name " + sFileName);
+        WasdiLog.debugLog("Download.executeOperation: return file name " + sFilePath);
 
         return false;
 		
