@@ -3,8 +3,11 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.8.7.8] - 2025-05-06
+### Added
+- getFullProductPath: check if the requested path is either a file or a folder. Otherwise files like S3 and S6, that are referenced as folders, are re-downaloaded by each application
 
-## [0.8.7.6] - 2025-05-06
+## [0.8.7.7] - 2025-05-06
 ### Added
 - addFileToWasdi: added bForceUpdate flag to force the lib overwrite a file if exists
 

@@ -3,7 +3,6 @@ package it.fadeout.rest.resources;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -1074,7 +1073,9 @@ public class SubscriptionResource {
 	private void sendRabbitMessage(String sWorkspaceId, StripePaymentDetail oStripePaymentDetail) {
 		try {
 			// Search for exchange name
-			String sExchange = WasdiConfig.Current.rabbit.exchange;
+            String sExchange = "";
+            
+            if (WasdiConfig.Current.rabbit!=null) sExchange = WasdiConfig.Current.rabbit.exchange;
 
 			// Set default if is empty
 			if (Utils.isNullOrEmpty(sExchange)) {
@@ -1167,19 +1168,7 @@ public class SubscriptionResource {
 
 		return aoSubscriptions.stream().map(Subscription::getSubscriptionId).collect(Collectors.toSet());
 	}
-
-	private List<Subscription> getSubscriptionsSharedWithUser(String sUserId) {
-		List<String> aoSubscriptionIds = getIdsOfSubscriptionsSharedWithUser(sUserId);
-
-		if (aoSubscriptionIds.isEmpty()) {
-			return Collections.emptyList();
-		}
-
-		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-
-		return oSubscriptionRepository.getSubscriptionsBySubscriptionIds(aoSubscriptionIds);
-	}
-
+	
 	private List<String> getIdsOfSubscriptionsSharedWithUser(String sUserId) {
 		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 		List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository.getSubscriptionSharingsByUserId(sUserId);

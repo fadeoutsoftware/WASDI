@@ -1,0 +1,150 @@
+package wasdi.shared.data.mongo;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bson.Document;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.DeleteResult;
+
+import wasdi.shared.business.PublishedBand;
+import wasdi.shared.data.interfaces.IPublishedBandsRepositoryBackend;
+import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
+
+/**
+ * Mongo backend implementation for published bands repository.
+ */
+public class MongoPublishedBandsRepositoryBackend extends MongoRepository implements IPublishedBandsRepositoryBackend {
+
+	public MongoPublishedBandsRepositoryBackend() {
+		m_sThisCollection = "publishedbands";
+	}
+
+	@Override
+	public boolean insertPublishedBand(PublishedBand oFile) {
+		try {
+			String sJSON = s_oMapper.writeValueAsString(oFile);
+			getCollection(m_sThisCollection).insertOne(Document.parse(sJSON));
+
+			return true;
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("PublishedBandsRepository.insertPublishedBand: exception ", oEx);
+		}
+
+		return false;
+	}
+
+	@Override
+	public PublishedBand getPublishedBand(String sProductName, String sBandName) {
+		try {
+			BasicDBObject oQuery = new BasicDBObject();
+			List<BasicDBObject> aoAndList = new ArrayList<>();
+			aoAndList.add(new BasicDBObject("productName", sProductName));
+			aoAndList.add(new BasicDBObject("bandName", sBandName));
+			oQuery.put("$and", aoAndList);
+
+			Document oSessionDocument = getCollection(m_sThisCollection).find(oQuery).first();
+
+			if (oSessionDocument == null) {
+				return null;
+			}
+
+			String sJSON = oSessionDocument.toJson();
+
+			PublishedBand oPublishedBand = s_oMapper.readValue(sJSON, PublishedBand.class);
+
+			return oPublishedBand;
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("PublishedBandsRepository.getPublishedBand: exception ", oEx);
+		}
+
+		return null;
+	}
+
+	@Override
+	public List<PublishedBand> getPublishedBandsByProductName(String sProductName) {
+
+		final ArrayList<PublishedBand> aoReturnList = new ArrayList<PublishedBand>();
+		try {
+
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.eq("productName", sProductName));
+
+			fillList(aoReturnList, oWSDocuments, PublishedBand.class);
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("PublishedBandsRepository.getPublishedBandsByProductName: exception ", oEx);
+		}
+
+		return aoReturnList;
+	}
+
+	@Override
+	public List<PublishedBand> getList() {
+
+		final ArrayList<PublishedBand> aoReturnList = new ArrayList<PublishedBand>();
+		try {
+
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
+
+			fillList(aoReturnList, oWSDocuments, PublishedBand.class);
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("PublishedBandsRepository.getList: exception ", oEx);
+		}
+
+		return aoReturnList;
+	}
+
+	@Override
+	public int deleteByProductName(String sProductName) {
+
+		if (Utils.isNullOrEmpty(sProductName)) {
+			return 0;
+		}
+
+		try {
+
+			DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteMany(Filters.eq("productName", sProductName));
+
+			if (oDeleteResult != null) {
+				return (int) oDeleteResult.getDeletedCount();
+			}
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("PublishedBandsRepository.deleteByProductName: exception ", oEx);
+		}
+
+		return 0;
+	}
+
+	@Override
+	public int deleteByProductNameLayerId(String sProductName, String sLayerId) {
+
+		if (Utils.isNullOrEmpty(sProductName)) {
+			return 0;
+		}
+		if (Utils.isNullOrEmpty(sLayerId)) {
+			return 0;
+		}
+
+		try {
+
+			DeleteResult oDeleteResult = getCollection(m_sThisCollection)
+					.deleteOne(Filters.and(Filters.eq("productName", sProductName), Filters.eq("layerId", sLayerId)));
+
+			if (oDeleteResult != null) {
+				return (int) oDeleteResult.getDeletedCount();
+			}
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("PublishedBandsRepository.deleteByProductNameLayerId: exception ", oEx);
+		}
+
+		return 0;
+	}
+}

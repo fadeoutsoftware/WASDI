@@ -13,5 +13,7 @@ with just a drag and drop.
 See the [online documentation](https://wasdi.readthedocs.io/en/latest/index.html),
 in particular the [python tutorial](https://wasdi.readthedocs.io/en/latest/PythonTutorial.html)
 and the [python reference](https://wasdi.readthedocs.io/en/latest/python/waspy.html).
+Our [git repo](https://github.com/fadeoutsoftware/WASDI)
 
-Have fun with WASDI at https://www.wasdi.net/
+Have fun with WASDI: Platform https://www.wasdi.net/ 
+Public Web Site: https://www.wasdi.cloud/ 

@@ -37,6 +37,7 @@ import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserType;
 import wasdi.shared.data.MetricsEntryRepository;
 import wasdi.shared.data.OrganizationRepository;
+import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.UserRepository;
@@ -1140,7 +1141,85 @@ public class AdminDashboardResource {
 			WasdiLog.errorLog("AdminDashboardResource.deleteUser: exeception ", oEx);
 			return Response.serverError().build();
 		}
-	}	
+	}
+	
+	@DELETE
+	@Path("/cleanProcessesQueue")
+	@Produces({"application/json", "application/xml", "text/xml" })
+	public Response cleanProcessesQueue(@HeaderParam("x-session-token") String sSessionId) {
+		
+		try {
+			WasdiLog.debugLog("AdminDashboardResource.cleanProcessesQueue");
+
+			// Validate Session
+			User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+			if (oRequesterUser == null) {
+				WasdiLog.warnLog("AdminDashboardResource.cleanProcessesQueue: invalid session");
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+			}
+
+			// Can the user access this section?
+			if (!UserApplicationRole.isAdmin(oRequesterUser)) {
+				WasdiLog.warnLog("AdminDashboardResource.cleanProcessesQueue: user is not an admin");
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
+			}
+			
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			
+			if (oProcessWorkspaceRepository.cleanQueue()) {
+				WasdiLog.infoLog("AdminDashboardResource.cleanProcessesQueue: all created processes changed to ERROR");
+				return Response.ok().build();
+			}
+			else {
+				WasdiLog.warnLog("AdminDashboardResource.cleanProcessesQueue: cleanProcessesQueue returned false");
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();	
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("AdminDashboardResource.cleanOldProcessWorkspaces: exception ", oEx);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+
+	}
+	
+	@DELETE
+	@Path("/cleanOldProcesses")
+	@Produces({"application/json", "application/xml", "text/xml" })
+	public Response cleanOldProcessWorkspaces(@HeaderParam("x-session-token") String sSessionId) {
+		
+		try {
+			WasdiLog.debugLog("AdminDashboardResource.cleanOldProcessWorkspaces");
+
+			// Validate Session
+			User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+			if (oRequesterUser == null) {
+				WasdiLog.warnLog("AdminDashboardResource.cleanOldProcessWorkspaces: invalid session");
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+			}
+
+			// Can the user access this section?
+			if (!UserApplicationRole.isAdmin(oRequesterUser)) {
+				WasdiLog.warnLog("AdminDashboardResource.cleanOldProcessWorkspaces: user is not an admin");
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
+			}
+			
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			
+			if (oProcessWorkspaceRepository.cleanPastProcessWorkspaces()) {
+				WasdiLog.infoLog("AdminDashboardResource.cleanOldProcessWorkspaces: all created processes changed to ERROR");
+				return Response.ok().build();
+			}
+			else {
+				WasdiLog.warnLog("AdminDashboardResource.cleanOldProcessWorkspaces: cleanPastProcessWorkspaces returned false");
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();	
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("AdminDashboardResource.cleanOldProcessWorkspaces: exception", oEx);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+
+	}
 	
 	/**
 	 * Converts a User in a User View Model

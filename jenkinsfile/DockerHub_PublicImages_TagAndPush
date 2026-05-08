@@ -1,0 +1,107 @@
+pipeline {
+  agent any
+
+  environment {
+    sCurrentRevision = "${env.BUILD_ID}"
+    PATH             = "/usr/local/bin:/usr/bin:${env.PATH}"
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '365'))
+    disableConcurrentBuilds()
+  }
+
+  parameters {
+    booleanParam(name: 'PUSH_wasdi_launcher',                      defaultValue: true, description: 'Tag and push wasdi-launcher')
+    booleanParam(name: 'PUSH_wasdi_toolbox',                       defaultValue: true, description: 'Tag and push wasdi-toolbox')
+    booleanParam(name: 'PUSH_wasdi_gdal',                          defaultValue: true, description: 'Tag and push wasdi-gdal')
+    booleanParam(name: 'PUSH_wasdi_snaphu',                        defaultValue: true, description: 'Tag and push wasdi-snaphu')
+    booleanParam(name: 'PUSH_wasdi_sen2cor',                       defaultValue: true, description: 'Tag and push wasdi-sen2cor')
+    booleanParam(name: 'PUSH_wasdi_utils',                         defaultValue: true, description: 'Tag and push wasdi-utils')
+    booleanParam(name: 'PUSH_wasdi_trigger',                       defaultValue: true, description: 'Tag and push wasdi-trigger')
+    booleanParam(name: 'PUSH_wasdi_dataprovider_copernicusmarine', defaultValue: true, description: 'Tag and push wasdi-dataprovider-copernicusmarine')
+    booleanParam(name: 'PUSH_wasdi_dataprovider_cds',              defaultValue: true, description: 'Tag and push wasdi-dataprovider-cds')
+    booleanParam(name: 'PUSH_wasdi_dataprovider_ers',              defaultValue: true, description: 'Tag and push wasdi-dataprovider-ers')
+    booleanParam(name: 'PUSH_wasdi_dataprovider_extpython',        defaultValue: true, description: 'Tag and push wasdi-dataprovider-extpython')
+    booleanParam(name: 'PUSH_wasdi_client_v2',                     defaultValue: true, description: 'Tag and push wasdi-client-v2')
+    booleanParam(name: 'PUSH_wasdi_geoserver',                     defaultValue: true, description: 'Tag and push wasdi-geoserver')
+    booleanParam(name: 'PUSH_wasdi_keycloak',                      defaultValue: true, description: 'Tag and push wasdi-keycloak')
+    booleanParam(name: 'PUSH_wasdi_rabbitmq',                      defaultValue: true, description: 'Tag and push wasdi-rabbitmq')
+    booleanParam(name: 'PUSH_wasdi_scheduler',                     defaultValue: true, description: 'Tag and push wasdi-scheduler')
+    booleanParam(name: 'PUSH_wasdi_tomcat_wasdiwebserver',         defaultValue: true, description: 'Tag and push wasdi-tomcat-wasdiwebserver')
+    booleanParam(name: 'PUSH_wasdi_print_server',                  defaultValue: true, description: 'Tag and push wasdi-print-server')
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        echo "env.GIT_BRANCH       = " + env.GIT_BRANCH
+        echo "env.sCurrentRevision = " + env.sCurrentRevision
+        echo "env.NODE_NAME        = " + env.NODE_NAME
+        echo "env.WORKSPACE        = " + env.WORKSPACE
+
+        sh script: "pwd", label: "Current location"
+        sh script: "docker --version", label: "Tool > docker > current version"
+        sh script: "docker images --filter 'reference=wasdi-*' --format 'table {{.Repository}}\\t{{.Tag}}\\t{{.ID}}\\t{{.Size}}'", label: "Available WASDI Docker images on this node"
+      }
+    }
+
+    stage('LOGIN TO DOCKER HUB') {
+      steps {
+        withCredentials([
+          usernamePassword(credentialsId: 'sWasdiDockerHubCredentials', usernameVariable: 'sDockerHubUsername', passwordVariable: 'sDockerHubPassword')
+        ]) {
+          sh script: '''
+            echo "${sDockerHubPassword}" | docker login --username "${sDockerHubUsername}" --password-stdin
+          ''',
+          label: "Login to Docker Hub"
+        }
+      }
+    }
+
+    stage('TAG AND PUSH THE IMAGES') {
+      steps {
+        sh script: """
+          set -e
+
+          tag_and_push() {
+            local sLocalImage="\$1"
+            local sRemoteImage="\$2"
+            echo ""
+            echo ">>> \${sLocalImage}:latest  -->  \${sRemoteImage}"
+            docker tag "\${sLocalImage}:latest" "\${sRemoteImage}"
+            docker image push "\${sRemoteImage}"
+          }
+
+          [ "${params.PUSH_wasdi_launcher}"                      = "true" ] && tag_and_push "wasdi-launcher"                      "wasdi/wasdi:wasdi-launcher"
+          [ "${params.PUSH_wasdi_toolbox}"                       = "true" ] && tag_and_push "wasdi-toolbox"                       "wasdi/wasdi:wasdi-toolbox"
+          [ "${params.PUSH_wasdi_gdal}"                          = "true" ] && tag_and_push "wasdi-gdal"                          "wasdi/wasdi:wasdi-gdal"
+          [ "${params.PUSH_wasdi_snaphu}"                        = "true" ] && tag_and_push "wasdi-snaphu"                        "wasdi/wasdi:wasdi-snaphu"
+          [ "${params.PUSH_wasdi_sen2cor}"                       = "true" ] && tag_and_push "wasdi-sen2cor"                       "wasdi/wasdi:wasdi-sen2cor"
+          [ "${params.PUSH_wasdi_utils}"                         = "true" ] && tag_and_push "wasdi-utils"                         "wasdi/wasdi:wasdi-utils"
+          [ "${params.PUSH_wasdi_trigger}"                       = "true" ] && tag_and_push "wasdi-trigger"                       "wasdi/wasdi:wasdi-trigger"
+          [ "${params.PUSH_wasdi_dataprovider_copernicusmarine}" = "true" ] && tag_and_push "wasdi-dataprovider-copernicusmarine" "wasdi/wasdi:wasdi-dataprovider-copernicusmarine"
+          [ "${params.PUSH_wasdi_dataprovider_cds}"              = "true" ] && tag_and_push "wasdi-dataprovider-cds"              "wasdi/wasdi:wasdi-dataprovider-cds"
+          [ "${params.PUSH_wasdi_dataprovider_ers}"              = "true" ] && tag_and_push "wasdi-dataprovider-ers"              "wasdi/wasdi:wasdi-dataprovider-ers"
+          [ "${params.PUSH_wasdi_dataprovider_extpython}"        = "true" ] && tag_and_push "wasdi-dataprovider-extpython"        "wasdi/wasdi:wasdi-dataprovider-extpython"
+          [ "${params.PUSH_wasdi_client_v2}"                     = "true" ] && tag_and_push "wasdi-client-v2"                     "wasdi/wasdi:wasdi-client-v2"
+          [ "${params.PUSH_wasdi_geoserver}"                     = "true" ] && tag_and_push "wasdi-geoserver"                     "wasdi/wasdi:wasdi-geoserver"
+          [ "${params.PUSH_wasdi_keycloak}"                      = "true" ] && tag_and_push "wasdi-keycloak"                      "wasdi/wasdi:wasdi-keycloak"
+          [ "${params.PUSH_wasdi_rabbitmq}"                      = "true" ] && tag_and_push "wasdi-rabbitmq"                      "wasdi/wasdi:wasdi-rabbitmq"
+          [ "${params.PUSH_wasdi_scheduler}"                     = "true" ] && tag_and_push "wasdi-scheduler"                     "wasdi/wasdi:wasdi-scheduler"
+          [ "${params.PUSH_wasdi_tomcat_wasdiwebserver}"         = "true" ] && tag_and_push "wasdi-tomcat-wasdiwebserver"         "wasdi/wasdi:wasdi-tomcat-wasdiwebserver"
+          [ "${params.PUSH_wasdi_print_server}"                  = "true" ] && tag_and_push "wasdi-print-server"                  "wasdi/wasdi:wasdi-print-server"
+          true
+        """,
+        label: "Tag and push selected WASDI public images to Docker Hub"
+      }
+    }
+  }
+
+  post {
+    always {
+      sh script: "docker logout || true", label: "Logout from Docker Hub"
+      cleanWs()
+    }
+  }
+}

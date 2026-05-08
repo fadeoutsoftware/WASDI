@@ -42,7 +42,6 @@ import wasdi.shared.business.users.UserType;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MetricsEntryRepository;
-import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ParametersRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -50,6 +49,8 @@ import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.data.factories.DataLayerManager;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.HttpUtils;
@@ -125,6 +126,7 @@ public class Wasdi extends ResourceConfig {
 		register(new WasdiBinder());
 		register(JacksonFeature.class);
 		register(JerseyMapperProvider.class);
+		register(org.glassfish.jersey.media.multipart.MultiPartFeature.class);
 		packages(true, "it.fadeout.rest.resources");
 	}
 
@@ -138,15 +140,32 @@ public class Wasdi extends ResourceConfig {
 
 		String sConfigFilePath = "/etc/wasdi/wasdiConfig.json";
 
-		if (Utils.isNullOrEmpty(m_oServletConfig.getInitParameter("ConfigFilePath")) == false){
-			sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");
+		if (m_oServletConfig!=null) {
+			if (Utils.isNullOrEmpty(m_oServletConfig.getInitParameter("ConfigFilePath")) == false){
+				sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");
+			}			
 		}
+		
+
+		try {
+			Map<String, String> aoEnviornmentVars = System.getenv();
+			
+			if (aoEnviornmentVars != null) {
+				if (aoEnviornmentVars.containsKey("WASDI_CONFIG_FILE")) {
+					sConfigFilePath = aoEnviornmentVars.get("WASDI_CONFIG_FILE");
+					WasdiLog.infoLog("Wasdi.initWasdi: found WASDI_CONFIG_FILE env variable, using it");
+				}
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("Wasdi.initWasdi: Exception searching WASDI_CONFIG_FILE env variable " + oEx.toString());
+		}		
 		
 		if (!WasdiConfig.readConfig(sConfigFilePath)) {
 			WasdiLog.warnLog("Wasdi.initWasdi: ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
 		}
 		
-		WasdiLog.initLogger(WasdiConfig.Current.logLevelServer);
+		WasdiLog.initLogger(WasdiConfig.Current.logLevelServer);	
 		
 		// set nfs properties download folder
 		String sUserHome = System.getProperty("user.home");
@@ -156,15 +175,15 @@ public class Wasdi extends ResourceConfig {
 
 		WasdiLog.debugLog("------- NFS dir " + System.getProperty(Wasdi.s_SNFS_DATA_DOWNLOAD));
 		
-		// Read MongoDb Configuration
+		// Read Data Layer Configuration
 		try {
 
-            MongoRepository.readConfig();
+			DataLayerManager.init();
 
-			WasdiLog.debugLog("------- Mongo db User " + MongoRepository.DB_USER);
+			WasdiLog.debugLog("------- Db User " + MongoRepository.DB_USER);
 
 		} catch (Throwable oEx) {
-			WasdiLog.errorLog("Wasdi.initWasdi: Read MongoDb Configuration exception " + oEx.toString());
+			WasdiLog.errorLog("Wasdi.initWasdi: Read Data Layer Configuration exception " + oEx.toString());
 		}
 		
 		// Read the code of this Node
@@ -175,16 +194,17 @@ public class Wasdi extends ResourceConfig {
 			WasdiLog.errorLog("Wasdi.initWasdi: Read the code of this Node exception " + oEx.toString());
 		}
 		
-		// Read the configuration of KeyCloak		
-		s_sKeyCloakIntrospectionUrl = WasdiConfig.Current.keycloack.introspectAddress;
-		s_sClientId = WasdiConfig.Current.keycloack.confidentialClient;
-		s_sClientSecret = WasdiConfig.Current.keycloack.clientSecret;
+		if (WasdiConfig.Current.keycloack!=null) {
+			// Read the configuration of KeyCloak		
+			s_sKeyCloakIntrospectionUrl = WasdiConfig.Current.keycloack.introspectAddress;
+			s_sClientId = WasdiConfig.Current.keycloack.confidentialClient;
+			s_sClientSecret = WasdiConfig.Current.keycloack.clientSecret;			
+		}
 		
 		// Computational nodes need to configure also the local dababase
 		try {
 			// If this is not the main node
 			if (!WasdiConfig.Current.isMainNode()) {
-				
 				// Configure also the local connection: by default is the "wasdi" port + 1
 				MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
 				WasdiLog.debugLog("------- Addded Mongo Configuration local for " + WasdiConfig.Current.nodeCode);
@@ -201,9 +221,11 @@ public class Wasdi extends ResourceConfig {
 		
 		// Configure Rabbit
 		try {
-			RabbitFactory.readConfig();
 			
-			WasdiLog.infoLog("------- Rabbit Initialized ");
+			if (WasdiConfig.Current.rabbit != null) {
+				RabbitFactory.readConfig();
+				WasdiLog.infoLog("------- Rabbit Initialized ");				
+			}
 		} catch (Throwable oEx) {
 			WasdiLog.errorLog("Wasdi.initWasdi: Configure Rabbit exception " + oEx.toString());
 		}
@@ -247,15 +269,17 @@ public class Wasdi extends ResourceConfig {
 		WasdiLog.infoLog("--------        Welcome to space        -------");
 		WasdiLog.infoLog("-----------------------------------------------\n\n");
 		
-		try {
-			// Can be useful for debug
-			WasdiLog.debugLog("******************************Environment Vars*****************************"); 
-			Map<String, String> aoEnviorntmentVars = System.getenv();
-			for (String string : aoEnviorntmentVars.keySet()) { WasdiLog.debugLog(string + ": " + aoEnviorntmentVars.get(string)); }
-			 			
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("Environment Vars Exception " + oEx.toString());
+		if (WasdiConfig.Current.printWebEnvVariablesAtStartup) {
+			try {
+				// Can be useful for debug
+				WasdiLog.debugLog("******************************Environment Vars*****************************"); 
+				Map<String, String> aoEnviorntmentVars = System.getenv();
+				for (String sKey : aoEnviorntmentVars.keySet()) { WasdiLog.debugLog(sKey + ": " + aoEnviorntmentVars.get(sKey)); }
+				 			
+			}
+			catch (Exception oEx) {
+				WasdiLog.errorLog("Environment Vars Exception " + oEx.toString());
+			}			
 		}
 	}
 
@@ -266,9 +290,10 @@ public class Wasdi extends ResourceConfig {
 		try {
 			WasdiLog.debugLog("------- Shutting Down WASDI");
 			
-			// Stop mongo
+			// Stop database
 			try {
-				MongoRepository.shutDownConnection();
+				//MongoRepository.shutDownConnection();
+				DataLayerManager.shutdown();
 			} catch (Exception oE) {
 				WasdiLog.debugLog("Wasdi.shutDown: could not shut down connection to DB: " + oE);
 			}
@@ -292,6 +317,19 @@ public class Wasdi extends ResourceConfig {
 		try {			
 			// Check The Session with Keycloak
 			String sUserId = null;
+			
+			if (WasdiConfig.Current.disableAuthentication) {
+				WasdiLog.debugLog("Wasdi.getUserFromSession: auth is disabled, return standard user");
+				oUser = new User();
+				oUser.setName("user");
+				oUser.setUserId("user");
+				oUser.setRole(UserApplicationRole.ADMIN.getRole());
+				oUser.setSkin("wasdi");
+				oUser.setPublicNickName("user");
+				oUser.setType(UserType.PROFESSIONAL.name());
+				
+				return oUser;
+			}
 			
 			try  {
 				// Try to Introspect the token
@@ -456,7 +494,6 @@ public class Wasdi extends ResourceConfig {
 	 * @param sSessionId User session
 	 * @param sOperationType Id of the Launcher Operation
 	 * @param sProductName Product name associated to the Process Workspace
-	 * @param sSerializationPath Node Serialisation Path
 	 * @param oParameter Parameter associated to the operation
 	 * @return
 	 * @throws IOException
@@ -478,7 +515,6 @@ public class Wasdi extends ResourceConfig {
 	 * @param sSessionId User session
 	 * @param sOperationType Id of the Launcher Operation
 	 * @param sProductName Product name associated to the Process Workspace
-	 * @param sSerializationPath Node Serialisation Path
 	 * @param oParameter Parameter associated to the operation
 	 * @param sParentId Id the the parent process
 	 * @return Primitive Result with the output status of the operation
@@ -501,7 +537,6 @@ public class Wasdi extends ResourceConfig {
 	 * @param sOperationType Id of the Launcher Operation
 	 * @param sOperationSubId Sub Id of the Launcher Operation
 	 * @param sProductName Product name associated to the Process Workspace
-	 * @param sSerializationPath Node Serialisation Path
 	 * @param oParameter Parameter associated to the operation
 	 * @param sParentId Id the the parent process
 	 * @return Primitive Result with the output status of the operation: boolValue = true, intValue = 200, stringValue = processId if the operation is fine. 
@@ -589,26 +624,27 @@ public class Wasdi extends ResourceConfig {
 			}
 			else {
 				// The Workspace is here. Just add the Parameter and the ProcessWorkspace to the database 
-				
-				SessionRepository oSessionRepo = new SessionRepository();
-				
 				if (Utils.isNullOrEmpty(sParentId)) {
 					
-					//Create a WASDI session here
-					UserSession oSession = new UserSession();
-					oSession.setUserId(sUserId);
-					
 					sSessionId = UUID.randomUUID().toString();
-					oSession.setSessionId(sSessionId);
-					oSession.setLoginDate(Utils.nowInMillis());
-					oSession.setLastTouch(Utils.nowInMillis());
 					
-					if (!oSessionRepo.insertSession(oSession)) {
-						WasdiLog.warnLog("could not insert session " + oSession.getSessionId() + " in DB, try with the old one");						
-					}
-					else {
-						// Assign this new session to the parameter
-						oParameter.setSessionID(sSessionId);
+					if (!WasdiConfig.Current.disableAuthentication) {
+						//Create a WASDI session here
+						UserSession oSession = new UserSession();
+						oSession.setUserId(sUserId);
+						oSession.setSessionId(sSessionId);
+						oSession.setLoginDate(Utils.nowInMillis());
+						oSession.setLastTouch(Utils.nowInMillis());
+						
+						SessionRepository oSessionRepo = new SessionRepository();
+						
+						if (!oSessionRepo.insertSession(oSession)) {
+							WasdiLog.warnLog("Wasdi.runProcess: could not insert session " + oSession.getSessionId() + " in DB, try with the old one");						
+						}
+						else {
+							// Assign this new session to the parameter
+							oParameter.setSessionID(sSessionId);
+						}						
 					}
 				}
 				
@@ -629,11 +665,12 @@ public class Wasdi extends ResourceConfig {
 					oProcess.setWorkspaceId(oParameter.getWorkspace());
 					oProcess.setUserId(sUserId);
 					oProcess.setNotifyOwnerByMail(oParameter.isNotifyOwnerByMail());
-
-					//TODO - enforce the presence of a valid subscription and of an active project
-					if (Utils.isNullOrEmpty(oUser.getActiveProjectId())
-							|| Utils.isNullOrEmpty(oUser.getActiveSubscriptionId())) {
-						WasdiLog.warnLog("Wasdi.runProcess: Process Scheduled for Launcher. The user does not have a valid subscription and an active project");
+					
+					if (WasdiConfig.Current.activateSubscriptionChecks) {
+						if (Utils.isNullOrEmpty(oUser.getActiveProjectId())
+								|| Utils.isNullOrEmpty(oUser.getActiveSubscriptionId())) {
+							WasdiLog.warnLog("Wasdi.runProcess: Process Scheduled for Launcher. The user does not have a valid subscription and an active project");
+						}						
 					}
 
 					oProcess.setProjectId(oUser.getActiveProjectId());

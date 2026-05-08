@@ -30,11 +30,11 @@ import wasdi.shared.business.users.User;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
-import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.ShareFileParameter;
@@ -187,10 +187,7 @@ public class FileBufferResource {
 
 				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
 			}
-			
-			// Check the product
-			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-			
+						
 			// Must have a valid name
 			if (Utils.isNullOrEmpty(sProductName)) {
 				WasdiLog.warnLog("FileBufferResource.share: invalid product name");
@@ -215,6 +212,9 @@ public class FileBufferResource {
 			String sDestinationWorkspaceNode = oDestinationWorkspace.getNodeCode();
 			String sDestinationWorkspaceUserId = oDestinationWorkspace.getUserId();
 
+			// Check the product
+			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+			
 			String sOriginFilePath = WasdiFileUtils.fixPathSeparator(PathsConfig.getWorkspacePath(sOriginWorkspaceUserId, sOriginWorkspaceId) + sProductName);
 			ProductWorkspace oProductOriginWorkspace = oProductWorkspaceRepository.getProductWorkspace(sOriginFilePath, sOriginWorkspaceId);
 
@@ -456,7 +456,9 @@ public class FileBufferResource {
 					oFileOnNode.setIntValue(200);
 					
 					// Search for exchange name
-					String sExchange = WasdiConfig.Current.rabbit.exchange;
+					String sExchange = "";
+					
+					if (WasdiConfig.Current.rabbit != null) sExchange = WasdiConfig.Current.rabbit.exchange;
 					
 					// Set default if is empty
 					if (Utils.isNullOrEmpty(sExchange)) {

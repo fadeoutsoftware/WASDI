@@ -12,7 +12,8 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.factories.DataLayerManager;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.LauncherOperationsUtils;
@@ -35,7 +36,7 @@ public class WasdiScheduler
 	/**
 	 * Process Workpsace Repository
 	 */
-	private static ProcessWorkspaceRepository s_oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+	private static ProcessWorkspaceRepository s_oProcessWorkspaceRepository = null;
 		
 	/**
 	 * sleeping time between iterations
@@ -107,6 +108,8 @@ public class WasdiScheduler
   			//no log4j configuration
   			System.err.println("WasdiScheduler.main: Error Configuring log.  Reason: " + oEx );
   		}
+  		
+  		s_oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         
   		LoggerWrapper oLoggerWrapper = new LoggerWrapper(s_oLogger);
   		
@@ -123,20 +126,20 @@ public class WasdiScheduler
 		
 		WasdiLog.infoLog("WasdiScheduler.main: Logger configured :-)\n");
 				
-		WasdiLog.infoLog("WasdiScheduler.main: lastChangeDateOrderByParameter = " + WasdiConfig.Current.scheduler.lastStateChangeDateOrderBy);
+		WasdiLog.debugLog("WasdiScheduler.main: lastChangeDateOrderByParameter = " + WasdiConfig.Current.scheduler.lastStateChangeDateOrderBy);
 
 		
 		//mongo config
 		try {
-			WasdiLog.infoLog("WasdiScheduler.main: Configuring mongo...");
-			// Init Mongo Configuration
-			MongoRepository.readConfig();	
+			WasdiLog.infoLog("WasdiScheduler.main: Configuring data layer...");
+			// Init configured data layer
+			DataLayerManager.init();	
 		} 
 		catch (Throwable oEx) {
 			WasdiLog.errorLog("WasdiScheduler.main: Mongo configuration failed. Reason: " + oEx);
 			System.exit(-1);
 		}
-		WasdiLog.infoLog("WasdiScheduler.main: Mongo configured :-)\n");
+		WasdiLog.infoLog("WasdiScheduler.main: Data Layer configured :-)\n");
 		
 		// Computational nodes need to configure also the local dababase
 		try {
@@ -167,7 +170,7 @@ public class WasdiScheduler
 				long iThreadSleep = Long.parseLong(WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS);
 				if (iThreadSleep>0) {
 					s_lSleepingTimeMS = iThreadSleep;
-					WasdiLog.infoLog("WasdiScheduler.main: CatNap Ms: " + s_lSleepingTimeMS);
+					WasdiLog.debugLog("WasdiScheduler.main: CatNap Ms: " + s_lSleepingTimeMS);
 				}
 			} catch (Exception e) {
 				WasdiLog.errorLog("WasdiScheduler.main: Could not read schedulers configurations. Reason: " + e);
@@ -216,7 +219,7 @@ public class WasdiScheduler
 							oProcessScheduler.removeSupportedType(sSupportedType);							
 						}
 						else {
-							WasdiLog.infoLog("WasdiScheduler.main: Assigning to Scheduler " + sScheduler + " support type " + sSupportedType + " SubType " + oProcessScheduler.getOperationSubType());
+							WasdiLog.debugLog("WasdiScheduler.main: Assigning to Scheduler " + sScheduler + " support type " + sSupportedType + " SubType " + oProcessScheduler.getOperationSubType());
 						}
 					}
 					else {
@@ -228,7 +231,7 @@ public class WasdiScheduler
 						}
 						
 						// Yes: remove from the full list
-						WasdiLog.infoLog("WasdiScheduler.main: Assigning to Scheduler: " + sScheduler + " support type: " + sSupportedType + sSubTypeLog);
+						WasdiLog.debugLog("WasdiScheduler.main: Assigning to Scheduler: " + sScheduler + " support type: " + sSupportedType + sSubTypeLog);
 						asWasdiOperationTypes.remove(sSupportedType);
 					}
 				}
@@ -239,7 +242,7 @@ public class WasdiScheduler
 				
 				if (sSchedulerEnabled.equals("1")) {
 					// Start the scheduler
-					WasdiLog.infoLog("WasdiScheduler.main: Adding Scheduler: " + sScheduler);
+					WasdiLog.debugLog("WasdiScheduler.main: Adding Scheduler: " + sScheduler);
 					aoProcessSchedulers.add(oProcessScheduler);		
 				}
 				else {
@@ -257,7 +260,7 @@ public class WasdiScheduler
 				
 				// Assign all the types
 				for (String sOtherType : asWasdiOperationTypes) {
-					WasdiLog.infoLog("WasdiScheduler.main: Assigning to Scheduler: DEFAULT support type: " + sOtherType);
+					WasdiLog.debugLog("WasdiScheduler.main: Assigning to Scheduler: DEFAULT support type: " + sOtherType);
 					oProcessScheduler.addSupportedType(sOtherType);
 				}
 				

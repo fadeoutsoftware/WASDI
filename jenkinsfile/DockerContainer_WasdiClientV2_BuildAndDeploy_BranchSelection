@@ -12,7 +12,7 @@ pipeline {
   }
 
   tools {
-    nodejs "WASDI_NODEJS_V18"
+    nodejs "WASDI_NODEJS_V22"
   }
 
   stages {
@@ -97,7 +97,7 @@ pipeline {
       steps {
         sh script: """
           cd client_v2
-          npm install
+          npm install --legacy-peer-deps
         """,
         label: "Install NodeJS modules from package.json"
       }

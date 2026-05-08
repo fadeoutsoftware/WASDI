@@ -590,15 +590,19 @@ public class OpportunitySearchResource {
 		
 		WasdiLog.debugLog("OpportunitySearchResource.getSatellitesResources");
 
-		ArrayList<SatelliteResourceViewModel> aaoReturnValue = new ArrayList<SatelliteResourceViewModel>();
+		ArrayList<SatelliteResourceViewModel> aoReturnValue = new ArrayList<SatelliteResourceViewModel>();
 		
 		try {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			
 			if(null==oUser) {
 				WasdiLog.warnLog("OpportunitySearchResource.getSatellitesResources: invalid session");
-				return aaoReturnValue;
+				return aoReturnValue;
 			}
+			
+			if (WasdiConfig.Current.plan == null) {
+				return aoReturnValue;
+			}			
 
 			String[] asSatellites = null;
 
@@ -609,7 +613,7 @@ public class OpportunitySearchResource {
 			}
 			
 			if (asSatellites == null) {
-				return aaoReturnValue;
+				return aoReturnValue;
 			}
 
 			for (Integer iIndexSatellite = 0; iIndexSatellite < asSatellites.length; iIndexSatellite++) {
@@ -649,16 +653,16 @@ public class OpportunitySearchResource {
 					}
 					
 					oSatelliteResource.setSatelliteSensors(aoSensorViewModels);
-					aaoReturnValue.add(oSatelliteResource);
+					aoReturnValue.add(oSatelliteResource);
 				} catch (Exception oE) {
 					WasdiLog.errorLog("OpportunitySearchResource.getSatellitesResources Exception: ", oE);
-					return aaoReturnValue;
+					return aoReturnValue;
 				}
 			}
 		} catch (Exception oE) {
 			WasdiLog.errorLog("OpportunitySearchResource.getSatellitesResources: ", oE);
 		}
-		return aaoReturnValue;
+		return aoReturnValue;
 
 	}
 

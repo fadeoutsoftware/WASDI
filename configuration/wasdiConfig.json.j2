@@ -365,10 +365,8 @@
         "downloadRootPath": "{{ aoWasdiConfiguration['paths']['downloadRootPath'] }}",
         "gdalPath": "{{ aoWasdiConfiguration['paths']['gdalPath'] }}",
         "geoserverDataDir": "{{ aoWasdiConfiguration['paths']['geoserverDataDir'] }}",
-        "logBasePath": "{{ aoWasdiConfiguration['paths']['logBasePath'] }}",
         "metadataPath": "{{ aoWasdiConfiguration['paths']['metadataPath'] }}",
         "missionsConfigFilePath": "{{ aoWasdiConfiguration['paths']['missionsConfigFilePath'] }}",
-        "pythonExecPath": "{{ aoWasdiConfiguration['paths']['pythonExecPath'] }}",
         "s3VolumesBasePath": "{{ aoWasdiConfiguration['paths']['s3VolumesBasePath'] }}",
         "sen2CorePath": "{{ aoWasdiConfiguration['paths']['sen2CorePath'] }}",
         "sftpRootPath": "{{ aoWasdiConfiguration['paths']['sftpRootPath'] }}",
@@ -503,7 +501,6 @@
     "dockers": {
         "dockerComposeCommand": "{{ aoWasdiConfiguration['dockers']['dockerComposeCommand'] }}",
         "dockerNetworkMode": "{{ aoWasdiConfiguration['dockers']['dockerNetworkMode'] }}",
-        "dockersDeployLogFilePath": "{{ aoWasdiConfiguration['dockers']['dockersDeployLogFilePath'] }}",
         "eoepca": {
             "dockerWriteFolder": "{{ aoWasdiConfiguration['dockers']['eoepca']['dockerWriteFolder'] }}",
             "adesServerAddress": "{{ aoWasdiConfiguration['dockers']['eoepca']['adesServerAddress'] }}",
@@ -669,7 +666,6 @@
         "maxQueue": "{{ aoWasdiConfiguration['scheduler']['maxQueue'] }}",
         "processingThreadSleepingTimeMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadSleepingTimeMS'] }}",
         "processingThreadWaitStartMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadWaitStartMS'] }}",
-        "redirectLauncherOutput": {{ aoWasdiConfiguration['scheduler']['redirectLauncherOutput'] }},
         "sometimesCheckCounter":  {{ aoWasdiConfiguration['scheduler']['sometimesCheckCounter'] }},
         "watchDogCounter": {{ aoWasdiConfiguration['scheduler']['watchDogCounter'] }},
         "activateWatchDog":  {{ aoWasdiConfiguration['scheduler']['activateWatchDog'] | lower }},

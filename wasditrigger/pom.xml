@@ -17,14 +17,13 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionCommonsCli>1.9.0</sVersionCommonsCli>
-        <sVersionCommonsLang3>3.17.0</sVersionCommonsLang3>
+        <sVersionCommonsCli>1.10.0</sVersionCommonsCli>
+        <sVersionCommonsLang3>3.20.0</sVersionCommonsLang3>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
-        <sVersionLog4j>2.20.0</sVersionLog4j>
         <sVersionMavenJarPlugin>3.3.0</sVersionMavenJarPlugin>
         <sVersionMavenShadePlugin>3.5.0</sVersionMavenShadePlugin>
     </properties>
@@ -117,18 +116,6 @@
             <groupId>fadeout.software.wasdi</groupId>
             <artifactId>jwasdilib</artifactId>
             <version>0.7.5</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${sVersionLog4j}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${sVersionLog4j}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
         <dependency>

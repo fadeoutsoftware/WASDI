@@ -29,6 +29,9 @@ public class KeycloakService implements AuthProviderService {
 
 	public String getToken() {
 		try {
+			
+			if (WasdiConfig.Current.keycloack==null) return "";
+			
 			String sAuthUrl = WasdiConfig.Current.keycloack.address;
 			String sCliSecret =  WasdiConfig.Current.keycloack.cliSecret;
 			//URL
@@ -72,6 +75,9 @@ public class KeycloakService implements AuthProviderService {
 	}
 
 	public String getUserData(String sToken, String sUserId) {
+		
+		if (WasdiConfig.Current.keycloack==null) return "";
+		
 		// build keycloak API URL
 		String sUrl = WasdiConfig.Current.keycloack.address;
 		if(!sUrl.endsWith("/")) {
@@ -153,6 +159,12 @@ public class KeycloakService implements AuthProviderService {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		oResult.setIntValue(500);
+		
+		if (WasdiConfig.Current.keycloack==null) {
+			WasdiLog.debugLog("KeycloakService.requirePasswordUpdateViaEmail: keycloack config is null, aborting");
+			return oResult;
+		} 
+		
 		if(Utils.isNullOrEmpty(sUserId)) {
 			WasdiLog.debugLog("KeycloakService.requirePasswordUpdateViaEmail: user id null or empty, aborting");
 			return oResult;
@@ -232,6 +244,8 @@ public class KeycloakService implements AuthProviderService {
 	
 	@Override
 	public boolean logout(String sSessionId) {
+		
+		if (WasdiConfig.Current.keycloack==null) return true;
 		
 		try {
 			String sUrl = WasdiConfig.Current.keycloack.address;
