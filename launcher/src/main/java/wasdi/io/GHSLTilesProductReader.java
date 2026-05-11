@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.io.FileUtils;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FileDataStore;

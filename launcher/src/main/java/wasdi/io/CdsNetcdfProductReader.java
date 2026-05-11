@@ -11,8 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.esa.snap.core.datamodel.Product;
-
 import ucar.ma2.Array;
 import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;

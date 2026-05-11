@@ -318,14 +318,18 @@ def __extract_substring_limited_by(full_string: str, start: str, end: str) -> st
 
 
 def __version_string_2_dictionary(version: str) -> dict:
-	asVersion: list = version.split('.')
-	oVersion: dict = {
-		"name": "pip",
-		"version": version,
-		"major": asVersion[0],
-		"minor": asVersion[1],
-		"patch": asVersion[2]
-	}
+
+	try: 
+		asVersion: list = version.split('.')
+		oVersion: dict = {
+			"version": version,
+			"major": asVersion[0],
+			"minor": asVersion[1],
+			"patch": asVersion[2]
+		}
+	except Exception as oEx:
+		log("Error parsing version string: " + repr(oEx))
+		oVersion = {}
 
 	return oVersion
 

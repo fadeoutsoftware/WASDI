@@ -124,29 +124,39 @@ def pm_list_packages(sFlag: str):
     return  aoDependencies
 
 def pm_manager_version():
-    log('/packageManager/managerVersion/')
-
-    sCommandOutput: str = __execute_pip_command_and_get_output(['--version'])
-
-    start: str = 'pip '
-    end: str = ' from '
-
-    oMatch = re.search('%s(.*)%s' % (start, end), sCommandOutput)
-    if oMatch is None:
-        raise Exception('Could not parse pip version from output: ' + sCommandOutput)
-
-    sVersionFromOutput = oMatch.group(1)
-
-    asVersion: list = sVersionFromOutput.split('.')
-
     oVersion = {}
     oVersion["name"] = "pip"
-    oVersion["version"] = sVersionFromOutput
-    oVersion["major"] = asVersion[0]
-    oVersion["minor"] = asVersion[1]
-    oVersion["patch"] = asVersion[2]
+    oVersion["version"] = ""
+    oVersion["major"] = ""
+    oVersion["minor"] = ""
+    oVersion["patch"] = ""
+
+    try:
+        log('/packageManager/managerVersion/')
+
+        command: str = 'pip -V'
+
+        sCommandOutput: str = __execute_pip_command_and_get_output(command)
+
+        start: str = 'pip '
+        end: str = ' from '
+
+        sVersionFromOutput = re.search('%s(.*)%s' % (start, end), sCommandOutput).group(1)
+
+        asVersion: list = sVersionFromOutput.split('.')
+
+        oVersion["version"] = sVersionFromOutput
+        if len(asVersion) > 0:
+            oVersion["major"] = asVersion[0]
+        if len(asVersion) > 1:
+            oVersion["minor"] = asVersion[1]
+        if len(asVersion) > 2:
+            oVersion["patch"] = asVersion[2]
+    except Exception as oEx:
+        log("Error getting pip version: " + repr(oEx))
 
     return oVersion
+
 
 def __execute_pip_command_and_get_output(asPipArgs: list) -> str:
     sPrintableCommand = ' '.join([sys.executable, '-m', 'pip'] + asPipArgs)

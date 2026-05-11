@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.esa.snap.core.datamodel.Product;
-
 import wasdi.shared.business.modis11a2.ModisItemForReading;
 import wasdi.shared.business.modis11a2.ModisLocation;
 import wasdi.shared.data.modis11a2.ModisRepository;

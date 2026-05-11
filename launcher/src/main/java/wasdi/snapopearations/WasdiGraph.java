@@ -505,6 +505,8 @@ public class WasdiGraph {
         // Initialize band group
         oProductViewModel.setBandsGroups(new NodeGroupViewModel("Bands"));
         oProductViewModel.getBandsGroups().setBands(new ArrayList<>());
+        oProductViewModel.setName(oProductFile.getName());
+        oProductViewModel.setFileName(oProductFile.getName());
         
         if (oProduct != null) {
             for (Band oBand : oProduct.getBands()) {
