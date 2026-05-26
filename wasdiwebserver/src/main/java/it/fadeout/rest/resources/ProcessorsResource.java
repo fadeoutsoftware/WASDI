@@ -617,19 +617,23 @@ public class ProcessorsResource  {
 			ReviewRepository oReviewRepository = new ReviewRepository();
 			UserRepository oUserRepository = new UserRepository();
 			
+			boolean bScoreFilterEnabled = oFilters.getScore() > 0;
+			int iPageStart = oFilters.getPage() * oFilters.getItemsPerPage();
+			int iPageEndExclusive = (oFilters.getPage() + 1) * oFilters.getItemsPerPage();
+			
 			int iAvailableApps = 0;
 			
 			for (int i=0; i<aoDeployed.size(); i++) {
-								
-				AppListViewModel oAppListViewModel = new AppListViewModel();
+							
 				Processor oProcessor = aoDeployed.get(i);
 				// Initialize as No Votes
 				float fScore = -1.0f;
+				int iVotes = 0;
 				
 				if (!oProcessor.getShowInStore()) continue;
 				
 				// See if this is a processor the user can access to
-				if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId())) continue;
+				if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor)) continue;
 				
 				// Check and apply name filter taking in account both friendly and app name.
 				// Friendly name was added on the check to have a coherent behaviour for the users
@@ -663,51 +667,67 @@ public class ProcessorsResource  {
 					}
 				}
 				
-				// Get the reviews to compute the vote
-				List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
-
-				int iVotes = 0;
-
-				// If we have reviews
-				if (aoReviews != null) {
-					if (aoReviews.size()>0) {
-						fScore = 0;
-						
-						// Take the sum
-						for (Review oReview : aoReviews) {
-							fScore += oReview.getVote();
-						}
-						
-						// Compute average
-						fScore /= aoReviews.size();
-
-						iVotes = aoReviews.size();
-					}
-				}				
-				
-				if (oFilters.getScore()> 0) {
-										
-					if (fScore<oFilters.getScore() && fScore != -1.0f) {
-						continue;
-					}
-				}
-				
 				// Check and apply max price filter
 				if (oFilters.getMaxPrice()>=0) {
 					if (oProcessor.getOndemandPrice() > oFilters.getMaxPrice()) continue;
 				}
 				
+				if (bScoreFilterEnabled) {
+					// Score filter requires knowing rating before pagination.
+					List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
+
+					if (aoReviews != null) {
+						if (aoReviews.size() > 0) {
+							fScore = 0;
+
+							// Take the sum
+							for (Review oReview : aoReviews) {
+								fScore += oReview.getVote();
+							}
+
+							// Compute average
+							fScore /= aoReviews.size();
+
+							iVotes = aoReviews.size();
+						}
+					}
+					
+					if (fScore < oFilters.getScore() && fScore != -1.0f) {
+						continue;
+					}
+				}
+				
 				// This is a app compatible with the filter: handle the pagination
 				
 				// Jump if this is an app of previous pages
-				if (iAvailableApps<oFilters.getPage()*oFilters.getItemsPerPage()) {
+				if (iAvailableApps < iPageStart) {
 					iAvailableApps++;
 					continue;
 				}
 				// Stop if this is an app after the actual page
-				if (iAvailableApps>= (oFilters.getPage()+1) * oFilters.getItemsPerPage()) break;
+				if (iAvailableApps >= iPageEndExclusive) break;
 				
 				iAvailableApps++;
+				
+				if (!bScoreFilterEnabled) {
+					// In the common case (no score filter), query reviews only for page items.
+					List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
+
+					if (aoReviews != null) {
+						if (aoReviews.size() > 0) {
+							fScore = 0;
+
+							for (Review oReview : aoReviews) {
+								fScore += oReview.getVote();
+							}
+
+							fScore /= aoReviews.size();
+							iVotes = aoReviews.size();
+						}
+					}
+				}
+				
+				AppListViewModel oAppListViewModel = new AppListViewModel();
 				
 				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 				
