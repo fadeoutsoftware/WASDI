@@ -582,9 +582,42 @@ public class ProcessorsResource  {
 		ArrayList<AppListViewModel> aoRet = new ArrayList<>(); 
 		WasdiLog.debugLog("ProcessorsResource.getMarketPlaceAppList");
 		
+		long lRequestStartNs = System.nanoTime();
+		long lSessionCheckNs = 0L;
+		long lFetchProcessorsNs = 0L;
+		long lPermissionCheckNs = 0L;
+		long lNameFilterNs = 0L;
+		long lCategoryFilterNs = 0L;
+		long lPublisherFilterNs = 0L;
+		long lPriceFilterNs = 0L;
+		long lScoreFilterNs = 0L;
+		long lReviewsForScoreFilterNs = 0L;
+		long lPaginationNs = 0L;
+		long lReviewsForPageNs = 0L;
+		long lSharingLookupNs = 0L;
+		long lOwnerLookupNs = 0L;
+		long lVmBuildNs = 0L;
+		
+		int iVisitedProcessors = 0;
+		int iSkippedNotInStore = 0;
+		int iSkippedPermissions = 0;
+		int iSkippedName = 0;
+		int iSkippedCategory = 0;
+		int iSkippedPublisher = 0;
+		int iSkippedPrice = 0;
+		int iSkippedScore = 0;
+		int iSkippedPaginationBeforePage = 0;
+		int iScoreReviewQueries = 0;
+		int iPageReviewQueries = 0;
+		int iSharingQueries = 0;
+		int iOwnerQueries = 0;
+		int iTotalDeployed = 0;
+		
 		try {
 			// Check User 
+			long lStepStartNs = System.nanoTime();
 			User oUser = Wasdi.getUserFromSession(sSessionId);
+			lSessionCheckNs += System.nanoTime() - lStepStartNs;
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.getMarketPlaceAppList: invalid session");
@@ -613,9 +646,12 @@ public class ProcessorsResource  {
 			// Set descending if it was -1
 			if (oFilters.getOrderDirection() == -1) iDirection = -1;
 			
+			lStepStartNs = System.nanoTime();
 			List<Processor> aoDeployed = oProcessorRepository.getDeployedProcessors(sOrderBy, iDirection);
+			lFetchProcessorsNs += System.nanoTime() - lStepStartNs;
 			ReviewRepository oReviewRepository = new ReviewRepository();
 			UserRepository oUserRepository = new UserRepository();
+			iTotalDeployed = aoDeployed.size();
 			
 			boolean bScoreFilterEnabled = oFilters.getScore() > 0;
 			int iPageStart = oFilters.getPage() * oFilters.getItemsPerPage();
@@ -624,27 +660,44 @@ public class ProcessorsResource  {
 			int iAvailableApps = 0;
 			
 			for (int i=0; i<aoDeployed.size(); i++) {
+				iVisitedProcessors++;
 							
 				Processor oProcessor = aoDeployed.get(i);
 				// Initialize as No Votes
 				float fScore = -1.0f;
 				int iVotes = 0;
 				
-				if (!oProcessor.getShowInStore()) continue;
+				if (!oProcessor.getShowInStore()) {
+					iSkippedNotInStore++;
+					continue;
+				}
 				
 				// See if this is a processor the user can access to
-				if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor)) continue;
+				lStepStartNs = System.nanoTime();
+				boolean bCanAccess = PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor);
+				lPermissionCheckNs += System.nanoTime() - lStepStartNs;
+				if (!bCanAccess) {
+					iSkippedPermissions++;
+					continue;
+				}
 				
 				// Check and apply name filter taking in account both friendly and app name.
 				// Friendly name was added on the check to have a coherent behaviour for the users
+				lStepStartNs = System.nanoTime();
 				if (!Utils.isNullOrEmpty(oFilters.getName())) {
 					String sLowerProcessorName = oProcessor.getName().toLowerCase();
 					String sLowerProcessorFriendlyName = oProcessor.getFriendlyName().toLowerCase();
 					String sLowerFiltername = oFilters.getName().toLowerCase();
-					if (!(sLowerProcessorName.contains(sLowerFiltername) || sLowerProcessorFriendlyName.contains(sLowerFiltername))) continue;
+					if (!(sLowerProcessorName.contains(sLowerFiltername) || sLowerProcessorFriendlyName.contains(sLowerFiltername))) {
+						lNameFilterNs += System.nanoTime() - lStepStartNs;
+						iSkippedName++;
+						continue;
+					}
 				}
+				lNameFilterNs += System.nanoTime() - lStepStartNs;
 				
 				// Check and apply category filter
+				lStepStartNs = System.nanoTime();
 				if (oFilters.getCategories().size()>0) {
 					
 					boolean bCategoryFound = false;
@@ -656,25 +709,43 @@ public class ProcessorsResource  {
 						}
 					}
 					
-					if (!bCategoryFound) continue;
-				}
-				
-				// Check and apply publisher filter
-				if (oFilters.getPublishers().size()>0) {
-					
-					if (!oFilters.getPublishers().contains(oProcessor.getUserId())) {
+					if (!bCategoryFound) {
+						lCategoryFilterNs += System.nanoTime() - lStepStartNs;
+						iSkippedCategory++;
 						continue;
 					}
 				}
+				lCategoryFilterNs += System.nanoTime() - lStepStartNs;
+				
+				// Check and apply publisher filter
+				lStepStartNs = System.nanoTime();
+				if (oFilters.getPublishers().size()>0) {
+					
+					if (!oFilters.getPublishers().contains(oProcessor.getUserId())) {
+						lPublisherFilterNs += System.nanoTime() - lStepStartNs;
+						iSkippedPublisher++;
+						continue;
+					}
+				}
+				lPublisherFilterNs += System.nanoTime() - lStepStartNs;
 				
 				// Check and apply max price filter
+				lStepStartNs = System.nanoTime();
 				if (oFilters.getMaxPrice()>=0) {
-					if (oProcessor.getOndemandPrice() > oFilters.getMaxPrice()) continue;
+					if (oProcessor.getOndemandPrice() > oFilters.getMaxPrice()) {
+						lPriceFilterNs += System.nanoTime() - lStepStartNs;
+						iSkippedPrice++;
+						continue;
+					}
 				}
+				lPriceFilterNs += System.nanoTime() - lStepStartNs;
 				
 				if (bScoreFilterEnabled) {
 					// Score filter requires knowing rating before pagination.
+					lStepStartNs = System.nanoTime();
 					List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
+					iScoreReviewQueries++;
+					lReviewsForScoreFilterNs += System.nanoTime() - lStepStartNs;
 
 					if (aoReviews != null) {
 						if (aoReviews.size() > 0) {
@@ -692,26 +763,40 @@ public class ProcessorsResource  {
 						}
 					}
 					
+					lStepStartNs = System.nanoTime();
 					if (fScore < oFilters.getScore() && fScore != -1.0f) {
+						lScoreFilterNs += System.nanoTime() - lStepStartNs;
+						iSkippedScore++;
 						continue;
 					}
+					lScoreFilterNs += System.nanoTime() - lStepStartNs;
 				}
 				
 				// This is a app compatible with the filter: handle the pagination
 				
 				// Jump if this is an app of previous pages
+				lStepStartNs = System.nanoTime();
 				if (iAvailableApps < iPageStart) {
 					iAvailableApps++;
+					iSkippedPaginationBeforePage++;
+					lPaginationNs += System.nanoTime() - lStepStartNs;
 					continue;
 				}
 				// Stop if this is an app after the actual page
-				if (iAvailableApps >= iPageEndExclusive) break;
+				if (iAvailableApps >= iPageEndExclusive) {
+					lPaginationNs += System.nanoTime() - lStepStartNs;
+					break;
+				}
+				lPaginationNs += System.nanoTime() - lStepStartNs;
 				
 				iAvailableApps++;
 				
 				if (!bScoreFilterEnabled) {
 					// In the common case (no score filter), query reviews only for page items.
+					lStepStartNs = System.nanoTime();
 					List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
+					iPageReviewQueries++;
+					lReviewsForPageNs += System.nanoTime() - lStepStartNs;
 
 					if (aoReviews != null) {
 						if (aoReviews.size() > 0) {
@@ -727,9 +812,13 @@ public class ProcessorsResource  {
 					}
 				}
 				
+				lStepStartNs = System.nanoTime();
 				AppListViewModel oAppListViewModel = new AppListViewModel();
 				
+				long lSharingStepStartNs = System.nanoTime();
 				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
+				iSharingQueries++;
+				lSharingLookupNs += System.nanoTime() - lSharingStepStartNs;
 				
 				oAppListViewModel.setIsMine(false);
 				
@@ -777,7 +866,10 @@ public class ProcessorsResource  {
 				
 				oAppListViewModel.setPublisherNickName(oAppListViewModel.getPublisher());
 				
+				long lOwnerStepStartNs = System.nanoTime();
 				User oAppOwner = oUserRepository.getUser(oProcessor.getUserId());
+				iOwnerQueries++;
+				lOwnerLookupNs += System.nanoTime() - lOwnerStepStartNs;
 				
 				if (oAppOwner != null) {
 					if (Utils.isNullOrEmpty(oAppOwner.getPublicNickName())) {
@@ -789,11 +881,47 @@ public class ProcessorsResource  {
 				}
 
 				aoRet.add(oAppListViewModel);
+				lVmBuildNs += System.nanoTime() - lStepStartNs;
 			}
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessorsResource.getMarketPlaceAppList error: " + oEx);
 			return aoRet;
+		}
+		finally {
+			long lTotalMs = (System.nanoTime() - lRequestStartNs) / 1000000L;
+			WasdiLog.debugLog("ProcessorsResource.getMarketPlaceAppList PERF totalMs=" + lTotalMs
+					+ " sessionMs=" + (lSessionCheckNs / 1000000L)
+					+ " fetchProcessorsMs=" + (lFetchProcessorsNs / 1000000L)
+					+ " permissionMs=" + (lPermissionCheckNs / 1000000L)
+					+ " nameFilterMs=" + (lNameFilterNs / 1000000L)
+					+ " categoryFilterMs=" + (lCategoryFilterNs / 1000000L)
+					+ " publisherFilterMs=" + (lPublisherFilterNs / 1000000L)
+					+ " priceFilterMs=" + (lPriceFilterNs / 1000000L)
+					+ " scoreFilterMs=" + (lScoreFilterNs / 1000000L)
+					+ " reviewsScoreMs=" + (lReviewsForScoreFilterNs / 1000000L)
+					+ " reviewsPageMs=" + (lReviewsForPageNs / 1000000L)
+					+ " paginationMs=" + (lPaginationNs / 1000000L)
+					+ " sharingLookupMs=" + (lSharingLookupNs / 1000000L)
+					+ " ownerLookupMs=" + (lOwnerLookupNs / 1000000L)
+					+ " vmBuildMs=" + (lVmBuildNs / 1000000L)
+					+ " scoreFilterEnabled=" + (oFilters != null && oFilters.getScore() > 0));
+			
+			WasdiLog.debugLog("ProcessorsResource.getMarketPlaceAppList PERF counts totalDeployed=" + iTotalDeployed
+					+ " visited=" + iVisitedProcessors
+					+ " returned=" + aoRet.size()
+					+ " scoreReviewQueries=" + iScoreReviewQueries
+					+ " pageReviewQueries=" + iPageReviewQueries
+					+ " sharingQueries=" + iSharingQueries
+					+ " ownerQueries=" + iOwnerQueries
+					+ " skipNotInStore=" + iSkippedNotInStore
+					+ " skipPermission=" + iSkippedPermissions
+					+ " skipName=" + iSkippedName
+					+ " skipCategory=" + iSkippedCategory
+					+ " skipPublisher=" + iSkippedPublisher
+					+ " skipPrice=" + iSkippedPrice
+					+ " skipScore=" + iSkippedScore
+					+ " skipBeforePage=" + iSkippedPaginationBeforePage);
 		}		
 		return aoRet;
 	}
