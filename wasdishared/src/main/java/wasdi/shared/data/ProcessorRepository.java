@@ -111,6 +111,34 @@ public class ProcessorRepository {
 		return m_oBackend.getDeployedProcessors(sOrderBy, iDirection);
     }    
 
+  public List<Processor> getMarketplaceProcessors(String sOrderBy, int iDirection) {
+    return m_oBackend.getMarketplaceProcessors(sOrderBy, iDirection);
+  }
+
+  public List<Processor> getMarketplaceProcessorsPage(
+      String sUserId,
+      List<String> asSharedProcessorIds,
+      String sName,
+      List<String> asCategories,
+      List<String> asPublishers,
+      float fMaxPrice,
+      String sOrderBy,
+      int iDirection,
+      int iPage,
+      int iItemsPerPage) {
+    return m_oBackend.getMarketplaceProcessorsPage(
+        sUserId,
+        asSharedProcessorIds,
+        sName,
+        asCategories,
+        asPublishers,
+        fMaxPrice,
+        sOrderBy,
+        iDirection,
+        iPage,
+        iItemsPerPage);
+  }
+
 	public void updateProcessorDate(Processor oProcessor){
 		Date oDate = new Date();
 		oProcessor.setUpdateDate( (double) oDate.getTime());

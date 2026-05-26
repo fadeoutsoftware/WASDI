@@ -5,6 +5,7 @@ import static org.dizitart.no2.filters.FluentFilter.where;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.regex.Pattern;
 
 import org.dizitart.no2.collection.Document;
@@ -245,6 +246,95 @@ public class No2ProcessorRepositoryBackend extends No2Repository implements IPro
 		}
 		aoReturnList.sort(oComparator);
 		return aoReturnList;
+	}
+
+	@Override
+	public List<Processor> getMarketplaceProcessors(String sOrderBy, int iDirection) {
+		List<Processor> aoReturnList = getAllProcessors().stream()
+				.filter(oProcessor -> oProcessor != null && oProcessor.getShowInStore())
+				.collect(Collectors.toList());
+
+		Comparator<Processor> oComparator = comparatorForOrderBy(sOrderBy);
+		if (iDirection < 0) {
+			oComparator = oComparator.reversed();
+		}
+		aoReturnList.sort(oComparator);
+		return aoReturnList;
+	}
+
+	@Override
+	public List<Processor> getMarketplaceProcessorsPage(
+			String sUserId,
+			List<String> asSharedProcessorIds,
+			String sName,
+			List<String> asCategories,
+			List<String> asPublishers,
+			float fMaxPrice,
+			String sOrderBy,
+			int iDirection,
+			int iPage,
+			int iItemsPerPage) {
+		List<Processor> aoAll = getMarketplaceProcessors(sOrderBy, iDirection);
+		List<Processor> aoFiltered = new ArrayList<>();
+
+		if (iPage < 0) {
+			iPage = 0;
+		}
+		if (iItemsPerPage <= 0) {
+			iItemsPerPage = 12;
+		}
+
+		for (Processor oProcessor : aoAll) {
+			boolean bHasAccess = oProcessor.getIsPublic() == 1;
+			if (!Utils.isNullOrEmpty(sUserId) && sUserId.equals(oProcessor.getUserId())) {
+				bHasAccess = true;
+			}
+			if (!bHasAccess && asSharedProcessorIds != null && asSharedProcessorIds.contains(oProcessor.getProcessorId())) {
+				bHasAccess = true;
+			}
+			if (!bHasAccess) {
+				continue;
+			}
+
+			if (!Utils.isNullOrEmpty(sName)) {
+				String sLowerName = sName.toLowerCase();
+				String sProcName = oProcessor.getName() == null ? "" : oProcessor.getName().toLowerCase();
+				String sProcFriendlyName = oProcessor.getFriendlyName() == null ? "" : oProcessor.getFriendlyName().toLowerCase();
+				if (!sProcName.contains(sLowerName) && !sProcFriendlyName.contains(sLowerName)) {
+					continue;
+				}
+			}
+
+			if (asCategories != null && !asCategories.isEmpty()) {
+				boolean bFound = false;
+				for (String sCategory : oProcessor.getCategories()) {
+					if (asCategories.contains(sCategory)) {
+						bFound = true;
+						break;
+					}
+				}
+				if (!bFound) {
+					continue;
+				}
+			}
+
+			if (asPublishers != null && !asPublishers.isEmpty() && !asPublishers.contains(oProcessor.getUserId())) {
+				continue;
+			}
+
+			if (fMaxPrice >= 0 && oProcessor.getOndemandPrice() > fMaxPrice) {
+				continue;
+			}
+
+			aoFiltered.add(oProcessor);
+		}
+
+		int iFrom = iPage * iItemsPerPage;
+		if (iFrom >= aoFiltered.size()) {
+			return new ArrayList<>();
+		}
+		int iTo = Math.min(iFrom + iItemsPerPage, aoFiltered.size());
+		return new ArrayList<>(aoFiltered.subList(iFrom, iTo));
 	}
 
 	@Override

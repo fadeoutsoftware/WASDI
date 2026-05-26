@@ -10,6 +10,7 @@ import org.bson.conversions.Bson;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Projections;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
@@ -237,6 +238,120 @@ public class MongoProcessorRepositoryBackend extends MongoRepository implements 
 
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessorRepository.getDeployedProcessors :error ", oEx);
+		}
+
+		return aoReturnList;
+	}
+
+	@Override
+	public List<Processor> getMarketplaceProcessors(String sOrderBy, int iDirection) {
+
+		final ArrayList<Processor> aoReturnList = new ArrayList<Processor>();
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(new Document("showInStore", true))
+					.projection(Projections.include(
+							"processorId",
+							"userId",
+							"name",
+							"friendlyName",
+							"description",
+							"isPublic",
+							"ondemandPrice",
+							"pricePerSquareKm",
+							"showInStore",
+							"logo",
+							"categories"
+					))
+					.sort(new Document(sOrderBy, iDirection));
+
+			fillList(aoReturnList, oWSDocuments, Processor.class);
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorRepository.getMarketplaceProcessors :error ", oEx);
+		}
+
+		return aoReturnList;
+	}
+
+	@Override
+	public List<Processor> getMarketplaceProcessorsPage(
+			String sUserId,
+			List<String> asSharedProcessorIds,
+			String sName,
+			List<String> asCategories,
+			List<String> asPublishers,
+			float fMaxPrice,
+			String sOrderBy,
+			int iDirection,
+			int iPage,
+			int iItemsPerPage) {
+
+		final ArrayList<Processor> aoReturnList = new ArrayList<Processor>();
+		try {
+			if (iPage < 0) {
+				iPage = 0;
+			}
+			if (iItemsPerPage <= 0) {
+				iItemsPerPage = 12;
+			}
+
+			List<Bson> aoAndFilters = new ArrayList<>();
+			aoAndFilters.add(Filters.eq("showInStore", true));
+
+			List<Bson> aoAccessFilters = new ArrayList<>();
+			aoAccessFilters.add(Filters.eq("isPublic", 1));
+			if (!Utils.isNullOrEmpty(sUserId)) {
+				aoAccessFilters.add(Filters.eq("userId", sUserId));
+			}
+			if (asSharedProcessorIds != null && !asSharedProcessorIds.isEmpty()) {
+				aoAccessFilters.add(Filters.in("processorId", asSharedProcessorIds));
+			}
+			aoAndFilters.add(Filters.or(aoAccessFilters));
+
+			if (!Utils.isNullOrEmpty(sName)) {
+				Pattern oRegex = Pattern.compile(Pattern.quote(sName), Pattern.CASE_INSENSITIVE);
+				aoAndFilters.add(Filters.or(
+						Filters.regex("name", oRegex),
+						Filters.regex("friendlyName", oRegex)));
+			}
+
+			if (asCategories != null && !asCategories.isEmpty()) {
+				aoAndFilters.add(Filters.in("categories", asCategories));
+			}
+
+			if (asPublishers != null && !asPublishers.isEmpty()) {
+				aoAndFilters.add(Filters.in("userId", asPublishers));
+			}
+
+			if (fMaxPrice >= 0) {
+				aoAndFilters.add(Filters.lte("ondemandPrice", fMaxPrice));
+			}
+
+			Bson oFinalFilter = Filters.and(aoAndFilters);
+
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(oFinalFilter)
+					.projection(Projections.include(
+							"processorId",
+							"userId",
+							"name",
+							"friendlyName",
+							"description",
+							"isPublic",
+							"ondemandPrice",
+							"pricePerSquareKm",
+							"showInStore",
+							"logo",
+							"categories"))
+					.sort(new Document(sOrderBy, iDirection))
+					.skip(iPage * iItemsPerPage)
+					.limit(iItemsPerPage);
+
+			fillList(aoReturnList, oWSDocuments, Processor.class);
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorRepository.getMarketplaceProcessorsPage :error ", oEx);
 		}
 
 		return aoReturnList;
