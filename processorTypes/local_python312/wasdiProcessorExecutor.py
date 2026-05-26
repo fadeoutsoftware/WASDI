@@ -13,6 +13,7 @@ import subprocess
 import re
 import time
 import sys
+from importlib import metadata
 
 m_sProcId = ""
 
@@ -65,6 +66,8 @@ def refresh_package_list(sRefreshPackageList: str):
 
     #Run the processor
     try:
+        log("refresh_package_list 2.0")
+
         aoPackagesList = {}
 
         log("Get Outdated packages")
@@ -146,17 +149,8 @@ def pm_manager_version():
     try:
         log('/packageManager/managerVersion/')
 
-        sCommandOutput: str = __execute_pip_command_and_get_output(['-V'])
-
-        start: str = 'pip '
-        end: str = ' from '
-
-        oMatch = re.search('%s(.*)%s' % (start, end), sCommandOutput)
-        if oMatch is None:
-            log("pm_manager_version: unexpected output: " + str(sCommandOutput))
-            return oVersion
-
-        sVersionFromOutput = oMatch.group(1)
+        # Do not spawn pip subprocess for version to avoid runtime issues.
+        sVersionFromOutput = metadata.version('pip')
 
         asVersion: list = sVersionFromOutput.split('.')
 
@@ -181,11 +175,21 @@ def __execute_pip_command_and_get_output(asPipArgs: list) -> str:
     sPrintableCommand = ' '.join(asCommand)
     log('__execute_pip_command_and_get_output: ' + sPrintableCommand)
 
-    oPipProcess = subprocess.run(
-        asCommand,
-        capture_output=True,
-        text=True
-    )
+    try:
+        oPipProcess = subprocess.run(
+            asCommand,
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+    except subprocess.TimeoutExpired as oEx:
+        sStdout = '' if oEx.stdout is None else str(oEx.stdout)
+        sStderr = '' if oEx.stderr is None else str(oEx.stderr)
+        log('__execute_pip_command_and_get_output timeout for command: ' + sPrintableCommand)
+        return (sStdout + '\n' + sStderr).strip()
+    except Exception as oEx:
+        log('__execute_pip_command_and_get_output exception: ' + repr(oEx))
+        return ''
 
     sOutput: str = oPipProcess.stdout if oPipProcess.stdout is not None else ''
     sError: str = oPipProcess.stderr if oPipProcess.stderr is not None else ''
