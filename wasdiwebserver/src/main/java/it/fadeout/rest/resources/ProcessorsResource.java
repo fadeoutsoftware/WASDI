@@ -3840,8 +3840,7 @@ public class ProcessorsResource  {
 			//unzip
 			try {
 				ZipFileUtils oZipExtractor = new ZipFileUtils(sSessionId + " : " + sProcessorId);
-				String sTmpFolder = oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
-				WasdiLog.debugLog("ProcessorsResource.unzipProcessor: temporary dir: " + sTmpFolder );
+				oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
 			} catch (IOException | SecurityException oE) {
 				WasdiLog.errorLog("ProcessorsResource.unzipProcessor: unzip failed: " + oE);
 				return false;
