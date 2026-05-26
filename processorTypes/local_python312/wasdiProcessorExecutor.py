@@ -120,8 +120,20 @@ def pm_list_packages(sFlag: str):
 
     sOutput: str = __execute_pip_command_and_get_output(asArgs)
     log("Got output\n " + sOutput)
-    aoDependencies: list = __parse_list_command_output(sOutput)
-    return  aoDependencies
+
+    # Safe behavior: empty output means no rows, not a failure.
+    if sOutput is None or sOutput.strip() == "":
+        log("pm_list_packages: empty output for flag " + sFlag + ", returning empty list")
+        return []
+
+    try:
+        aoDependencies: list = __parse_list_command_output(sOutput)
+    except Exception as oEx:
+        # Never break the refresh flow for parser issues.
+        log("pm_list_packages: parse error, returning empty list: " + repr(oEx))
+        aoDependencies = []
+
+    return aoDependencies
 
 def pm_manager_version():
     oVersion = {}
@@ -134,14 +146,17 @@ def pm_manager_version():
     try:
         log('/packageManager/managerVersion/')
 
-        command: str = 'pip -V'
-
-        sCommandOutput: str = __execute_pip_command_and_get_output(command)
+        sCommandOutput: str = __execute_pip_command_and_get_output(['-V'])
 
         start: str = 'pip '
         end: str = ' from '
 
-        sVersionFromOutput = re.search('%s(.*)%s' % (start, end), sCommandOutput).group(1)
+        oMatch = re.search('%s(.*)%s' % (start, end), sCommandOutput)
+        if oMatch is None:
+            log("pm_manager_version: unexpected output: " + str(sCommandOutput))
+            return oVersion
+
+        sVersionFromOutput = oMatch.group(1)
 
         asVersion: list = sVersionFromOutput.split('.')
 
@@ -158,11 +173,16 @@ def pm_manager_version():
     return oVersion
 
 def __execute_pip_command_and_get_output(asPipArgs: list) -> str:
-    sPrintableCommand = ' '.join([sys.executable, '-m', 'pip'] + asPipArgs)
+    # Defensive: accept both list and accidental string input.
+    if isinstance(asPipArgs, str):
+        asPipArgs = asPipArgs.split()
+
+    asCommand = [sys.executable, '-m', 'pip'] + asPipArgs
+    sPrintableCommand = ' '.join(asCommand)
     log('__execute_pip_command_and_get_output: ' + sPrintableCommand)
 
     oPipProcess = subprocess.run(
-        [sys.executable, '-m', 'pip'] + asPipArgs,
+        asCommand,
         capture_output=True,
         text=True
     )
@@ -174,16 +194,26 @@ def __execute_pip_command_and_get_output(asPipArgs: list) -> str:
         if sOutput == '':
             sOutput = sError
         else:
-            sOutput += sError
+            sOutput += '\n' + sError
+
+    log('__execute_pip_command_and_get_output rc=' + str(oPipProcess.returncode) +
+        ' stdout_len=' + str(len(oPipProcess.stdout or '')) +
+        ' stderr_len=' + str(len(oPipProcess.stderr or '')))
 
     return sOutput
 
 def __parse_list_command_output(output: str) -> list:
-    asLines: list = output.splitlines()
+    log('__parse_list_command_output')
+
+    if output is None:
+        return []
+
+    # Remove empty lines to avoid header/index errors.
+    asLines: list = [sLine for sLine in output.splitlines() if sLine.strip() != ""]
+    if len(asLines) == 0:
+        return []
 
     sHeader: str = asLines[0]
-
-    log('__parse_list_command_output')
 
     asHeaders: list = sHeader.split()
 
@@ -196,11 +226,15 @@ def __parse_list_command_output(output: str) -> list:
         asColumns = sLine.split()
 
         if len(asHeaders) == 2:
+            if len(asColumns) < 2:
+                continue
             aoDependencies.append({
                 "managerName": "pip",
                 "packageName": asColumns[0],
                 "currentVersion": asColumns[1]})
         elif len(asHeaders) == 4:
+            if len(asColumns) < 4:
+                continue
             aoDependencies.append({
                 "managerName": "pip",
                 "packageName": asColumns[0],
