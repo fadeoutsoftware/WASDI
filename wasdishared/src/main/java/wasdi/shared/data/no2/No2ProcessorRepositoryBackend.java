@@ -10,7 +10,10 @@ import java.util.regex.Pattern;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
+import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.common.SortOrder;
+import org.dizitart.no2.filters.Filter;
 
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.WasdiConfig;
@@ -274,9 +277,6 @@ public class No2ProcessorRepositoryBackend extends No2Repository implements IPro
 			int iDirection,
 			int iPage,
 			int iItemsPerPage) {
-		List<Processor> aoAll = getMarketplaceProcessors(sOrderBy, iDirection);
-		List<Processor> aoFiltered = new ArrayList<>();
-
 		if (iPage < 0) {
 			iPage = 0;
 		}
@@ -284,57 +284,73 @@ public class No2ProcessorRepositoryBackend extends No2Repository implements IPro
 			iItemsPerPage = 12;
 		}
 
-		for (Processor oProcessor : aoAll) {
-			boolean bHasAccess = oProcessor.getIsPublic() == 1;
-			if (!Utils.isNullOrEmpty(sUserId) && sUserId.equals(oProcessor.getUserId())) {
-				bHasAccess = true;
-			}
-			if (!bHasAccess && asSharedProcessorIds != null && asSharedProcessorIds.contains(oProcessor.getProcessorId())) {
-				bHasAccess = true;
-			}
-			if (!bHasAccess) {
-				continue;
+		try {
+			NitriteCollection oCollection = getCollection(s_sCollectionName);
+			if (oCollection == null) {
+				return new ArrayList<>();
 			}
 
-			if (!Utils.isNullOrEmpty(sName)) {
-				String sLowerName = sName.toLowerCase();
-				String sProcName = oProcessor.getName() == null ? "" : oProcessor.getName().toLowerCase();
-				String sProcFriendlyName = oProcessor.getFriendlyName() == null ? "" : oProcessor.getFriendlyName().toLowerCase();
-				if (!sProcName.contains(sLowerName) && !sProcFriendlyName.contains(sLowerName)) {
-					continue;
+			List<Filter> aoAndFilters = new ArrayList<>();
+			aoAndFilters.add(where("showInStore").eq(true));
+
+			List<Filter> aoAccessFilters = new ArrayList<>();
+			aoAccessFilters.add(where("isPublic").eq(1));
+			if (!Utils.isNullOrEmpty(sUserId)) {
+				aoAccessFilters.add(where("userId").eq(sUserId));
+			}
+			if (asSharedProcessorIds != null && !asSharedProcessorIds.isEmpty()) {
+				if (asSharedProcessorIds.size() == 1) {
+					aoAccessFilters.add(where("processorId").eq(asSharedProcessorIds.get(0)));
 				}
+				else {
+					aoAccessFilters.add(where("processorId").in(asSharedProcessorIds.toArray(new String[0])));
+				}
+			}
+			aoAndFilters.add(combineOr(aoAccessFilters));
+
+			if (!Utils.isNullOrEmpty(sName)) {
+				String sRegex = "(?i).*" + Pattern.quote(sName) + ".*";
+				aoAndFilters.add(Filter.or(
+						where("name").regex(sRegex),
+						where("friendlyName").regex(sRegex)));
 			}
 
 			if (asCategories != null && !asCategories.isEmpty()) {
-				boolean bFound = false;
-				for (String sCategory : oProcessor.getCategories()) {
-					if (asCategories.contains(sCategory)) {
-						bFound = true;
-						break;
-					}
+				List<Filter> aoCategoriesFilters = new ArrayList<>();
+				for (String sCategory : asCategories) {
+					aoCategoriesFilters.add(where("categories").elemMatch(where("$").eq(sCategory)));
 				}
-				if (!bFound) {
-					continue;
+				aoAndFilters.add(combineOr(aoCategoriesFilters));
+			}
+
+			if (asPublishers != null && !asPublishers.isEmpty()) {
+				if (asPublishers.size() == 1) {
+					aoAndFilters.add(where("userId").eq(asPublishers.get(0)));
+				}
+				else {
+					aoAndFilters.add(where("userId").in(asPublishers.toArray(new String[0])));
 				}
 			}
 
-			if (asPublishers != null && !asPublishers.isEmpty() && !asPublishers.contains(oProcessor.getUserId())) {
-				continue;
+			if (fMaxPrice >= 0) {
+				aoAndFilters.add(where("ondemandPrice").lte(fMaxPrice));
 			}
 
-			if (fMaxPrice >= 0 && oProcessor.getOndemandPrice() > fMaxPrice) {
-				continue;
-			}
+			String sSortField = normalizeNo2SortField(sOrderBy);
+			SortOrder eSortOrder = iDirection < 0 ? SortOrder.Descending : SortOrder.Ascending;
+			FindOptions oFindOptions = FindOptions.orderBy(sSortField, eSortOrder)
+					.skip((long) iPage * iItemsPerPage)
+					.limit(iItemsPerPage);
 
-			aoFiltered.add(oProcessor);
+			Filter oFinalFilter = combineAnd(aoAndFilters);
+			DocumentCursor oCursor = oCollection.find(oFinalFilter, oFindOptions);
+			return toList(oCursor, Processor.class);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("No2ProcessorRepositoryBackend.getMarketplaceProcessorsPage: error", oEx);
 		}
 
-		int iFrom = iPage * iItemsPerPage;
-		if (iFrom >= aoFiltered.size()) {
-			return new ArrayList<>();
-		}
-		int iTo = Math.min(iFrom + iItemsPerPage, aoFiltered.size());
-		return new ArrayList<>(aoFiltered.subList(iFrom, iTo));
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -378,6 +394,42 @@ public class No2ProcessorRepositoryBackend extends No2Repository implements IPro
 			WasdiLog.errorLog("No2ProcessorRepositoryBackend.getAllProcessors: error", oEx);
 			return new ArrayList<>();
 		}
+	}
+
+	private String normalizeNo2SortField(String sOrderBy) {
+		if (Utils.isNullOrEmpty(sOrderBy) || "_id".equals(sOrderBy)) {
+			return "processorId";
+		}
+
+		switch (sOrderBy) {
+			case "friendlyName":
+			case "updateDate":
+			case "ondemandPrice":
+			case "name":
+				return sOrderBy;
+			default:
+				return "friendlyName";
+		}
+	}
+
+	private Filter combineAnd(List<Filter> aoFilters) {
+		if (aoFilters == null || aoFilters.isEmpty()) {
+			return Filter.ALL;
+		}
+		if (aoFilters.size() == 1) {
+			return aoFilters.get(0);
+		}
+		return Filter.and(aoFilters.toArray(new Filter[0]));
+	}
+
+	private Filter combineOr(List<Filter> aoFilters) {
+		if (aoFilters == null || aoFilters.isEmpty()) {
+			return Filter.ALL;
+		}
+		if (aoFilters.size() == 1) {
+			return aoFilters.get(0);
+		}
+		return Filter.or(aoFilters.toArray(new Filter[0]));
 	}
 
 	private Comparator<Processor> comparatorForOrderBy(String sOrderBy) {

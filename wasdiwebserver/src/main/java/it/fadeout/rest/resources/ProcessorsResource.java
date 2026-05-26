@@ -582,23 +582,9 @@ public class ProcessorsResource  {
 		ArrayList<AppListViewModel> aoRet = new ArrayList<>(); 
 		WasdiLog.debugLog("ProcessorsResource.getMarketPlaceAppList");
 		
-		long lRequestStartNs = System.nanoTime();
-		long lSessionCheckNs = 0L;
-		long lPermissionLoadNs = 0L;
-		long lFetchPageNs = 0L;
-		long lReviewsForPageNs = 0L;
-		long lOwnerLookupNs = 0L;
-		long lVmBuildNs = 0L;
-
-		int iPageReviewQueries = 0;
-		int iOwnerQueries = 0;
-		int iReturned = 0;
-		
 		try {
 			// Check User 
-			long lStepStartNs = System.nanoTime();
 			User oUser = Wasdi.getUserFromSession(sSessionId);
-			lSessionCheckNs += System.nanoTime() - lStepStartNs;
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.getMarketPlaceAppList: invalid session");
@@ -638,9 +624,7 @@ public class ProcessorsResource  {
 			List<String> asPublishers = oFilters.getPublishers() == null ? new ArrayList<>() : oFilters.getPublishers();
 			float fMaxPrice = oFilters.getMaxPrice() == null ? -1 : oFilters.getMaxPrice();
 
-			lStepStartNs = System.nanoTime();
 			List<UserResourcePermission> aoProcessorSharings = oUserResourcePermissionRepository.getProcessorSharingsByUserId(oUser.getUserId());
-			lPermissionLoadNs += System.nanoTime() - lStepStartNs;
 
 			List<String> asSharedProcessorIds = new ArrayList<>();
 			Map<String, UserResourcePermission> oSharingsByProcessorId = new HashMap<>();
@@ -657,7 +641,6 @@ public class ProcessorsResource  {
 				}
 			}
 
-			lStepStartNs = System.nanoTime();
 			List<Processor> aoPageProcessors = oProcessorRepository.getMarketplaceProcessorsPage(
 					oUser.getUserId(),
 					asSharedProcessorIds,
@@ -669,7 +652,6 @@ public class ProcessorsResource  {
 					iDirection,
 					iPage,
 					iItemsPerPage);
-			lFetchPageNs += System.nanoTime() - lStepStartNs;
 
 			ReviewRepository oReviewRepository = new ReviewRepository();
 			UserRepository oUserRepository = new UserRepository();
@@ -679,10 +661,7 @@ public class ProcessorsResource  {
 				float fScore = -1.0f;
 				int iVotes = 0;
 
-				lStepStartNs = System.nanoTime();
 				List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
-				iPageReviewQueries++;
-				lReviewsForPageNs += System.nanoTime() - lStepStartNs;
 
 				if (aoReviews != null && aoReviews.size() > 0) {
 					fScore = 0;
@@ -693,7 +672,6 @@ public class ProcessorsResource  {
 					iVotes = aoReviews.size();
 				}
 				
-				lStepStartNs = System.nanoTime();
 				AppListViewModel oAppListViewModel = new AppListViewModel();
 
 				UserResourcePermission oSharing = oSharingsByProcessorId.get(oProcessor.getProcessorId());
@@ -744,10 +722,7 @@ public class ProcessorsResource  {
 				
 				oAppListViewModel.setPublisherNickName(oAppListViewModel.getPublisher());
 				
-				long lOwnerStepStartNs = System.nanoTime();
 				User oAppOwner = oUserRepository.getUser(oProcessor.getUserId());
-				iOwnerQueries++;
-				lOwnerLookupNs += System.nanoTime() - lOwnerStepStartNs;
 				
 				if (oAppOwner != null) {
 					if (Utils.isNullOrEmpty(oAppOwner.getPublicNickName())) {
@@ -759,28 +734,12 @@ public class ProcessorsResource  {
 				}
 
 				aoRet.add(oAppListViewModel);
-				iReturned++;
-				lVmBuildNs += System.nanoTime() - lStepStartNs;
 			}
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessorsResource.getMarketPlaceAppList error: " + oEx);
 			return aoRet;
 		}
-		finally {
-			long lTotalMs = (System.nanoTime() - lRequestStartNs) / 1000000L;
-			WasdiLog.debugLog("ProcessorsResource.getMarketPlaceAppList PERF totalMs=" + lTotalMs
-					+ " sessionMs=" + (lSessionCheckNs / 1000000L)
-					+ " permissionLoadMs=" + (lPermissionLoadNs / 1000000L)
-					+ " fetchPageMs=" + (lFetchPageNs / 1000000L)
-					+ " reviewsPageMs=" + (lReviewsForPageNs / 1000000L)
-					+ " ownerLookupMs=" + (lOwnerLookupNs / 1000000L)
-					+ " vmBuildMs=" + (lVmBuildNs / 1000000L));
-			
-			WasdiLog.debugLog("ProcessorsResource.getMarketPlaceAppList PERF counts returned=" + iReturned
-					+ " pageReviewQueries=" + iPageReviewQueries
-					+ " ownerQueries=" + iOwnerQueries);
-		}		
 		return aoRet;
 	}
 	
