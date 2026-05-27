@@ -8,6 +8,23 @@ PYTHON_EXIT_CODE=0
 export CPLUS_INCLUDE_PATH=/usr/include/gdal
 export C_INCLUDE_PATH=/usr/include/gdal
 
+# Always expose a virtual node code for this container lifecycle.
+# Java services can decide whether to use it based on configuration.
+if [ -z "${WASDI_VIRTUAL_NODE_CODE:-}" ]; then
+	if [ -r /proc/sys/kernel/random/uuid ]; then
+		WASDI_VIRTUAL_NODE_CODE="$(cat /proc/sys/kernel/random/uuid)"
+	elif command -v uuidgen >/dev/null 2>&1; then
+		WASDI_VIRTUAL_NODE_CODE="$(uuidgen | tr '[:upper:]' '[:lower:]')"
+	else
+		# Last-resort fallback to keep startup resilient even without uuid tools.
+		WASDI_VIRTUAL_NODE_CODE="$(date +%s)-$$-${RANDOM}"
+	fi
+	echo "WASDI_VIRTUAL_NODE_CODE generated: ${WASDI_VIRTUAL_NODE_CODE}"
+else
+	echo "WASDI_VIRTUAL_NODE_CODE provided: ${WASDI_VIRTUAL_NODE_CODE}"
+fi
+export WASDI_VIRTUAL_NODE_CODE
+
 cleanup() {
 	echo "Stopping WASDI..."
 

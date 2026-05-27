@@ -513,7 +513,7 @@ public class ProcessScheduler {
 							long lTimeSpan = oNow.getTime() - oLastChange.longValue();
 							
 							// We ran over?
-							if (lTimeSpan > m_lTimeOutMs) {
+							if (lTimeSpan > lTimeoutMs) {
 								// Change the status to STOPPED
 								WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Process " + oRunningPws.getProcessObjId() + " is in Timeout");
 								
