@@ -10,7 +10,6 @@ import org.bson.conversions.Bson;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Projections;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
@@ -250,19 +249,6 @@ public class MongoProcessorRepositoryBackend extends MongoRepository implements 
 		try {
 			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
 					.find(new Document("showInStore", true))
-					.projection(Projections.include(
-							"processorId",
-							"userId",
-							"name",
-							"friendlyName",
-							"description",
-							"isPublic",
-							"ondemandPrice",
-							"pricePerSquareKm",
-							"showInStore",
-							"logo",
-							"categories"
-					))
 					.sort(new Document(sOrderBy, iDirection));
 
 			fillList(aoReturnList, oWSDocuments, Processor.class);
@@ -332,18 +318,6 @@ public class MongoProcessorRepositoryBackend extends MongoRepository implements 
 
 			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
 					.find(oFinalFilter)
-					.projection(Projections.include(
-							"processorId",
-							"userId",
-							"name",
-							"friendlyName",
-							"description",
-							"isPublic",
-							"ondemandPrice",
-							"pricePerSquareKm",
-							"showInStore",
-							"logo",
-							"categories"))
 					.sort(new Document(sOrderBy, iDirection))
 					.skip(iPage * iItemsPerPage)
 					.limit(iItemsPerPage);
