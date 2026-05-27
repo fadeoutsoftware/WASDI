@@ -12,6 +12,8 @@ import traceback
 import subprocess
 import re
 import time
+import sys
+from importlib import metadata
 
 m_sProcId = ""
 
@@ -113,14 +115,26 @@ def refresh_package_list(sRefreshPackageList: str):
 
 
 def pm_list_packages(sFlag: str):
-    sCommand: str = 'pip list'
+    asArgs = ['list']
     if sFlag != '':
-        sCommand = sCommand + ' -' + sFlag
+        asArgs.append('-' + sFlag)
 
-    sOutput: str = __execute_pip_command_and_get_output(sCommand)
+    sOutput: str = __execute_pip_command_and_get_output(asArgs)
     log("Got output\n " + sOutput)
-    aoDependencies: list = __parse_list_command_output(sOutput)
-    return  aoDependencies
+
+    # Safe behavior: empty output means no rows, not a failure.
+    if sOutput is None or sOutput.strip() == "":
+        log("pm_list_packages: empty output for flag " + sFlag + ", returning empty list")
+        return []
+
+    try:
+        aoDependencies: list = __parse_list_command_output(sOutput)
+    except Exception as oEx:
+        # Never break the refresh flow for parser issues.
+        log("pm_list_packages: parse error, returning empty list: " + repr(oEx))
+        aoDependencies = []
+
+    return aoDependencies
 
 def pm_manager_version():
     oVersion = {}
@@ -133,14 +147,8 @@ def pm_manager_version():
     try:
         log('/packageManager/managerVersion/')
 
-        command: str = 'pip -V'
-
-        sCommandOutput: str = __execute_pip_command_and_get_output(command)
-
-        start: str = 'pip '
-        end: str = ' from '
-
-        sVersionFromOutput = re.search('%s(.*)%s' % (start, end), sCommandOutput).group(1)
+        # Do not spawn pip subprocess for version to avoid runtime issues.
+        sVersionFromOutput = metadata.version('pip')
 
         asVersion: list = sVersionFromOutput.split('.')
 
@@ -157,29 +165,59 @@ def pm_manager_version():
     return oVersion
 
 def __execute_pip_command_and_get_output(command: str) -> str:
-    log('__execute_pip_command_and_get_output: ' + command)
+    # Defensive: accept both list and accidental string input.
+    if isinstance(command, str):
+        asPipArgs = command.split()
+    else:
+        asPipArgs = command
 
-    oPipProcess = subprocess.run(command + ' > tmp', shell=True, capture_output=True)
+    asCommand = [sys.executable, '-m', 'pip'] + asPipArgs
+    sPrintableCommand = ' '.join(asCommand)
+    log('__execute_pip_command_and_get_output: ' + sPrintableCommand)
 
-    sOutput = open('tmp', 'r').read()
-    os.remove('tmp')
+    try:
+        oPipProcess = subprocess.run(
+            asCommand,
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+    except subprocess.TimeoutExpired as oEx:
+        sStdout = '' if oEx.stdout is None else str(oEx.stdout)
+        sStderr = '' if oEx.stderr is None else str(oEx.stderr)
+        log('__execute_pip_command_and_get_output timeout for command: ' + sPrintableCommand)
+        return (sStdout + '\n' + sStderr).strip()
+    except Exception as oEx:
+        log('__execute_pip_command_and_get_output exception: ' + repr(oEx))
+        return ''
 
-    stderr: str = oPipProcess.stderr.decode("utf-8")
+    sOutput: str = oPipProcess.stdout if oPipProcess.stdout is not None else ''
+    sError: str = oPipProcess.stderr if oPipProcess.stderr is not None else ''
 
-    if stderr != '':
+    if sError != '':
         if sOutput == '':
-            sOutput = stderr
+            sOutput = sError
         else:
-            sOutput += stderr
+            sOutput += '\n' + sError
+
+    log('__execute_pip_command_and_get_output rc=' + str(oPipProcess.returncode) +
+        ' stdout_len=' + str(len(oPipProcess.stdout or '')) +
+        ' stderr_len=' + str(len(oPipProcess.stderr or '')))
 
     return sOutput
 
 def __parse_list_command_output(output: str) -> list:
-    asLines: list = output.splitlines()
+    log('__parse_list_command_output')
+
+    if output is None:
+        return []
+
+    # Remove empty lines to avoid header/index errors.
+    asLines: list = [sLine for sLine in output.splitlines() if sLine.strip() != ""]
+    if len(asLines) == 0:
+        return []
 
     sHeader: str = asLines[0]
-
-    log('__parse_list_command_output')
 
     asHeaders: list = sHeader.split()
 
@@ -192,11 +230,15 @@ def __parse_list_command_output(output: str) -> list:
         asColumns = sLine.split()
 
         if len(asHeaders) == 2:
+            if len(asColumns) < 2:
+                continue
             aoDependencies.append({
                 "managerName": "pip",
                 "packageName": asColumns[0],
                 "currentVersion": asColumns[1]})
         elif len(asHeaders) == 4:
+            if len(asColumns) < 4:
+                continue
             aoDependencies.append({
                 "managerName": "pip",
                 "packageName": asColumns[0],
