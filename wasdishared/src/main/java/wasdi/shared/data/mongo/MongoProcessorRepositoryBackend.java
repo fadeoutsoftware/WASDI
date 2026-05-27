@@ -254,6 +254,25 @@ public class MongoProcessorRepositoryBackend extends MongoRepository implements 
 	}
 
 	@Override
+	public List<Processor> getDeployedProcessorsLightweight() {
+
+		final ArrayList<Processor> aoReturnList = new ArrayList<Processor>();
+		try {
+
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find()
+					.projection(new Document("processorId", 1).append("userId", 1).append("isPublic", 1));
+
+			fillList(aoReturnList, oWSDocuments, Processor.class);
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorRepository.getDeployedProcessorsLightweight :error ", oEx);
+		}
+
+		return aoReturnList;
+	}
+
+	@Override
 	public List<Processor> getMarketplaceProcessors(String sOrderBy, int iDirection) {
 
 		final ArrayList<Processor> aoReturnList = new ArrayList<Processor>();

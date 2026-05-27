@@ -102,6 +102,10 @@ public class ProcessorRepository {
     public List<Processor> getDeployedProcessors() {
 		return m_oBackend.getDeployedProcessors();
     }
+
+  public List<Processor> getDeployedProcessorsLightweight() {
+    return m_oBackend.getDeployedProcessorsLightweight();
+  }
     
     public List<Processor> getDeployedProcessors(String sOrderBy) {
 		return m_oBackend.getDeployedProcessors(sOrderBy);

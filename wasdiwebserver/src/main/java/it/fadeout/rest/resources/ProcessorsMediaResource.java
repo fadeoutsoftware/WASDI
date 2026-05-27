@@ -588,7 +588,7 @@ public class ProcessorsMediaResource {
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 		
-		List<Processor> aoProcessors = oProcessorRepository.getDeployedProcessors();
+		List<Processor> aoProcessors = oProcessorRepository.getDeployedProcessorsLightweight();
 		
 		if(aoProcessors == null) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
