@@ -593,15 +593,7 @@ public class ProcessorsMediaResource {
 		// For each processor
 		for (Processor oProcessor : aoProcessors) {
 			
-			if (!oProcessor.getShowInStore()) continue;
-			
-			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
-			
-			if (oProcessor.getIsPublic() != 1) {
-				if (oProcessor.getUserId().equals(oUser.getUserId()) == false) {
-					if (oSharing == null) continue;
-				}
-			}			
+			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor)) continue;
 			
 			boolean bFound = false;
 			

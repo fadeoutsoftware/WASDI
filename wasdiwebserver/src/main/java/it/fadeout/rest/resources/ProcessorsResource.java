@@ -271,7 +271,9 @@ public class ProcessorsResource  {
 			oProcessor.setDescription(sDescription);
 			oProcessor.setUserId(sUserId);
 			oProcessor.setProcessorId(sProcessorId);
-			oProcessor.setVersion(sVersion);
+			// P.Campanella 27/05/2026: force the first version to be 1: version was for the users in the past, now is fully WASDI-Managed and must be a number.
+			// Here we force it to a first valid value
+			oProcessor.setVersion("1");
 			oProcessor.setPort(-1);
 			oProcessor.setType(sType);
 			oProcessor.setIsPublic(iPublic);
