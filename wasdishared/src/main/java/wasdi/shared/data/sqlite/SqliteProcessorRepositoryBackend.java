@@ -182,6 +182,22 @@ public class SqliteProcessorRepositoryBackend extends SqliteRepository implement
 	}
 
 	@Override
+	public List<Processor> getDeployedProcessorsLightweight() {
+		try {
+			String sQuery = "SELECT json_object('processorId', json_extract(data,'$.processorId'),"
+					+ " 'userId', json_extract(data,'$.userId'),"
+					+ " 'isPublic', json_extract(data,'$.isPublic'))"
+					+ " FROM " + m_sThisCollection + " ORDER BY id ASC";
+			return queryList(sQuery, Arrays.asList(), Processor.class);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorRepository.getDeployedProcessorsLightweight :error ", oEx);
+		}
+
+		return new ArrayList<>();
+	}
+
+	@Override
 	public List<Processor> getMarketplaceProcessors(String sOrderBy, int iDirection) {
 		try {
 			String sDir = (iDirection >= 0) ? "ASC" : "DESC";

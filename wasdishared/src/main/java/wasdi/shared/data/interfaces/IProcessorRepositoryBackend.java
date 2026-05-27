@@ -35,11 +35,8 @@ public interface IProcessorRepositoryBackend {
 
 	/**
 	 * Get deployed processors with a lightweight payload.
-	 * Default implementation falls back to the full query for non-optimized backends.
 	 */
-	default List<Processor> getDeployedProcessorsLightweight() {
-		return getDeployedProcessors();
-	}
+	List<Processor> getDeployedProcessorsLightweight();
 
 	/**
 	 * Get processors candidate for marketplace listing using backend-side filtering/projection.

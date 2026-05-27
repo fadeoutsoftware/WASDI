@@ -252,6 +252,31 @@ public class No2ProcessorRepositoryBackend extends No2Repository implements IPro
 	}
 
 	@Override
+	public List<Processor> getDeployedProcessorsLightweight() {
+		List<Processor> aoReturnList = new ArrayList<>();
+
+		try {
+			NitriteCollection oCollection = getCollection(s_sCollectionName);
+			if (oCollection == null) {
+				return aoReturnList;
+			}
+
+			DocumentCursor oCursor = oCollection.find(Filter.ALL, FindOptions.orderBy("processorId", SortOrder.Ascending));
+			for (Document oDocument : oCursor) {
+				Processor oProcessor = toLightweightProcessor(oDocument);
+				if (oProcessor != null) {
+					aoReturnList.add(oProcessor);
+				}
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("No2ProcessorRepositoryBackend.getDeployedProcessorsLightweight: error", oEx);
+		}
+
+		return aoReturnList;
+	}
+
+	@Override
 	public List<Processor> getMarketplaceProcessors(String sOrderBy, int iDirection) {
 		List<Processor> aoReturnList = getAllProcessors().stream()
 				.filter(oProcessor -> oProcessor != null && oProcessor.getShowInStore())
@@ -456,6 +481,39 @@ public class No2ProcessorRepositoryBackend extends No2Repository implements IPro
 
 	private boolean matches(Pattern oPattern, String sValue) {
 		return sValue != null && oPattern.matcher(sValue).find();
+	}
+
+	private Processor toLightweightProcessor(Document oDocument) {
+		if (oDocument == null) {
+			return null;
+		}
+
+		Processor oProcessor = new Processor();
+		oProcessor.setProcessorId(asString(oDocument.get("processorId")));
+		oProcessor.setUserId(asString(oDocument.get("userId")));
+		oProcessor.setIsPublic(asInt(oDocument.get("isPublic"), 0));
+		return oProcessor;
+	}
+
+	private String asString(Object oValue) {
+		return oValue == null ? null : oValue.toString();
+	}
+
+	private int asInt(Object oValue, int iDefaultValue) {
+		if (oValue instanceof Number) {
+			return ((Number) oValue).intValue();
+		}
+
+		if (oValue != null) {
+			try {
+				return Integer.parseInt(oValue.toString());
+			}
+			catch (NumberFormatException oEx) {
+				WasdiLog.warnLog("No2ProcessorRepositoryBackend.asInt: invalid integer value " + oValue);
+			}
+		}
+
+		return iDefaultValue;
 	}
 
 	private boolean equalsSafe(String sA, String sB) {
