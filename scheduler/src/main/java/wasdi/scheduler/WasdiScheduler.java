@@ -21,6 +21,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.LoggerWrapper;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 
 /**
  * WASDI Scheduler
@@ -304,13 +305,26 @@ public class WasdiScheduler
 		int iWatchDogCount = 0;
 		int iWDCreatedCount = -1;
 		int iWDWaitingCount = -1;
+
+		String sNodeCode = WasdiConfig.Current.nodeCode;
+			
+		if (WasdiConfig.Current.scheduler.useVirtualNodeCode) {
+			String sVirtualNodeCode = RunTimeUtils.getSystemEnvironmentVariable("WASDI_VIRTUAL_NODE_CODE");
+			if (Utils.isNullOrEmpty(sVirtualNodeCode)) {
+				WasdiLog.warnLog("WasdiScheduler.run: useVirtualNodeCode is true, but WASDI_VIRTUAL_NODE_CODE is empty or not available. We will use the node code by config");
+			}
+			else {
+				sNodeCode = sVirtualNodeCode;
+			}
+		}
+
 		
 		while(true) {
 			
 			iSometimes ++;
 			
 			
-			List<ProcessWorkspace> aoProcessesList = s_oProcessWorkspaceRepository.getProcessesForSchedulerNode(WasdiConfig.Current.nodeCode, "lastStateChangeDate");
+			List<ProcessWorkspace> aoProcessesList = s_oProcessWorkspaceRepository.getProcessesForSchedulerNode(sNodeCode, "lastStateChangeDate");
 			
 			List<ProcessWorkspace> aoRunningList = getStateList(aoProcessesList, "RUNNING");
 			List<ProcessWorkspace> aoReadyList = getStateList(aoProcessesList, "READY");
@@ -325,7 +339,7 @@ public class WasdiScheduler
 			if (iSometimes == s_iSometimesCounter) {
 				iSometimes = 0;
 				
-				aoProcessesList = s_oProcessWorkspaceRepository.getProcessesForSchedulerNode(WasdiConfig.Current.nodeCode, "lastStateChangeDate");
+				aoProcessesList = s_oProcessWorkspaceRepository.getProcessesForSchedulerNode(sNodeCode, "lastStateChangeDate");
 				
 				aoRunningList = getStateList(aoProcessesList, "RUNNING");
 				aoReadyList = getStateList(aoProcessesList, "READY");
@@ -367,7 +381,7 @@ public class WasdiScheduler
 							// We got it for too many time! The number of waiting and created is always the same and nothing is running.
 							// This is likely to be a deadlock,  We force the waiting processor in stopped
 							iWatchDogCount = 0;
-							WasdiLog.warnLog("WasdiScheduler.main: watchdog triggered: we have " + aoWaitingList.size() + " suspect waiting processes");
+							WasdiLog.warnLog("WasdiScheduler.run: watchdog triggered: we have " + aoWaitingList.size() + " suspect waiting processes");
 							
 							// We check first if there are blocked Processes that are not User Processors
 							boolean bAllUserProcesses = true;
@@ -381,7 +395,7 @@ public class WasdiScheduler
 									}									
 								}
 								catch (Exception oInnerEx) {
-									WasdiLog.errorLog("WasdiScheduler.main: exception in the watchdog check loop: ", oInnerEx);
+									WasdiLog.errorLog("WasdiScheduler.run: exception in the watchdog check loop: ", oInnerEx);
 								}
 							}							
 							
@@ -390,7 +404,7 @@ public class WasdiScheduler
 									ProcessWorkspace oProcessWorkspace = aoWaitingList.get(iWaiting);
 									
 									if (LauncherOperationsUtils.doesOperationLaunchApplication(oProcessWorkspace.getOperationType()) && !bAllUserProcesses) {
-										WasdiLog.warnLog("WasdiScheduler.main: watchdog we save for now " + oProcessWorkspace.getProcessObjId() + " becuase in the waiting list, not all were user processors. Try before to stop other operations.");
+										WasdiLog.warnLog("WasdiScheduler.run: watchdog we save for now " + oProcessWorkspace.getProcessObjId() + " becuase in the waiting list, not all were user processors. Try before to stop other operations.");
 										continue;
 									}
 									
@@ -398,10 +412,10 @@ public class WasdiScheduler
 									oProcessWorkspace.setStatus(ProcessStatus.STOPPED.name());
 									s_oProcessWorkspaceRepository.updateProcess(oProcessWorkspace);
 									
-									WasdiLog.warnLog("WasdiScheduler.main: watchdog Stopped " + oProcessWorkspace.getProcessObjId());
+									WasdiLog.warnLog("WasdiScheduler.run: watchdog Stopped " + oProcessWorkspace.getProcessObjId());
 								}
 								catch (Exception oInnerEx) {
-									WasdiLog.errorLog("WasdiScheduler.main: exception in the watchdog stopping loop: ", oInnerEx);
+									WasdiLog.errorLog("WasdiScheduler.run: exception in the watchdog stopping loop: ", oInnerEx);
 								}
 							}
 						}

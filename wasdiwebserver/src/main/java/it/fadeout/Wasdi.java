@@ -59,6 +59,7 @@ import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 import wasdi.shared.utils.wasdiAPI.ProcessingAPIClient;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -146,20 +147,12 @@ public class Wasdi extends ResourceConfig {
 			}			
 		}
 		
-
-		try {
-			Map<String, String> aoEnviornmentVars = System.getenv();
-			
-			if (aoEnviornmentVars != null) {
-				if (aoEnviornmentVars.containsKey("WASDI_CONFIG_FILE")) {
-					sConfigFilePath = aoEnviornmentVars.get("WASDI_CONFIG_FILE");
-					WasdiLog.infoLog("Wasdi.initWasdi: found WASDI_CONFIG_FILE env variable, using it");
-				}
-			}
+		String sEnvConfigFile = RunTimeUtils.getSystemEnvironmentVariable("WASDI_CONFIG_FILE");
+		
+		if (!Utils.isNullOrEmpty(sEnvConfigFile)) {
+			sConfigFilePath = sEnvConfigFile;
+			WasdiLog.infoLog("Wasdi.initWasdi: found WASDI_CONFIG_FILE env variable, using it");				
 		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("Wasdi.initWasdi: Exception searching WASDI_CONFIG_FILE env variable " + oEx.toString());
-		}		
 		
 		if (!WasdiConfig.readConfig(sConfigFilePath)) {
 			WasdiLog.warnLog("Wasdi.initWasdi: ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
@@ -678,6 +671,17 @@ public class Wasdi extends ResourceConfig {
 					oProcess.setProcessObjId(sProcessObjId);
 					if (!Utils.isNullOrEmpty(sParentId)) oProcess.setParentId(sParentId);
 					oProcess.setStatus(ProcessStatus.CREATED.name());
+					
+					if (WasdiConfig.Current.scheduler.useVirtualNodeCode) {
+						String sVirtualNodeCode = RunTimeUtils.getSystemEnvironmentVariable("WASDI_VIRTUAL_NODE_CODE");
+						if (Utils.isNullOrEmpty(sVirtualNodeCode)) {
+							WasdiLog.warnLog("Wasdi.runProcess: useVirtualNodeCode is true, but WASDI_VIRTUAL_NODE_CODE is empty or not available. We will use the node code by config");
+						}
+						else {
+							sWsNodeCode = sVirtualNodeCode;
+						}
+					}
+					
 					oProcess.setNodeCode(sWsNodeCode);
 					oRepository.insertProcessWorkspace(oProcess);
 					WasdiLog.debugLog("Wasdi.runProcess: Process Scheduled for Launcher");
