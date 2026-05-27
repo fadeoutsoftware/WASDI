@@ -496,7 +496,7 @@ public class ProcessorsResource  {
 			
 			if (Utils.isNullOrEmpty(sProcessorId)) sProcessorId = oProcessor.getProcessorId();
 			
-			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), sProcessorId)) {
+			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor)) {
 				WasdiLog.warnLog("ProcessorsResource.getSingleDeployedProcessor: user cannot access the processor");
 				return oDeployedProcessorViewModel;				
 			}	
