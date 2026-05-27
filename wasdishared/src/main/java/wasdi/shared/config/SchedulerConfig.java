@@ -95,7 +95,7 @@ public class SchedulerConfig {
 	 * Note that the workspace it self will use the real node code, allowing cuncurrent execution of parall apps also in the same workspace if the volume mounted is the same  
 	 */
 	public boolean useVirtualNodeCode = false;
-	
+		
 	/**
 	 * Get a scheduler from the queue code
 	 * @param sScheduler Code of the Queue

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -99,6 +100,27 @@ public class ProcessScheduler {
 	 * the subtype filter is supported only for mono-type schedulers
 	 */
 	protected String m_sOperationSubType;
+
+	/**
+	 * Enable fair round robin over CREATED processes by user
+	 */
+	protected boolean m_bFairRoundRobin = false;
+
+	/**
+	 * Max number of CREATED processes dispatched per user in one round
+	 */
+	protected int m_iFairRoundRobinMaxProcessesCount = 3;
+
+	/**
+	 * Persistent round robin state: user order and pointer
+	 */
+	protected ArrayList<String> m_asFairRoundRobinUsers = new ArrayList<String>();
+	protected int m_iFairRoundRobinCurrentUserIndex = 0;
+
+	/**
+	 * Persistent round state: how many processes dispatched for each user
+	 */
+	protected Map<String, Integer> m_aoFairRoundRobinServedInRound = new HashMap<String, Integer>();
 	
 	
 	public boolean init(String sSchedulerKey) {
@@ -177,6 +199,16 @@ public class ProcessScheduler {
 				
 				m_bSpecialWaitCondition = oSchedulerQueueConfig.specialWaitCondition;
 				m_iMaxWaitingQueue = oSchedulerQueueConfig.maxWaitingQueue;
+				m_bFairRoundRobin = oSchedulerQueueConfig.fairRoundRobin;
+				m_iFairRoundRobinMaxProcessesCount = oSchedulerQueueConfig.fairRoundRobinMaxProcessesCount;
+
+				if (m_iFairRoundRobinMaxProcessesCount <= 0) {
+					m_iFairRoundRobinMaxProcessesCount = 1;
+				}
+
+				if (m_bFairRoundRobin) {
+					WasdiLog.infoLog(m_sLogPrefix + ".init: FairRoundRobin enabled. Max per user per round = " + m_iFairRoundRobinMaxProcessesCount);
+				}
 			}
 			else if (sSchedulerKey.equals("DEFAULT")) {
 				WasdiLog.debugLog(m_sLogPrefix + ".init: this is the default scheduler");
@@ -309,7 +341,7 @@ public class ProcessScheduler {
 					}
 					
 					// Get the Created process
-					ProcessWorkspace oCreatedProcess = aoCreatedList.get(0);
+					ProcessWorkspace oCreatedProcess = getNextCreatedProcessToDispatch(aoCreatedList);
 
 					if (!bFifo) {
 						WasdiLog.warnLog(m_sLogPrefix + ".run: Waiting queue Emergency: activate NOT FIFO mitigation");
@@ -358,7 +390,7 @@ public class ProcessScheduler {
 					}
 					
 					if (bFifo) {
-						aoCreatedList.remove(0);
+						removeCreatedProcessFromList(aoCreatedList, oCreatedProcess);
 					}
 					else {
 						return;
@@ -369,6 +401,152 @@ public class ProcessScheduler {
 		catch (Exception oEx) {
 			WasdiLog.errorLog(m_sLogPrefix + ".run: " + oEx); 
 		} 
+	}
+
+	/**
+	 * Pick the next CREATED process to dispatch.
+	 * When fair round robin is disabled, this is equivalent to FIFO head.
+	 */
+	protected ProcessWorkspace getNextCreatedProcessToDispatch(List<ProcessWorkspace> aoCreatedList) {
+		if (aoCreatedList == null || aoCreatedList.size() == 0) {
+			return null;
+		}
+
+		if (!m_bFairRoundRobin) {
+			return aoCreatedList.get(0);
+		}
+
+		try {
+			LinkedHashMap<String, ArrayList<ProcessWorkspace>> aoCreatedByUser = new LinkedHashMap<String, ArrayList<ProcessWorkspace>>();
+
+			for (ProcessWorkspace oCreatedProcess : aoCreatedList) {
+				String sUserKey = getFairRoundRobinUserKey(oCreatedProcess);
+				if (!aoCreatedByUser.containsKey(sUserKey)) {
+					aoCreatedByUser.put(sUserKey, new ArrayList<ProcessWorkspace>());
+				}
+				aoCreatedByUser.get(sUserKey).add(oCreatedProcess);
+			}
+
+			if (aoCreatedByUser.size() == 0) {
+				return aoCreatedList.get(0);
+			}
+
+			ArrayList<String> asActiveUsers = new ArrayList<String>(aoCreatedByUser.keySet());
+
+			// Remove users not active anymore from persistent state
+			m_aoFairRoundRobinServedInRound.keySet().retainAll(asActiveUsers);
+
+			for (int i = m_asFairRoundRobinUsers.size() - 1; i >= 0; i--) {
+				if (!aoCreatedByUser.containsKey(m_asFairRoundRobinUsers.get(i))) {
+					m_asFairRoundRobinUsers.remove(i);
+				}
+			}
+
+			// Add newly active users at the tail to preserve round continuity
+			for (String sActiveUser : asActiveUsers) {
+				if (!m_asFairRoundRobinUsers.contains(sActiveUser)) {
+					m_asFairRoundRobinUsers.add(sActiveUser);
+				}
+			}
+
+			if (m_asFairRoundRobinUsers.size() == 0) {
+				return aoCreatedList.get(0);
+			}
+
+			if (m_iFairRoundRobinCurrentUserIndex >= m_asFairRoundRobinUsers.size()) {
+				m_iFairRoundRobinCurrentUserIndex = 0;
+			}
+
+			boolean bHasUserWithAvailableQuota = false;
+			for (String sUserKey : m_asFairRoundRobinUsers) {
+				ArrayList<ProcessWorkspace> aoUserCreated = aoCreatedByUser.get(sUserKey);
+				if (aoUserCreated == null || aoUserCreated.size() == 0) {
+					continue;
+				}
+
+				int iServed = 0;
+				if (m_aoFairRoundRobinServedInRound.containsKey(sUserKey)) {
+					iServed = m_aoFairRoundRobinServedInRound.get(sUserKey);
+				}
+
+				if (iServed < m_iFairRoundRobinMaxProcessesCount) {
+					bHasUserWithAvailableQuota = true;
+					break;
+				}
+			}
+
+			// Everyone consumed the quantum for this round: start a new round
+			if (!bHasUserWithAvailableQuota) {
+				m_aoFairRoundRobinServedInRound.clear();
+			}
+
+			int iUsers = m_asFairRoundRobinUsers.size();
+			for (int iStep = 0; iStep < iUsers; iStep++) {
+				int iIndex = (m_iFairRoundRobinCurrentUserIndex + iStep) % iUsers;
+				String sUserKey = m_asFairRoundRobinUsers.get(iIndex);
+				ArrayList<ProcessWorkspace> aoUserCreated = aoCreatedByUser.get(sUserKey);
+
+				if (aoUserCreated == null || aoUserCreated.size() == 0) {
+					continue;
+				}
+
+				int iServed = 0;
+				if (m_aoFairRoundRobinServedInRound.containsKey(sUserKey)) {
+					iServed = m_aoFairRoundRobinServedInRound.get(sUserKey);
+				}
+
+				if (iServed >= m_iFairRoundRobinMaxProcessesCount) {
+					continue;
+				}
+
+				ProcessWorkspace oSelected = aoUserCreated.get(0);
+				m_aoFairRoundRobinServedInRound.put(sUserKey, iServed + 1);
+				m_iFairRoundRobinCurrentUserIndex = (iIndex + 1) % iUsers;
+				return oSelected;
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog(m_sLogPrefix + ".getNextCreatedProcessToDispatch: exception ", oEx);
+		}
+
+		return aoCreatedList.get(0);
+	}
+
+	/**
+	 * Remove from created list by process id. Fallback to index 0 to preserve progress.
+	 */
+	protected void removeCreatedProcessFromList(List<ProcessWorkspace> aoCreatedList, ProcessWorkspace oCreatedProcess) {
+		if (aoCreatedList == null || aoCreatedList.size() == 0) {
+			return;
+		}
+
+		if (oCreatedProcess == null || Utils.isNullOrEmpty(oCreatedProcess.getProcessObjId())) {
+			aoCreatedList.remove(0);
+			return;
+		}
+
+		String sProcessObjId = oCreatedProcess.getProcessObjId();
+
+		for (int i = 0; i < aoCreatedList.size(); i++) {
+			ProcessWorkspace oItem = aoCreatedList.get(i);
+			if (oItem != null && sProcessObjId.equals(oItem.getProcessObjId())) {
+				aoCreatedList.remove(i);
+				return;
+			}
+		}
+
+		aoCreatedList.remove(0);
+	}
+
+	/**
+	 * User key used for fair scheduling.
+	 */
+	protected String getFairRoundRobinUserKey(ProcessWorkspace oCreatedProcess) {
+		if (oCreatedProcess == null || Utils.isNullOrEmpty(oCreatedProcess.getUserId())) {
+			return "UNKNOWN";
+		}
+
+		return oCreatedProcess.getUserId();
 	}
 	
 	
