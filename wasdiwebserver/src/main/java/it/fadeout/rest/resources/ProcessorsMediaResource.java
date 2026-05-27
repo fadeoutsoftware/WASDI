@@ -4,7 +4,12 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.DELETE;
@@ -575,6 +580,8 @@ public class ProcessorsMediaResource {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
+		String sUserId = oUser.getUserId();
+		
 		UserRepository oUserRepository = new UserRepository();
 		
 		// Get all the processors
@@ -587,48 +594,64 @@ public class ProcessorsMediaResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 		
-		// Create a return list of publishers
-		ArrayList<PublisherFilterViewModel> aoPublishers = new ArrayList<PublisherFilterViewModel>();
-		
-		// For each processor
-		for (Processor oProcessor : aoProcessors) {
-			
-			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor)) continue;
-			
-			boolean bFound = false;
-			
-			// Check if there is already a view model of the publisher
-			for (PublisherFilterViewModel oPublisher : aoPublishers) {
-				if (oPublisher.getPublisher().equals(oProcessor.getUserId())) {
-					// Yes, increment the count and break;
-					bFound = true;
-					oPublisher.setAppCount(oPublisher.getAppCount()+1);
-					break;
+		List<UserResourcePermission> aoProcessorSharings = oUserResourcePermissionRepository.getProcessorSharingsByUserId(sUserId);
+		Set<String> asSharedProcessorIds = new HashSet<String>();
+		if (aoProcessorSharings != null) {
+			for (UserResourcePermission oSharing : aoProcessorSharings) {
+				if (oSharing == null || Utils.isNullOrEmpty(oSharing.getResourceId())) {
+					continue;
 				}
-			}
-			
-			if (!bFound) {
-				// New Publisher, create the View Model
-				PublisherFilterViewModel oPublisherFilter = new PublisherFilterViewModel();
-				oPublisherFilter.setPublisher(oProcessor.getUserId());
-				oPublisherFilter.setAppCount(1);
-				
-				User oAppPublisher = oUserRepository.getUser(oProcessor.getUserId());
-				if (oAppPublisher != null) {
-					oPublisherFilter.setNickName(oAppPublisher.getPublicNickName());
-					if (Utils.isNullOrEmpty(oPublisherFilter.getNickName())) {
-						oPublisherFilter.setNickName(oAppPublisher.getName());
-					}
-				}
-				else {
-					oPublisherFilter.setNickName(oProcessor.getUserId());
-				}
-				
-				aoPublishers.add(oPublisherFilter);
+				asSharedProcessorIds.add(oSharing.getResourceId());
 			}
 		}
 		
-	    return Response.ok(aoPublishers).build();
+		// Keep insertion order while aggregating by publisher id.
+		Map<String, PublisherFilterViewModel> aoPublishersById = new LinkedHashMap<String, PublisherFilterViewModel>();
+		Map<String, String> aoPublisherNickNames = new HashMap<String, String>();
+		
+		// For each processor
+		for (Processor oProcessor : aoProcessors) {
+			if (oProcessor == null || Utils.isNullOrEmpty(oProcessor.getProcessorId()) || Utils.isNullOrEmpty(oProcessor.getUserId())) {
+				continue;
+			}
+			
+			boolean bCanAccessProcessor = oProcessor.getIsPublic() > 0
+					|| sUserId.equals(oProcessor.getUserId())
+					|| asSharedProcessorIds.contains(oProcessor.getProcessorId());
+			
+			if (!bCanAccessProcessor) continue;
+			
+			PublisherFilterViewModel oPublisherFilter = aoPublishersById.get(oProcessor.getUserId());
+			if (oPublisherFilter != null) {
+				oPublisherFilter.setAppCount(oPublisherFilter.getAppCount() + 1);
+				continue;
+			}
+			
+			// New Publisher, create the View Model
+			oPublisherFilter = new PublisherFilterViewModel();
+			oPublisherFilter.setPublisher(oProcessor.getUserId());
+			oPublisherFilter.setAppCount(1);
+			
+			String sPublisherNickName = aoPublisherNickNames.get(oProcessor.getUserId());
+			if (sPublisherNickName == null) {
+				User oAppPublisher = oUserRepository.getUser(oProcessor.getUserId());
+				if (oAppPublisher != null) {
+					sPublisherNickName = oAppPublisher.getPublicNickName();
+					if (Utils.isNullOrEmpty(sPublisherNickName)) {
+						sPublisherNickName = oAppPublisher.getName();
+					}
+				}
+				
+				if (Utils.isNullOrEmpty(sPublisherNickName)) {
+					sPublisherNickName = oProcessor.getUserId();
+				}
+				aoPublisherNickNames.put(oProcessor.getUserId(), sPublisherNickName);
+			}
+			oPublisherFilter.setNickName(sPublisherNickName);
+			aoPublishersById.put(oProcessor.getUserId(), oPublisherFilter);
+		}
+		
+	    return Response.ok(new ArrayList<PublisherFilterViewModel>(aoPublishersById.values())).build();
 
 	}
 	
