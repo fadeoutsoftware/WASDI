@@ -84,6 +84,17 @@ public class MongoProcessorRepositoryBackend extends MongoRepository implements 
 	@Override
 	public boolean updateProcessor(Processor oProcessor) {
 		try {
+			
+			if (Utils.isNullOrEmpty(oProcessor.getVersion())) {
+				WasdiLog.errorLog("ProcessorRepository.updateProcessor: Tyring to update a processor but version is null: we do not allow it");
+				return false;
+			}
+			
+			if (Utils.isNullOrEmpty(oProcessor.getType())) {
+				WasdiLog.errorLog("ProcessorRepository.updateProcessor: Tyring to update a processor but type is null: we do not allow it");
+				return false;		
+			}
+			
 			String sJSON = s_oMapper.writeValueAsString(oProcessor);
 
 			Bson oFilter = new Document("processorId", oProcessor.getProcessorId());
@@ -95,7 +106,7 @@ public class MongoProcessorRepositoryBackend extends MongoRepository implements 
 				return true;
 			}
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorRepository.updateProcessor :error ", oEx);
+			WasdiLog.errorLog("ProcessorRepository.updateProcessor: error ", oEx);
 		}
 
 		return false;
