@@ -400,13 +400,15 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 			WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: sJson: " + sJson);
 			JSONObject oJsonItem = new JSONObject(sJson);
 
+			// Get the requested command
 			Object oUpdateCommand = oJsonItem.get("updateCommand");
-
+			
+			// If the command is null, we will just run the environment update
 			if (oUpdateCommand == null || oUpdateCommand.equals(org.json.JSONObject.NULL)) {
-				// This will be done in the Operation code
 				WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: refresh of the list of libraries.");
 			} 
 			else {
+				// We have a command
 				String sUpdateCommand = (String) oUpdateCommand;
 				WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
 				

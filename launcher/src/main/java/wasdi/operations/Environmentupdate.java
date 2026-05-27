@@ -159,7 +159,9 @@ public class Environmentupdate extends Operation {
 				// We need to refresh the package list if we are in the main node
 				if (WasdiConfig.Current.isMainNode()) {
 					
-					oEngine.refreshPackagesInfo(oParameter);
+					if (!oEngine.refreshPackagesInfo(oParameter)) {
+						WasdiLog.errorLog("Environmentupdate.executeOperation: oEngine.refreshPackagesInfo returned false, there may be some problem");
+					}
 					
 					// Notify the user
 					String sInfo = sProcessorName + " application<br>Environment Updated";
