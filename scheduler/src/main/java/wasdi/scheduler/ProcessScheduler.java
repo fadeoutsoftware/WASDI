@@ -89,6 +89,17 @@ public class ProcessScheduler {
 	 * Max number of waiting processes admitted before breaking the FIFO rules
 	 */
 	protected int m_iMaxWaitingQueue = 100;
+
+	/**
+	 * In emergency mode, when no unblock candidate is found and running queue is not empty,
+	 * fallback to default CREATED candidate every N cycles to avoid prolonged starvation.
+	 */
+	protected int m_iEmergencyFallbackEveryNCycles = 5;
+
+	/**
+	 * Counter of consecutive emergency cycles without unblock candidate.
+	 */
+	protected int m_iEmergencyNoUnblockStreak = 0;
 	
 	/**
 	 * List of operation types supported by this scheduler
@@ -107,25 +118,59 @@ public class ProcessScheduler {
 	protected boolean m_bFairRoundRobin = false;
 
 	/**
-	 * Max number of CREATED processes dispatched per user in one round
+	 * Max number of CREATED processes dispatched consecutively for one user turn
 	 */
 	protected int m_iFairRoundRobinMaxProcessesCount = 3;
+
+	/**
+	 * Enable second-level fair round robin over parentId groups inside one user queue
+	 */
+	protected boolean m_bFairRoundRobinParentId = false;
+
+	/**
+	 * Max number of CREATED processes dispatched consecutively for one parentId group turn
+	 */
+	protected int m_iFairRoundRobinParentIdMaxProcessesCount = 3;
 
 	/**
 	 * Persistent round robin state: user order and pointer
 	 */
 	protected ArrayList<String> m_asFairRoundRobinUsers = new ArrayList<String>();
+	
+	/**
+	 * Pointer to the list of users
+	 */
 	protected int m_iFairRoundRobinCurrentUserIndex = 0;
 
 	/**
-	 * Persistent round state: how many processes dispatched for each user
+	 * Persistent burst state: dispatched count for the current user turn
 	 */
-	protected Map<String, Integer> m_aoFairRoundRobinServedInRound = new HashMap<String, Integer>();
+	protected int m_iFairRoundRobinCurrentUserBurstCount = 0;
+
+	/**
+	 * Persistent parentId round robin state by user
+	 */
+	protected Map<String, ArrayList<String>> m_aaoFairRoundRobinParentGroupsByUser = new HashMap<String, ArrayList<String>>();
+
+	/**
+	 * Pointer to current parentId group by user
+	 */
+	protected Map<String, Integer> m_aoFairRoundRobinCurrentParentIndexByUser = new HashMap<String, Integer>();
+
+	/**
+	 * Current burst count for selected parentId group by user
+	 */
+	protected Map<String, Integer> m_aoFairRoundRobinCurrentParentBurstCountByUser = new HashMap<String, Integer>();
 	
 	
 	public boolean init(String sSchedulerKey) {
 		
 		try {
+			m_iEmergencyFallbackEveryNCycles = WasdiConfig.Current.scheduler.emergencyFallbackEveryNCycles;
+			if (m_iEmergencyFallbackEveryNCycles <= 0) {
+				m_iEmergencyFallbackEveryNCycles = 1;
+			}
+
 			// Save the scheduler Key
 			m_sSchedulerKey = sSchedulerKey;
 			// Init the scheduler log prefix
@@ -201,9 +246,15 @@ public class ProcessScheduler {
 				m_iMaxWaitingQueue = oSchedulerQueueConfig.maxWaitingQueue;
 				m_bFairRoundRobin = oSchedulerQueueConfig.fairRoundRobin;
 				m_iFairRoundRobinMaxProcessesCount = oSchedulerQueueConfig.fairRoundRobinMaxProcessesCount;
+				m_bFairRoundRobinParentId = oSchedulerQueueConfig.fairRoundRobinParentId;
+				m_iFairRoundRobinParentIdMaxProcessesCount = oSchedulerQueueConfig.fairRoundRobinParentIdMaxProcessesCount;
 
 				if (m_iFairRoundRobinMaxProcessesCount <= 0) {
 					m_iFairRoundRobinMaxProcessesCount = 1;
+				}
+
+				if (m_iFairRoundRobinParentIdMaxProcessesCount <= 0) {
+					m_iFairRoundRobinParentIdMaxProcessesCount = 1;
 				}
 
 				if (m_bFairRoundRobin) {
@@ -240,6 +291,24 @@ public class ProcessScheduler {
 					WasdiLog.errorLog(m_sLogPrefix + ".init: error ", e);
 				}				
 				
+				m_bSpecialWaitCondition = WasdiConfig.Current.scheduler.defaultSpecialWaitCondition;
+				m_iMaxWaitingQueue = WasdiConfig.Current.scheduler.defaultMaxWaitingQueue;
+				m_bFairRoundRobin = WasdiConfig.Current.scheduler.defaultFairRoundRobin;
+				m_iFairRoundRobinMaxProcessesCount = WasdiConfig.Current.scheduler.defaultFairRoundRobinMaxProcessesCount;
+				m_bFairRoundRobinParentId = WasdiConfig.Current.scheduler.defaultFairRoundRobinParentId;
+				m_iFairRoundRobinParentIdMaxProcessesCount = WasdiConfig.Current.scheduler.defaultFairRoundRobinParentIdMaxProcessesCount;
+
+				if (m_iFairRoundRobinMaxProcessesCount <= 0) {
+					m_iFairRoundRobinMaxProcessesCount = 1;
+				}
+
+				if (m_iFairRoundRobinParentIdMaxProcessesCount <= 0) {
+					m_iFairRoundRobinParentIdMaxProcessesCount = 1;
+				}
+
+				if (m_bFairRoundRobin) {
+					WasdiLog.infoLog(m_sLogPrefix + ".init: FairRoundRobin enabled. Max per user per round = " + m_iFairRoundRobinMaxProcessesCount);
+				}				
 				
 			}
 			else {
@@ -257,7 +326,8 @@ public class ProcessScheduler {
 				}
 			} catch (Exception e) {
 				WasdiLog.errorLog(m_sLogPrefix + ".init: error ", e);
-			}			
+			}
+						
 			
 			// Read the Lancher Path
 			m_sLauncherPath = WasdiConfig.Current.scheduler.launcherPath;
@@ -290,6 +360,7 @@ public class ProcessScheduler {
 	public void cycle(List<ProcessWorkspace> aoRunningList, List<ProcessWorkspace> aoReadyList, List<ProcessWorkspace> aoCreatedList, List<ProcessWorkspace> aoWaitingList) {
 					
 		try {
+			boolean bEmergencyModeActive = false;
 							
 			// Get the updated list of running processes
 			aoRunningList = getRunningList(aoRunningList);
@@ -336,12 +407,15 @@ public class ProcessScheduler {
 							
 							if (aoWaitingList.size() > m_iMaxWaitingQueue) {
 								bFifo = false;
+								bEmergencyModeActive = true;
 							}
 						}
 					}
 					
 					// Get the Created process
 					ProcessWorkspace oCreatedProcess = getNextCreatedProcessToDispatch(aoCreatedList);
+					
+					if (oCreatedProcess==null) continue;
 
 					if (!bFifo) {
 						WasdiLog.warnLog(m_sLogPrefix + ".run: Waiting queue Emergency: activate NOT FIFO mitigation");
@@ -350,7 +424,7 @@ public class ProcessScheduler {
 						
 						for (ProcessWorkspace oWaitingProcess : aoWaitingList) {
 							for (ProcessWorkspace oPotentialNewProcess : aoCreatedList) {
-								if (!Utils.isNullOrEmpty(oCreatedProcess.getParentId())) {
+								if (!Utils.isNullOrEmpty(oPotentialNewProcess.getParentId())) {
 									if (oPotentialNewProcess.getParentId().equals(oWaitingProcess.getProcessObjId())) {
 										oCandidate = oPotentialNewProcess;
 										oToUnblock = oWaitingProcess;
@@ -358,15 +432,31 @@ public class ProcessScheduler {
 									}
 								}
 							}
+
+							if (oCandidate != null && oToUnblock != null) {
+								break;
+							}
 						}
 						
 						if (oCandidate != null && oToUnblock != null) {
 							WasdiLog.warnLog(m_sLogPrefix + ".run: Found candiate created process " + oCandidate.getProcessObjId() + " that is blocking " + oToUnblock.getProcessObjId());
 							oCreatedProcess = oCandidate;
+							m_iEmergencyNoUnblockStreak = 0;
 						}
 						else {
-							WasdiLog.warnLog(m_sLogPrefix + ".run: in the waiting queue, no one is blocked by any of the created list. We jump this cycle waiting for the queue to be smaller");
-							return;
+							m_iEmergencyNoUnblockStreak++;
+							if (aoRunningList.size() == 0) {
+								WasdiLog.warnLog(m_sLogPrefix + ".run: emergency mode with empty running queue and no unblock candidate. Fallback to default candidate " + oCreatedProcess.getProcessObjId());
+								m_iEmergencyNoUnblockStreak = 0;
+							}
+							else if (m_iEmergencyNoUnblockStreak >= m_iEmergencyFallbackEveryNCycles) {
+								WasdiLog.warnLog(m_sLogPrefix + ".run: emergency mode no unblock candidate for " + m_iEmergencyNoUnblockStreak + " cycles. Fallback to default candidate " + oCreatedProcess.getProcessObjId());
+								m_iEmergencyNoUnblockStreak = 0;
+							}
+							else {
+								WasdiLog.warnLog(m_sLogPrefix + ".run: in the waiting queue, no one is blocked by any created process. Skip cycle " + m_iEmergencyNoUnblockStreak + "/" + m_iEmergencyFallbackEveryNCycles + " to reduce queue pressure");
+								return;
+							}
 						}
 					}						
 					
@@ -393,9 +483,16 @@ public class ProcessScheduler {
 						removeCreatedProcessFromList(aoCreatedList, oCreatedProcess);
 					}
 					else {
+						if (aoRunningList.size() > 0 && m_iEmergencyNoUnblockStreak != 0) {
+							WasdiLog.debugLog(m_sLogPrefix + ".run: preserving emergency no-unblock streak value " + m_iEmergencyNoUnblockStreak);
+						}
 						return;
 					}
 				}
+
+			if (!bEmergencyModeActive && m_iEmergencyNoUnblockStreak != 0) {
+				m_iEmergencyNoUnblockStreak = 0;
+			}
 			}			
 		} 
 		catch (Exception oEx) {
@@ -433,12 +530,12 @@ public class ProcessScheduler {
 
 			ArrayList<String> asActiveUsers = new ArrayList<String>(aoCreatedByUser.keySet());
 
-			// Remove users not active anymore from persistent state
-			m_aoFairRoundRobinServedInRound.keySet().retainAll(asActiveUsers);
-
 			for (int i = m_asFairRoundRobinUsers.size() - 1; i >= 0; i--) {
 				if (!aoCreatedByUser.containsKey(m_asFairRoundRobinUsers.get(i))) {
 					m_asFairRoundRobinUsers.remove(i);
+					if (i < m_iFairRoundRobinCurrentUserIndex) {
+						m_iFairRoundRobinCurrentUserIndex--;
+					}
 				}
 			}
 
@@ -453,56 +550,37 @@ public class ProcessScheduler {
 				return aoCreatedList.get(0);
 			}
 
-			if (m_iFairRoundRobinCurrentUserIndex >= m_asFairRoundRobinUsers.size()) {
-				m_iFairRoundRobinCurrentUserIndex = 0;
-			}
-
-			boolean bHasUserWithAvailableQuota = false;
-			for (String sUserKey : m_asFairRoundRobinUsers) {
-				ArrayList<ProcessWorkspace> aoUserCreated = aoCreatedByUser.get(sUserKey);
-				if (aoUserCreated == null || aoUserCreated.size() == 0) {
-					continue;
-				}
-
-				int iServed = 0;
-				if (m_aoFairRoundRobinServedInRound.containsKey(sUserKey)) {
-					iServed = m_aoFairRoundRobinServedInRound.get(sUserKey);
-				}
-
-				if (iServed < m_iFairRoundRobinMaxProcessesCount) {
-					bHasUserWithAvailableQuota = true;
-					break;
-				}
-			}
-
-			// Everyone consumed the quantum for this round: start a new round
-			if (!bHasUserWithAvailableQuota) {
-				m_aoFairRoundRobinServedInRound.clear();
-			}
-
 			int iUsers = m_asFairRoundRobinUsers.size();
+			if (m_iFairRoundRobinCurrentUserIndex >= iUsers || m_iFairRoundRobinCurrentUserIndex < 0) {
+				m_iFairRoundRobinCurrentUserIndex = 0;
+				m_iFairRoundRobinCurrentUserBurstCount = 0;
+			}
+
 			for (int iStep = 0; iStep < iUsers; iStep++) {
-				int iIndex = (m_iFairRoundRobinCurrentUserIndex + iStep) % iUsers;
-				String sUserKey = m_asFairRoundRobinUsers.get(iIndex);
+				String sUserKey = m_asFairRoundRobinUsers.get(m_iFairRoundRobinCurrentUserIndex);
 				ArrayList<ProcessWorkspace> aoUserCreated = aoCreatedByUser.get(sUserKey);
 
-				if (aoUserCreated == null || aoUserCreated.size() == 0) {
-					continue;
+				if (aoUserCreated != null && aoUserCreated.size() > 0 && m_iFairRoundRobinCurrentUserBurstCount < m_iFairRoundRobinMaxProcessesCount) {
+					ProcessWorkspace oSelected = selectNextCreatedProcessForUser(sUserKey, aoUserCreated);
+
+					if (oSelected == null) {
+						oSelected = aoUserCreated.get(0);
+					}
+
+					m_iFairRoundRobinCurrentUserBurstCount++;
+
+					// Move to next user after max burst or if this was the last item of this user queue
+					if (m_iFairRoundRobinCurrentUserBurstCount >= m_iFairRoundRobinMaxProcessesCount || aoUserCreated.size() == 1) {
+						m_iFairRoundRobinCurrentUserIndex = (m_iFairRoundRobinCurrentUserIndex + 1) % iUsers;
+						m_iFairRoundRobinCurrentUserBurstCount = 0;
+					}
+
+					return oSelected;
 				}
 
-				int iServed = 0;
-				if (m_aoFairRoundRobinServedInRound.containsKey(sUserKey)) {
-					iServed = m_aoFairRoundRobinServedInRound.get(sUserKey);
-				}
-
-				if (iServed >= m_iFairRoundRobinMaxProcessesCount) {
-					continue;
-				}
-
-				ProcessWorkspace oSelected = aoUserCreated.get(0);
-				m_aoFairRoundRobinServedInRound.put(sUserKey, iServed + 1);
-				m_iFairRoundRobinCurrentUserIndex = (iIndex + 1) % iUsers;
-				return oSelected;
+				// Current user cannot be dispatched now: move to next user and reset burst counter
+				m_iFairRoundRobinCurrentUserIndex = (m_iFairRoundRobinCurrentUserIndex + 1) % iUsers;
+				m_iFairRoundRobinCurrentUserBurstCount = 0;
 			}
 		}
 		catch (Exception oEx) {
@@ -510,6 +588,108 @@ public class ProcessScheduler {
 		}
 
 		return aoCreatedList.get(0);
+	}
+
+	/**
+	 * Select next CREATED process for one user queue, optionally applying parentId-level fairness.
+	 */
+	protected ProcessWorkspace selectNextCreatedProcessForUser(String sUserKey, List<ProcessWorkspace> aoUserCreated) {
+		if (aoUserCreated == null || aoUserCreated.size() == 0) {
+			return null;
+		}
+
+		if (!m_bFairRoundRobinParentId) {
+			return aoUserCreated.get(0);
+		}
+
+		try {
+			LinkedHashMap<String, ArrayList<ProcessWorkspace>> aoCreatedByParentGroup = new LinkedHashMap<String, ArrayList<ProcessWorkspace>>();
+
+			for (ProcessWorkspace oCreatedProcess : aoUserCreated) {
+				String sParentGroupKey = getFairRoundRobinParentGroupKey(oCreatedProcess);
+				if (!aoCreatedByParentGroup.containsKey(sParentGroupKey)) {
+					aoCreatedByParentGroup.put(sParentGroupKey, new ArrayList<ProcessWorkspace>());
+				}
+				aoCreatedByParentGroup.get(sParentGroupKey).add(oCreatedProcess);
+			}
+
+			if (aoCreatedByParentGroup.size() == 0) {
+				return aoUserCreated.get(0);
+			}
+
+			ArrayList<String> asActiveParentGroups = new ArrayList<String>(aoCreatedByParentGroup.keySet());
+			ArrayList<String> asParentGroupsOrder = m_aaoFairRoundRobinParentGroupsByUser.get(sUserKey);
+
+			if (asParentGroupsOrder == null) {
+				asParentGroupsOrder = new ArrayList<String>();
+				m_aaoFairRoundRobinParentGroupsByUser.put(sUserKey, asParentGroupsOrder);
+			}
+
+			int iCurrentParentIndex = 0;
+			if (m_aoFairRoundRobinCurrentParentIndexByUser.containsKey(sUserKey)) {
+				iCurrentParentIndex = m_aoFairRoundRobinCurrentParentIndexByUser.get(sUserKey);
+			}
+
+			for (int i = asParentGroupsOrder.size() - 1; i >= 0; i--) {
+				if (!aoCreatedByParentGroup.containsKey(asParentGroupsOrder.get(i))) {
+					asParentGroupsOrder.remove(i);
+					if (i < iCurrentParentIndex) {
+						iCurrentParentIndex--;
+					}
+				}
+			}
+
+			for (String sActiveParentGroup : asActiveParentGroups) {
+				if (!asParentGroupsOrder.contains(sActiveParentGroup)) {
+					asParentGroupsOrder.add(sActiveParentGroup);
+				}
+			}
+
+			if (asParentGroupsOrder.size() == 0) {
+				return aoUserCreated.get(0);
+			}
+
+			int iCurrentParentBurstCount = 0;
+			if (m_aoFairRoundRobinCurrentParentBurstCountByUser.containsKey(sUserKey)) {
+				iCurrentParentBurstCount = m_aoFairRoundRobinCurrentParentBurstCountByUser.get(sUserKey);
+			}
+
+			int iParentGroupsCount = asParentGroupsOrder.size();
+			if (iCurrentParentIndex >= iParentGroupsCount || iCurrentParentIndex < 0) {
+				iCurrentParentIndex = 0;
+				iCurrentParentBurstCount = 0;
+			}
+
+			for (int iStep = 0; iStep < iParentGroupsCount; iStep++) {
+				String sCurrentParentGroup = asParentGroupsOrder.get(iCurrentParentIndex);
+				ArrayList<ProcessWorkspace> aoParentGroupCreated = aoCreatedByParentGroup.get(sCurrentParentGroup);
+
+				if (aoParentGroupCreated != null && aoParentGroupCreated.size() > 0 && iCurrentParentBurstCount < m_iFairRoundRobinParentIdMaxProcessesCount) {
+					ProcessWorkspace oSelected = aoParentGroupCreated.get(0);
+					iCurrentParentBurstCount++;
+
+					if (iCurrentParentBurstCount >= m_iFairRoundRobinParentIdMaxProcessesCount || aoParentGroupCreated.size() == 1) {
+						iCurrentParentIndex = (iCurrentParentIndex + 1) % iParentGroupsCount;
+						iCurrentParentBurstCount = 0;
+					}
+
+					m_aoFairRoundRobinCurrentParentIndexByUser.put(sUserKey, iCurrentParentIndex);
+					m_aoFairRoundRobinCurrentParentBurstCountByUser.put(sUserKey, iCurrentParentBurstCount);
+					return oSelected;
+				}
+
+				iCurrentParentIndex = (iCurrentParentIndex + 1) % iParentGroupsCount;
+				iCurrentParentBurstCount = 0;
+			}
+
+			m_aoFairRoundRobinCurrentParentIndexByUser.put(sUserKey, iCurrentParentIndex);
+			m_aoFairRoundRobinCurrentParentBurstCountByUser.put(sUserKey, iCurrentParentBurstCount);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog(m_sLogPrefix + ".selectNextCreatedProcessForUser: exception ", oEx);
+		}
+
+		return aoUserCreated.get(0);
 	}
 
 	/**
@@ -547,6 +727,25 @@ public class ProcessScheduler {
 		}
 
 		return oCreatedProcess.getUserId();
+	}
+
+	/**
+	 * ParentId-group key used for second-level fair scheduling inside one user queue.
+	 */
+	protected String getFairRoundRobinParentGroupKey(ProcessWorkspace oCreatedProcess) {
+		if (oCreatedProcess == null) {
+			return "UNKNOWN_PARENT";
+		}
+
+		if (!Utils.isNullOrEmpty(oCreatedProcess.getParentId())) {
+			return "PARENT:" + oCreatedProcess.getParentId();
+		}
+
+		if (!Utils.isNullOrEmpty(oCreatedProcess.getProcessObjId())) {
+			return "SELF:" + oCreatedProcess.getProcessObjId();
+		}
+
+		return "NO_PARENT";
 	}
 	
 	

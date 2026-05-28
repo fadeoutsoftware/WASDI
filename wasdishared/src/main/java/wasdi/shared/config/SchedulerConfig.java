@@ -95,6 +95,45 @@ public class SchedulerConfig {
 	 * Note that the workspace it self will use the real node code, allowing cuncurrent execution of parall apps also in the same workspace if the volume mounted is the same  
 	 */
 	public boolean useVirtualNodeCode = false;
+	
+	/**
+	 * It enables the fair Round Robin per user: it will round x processes per user in the CREATED list 
+	 */
+	public boolean defaultFairRoundRobin = false;
+	
+	/**
+	 * Max number of consecutive processess per user, if the fairRoundRobin is activated and there are other users in queue
+	 */
+	public int defaultFairRoundRobinMaxProcessesCount = 3;
+
+	/**
+	 * If true, when defaultFairRoundRobin is active, applies a second round robin by parentId inside each user queue
+	 */
+	public boolean defaultFairRoundRobinParentId = false;
+
+	/**
+	 * Max number of consecutive processess per parentId group inside the selected user queue
+	 */
+	public int defaultFairRoundRobinParentIdMaxProcessesCount = 3;
+
+	/**
+	 * Flag to know if this Process Scheduler applies the Special Wait Condition 
+	 * to avoid to trigger too many processes considering also the waiting queue
+	 */	
+	public boolean defaultSpecialWaitCondition = false;
+	
+	/**
+	 * Max number of waiting processes admitted before breaking the FIFO rules
+	 */
+	public int defaultMaxWaitingQueue = 100;
+
+	/**
+	 * In emergency mode (waiting queue over threshold), if no unblock candidate is found,
+	 * fallback to default CREATED candidate every N cycles to avoid prolonged starvation.
+	 */
+	public int emergencyFallbackEveryNCycles = 5;
+	
+	
 		
 	/**
 	 * Get a scheduler from the queue code

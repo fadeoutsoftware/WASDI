@@ -125,19 +125,19 @@ public class WasdiScheduler
         	WasdiLog.initLogger(WasdiConfig.Current.logLevelScheduler);
         }
 		
-		WasdiLog.infoLog("WasdiScheduler.main: Logger configured :-)\n");
+		WasdiLog.debugLog("WasdiScheduler.main: Logger configured :-)\n");
 				
 		WasdiLog.debugLog("WasdiScheduler.main: lastChangeDateOrderByParameter = " + WasdiConfig.Current.scheduler.lastStateChangeDateOrderBy);
 
 		
 		//mongo config
 		try {
-			WasdiLog.infoLog("WasdiScheduler.main: Configuring data layer...");
+			WasdiLog.debugLog("WasdiScheduler.main: Configuring data layer...");
 			// Init configured data layer
 			DataLayerManager.init();	
 		} 
 		catch (Throwable oEx) {
-			WasdiLog.errorLog("WasdiScheduler.main: Mongo configuration failed. Reason: " + oEx);
+			WasdiLog.errorLog("WasdiScheduler.main: Db Initialization failed. Reason: " + oEx);
 			System.exit(-1);
 		}
 		WasdiLog.infoLog("WasdiScheduler.main: Data Layer configured :-)\n");
@@ -238,6 +238,11 @@ public class WasdiScheduler
 				}
 				
 				SchedulerQueueConfig oSchedulerQueueConfig = WasdiConfig.Current.scheduler.getSchedulerQueueConfig(sScheduler.toUpperCase());
+
+				if (oSchedulerQueueConfig == null) {
+					WasdiLog.warnLog("WasdiScheduler.main: Scheduler: " + sScheduler + " not found in configuration, will not start");
+					continue;
+				}
 				
 				String sSchedulerEnabled = oSchedulerQueueConfig.enabled;
 				
@@ -305,6 +310,7 @@ public class WasdiScheduler
 		int iWatchDogCount = 0;
 		int iWDCreatedCount = -1;
 		int iWDWaitingCount = -1;
+		int iWDWaitingOnlyCount = 0;
 
 		String sNodeCode = WasdiConfig.Current.nodeCode;
 			
@@ -352,7 +358,7 @@ public class WasdiScheduler
 				
 				if (WasdiScheduler.s_bActivateWatchDog) {
 					// Now lets take a look to the blocking situations
-					if (aoRunningList.size()==0 && aoReadyList.size()==0 && aoWaitingList.size()>0 && aoCreatedList.size()>0) {
+					if (WatchDogConditions.isBlockingCondition(aoRunningList, aoReadyList, aoWaitingList, aoCreatedList)) {
 						
 						// Check if we have the same number of elements in the waiting queue
 						if (iWDWaitingCount != aoWaitingList.size()) {
@@ -364,7 +370,7 @@ public class WasdiScheduler
 						// Save the number of processes in waiting
 						iWDWaitingCount = aoWaitingList.size();
 						
-						// Check if we the number of created elements is decreased
+						// Check if the number of created elements is decreased
 						if (iWDCreatedCount > aoCreatedList.size()) {
 							// If the number is decreased, or is the first time we detect it, or something moved
 							// In both cases we can reset the counter							
@@ -419,11 +425,25 @@ public class WasdiScheduler
 								}
 							}
 						}
+
+						iWDWaitingOnlyCount = 0;
+					}
+					else if (WatchDogConditions.isWaitingOnlyCondition(aoRunningList, aoReadyList, aoWaitingList, aoCreatedList)) {
+						iWatchDogCount = 0;
+						iWDCreatedCount = -1;
+						iWDWaitingCount = -1;
+
+						iWDWaitingOnlyCount++;
+						if (iWDWaitingOnlyCount >= s_iWatchDogCounter) {
+							WasdiLog.warnLog("WasdiScheduler.run: waiting-only condition detected for " + iWDWaitingOnlyCount + " checks (RUNNING=0, READY=0, WAITING=" + aoWaitingList.size() + ", CREATED=0). No watchdog stop action applied.");
+							iWDWaitingOnlyCount = 0;
+						}
 					}
 					else {
 						iWatchDogCount = 0;
 						iWDWaitingCount = -1;
 						iWDCreatedCount = -1;
+						iWDWaitingOnlyCount = 0;
 					}					
 				}
 			}
@@ -438,6 +458,20 @@ public class WasdiScheduler
 		}
 		
 	}
+
+	/**
+	 * Condition that can trigger hard watchdog recovery actions.
+	 */
+	protected static boolean isWatchDogBlockingCondition(List<ProcessWorkspace> aoRunningList, List<ProcessWorkspace> aoReadyList, List<ProcessWorkspace> aoWaitingList, List<ProcessWorkspace> aoCreatedList) {
+		return WatchDogConditions.isBlockingCondition(aoRunningList, aoReadyList, aoWaitingList, aoCreatedList);
+	}
+
+	/**
+	 * Condition used only for waiting-only diagnostics (no hard stop action).
+	 */
+	protected static boolean isWatchDogWaitingOnlyCondition(List<ProcessWorkspace> aoRunningList, List<ProcessWorkspace> aoReadyList, List<ProcessWorkspace> aoWaitingList, List<ProcessWorkspace> aoCreatedList) {
+		return WatchDogConditions.isWaitingOnlyCondition(aoRunningList, aoReadyList, aoWaitingList, aoCreatedList);
+	}
 	
 	/**
 	 * Sleep method for the Scheduler Cycle
@@ -449,6 +483,7 @@ public class WasdiScheduler
 			Thread.currentThread().interrupt();
 		}
 	}
+
 
 	/**
 	 * Get the list of running processes
