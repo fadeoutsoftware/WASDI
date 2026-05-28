@@ -13,7 +13,12 @@ s_sBucketName = "noaa-gfs-bdp-pds"
 s_sBaseUrl = "https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl?"
 
 
-def getValidDates(sStartDate, sEndDate):
+def getDatesIntervals(sStartDate, sEndDate):
+    """
+    Given a start and an end date, returns two lists of date time objets:
+    - the first list includes the date time objects that fall between those two dates, but only if those dates are no older than 9 days from the current date.
+    - the second list includes the date time objects which are older tha 9 days
+    """
     asStartDateTime = sStartDate.split("T")
     asEndDateTime = sEndDate.split("T")
 
@@ -29,14 +34,18 @@ def getValidDates(sStartDate, sEndDate):
 
     oActualDate = oStartDate
 
-    aoValidDates = []
+    aoMostRecentDates = []
+    aoPastDates = []
 
     while oActualDate <= oEndDate:
         if oActualDate >= oLastValidDate:
-            aoValidDates.append(oActualDate)
+            aoMostRecentDates.append(oActualDate)
+        else:
+            aoPastDates.append(oActualDate)
         oActualDate = oActualDate + oOneDayStep
 
-    return aoValidDates
+    return aoMostRecentDates, aoPastDates
+
 
 def executeCount(sInputFilePath, sOutputFilePath):
     if not os.path.isfile(sInputFilePath):
@@ -53,9 +62,9 @@ def executeCount(sInputFilePath, sOutputFilePath):
     sVariable = oQueryViewModel.productType
     sLevel = oQueryViewModel.productLevel
     sModelRun = oQueryViewModel.filters["modelRun"]
-    sForecastTime = oQueryViewModel.filters["forecastTime"]
+    sForecastTime = oQueryViewModel.filters["forecastTime"] #f000
 
-    aoValidDates = getValidDates(sStartDate, sEndDate)
+    aoMostRecentDates, aoPastDates = getDatesIntervals(sStartDate, sEndDate)
 
     iRunMultiplier = 1
     if sModelRun == "ALL":
@@ -65,11 +74,16 @@ def executeCount(sInputFilePath, sOutputFilePath):
     if sForecastTime == "ALL":
         iForecastTimeMultiplier = 210
 
-    iValidDates = len(aoValidDates)
+    iValidDates = len(aoMostRecentDates)
 
     aoReturnObject = {}
+
     # We compute the number of total results
     iResultCount = iValidDates * iForecastTimeMultiplier * iRunMultiplier
+
+    if sVariable == "PRATE" and sLevel.lower() == "surfaca":
+        # For this variable and level we have also historical data, so we can consider also the past dates
+        iResultCount = iResultCount + len(aoPastDates) * iForecastTimeMultiplier * iRunMultiplier
 
     aoReturnObject["count"] = iResultCount
 
@@ -92,10 +106,11 @@ def executeAndRetrieve(sInputFilePath, sOutputFilePath):
     sEndDate = oQueryViewModel.endToDate
     sVariable = oQueryViewModel.productType
     sLevel = oQueryViewModel.productLevel
-    sModelRun = oQueryViewModel.filters["modelRun"]
-    sForecastTime = oQueryViewModel.filters["forecastTime"]
+    sModelRun = oQueryViewModel.filters["modelRun"] # run
+    sForecastTime = oQueryViewModel.filters["forecastTime"] #f000
 
-    aoValidDates = getValidDates(sStartDate, sEndDate)
+    aoMostRecentDates, aoPastDates = getDatesIntervals(sStartDate, sEndDate)
+    print("0- past dates: " + str(len(aoPastDates)))
     aoModelRuns = []
 
     if sModelRun == "ALL":
@@ -124,15 +139,43 @@ def executeAndRetrieve(sInputFilePath, sOutputFilePath):
     aoReturnList = []
 
     # Make the query, get the result and convert to QueryResultViewModels
-    for oDate in aoValidDates:
-        for sModel in aoModelRuns:
+
+    # for PRATE-surface we have also historical data, so we can consider also the past dates
+    if sVariable == "PRATE" and sLevel.lower() == "surface":
+        print("1- new code. ")
+        for oDate in aoPastDates:
+            for sModelRun in aoModelRuns:
+                for sTime in aoForecastTime:
+                        oResult = {}
+                        sDate = oDate.strftime("%Y%m%d")
+                        oResult["title"] = "GFS_"+sDate+"_" + sModelRun + "_" + sTime + "_" + sVariable + "_" + sLevel
+                        oResult["id"] = "gfs." + sDate + "_" + "gfs.t"+sModelRun+"z.pgrb2.0p25."+sTime + "_" + sLevel
+                        oResult["summary"] = "GFS Model date: " + sDate + " ran at: " + sModelRun + " forecast time: " + sTime + " Variable: " + sVariable + " Level: " + sLevel
+                        if sModelRun == "LAST":
+                            sModelRun = "18"    # the last model run for dates in the past is always 18
+                        sDownloadURL = "https://noaa-gfs-bdp-pds.s3.amazonaws.com/index.html#gfs." + sDate + "/" + sModelRun + "/atoms/gfs.t" + sModelRun + "z.pgrb2.0p25." + sTime
+                        if DataProviderUtils.checkUrlExists(sDownloadURL):
+                            print("trovato link con atoms")
+                            oResult["link"] = sDownloadURL
+                        elif DataProviderUtils.checkUrlExists(sDownloadURL.replace("atoms/", "")):
+                            oResult["link"] = sDownloadURL.replace("atoms/", "")
+                            print("trovato link senza atoms")
+                        else:
+                            print("non ho trovato nessun lin :(")
+                            continue
+                        oResult["provider"] = s_sDataProviderName
+                        oResult["platform"] = s_sPlatform
+                        aoReturnList.append(oResult)
+
+    for oDate in aoMostRecentDates:
+        for sModelRun in aoModelRuns:
             for sTime in aoForecastTime:
                 oResult = {}
                 sDate = oDate.strftime("%Y-%m-%d")
-                oResult["title"] = "GFS_"+sDate+"_" + sModel + "_" + sTime + "_" + sVariable + "_" + sLevel
-                oResult["id"] = "gfs." + sDate + "_" + "gfs.t"+sModel+"z.pgrb2.0p25."+sTime + "_" + sLevel
-                oResult["link"] = sDate +"_" + sModel + "_" + sTime + "_" + sVariable + "_" + sLevel
-                oResult["summary"] = "GFS Model date: " + sDate + " ran at: " + sModel + " forecast time: " + sTime + " Variable: " + sVariable + " Level: " + sLevel
+                oResult["title"] = "GFS_"+sDate+"_" + sModelRun + "_" + sTime + "_" + sVariable + "_" + sLevel
+                oResult["id"] = "gfs." + sDate + "_" + "gfs.t"+sModelRun+"z.pgrb2.0p25."+sTime + "_" + sLevel
+                oResult["link"] = sDate +"_" + sModelRun + "_" + sTime + "_" + sVariable + "_" + sLevel
+                oResult["summary"] = "GFS Model date: " + sDate + " ran at: " + sModelRun + " forecast time: " + sTime + " Variable: " + sVariable + " Level: " + sLevel
                 oResult["provider"] = s_sDataProviderName
                 oResult["platform"] = s_sPlatform
 
@@ -171,8 +214,15 @@ def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
 
     sTargetFolder = oDownloadFileViewModel.downloadDirectory
     sTargetFileName = oDownloadFileViewModel.downloadFileName
+    sDownloadedFilePath = sTargetFolder + sTargetFileName
     iMaxRetry = oDownloadFileViewModel.maxRetry
     sUrl = oDownloadFileViewModel.url
+
+    if sUrl.startswith("http"):
+        bDownloaded = DataProviderUtils.downloadFile(sUrl, sDownloadedFilePath)
+        if bDownloaded:
+            # TODO: rename the file with the extension grib2
+            pass
 
     asUrlParts = sUrl.split("_")
 
@@ -210,7 +260,6 @@ def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
     sUrl += "&"
     sUrl += "lev_" + sLevel + "=on"
 
-    sDownloadedFilePath = sTargetFolder + sTargetFileName
 
     bDownloaded = DataProviderUtils.downloadFile(sUrl, sDownloadedFilePath)
 
