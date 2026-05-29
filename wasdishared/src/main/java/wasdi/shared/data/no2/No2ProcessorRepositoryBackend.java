@@ -5,11 +5,15 @@ import static org.dizitart.no2.filters.FluentFilter.where;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.regex.Pattern;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
+import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.common.SortOrder;
+import org.dizitart.no2.filters.Filter;
 
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.WasdiConfig;
@@ -248,6 +252,133 @@ public class No2ProcessorRepositoryBackend extends No2Repository implements IPro
 	}
 
 	@Override
+	public List<Processor> getDeployedProcessorsLightweight() {
+		List<Processor> aoReturnList = new ArrayList<>();
+
+		try {
+			NitriteCollection oCollection = getCollection(s_sCollectionName);
+			if (oCollection == null) {
+				return aoReturnList;
+			}
+
+			DocumentCursor oCursor = oCollection.find(Filter.ALL, FindOptions.orderBy("processorId", SortOrder.Ascending));
+			for (Document oDocument : oCursor) {
+				Processor oProcessor = toLightweightProcessor(oDocument);
+				if (oProcessor != null) {
+					aoReturnList.add(oProcessor);
+				}
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("No2ProcessorRepositoryBackend.getDeployedProcessorsLightweight: error", oEx);
+		}
+
+		return aoReturnList;
+	}
+
+	@Override
+	public List<Processor> getMarketplaceProcessors(String sOrderBy, int iDirection) {
+		List<Processor> aoReturnList = getAllProcessors().stream()
+				.filter(oProcessor -> oProcessor != null && oProcessor.getShowInStore())
+				.collect(Collectors.toList());
+
+		Comparator<Processor> oComparator = comparatorForOrderBy(sOrderBy);
+		if (iDirection < 0) {
+			oComparator = oComparator.reversed();
+		}
+		aoReturnList.sort(oComparator);
+		return aoReturnList;
+	}
+
+	@Override
+	public List<Processor> getMarketplaceProcessorsPage(
+			String sUserId,
+			List<String> asSharedProcessorIds,
+			String sName,
+			List<String> asCategories,
+			List<String> asPublishers,
+			float fMaxPrice,
+			String sOrderBy,
+			int iDirection,
+			int iPage,
+			int iItemsPerPage) {
+		if (iPage < 0) {
+			iPage = 0;
+		}
+		if (iItemsPerPage <= 0) {
+			iItemsPerPage = 12;
+		}
+
+		try {
+			NitriteCollection oCollection = getCollection(s_sCollectionName);
+			if (oCollection == null) {
+				return new ArrayList<>();
+			}
+
+			List<Filter> aoAndFilters = new ArrayList<>();
+			aoAndFilters.add(where("showInStore").eq(true));
+
+			List<Filter> aoAccessFilters = new ArrayList<>();
+			aoAccessFilters.add(where("isPublic").eq(1));
+			if (!Utils.isNullOrEmpty(sUserId)) {
+				aoAccessFilters.add(where("userId").eq(sUserId));
+			}
+			if (asSharedProcessorIds != null && !asSharedProcessorIds.isEmpty()) {
+				if (asSharedProcessorIds.size() == 1) {
+					aoAccessFilters.add(where("processorId").eq(asSharedProcessorIds.get(0)));
+				}
+				else {
+					aoAccessFilters.add(where("processorId").in(asSharedProcessorIds.toArray(new String[0])));
+				}
+			}
+			aoAndFilters.add(combineOr(aoAccessFilters));
+
+			if (!Utils.isNullOrEmpty(sName)) {
+				String sRegex = "(?i).*" + Pattern.quote(sName) + ".*";
+				aoAndFilters.add(Filter.or(
+						where("name").regex(sRegex),
+						where("friendlyName").regex(sRegex)));
+			}
+
+			if (asCategories != null && !asCategories.isEmpty()) {
+				List<Filter> aoCategoriesFilters = new ArrayList<>();
+				for (String sCategory : asCategories) {
+					aoCategoriesFilters.add(where("categories").elemMatch(where("$").eq(sCategory)));
+				}
+				aoAndFilters.add(combineOr(aoCategoriesFilters));
+			}
+
+			if (asPublishers != null && !asPublishers.isEmpty()) {
+				if (asPublishers.size() == 1) {
+					aoAndFilters.add(where("userId").eq(asPublishers.get(0)));
+				}
+				else {
+					aoAndFilters.add(where("userId").in(asPublishers.toArray(new String[0])));
+				}
+			}
+
+			if (fMaxPrice >= 0) {
+				aoAndFilters.add(where("ondemandPrice").lte(fMaxPrice));
+			}
+
+			String sSortField = normalizeNo2SortField(sOrderBy);
+			SortOrder eSortOrder = iDirection < 0 ? SortOrder.Descending : SortOrder.Ascending;
+			FindOptions oFindOptions = FindOptions.orderBy(sSortField, eSortOrder)
+					.skip((long) iPage * iItemsPerPage)
+					.limit(iItemsPerPage);
+
+			Filter oFinalFilter = combineAnd(aoAndFilters);
+			DocumentCursor oCursor = oCollection.find(oFinalFilter, oFindOptions);
+			return toList(oCursor, Processor.class);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("No2ProcessorRepositoryBackend.getMarketplaceProcessorsPage: error", oEx);
+		}
+
+		return new ArrayList<>();
+	}
+
+	@Override
 	public long countProcessors() {
 		try {
 			NitriteCollection oCollection = getCollection(s_sCollectionName);
@@ -290,6 +421,42 @@ public class No2ProcessorRepositoryBackend extends No2Repository implements IPro
 		}
 	}
 
+	private String normalizeNo2SortField(String sOrderBy) {
+		if (Utils.isNullOrEmpty(sOrderBy) || "_id".equals(sOrderBy)) {
+			return "processorId";
+		}
+
+		switch (sOrderBy) {
+			case "friendlyName":
+			case "updateDate":
+			case "ondemandPrice":
+			case "name":
+				return sOrderBy;
+			default:
+				return "friendlyName";
+		}
+	}
+
+	private Filter combineAnd(List<Filter> aoFilters) {
+		if (aoFilters == null || aoFilters.isEmpty()) {
+			return Filter.ALL;
+		}
+		if (aoFilters.size() == 1) {
+			return aoFilters.get(0);
+		}
+		return Filter.and(aoFilters.toArray(new Filter[0]));
+	}
+
+	private Filter combineOr(List<Filter> aoFilters) {
+		if (aoFilters == null || aoFilters.isEmpty()) {
+			return Filter.ALL;
+		}
+		if (aoFilters.size() == 1) {
+			return aoFilters.get(0);
+		}
+		return Filter.or(aoFilters.toArray(new Filter[0]));
+	}
+
 	private Comparator<Processor> comparatorForOrderBy(String sOrderBy) {
 		String sField = Utils.isNullOrEmpty(sOrderBy) ? "_id" : sOrderBy;
 
@@ -314,6 +481,39 @@ public class No2ProcessorRepositoryBackend extends No2Repository implements IPro
 
 	private boolean matches(Pattern oPattern, String sValue) {
 		return sValue != null && oPattern.matcher(sValue).find();
+	}
+
+	private Processor toLightweightProcessor(Document oDocument) {
+		if (oDocument == null) {
+			return null;
+		}
+
+		Processor oProcessor = new Processor();
+		oProcessor.setProcessorId(asString(oDocument.get("processorId")));
+		oProcessor.setUserId(asString(oDocument.get("userId")));
+		oProcessor.setIsPublic(asInt(oDocument.get("isPublic"), 0));
+		return oProcessor;
+	}
+
+	private String asString(Object oValue) {
+		return oValue == null ? null : oValue.toString();
+	}
+
+	private int asInt(Object oValue, int iDefaultValue) {
+		if (oValue instanceof Number) {
+			return ((Number) oValue).intValue();
+		}
+
+		if (oValue != null) {
+			try {
+				return Integer.parseInt(oValue.toString());
+			}
+			catch (NumberFormatException oEx) {
+				WasdiLog.warnLog("No2ProcessorRepositoryBackend.asInt: invalid integer value " + oValue);
+			}
+		}
+
+		return iDefaultValue;
 	}
 
 	private boolean equalsSafe(String sA, String sB) {

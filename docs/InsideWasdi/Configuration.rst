@@ -1287,6 +1287,16 @@ The admin can then add all the needed queues.
        "sometimesCheckCounter": 30,
        "watchDogCounter": 30,
        "activateWatchDog": true,
+       "redirectLauncherOutputs": false,
+       "launcherOutputPath": "",
+       "useVirtualNodeCode": false,
+       "defaultFairRoundRobin": false,
+       "defaultFairRoundRobinMaxProcessesCount": 3,
+       "defaultFairRoundRobinParentId": false,
+       "defaultFairRoundRobinParentIdMaxProcessesCount": 3,
+       "defaultSpecialWaitCondition": false,
+       "defaultMaxWaitingQueue": 100,
+       "emergencyFallbackEveryNCycles": 5,
        "schedulers": [
          {
            "name": "default",
@@ -1295,6 +1305,10 @@ The admin can then add all the needed queues.
            "opTypes": "RUNPROCESSOR,RUNIDL,RUNMATLAB",
            "opSubType": "",
            "enabled": "true",
+           "fairRoundRobin": false,
+           "fairRoundRobinMaxProcessesCount": 3,
+           "fairRoundRobinParentId": false,
+           "fairRoundRobinParentIdMaxProcessesCount": 3,
            "specialWaitCondition": false,
            "maxWaitingQueue": 100
          },
@@ -1317,85 +1331,135 @@ SchedulerConfig Properties
 
 These are the configurations of the default scheduler
 
-+------------------------------------+-------------+-------------------------------+
-| Property                           | Type        | Description                   |
-+====================================+=============+===============================+
-| ``processingThreadWaitStartMS``    | String      | Number of milliseconds to     |
-|                                    |             | wait after a process is       |
-|                                    |             | started                       |
-+------------------------------------+-------------+-------------------------------+
-| ``processingThreadSleepingTimeMS`` | String      | Number of milliseconds to     |
-|                                    |             | sleep between scheduler       |
-|                                    |             | cycles                        |
-+------------------------------------+-------------+-------------------------------+
-| ``launcherPath``                   | String      | Full path of Launcher jar     |
-|                                    |             | file                          |
-+------------------------------------+-------------+-------------------------------+
-| ``javaExe``                        | String      | Local Java command line       |
-|                                    |             | executable                    |
-+------------------------------------+-------------+-------------------------------+
-| ``killCommand``                    | String      | OS kill command for           |
-|                                    |             | terminating processes         |
-+------------------------------------+-------------+-------------------------------+
-| ``maxQueue``                       | String      | Default maximum queue size    |
-+------------------------------------+-------------+-------------------------------+
-| ``timeoutMs``                      | String      | Default queue timeout in      |
-|                                    |             | milliseconds                  |
-+------------------------------------+-------------+-------------------------------+
-| ``lastStateChangeDateOrderBy``     | int         | Direction to order process    |
-|                                    |             | workspaces in scheduler queue |
-|                                    |             | (default: -1)                 |
-+------------------------------------+-------------+-------------------------------+
-| ``sometimesCheckCounter``          | int         | Number of cycles before       |
-|                                    |             | starting periodic checks      |
-|                                    |             | (default: 30)                 |
-+------------------------------------+-------------+-------------------------------+
-| ``watchDogCounter``                | int         | Counter for deadlock          |
-|                                    |             | detection when only waiting   |
-|                                    |             | processes exist (default: 30) |
-+------------------------------------+-------------+-------------------------------+
-| ``activateWatchDog``               | boolean     | Flag to activate or           |
-|                                    |             | deactivate the watch dog      |
-|                                    |             | functionality (default: true) |
-+------------------------------------+-------------+-------------------------------+
-| ``schedulers``                     | ArrayList   | List of configured scheduler  |
-|                                    |             | queues                        |
-+------------------------------------+-------------+-------------------------------+
++------------------------------------------------------+-----------+----------------------------------------------+
+| Property                                             | Type      | Description                                  |
++======================================================+===========+==============================================+
+| ``processingThreadWaitStartMS``                      | String    | Number of milliseconds to wait after a       |
+|                                                      |           | process is started                           |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``processingThreadSleepingTimeMS``                   | String    | Number of milliseconds to sleep between      |
+|                                                      |           | scheduler cycles                             |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``launcherPath``                                     | String    | Full path of Launcher jar file               |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``javaExe``                                          | String    | Local Java command line executable           |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``killCommand``                                      | String    | OS kill command for terminating processes    |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``maxQueue``                                         | String    | Default maximum queue size                   |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``timeoutMs``                                        | String    | Default queue timeout in milliseconds        |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``lastStateChangeDateOrderBy``                       | int       | Direction to order process workspaces in     |
+|                                                      |           | scheduler queue (default: -1)                |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``sometimesCheckCounter``                            | int       | Number of cycles before starting periodic    |
+|                                                      |           | checks (default: 30)                         |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``watchDogCounter``                                  | int       | Counter for deadlock detection when only     |
+|                                                      |           | waiting processes exist (default: 30)        |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``activateWatchDog``                                 | boolean   | Flag to activate or deactivate the watch     |
+|                                                      |           | dog functionality (default: true)            |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``redirectLauncherOutputs``                          | boolean   | If true, asks launcher to redirect its       |
+|                                                      |           | output to file                               |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``launcherOutputPath``                               | String    | Destination path used when launcher output   |
+|                                                      |           | redirection is enabled (default: "")         |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``useVirtualNodeCode``                               | boolean   | Enables virtual node code filtering for      |
+|                                                      |           | scheduler execution (default: false)         |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``defaultFairRoundRobin``                            | boolean   | Enables fair round robin per user in         |
+|                                                      |           | CREATED list (default: false)                |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``defaultFairRoundRobinMaxProcessesCount``           | int       | Max consecutive processes per user when      |
+|                                                      |           | fair round robin is active (default: 3)      |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``defaultFairRoundRobinParentId``                    | boolean   | Enables second round robin by parentId       |
+|                                                      |           | inside selected user queue (default: false)  |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``defaultFairRoundRobinParentIdMaxProcessesCount``   | int       | Max consecutive processes per parentId       |
+|                                                      |           | group when parentId round robin is active    |
+|                                                      |           | (default: 3)                                 |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``defaultSpecialWaitCondition``                      | boolean   | Enables special wait condition to consider   |
+|                                                      |           | waiting queue before triggering processes    |
+|                                                      |           | (default: false)                             |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``defaultMaxWaitingQueue``                           | int       | Max waiting processes admitted before        |
+|                                                      |           | breaking FIFO rules (default: 100)           |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``emergencyFallbackEveryNCycles``                    | int       | In emergency mode, fallback to default       |
+|                                                      |           | CREATED candidate every N cycles when no     |
+|                                                      |           | unblock candidate is found (default: 5)      |
++------------------------------------------------------+-----------+----------------------------------------------+
+| ``schedulers``                                       | ArrayList | List of configured scheduler queues          |
++------------------------------------------------------+-----------+----------------------------------------------+
 
 SchedulerQueueConfig Properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Each of these, is a specific queue.
 
-+--------------------------+-------------+-------------------------------+
-| Property                 | Type        | Description                   |
-+==========================+=============+===============================+
-| ``name``                 | String      | Name identifier of the queue  |
-+--------------------------+-------------+-------------------------------+
-| ``maxQueue``             | String      | Maximum number of elements    |
-|                          |             | allowed in this queue         |
-+--------------------------+-------------+-------------------------------+
-| ``timeoutMs``            | String      | Queue timeout in milliseconds |
-|                          |             | for this specific queue       |
-+--------------------------+-------------+-------------------------------+
-| ``opTypes``              | String      | Comma-separated operation     |
-|                          |             | types supported by this queue |
-+--------------------------+-------------+-------------------------------+
-| ``opSubType``            | String      | Operation subtype (requires   |
-|                          |             | opTypes to contain only one   |
-|                          |             | operation)                    |
-+--------------------------+-------------+-------------------------------+
-| ``enabled``              | String      | Flag to enable or disable     |
-|                          |             | this queue                    |
-+--------------------------+-------------+-------------------------------+
-| ``specialWaitCondition`` | boolean     | Flag to apply special wait    |
-|                          |             | condition considering waiting |
-|                          |             | queue (default: false)        |
-+--------------------------+-------------+-------------------------------+
-| ``maxWaitingQueue``      | int         | Maximum waiting processes     |
-|                          |             | before breaking FIFO rules    |
-|                          |             | (default: 100)                |
-+--------------------------+-------------+-------------------------------+
++----------------------------------------------+---------+----------------------------------------------+
+| Property                                     | Type    | Description                                  |
++==============================================+=========+==============================================+
+| ``name``                                     | String  | Name identifier of the queue                 |
++----------------------------------------------+---------+----------------------------------------------+
+| ``maxQueue``                                 | String  | Maximum number of elements allowed in this   |
+|                                              |         | queue                                        |
++----------------------------------------------+---------+----------------------------------------------+
+| ``timeoutMs``                                | String  | Queue timeout in milliseconds for this       |
+|                                              |         | specific queue                               |
++----------------------------------------------+---------+----------------------------------------------+
+| ``opTypes``                                  | String  | Comma-separated operation types supported    |
+|                                              |         | by this queue                                |
++----------------------------------------------+---------+----------------------------------------------+
+| ``opSubType``                                | String  | Operation subtype (requires opTypes to       |
+|                                              |         | contain only one operation)                  |
++----------------------------------------------+---------+----------------------------------------------+
+| ``enabled``                                  | String  | Flag to enable or disable this queue         |
++----------------------------------------------+---------+----------------------------------------------+
+| ``specialWaitCondition``                     | boolean | Flag to apply special wait condition         |
+|                                              |         | considering waiting queue (default: false)   |
++----------------------------------------------+---------+----------------------------------------------+
+| ``maxWaitingQueue``                          | int     | Maximum waiting processes before breaking    |
+|                                              |         | FIFO rules (default: 100)                    |
++----------------------------------------------+---------+----------------------------------------------+
+| ``fairRoundRobin``                           | boolean | Enables fair round robin per user in         |
+|                                              |         | CREATED list (default: false)                |
++----------------------------------------------+---------+----------------------------------------------+
+| ``fairRoundRobinMaxProcessesCount``          | int     | Max consecutive processes per user when      |
+|                                              |         | fair round robin is active (default: 3)      |
++----------------------------------------------+---------+----------------------------------------------+
+| ``fairRoundRobinParentId``                   | boolean | Enables second round robin by parentId       |
+|                                              |         | inside selected user queue (default: false)  |
++----------------------------------------------+---------+----------------------------------------------+
+| ``fairRoundRobinParentIdMaxProcessesCount``  | int     | Max consecutive processes per parentId       |
+|                                              |         | group when parentId round robin is active    |
+|                                              |         | (default: 3)                                 |
++----------------------------------------------+---------+----------------------------------------------+
+
+Scheduler Defaults and Queue Overrides
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The scheduler-level properties prefixed with ``default`` are global defaults
+applied to queue behavior.
+
+If a queue in ``schedulers`` defines the corresponding queue-level property,
+that queue value takes precedence for that queue. Otherwise, the scheduler
+default is used.
+
+Main mappings:
+
+- ``defaultFairRoundRobin`` -> ``fairRoundRobin``
+- ``defaultFairRoundRobinMaxProcessesCount`` -> ``fairRoundRobinMaxProcessesCount``
+- ``defaultFairRoundRobinParentId`` -> ``fairRoundRobinParentId``
+- ``defaultFairRoundRobinParentIdMaxProcessesCount`` -> ``fairRoundRobinParentIdMaxProcessesCount``
+- ``defaultSpecialWaitCondition`` -> ``specialWaitCondition``
+- ``defaultMaxWaitingQueue`` -> ``maxWaitingQueue``
 
 Load Balancer Configuration
 ---------------------------

@@ -135,6 +135,10 @@ public class WasdiGraph {
 				
 				sGraphXML = sGraphXML.replace(sParameterKey, sValue);
 			}
+			
+			WasdiLog.debugLog("WasdiGraph: XML after replacements of template params:");
+			WasdiLog.debugLog(sGraphXML);
+			WasdiLog.debugLog("-------------------------------------------------------------------");
 		}
 		
 		//build snap graph object
