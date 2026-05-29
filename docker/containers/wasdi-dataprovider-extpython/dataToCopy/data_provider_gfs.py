@@ -110,7 +110,6 @@ def executeAndRetrieve(sInputFilePath, sOutputFilePath):
     sForecastTime = oQueryViewModel.filters["forecastTime"] #f000
 
     aoMostRecentDates, aoPastDates = getDatesIntervals(sStartDate, sEndDate)
-    print("0- past dates: " + str(len(aoPastDates)))
     aoModelRuns = []
 
     if sModelRun == "ALL":
@@ -142,7 +141,6 @@ def executeAndRetrieve(sInputFilePath, sOutputFilePath):
 
     # for PRATE-surface we have also historical data, so we can consider also the past dates
     if sVariable == "PRATE" and sLevel.lower() == "surface":
-        print("1- new code. ")
         for oDate in aoPastDates:
             for sModelRun in aoModelRuns:
                 for sTime in aoForecastTime:
@@ -153,16 +151,7 @@ def executeAndRetrieve(sInputFilePath, sOutputFilePath):
                         oResult["summary"] = "GFS Model date: " + sDate + " ran at: " + sModelRun + " forecast time: " + sTime + " Variable: " + sVariable + " Level: " + sLevel
                         if sModelRun == "LAST":
                             sModelRun = "18"    # the last model run for dates in the past is always 18
-                        sDownloadURL = "https://noaa-gfs-bdp-pds.s3.amazonaws.com/index.html#gfs." + sDate + "/" + sModelRun + "/atoms/gfs.t" + sModelRun + "z.pgrb2.0p25." + sTime
-                        if DataProviderUtils.checkUrlExists(sDownloadURL):
-                            print("trovato link con atoms")
-                            oResult["link"] = sDownloadURL
-                        elif DataProviderUtils.checkUrlExists(sDownloadURL.replace("atoms/", "")):
-                            oResult["link"] = sDownloadURL.replace("atoms/", "")
-                            print("trovato link senza atoms")
-                        else:
-                            print("non ho trovato nessun lin :(")
-                            continue
+                        oResult["link"] = "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs." + sDate + "/" + sModelRun + "/atmos/gfs.t" + sModelRun + "z.pgrb2.0p25." + sTime
                         oResult["provider"] = s_sDataProviderName
                         oResult["platform"] = s_sPlatform
                         aoReturnList.append(oResult)
@@ -199,7 +188,6 @@ def getPreviousRun(sRun):
     return ""
 
 def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
-
     oDownloadFileViewModel = DataProviderUtils.getDownloadFileViewModel(sInputFilePath)
 
     if oDownloadFileViewModel is None:
@@ -211,57 +199,57 @@ def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
     if oDataProviderConfig is None:
         logging.warning(f"executeDownloadFile: no configuration found for {s_sDataProviderName}. Impossible to continue")
         sys.exit(1)
-
     sTargetFolder = oDownloadFileViewModel.downloadDirectory
     sTargetFileName = oDownloadFileViewModel.downloadFileName
     sDownloadedFilePath = sTargetFolder + sTargetFileName
     iMaxRetry = oDownloadFileViewModel.maxRetry
     sUrl = oDownloadFileViewModel.url
 
-    if sUrl.startswith("http"):
+    if sUrl.startswith("https://"):
         bDownloaded = DataProviderUtils.downloadFile(sUrl, sDownloadedFilePath)
-        if bDownloaded:
-            # TODO: rename the file with the extension grib2
-            pass
+        if not bDownloaded:
+            # we try to download the file with the same url, but removing the 'atmos' part, since that folder is not always present in the NOAA S3 bucket
+                sUrl = sUrl.replace("/atmos", "")
+                bDownloaded = DataProviderUtils.downloadFile(sUrl, sDownloadedFilePath)
 
-    asUrlParts = sUrl.split("_")
+    else:
+        asUrlParts = sUrl.split("_")
 
-    sDate = asUrlParts[0]
-    sRun = asUrlParts[1]
-    sForecastTime = asUrlParts[2]
-    sVariable = asUrlParts[3]
-    sLevel = asUrlParts[4]
+        sDate = asUrlParts[0]
+        sRun = asUrlParts[1]
+        sForecastTime = asUrlParts[2]
+        sVariable = asUrlParts[3]
+        sLevel = asUrlParts[4]
 
-    sUrl = s_sBaseUrl
-    oNow = datetime.today()
-    oDate = datetime.strptime(sDate,"%Y-%m-%d")
+        sUrl = s_sBaseUrl
+        oNow = datetime.today()
+        oDate = datetime.strptime(sDate,"%Y-%m-%d")
 
-    bTestLastForToday = False
+        bTestLastForToday = False
 
-    if sRun == "LAST":
-        sRun = "18"
-        if oNow.date()==oDate.date():
-            bTestLastForToday = True
-            iHour = oNow.hour
-            if iHour<6:
-                sRun = "00"
-            elif iHour<12:
-                sRun = "06"
-            elif iHour<18:
-                sRun = "12"
-            else:
-                sRun = "18"
+        if sRun == "LAST":
+            sRun = "18"
+            if oNow.date()==oDate.date():
+                bTestLastForToday = True
+                iHour = oNow.hour
+                if iHour<6:
+                    sRun = "00"
+                elif iHour<12:
+                    sRun = "06"
+                elif iHour<18:
+                    sRun = "12"
+                else:
+                    sRun = "18"
 
-    sUrl += "dir=/gfs." + sDate.replace("-","") + "/" + sRun + "/atmos"
-    sUrl += "&"
-    sUrl += "file=gfs.t"+sRun + "z.pgrb2.0p25."+ sForecastTime
-    sUrl += "&"
-    sUrl += "var_"+ sVariable + "=on"
-    sUrl += "&"
-    sUrl += "lev_" + sLevel + "=on"
+        sUrl += "dir=/gfs." + sDate.replace("-","") + "/" + sRun + "/atmos"
+        sUrl += "&"
+        sUrl += "file=gfs.t"+sRun + "z.pgrb2.0p25."+ sForecastTime
+        sUrl += "&"
+        sUrl += "var_"+ sVariable + "=on"
+        sUrl += "&"
+        sUrl += "lev_" + sLevel + "=on"
 
-
-    bDownloaded = DataProviderUtils.downloadFile(sUrl, sDownloadedFilePath)
+        bDownloaded = DataProviderUtils.downloadFile(sUrl, sDownloadedFilePath)
 
     if not bDownloaded:
         # Maybe we can search a previous run for today?
@@ -288,7 +276,6 @@ def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
 
 
 def getFileName(sInputFilePath, sOutputFilePath):
-
     oFileNameViewModel = DataProviderUtils.getFileNameViewModel(sInputFilePath)
 
     if oFileNameViewModel is None:
@@ -296,9 +283,24 @@ def getFileName(sInputFilePath, sOutputFilePath):
         sys.exit(1)
 
     sUrl = oFileNameViewModel.url
-    # Extract the file name from the Url
-    sFileName = "GFS_" + sUrl + ".grb2"
     
+    sFileName = ""
+
+    # Extract the file name from the Url
+    if sUrl.startswith("https://"):
+        try:
+            # we are dealing with historical products - we extract them from the NOAA S3 bucket
+            asUrlParts = sUrl.removeprefix("https://").split("/")
+            sDate = asUrlParts[1].removeprefix("gfs.")
+            oDateTime = datetime.strptime(sDate, "%Y%m%d")
+            sRun = asUrlParts[2]
+            sForecastTime = asUrlParts[-1].split(".")[-1]
+            sFileName = f"GFS_{oDateTime:%Y-%m-%d}_{sRun}_{sForecastTime}_PRATE_surface.grb2"
+        except:
+            sFileName = "GFS_no_name.grb2"
+    else:
+        sFileName = "GFS_" + sUrl + ".grb2"
+
     oRes = {
         'fileName': sFileName
     }    
@@ -309,7 +311,6 @@ def getFileName(sInputFilePath, sOutputFilePath):
     except Exception as oEx:
         logging.warning(f'getFileName: error trying to write the output file {sOutputFilePath}, {oEx}')
         sys.exit(1)
-
 
 if __name__ == '__main__':
     logging.basicConfig(encoding='utf-8', format='[%(levelname)s] %(message)s', level=logging.DEBUG)
