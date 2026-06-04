@@ -182,6 +182,156 @@ public class SqliteProcessorRepositoryBackend extends SqliteRepository implement
 	}
 
 	@Override
+	public List<Processor> getDeployedProcessorsLightweight() {
+		try {
+			String sQuery = "SELECT json_object('processorId', json_extract(data,'$.processorId'),"
+					+ " 'userId', json_extract(data,'$.userId'),"
+					+ " 'isPublic', json_extract(data,'$.isPublic'))"
+					+ " FROM " + m_sThisCollection + " ORDER BY id ASC";
+			return queryList(sQuery, Arrays.asList(), Processor.class);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorRepository.getDeployedProcessorsLightweight :error ", oEx);
+		}
+
+		return new ArrayList<>();
+	}
+
+	@Override
+	public List<Processor> getMarketplaceProcessors(String sOrderBy, int iDirection) {
+		try {
+			String sDir = (iDirection >= 0) ? "ASC" : "DESC";
+			String sSortExpr = "_id".equals(sOrderBy) ? "id" : "json_extract(data,'$." + sOrderBy + "')";
+			String sQuery = "SELECT data FROM " + m_sThisCollection
+					+ " WHERE json_extract(data,'$.showInStore') = 1"
+					+ " ORDER BY " + sSortExpr + " " + sDir;
+			return queryList(sQuery, Arrays.asList(), Processor.class);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorRepository.getMarketplaceProcessors :error ", oEx);
+		}
+
+		return new ArrayList<>();
+	}
+
+	@Override
+	public List<Processor> getMarketplaceProcessorsPage(
+			String sUserId,
+			List<String> asSharedProcessorIds,
+			String sName,
+			List<String> asCategories,
+			List<String> asPublishers,
+			float fMaxPrice,
+			String sOrderBy,
+			int iDirection,
+			int iPage,
+			int iItemsPerPage) {
+		if (iPage < 0) {
+			iPage = 0;
+		}
+		if (iItemsPerPage <= 0) {
+			iItemsPerPage = 12;
+		}
+
+		try {
+			List<Object> aoParams = new ArrayList<>();
+			StringBuilder oWhere = new StringBuilder();
+			oWhere.append(" WHERE json_extract(data,'$.showInStore') = 1");
+
+			List<String> asAccessClauses = new ArrayList<>();
+			asAccessClauses.add("json_extract(data,'$.isPublic') = 1");
+			if (!Utils.isNullOrEmpty(sUserId)) {
+				asAccessClauses.add("json_extract(data,'$.userId') = ?");
+				aoParams.add(sUserId);
+			}
+			if (asSharedProcessorIds != null && !asSharedProcessorIds.isEmpty()) {
+				asAccessClauses.add("json_extract(data,'$.processorId') IN (" + getPlaceholders(asSharedProcessorIds.size()) + ")");
+				aoParams.addAll(asSharedProcessorIds);
+			}
+			oWhere.append(" AND (").append(String.join(" OR ", asAccessClauses)).append(")");
+
+			if (!Utils.isNullOrEmpty(sName)) {
+				String sLike = "%" + sName + "%";
+				oWhere.append(" AND (")
+						.append("LOWER(json_extract(data,'$.name')) LIKE LOWER(?)")
+						.append(" OR LOWER(json_extract(data,'$.friendlyName')) LIKE LOWER(?)")
+						.append(")");
+				aoParams.add(sLike);
+				aoParams.add(sLike);
+			}
+
+			if (asCategories != null && !asCategories.isEmpty()) {
+				oWhere.append(" AND EXISTS (")
+						.append("SELECT 1 FROM json_each(json_extract(data,'$.categories')) c ")
+						.append("WHERE c.value IN (")
+						.append(getPlaceholders(asCategories.size()))
+						.append(")")
+						.append(")");
+				aoParams.addAll(asCategories);
+			}
+
+			if (asPublishers != null && !asPublishers.isEmpty()) {
+				oWhere.append(" AND json_extract(data,'$.userId') IN (")
+						.append(getPlaceholders(asPublishers.size()))
+						.append(")");
+				aoParams.addAll(asPublishers);
+			}
+
+			if (fMaxPrice >= 0) {
+				oWhere.append(" AND json_extract(data,'$.ondemandPrice') <= ?");
+				aoParams.add(fMaxPrice);
+			}
+
+			String sDir = (iDirection >= 0) ? "ASC" : "DESC";
+			String sSortExpr = getSqliteSortExpr(sOrderBy);
+			String sQuery = "SELECT data FROM " + m_sThisCollection
+					+ oWhere
+					+ " ORDER BY " + sSortExpr + " " + sDir
+					+ " LIMIT ? OFFSET ?";
+
+			aoParams.add(iItemsPerPage);
+			aoParams.add(iPage * iItemsPerPage);
+
+			return queryList(sQuery, aoParams, Processor.class);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorRepository.getMarketplaceProcessorsPage :error ", oEx);
+		}
+
+		return new ArrayList<>();
+	}
+
+	private String getSqliteSortExpr(String sOrderBy) {
+		if (Utils.isNullOrEmpty(sOrderBy) || "_id".equals(sOrderBy)) {
+			return "id";
+		}
+
+		switch (sOrderBy) {
+			case "friendlyName":
+			case "updateDate":
+			case "ondemandPrice":
+			case "name":
+				return "json_extract(data,'$." + sOrderBy + "')";
+			default:
+				return "json_extract(data,'$.friendlyName')";
+		}
+	}
+
+	private String getPlaceholders(int iCount) {
+		if (iCount <= 0) {
+			return "";
+		}
+
+		StringBuilder oSb = new StringBuilder();
+		for (int i = 0; i < iCount; i++) {
+			if (i > 0) {
+				oSb.append(",");
+			}
+			oSb.append("?");
+		}
+		return oSb.toString();
+	}
+
+	@Override
 	public long countProcessors() {
 		return count(m_sThisCollection);
 	}

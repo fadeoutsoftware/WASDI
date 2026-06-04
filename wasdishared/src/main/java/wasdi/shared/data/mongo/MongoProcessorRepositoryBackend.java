@@ -84,6 +84,17 @@ public class MongoProcessorRepositoryBackend extends MongoRepository implements 
 	@Override
 	public boolean updateProcessor(Processor oProcessor) {
 		try {
+			
+			if (Utils.isNullOrEmpty(oProcessor.getVersion())) {
+				WasdiLog.errorLog("ProcessorRepository.updateProcessor: Tyring to update a processor but version is null: we do not allow it");
+				return false;
+			}
+			
+			if (Utils.isNullOrEmpty(oProcessor.getType())) {
+				WasdiLog.errorLog("ProcessorRepository.updateProcessor: Tyring to update a processor but type is null: we do not allow it");
+				return false;		
+			}
+			
 			String sJSON = s_oMapper.writeValueAsString(oProcessor);
 
 			Bson oFilter = new Document("processorId", oProcessor.getProcessorId());
@@ -95,7 +106,7 @@ public class MongoProcessorRepositoryBackend extends MongoRepository implements 
 				return true;
 			}
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorRepository.updateProcessor :error ", oEx);
+			WasdiLog.errorLog("ProcessorRepository.updateProcessor: error ", oEx);
 		}
 
 		return false;
@@ -237,6 +248,114 @@ public class MongoProcessorRepositoryBackend extends MongoRepository implements 
 
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessorRepository.getDeployedProcessors :error ", oEx);
+		}
+
+		return aoReturnList;
+	}
+
+	@Override
+	public List<Processor> getDeployedProcessorsLightweight() {
+
+		final ArrayList<Processor> aoReturnList = new ArrayList<Processor>();
+		try {
+
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find()
+					.projection(new Document("processorId", 1).append("userId", 1).append("isPublic", 1));
+
+			fillList(aoReturnList, oWSDocuments, Processor.class);
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorRepository.getDeployedProcessorsLightweight :error ", oEx);
+		}
+
+		return aoReturnList;
+	}
+
+	@Override
+	public List<Processor> getMarketplaceProcessors(String sOrderBy, int iDirection) {
+
+		final ArrayList<Processor> aoReturnList = new ArrayList<Processor>();
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(new Document("showInStore", true))
+					.sort(new Document(sOrderBy, iDirection));
+
+			fillList(aoReturnList, oWSDocuments, Processor.class);
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorRepository.getMarketplaceProcessors :error ", oEx);
+		}
+
+		return aoReturnList;
+	}
+
+	@Override
+	public List<Processor> getMarketplaceProcessorsPage(
+			String sUserId,
+			List<String> asSharedProcessorIds,
+			String sName,
+			List<String> asCategories,
+			List<String> asPublishers,
+			float fMaxPrice,
+			String sOrderBy,
+			int iDirection,
+			int iPage,
+			int iItemsPerPage) {
+
+		final ArrayList<Processor> aoReturnList = new ArrayList<Processor>();
+		try {
+			if (iPage < 0) {
+				iPage = 0;
+			}
+			if (iItemsPerPage <= 0) {
+				iItemsPerPage = 12;
+			}
+
+			List<Bson> aoAndFilters = new ArrayList<>();
+			aoAndFilters.add(Filters.eq("showInStore", true));
+
+			List<Bson> aoAccessFilters = new ArrayList<>();
+			aoAccessFilters.add(Filters.eq("isPublic", 1));
+			if (!Utils.isNullOrEmpty(sUserId)) {
+				aoAccessFilters.add(Filters.eq("userId", sUserId));
+			}
+			if (asSharedProcessorIds != null && !asSharedProcessorIds.isEmpty()) {
+				aoAccessFilters.add(Filters.in("processorId", asSharedProcessorIds));
+			}
+			aoAndFilters.add(Filters.or(aoAccessFilters));
+
+			if (!Utils.isNullOrEmpty(sName)) {
+				Pattern oRegex = Pattern.compile(Pattern.quote(sName), Pattern.CASE_INSENSITIVE);
+				aoAndFilters.add(Filters.or(
+						Filters.regex("name", oRegex),
+						Filters.regex("friendlyName", oRegex)));
+			}
+
+			if (asCategories != null && !asCategories.isEmpty()) {
+				aoAndFilters.add(Filters.in("categories", asCategories));
+			}
+
+			if (asPublishers != null && !asPublishers.isEmpty()) {
+				aoAndFilters.add(Filters.in("userId", asPublishers));
+			}
+
+			if (fMaxPrice >= 0) {
+				aoAndFilters.add(Filters.lte("ondemandPrice", fMaxPrice));
+			}
+
+			Bson oFinalFilter = Filters.and(aoAndFilters);
+
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(oFinalFilter)
+					.sort(new Document(sOrderBy, iDirection))
+					.skip(iPage * iItemsPerPage)
+					.limit(iItemsPerPage);
+
+			fillList(aoReturnList, oWSDocuments, Processor.class);
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorRepository.getMarketplaceProcessorsPage :error ", oEx);
 		}
 
 		return aoReturnList;

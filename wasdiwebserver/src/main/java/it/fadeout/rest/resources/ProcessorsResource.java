@@ -271,7 +271,9 @@ public class ProcessorsResource  {
 			oProcessor.setDescription(sDescription);
 			oProcessor.setUserId(sUserId);
 			oProcessor.setProcessorId(sProcessorId);
-			oProcessor.setVersion(sVersion);
+			// P.Campanella 27/05/2026: force the first version to be 1: version was for the users in the past, now is fully WASDI-Managed and must be a number.
+			// Here we force it to a first valid value
+			oProcessor.setVersion("1");
 			oProcessor.setPort(-1);
 			oProcessor.setType(sType);
 			oProcessor.setIsPublic(iPublic);
@@ -496,7 +498,7 @@ public class ProcessorsResource  {
 			
 			if (Utils.isNullOrEmpty(sProcessorId)) sProcessorId = oProcessor.getProcessorId();
 			
-			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), sProcessorId)) {
+			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor)) {
 				WasdiLog.warnLog("ProcessorsResource.getSingleDeployedProcessor: user cannot access the processor");
 				return oDeployedProcessorViewModel;				
 			}	
@@ -596,6 +598,10 @@ public class ProcessorsResource  {
 			
 			String sOrderBy = "friendlyName";
 			
+			if (oFilters == null) {
+				oFilters = new AppFilterViewModel();
+			}
+
 			if (!Utils.isNullOrEmpty(oFilters.getOrderBy())) {
 				if (oFilters.getOrderBy().toLowerCase().equals("date")) {
 					sOrderBy = "updateDate";
@@ -612,104 +618,65 @@ public class ProcessorsResource  {
 			int iDirection = 1;
 			// Set descending if it was -1
 			if (oFilters.getOrderDirection() == -1) iDirection = -1;
-			
-			List<Processor> aoDeployed = oProcessorRepository.getDeployedProcessors(sOrderBy, iDirection);
+
+			int iPage = oFilters.getPage() == null ? 0 : Math.max(0, oFilters.getPage());
+			int iItemsPerPage = oFilters.getItemsPerPage() == null ? 12 : Math.max(1, oFilters.getItemsPerPage());
+
+			List<String> asCategories = oFilters.getCategories() == null ? new ArrayList<>() : oFilters.getCategories();
+			List<String> asPublishers = oFilters.getPublishers() == null ? new ArrayList<>() : oFilters.getPublishers();
+			float fMaxPrice = oFilters.getMaxPrice() == null ? -1 : oFilters.getMaxPrice();
+
+			List<UserResourcePermission> aoProcessorSharings = oUserResourcePermissionRepository.getProcessorSharingsByUserId(oUser.getUserId());
+
+			List<String> asSharedProcessorIds = new ArrayList<>();
+			Map<String, UserResourcePermission> oSharingsByProcessorId = new HashMap<>();
+			if (aoProcessorSharings != null) {
+				for (UserResourcePermission oSharing : aoProcessorSharings) {
+					if (oSharing == null || Utils.isNullOrEmpty(oSharing.getResourceId())) {
+						continue;
+					}
+					asSharedProcessorIds.add(oSharing.getResourceId());
+					UserResourcePermission oExisting = oSharingsByProcessorId.get(oSharing.getResourceId());
+					if (oExisting == null || (!oExisting.canWrite() && oSharing.canWrite())) {
+						oSharingsByProcessorId.put(oSharing.getResourceId(), oSharing);
+					}
+				}
+			}
+
+			List<Processor> aoPageProcessors = oProcessorRepository.getMarketplaceProcessorsPage(
+					oUser.getUserId(),
+					asSharedProcessorIds,
+					oFilters.getName(),
+					asCategories,
+					asPublishers,
+					fMaxPrice,
+					sOrderBy,
+					iDirection,
+					iPage,
+					iItemsPerPage);
+
 			ReviewRepository oReviewRepository = new ReviewRepository();
 			UserRepository oUserRepository = new UserRepository();
-			
-			int iAvailableApps = 0;
-			
-			for (int i=0; i<aoDeployed.size(); i++) {
-								
-				AppListViewModel oAppListViewModel = new AppListViewModel();
-				Processor oProcessor = aoDeployed.get(i);
+
+			for (Processor oProcessor : aoPageProcessors) {
 				// Initialize as No Votes
 				float fScore = -1.0f;
-				
-				if (!oProcessor.getShowInStore()) continue;
-				
-				// See if this is a processor the user can access to
-				if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId())) continue;
-				
-				// Check and apply name filter taking in account both friendly and app name.
-				// Friendly name was added on the check to have a coherent behaviour for the users
-				if (!Utils.isNullOrEmpty(oFilters.getName())) {
-					String sLowerProcessorName = oProcessor.getName().toLowerCase();
-					String sLowerProcessorFriendlyName = oProcessor.getFriendlyName().toLowerCase();
-					String sLowerFiltername = oFilters.getName().toLowerCase();
-					if (!(sLowerProcessorName.contains(sLowerFiltername) || sLowerProcessorFriendlyName.contains(sLowerFiltername))) continue;
-				}
-				
-				// Check and apply category filter
-				if (oFilters.getCategories().size()>0) {
-					
-					boolean bCategoryFound = false;
-					
-					for (String sProcessorCategory : oProcessor.getCategories()) {
-						if (oFilters.getCategories().contains(sProcessorCategory)) {
-							bCategoryFound = true;
-							break;
-						}
-					}
-					
-					if (!bCategoryFound) continue;
-				}
-				
-				// Check and apply publisher filter
-				if (oFilters.getPublishers().size()>0) {
-					
-					if (!oFilters.getPublishers().contains(oProcessor.getUserId())) {
-						continue;
-					}
-				}
-				
-				// Get the reviews to compute the vote
-				List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
-
 				int iVotes = 0;
 
-				// If we have reviews
-				if (aoReviews != null) {
-					if (aoReviews.size()>0) {
-						fScore = 0;
-						
-						// Take the sum
-						for (Review oReview : aoReviews) {
-							fScore += oReview.getVote();
-						}
-						
-						// Compute average
-						fScore /= aoReviews.size();
+				List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
 
-						iVotes = aoReviews.size();
+				if (aoReviews != null && aoReviews.size() > 0) {
+					fScore = 0;
+					for (Review oReview : aoReviews) {
+						fScore += oReview.getVote();
 					}
-				}				
-				
-				if (oFilters.getScore()> 0) {
-										
-					if (fScore<oFilters.getScore() && fScore != -1.0f) {
-						continue;
-					}
+					fScore /= aoReviews.size();
+					iVotes = aoReviews.size();
 				}
 				
-				// Check and apply max price filter
-				if (oFilters.getMaxPrice()>=0) {
-					if (oProcessor.getOndemandPrice() > oFilters.getMaxPrice()) continue;
-				}
-				
-				// This is a app compatible with the filter: handle the pagination
-				
-				// Jump if this is an app of previous pages
-				if (iAvailableApps<oFilters.getPage()*oFilters.getItemsPerPage()) {
-					iAvailableApps++;
-					continue;
-				}
-				// Stop if this is an app after the actual page
-				if (iAvailableApps>= (oFilters.getPage()+1) * oFilters.getItemsPerPage()) break;
-				
-				iAvailableApps++;
-				
-				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
+				AppListViewModel oAppListViewModel = new AppListViewModel();
+
+				UserResourcePermission oSharing = oSharingsByProcessorId.get(oProcessor.getProcessorId());
 				
 				oAppListViewModel.setIsMine(false);
 				
@@ -774,7 +741,7 @@ public class ProcessorsResource  {
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessorsResource.getMarketPlaceAppList error: " + oEx);
 			return aoRet;
-		}		
+		}
 		return aoRet;
 	}
 	
@@ -3875,8 +3842,7 @@ public class ProcessorsResource  {
 			//unzip
 			try {
 				ZipFileUtils oZipExtractor = new ZipFileUtils(sSessionId + " : " + sProcessorId);
-				String sTmpFolder = oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
-				WasdiLog.debugLog("ProcessorsResource.unzipProcessor: temporary dir: " + sTmpFolder );
+				oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
 			} catch (IOException | SecurityException oE) {
 				WasdiLog.errorLog("ProcessorsResource.unzipProcessor: unzip failed: " + oE);
 				return false;

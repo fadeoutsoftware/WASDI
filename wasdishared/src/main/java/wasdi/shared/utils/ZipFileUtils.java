@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -114,11 +115,12 @@ public class ZipFileUtils {
 	 *
 	 * @param sZipFileAbsolutePath the filename of the Zip file to be extracted
 	 * @param sDestinationPath     The intended path in which the file should be extracted
-	 * @throws Exception 
+	 * @return true if unzip and cleanup are both successful, false otherwise
 	 */
-	public String unzip(String sZipFileAbsolutePath, String sDestinationPath) throws Exception {
+	public boolean unzip(String sZipFileAbsolutePath, String sDestinationPath) {
 		String sTempRelativeDirectory = null;
 		String sTempAbsolutePath = null;
+		boolean bSuccess = false;
 		try {
 			m_iEntries = 0;
 			m_lTotal = 0;
@@ -140,19 +142,23 @@ public class ZipFileUtils {
 					extractOneEntry(sTempRelativeDirectory, sTempAbsolutePath, oZipFile, aoZipArchiveEntries);
 				}
 			}
+
+			bSuccess = true;
 		} 
 		catch (Exception oE) {
 			WasdiLog.errorLog(m_sLoggerPrefix + ".unzip: " + oE);
-			throw oE;
+			bSuccess = false;
 		} 
 		finally {
 			// make sure temporary directory gets deleted
 			WasdiLog.debugLog(m_sLoggerPrefix + "Copy and clean tmp dir.");
-			if (!cleanTempDir(sTempAbsolutePath, sTempRelativeDirectory)) {
+			if (!Utils.isNullOrEmpty(sTempAbsolutePath) && !Utils.isNullOrEmpty(sTempRelativeDirectory)
+					&& !cleanTempDir(sTempAbsolutePath, sTempRelativeDirectory)) {
 				WasdiLog.errorLog(m_sLoggerPrefix + " cleanTempDir( " + sTempAbsolutePath + ", " + sTempRelativeDirectory + " returned false...");
+				bSuccess = false;
 			}
 		}
-		return sTempAbsolutePath;
+		return bSuccess;
 	}
 
 	/**
@@ -188,8 +194,9 @@ public class ZipFileUtils {
 			}
 			
 			byte[] ayData = new byte[BUFFER];
-			try (FileOutputStream oFos = new FileOutputStream(sName); BufferedOutputStream oDest = new BufferedOutputStream(oFos, BUFFER)){
-				InputStream oZis = oZipFile.getInputStream(oEntry);
+			try (FileOutputStream oFos = new FileOutputStream(sName);
+					BufferedOutputStream oDest = new BufferedOutputStream(oFos, BUFFER);
+					InputStream oZis = oZipFile.getInputStream(oEntry)) {
 				copyOneEntryOutOfArchive(oZis, ayData, oDest);
 				m_iEntries++;
 			}
@@ -420,10 +427,11 @@ public class ZipFileUtils {
 	 * @throws IOException
 	 */
 	protected void deleteDirectory(Path oToBeDeleted) throws IOException {
-		try (Stream<Path> aoPathStream = Files.walk(oToBeDeleted)){
-			aoPathStream.sorted(Comparator.reverseOrder())
-			.map(Path::toFile)
-			.forEach(File::delete);
+		try (Stream<Path> aoPathStream = Files.walk(oToBeDeleted)) {
+			List<Path> aoPaths = aoPathStream.sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+			for (Path oPath : aoPaths) {
+				Files.delete(oPath);
+			}
 		}
 	}
 
@@ -586,7 +594,9 @@ public class ZipFileUtils {
 
 		String sFilename = oZipFile.getAbsolutePath();
 		String sPath = sDestDir.getAbsolutePath();
-		oZipExtractor.unzip(sFilename, sPath);
+		if (!oZipExtractor.unzip(sFilename, sPath)) {
+			WasdiLog.errorLog("ZipFileUtils.cleanUnzipFile: unzip failed for " + sFilename);
+		}
 
 		String sDirPath = completeDirPath(sDestDir.getAbsolutePath());
 		String sFileZipPath = sDirPath + oZipFile.getName();
@@ -625,66 +635,70 @@ public class ZipFileUtils {
 
 		String sDirPath = completeDirPath(sPath);
 		String sSimpleFilename = removeZipExtension(oZipFile.getName());
-		String unzippedDirectoryPath = completeDirPath(sDirPath + sSimpleFilename);
+		String sUnzippedDirectoryPath = completeDirPath(sDirPath + sSimpleFilename);
 
-		oZipExtractor.unzip(sFilename, unzippedDirectoryPath);
+		if (!oZipExtractor.unzip(sFilename, sUnzippedDirectoryPath)) {
+			WasdiLog.errorLog("ZipFileUtils.extractInnerZipFileAndCleanZipFile: unzip failed for " + sFilename);
+		}
 
 		String fileZipPath = sDirPath + oZipFile.getName();
 
-		if (fileExists(unzippedDirectoryPath)) {
-			boolean fileMovedFlag = moveFile(unzippedDirectoryPath + sSimpleFilename + ".tif", sDirPath);
+		if (fileExists(sUnzippedDirectoryPath)) {
+			boolean fileMovedFlag = moveFile(sUnzippedDirectoryPath + sSimpleFilename + ".tif", sDirPath);
 
 			if (fileMovedFlag) {
-				deleteFile(unzippedDirectoryPath);
+				deleteFile(sUnzippedDirectoryPath);
 				deleteFile(fileZipPath);
 			}
 		}
 	}
 
-	public static void fixZipFileInnerSafePath(String zipFilePath) throws Exception {
-		if (zipFilePath == null) {
+	public static void fixZipFileInnerSafePath(String sZipFilePath) throws Exception {
+		if (sZipFilePath == null) {
 			WasdiLog.errorLog("ZipFileUtils.fixZipFileInnerSafePath: zipFilePath is null");
 			return;
 		}
 
-		File zipFile = new File(zipFilePath);
+		File zipFile = new File(sZipFilePath);
 		if (!zipFile.exists()) {
 			WasdiLog.errorLog("ZipFileUtils.fixZipFileInnerSafePath: zipFile does not exist: " + zipFile.getAbsolutePath());
 			return;
 		}
 
-		String dirPath = completeDirPath(zipFile.getParentFile().getAbsolutePath());
-		String simpleName = removeZipExtension(zipFile.getName());
+		String sDirPath = completeDirPath(zipFile.getParentFile().getAbsolutePath());
+		String sSimpleName = removeZipExtension(zipFile.getName());
 
-		String unzippedDirectoryPath = dirPath + simpleName;
-		File unzippedDirectory = new File(unzippedDirectoryPath);
+		String sUnzippedDirectoryPath = sDirPath + sSimpleName;
+		File sUnzippedDirectory = new File(sUnzippedDirectoryPath);
 
-		if  (!unzippedDirectory.exists()) {
-			unzippedDirectory.mkdirs();
+		if  (!sUnzippedDirectory.exists()) {
+			sUnzippedDirectory.mkdirs();
 		}
 
 		ZipFileUtils oZipExtractor = new ZipFileUtils();
-		oZipExtractor.unzip(zipFilePath, unzippedDirectoryPath);
+		if (!oZipExtractor.unzip(sZipFilePath, sUnzippedDirectoryPath)) {
+			WasdiLog.errorLog("ZipFileUtils.fixZipFileInnerSafePath: unzip failed for " + sZipFilePath);
+		}
 
-		File[] files = unzippedDirectory.listFiles();
-		while (files != null && files.length > 0) {
-			for (File file : files) {
-				if (file.isDirectory()) {
-					if ((simpleName).equalsIgnoreCase(file.getName())) {
-						oZipExtractor.zipFolder(file.getAbsolutePath(), dirPath + simpleName + "_temp" + ".zip");
-						files = null;
+		File[] aoFiles = sUnzippedDirectory.listFiles();
+		while (aoFiles != null && aoFiles.length > 0) {
+			for (File oFile : aoFiles) {
+				if (oFile.isDirectory()) {
+					if ((sSimpleName).equalsIgnoreCase(oFile.getName())) {
+						oZipExtractor.zipFolder(oFile.getAbsolutePath(), sDirPath + sSimpleName + "_temp" + ".zip");
+						aoFiles = null;
 						break;
 					} else {
-						files = file.listFiles();
+						aoFiles = oFile.listFiles();
 						continue;
 					}
 				}
 			}
 		}
 
-		deleteFile(unzippedDirectoryPath);
-		deleteFile(zipFilePath);
-		WasdiFileUtils.renameFile(dirPath + simpleName + "_temp" + ".zip", simpleName + ".zip");
+		deleteFile(sUnzippedDirectoryPath);
+		deleteFile(sZipFilePath);
+		WasdiFileUtils.renameFile(sDirPath + sSimpleName + "_temp" + ".zip", sSimpleName + ".zip");
 	}
 	
 	/**

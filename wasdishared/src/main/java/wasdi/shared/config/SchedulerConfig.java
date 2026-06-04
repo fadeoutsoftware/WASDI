@@ -89,6 +89,14 @@ public class SchedulerConfig {
 	public String launcherOutputPath = "";
 	
 	/**
+	 * It enables the virtual node code generation. Used mainly for mini-wasdi with mongo to allow parallel execution of different containers. When true, the executeProcess 
+	 * method in the server Wasdi.java, will assign the value found in the WASDI_VIRTUAL_NODE_CODE env variable to the process workpsace.
+	 * The scheduler will filter in this case using the same varialbe.
+	 * Note that the workspace it self will use the real node code, allowing cuncurrent execution of parall apps also in the same workspace if the volume mounted is the same  
+	 */
+	public boolean useVirtualNodeCode = false;
+	
+	/**
 	 * Get a scheduler from the queue code
 	 * @param sScheduler Code of the Queue
 	 * @return SchedulerQueueConfig

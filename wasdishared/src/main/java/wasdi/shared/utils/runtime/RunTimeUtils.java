@@ -713,4 +713,29 @@ public class RunTimeUtils {
 			WasdiLog.errorLog("RunTimeUtils.deleteLogFile exception: " + e.getMessage());
 		}
 	}
+	
+	/**
+	 * Read a system environment variable
+	 * 
+	 * @param sVariableName
+	 * @return
+	 */
+	public static String getSystemEnvironmentVariable(String sVariableName) {
+		try {
+			Map<String, String> aoEnviornmentVars = System.getenv();
+			
+			if (aoEnviornmentVars != null) {
+				if (aoEnviornmentVars.containsKey(sVariableName)) {
+					String sValue = aoEnviornmentVars.get(sVariableName);
+					WasdiLog.debugLog("RunTimeUtils.getSystemEnvironmentVariable: found " + sVariableName);
+					return sValue;
+				}
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("RunTimeUtils.getSystemEnvironmentVariable: Exception searching env variable " + sVariableName);
+		}
+		
+		return "";
+	}
 }

@@ -33,6 +33,32 @@ public interface IProcessorRepositoryBackend {
 
 	List<Processor> getDeployedProcessors(String sOrderBy, int iDirection);
 
+	/**
+	 * Get deployed processors with a lightweight payload.
+	 */
+	List<Processor> getDeployedProcessorsLightweight();
+
+	/**
+	 * Get processors candidate for marketplace listing using backend-side filtering/projection.
+	 */
+	List<Processor> getMarketplaceProcessors(String sOrderBy, int iDirection);
+
+	/**
+	 * Get a paginated marketplace processor list using backend-side filtering.
+	 * Score filtering is intentionally not part of this query.
+	 */
+	List<Processor> getMarketplaceProcessorsPage(
+			String sUserId,
+			List<String> asSharedProcessorIds,
+			String sName,
+			List<String> asCategories,
+			List<String> asPublishers,
+			float fMaxPrice,
+			String sOrderBy,
+			int iDirection,
+			int iPage,
+			int iItemsPerPage);
+
 	long countProcessors();
 
 	long countProcessors(boolean bPublicOnly);

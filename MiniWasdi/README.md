@@ -230,6 +230,13 @@ cp /etc/wasdi/wasdiConfig.json /data/wasdi/wasdiConfig.json
   - Optional flag to clear past process workspaces at startup. By default, the system keeps all past process workspaces, which can be useful for debugging and historical reference. Setting this flag to `true` will delete all past process workspaces and allow also to start processes marked as CREATED from a previous run. If this flag is set, the system will clean the CREATED queue and delete all the processes that have been already executed.
   - Typical value: `1` or `true`. If it is not set or have any other value is considered false.
 
+- `WASDI_VIRTUAL_NODE_CODE`
+  - Runtime variable used when `scheduler.useVirtualNodeCode=true`.
+  - Mini-WASDI start script generates a GUID at startup and stores it in this variable.
+  - All processes created by that Mini-WASDI run are tagged with this value.
+  - The scheduler uses this value to process only items that belong to the current run.
+  - Usually this variable is auto-generated and should not be set manually.
+
 ## 6. Configuration
 
 The `wasdiConfig.json` file controls all Mini-WASDI behavior. For detailed documentation, see the [Configuration guide](https://wasdi.readthedocs.io/en/latest/InsideWasdi/Configuration.html).
@@ -245,6 +252,18 @@ Key configuration settings for Mini-WASDI:
 
 - `dbEngine`: Must be set to `sqlitedb` for Mini-WASDI.
 - MongoDB and NO2 databases are supported by WASDI in production deployments but are not included in the Docker container.
+
+**Scheduler and Virtual Node Code**
+
+- `scheduler.useVirtualNodeCode`: when set to `true`, Mini-WASDI enables run-level isolation for scheduler processing.
+- This option is useful when multiple Mini-WASDI instances run in parallel using:
+  - the same MongoDB
+  - the same shared volume
+- At startup, each instance generates its own GUID virtual node code (`WASDI_VIRTUAL_NODE_CODE`).
+- All processes created by that instance are assigned to that virtual node code.
+- The scheduler filters by virtual node code, so each Mini-WASDI instance executes only its own processes.
+- This allows multiple schedulers to work safely in parallel on shared infrastructure.
+- Important: this mode is not compatible with `WASDI_CLEAR_HISTORY`.
 
 **Data Providers and Catalogues**
 
@@ -485,3 +504,28 @@ Valid operations are:
 - `KILL`
 - `MULTISUBSET`
 - `DELETEPROCESSOR`
+
+### 10.1 Parallel Mini-WASDI runs on shared MongoDB and shared volume
+
+When you need to run multiple Mini-WASDI apps in parallel against the same MongoDB and the same mounted volume, enable Virtual Node Code isolation.
+
+Set this in your `wasdiConfig.json`:
+
+```json
+{
+  "scheduler": {
+    "useVirtualNodeCode": true
+  }
+}
+```
+
+Behavior when enabled:
+
+- At startup, each Mini-WASDI run generates a GUID and exports it in `WASDI_VIRTUAL_NODE_CODE`.
+- New processes are tagged with that virtual node code.
+- The scheduler processes only entries matching its own virtual node code.
+- Different Mini-WASDI runs therefore do not consume each other's queues.
+
+Compatibility note:
+
+- Do not use `WASDI_CLEAR_HISTORY` together with `scheduler.useVirtualNodeCode=true`.
