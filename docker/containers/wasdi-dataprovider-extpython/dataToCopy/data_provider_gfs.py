@@ -48,7 +48,6 @@ def getDatesIntervals(sStartDate, sEndDate):
 
 
 def executeCount(sInputFilePath, sOutputFilePath):
-    logging.debug("execute count")
     if not os.path.isfile(sInputFilePath):
         logging.warning('executeCount: input file not found')
 
@@ -82,14 +81,12 @@ def executeCount(sInputFilePath, sOutputFilePath):
     # We compute the number of total results
     iResultCount = iValidDates * iForecastTimeMultiplier * iRunMultiplier
 
-    if sVariable == "PRATE" and sLevel.lower() == "surfaca":
+    if sVariable == "PRATE" and sLevel.lower() == "surface":
         logging.debug("executeCount: for PRATE - SURFACE we have also historical data")
         # For this variable and level we have also historical data, so we can consider also the past dates
         iResultCount = iResultCount + len(aoPastDates) * iForecastTimeMultiplier * iRunMultiplier
 
     aoReturnObject["count"] = iResultCount
-
-    logging.debug(f'executeCount: result count is {iResultCount}')
 
     try:
         with open(sOutputFilePath, 'w') as oFile:
