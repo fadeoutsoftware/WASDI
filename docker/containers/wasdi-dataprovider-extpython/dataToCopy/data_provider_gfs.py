@@ -89,7 +89,7 @@ def executeCount(sInputFilePath, sOutputFilePath):
 
     aoReturnObject["count"] = iResultCount
 
-    logging.result(f'executeCount: result count is {iResultCount}')
+    logging.debug(f'executeCount: result count is {iResultCount}')
 
     try:
         with open(sOutputFilePath, 'w') as oFile:
