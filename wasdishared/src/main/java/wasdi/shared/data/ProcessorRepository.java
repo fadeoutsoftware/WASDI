@@ -85,6 +85,16 @@ public class ProcessorRepository {
     public boolean deleteProcessor(String sProcessorId) {
 		return m_oBackend.deleteProcessor(sProcessorId);
     }
+
+    /**
+     * Delete a processor from name
+     * @param sProcessorName Processor Name
+     * @return True or false in case of exception
+     */
+    public boolean deleteProcessorByName(String sProcessorName) {
+		return m_oBackend.deleteProcessorByName(sProcessorName);
+    }
+
     
     /**
      * Delete all the processors of a user
