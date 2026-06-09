@@ -19,4 +19,5 @@ public class DatasetViewModel {
 	public String missions;
 	public ArrayList<String> tasks = new ArrayList<>();
 	public String ownersIds;
+	public String templateId;
 }
