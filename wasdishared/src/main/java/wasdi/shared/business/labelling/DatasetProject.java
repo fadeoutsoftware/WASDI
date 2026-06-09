@@ -17,12 +17,12 @@ public class DatasetProject {
 	private boolean reviewRequired;
 	private int minReviewCount;
 	private String missions;
-	private ArrayList<String> tasksIds = new ArrayList<>();
+	private ArrayList<String> tasks = new ArrayList<>();
 	private ArrayList<String> imagesIds = new ArrayList<>();
 	private String templateId;
 	private String ownersIds;
-	private String annotatorsIds;
-	private String reviewersIds;
+	private ArrayList<String> annotators = new ArrayList<>();
+	private ArrayList<String> reviewers = new ArrayList<>();
 	private String imageStyleId;
 	
 	public String getId() {
@@ -109,11 +109,11 @@ public class DatasetProject {
 	public void setMissions(String missions) {
 		this.missions = missions;
 	}
-	public ArrayList<String> getTasksIds() {
-		return tasksIds;
+	public ArrayList<String> getTasks() {
+		return tasks;
 	}
-	public void setTasksIds(ArrayList<String> tasksIds) {
-		this.tasksIds = tasksIds;
+	public void setTasks(ArrayList<String> tasks) {
+		this.tasks = tasks;
 	}
 	public String getTemplateId() {
 		return templateId;
@@ -127,18 +127,6 @@ public class DatasetProject {
 	public void setOwnersIds(String ownersIds) {
 		this.ownersIds = ownersIds;
 	}
-	public String getAnnotatorsIds() {
-		return annotatorsIds;
-	}
-	public void setAnnotatorsIds(String annotatorsIds) {
-		this.annotatorsIds = annotatorsIds;
-	}
-	public String getReviewersIds() {
-		return reviewersIds;
-	}
-	public void setReviewersIds(String reviewersIds) {
-		this.reviewersIds = reviewersIds;
-	}
 	public String getImageStyleId() {
 		return imageStyleId;
 	}
@@ -150,6 +138,18 @@ public class DatasetProject {
 	}
 	public void setImagesIds(ArrayList<String> imagesIds) {
 		this.imagesIds = imagesIds;
+	}
+	public ArrayList<String> getAnnotators() {
+		return annotators;
+	}
+	public void setAnnotators(ArrayList<String> annotators) {
+		this.annotators = annotators;
+	}
+	public ArrayList<String> getReviewers() {
+		return reviewers;
+	}
+	public void setReviewers(ArrayList<String> reviewers) {
+		this.reviewers = reviewers;
 	}
 
 }

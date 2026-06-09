@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
-import org.bson.conversions.Bson;
 
 import com.mongodb.client.FindIterable;
-import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
 import wasdi.shared.business.labelling.Template;
@@ -19,12 +17,12 @@ import wasdi.shared.utils.log.WasdiLog;
 public class MongoLabellingTemplatesRepositoryBackend extends MongoRepository implements ILabellingTemplateRepositoryBackend{
 
 	public MongoLabellingTemplatesRepositoryBackend() {
-		m_sThisCollection = "templates";
+		m_sThisCollection = "labelling_templates";
 	}
 
 	/**
 	 * Insert a new Template
-	 * @param oTemplate Template object to insert
+	 * @param oTemplate Templ	ate object to insert
 	 * @return true if successful, false otherwise
 	 */
 	public boolean insertTemplate(Template oTemplate) {
