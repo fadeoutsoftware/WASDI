@@ -24,6 +24,8 @@ public interface IProcessorRepositoryBackend {
 	int getNextProcessorPort();
 
 	boolean deleteProcessor(String sProcessorId);
+	
+	public boolean deleteProcessorByName(String sProcessorName);
 
 	int deleteProcessorByUser(String sUserId);
 
