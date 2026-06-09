@@ -172,7 +172,7 @@ public class ProcessorsResource  {
 				return oResult;
 			}
 
-			if(!isNameUnique(sName)) {
+			if(!isNameUnique(sName) && !bForce) {
 				WasdiLog.warnLog("ProcessorsResource.uploadProcessor: the name is already used, aborting");
 				oResult.setIntValue(409);
 				oResult.setStringValue("The name " + sName + " is already used. Please use a different name.");
@@ -221,6 +221,7 @@ public class ProcessorsResource  {
 			
 			// Set the processor path
 			File oProcessorPath = new File(PathsConfig.getProcessorFolder(sName));
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			
 			// Create folders
 			if (!oProcessorPath.exists()) {
@@ -237,6 +238,7 @@ public class ProcessorsResource  {
 				else {
 					WasdiLog.warnLog("ProcessorsResource.uploadProcessor: the folder of the app already exists, Force is true, we clean it");
 					FileUtils.cleanDirectory(oProcessorPath);
+					oProcessorRepository.deleteProcessorByName(sName);
 				}
 			}
 			
@@ -307,7 +309,6 @@ public class ProcessorsResource  {
 			}
 			
 			// Store in the db
-			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			oProcessorRepository.insertProcessor(oProcessor);
 			
 			// We need to deploy the processor in the main node

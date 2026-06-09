@@ -519,4 +519,26 @@ public class No2ProcessorRepositoryBackend extends No2Repository implements IPro
 	private boolean equalsSafe(String sA, String sB) {
 		return sA == null ? sB == null : sA.equals(sB);
 	}
+
+	@Override
+	public boolean deleteProcessorByName(String sProcessorName) {
+		if (Utils.isNullOrEmpty(sProcessorName)) {
+			return false;
+		}
+
+		boolean bExisted = getProcessor(sProcessorName) != null;
+
+		try {
+			NitriteCollection oCollection = getCollection(s_sCollectionName);
+			if (oCollection != null) {
+				oCollection.remove(where("name").eq(sProcessorName));
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("No2ProcessorRepositoryBackend.deleteProcessorByName: error", oEx);
+			return false;
+		}
+
+		return bExisted;
+	}
 }
