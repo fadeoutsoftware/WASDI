@@ -203,6 +203,30 @@ public class MongoProcessorRepositoryBackend extends MongoRepository implements 
 
 		return false;
 	}
+	
+	@Override
+	public boolean deleteProcessorByName(String sProcessorName) {
+
+		if (Utils.isNullOrEmpty(sProcessorName)) {
+			return false;
+		}
+
+		try {
+
+			DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteOne(new Document("name", sProcessorName));
+
+			if (oDeleteResult != null) {
+				if (oDeleteResult.getDeletedCount() == 1) {
+					return true;
+				}
+			}
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorRepository.deleteProcessor :error ", oEx);
+		}
+
+		return false;
+	}	
 
 	@Override
 	public int deleteProcessorByUser(String sUserId) {
