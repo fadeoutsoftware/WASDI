@@ -59,6 +59,24 @@ class DataProviderUtils:
         return True
 
     @staticmethod
+    def checkUrlExists(sUrl) -> bool:
+
+        if not sUrl:
+            return False
+
+        oResponse = None
+
+        try:
+            oResponse = requests.get(sUrl)
+        except Exception as oEx:
+            logging.error("DataProviderUtils.checkUrlExists: there was an error contacting the url " + str(oEx))
+
+        if oResponse is None:
+            return False
+
+        return oResponse.status_code == 200
+
+    @staticmethod
     def stringIsNullOrEmpty(sString):
         return sString is None or sString == ""
 
