@@ -131,12 +131,13 @@ public class TemplateResource {
 			}
 			oTemplateViewModel.created = oTemplate.getCreationDate();
 			oTemplateViewModel.creator = oTemplate.getCreator();
-			
-			for (Attribute oAttribute : oTemplate.getAttributes()) {
-				AttributeViewModel oVM = AttributeViewModel.getFromEntity(oAttribute);
-				oTemplateViewModel.attributes.add(oVM);	
+			List<Attribute> aoAttributes=oTemplate.getAttributes();
+			if(aoAttributes!=null) {
+				for (Attribute oAttribute : oTemplate.getAttributes()) {
+					AttributeViewModel oVM = AttributeViewModel.getFromEntity(oAttribute);
+					oTemplateViewModel.attributes.add(oVM);	
+				}	
 			}
-			
 			oTemplateViewModel.colourAttributeName = oTemplate.getColourAttributeName();
 			oTemplateViewModel.description = oTemplate.getDescription();
 			oTemplateViewModel.fixedColour = oTemplate.getFixedColour();
@@ -192,7 +193,7 @@ public class TemplateResource {
 			oTemplate.setHasLines(oTemplateViewModel.hasLines) ;
 			oTemplate.setHasPoints(oTemplateViewModel.hasPoints);
 			oTemplate.setHasPolygons(oTemplateViewModel.hasPolygons) ;
-			oTemplate.setFixedColour(oTemplateViewModel.isFixedColour) ;
+			oTemplate.setIsFixedColour(oTemplateViewModel.isFixedColour) ;
 			
 			
 			for (AttributeViewModel oVM : oTemplateViewModel.attributes) {
@@ -255,7 +256,7 @@ public class TemplateResource {
 			oTemplate.setHasLines(oTemplateViewModel.hasLines) ;
 			oTemplate.setHasPoints(oTemplateViewModel.hasPoints);
 			oTemplate.setHasPolygons(oTemplateViewModel.hasPolygons) ;
-			oTemplate.setFixedColour(oTemplateViewModel.isFixedColour) ;
+			oTemplate.setIsFixedColour(oTemplateViewModel.isFixedColour) ;
 			
 			oTemplate.getAttributes().clear();
 			

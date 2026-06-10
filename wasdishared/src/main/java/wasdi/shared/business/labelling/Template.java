@@ -61,7 +61,7 @@ public class Template {
 	public boolean isFixedColour() {
 		return isFixedColour;
 	}
-	public void setFixedColour(boolean isFixedColour) {
+	public void setIsFixedColour(boolean isFixedColour) {
 		this.isFixedColour = isFixedColour;
 	}
 	public Integer getFixedColour() {

@@ -11,7 +11,7 @@ public class TemplateViewModel {
 	public boolean hasPolygons;
 	public boolean hasLines;
 	public boolean hasPoints;
-	public ArrayList<AttributeViewModel> attributes;
+	public ArrayList<AttributeViewModel> attributes= new ArrayList<>();
 	public boolean isFixedColour;
 	public Integer fixedColour;
 	public String colourAttributeName;
