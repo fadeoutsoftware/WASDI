@@ -29,7 +29,7 @@ public class No2LabelRepositoryBackend  extends No2Repository implements ILabelR
 	}
 
 	@Override
-	public List<Label> getLabelsByImage(String sImage) {
+	public List<Label> getLabelsByImage(String sDatasetId, String sImage) {
 		return null;
 	}
 

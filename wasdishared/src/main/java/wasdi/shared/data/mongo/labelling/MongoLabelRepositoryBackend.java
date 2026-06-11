@@ -98,16 +98,17 @@ public class MongoLabelRepositoryBackend  extends MongoRepository implements ILa
 	}
 
 	@Override
-	public List<Label> getLabelsByImage(String sImage) {
+	public List<Label> getLabelsByImage(String sDatasetId, String sImage) {
 		final List<Label> aoReturnList = new ArrayList<>();
 
-		if (Utils.isNullOrEmpty(sImage)) {
+		if (Utils.isNullOrEmpty(sDatasetId) || Utils.isNullOrEmpty(sImage)) {
 			return aoReturnList;
 		}
 
 		try {
+			Document oFilter = new Document("datasetId", sDatasetId).append("image", sImage);
 			FindIterable<Document> oDocuments = getCollection(m_sThisCollection)
-					.find(new Document("image", sImage))
+					.find(oFilter)
 					.sort(new Document("id", 1));
 			fillList(aoReturnList, oDocuments, Label.class);
 		} catch (Exception oEx) {

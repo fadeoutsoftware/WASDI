@@ -29,7 +29,7 @@ public class SqliteLabelRepositoryBackend  extends SqliteRepository implements I
 	}
 
 	@Override
-	public List<Label> getLabelsByImage(String sImage) {
+	public List<Label> getLabelsByImage(String sDatasetId, String sImage) {
 		return null;
 	}
 

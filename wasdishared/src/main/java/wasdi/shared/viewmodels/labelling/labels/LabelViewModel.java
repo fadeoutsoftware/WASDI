@@ -19,4 +19,5 @@ public class LabelViewModel {
 	public int reviewCount;
 	public boolean isValidated;
 	public String creatorId;
+	public String datasetId;
 }

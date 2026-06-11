@@ -17,6 +17,7 @@ public class Label {
 	private int reviewCount;
 	private boolean isValidated;
 	private String creatorId;
+	private String datasetId;
 	
 	public String getId() {
 		return id;
@@ -101,5 +102,11 @@ public class Label {
 	}
 	public void setCreatorId(String creatorId) {
 		this.creatorId = creatorId;
+	}
+	public String getDatasetId() {
+		return datasetId;
+	}
+	public void setDatasetId(String datasetId) {
+		this.datasetId = datasetId;
 	}
 }

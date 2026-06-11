@@ -13,7 +13,7 @@ public interface ILabelRepositoryBackend {
 
 	boolean deleteLabel(String sLabelId);
 
-	List<Label> getLabelsByImage(String sImage);
+	List<Label> getLabelsByImage(String sDatasetId, String sImage);
 
 	List<Label> getAll();
 

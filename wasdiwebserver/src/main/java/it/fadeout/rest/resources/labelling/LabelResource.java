@@ -39,7 +39,7 @@ public class LabelResource {
 	@GET
 	@Path("/byimage")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getByImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("imageName") String sImageName) {
+	public Response getByImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("datasetId") String sDatasetId, @QueryParam("imageName") String sImageName) {
 
 		WasdiLog.debugLog("LabelResource.getByImage");
 
@@ -57,14 +57,14 @@ public class LabelResource {
 		}
 
 		try {
-			DatasetProject oDataset = getReadableDatasetForImage(oUser, sImageName);
+			DatasetProject oDataset = getReadableDataset(oUser, sImageName);
 			if (oDataset == null) {
 				WasdiLog.warnLog("LabelResource.getByImage: user cannot access the label dataset");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
 			LabelRepository oLabelRepository = new LabelRepository();
-			List<Label> aoLabels = oLabelRepository.getLabelsByImage(sImageName);
+			List<Label> aoLabels = oLabelRepository.getLabelsByImage(sDatasetId, sImageName);
 
 			if (aoLabels == null) {
 				return Response.ok(aoLabelsViewModels).build();
@@ -109,7 +109,7 @@ public class LabelResource {
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
-			DatasetProject oDataset = getReadableDatasetForImage(oUser, oLabel.getImage());
+			DatasetProject oDataset = getReadableDataset(oUser, oLabel.getImage());
 			if (oDataset == null) {
 				WasdiLog.warnLog("LabelResource.getById: user cannot access the label dataset");
 				return Response.status(Status.UNAUTHORIZED).build();
@@ -142,7 +142,7 @@ public class LabelResource {
 		}
 
 		try {
-			DatasetProject oDataset = getWritableDatasetForImage(oUser, oLabelViewModel.image);
+			DatasetProject oDataset = getWritableDatasetForImage(oUser, oLabelViewModel.datasetId);
 			if (oDataset == null) {
 				WasdiLog.warnLog("LabelResource.create: user cannot edit the label dataset");
 				return Response.status(Status.UNAUTHORIZED).build();
@@ -191,8 +191,7 @@ public class LabelResource {
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
-			String sTargetImageId = Utils.isNullOrEmpty(oLabelViewModel.image) ? oStoredLabel.getImage() : oLabelViewModel.image;
-			DatasetProject oDataset = getWritableDatasetForImage(oUser, sTargetImageId);
+			DatasetProject oDataset = getWritableDatasetForImage(oUser, oLabelViewModel.datasetId);
 			if (oDataset == null) {
 				WasdiLog.warnLog("LabelResource.update: user cannot edit the label dataset");
 				return Response.status(Status.UNAUTHORIZED).build();
@@ -236,7 +235,7 @@ public class LabelResource {
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
-			DatasetProject oDataset = getWritableDatasetForImage(oUser, oLabel.getImage());
+			DatasetProject oDataset = getWritableDatasetForImage(oUser, oLabel.getDatasetId());
 			if (oDataset == null) {
 				WasdiLog.warnLog("LabelResource.delete: user cannot edit the label dataset");
 				return Response.status(Status.UNAUTHORIZED).build();
@@ -280,7 +279,7 @@ public class LabelResource {
 			}
 
 			// Check authorization: user must be owner or reviewer of the dataset
-			DatasetProject oDataset = getDatasetByImageId(oLabel.getImage());
+			DatasetProject oDataset = getWritableDatasetForImage(oUser, oLabel.getDatasetId());
 			if (oDataset == null) {
 				WasdiLog.warnLog("LabelResource.approve: dataset not found");
 				return Response.status(Status.NOT_FOUND).build();
@@ -358,7 +357,7 @@ public class LabelResource {
 			}
 
 			// Check authorization: user must be owner or reviewer of the dataset
-			DatasetProject oDataset = getDatasetByImageId(oLabel.getImage());
+			DatasetProject oDataset = getWritableDatasetForImage(oUser, oLabel.getDatasetId());
 			if (oDataset == null) {
 				WasdiLog.warnLog("LabelResource.reject: dataset not found");
 				return Response.status(Status.NOT_FOUND).build();
@@ -417,7 +416,7 @@ public class LabelResource {
 			}
 
 			// Check authorization: user must be owner or reviewer of the dataset
-			DatasetProject oDataset = getDatasetByImageId(oLabel.getImage());
+			DatasetProject oDataset = getWritableDatasetForImage(oUser, oLabel.getDatasetId());
 			if (oDataset == null) {
 				WasdiLog.warnLog("LabelResource.addNote: dataset not found");
 				return Response.status(Status.NOT_FOUND).build();
@@ -486,7 +485,7 @@ public class LabelResource {
 			}
 
 			// Check authorization: user must be owner or reviewer of the dataset
-			DatasetProject oDataset = getDatasetByImageId(oLabel.getImage());
+			DatasetProject oDataset = getWritableDatasetForImage(oUser, oLabel.getDatasetId());
 			if (oDataset == null) {
 				WasdiLog.warnLog("LabelResource.resolveNote: dataset not found");
 				return Response.status(Status.NOT_FOUND).build();
@@ -529,8 +528,9 @@ public class LabelResource {
 		}
 	}
 
-	private DatasetProject getReadableDatasetForImage(User oUser, String sImageId) {
-		DatasetProject oDataset = getDatasetByImageId(sImageId);
+	private DatasetProject getReadableDataset(User oUser, String sDatasetId) {
+		DatasetProjectRepository oDatasetRepository = new DatasetProjectRepository();
+		DatasetProject oDataset = oDatasetRepository.getDataset(sDatasetId);
 
 		if (oDataset == null) {
 			return null;
@@ -543,8 +543,9 @@ public class LabelResource {
 		return null;
 	}
 
-	private DatasetProject getWritableDatasetForImage(User oUser, String sImageId) {
-		DatasetProject oDataset = getDatasetByImageId(sImageId);
+	private DatasetProject getWritableDatasetForImage(User oUser, String sDatasetId) {
+		DatasetProjectRepository oDatasetRepository = new DatasetProjectRepository();
+		DatasetProject oDataset = oDatasetRepository.getDataset(sDatasetId);
 
 		if (oDataset == null) {
 			return null;
@@ -552,21 +553,6 @@ public class LabelResource {
 
 		if (oDataset.getOwner().equals(oUser.getUserId()) || isCollaborator(oDataset, oUser.getUserId())) {
 			return oDataset;
-		}
-
-		return null;
-	}
-
-	private DatasetProject getDatasetByImageId(String sImageId) {
-		if (Utils.isNullOrEmpty(sImageId)) {
-			return null;
-		}
-
-		DatasetProjectRepository oDatasetRepository = new DatasetProjectRepository();
-		for (DatasetProject oDataset : oDatasetRepository.getAll()) {
-			if (oDataset != null && oDataset.getImagesIds() != null && oDataset.getImagesIds().contains(sImageId)) {
-				return oDataset;
-			}
 		}
 
 		return null;
@@ -590,6 +576,7 @@ public class LabelResource {
 		oLabelViewModel.isValidated = oLabel.isValidated();
 		oLabelViewModel.creatorId = oLabel.getCreatorId();
 		oLabelViewModel.reviewers.addAll(oLabel.getReviewers());
+		oLabelViewModel.datasetId = oLabel.getDatasetId();
 		
 		for (ReviewNote oReviewNote : oLabel.getReviewNotes()) {
 			ReviewNoteViewModel oNoteViewModel = new ReviewNoteViewModel();
@@ -622,6 +609,7 @@ public class LabelResource {
 		oLabel.setReviewCount(oLabelViewModel.reviewCount);
 		oLabel.setValidated(oLabelViewModel.isValidated);
 		oLabel.setCreatorId(oLabelViewModel.creatorId);
+		oLabel.setDatasetId(oLabelViewModel.datasetId);
 		
 		oLabel.getReviewers().clear();
 		if (oLabelViewModel.reviewers != null) {

@@ -34,8 +34,8 @@ public class LabelRepository {
 		return m_oBackend.deleteLabel(sLabelId);
 	}
 
-	public List<Label> getLabelsByImage(String sImage) {
-		return m_oBackend.getLabelsByImage(sImage);
+	public List<Label> getLabelsByImage(String sDatasetId, String sImage) {
+		return m_oBackend.getLabelsByImage(sDatasetId, sImage);
 	}
 
 	public List<Label> getAll() {
