@@ -48,7 +48,7 @@ public class DataLayerManager {
 	}
 
 	private static IDataLayerBootstrap createBootstrapByDbEngine() {
-		String sDbEngine = "mongo";
+		String sDbEngine = "wasdi";
 
 		if (WasdiConfig.Current != null && WasdiConfig.Current.dbEngine != null) {
 			sDbEngine = WasdiConfig.Current.dbEngine.trim().toLowerCase();
@@ -64,7 +64,7 @@ public class DataLayerManager {
 			return new SqliteDataLayerBootstrap();
 		}
 
-		if ("mongo".equals(sDbEngine)) {
+		if ("wasdi".equals(sDbEngine) || "mongo".equals(sDbEngine)) {
 			WasdiLog.warnLog("DataLayerManager.createBootstrapByDbEngine: dbEngine=mongo selected. Using Mongo Db.");
 			return new MongoDataLayerBootstrap();
 		}

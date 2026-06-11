@@ -267,8 +267,7 @@ public class MongoDataRepositoryFactory implements IDataRepositoryFactory {
 
 	@Override
 	public ILabelRepositoryBackend createLabelRepository() {
-		// TODO Auto-generated method stub
-		return null;
+        return new MongoLabelRepositoryBackend();
 	}
 
 }

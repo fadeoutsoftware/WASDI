@@ -10,6 +10,7 @@ public class Label {
 	private boolean isPolygon;
 	private boolean isMultiPolygon;
 	private String annotator;
+	private String image;
 	private ArrayList<String> reviewers = new ArrayList<>();
 	private ArrayList<String> reviewNotes = new ArrayList<>();
 	private ArrayList<Attribute> attributes = new ArrayList<>();
@@ -74,6 +75,10 @@ public class Label {
 	public void setAttributes(ArrayList<Attribute> attributes) {
 		this.attributes = attributes;
 	}
-	
-
+	public String getImage() {
+		return image;
+	}
+	public void setImage(String image) {
+		this.image = image;
+	}
 }

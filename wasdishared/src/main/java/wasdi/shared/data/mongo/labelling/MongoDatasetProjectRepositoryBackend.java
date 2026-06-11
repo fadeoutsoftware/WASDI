@@ -137,7 +137,7 @@ public class MongoDatasetProjectRepositoryBackend  extends MongoRepository  impl
 		}
 
 		try {
-			FindIterable<Document> oDocuments = getCollection(m_sThisCollection).find(new Document("creator", sOwnerId)).sort(new Document("name", 1));
+			FindIterable<Document> oDocuments = getCollection(m_sThisCollection).find(new Document("owner", sOwnerId)).sort(new Document("name", 1));
 
 			fillList(aoReturnList, oDocuments, DatasetProject.class);
 		} catch (Exception oEx) {
@@ -161,7 +161,7 @@ public class MongoDatasetProjectRepositoryBackend  extends MongoRepository  impl
 
 		try {
 			
-			Bson oFilter= Filters.or(new Document("creator", sUserId), new Document("isPublic", true));
+			Bson oFilter= Filters.or(new Document("owner", sUserId), new Document("isPublic", true));
 			
 			FindIterable<Document> oDocuments = getCollection(m_sThisCollection).find(oFilter).sort(new Document("name", 1));
 

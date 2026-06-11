@@ -18,6 +18,7 @@ public class DatasetViewModel {
 	public int minReviewCount;
 	public String missions;
 	public ArrayList<String> tasks = new ArrayList<>();
-	public String ownersIds;
+	public String owner;
 	public String templateId;
+	public String workspaceId;
 }

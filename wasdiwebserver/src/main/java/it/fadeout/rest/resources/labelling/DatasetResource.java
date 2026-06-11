@@ -17,22 +17,19 @@ import javax.ws.rs.core.Response.Status;
 import org.joda.time.DateTimeUtils;
 
 import it.fadeout.Wasdi;
-import wasdi.shared.business.labelling.Attribute;
+import it.fadeout.rest.resources.WorkspaceResource;
 import wasdi.shared.business.labelling.DatasetProject;
-import wasdi.shared.business.labelling.Template;
+import wasdi.shared.business.labelling.LabellingProjectRoles;
 import wasdi.shared.business.users.User;
 import wasdi.shared.data.labelling.DatasetProjectRepository;
-import wasdi.shared.data.labelling.LabellingTemplateRepository;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ClientMessageCodes;
 import wasdi.shared.viewmodels.ErrorResponse;
-import wasdi.shared.viewmodels.labelling.attributes.AttributeViewModel;
+import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.labelling.datasets.DatasetCollaboratorViewModel;
 import wasdi.shared.viewmodels.labelling.datasets.DatasetListViewModel;
 import wasdi.shared.viewmodels.labelling.datasets.DatasetViewModel;
-import wasdi.shared.viewmodels.labelling.templates.TemplateListViewModel;
-import wasdi.shared.viewmodels.labelling.templates.TemplateViewModel;
 
 @Path("/labelling/datasets")
 public class DatasetResource {
@@ -64,7 +61,7 @@ public class DatasetResource {
 			List<DatasetProject> aoDatasets = oDatasetRepository.getDatasetsForUser(oUser.getUserId());
 			
 			if (aoDatasets==null) {
-				WasdiLog.debugLog("DatasetResource.getList: aoTemplates is null");
+				WasdiLog.warnLog("DatasetResource.getList: aoTemplates is null");
 				return Response.ok(aoDataasetsList).build();
 			}			
 			
@@ -76,7 +73,7 @@ public class DatasetResource {
 				oDatasetListViewModel.name = oDataset.getName();
 				oDatasetListViewModel.id = oDataset.getId();
 				
-				if (oDataset.getOwnersIds().equals(oUser.getUserId())) {
+				if (oDataset.getOwner().equals(oUser.getUserId())) {
 					oDatasetListViewModel.userRole = "OWNER";	
 				}
 				else {
@@ -125,11 +122,11 @@ public class DatasetResource {
 			DatasetProject oDataset = oDatasetRepository.getDataset(sDatasetId);
 			
 			if (oDataset==null) {
-				WasdiLog.debugLog("DatasetResource.getById: oDataset is null");
+				WasdiLog.warnLog("DatasetResource.getById: oDataset is null");
 				return Response.status(Status.BAD_REQUEST).build();
 			}			
 			
-			if ( !oDataset.getOwnersIds().equals(oUser.getUserId())) {
+			if ( !oDataset.getOwner().equals(oUser.getUserId())) {
 				if (!oDataset.isPublic()) {
 					WasdiLog.warnLog("DatasetResource.getById: user cannot access the dataset");
 					return Response.status(Status.UNAUTHORIZED).build();					
@@ -151,12 +148,12 @@ public class DatasetResource {
 			oDatasetViewModel.link = oDataset.getLink();
 			oDatasetViewModel.minReviewCount = oDataset.getMinReviewCount();
 			oDatasetViewModel.missions = oDataset.getMissions();
-			oDatasetViewModel.ownersIds = oDataset.getOwnersIds();
+			oDatasetViewModel.owner = oDataset.getOwner();
 			oDatasetViewModel.reviewRequired = oDataset.isReviewRequired();
 			oDatasetViewModel.startDate = oDataset.getStartDate();
 			oDatasetViewModel.templateId = oDataset.getTemplateId();
 			oDatasetViewModel.tasks.addAll(oDataset.getTasks());
-			
+			oDatasetViewModel.workspaceId = oDataset.getWorkspaceId();
 			
 			return Response.ok(oDatasetViewModel).build();
 		} catch (Exception oEx) {
@@ -192,11 +189,11 @@ public class DatasetResource {
 			DatasetProject oDataset = oDatasetRepository.getDataset(sDatasetId);
 			
 			if (oDataset==null) {
-				WasdiLog.debugLog("DatasetResource.getCollaborators: oDataset is null");
+				WasdiLog.warnLog("DatasetResource.getCollaborators: oDataset is null");
 				return Response.status(Status.BAD_REQUEST).build();
 			}			
 			
-			if ( !oDataset.getOwnersIds().equals(oUser.getUserId())) {
+			if ( !oDataset.getOwner().equals(oUser.getUserId())) {
 				if (!oDataset.isPublic()) {
 					WasdiLog.warnLog("DatasetResource.getCollaborators: user cannot access the dataset");
 					return Response.status(Status.UNAUTHORIZED).build();					
@@ -206,14 +203,14 @@ public class DatasetResource {
 			for (String sAnnotator : oDataset.getAnnotators()) {
 				DatasetCollaboratorViewModel oVM = new DatasetCollaboratorViewModel();
 				oVM.userId = sAnnotator;
-				oVM.userRole = "ANNOTATOR";
+				oVM.userRole = LabellingProjectRoles.ANNOTATOR.name();
 				aoCollaborators.add(oVM);
 			}
 			
 			for (String sReviewer : oDataset.getReviewers()) {
 				DatasetCollaboratorViewModel oVM = new DatasetCollaboratorViewModel();
 				oVM.userId = sReviewer;
-				oVM.userRole = "REVIEWER";
+				oVM.userRole = LabellingProjectRoles.REVIEWER.name();
 				aoCollaborators.add(oVM);
 			}
 			
@@ -255,7 +252,7 @@ public class DatasetResource {
 			
 			oDataset.setName(oDatasetViewModel.name);
 			oDataset.setId(Utils.getRandomName());
-			oDataset.setOwnersIds(oUser.getUserId());			
+			oDataset.setOwner(oUser.getUserId());			
 			oDataset.setCreationDate(DateTimeUtils.currentTimeMillis());
 			oDataset.setDescription(oDatasetViewModel.description) ;
 			oDataset.setAnnotatorSeeAllLabels(oDatasetViewModel.annotatorSeeAllLabels);
@@ -272,6 +269,15 @@ public class DatasetResource {
 			oDataset.setStartDate(oDatasetViewModel.startDate);
 			oDataset.getTasks().addAll(oDatasetViewModel.tasks);
 			oDataset.setTemplateId(oDatasetViewModel.templateId);
+			WorkspaceResource oWorkspaceResource = new WorkspaceResource();
+			PrimitiveResult oPrimitiveResult = oWorkspaceResource.createWorkspace(sSessionId, "labelling_"+oDatasetViewModel.name, sSessionId);
+			if (oPrimitiveResult == null) {
+				WasdiLog.errorLog("DatasetResource.create: we could not create the workspace associated to the dataset.. not good at all...");
+				return Response.serverError().build();				
+			}
+			else {
+				oDataset.setWorkspaceId(oPrimitiveResult.getStringValue());
+			}
 			
 			oDatasetRepository.insertDataset(oDataset);
 			
@@ -316,7 +322,7 @@ public class DatasetResource {
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
-			if (!oDataset.getOwnersIds().equals(oUser.getUserId())) {
+			if (!oDataset.getOwner().equals(oUser.getUserId())) {
 				WasdiLog.warnLog("DatasetResource.update: the user is not the creator for the dataset");
 				return Response.status(Status.UNAUTHORIZED).build();				
 			}
@@ -375,10 +381,13 @@ public class DatasetResource {
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
-			if (!oDataset.getOwnersIds().equals(oUser.getUserId())) {
+			if (!oDataset.getOwner().equals(oUser.getUserId())) {
 				WasdiLog.warnLog("DatasetResource.delete: the user is not the creator for the dataset");
 				return Response.status(Status.UNAUTHORIZED).build();				
 			}
+			
+			WorkspaceResource oWorkspaceResource = new WorkspaceResource();
+			oWorkspaceResource.deleteWorkspace(sSessionId, oDataset.getWorkspaceId(), true, true);
 			
 			oDatasetRepository.deleteDataset(sDatasetId);
 			
@@ -388,6 +397,184 @@ public class DatasetResource {
 			return Response.serverError().build();
 		}		
 	}		
+	
+	
+	@POST
+	@Path("/collaborators")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response addCollaborator(@HeaderParam("x-session-token") String sSessionId, @QueryParam("datasetId") String sDatasetId, @QueryParam("userId") String sUserId, @QueryParam("roleId") String sRole) {
+		
+		WasdiLog.debugLog("DatasetResource.addCollaborator");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		// Domain Check
+		if (oUser == null) {
+			WasdiLog.warnLog("DatasetResource.addCollaborator: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+
+		try {
+			
+			WasdiLog.debugLog("DatasetResource.addCollaborator: dataset " + sUserId);
+
+			// Create repo
+			DatasetProjectRepository oDatasetRepository = new DatasetProjectRepository();
+			
+			DatasetProject oDataset = oDatasetRepository.getDataset(sDatasetId);
+			
+			if (oDataset==null) {
+				WasdiLog.warnLog("DatasetResource.addCollaborator: oDataset is null");
+				return Response.status(Status.BAD_REQUEST).build();
+			}			
+			
+			if ( !oDataset.getOwner().equals(oUser.getUserId())) {
+				if (!oDataset.isPublic()) {
+					WasdiLog.warnLog("DatasetResource.addCollaborator: user cannot access the dataset");
+					return Response.status(Status.UNAUTHORIZED).build();					
+				}
+			}
+			
+			if (oUser.getUserId().equals(sUserId)) {
+				WasdiLog.warnLog("DatasetResource.addCollaborator: target user is the owner, bad request");
+				return Response.status(Status.BAD_REQUEST).build();		
+			}
+			
+			boolean bExisting = false;
+			
+			for (String sAnnotator : oDataset.getAnnotators()) {
+				if (sAnnotator.equals(sUserId)) {
+					bExisting = true;
+					break;
+				}
+			}
+			
+			if (!bExisting) {
+				for (String sReviewer : oDataset.getReviewers()) {
+					if (sReviewer.equals(sUserId)) {
+						bExisting = true;
+						break;
+					}
+				}				
+			}
+			
+			if (bExisting) {
+				WasdiLog.warnLog("DatasetResource.addCollaborator: user is already part of the Dataset as collaborator");
+				return Response.status(Status.CONFLICT).build();				
+			}
+
+			if (!isValidLabellingProjectRole(sRole)) {
+				WasdiLog.warnLog("DatasetResource.addCollaborator: invalid role");
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+			
+			if (sRole.equals(LabellingProjectRoles.OWNER.name())) {
+				WasdiLog.warnLog("DatasetResource.addCollaborator: the user cannot add another owner");
+				return Response.status(Status.BAD_REQUEST).build();				
+			}
+			
+			if (sRole.equals(LabellingProjectRoles.ANNOTATOR.name())) {
+				oDataset.getAnnotators().add(sUserId);
+			}
+			else if (sRole.equals(LabellingProjectRoles.REVIEWER.name())) {
+				oDataset.getReviewers().add(sUserId);
+			}
+			
+			return Response.ok().build();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("DatasetResource.addCollaborator error: " + oEx);
+			return Response.serverError().build();
+		}
+	}		
+
+	
+	@DELETE
+	@Path("/collaborators")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response deleteCollaborator(@HeaderParam("x-session-token") String sSessionId, @QueryParam("datasetId") String sDatasetId, @QueryParam("userId") String sUserId) {
+		
+		WasdiLog.debugLog("DatasetResource.deleteCollaborator");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		// Domain Check
+		if (oUser == null) {
+			WasdiLog.warnLog("DatasetResource.deleteCollaborator: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+
+		try {
+			
+			WasdiLog.debugLog("DatasetResource.deleteCollaborator: dataset " + sUserId);
+
+			// Create repo
+			DatasetProjectRepository oDatasetRepository = new DatasetProjectRepository();
+			
+			DatasetProject oDataset = oDatasetRepository.getDataset(sDatasetId);
+			
+			if (oDataset==null) {
+				WasdiLog.warnLog("DatasetResource.deleteCollaborator: oDataset is null");
+				return Response.status(Status.BAD_REQUEST).build();
+			}			
+			
+			if ( !oDataset.getOwner().equals(oUser.getUserId())) {
+				if (!oDataset.isPublic()) {
+					WasdiLog.warnLog("DatasetResource.deleteCollaborator: user cannot access the dataset");
+					return Response.status(Status.UNAUTHORIZED).build();					
+				}
+			}
+			
+			if (oUser.getUserId().equals(sUserId)) {
+				WasdiLog.warnLog("DatasetResource.deleteCollaborator: target user is the owner, bad request");
+				return Response.status(Status.BAD_REQUEST).build();		
+			}
+			
+			boolean bExisting = false;
+			
+			for (String sAnnotator : oDataset.getAnnotators()) {
+				if (sAnnotator.equals(sUserId)) {
+					bExisting = true;
+					oDataset.getAnnotators().remove(sUserId);
+					break;
+				}
+			}
+			
+			if (!bExisting) {
+				for (String sReviewer : oDataset.getReviewers()) {
+					if (sReviewer.equals(sUserId)) {
+						bExisting = true;
+						oDataset.getAnnotators().remove(sUserId);
+						break;
+					}
+				}				
+			}
+			
+			if (!bExisting) {
+				WasdiLog.warnLog("DatasetResource.deleteCollaborator: user is not part of the Dataset as collaborator");
+				return Response.status(Status.BAD_REQUEST).build();				
+			}
+			
+			return Response.ok().build();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("DatasetResource.addCollaborator error: " + oEx);
+			return Response.serverError().build();
+		}
+	}		
+	
+	
+	private boolean isValidLabellingProjectRole(String sRole) {
+		if (Utils.isNullOrEmpty(sRole)) {
+			return false;
+		}
+
+		for (LabellingProjectRoles oRole : LabellingProjectRoles.values()) {
+			if (oRole.name().equals(sRole)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 	
 	
 

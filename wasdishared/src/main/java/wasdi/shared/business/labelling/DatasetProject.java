@@ -20,10 +20,11 @@ public class DatasetProject {
 	private ArrayList<String> tasks = new ArrayList<>();
 	private ArrayList<String> imagesIds = new ArrayList<>();
 	private String templateId;
-	private String ownersIds;
+	private String owner;
 	private ArrayList<String> annotators = new ArrayList<>();
 	private ArrayList<String> reviewers = new ArrayList<>();
 	private String imageStyleId;
+	private String workspaceId;
 	
 	public String getId() {
 		return id;
@@ -121,11 +122,11 @@ public class DatasetProject {
 	public void setTemplateId(String templateId) {
 		this.templateId = templateId;
 	}
-	public String getOwnersIds() {
-		return ownersIds;
+	public String getOwner() {
+		return owner;
 	}
-	public void setOwnersIds(String ownersIds) {
-		this.ownersIds = ownersIds;
+	public void setOwner(String owner) {
+		this.owner = owner;
 	}
 	public String getImageStyleId() {
 		return imageStyleId;
@@ -150,6 +151,12 @@ public class DatasetProject {
 	}
 	public void setReviewers(ArrayList<String> reviewers) {
 		this.reviewers = reviewers;
+	}
+	public String getWorkspaceId() {
+		return workspaceId;
+	}
+	public void setWorkspaceId(String workspaceId) {
+		this.workspaceId = workspaceId;
 	}
 
 }
