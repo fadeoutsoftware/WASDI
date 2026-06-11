@@ -12,8 +12,11 @@ public class Label {
 	private String annotator;
 	private String image;
 	private ArrayList<String> reviewers = new ArrayList<>();
-	private ArrayList<String> reviewNotes = new ArrayList<>();
+	private ArrayList<ReviewNote> reviewNotes = new ArrayList<>();
 	private ArrayList<Attribute> attributes = new ArrayList<>();
+	private int reviewCount;
+	private boolean isValidated;
+	private String creatorId;
 	
 	public String getId() {
 		return id;
@@ -63,10 +66,10 @@ public class Label {
 	public void setReviewers(ArrayList<String> reviewers) {
 		this.reviewers = reviewers;
 	}
-	public ArrayList<String> getReviewNotes() {
+	public ArrayList<ReviewNote> getReviewNotes() {
 		return reviewNotes;
 	}
-	public void setReviewNotes(ArrayList<String> reviewNotes) {
+	public void setReviewNotes(ArrayList<ReviewNote> reviewNotes) {
 		this.reviewNotes = reviewNotes;
 	}
 	public ArrayList<Attribute> getAttributes() {
@@ -80,5 +83,23 @@ public class Label {
 	}
 	public void setImage(String image) {
 		this.image = image;
+	}
+	public int getReviewCount() {
+		return reviewCount;
+	}
+	public void setReviewCount(int reviewCount) {
+		this.reviewCount = reviewCount;
+	}
+	public boolean isValidated() {
+		return isValidated;
+	}
+	public void setValidated(boolean isValidated) {
+		this.isValidated = isValidated;
+	}
+	public String getCreatorId() {
+		return creatorId;
+	}
+	public void setCreatorId(String creatorId) {
+		this.creatorId = creatorId;
 	}
 }

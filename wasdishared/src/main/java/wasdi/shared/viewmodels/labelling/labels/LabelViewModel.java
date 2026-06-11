@@ -14,6 +14,9 @@ public class LabelViewModel {
 	public String annotator;
 	public String image;
 	public ArrayList<String> reviewers = new ArrayList<>();
-	public ArrayList<String> reviewNotes = new ArrayList<>();
+	public ArrayList<ReviewNoteViewModel> reviewNotes = new ArrayList<>();
 	public ArrayList<AttributeViewModel> attributes = new ArrayList<>();
+	public int reviewCount;
+	public boolean isValidated;
+	public String creatorId;
 }

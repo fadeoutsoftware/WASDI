@@ -2,6 +2,7 @@ package it.fadeout.rest.resources.labelling;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -18,6 +19,7 @@ import it.fadeout.Wasdi;
 import wasdi.shared.business.labelling.Attribute;
 import wasdi.shared.business.labelling.DatasetProject;
 import wasdi.shared.business.labelling.Label;
+import wasdi.shared.business.labelling.ReviewNote;
 import wasdi.shared.business.users.User;
 import wasdi.shared.data.labelling.DatasetProjectRepository;
 import wasdi.shared.data.labelling.LabelRepository;
@@ -27,6 +29,9 @@ import wasdi.shared.viewmodels.ClientMessageCodes;
 import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.labelling.attributes.AttributeViewModel;
 import wasdi.shared.viewmodels.labelling.labels.LabelViewModel;
+import wasdi.shared.viewmodels.labelling.labels.NoteRequestViewModel;
+import wasdi.shared.viewmodels.labelling.labels.ResolveNoteRequestViewModel;
+import wasdi.shared.viewmodels.labelling.labels.ReviewNoteViewModel;
 
 @Path("/labelling/labels")
 public class LabelResource {
@@ -146,6 +151,7 @@ public class LabelResource {
 			Label oLabel = toEntity(oLabelViewModel);
 			oLabel.setId(Utils.getRandomName());
 			oLabel.setAnnotator(oUser.getUserId());
+			oLabel.setCreatorId(oUser.getUserId());
 
 			LabelRepository oLabelRepository = new LabelRepository();
 			oLabelRepository.insertLabel(oLabel);
@@ -245,6 +251,284 @@ public class LabelResource {
 		}
 	}
 
+	@GET
+	@Path("/approve")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response approve(@HeaderParam("x-session-token") String sSessionId, @QueryParam("labelId") String sLabelId) {
+
+		WasdiLog.debugLog("LabelResource.approve");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.warnLog("LabelResource.approve: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+
+		if (Utils.isNullOrEmpty(sLabelId)) {
+			WasdiLog.warnLog("LabelResource.approve: invalid label id");
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+
+		try {
+			LabelRepository oLabelRepository = new LabelRepository();
+			Label oLabel = oLabelRepository.getLabel(sLabelId);
+
+			if (oLabel == null) {
+				WasdiLog.warnLog("LabelResource.approve: label not found");
+				return Response.status(Status.NOT_FOUND).build();
+			}
+
+			// Check authorization: user must be owner or reviewer of the dataset
+			DatasetProject oDataset = getDatasetByImageId(oLabel.getImage());
+			if (oDataset == null) {
+				WasdiLog.warnLog("LabelResource.approve: dataset not found");
+				return Response.status(Status.NOT_FOUND).build();
+			}
+			
+			if (oDataset.isReviewRequired() == false) {				
+				WasdiLog.warnLog("LabelResource.approve: dataset does not requires review");
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+
+			boolean bIsOwnerOrReviewer = oDataset.getOwner().equals(oUser.getUserId()) || oDataset.getReviewers().contains(oUser.getUserId());
+			if (!bIsOwnerOrReviewer) {
+				WasdiLog.warnLog("LabelResource.approve: user is not owner or reviewer");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+
+			// Add reviewer if not already present
+			ArrayList<String> aoCurrentReviewers = oLabel.getReviewers();
+			if (aoCurrentReviewers == null) {
+				aoCurrentReviewers = new ArrayList<>();
+			}
+
+			if (!aoCurrentReviewers.contains(oUser.getUserId())) {
+				aoCurrentReviewers.add(oUser.getUserId());
+				oLabel.setReviewers(aoCurrentReviewers);
+				oLabel.setReviewCount(oLabel.getReviewCount() + 1);
+
+				// Check if validation threshold is met
+				int iMinReviewCount = oDataset.getMinReviewCount();
+				if (oLabel.getReviewCount() >= iMinReviewCount) {
+					oLabel.setValidated(true);
+				}
+
+				oLabelRepository.updateLabel(oLabel);
+			}
+
+			LabelViewModel oViewModel = new LabelViewModel();
+			oViewModel.id = sLabelId;
+			oViewModel.isValidated = oLabel.isValidated();
+			oViewModel.reviewCount = oLabel.getReviewCount();
+
+			return Response.ok(oViewModel).build();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("LabelResource.approve error: " + oEx);
+			return Response.serverError().build();
+		}
+	}
+
+	@GET
+	@Path("/reject")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response reject(@HeaderParam("x-session-token") String sSessionId, @QueryParam("labelId") String sLabelId) {
+
+		WasdiLog.debugLog("LabelResource.reject");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.warnLog("LabelResource.reject: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+
+		if (Utils.isNullOrEmpty(sLabelId)) {
+			WasdiLog.warnLog("LabelResource.reject: invalid label id");
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+
+		try {
+			LabelRepository oLabelRepository = new LabelRepository();
+			Label oLabel = oLabelRepository.getLabel(sLabelId);
+
+			if (oLabel == null) {
+				WasdiLog.warnLog("LabelResource.reject: label not found");
+				return Response.status(Status.NOT_FOUND).build();
+			}
+
+			// Check authorization: user must be owner or reviewer of the dataset
+			DatasetProject oDataset = getDatasetByImageId(oLabel.getImage());
+			if (oDataset == null) {
+				WasdiLog.warnLog("LabelResource.reject: dataset not found");
+				return Response.status(Status.NOT_FOUND).build();
+			}
+			
+			if (oDataset.isReviewRequired() == false) {				
+				WasdiLog.warnLog("LabelResource.approve: dataset does not requires review");
+				return Response.status(Status.BAD_REQUEST).build();
+			}			
+
+			boolean bIsOwnerOrReviewer = oDataset.getOwner().equals(oUser.getUserId()) || oDataset.getReviewers().contains(oUser.getUserId());
+			if (!bIsOwnerOrReviewer) {
+				WasdiLog.warnLog("LabelResource.reject: user is not owner or reviewer");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+
+			oLabel.setValidated(false);
+			oLabelRepository.updateLabel(oLabel);
+
+			LabelViewModel oViewModel = new LabelViewModel();
+			oViewModel.id = sLabelId;
+
+			return Response.ok(oViewModel).build();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("LabelResource.reject error: " + oEx);
+			return Response.serverError().build();
+		}
+	}
+
+	@POST
+	@Path("/addNote")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response addNote(@HeaderParam("x-session-token") String sSessionId, NoteRequestViewModel oRequest) {
+
+		WasdiLog.debugLog("LabelResource.addNote");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.warnLog("LabelResource.addNote: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+
+		if (oRequest == null || Utils.isNullOrEmpty(oRequest.labelId) || Utils.isNullOrEmpty(oRequest.note)) {
+			WasdiLog.warnLog("LabelResource.addNote: invalid request");
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+
+		try {
+			LabelRepository oLabelRepository = new LabelRepository();
+			Label oLabel = oLabelRepository.getLabel(oRequest.labelId);
+
+			if (oLabel == null) {
+				WasdiLog.warnLog("LabelResource.addNote: label not found");
+				return Response.status(Status.NOT_FOUND).build();
+			}
+
+			// Check authorization: user must be owner or reviewer of the dataset
+			DatasetProject oDataset = getDatasetByImageId(oLabel.getImage());
+			if (oDataset == null) {
+				WasdiLog.warnLog("LabelResource.addNote: dataset not found");
+				return Response.status(Status.NOT_FOUND).build();
+			}
+
+			boolean bIsOwnerOrReviewer = oDataset.getOwner().equals(oUser.getUserId()) || oDataset.getReviewers().contains(oUser.getUserId());
+			if (!bIsOwnerOrReviewer) {
+				WasdiLog.warnLog("LabelResource.addNote: user is not owner or reviewer");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+
+			ArrayList<ReviewNote> aoCurrentNotes = oLabel.getReviewNotes();
+			if (aoCurrentNotes == null) {
+				aoCurrentNotes = new ArrayList<>();
+			}
+
+			ReviewNote oNewNote = new ReviewNote();
+			oNewNote.setId(UUID.randomUUID().toString());
+			oNewNote.setSender(oUser.getUserId());
+			oNewNote.setNote(oRequest.note);
+			oNewNote.setResolved(false);
+
+			aoCurrentNotes.add(oNewNote);
+			oLabel.setReviewNotes(aoCurrentNotes);
+			oLabelRepository.updateLabel(oLabel);
+
+			ReviewNoteViewModel oNoteViewModel = new ReviewNoteViewModel();
+			oNoteViewModel.id = oNewNote.getId();
+			oNoteViewModel.sender = oNewNote.getSender();
+			oNoteViewModel.note = oNewNote.getNote();
+			oNoteViewModel.resolved = oNewNote.isResolved();
+
+			return Response.ok(oNoteViewModel).build();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("LabelResource.addNote error: " + oEx);
+			return Response.serverError().build();
+		}
+	}
+
+	@POST
+	@Path("/resolveNote")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response resolveNote(@HeaderParam("x-session-token") String sSessionId, ResolveNoteRequestViewModel oRequest) {
+
+		WasdiLog.debugLog("LabelResource.resolveNote");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.warnLog("LabelResource.resolveNote: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+
+		if (oRequest == null || Utils.isNullOrEmpty(oRequest.labelId) || Utils.isNullOrEmpty(oRequest.noteId)) {
+			WasdiLog.warnLog("LabelResource.resolveNote: invalid request");
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+
+		try {
+			LabelRepository oLabelRepository = new LabelRepository();
+			Label oLabel = oLabelRepository.getLabel(oRequest.labelId);
+
+			if (oLabel == null) {
+				WasdiLog.warnLog("LabelResource.resolveNote: label not found");
+				return Response.status(Status.NOT_FOUND).build();
+			}
+
+			// Check authorization: user must be owner or reviewer of the dataset
+			DatasetProject oDataset = getDatasetByImageId(oLabel.getImage());
+			if (oDataset == null) {
+				WasdiLog.warnLog("LabelResource.resolveNote: dataset not found");
+				return Response.status(Status.NOT_FOUND).build();
+			}
+
+			boolean bIsOwnerOrReviewer = oDataset.getOwner().equals(oUser.getUserId()) || oDataset.getReviewers().contains(oUser.getUserId());
+			if (!bIsOwnerOrReviewer) {
+				WasdiLog.warnLog("LabelResource.resolveNote: user is not owner or reviewer");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+
+			ArrayList<ReviewNote> aoCurrentNotes = oLabel.getReviewNotes();
+			if (aoCurrentNotes == null) {
+				WasdiLog.warnLog("LabelResource.resolveNote: no notes found");
+				return Response.status(Status.NOT_FOUND).build();
+			}
+
+			// Find and mark the note as resolved
+			boolean bFound = false;
+			for (ReviewNote oNote : aoCurrentNotes) {
+				if (oNote.getId().equals(oRequest.noteId)) {
+					oNote.setResolved(true);
+					bFound = true;
+					break;
+				}
+			}
+
+			if (!bFound) {
+				WasdiLog.warnLog("LabelResource.resolveNote: note not found");
+				return Response.status(Status.NOT_FOUND).build();
+			}
+
+			oLabel.setReviewNotes(aoCurrentNotes);
+			oLabelRepository.updateLabel(oLabel);
+
+			return Response.ok().build();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("LabelResource.resolveNote error: " + oEx);
+			return Response.serverError().build();
+		}
+	}
+
 	private DatasetProject getReadableDatasetForImage(User oUser, String sImageId) {
 		DatasetProject oDataset = getDatasetByImageId(sImageId);
 
@@ -302,8 +586,20 @@ public class LabelResource {
 		oLabelViewModel.isMultiPolygon = oLabel.isMultiPolygon();
 		oLabelViewModel.annotator = oLabel.getAnnotator();
 		oLabelViewModel.image = oLabel.getImage();
+		oLabelViewModel.reviewCount = oLabel.getReviewCount();
+		oLabelViewModel.isValidated = oLabel.isValidated();
+		oLabelViewModel.creatorId = oLabel.getCreatorId();
 		oLabelViewModel.reviewers.addAll(oLabel.getReviewers());
-		oLabelViewModel.reviewNotes.addAll(oLabel.getReviewNotes());
+		
+		for (ReviewNote oReviewNote : oLabel.getReviewNotes()) {
+			ReviewNoteViewModel oNoteViewModel = new ReviewNoteViewModel();
+			oNoteViewModel.id = oReviewNote.getId();
+			oNoteViewModel.sender = oReviewNote.getSender();
+			oNoteViewModel.note = oReviewNote.getNote();
+			oNoteViewModel.resolved = oReviewNote.isResolved();
+			oLabelViewModel.reviewNotes.add(oNoteViewModel);
+		}
+		
 		for (Attribute oAttribute : oLabel.getAttributes()) {
 			oLabelViewModel.attributes.add(AttributeViewModel.getFromEntity(oAttribute));
 		}
@@ -323,14 +619,27 @@ public class LabelResource {
 		oLabel.setPolygon(oLabelViewModel.isPolygon);
 		oLabel.setMultiPolygon(oLabelViewModel.isMultiPolygon);
 		oLabel.setImage(oLabelViewModel.image);
+		oLabel.setReviewCount(oLabelViewModel.reviewCount);
+		oLabel.setValidated(oLabelViewModel.isValidated);
+		oLabel.setCreatorId(oLabelViewModel.creatorId);
+		
 		oLabel.getReviewers().clear();
 		if (oLabelViewModel.reviewers != null) {
 			oLabel.getReviewers().addAll(oLabelViewModel.reviewers);
 		}
+		
 		oLabel.getReviewNotes().clear();
 		if (oLabelViewModel.reviewNotes != null) {
-			oLabel.getReviewNotes().addAll(oLabelViewModel.reviewNotes);
+			for (ReviewNoteViewModel oNoteViewModel : oLabelViewModel.reviewNotes) {
+				ReviewNote oReviewNote = new ReviewNote();
+				oReviewNote.setId(oNoteViewModel.id);
+				oReviewNote.setSender(oNoteViewModel.sender);
+				oReviewNote.setNote(oNoteViewModel.note);
+				oReviewNote.setResolved(oNoteViewModel.resolved);
+				oLabel.getReviewNotes().add(oReviewNote);
+			}
 		}
+		
 		oLabel.getAttributes().clear();
 		if (oLabelViewModel.attributes != null) {
 			for (AttributeViewModel oAttributeViewModel : oLabelViewModel.attributes) {
