@@ -365,4 +365,20 @@ public class SqliteProcessorRepositoryBackend extends SqliteRepository implement
 		}
 		return -1L;
 	}
+
+	@Override
+	public boolean deleteProcessorByName(String sProcessorName) {
+		if (Utils.isNullOrEmpty(sProcessorName)) {
+			return false;
+		}
+
+		try {
+			int iDeleteCount = deleteWhere(m_sThisCollection, "name", sProcessorName);
+			return iDeleteCount == 1;
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorRepository.deleteProcessorByName :error ", oEx);
+		}
+
+		return false;
+	}
 }

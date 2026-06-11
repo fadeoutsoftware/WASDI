@@ -323,6 +323,8 @@ public class WasdiScheduler
 				sNodeCode = sVirtualNodeCode;
 			}
 		}
+		
+		WasdiLog.infoLog("WasdiScheduler.run: Node Code: " + sNodeCode);
 
 		
 		while(true) {

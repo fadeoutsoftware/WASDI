@@ -94,4 +94,6 @@ CMD {{ sWasdiSystemUserHome }}/venv/bin/jupyter lab \
     --ServerApp.root_dir={{ sWasdiSystemUserHome }}/notebook \
     --ServerApp.base_url=/notebook/${sWasdiNotebookId} \
     --ServerApp.browser=false \
-    --no-browser
+    --no-browser \
+    --ServerApp.terminals_enabled=False \
+    --NotebookApp.terminals_enabled=False    
