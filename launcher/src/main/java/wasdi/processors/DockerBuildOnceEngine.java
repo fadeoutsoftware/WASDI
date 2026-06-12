@@ -139,23 +139,6 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		oDeleteOldDockerImagesThread.setProcessor(oProcessor);
 		
 		oDeleteOldDockerImagesThread.start();
-			
-		/*
-		try {
-			WasdiLog.infoLog("DockerBuildOnceEngine.redeploy: try to clean old images. Last valid version is " + sNewVersion);
-			
-			String sVersion = oProcessor.getVersion();
-			Integer iVersion = Integer.parseInt(sVersion);
-			
-			if (iVersion>1) {
-				iVersion = iVersion - 1;				
-				oDockerUtils.delete(oProcessor.getName(), "" + iVersion);
-			}
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("DockerBuildOnceEngine.run error searching old versions: ", oEx);
-		}
-		*/
 		
 		// Here we save the address of the image
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
