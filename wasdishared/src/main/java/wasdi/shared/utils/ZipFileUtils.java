@@ -406,7 +406,7 @@ public class ZipFileUtils {
 			}
 	
 			try {
-				deleteDirectory(oDir.toPath());
+				ZipFileUtils.deleteZipTmpDirectory(oDir.toPath());
 			} catch (IOException oE) {
 				WasdiLog.errorLog(m_sLoggerPrefix +".cleanTempDir: delete directory failed because: " + oE);
 				return false;
@@ -426,7 +426,7 @@ public class ZipFileUtils {
 	 * @param oToBeDeleted path to be deleted
 	 * @throws IOException
 	 */
-	protected void deleteDirectory(Path oToBeDeleted) throws IOException {
+	public static void deleteZipTmpDirectory(Path oToBeDeleted) throws IOException {
 		if (oToBeDeleted == null) {
 			return;
 		}
@@ -446,7 +446,7 @@ public class ZipFileUtils {
 				}
 			} catch (IOException oE) {
 				oLastException = oE;
-				WasdiLog.warnLog(m_sLoggerPrefix + "deleteDirectory: apache deleteDirectory failed at attempt " + iAttempt + " because: " + oE);
+				WasdiLog.warnLog("ZipFileUtils.deleteDirectory: apache deleteDirectory failed at attempt " + iAttempt + " because: " + oE);
 			}
 
 			try {
@@ -458,7 +458,7 @@ public class ZipFileUtils {
 				}
 			} catch (IOException oE) {
 				oLastException = oE;
-				WasdiLog.warnLog(m_sLoggerPrefix + "deleteDirectory: apache forceDelete failed at attempt " + iAttempt + " because: " + oE);
+				WasdiLog.warnLog("ZipFileUtils.deleteDirectory: apache forceDelete failed at attempt " + iAttempt + " because: " + oE);
 			}
 
 			try (Stream<Path> aoPathStream = Files.walk(oNormalizedPath)) {
@@ -474,11 +474,11 @@ public class ZipFileUtils {
 				}
 			} catch (IOException oE) {
 				oLastException = oE;
-				WasdiLog.warnLog(m_sLoggerPrefix + "deleteDirectory: NIO fallback failed at attempt " + iAttempt + " because: " + oE);
+				WasdiLog.warnLog("ZipFileUtils.deleteDirectory: NIO fallback failed at attempt " + iAttempt + " because: " + oE);
 			}
 
 			if (oDir.exists()) {
-				WasdiLog.warnLog(m_sLoggerPrefix + "deleteDirectory: folder still exists after attempt " + iAttempt + ": " + oNormalizedPath);
+				WasdiLog.warnLog("ZipFileUtils.deleteDirectory: folder still exists after attempt " + iAttempt + ": " + oNormalizedPath);
 			}
 		}
 
