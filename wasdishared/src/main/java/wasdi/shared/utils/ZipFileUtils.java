@@ -88,7 +88,7 @@ public class ZipFileUtils {
 		try {
 			File oInputFile = new File(sZipFileAbsolutePath);
 
-			try (ZipFile oZipFile = new ZipFile(oInputFile)) {
+			try (ZipFile oZipFile = ZipFile.builder().setFile(oInputFile).get()) {
 				Enumeration<? extends ZipArchiveEntry> aoZipArchiveEntries = oZipFile.getEntries();
 				while(aoZipArchiveEntries.hasMoreElements()) {
 					ZipArchiveEntry oEntry = aoZipArchiveEntries.nextElement();
@@ -136,7 +136,7 @@ public class ZipFileUtils {
 			}
 	
 			File oInputFile = new File(sZipFileAbsolutePath);
-			try(ZipFile oZipFile = new ZipFile(oInputFile)){
+			try(ZipFile oZipFile = ZipFile.builder().setFile(oInputFile).get()){
 				Enumeration<? extends ZipArchiveEntry> aoZipArchiveEntries = oZipFile.getEntries();
 				while(aoZipArchiveEntries.hasMoreElements()) {
 					extractOneEntry(sTempRelativeDirectory, sTempAbsolutePath, oZipFile, aoZipArchiveEntries);
@@ -406,7 +406,7 @@ public class ZipFileUtils {
 			}
 	
 			try {
-				deleteDirectory(oDir.toPath());
+				ZipFileUtils.deleteZipTmpDirectory(oDir.toPath());
 			} catch (IOException oE) {
 				WasdiLog.errorLog(m_sLoggerPrefix +".cleanTempDir: delete directory failed because: " + oE);
 				return false;
@@ -426,13 +426,69 @@ public class ZipFileUtils {
 	 * @param oToBeDeleted path to be deleted
 	 * @throws IOException
 	 */
-	protected void deleteDirectory(Path oToBeDeleted) throws IOException {
-		try (Stream<Path> aoPathStream = Files.walk(oToBeDeleted)) {
-			List<Path> aoPaths = aoPathStream.sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-			for (Path oPath : aoPaths) {
-				Files.delete(oPath);
+	public static void deleteZipTmpDirectory(Path oToBeDeleted) throws IOException {
+		if (oToBeDeleted == null) {
+			return;
+		}
+
+		Path oNormalizedPath = oToBeDeleted.toAbsolutePath().normalize();
+		File oDir = oNormalizedPath.toFile();
+		if (!oDir.exists()) {
+			return;
+		}
+
+		IOException oLastException = null;
+		for (int iAttempt = 1; iAttempt <= 3; iAttempt++) {
+			try {
+				org.apache.commons.io.FileUtils.deleteDirectory(oDir);
+				if (!oDir.exists()) {
+					return;
+				}
+			} catch (IOException oE) {
+				oLastException = oE;
+				WasdiLog.warnLog("ZipFileUtils.deleteDirectory: apache deleteDirectory failed at attempt " + iAttempt + " because: " + oE);
+			}
+
+			try {
+				if (oDir.exists()) {
+					org.apache.commons.io.FileUtils.forceDelete(oDir);
+				}
+				if (!oDir.exists()) {
+					return;
+				}
+			} catch (IOException oE) {
+				oLastException = oE;
+				WasdiLog.warnLog("ZipFileUtils.deleteDirectory: apache forceDelete failed at attempt " + iAttempt + " because: " + oE);
+			}
+
+			try (Stream<Path> aoPathStream = Files.walk(oNormalizedPath)) {
+				List<Path> aoPaths = aoPathStream.sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+				for (Path oPath : aoPaths) {
+					boolean bDeleted = Files.deleteIfExists(oPath);
+					if (!bDeleted && Files.exists(oPath)) {
+						throw new IOException("Path still exists after deleteIfExists: " + oPath);
+					}
+				}
+				if (!oDir.exists()) {
+					return;
+				}
+			} catch (IOException oE) {
+				oLastException = oE;
+				WasdiLog.warnLog("ZipFileUtils.deleteDirectory: NIO fallback failed at attempt " + iAttempt + " because: " + oE);
+			}
+
+			if (oDir.exists()) {
+				WasdiLog.warnLog("ZipFileUtils.deleteDirectory: folder still exists after attempt " + iAttempt + ": " + oNormalizedPath);
 			}
 		}
+
+		if (oDir.exists()) {
+			if (oLastException != null) {
+				throw oLastException;
+			}
+			throw new IOException("Unable to delete directory after retries: " + oNormalizedPath);
+		}
+		
 	}
 
 	/**
@@ -709,7 +765,7 @@ public class ZipFileUtils {
 	 public static boolean isValidZipFile(final File oFile) {
 		    ZipFile oZipfile = null;
 		    try {
-		        oZipfile = new ZipFile(oFile);
+		        oZipfile = ZipFile.builder().setFile(oFile).get();
 		        return true;
 		    } catch (IOException e) {
 		        return false;

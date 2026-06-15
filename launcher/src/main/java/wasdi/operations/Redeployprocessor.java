@@ -28,6 +28,8 @@ public class Redeployprocessor extends Operation {
 		
 		ProcessorRepository oProcessorRepository = null;
 		Processor oProcessor = null;
+		boolean bRet = false;
+		WasdiProcessorEngine oEngine = null;
 		
 		try {
 	        // redeploy User Processor
@@ -46,7 +48,7 @@ public class Redeployprocessor extends Operation {
                 return false;
             }
 
-	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
+	        oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
 	        
 	        if (!oEngine.isProcessorOnNode(oParameter)) {
                 WasdiLog.errorLog("Redeployprocessor.executeOperation: Processor [" + sProcessorName + "] not installed in this node, return");
@@ -58,12 +60,10 @@ public class Redeployprocessor extends Operation {
 	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 	        oEngine.setProcessWorkspace(oProcessWorkspace);
 	        
-	        boolean bRet =  oEngine.redeploy(oParameter);
+	        bRet = oEngine.redeploy(oParameter);
 	        
 	        // Re-read the processor: maybe has been updated in the re-deploy
 	        oProcessor = oProcessorRepository.getProcessor(sProcessorId);
-	        
-	        m_oSendToRabbit.sendRedeployDoneMessage(oParameter, bRet, oEngine.isLocalBuild());	     
 
             return bRet;	        
 		}
@@ -83,7 +83,14 @@ public class Redeployprocessor extends Operation {
 			        	WasdiLog.debugLog("Redeployprocessor.executeOperation: flag for tracking the in-progress deployment set back to false");
 			        } else {
 			        	WasdiLog.warnLog("Redeployprocessor.executeOperation: could not set back to false the flag for tracking the in-progress deployment");
-			        }					
+			        }
+					
+					boolean bIsLocalBuild = false;
+					if (oEngine != null) {
+						bIsLocalBuild = oEngine.isLocalBuild();
+					}
+					
+					m_oSendToRabbit.sendRedeployDoneMessage(oParameter, bRet, bIsLocalBuild);
 				}
 			}            
 		}

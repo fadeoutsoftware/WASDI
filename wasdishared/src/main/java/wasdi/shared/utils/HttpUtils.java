@@ -525,6 +525,7 @@ public final class HttpUtils {
 		}
 
 		String sZippedFile = null;
+		String sTempPath = "";
 
 		// Check if we need to zip this file
 		if (!oFile.getName().toUpperCase().endsWith("ZIP")) {
@@ -534,7 +535,7 @@ public final class HttpUtils {
 			int iRandom = new SecureRandom().nextInt() & Integer.MAX_VALUE;
 
 			String sTemp = "tmp-" + iRandom + File.separator;
-			String sTempPath = WasdiFileUtils.fixPathSeparator(oFile.getParentFile().getPath());
+			sTempPath = WasdiFileUtils.fixPathSeparator(oFile.getParentFile().getPath());
 
 			if (!sTempPath.endsWith(File.separator)) {
 				sTempPath += File.separator;
@@ -551,10 +552,13 @@ public final class HttpUtils {
 			sZippedFile = sTempPath+iRandom + ".zip";
 
 			File oZippedFile = new File(sTempPath+iRandom + ".zip");
-			ZipOutputStream oOutZipStream = new ZipOutputStream(new FileOutputStream(oZippedFile));
-			ZipFileUtils.zipFile(oFile, oFile.getName(), oOutZipStream);
-
-			oOutZipStream.close();
+			try (FileOutputStream oFileOutputStream = new FileOutputStream(oZippedFile); ZipOutputStream oOutZipStream = new ZipOutputStream(oFileOutputStream)) {
+				ZipFileUtils.zipFile(oFile, oFile.getName(), oOutZipStream);
+			} 
+			catch (Exception oInEx) {
+				WasdiLog.errorLog("HttpUtils.httpPostFile: exception zipping file ", oInEx);
+				return false;
+			}			
 
 			String sOldFileName = oFile.getName();
 
@@ -587,91 +591,97 @@ public final class HttpUtils {
 		}
 
 		String sBoundary = "**WASDIlib**" + UUID.randomUUID().toString() + "**WASDIlib**";
-		try (FileInputStream oInputStream = new FileInputStream(oFile)) {
-			//request
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			oConnection.setDoOutput(true);
-			oConnection.setDoInput(true);
-			oConnection.setUseCaches(false);
-			int iBufferSize = 8192;//8*1024*1024
-			oConnection.setChunkedStreamingMode(iBufferSize);
-			Long lLen = oFile.length();
-			WasdiLog.debugLog("HttpUtils.httpPostFile: file length is: " + Long.toString(lLen));
+		
+		try {
+			try (FileInputStream oInputStream = new FileInputStream(oFile)) {
+				//request
+				URL oURL = new URL(sUrl);
+				HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+				oConnection.setDoOutput(true);
+				oConnection.setDoInput(true);
+				oConnection.setUseCaches(false);
+				int iBufferSize = 8192;//8*1024*1024
+				oConnection.setChunkedStreamingMode(iBufferSize);
+				Long lLen = oFile.length();
+				WasdiLog.debugLog("HttpUtils.httpPostFile: file length is: " + Long.toString(lLen));
 
-			if (asHeaders != null) {
-				for (String sKey : asHeaders.keySet()) {
-					oConnection.setRequestProperty(sKey, asHeaders.get(sKey));
-				}
-			}
-			oConnection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + sBoundary);
-			oConnection.setRequestProperty("Connection", "Keep-Alive");
-			oConnection.setRequestProperty("User-Agent", "WasdiLib.Java");
-			oConnection.connect();
-
-			try (DataOutputStream oOutputStream = new DataOutputStream(oConnection.getOutputStream())) {
-
-				oOutputStream.writeBytes( "--" + sBoundary + "\r\n" );
-				oOutputStream.writeBytes( "Content-Disposition: form-data; name=\"" + "file" + "\"; filename=\"" + sFileName + "\"" + "\r\n");
-				oOutputStream.writeBytes( "Content-Type: " + URLConnection.guessContentTypeFromName(sFileName) + "\r\n");
-				oOutputStream.writeBytes( "Content-Transfer-Encoding: binary" + "\r\n");
-				oOutputStream.writeBytes("\r\n");
-
-				Util.copyStream(oInputStream, oOutputStream);
-
-				oOutputStream.flush();
-				oInputStream.close();
-				oOutputStream.writeBytes("\r\n");
-				oOutputStream.flush();
-				oOutputStream.writeBytes("\r\n");
-				oOutputStream.writeBytes("--" + sBoundary + "--"+"\r\n");
-
-				// response
-				int iResponse = oConnection.getResponseCode();
-				
-				if (WasdiConfig.Current.logHttpCalls && bLog) {
-					WasdiLog.debugLog("HttpUtils.httpPostFile: server returned " + iResponse);
-				}
-
-				InputStream oResponseInputStream = null;
-
-				ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
-
-				if( 200 <= iResponse && 299 >= iResponse ) {
-					oResponseInputStream = oConnection.getInputStream();
-				} else {
-					oResponseInputStream = oConnection.getErrorStream();
-				}
-				if(null!=oResponseInputStream) {
-					Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
-					
-					if (WasdiConfig.Current.logHttpCalls) {
-						String sMessage = "HttpUtils.uploadFile: " + oByteArrayOutputStream.toString();
-						WasdiLog.debugLog(sMessage);
+				if (asHeaders != null) {
+					for (String sKey : asHeaders.keySet()) {
+						oConnection.setRequestProperty(sKey, asHeaders.get(sKey));
 					}
-				} else {
-					throw new NullPointerException("WasdiLib.uploadFile: stream is null");
 				}
+				oConnection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + sBoundary);
+				oConnection.setRequestProperty("Connection", "Keep-Alive");
+				oConnection.setRequestProperty("User-Agent", "WasdiLib.Java");
+				oConnection.connect();
 
-				oConnection.disconnect();
+				try (DataOutputStream oOutputStream = new DataOutputStream(oConnection.getOutputStream())) {
 
-			} catch(Exception oE) {
-				WasdiLog.debugLog("HttpUtils.uploadFile( " + sUrl + ", " + sFileName + ", ...): internal exception: " + oE);
+					oOutputStream.writeBytes( "--" + sBoundary + "\r\n" );
+					oOutputStream.writeBytes( "Content-Disposition: form-data; name=\"" + "file" + "\"; filename=\"" + sFileName + "\"" + "\r\n");
+					oOutputStream.writeBytes( "Content-Type: " + URLConnection.guessContentTypeFromName(sFileName) + "\r\n");
+					oOutputStream.writeBytes( "Content-Transfer-Encoding: binary" + "\r\n");
+					oOutputStream.writeBytes("\r\n");
+
+					Util.copyStream(oInputStream, oOutputStream);
+
+					oOutputStream.flush();
+					oInputStream.close();
+					oOutputStream.writeBytes("\r\n");
+					oOutputStream.flush();
+					oOutputStream.writeBytes("\r\n");
+					oOutputStream.writeBytes("--" + sBoundary + "--"+"\r\n");
+
+					// response
+					int iResponse = oConnection.getResponseCode();
+					
+					if (WasdiConfig.Current.logHttpCalls && bLog) {
+						WasdiLog.debugLog("HttpUtils.httpPostFile: server returned " + iResponse);
+					}
+
+					
+
+					ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
+					
+					try (InputStream oResponseInputStream = (200 <= iResponse && 299 >= iResponse)  ? oConnection.getInputStream()  : oConnection.getErrorStream()) {
+		                
+		                if (oResponseInputStream != null ) {
+		                    Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
+		                    if (WasdiConfig.Current.logHttpCalls) {
+		                        WasdiLog.debugLog("HttpUtils.httpPostFile: " + oByteArrayOutputStream.toString());
+		                    }
+		                } else {
+		                    WasdiLog.warnLog("WasdiLib.uploadFile: stream is null");
+		                }
+		            }
+					
+					oConnection.disconnect();
+
+				} catch(Exception oE) {
+					WasdiLog.errorLog("HttpUtils.httpPostFile( " + sUrl + ", " + sFileName + ", ...): internal exception: " + oE);
+					return false;
+				}
+			} catch (Exception oE) {
+				WasdiLog.errorLog("HttpUtils.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not open file due to: " + oE + ", aborting");
 				return false;
-			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("HttpUtils.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not open file due to: " + oE + ", aborting");
+			}			
+		}
+		catch(Exception oE) {
+			WasdiLog.errorLog("HttpUtils.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not open file due to: " + oE + ", aborting");
 			return false;
 		}
-
-		if (!Utils.isNullOrEmpty(sZippedFile)) {
-			try {
-				FileUtils.deleteDirectory(new File(sZippedFile).getParentFile());
-			}
-			catch (Exception oE) {
-				WasdiLog.debugLog("HttpUtils.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not delete temp zip file: " + oE + "");
-			}
+		finally {
+			if (!Utils.isNullOrEmpty(sZippedFile)) {
+				try {
+					WasdiLog.debugLog("HttpUtils.httpPostFile: Cleaning up temporary directory: " + sTempPath);
+					ZipFileUtils.deleteZipTmpDirectory(new File(sTempPath).toPath());
+				}
+				catch (Exception oE) {
+					WasdiLog.errorLog("HttpUtils.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not delete temp zip file: " + oE + "");
+				}
+			}			
 		}
+
 
 		return true;
 	}
