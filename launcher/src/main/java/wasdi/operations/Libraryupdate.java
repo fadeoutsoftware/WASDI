@@ -28,6 +28,8 @@ public class Libraryupdate extends Operation {
 		
 		ProcessorRepository oProcessorRepository = null;
 		Processor oProcessor = null;
+		boolean bRet = false;
+		WasdiProcessorEngine oEngine = null;
 		
 		try {		
 	        // Update Lib
@@ -45,8 +47,7 @@ public class Libraryupdate extends Operation {
                 return false;
             }
 	        
-	        
-	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
+	        oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
 	        
 	        if (!oEngine.isProcessorOnNode(oParameter)) {
                 WasdiLog.errorLog("Libraryupdate.executeOperation: Processor [" + oParameter.getName() + "] not installed in this node, return");
@@ -57,9 +58,7 @@ public class Libraryupdate extends Operation {
 	        oEngine.setSendToRabbit(m_oSendToRabbit);
 	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 	        oEngine.setProcessWorkspace(oProcessWorkspace);
-	        boolean bRet = oEngine.libraryUpdate(oParameter);
-	        
-	        m_oSendToRabbit.sendRedeployDoneMessage(oParameter, bRet, oEngine.isLocalBuild());
+	        bRet = oEngine.libraryUpdate(oParameter);
 	        
 	        return bRet;
 		}
@@ -78,7 +77,15 @@ public class Libraryupdate extends Operation {
 			        	WasdiLog.debugLog("Libraryupdate.executeOperation: flag for tracking the in-progress deployment set back to false");
 			        } else {
 			        	WasdiLog.warnLog("Libraryupdate.executeOperation: could not set back to false the flag for tracking the in-progress deployment");
-			        }					
+			        }
+					
+					boolean bIsLocalBuild = false;
+					if (oEngine != null) {
+						bIsLocalBuild = oEngine.isLocalBuild();
+					}
+					
+					m_oSendToRabbit.sendRedeployDoneMessage(oParameter, bRet, bIsLocalBuild);
+					
 				}
 			}            
 		}		
