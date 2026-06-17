@@ -1205,6 +1205,56 @@ services:
 {% endif %}
 
 
+
+{% if bWasdaiEnabled == True %}
+  ai-assistant:
+    depends_on:
+{% if bWasdiMongoEnabled == True %}
+      {{ sWasdiMongoServiceName }}:
+        condition: service_started
+{% endif %}
+      {{ sWasdiTraefikServiceName }}:
+        condition: service_started
+{% if ( aoAssistantEnvVariables | default([]) | length ) > 0 %}
+    environment:
+{% for oVariable in aoAssistantEnvVariables %}
+      - {{ oVariable['key'] }}={{ oVariable['value'] }}
+{% endfor %}
+{% endif %}
+    image: "wasdai-assistant:latest"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.r_ai-assistant.entrypoints={{ sWasdiTraefikEntrypoint }}"
+      - "traefik.http.routers.r_ai-assistant.rule=Host(`{{ sAIBaseUrl }}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.r_ai-assistant.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_ai-assistant.service=s_ai-assistant"
+{% if bWasdiSslEnabled == True %}
+      - "traefik.http.routers.r_ai-assistant.tls=true"
+{% endif %}
+      - "traefik.http.services.s_ai-assistant.loadbalancer.server.port=8000"
+{% if ( aoAssistantServerPorts | length ) > 0 %}
+    ports:
+{% for sAssistantServerCurrentPort in aoAssistantServerPorts %}
+      - "{{ sAssistantServerCurrentPort | regex_replace('^:', '') }}"
+{% endfor %}
+{% endif %}
+    pull_policy: "never"
+    restart: "always"
+    ulimits:
+      nofile:
+        soft: 524288
+        hard: 524288
+{% if ( aoAiVolumes | length ) > 0 %}
+    volumes:
+{% for sVolume in aoAiVolumes %}
+      - {{ sVolume }}
+{% endfor %}
+{% endif %}
+{% endif %}
+
+
+
+
   {{ sWasdiTraefikServiceName }}:
     command:
       - "--global.sendanonymoususage=false"

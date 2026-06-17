@@ -260,7 +260,7 @@ public class ProcessorsResource  {
 			}
 			
 			if (Utils.isNullOrEmpty(sType)) {
-				sType = ProcessorTypes.UBUNTU_PYTHON37_SNAP;
+				sType = ProcessorTypes.PYTHON312_UBUNTU24;
 			}
 			
 			Date oDate = new Date();
