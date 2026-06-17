@@ -1244,9 +1244,9 @@ services:
       nofile:
         soft: 524288
         hard: 524288
-{% if ( aoRiseTomcatWasdiWebServerVolume | length ) > 0 %}
+{% if ( aoAiVolumes | length ) > 0 %}
     volumes:
-{% for sVolume in aoRiseTomcatWasdiWebServerVolume %}
+{% for sVolume in aoAiVolumes %}
       - {{ sVolume }}
 {% endfor %}
 {% endif %}
