@@ -1270,7 +1270,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_ai-mcp.entrypoints={{ sWasdiTraefikEntrypoint }}"
-      - "traefik.http.routers.r_ai-mcp.rule=Host(`{{ sAIBaseUrl }}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.r_ai-mcp.rule=Host(`{{ sMCPBaseUrl }}`) && PathPrefix(`/`)"
       - "traefik.http.routers.r_ai-mcp.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_ai-mcp.service=s_ai-mcp"
 {% if bWasdiSslEnabled == True %}
