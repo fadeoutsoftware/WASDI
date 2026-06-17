@@ -33,6 +33,16 @@ import wasdi.shared.data.interfaces.ISubscriptionRepositoryBackend;
 import wasdi.shared.data.interfaces.IUserRepositoryBackend;
 import wasdi.shared.data.interfaces.IUserResourcePermissionRepositoryBackend;
 import wasdi.shared.data.interfaces.IWorkspaceRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.IDatasetImageRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.IDatasetProjectRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.IImageStyleRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.ILabelRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.ILabellingTemplateRepositoryBackend;
+import wasdi.shared.data.mongo.labelling.MongoDatasetImageRepositoryBackend;
+import wasdi.shared.data.mongo.labelling.MongoDatasetProjectRepositoryBackend;
+import wasdi.shared.data.mongo.labelling.MongoImageStyleRepositoryBackend;
+import wasdi.shared.data.mongo.labelling.MongoLabelRepositoryBackend;
+import wasdi.shared.data.mongo.labelling.MongoLabellingTemplatesRepositoryBackend;
 
 /**
  * Mongo implementation of centralized repository backend factory.
@@ -230,5 +240,35 @@ public class MongoDataRepositoryFactory implements IDataRepositoryFactory {
         IWorkspaceRepositoryBackend oRepositoryBackend = new MongoWorkspaceRepositoryBackend();
         return oRepositoryBackend;
     }
+
+	@Override
+	public IDatasetImageRepositoryBackend createDatasetImageRepository() {
+		IDatasetImageRepositoryBackend oRepositoryBackend = new MongoDatasetImageRepositoryBackend();
+
+		return oRepositoryBackend;
+	}
+
+	@Override
+	public IDatasetProjectRepositoryBackend createDatasetProjectRepository() {
+		IDatasetProjectRepositoryBackend oRepositoryBackend = new MongoDatasetProjectRepositoryBackend();
+		return oRepositoryBackend;
+	}
+
+	@Override
+	public IImageStyleRepositoryBackend createImageStyleRepository() {
+		IImageStyleRepositoryBackend oRepositoryBackend = new MongoImageStyleRepositoryBackend();
+		return oRepositoryBackend;
+	}
+
+	@Override
+	public ILabellingTemplateRepositoryBackend createLabellingTemplateRepository() {
+		ILabellingTemplateRepositoryBackend oRepositoryBackend = new MongoLabellingTemplatesRepositoryBackend();
+		return oRepositoryBackend;
+	}
+
+	@Override
+	public ILabelRepositoryBackend createLabelRepository() {
+        return new MongoLabelRepositoryBackend();
+	}
 
 }

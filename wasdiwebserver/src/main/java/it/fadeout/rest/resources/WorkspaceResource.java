@@ -91,7 +91,7 @@ public class WorkspaceResource {
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public List<WorkspaceListInfoViewModel> getListByUser(@HeaderParam("x-session-token") String sSessionId) {
-
+		
 		WasdiLog.debugLog("WorkspaceResource.getListByUser");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -357,8 +357,7 @@ public class WorkspaceResource {
 	@GET
 	@Path("create")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult createWorkspace(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("name") String sName, @QueryParam("node") String sNodeCode) {
+	public PrimitiveResult createWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName, @QueryParam("node") String sNodeCode) {
 
 		WasdiLog.debugLog("WorkspaceResource.createWorkspace(" + sName + ", " + sNodeCode + " )");
 

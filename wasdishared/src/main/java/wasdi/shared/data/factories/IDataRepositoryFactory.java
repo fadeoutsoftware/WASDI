@@ -32,6 +32,11 @@ import wasdi.shared.data.interfaces.ISubscriptionRepositoryBackend;
 import wasdi.shared.data.interfaces.IUserRepositoryBackend;
 import wasdi.shared.data.interfaces.IUserResourcePermissionRepositoryBackend;
 import wasdi.shared.data.interfaces.IWorkspaceRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.IDatasetImageRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.IDatasetProjectRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.IImageStyleRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.ILabelRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.ILabellingTemplateRepositoryBackend;
 
 /**
  * Centralized factory contract for repository backends.
@@ -101,5 +106,16 @@ public interface IDataRepositoryFactory {
     IUserResourcePermissionRepositoryBackend createUserResourcePermissionRepository();
 
     IWorkspaceRepositoryBackend createWorkspaceRepository();
+    
+    IDatasetImageRepositoryBackend createDatasetImageRepository();
+    
+    IDatasetProjectRepositoryBackend createDatasetProjectRepository();
+    
+    IImageStyleRepositoryBackend createImageStyleRepository();
+    
+    ILabellingTemplateRepositoryBackend createLabellingTemplateRepository();
+    
+    ILabelRepositoryBackend createLabelRepository();
+    
 
 }
