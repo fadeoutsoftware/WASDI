@@ -41,6 +41,7 @@ import wasdi.shared.data.interfaces.labelling.ILabellingTemplateRepositoryBacken
 import wasdi.shared.data.mongo.labelling.MongoDatasetImageRepositoryBackend;
 import wasdi.shared.data.mongo.labelling.MongoDatasetProjectRepositoryBackend;
 import wasdi.shared.data.mongo.labelling.MongoImageStyleRepositoryBackend;
+import wasdi.shared.data.mongo.labelling.MongoLabelRepositoryBackend;
 import wasdi.shared.data.mongo.labelling.MongoLabellingTemplatesRepositoryBackend;
 
 /**
