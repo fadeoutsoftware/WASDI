@@ -26,6 +26,7 @@ import wasdi.shared.business.Organization;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.Style;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.labelling.DatasetProject;
 import wasdi.shared.business.missions.Mission;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.Subscription;
@@ -43,6 +44,7 @@ import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.data.labelling.DatasetProjectRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.missions.MissionsRepository;
@@ -620,6 +622,46 @@ public class AdminDashboardResource {
 			else {
 				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Error inserting the sharing")).build();
 			}
+		}		
+		else if (sResourceType.equalsIgnoreCase(ResourceTypes.LABELLINGDATASET.getResourceType())) {
+			DatasetProjectRepository oDatasetProjectRepository = new DatasetProjectRepository();
+			DatasetProject oDatasetProject = oDatasetProjectRepository.getDataset(sResourceId);
+			
+			if (oDatasetProject == null) {
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid Resource Id")).build();
+			}
+			
+			if (oDatasetProject.getOwner().equals(oRequesterUser.getUserId()) || UserApplicationRole.isAdmin(oRequesterUser.getUserId())) {
+				UserResourcePermission oUserResourcePermission = new UserResourcePermission(sResourceType,sResourceId, sDestinationUserId,oDatasetProject.getOwner(),oRequesterUser.getUserId(), sRights);
+				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+				
+				UserResourcePermission oExsiting = oUserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId(sResourceType, sDestinationUserId, sResourceId);
+				
+				if (oExsiting != null) {
+					return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Already shared")).build();
+				}
+				
+				if (oUserResourcePermissionRepository.insertPermission(oUserResourcePermission)) {
+					
+					// Share also the workspace
+					
+					WorkspaceResource oWorkspaceResource = new WorkspaceResource();
+					PrimitiveResult oResult = oWorkspaceResource.shareWorkspace(sSessionId, sResourceId, sDestinationUserId, sRights);
+
+					if (oResult.getBoolValue()) {
+						return Response.ok().build();
+					} else {
+						return Response.status(oResult.getIntValue()).entity(new ErrorResponse("Dataset shared but workspace sharing failed")).build();
+					}
+				}
+				else {
+					return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Error inserting the sharing")).build();
+				}				
+			}
+			else {
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Unauthorized")).build();
+			}			
+			
 		}
 		else {
 			WasdiLog.debugLog("AdminDashboardResource.addResourcePermission: invalid resource type");
@@ -716,7 +758,33 @@ public class AdminDashboardResource {
 			else {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
-		} 
+		}
+		else if (sResourceType.equalsIgnoreCase(ResourceTypes.LABELLINGDATASET.getResourceType())) {
+			DatasetProjectRepository oDatasetProjectRepository = new DatasetProjectRepository();
+			DatasetProject oDatasetProject = oDatasetProjectRepository.getDataset(sResourceId);
+			
+			if (oDatasetProject == null) {
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid Resource Id")).build();
+			}
+			
+			if (oDatasetProject.getOwner().equals(oRequesterUser.getUserId()) || UserApplicationRole.isAdmin(oRequesterUser.getUserId())) {
+				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+				int iDeleted = oUserResourcePermissionRepository.deletePermissionsByTypeAndUserIdAndResourceId(sResourceType, sUserId, sResourceId);
+				if (iDeleted>=1) {
+					
+					oUserResourcePermissionRepository.deletePermissionsByTypeAndUserIdAndResourceId("workspace", sUserId, oDatasetProject.getWorkspaceId());
+					
+					return Response.ok().build();
+				}
+				else {
+					return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Error removing the sharing")).build();
+				}				
+			}
+			else {
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Unauthorized")).build();
+			}			
+			
+		}		
 		else {
 			
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
