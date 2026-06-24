@@ -11,9 +11,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import net.wasdi.openeoserver.viewmodels.Error;
-import net.wasdi.openeoserver.viewmodels.Processes;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.MongoRepository;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
