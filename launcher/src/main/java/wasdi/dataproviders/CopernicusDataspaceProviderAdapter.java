@@ -135,7 +135,6 @@ public class CopernicusDataspaceProviderAdapter extends ProviderAdapter {
 			
 			Map<String, String> oHeader = new HashMap<>();
 			oHeader.put("Authorization", "Bearer " + sAccessToken);
-	        oHeader.put("Authorization", "Bearer " + sAccessToken);
 	        oHeader.put("accept", "application/json, text/plain, */*");
 	        oHeader.put("Accept-encoding", "gzip, deflate, br, zstd");
 	        			
