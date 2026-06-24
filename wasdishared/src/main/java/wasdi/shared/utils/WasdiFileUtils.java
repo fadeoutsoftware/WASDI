@@ -707,6 +707,66 @@ public class WasdiFileUtils {
 		
 		return "";
 	}
+	
+	public static boolean copyOtherShapeFiles(File oOriginFile, File oDestinationFile) {
+		
+		if (oOriginFile == null) return false;
+		if (oDestinationFile == null) return false;
+		if (oOriginFile.getName().toLowerCase().endsWith(".shp")==false) return false;
+		if (oDestinationFile.getName().toLowerCase().endsWith(".shp")==false) return false;
+		
+		try  {
+			
+			
+			
+			ArrayList<String> asFilesToCopy = new ArrayList<String>();
+			File oWorkspaceFolder = new File(oOriginFile.getParent());
+			
+			// Take all the files in the folder
+			File[] aoWorkspaceFiles = oWorkspaceFolder.listFiles();
+			
+			// We are searching for files with the same name but different extension
+			String sBaseFileNameFilter = oOriginFile.getName();
+			sBaseFileNameFilter = WasdiFileUtils.getFileNameWithoutLastExtension(sBaseFileNameFilter);
+			sBaseFileNameFilter += ".";
+			
+			if (aoWorkspaceFiles != null) {
+				for (File oChild : aoWorkspaceFiles) {
+					// Is it me?
+					if (oChild.getName().equals(oOriginFile.getName())) continue;
+					
+					// Does it match?
+					if (oChild.getName().startsWith(sBaseFileNameFilter))  {
+						if (!oChild.getName().toLowerCase().endsWith(".zip")) {
+							asFilesToCopy.add(oChild.getPath());
+							WasdiLog.debugLog("WasdiFileUtils.copyOtherShapeFiles: found other file to copy " + oChild.getName());							
+						}
+					}
+				}
+			}
+	        
+	        if (asFilesToCopy.size()>0) {
+				for (String sFileToCopy : asFilesToCopy) {
+					String sOtherOutputFile = oDestinationFile.getPath();
+					String sOtherOutputExtension = WasdiFileUtils.getFileNameExtension(sOtherOutputFile);
+					String sNewExtension = WasdiFileUtils.getFileNameExtension(sFileToCopy);
+					
+					sOtherOutputFile = sOtherOutputFile.replace(sOtherOutputExtension, sNewExtension);
+					
+					WasdiLog.debugLog("WasdiFileUtils.copyOtherShapeFiles: copy also " + sFileToCopy + " to " + sOtherOutputFile);
+					
+					FileUtils.copyFile(new File(sFileToCopy), new File(sOtherOutputFile));
+				}            	
+	        }
+	        return true;
+		}
+		catch(Exception oEx) {
+			WasdiLog.errorLog("WasdiFileUtils.copyOtherShapeFiles: exception ", oEx);
+			return false;
+		}
+
+	       
+	}
 
 	
 	/***

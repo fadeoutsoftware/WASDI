@@ -32,7 +32,7 @@ import wasdi.shared.business.Workspace;
 import wasdi.shared.business.users.User;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
-import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.OpenEOJobRepository;
 import wasdi.shared.data.WorkspaceRepository;

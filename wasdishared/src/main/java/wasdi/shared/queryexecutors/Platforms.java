@@ -52,6 +52,12 @@ public class Platforms {
 	public static String SWOT = "SWOT";
 	
 	public static String GLOBATHY = "GLOBATHY";
+	
+	/**
+	 * Link to the globathy collection that can be used from a mini wasdi or external wasdi to use the main one as 
+	 * data provider
+	 */
+	public static String GLOBATHYWASDI = "GLOBATHYWASDI";
 		
 	// Creodias 2 new platforms
 	public static String SMOS = "SMOS";

@@ -23,7 +23,7 @@ import wasdi.shared.business.Node;
 import wasdi.shared.business.users.*;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
-import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.HttpUtils;

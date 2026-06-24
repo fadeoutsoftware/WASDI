@@ -48,4 +48,25 @@ public class SchedulerQueueConfig {
 	 * Max number of waiting processes admitted before breaking the FIFO rules
 	 */
 	public int maxWaitingQueue = 100;
+	
+	/**
+	 * It enables the fair Round Robin per user: it will round x processes per user in the CREATED list 
+	 */
+	public boolean fairRoundRobin = false;
+	
+	/**
+	 * Max number of consecutive processess per user, if the fairRoundRobin is activated and there are other users in queue
+	 */
+	public int fairRoundRobinMaxProcessesCount = 3;
+
+	/**
+	 * If true, when fairRoundRobin is active, applies a second round robin by parentId inside each user queue
+	 */
+	public boolean fairRoundRobinParentId = false;
+
+	/**
+	 * Max number of consecutive processess per parentId group inside the selected user queue
+	 */
+	public int fairRoundRobinParentIdMaxProcessesCount = 3;
+
 }

@@ -4,17 +4,19 @@ import java.io.File;
 import java.util.Map;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.wasdiAPI.AuthAPIClient;
 
-public class GlobathyProviderAdapter extends ProviderAdapter {
+public class GlobathyWasdiProviderAdapter extends ProviderAdapter {
+	
+	protected String m_sRemoteWasdiSessionId = "";
 	
 
-	public GlobathyProviderAdapter() {
-		m_sDataProviderCode = "GLOBATHY";
+	public GlobathyWasdiProviderAdapter() {
+		m_sDataProviderCode = "GLOBATHYWASDI";
 	}
 
 	@Override
@@ -30,12 +32,12 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 		try {
 		
 			if (sFileURL.contains(",")) {
-				WasdiLog.debugLog("GlobathyProviderAdapter.getDownloadFileSize. File size for url " + sFileURL);
+				WasdiLog.debugLog("GlobathyWasdiProviderAdapter.getDownloadFileSize. File size for url " + sFileURL);
 				return Long.parseLong(sFileURL.split(",")[1]);
 			}
 			
 		} catch(Exception oE) {
-			WasdiLog.errorLog("GlobathyProviderAdapter.getDownloadFileSize. Error", oE);
+			WasdiLog.errorLog("GlobathyWasdiProviderAdapter.getDownloadFileSize. Error", oE);
 		}
 				
 		return lFileSize;
@@ -45,7 +47,7 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		
-		WasdiLog.debugLog("GlobathyProviderAdapter.executeDownloadFile. Copying bathymetry file to " + sSaveDirOnServer);
+		WasdiLog.debugLog("GlobathyWasdiProviderAdapter.executeDownloadFile. Copying bathymetry file to " + sSaveDirOnServer);
 		
 		String sDownloadedFilePath = null;
 		
@@ -56,14 +58,7 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 			String sSubfolderName = getSubFolderName(sFileName);
 			
 			if (Utils.isNullOrEmpty(sSubfolderName)) {
-				WasdiLog.warnLog("GlobathyProviderAdapter.executeDownloadFile. Could not determine subfolder name for url " + sFileURL);
-				return null;
-			}
-			
-			String sSessionId = this.m_sSession;
-			
-			if (Utils.isNullOrEmpty(sSessionId)) {
-				WasdiLog.warnLog("GlobathyProviderAdapter.executeDownloadFile. No session id. Impossible to call APIs");
+				WasdiLog.warnLog("GlobathyWasdiProviderAdapter.executeDownloadFile. Could not determine subfolder name for url " + sFileURL);
 				return null;
 			}
 			
@@ -72,7 +67,7 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 				sDestinationFilePath += File.separator;
 			sDestinationFilePath += sFileName;
 			
-			String sHttpURL = WasdiConfig.Current.baseUrl;
+			String sHttpURL = this.m_oDataProviderConfig.link;
 			if (!sHttpURL.endsWith("/"))
 				sHttpURL += "/";
 			sHttpURL += "images/get";
@@ -81,21 +76,27 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 					+ "&folder=" + sSubfolderName 
 					+ "&name=" + sFileName;
 			
-			Map<String, String> aoHeaders = Map.of("x-session-token", sSessionId);
+			m_sRemoteWasdiSessionId = AuthAPIClient.login(m_sProviderUser, m_sProviderPassword, this.m_oDataProviderConfig.link);
+			
+			if (Utils.isNullOrEmpty(m_sRemoteWasdiSessionId)) {
+				WasdiLog.errorLog("QueryExecutorGlobathyWasdi.init: impossible to get the session id for url  " + this.m_oDataProviderConfig.link + " user " + m_sProviderUser);
+			}
+			
+			Map<String, String> aoHeaders = Map.of("x-session-token", m_sRemoteWasdiSessionId);
 				
 			sDownloadedFilePath = HttpUtils.downloadFile(sHttpURL, aoHeaders, sDestinationFilePath);
 			
 			if (Utils.isNullOrEmpty(sDownloadedFilePath)) {
-				WasdiLog.warnLog("GlobathyProviderAdapter.executeDownloadFile. Error in downloading the file");
+				WasdiLog.warnLog("GlobathyWasdiProviderAdapter.executeDownloadFile. Error in downloading the file");
 				return null;
 			}
 			
-			WasdiLog.debugLog("GlobathyProviderAdapter.executeDownloadFile. File saved at path " + sDownloadedFilePath);
+			WasdiLog.debugLog("GlobathyWasdiProviderAdapter.executeDownloadFile. File saved at path " + sDownloadedFilePath);
 			
 			return sDownloadedFilePath;
 			
 		} catch (Exception oE) {
-			WasdiLog.errorLog("GlobathyProviderAdapter.executeDownloadFile. Error copyting bathymetry file", oE);
+			WasdiLog.errorLog("GlobathyWasdiProviderAdapter.executeDownloadFile. Error copyting bathymetry file", oE);
 		}
 
 		return sDownloadedFilePath;
@@ -112,8 +113,8 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 	@Override
 	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
 		
-		if (sPlatformType.equals(Platforms.GLOBATHY)) {
-			return DataProviderScores.FILE_ACCESS.getValue();
+		if (sPlatformType.equals(Platforms.GLOBATHYWASDI)) {
+			return DataProviderScores.DOWNLOAD.getValue();
 		}
 		
 		return 0;
@@ -154,6 +155,22 @@ public class GlobathyProviderAdapter extends ProviderAdapter {
 		}
 		
 		return null;
+	}
+	
+	@Override
+	public void closeConnections() {
+		super.closeConnections();
+		if (!Utils.isNullOrEmpty(m_sRemoteWasdiSessionId)) {
+			if (m_oDataProviderConfig!=null) {
+				try {
+					AuthAPIClient.logout(m_sRemoteWasdiSessionId, this.m_oDataProviderConfig.link);		
+				}
+				catch (Exception oEx) {
+					WasdiLog.errorLog("GlobathyProvider.closeConnections. Error ", oEx);
+				}
+			}
+			
+		}
 	}
 
 }
