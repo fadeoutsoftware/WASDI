@@ -21,17 +21,14 @@ import javax.ws.rs.core.Response.Status;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import ogc.wasdi.processes.OgcProcesses;
-import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.OgcProcessesTask;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.processors.*;
-import wasdi.shared.business.users.*;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.users.User;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.DownloadedFilesRepository;
-import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.OgcProcessesTaskRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -118,7 +115,7 @@ public class JobsResource {
 					String sResponse = oHttpCallResponse.getResponseBody();
 					
 					if (Utils.isNullOrEmpty(sResponse)==false) {
-						ArrayList<ProcessWorkspaceViewModel> aoProcWs = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<ArrayList<ProcessWorkspaceViewModel>>(){});
+						ArrayList<ProcessWorkspaceViewModel> aoProcWs = wasdi.shared.data.mongo.MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<ArrayList<ProcessWorkspaceViewModel>>(){});
 						aoAllProcs.addAll(aoProcWs);
 					}
 				}
