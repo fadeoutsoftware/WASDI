@@ -1,6 +1,7 @@
 package wasdi.operations;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -133,6 +134,11 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 
 				try {
 					FileUtils.copyFile(oOriginFile, oDestinationFile);
+					
+					if (WasdiFileUtils.isShapeFile(oOriginFile)) {
+						WasdiFileUtils.copyOtherShapeFiles(oOriginFile, oDestinationFile);
+					}
+					
 				} catch (Exception oE) {
 					WasdiLog.errorLog("Share.executeOperation: could not copy file due to: " + oE);
 				}

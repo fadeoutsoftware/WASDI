@@ -1016,7 +1016,8 @@ public final class HttpUtils {
 						InputStream oInputStream = oConnection.getInputStream()) {
 					// 	opens an output stream to save into file
 					Util.copyStream(oInputStream, oOutputStream);
-				} catch (Exception oEx) {
+				} 
+				catch (Exception oEx) {
 					WasdiLog.errorLog("HttpUtils.downloadFile: error ", oEx);
 				}
 				return sOutputFilePath;
