@@ -57,7 +57,7 @@ public class LabelResource {
 		}
 
 		try {
-			DatasetProject oDataset = getReadableDataset(oUser, sImageName);
+			DatasetProject oDataset = getReadableDataset(oUser, sDatasetId);
 			if (oDataset == null) {
 				WasdiLog.warnLog("LabelResource.getByImage: user cannot access the label dataset");
 				return Response.status(Status.UNAUTHORIZED).build();
