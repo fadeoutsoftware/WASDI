@@ -1046,6 +1046,13 @@
 					"regex": ".*"
 				}
 			]
+		},
+		{
+			"name": "GLOBATHYWASDI",
+			"indexname": "platformname",
+			"indexvalue": "GLOBATHYWASDI",
+			"ispublic": true,
+			"filters": []
 		}
 	],
 	"orbitsearch": {
