@@ -1,4 +1,4 @@
-FROM ubuntu:24.10
+FROM ubuntu:24.04
 
 
 LABEL org.opencontainers.image.authors="WASDI SARL"
@@ -34,9 +34,9 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     apt-get update && \
     apt-get install \
         ca-certificates && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ oracular main restricted universe multiverse"           > /etc/apt/sources.list && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ oracular-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ oracular-security main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ noble main restricted universe multiverse"           > /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ noble-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ noble-security main restricted universe multiverse" >> /etc/apt/sources.list && \
     apt-get update && \
     apt-get dist-upgrade && \
     apt-get install \
