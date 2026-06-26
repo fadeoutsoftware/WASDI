@@ -198,7 +198,13 @@
 			"catalogues": [
 				"GFS_NRT"
 			]
-		}
+		},
+        {
+            "platform": "SWOT",
+            "catalogues": [
+                "LPDAAC"
+            ]
+        }
 	],
 	"dataProviders": [
 		{
@@ -460,7 +466,8 @@
 			"cloudProvider": "NASA",
 			"supportedPlatforms": [
 				"TERRA",
-				"VIIRS"
+				"VIIRS",
+				"SWOT"
 			]
 		},
 		{
