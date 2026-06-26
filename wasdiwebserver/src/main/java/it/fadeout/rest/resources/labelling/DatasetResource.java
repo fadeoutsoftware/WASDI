@@ -270,7 +270,7 @@ public class DatasetResource {
 			oDataset.getTasks().addAll(oDatasetViewModel.tasks);
 			oDataset.setTemplateId(oDatasetViewModel.templateId);
 			WorkspaceResource oWorkspaceResource = new WorkspaceResource();
-			PrimitiveResult oPrimitiveResult = oWorkspaceResource.createWorkspace(sSessionId, "labelling_"+oDatasetViewModel.name, sSessionId);
+			PrimitiveResult oPrimitiveResult = oWorkspaceResource.createWorkspace(sSessionId, "labelling_"+oDatasetViewModel.name, "");
 			if (oPrimitiveResult == null) {
 				WasdiLog.errorLog("DatasetResource.create: we could not create the workspace associated to the dataset.. not good at all...");
 				return Response.serverError().build();				
