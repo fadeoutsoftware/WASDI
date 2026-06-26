@@ -12,4 +12,5 @@ public class DatasetListViewModel {
 	public String mission;
 	public ArrayList<String> tasks = new ArrayList<>();
 	public String userRole;
+	public String workspaceId;
 }
