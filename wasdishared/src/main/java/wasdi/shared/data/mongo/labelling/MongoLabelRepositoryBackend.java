@@ -132,4 +132,25 @@ public class MongoLabelRepositoryBackend  extends MongoRepository implements ILa
 		return aoReturnList;
 	}
 
+	@Override
+	public List<Label> getLabelsByDataset(String sDatasetId) {
+		final List<Label> aoReturnList = new ArrayList<>();
+
+		if (Utils.isNullOrEmpty(sDatasetId)) {
+			return aoReturnList;
+		}
+
+		try {
+			Document oFilter = new Document("datasetId", sDatasetId);
+			FindIterable<Document> oDocuments = getCollection(m_sThisCollection)
+					.find(oFilter)
+					.sort(new Document("id", 1));
+			fillList(aoReturnList, oDocuments, Label.class);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("MongoLabelRepositoryBackend.getLabelsByDataset : error ", oEx);
+		}
+
+		return aoReturnList;
+	}
+
 }

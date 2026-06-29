@@ -1,5 +1,7 @@
 package it.fadeout.rest.resources.labelling;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,8 +13,10 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.joda.time.DateTimeUtils;
 
@@ -21,7 +25,9 @@ import it.fadeout.rest.resources.WorkspaceResource;
 import wasdi.shared.business.labelling.DatasetProject;
 import wasdi.shared.business.labelling.LabellingProjectRoles;
 import wasdi.shared.business.users.User;
+import wasdi.shared.business.labelling.Label;
 import wasdi.shared.data.labelling.DatasetProjectRepository;
+import wasdi.shared.data.labelling.LabelRepository;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ClientMessageCodes;
@@ -30,6 +36,7 @@ import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.labelling.datasets.DatasetCollaboratorViewModel;
 import wasdi.shared.viewmodels.labelling.datasets.DatasetListViewModel;
 import wasdi.shared.viewmodels.labelling.datasets.DatasetViewModel;
+import wasdi.shared.viewmodels.labelling.datasets.ExportDatasetViewModel;
 
 @Path("/labelling/datasets")
 public class DatasetResource {
@@ -577,6 +584,95 @@ public class DatasetResource {
 
 		return false;
 	}
+	
+	@POST
+	@Path("/export")
+	@Produces("application/zip")
+	public Response exportDataset(@HeaderParam("x-session-token") String sSessionId, ExportDatasetViewModel oExportViewModel) {
+		
+		WasdiLog.debugLog("DatasetResource.exportDataset");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		// 1. Session Check
+		if (oUser == null) {
+			WasdiLog.warnLog("DatasetResource.exportDataset: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+		
+		if (oExportViewModel == null || Utils.isNullOrEmpty(oExportViewModel.projectId)) {
+			WasdiLog.warnLog("DatasetResource.exportDataset: invalid payload");
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+
+		try {
+			// 2. Fetch the Project
+			DatasetProjectRepository oDatasetRepository = new DatasetProjectRepository();
+			DatasetProject oDataset = oDatasetRepository.getDataset(oExportViewModel.projectId);
+			
+			if (oDataset == null) {
+				WasdiLog.warnLog("DatasetResource.exportDataset: dataset not found");
+				return Response.status(Status.NOT_FOUND).build();
+			}			
+			
+			// (Security and Filtering commented out for now as requested)
+
+			// 3. Fetch the Labels
+			LabelRepository oLabelRepo = new LabelRepository();
+			List<Label> aoAllLabels = oLabelRepo.getLabelsByDataset(oDataset.getId());
+			
+			if (aoAllLabels == null || aoAllLabels.isEmpty()) {
+				WasdiLog.warnLog("DatasetResource.exportDataset: No labels found");
+				return Response.status(Status.NOT_FOUND).entity("No labels found").build();
+			}
+
+			// 4. Create the Streaming ZIP Output
+			StreamingOutput oStream = new StreamingOutput() {
+				@Override
+				public void write(OutputStream output) throws IOException, WebApplicationException {
+					try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(output)) {
+						
+						// ── THE FIX: EXPORT AS JSON TO BYPASS GEOTOOLS ──
+						java.util.zip.ZipEntry entry = new java.util.zip.ZipEntry("labels_export.json");
+						zos.putNextEntry(entry);
+						
+						// Use Jackson ObjectMapper (which WASDI already has) to write the labels to the ZIP
+						com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+						byte[] jsonBytes = mapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(aoAllLabels);
+						
+						zos.write(jsonBytes);
+						zos.closeEntry();
+
+						// B. Write Raw Imagery into the ZIP (Commented out for now)
+						/*
+						if (oExportViewModel.includeRawData) {
+							// ProductRepository oProductRepo = new ProductRepository();
+							// List<Product> aoImages = oProductRepo.getProductsByWorkspace(oDataset.getWorkspaceId());
+							// for (Product oImg : aoImages) {
+							//     writeImageToZip(zos, oImg);
+							// }
+						}
+						*/
+					} catch (Exception e) {
+						WasdiLog.errorLog("Error writing zip stream: " + e.getMessage());
+						throw new WebApplicationException("Error generating zip", e);
+					}
+				}
+			};
+
+			// 5. Return the ZIP stream safely
+			String sSafeName = oDataset.getName().replaceAll("[^a-zA-Z0-9_-]", "_");
+			return Response.ok(oStream)
+					.type("application/zip")
+					.header("Content-Disposition", "attachment; filename=\"ComapVeda_Export_" + sSafeName + ".zip\"")
+					.build();
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("DatasetResource.exportDataset error: " + oEx);
+			return Response.serverError().build();
+		}
+	}
+	
 	
 	
 

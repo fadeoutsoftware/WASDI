@@ -41,4 +41,8 @@ public class LabelRepository {
 	public List<Label> getAll() {
 		return m_oBackend.getAll();
 	}
+	
+	public List<Label> getLabelsByDataset(String sDatasetId){
+		return m_oBackend.getLabelsByDataset(sDatasetId);
+	}
 }

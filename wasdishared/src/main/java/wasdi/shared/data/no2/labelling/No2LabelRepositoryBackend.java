@@ -38,4 +38,10 @@ public class No2LabelRepositoryBackend  extends No2Repository implements ILabelR
 		return null;
 	}
 
+	@Override
+	public List<Label> getLabelsByDataset(String sDatasetId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
