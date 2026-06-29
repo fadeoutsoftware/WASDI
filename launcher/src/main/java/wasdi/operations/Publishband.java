@@ -325,6 +325,20 @@ public class Publishband extends Operation {
                     WasdiLog.debugLog("Publishband.executeOperation: node code: " + oNode.getNodeCode());
                     oPublishedBand.setGeoserverUrl(oNode.getNodeGeoserverAddress());
                 }
+                else {
+                	if (WasdiConfig.Current.geoserver!=null) {
+                		String sGeoserverUrl = WasdiConfig.Current.geoserver.address;
+                		if (!sGeoserverUrl.endsWith("ows")) {
+                			if (!sGeoserverUrl.endsWith("/")) sGeoserverUrl +="/";
+                			sGeoserverUrl += "ows";
+                		}
+                		
+                		oPublishedBand.setGeoserverUrl(sGeoserverUrl);	
+                	}
+                	else {
+                		WasdiLog.errorLog("Publishband.executeOperation: geoserver url not found neither in the node nor in the config.");
+                	}
+                }
 
                 // Add it the the db
                 oPublishedBandsRepository.insertPublishedBand(oPublishedBand);
