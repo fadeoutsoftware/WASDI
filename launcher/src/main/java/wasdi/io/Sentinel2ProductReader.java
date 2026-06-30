@@ -206,6 +206,15 @@ public class Sentinel2ProductReader extends WasdiProductReader {
             asArgs.add("-of");
             asArgs.add("GTiff");
             
+            asArgs.add("-ot");
+            asArgs.add("Byte");
+            
+            asArgs.add("-scale");
+            asArgs.add("0");
+            asArgs.add("4000");
+            asArgs.add("0");
+            asArgs.add("255");            
+            
             asArgs.add("-co");
             asArgs.add("PHOTOMETRIC=RGB");
             
