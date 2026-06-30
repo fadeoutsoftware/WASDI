@@ -176,6 +176,13 @@ public class Sentinel2ProductReader extends WasdiProductReader {
             asVrtArgs.add(sGdalBuildVrtCommand);
             asVrtArgs.add("-separate");
             asVrtArgs.add(sVrtPath);
+            
+            asVrtArgs.add("-scale");
+            asVrtArgs.add("0");
+            asVrtArgs.add("4000");
+            asVrtArgs.add("0");
+            asVrtArgs.add("255");            
+            
             asVrtArgs.add(oSourceR.sDatasetPath); 
             asVrtArgs.add(oSourceG.sDatasetPath); 
             asVrtArgs.add(oSourceB.sDatasetPath);
@@ -208,13 +215,7 @@ public class Sentinel2ProductReader extends WasdiProductReader {
             
             asArgs.add("-ot");
             asArgs.add("Byte");
-            
-            asArgs.add("-scale");
-            asArgs.add("0");
-            asArgs.add("4000");
-            asArgs.add("0");
-            asArgs.add("255");            
-            
+                        
             asArgs.add("-co");
             asArgs.add("PHOTOMETRIC=RGB");
             
