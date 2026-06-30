@@ -175,13 +175,7 @@ public class Sentinel2ProductReader extends WasdiProductReader {
             ArrayList<String> asVrtArgs = new ArrayList<String>();
             asVrtArgs.add(sGdalBuildVrtCommand);
             asVrtArgs.add("-separate");
-            asVrtArgs.add(sVrtPath);
-            
-            asVrtArgs.add("-scale");
-            asVrtArgs.add("0");
-            asVrtArgs.add("4000");
-            asVrtArgs.add("0");
-            asVrtArgs.add("255");            
+            asVrtArgs.add(sVrtPath);            
             
             asVrtArgs.add(oSourceR.sDatasetPath); 
             asVrtArgs.add(oSourceG.sDatasetPath); 
@@ -195,16 +189,28 @@ public class Sentinel2ProductReader extends WasdiProductReader {
                 WasdiLog.errorLog("Sentinel2ProductReader.getFileForPublishBand: VRT creation failed.");
                 return null;
             }            
+            
+            String sTempScaledTiff = sBaseDir + File.separator + sLayerId + "_scaled.tif";
+            String sGdalTranslateCommand = GdalUtils.adjustGdalFolder("gdal_translate");
+            ArrayList<String> asTranslateArgs = new ArrayList<String>();
+            asTranslateArgs.add(sGdalTranslateCommand);
+            asTranslateArgs.add("-ot");
+            asTranslateArgs.add("Byte"); // Convert data type to Byte
 
-            MeasurementSource oSource = findSourceForBand(sBand);
-            if (oSource == null) {
-                WasdiLog.warnLog("Sentinel2ProductReader.getFileForPublishBand: no source found for band " + sBand);
-                return null;
-            }
+            // Scale raw values (0 to 4000) down to standard visual ranges (0 to 255)
+            asTranslateArgs.add("-scale");
+            asTranslateArgs.add("0");
+            asTranslateArgs.add("4000");
+            asTranslateArgs.add("0");
+            asTranslateArgs.add("255");
+
+            asTranslateArgs.add(sVrtPath);       // Input VRT
+            asTranslateArgs.add(sTempScaledTiff); // Intermediate Output
+
+            ShellExecReturn oTranslateReturn = RunTimeUtils.shellExec(asTranslateArgs, true, true, true, true);
+            WasdiLog.debugLog("Sentinel2ProductReader.getFileForPublishBand [gdal_warp]: " + oTranslateReturn.getOperationLogs());
 
             // Use gdalwarp to reproject to EPSG:4326. This ensures the output is in WGS84
-            // (which GeoServer expects and the EPSG fallback in Publishband uses), and avoids
-            // SNAP failing on uint16/12-bit S2 data when it tries to read the output .tif for EPSG detection.
             String sGdalCommand = GdalUtils.adjustGdalFolder("gdalwarp");
             ArrayList<String> asArgs = new ArrayList<String>();
             asArgs.add(sGdalCommand);
@@ -212,9 +218,6 @@ public class Sentinel2ProductReader extends WasdiProductReader {
             asArgs.add("EPSG:4326");
             asArgs.add("-of");
             asArgs.add("GTiff");
-            
-            asArgs.add("-ot");
-            asArgs.add("Byte");
                         
             asArgs.add("-co");
             asArgs.add("PHOTOMETRIC=RGB");
@@ -222,8 +225,8 @@ public class Sentinel2ProductReader extends WasdiProductReader {
             asArgs.add(sVrtPath);
             asArgs.add(sOutputPath);
 
-            ShellExecReturn oTranslateReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
-            WasdiLog.debugLog("Sentinel2ProductReader.getFileForPublishBand [gdal_translate]: " + oTranslateReturn.getOperationLogs());
+            ShellExecReturn oWarpReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
+            WasdiLog.debugLog("Sentinel2ProductReader.getFileForPublishBand [gdal_warp]: " + oWarpReturn.getOperationLogs());
 
             File oOutputFile = new File(sOutputPath);
             if (oOutputFile.exists()) {
