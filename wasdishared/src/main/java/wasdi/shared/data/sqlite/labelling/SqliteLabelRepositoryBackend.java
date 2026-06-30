@@ -38,4 +38,10 @@ public class SqliteLabelRepositoryBackend  extends SqliteRepository implements I
 		return null;
 	}
 
+	@Override
+	public List<Label> getLabelsByDataset(String sDatasetId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

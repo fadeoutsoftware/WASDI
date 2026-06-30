@@ -16,5 +16,7 @@ public interface ILabelRepositoryBackend {
 	List<Label> getLabelsByImage(String sDatasetId, String sImage);
 
 	List<Label> getAll();
+	
+	List<Label> getLabelsByDataset(String sDatasetId);
 
 }
