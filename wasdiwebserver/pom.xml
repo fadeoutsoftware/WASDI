@@ -28,7 +28,7 @@
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionGoogleApiClient>2.8.1</sVersionGoogleApiClient>
         <sVersionHttpClient>4.5.14</sVersionHttpClient>
-        <sVersionJackson>2.22.0</sVersionJackson>
+        <sVersionJackson>2.20.1</sVersionJackson>
         <sVersionJavaApiForKml>2.2.1</sVersionJavaApiForKml>
         <sVersionJavaxWebsocketApi>1.1</sVersionJavaxWebsocketApi>
         <sVersionJson>20250517</sVersionJson>

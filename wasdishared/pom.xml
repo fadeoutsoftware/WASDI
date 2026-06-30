@@ -34,7 +34,7 @@
         <sVersionGeoserverManager>1.7.0</sVersionGeoserverManager>
         <!--sVersionGson>2.12.1</sVersionGson-->
         <sVersionGuava>33.5.0-jre</sVersionGuava>
-        <sVersionJackson>2.22.0</sVersionJackson>
+        <sVersionJackson>2.20.1</sVersionJackson>
         <sVersionJson>20251224</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionJunitJupiter>5.7.0</sVersionJunitJupiter>
