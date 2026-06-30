@@ -155,14 +155,45 @@ public class Sentinel2ProductReader extends WasdiProductReader {
                 WasdiLog.warnLog("Sentinel2ProductReader.getFileForPublishBand: band is null or empty");
                 return null;
             }
+            
+            // Read the RGB Bands
+            MeasurementSource oSourceR = findSourceForBand("B4");
+            MeasurementSource oSourceG = findSourceForBand("B3");
+            MeasurementSource oSourceB = findSourceForBand("B2");
+
+            if (oSourceR == null || oSourceG == null || oSourceB == null) {
+                WasdiLog.warnLog("Sentinel2ProductReader.getFileForPublishBand: Missing source for one of the bands");
+                return null;
+            }
+
+            String sBaseDir = m_oProductFile.getParentFile().getAbsolutePath();
+            String sVrtPath = sBaseDir + File.separator + sLayerId + "_temp.vrt";
+            String sOutputPath = sBaseDir + File.separator + sLayerId + ".tif";
+
+            // Build a VRT with RGB Bands
+            String sGdalBuildVrtCommand = GdalUtils.adjustGdalFolder("gdalbuildvrt");
+            ArrayList<String> asVrtArgs = new ArrayList<String>();
+            asVrtArgs.add(sGdalBuildVrtCommand);
+            asVrtArgs.add("-separate");
+            asVrtArgs.add(sVrtPath);
+            asVrtArgs.add(oSourceR.sDatasetPath); 
+            asVrtArgs.add(oSourceG.sDatasetPath); 
+            asVrtArgs.add(oSourceB.sDatasetPath);
+            
+            ShellExecReturn oVrtReturn = RunTimeUtils.shellExec(asVrtArgs, true, true, true, true);
+            WasdiLog.debugLog("Sentinel2ProductReader.getFileForPublishBand [gdalbuildvrt]: " + oVrtReturn.getOperationLogs());
+
+            File oVrtFile = new File(sVrtPath);
+            if (!oVrtFile.exists()) {
+                WasdiLog.errorLog("Sentinel2ProductReader.getFileForPublishBand: VRT creation failed.");
+                return null;
+            }            
 
             MeasurementSource oSource = findSourceForBand(sBand);
             if (oSource == null) {
                 WasdiLog.warnLog("Sentinel2ProductReader.getFileForPublishBand: no source found for band " + sBand);
                 return null;
             }
-
-            String sOutputPath = m_oProductFile.getParentFile().getAbsolutePath() + File.separator + sLayerId + ".tif";
 
             // Use gdalwarp to reproject to EPSG:4326. This ensures the output is in WGS84
             // (which GeoServer expects and the EPSG fallback in Publishband uses), and avoids
@@ -174,7 +205,11 @@ public class Sentinel2ProductReader extends WasdiProductReader {
             asArgs.add("EPSG:4326");
             asArgs.add("-of");
             asArgs.add("GTiff");
-            asArgs.add(oSource.sDatasetPath);
+            
+            asArgs.add("-co");
+            asArgs.add("PHOTOMETRIC=RGB");
+            
+            asArgs.add(sVrtPath);
             asArgs.add(sOutputPath);
 
             ShellExecReturn oTranslateReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
