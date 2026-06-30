@@ -222,11 +222,23 @@ public class Sentinel2ProductReader extends WasdiProductReader {
             asArgs.add("-co");
             asArgs.add("PHOTOMETRIC=RGB");
             
+            asArgs.add("-co");
+            asArgs.add("COMPRESS=DEFLATE");
+            
+            asArgs.add("-co");
+            asArgs.add("PREDICTOR=2");
+
+            asArgs.add("-co");
+            asArgs.add("TILED=YES");
+            
             asArgs.add(sVrtPath);
             asArgs.add(sOutputPath);
 
             ShellExecReturn oWarpReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
             WasdiLog.debugLog("Sentinel2ProductReader.getFileForPublishBand [gdal_warp]: " + oWarpReturn.getOperationLogs());
+            
+            WasdiFileUtils.deleteFile(sVrtPath);
+            WasdiFileUtils.deleteFile(sTempScaledTiff);
 
             File oOutputFile = new File(sOutputPath);
             if (oOutputFile.exists()) {

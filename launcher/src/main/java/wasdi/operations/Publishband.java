@@ -448,7 +448,10 @@ public class Publishband extends Operation {
         	GpkgProductReader oGpkgReader = (GpkgProductReader) oReadProduct;
         	sStyle = oGpkgReader.getStyleForPublishBand(sBandName);
         }
-                
+        else if (sFile.toUpperCase().startsWith("S2")) {
+        	sStyle = "wasdi_s2_rgb";
+        }
+        
         return sStyle;
 	}
 	
