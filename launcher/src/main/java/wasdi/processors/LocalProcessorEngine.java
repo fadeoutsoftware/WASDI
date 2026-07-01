@@ -309,6 +309,9 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 			if (!Utils.isNullOrEmpty(oRunResult.getOperationLogs())) {
 				WasdiLog.debugLog("LocalProcessorEngine.run output:\n" + oRunResult.getOperationLogs());
 			}
+			
+			// Re-Read the process workspace when the app is done!
+			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
 
 			if (!oRunResult.isOperationOk() || oRunResult.getOperationReturn() != 0) {
 				WasdiLog.errorLog("LocalProcessorEngine.run: processor exited with non-zero code " + oRunResult.getOperationReturn());
@@ -322,6 +325,8 @@ public class LocalProcessorEngine extends WasdiProcessorEngine {
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("LocalProcessorEngine.run: exception", oEx);
 			try {
+				// Re-Read the process workspace when the app is done!
+				oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());				
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 			} catch (Exception oInnerEx) {
 				WasdiLog.errorLog("LocalProcessorEngine.run: exception updating status", oInnerEx);
