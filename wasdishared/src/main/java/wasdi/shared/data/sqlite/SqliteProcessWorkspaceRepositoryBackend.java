@@ -1173,10 +1173,7 @@ public class SqliteProcessWorkspaceRepositoryBackend extends SqliteRepository im
             		oProcessWorkspace.setRunningTime(oOriginal.getRunningTime() + lDelta);
             	}
         	}
-        	
-        	WasdiLog.debugLog("ProcessWorkspaceRepository.updateProcess: JSON OF PWS\n" + toJson(oProcessWorkspace));
-        	WasdiLog.debugLog("\n");
-        	
+        	        	
         	updateById(oProcessWorkspace.getProcessObjId(), oProcessWorkspace);
             return true;
 
