@@ -8,12 +8,19 @@ public class Attribute {
 	private ArrayList<String> categories = new ArrayList<>();
 	private ArrayList<Integer> colours = new ArrayList<>();
 	private boolean isMandatory;
+	public String value;
 	
 	public String getName() {
 		return name;
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getValue() {
+		return value;
+	}
+	public void setValue(String value) {
+		this.value= value;
 	}
 	public AttributeType getType() {
 		return type;
