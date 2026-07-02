@@ -494,15 +494,19 @@ def run():
     except Exception as oEx:
         errorLog("Error parsing WASDI_PARAMS, using empty params. Error: " + str(oEx))
     
+    debugLog("WASDI_RUN_APPLICATION value: " + str(sApplicationToStart))
     debugLog("WASDI_PARAMS value: " + sParams)
 
     bUseWorkspaceId = False
     # Sanity check the workspace, if not set use empty workspace
-    if sWorkspace is None:
+    if sWorkspace in ("", None):
         sWorkspace = ""
         sWorkspaceId = _getEnvironmentVariable("WASDI_WORKSPACE_ID")
+        debugLog("WASDI_WORKSPACE_ID value: " + str(sWorkspaceId))
         if sWorkspaceId is not None and sWorkspaceId != "":
             bUseWorkspaceId = True
+    else:
+        debugLog("WASDI_WORKSPACE value: " + str(sWorkspace))
 
 
     aoWorkspaces = wasdi.getWorkspaces()
@@ -518,9 +522,11 @@ def run():
                 if oWorkspace.get("workspaceId", "") == sWorkspaceId:
                     bCreate = False
                     sWorkspace = oWorkspace.get("workspaceName", "")
+                    debugLog("Found workspace by ID: " + sWorkspace)
                     break
             else:
                 if oWorkspace.get("workspaceName", "") == sWorkspace:
+                    debugLog("Found workspace by Name: " + sWorkspace)
                     bCreate = False
                     break
 
@@ -528,8 +534,10 @@ def run():
         # We need a new workspace
         sWsId = wasdi.createWorkspace(sWorkspace)
         wasdi.setActiveWorkspaceId(sWsId)
+        debugLog("Created new workspace: " + sWorkspace + " with ID: " + sWsId)
     else:
         wasdi.openWorkspace(sWorkspace)
+        debugLog("Opened existing workspace: " + sWorkspace)
 
     if sApplicationToStart is not None:
         sProcId =  wasdi.executeProcessor(sApplicationToStart, aoParams)

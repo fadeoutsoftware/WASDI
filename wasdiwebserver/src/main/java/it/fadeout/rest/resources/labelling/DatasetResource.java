@@ -91,6 +91,7 @@ public class DatasetResource {
 				oDatasetListViewModel.isGlobal = oDataset.isGlobal();
 				oDatasetListViewModel.mission = oDataset.getMissions();
 				oDatasetListViewModel.workspaceId = oDataset.getWorkspaceId();
+				oDatasetListViewModel.templateId = oDataset.getTemplateId();
 				
 				for (String sTask : oDataset.getTasks()) {
 					oDatasetListViewModel.tasks.add(sTask);

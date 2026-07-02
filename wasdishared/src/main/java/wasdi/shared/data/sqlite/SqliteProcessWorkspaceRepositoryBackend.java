@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 import wasdi.shared.LauncherOperations;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.aggregators.ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult;
 import wasdi.shared.business.aggregators.ProcessWorkspaceAggregatorBySubscriptionAndProject;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.interfaces.IProcessWorkspaceRepositoryBackend;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -1173,7 +1173,7 @@ public class SqliteProcessWorkspaceRepositoryBackend extends SqliteRepository im
             		oProcessWorkspace.setRunningTime(oOriginal.getRunningTime() + lDelta);
             	}
         	}
-        	
+        	        	
         	updateById(oProcessWorkspace.getProcessObjId(), oProcessWorkspace);
             return true;
 

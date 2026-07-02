@@ -8,8 +8,9 @@ import wasdi.shared.business.labelling.AttributeType;
 public class AttributeViewModel {
 	public String name;
 	public String type;
-	public ArrayList<String> categories  = new ArrayList<>(); ;
-	public ArrayList<Integer> colours  = new ArrayList<>(); ;
+	public ArrayList<String> categories  = new ArrayList<>(); 
+	public ArrayList<Integer> colours  = new ArrayList<>();
+	public String value;
 	public boolean isMandatory;
 	
 	public static AttributeViewModel getFromEntity(Attribute oAttribute) {
@@ -20,6 +21,7 @@ public class AttributeViewModel {
 	    oVM.type = oAttribute.getType().name();
 	    oVM.categories = new ArrayList<>();
 	    oVM.colours = new ArrayList<>();
+	    oVM.value = oAttribute.getValue();
 
 	    if (oAttribute.getCategories() != null) {
 	        oVM.categories.addAll(oAttribute.getCategories());
@@ -37,6 +39,7 @@ public class AttributeViewModel {
 	    Attribute oAttribute = new Attribute();
 	    oAttribute.setName(oAttributeViewModel.name);
 	    oAttribute.setType(AttributeType.valueOf(oAttributeViewModel.type.toUpperCase()));
+	    oAttribute.setValue(oAttributeViewModel.value);
 
 	    // Guard against null lists
 	    if (oAttributeViewModel.categories != null) {
