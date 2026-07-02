@@ -2373,19 +2373,19 @@ public class ProcessorsResource  {
 						NodeRepository oNodeRepo = new NodeRepository();
 						List<Node> aoNodes = oNodeRepo.getNodesList();
 						
-						if (aoNodes!=null) {
-							if (aoNodes.size()>0)  {
-								WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: this is the main node, starting Worker to update computing nodes");
-								
-								//This is the main node: forward the request to other nodes
-								UpdateProcessorFilesWorker oUpdateWorker = new UpdateProcessorFilesWorker();
-								
-								oUpdateWorker.init(aoNodes, oProcessorFile.getPath(), sSessionId, sWorkspaceId, sProcessorId);
-								oUpdateWorker.start();
-								
-								WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: Worker started");														
-							}
+						if (aoNodes == null) {
+							aoNodes = new ArrayList<>();
 						}
+						
+						WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: this is the main node, starting Worker to update computing nodes");
+						
+						//This is the main node: forward the request to other nodes
+						UpdateProcessorFilesWorker oUpdateWorker = new UpdateProcessorFilesWorker();
+						
+						oUpdateWorker.init(aoNodes, oProcessorFile.getPath(), sSessionId, sWorkspaceId, sProcessorId);
+						oUpdateWorker.start();
+						
+						WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: Worker started");														
 						
 					}
 					catch (Exception oEx) {
