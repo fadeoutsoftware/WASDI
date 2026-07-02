@@ -207,9 +207,9 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 				
 					String sFilesystemPath = extractProductIdentifierFromURL(sFileURL);
 					
-					WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize - file system path from URL: " + sFilesystemPath);
-					
 					if (!Utils.isNullOrEmpty(sFilesystemPath)) {
+						WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize - file system path from URL: " + sFilesystemPath);
+						
 						File oSourceFile = new File(sFilesystemPath);
 						
 						if (oSourceFile.exists()) {
@@ -219,7 +219,8 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 						} else {
 							WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize - the file at the provided system path does not exist");
 						}
-					} else {
+					} 
+					else {
 						WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize - the file system path is null or empty");
 					}
 				} catch (Exception oEx) {
@@ -318,7 +319,11 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	}
 	
 	private String extractProductIdentifierFromURL(String sFileURL) {
-		Preconditions.checkNotNull(sFileURL, "URL is null");
+		if (Utils.isNullOrEmpty(sFileURL)) {
+			WasdiLog.errorLog("CREODIASProviderAdapter.extractProductIdentifierFromURL: sFileURL is null");
+			return null;
+		}
+		
 		try {
 			String[] asParts = sFileURL.split(ResponseTranslatorCreoDias2.SLINK_SEPARATOR);
 			String sProductIdentifier = asParts[ResponseTranslatorCreoDias2.IPOSITIONOF_PRODUCTIDENTIFIER];

@@ -1048,7 +1048,7 @@ public class ProcessWorkspaceResource {
 	
 	protected ProcessWorkspaceViewModel internalSetPaylod(String sSessionId, String sProcessObjId, String sPayload) {
 		
-		WasdiLog.debugLog("ProcessWorkspaceResource.internalSetPaylod" );
+		WasdiLog.debugLog("ProcessWorkspaceResource.internalSetPaylod sProcessObjId = " + sProcessObjId + " sPayload = " + sPayload );
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
