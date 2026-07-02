@@ -501,6 +501,7 @@ def run():
     if sWorkspace is None:
         sWorkspace = ""
         sWorkspaceId = _getEnvironmentVariable("WASDI_WORKSPACE_ID")
+        debugLog("WASDI_WORKSPACE_ID value: " + str(sWorkspaceId))
         if sWorkspaceId is not None and sWorkspaceId != "":
             bUseWorkspaceId = True
 
@@ -518,9 +519,11 @@ def run():
                 if oWorkspace.get("workspaceId", "") == sWorkspaceId:
                     bCreate = False
                     sWorkspace = oWorkspace.get("workspaceName", "")
+                    debugLog("Found workspace by ID: " + sWorkspace)
                     break
             else:
                 if oWorkspace.get("workspaceName", "") == sWorkspace:
+                    debugLog("Found workspace by Name: " + sWorkspace)
                     bCreate = False
                     break
 
@@ -528,8 +531,10 @@ def run():
         # We need a new workspace
         sWsId = wasdi.createWorkspace(sWorkspace)
         wasdi.setActiveWorkspaceId(sWsId)
+        debugLog("Created new workspace: " + sWorkspace + " with ID: " + sWsId)
     else:
         wasdi.openWorkspace(sWorkspace)
+        debugLog("Opened existing workspace: " + sWorkspace)
 
     if sApplicationToStart is not None:
         sProcId =  wasdi.executeProcessor(sApplicationToStart, aoParams)
