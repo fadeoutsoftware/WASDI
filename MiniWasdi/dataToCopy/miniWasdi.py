@@ -494,6 +494,7 @@ def run():
     except Exception as oEx:
         errorLog("Error parsing WASDI_PARAMS, using empty params. Error: " + str(oEx))
     
+    debugLog("WASDI_RUN_APPLICATION value: " + str(sApplicationToStart))
     debugLog("WASDI_PARAMS value: " + sParams)
 
     bUseWorkspaceId = False
@@ -504,6 +505,8 @@ def run():
         debugLog("WASDI_WORKSPACE_ID value: " + str(sWorkspaceId))
         if sWorkspaceId is not None and sWorkspaceId != "":
             bUseWorkspaceId = True
+    else:
+        debugLog("WASDI_WORKSPACE value: " + str(sWorkspace))
 
 
     aoWorkspaces = wasdi.getWorkspaces()
