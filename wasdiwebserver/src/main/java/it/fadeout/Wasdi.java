@@ -640,8 +640,14 @@ public class Wasdi extends ResourceConfig {
 						}						
 					}
 				}
+				else {
+					// if the parameter does not have a session, we assign this one that should be the one of the app
+					if (Utils.isNullOrEmpty(oParameter.getSessionID())) {
+						oParameter.setSessionID(sSessionId);
+					}
+				}
 				
-				// Insert the parameter in mongo
+				// Insert the parameter in the db
 				ParametersRepository oParametersRepository = new ParametersRepository();
 				oParametersRepository.insertParameter(oParameter);
 

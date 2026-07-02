@@ -481,7 +481,6 @@ public class FileBufferResource {
 			String sProcessObjId = Utils.getRandomName();
 			
 			DownloadFileParameter oParameter = new DownloadFileParameter();
-			oParameter.setQueue(sSessionId);
 			oParameter.setUrl(sFileUrl);
 			oParameter.setName(sFileName);
 			oParameter.setWorkspace(sWorkspaceId);
@@ -608,7 +607,6 @@ public class FileBufferResource {
 			String sProcessObjId = Utils.getRandomName();
 
 			PublishBandParameter oParameter = new PublishBandParameter();
-			oParameter.setQueue(sSessionId);
 			oParameter.setFileName(sFileUrl);
 			oParameter.setWorkspace(sWorkspaceId);
 			oParameter.setUserId(sUserId);

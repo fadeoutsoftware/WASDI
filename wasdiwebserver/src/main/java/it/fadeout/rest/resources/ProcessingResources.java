@@ -345,7 +345,7 @@ public class ProcessingResources {
         if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) sParentProcessWorkspaceId = "";
         
         // Log intro
-        WasdiLog.debugLog("ProsessingResources.runProcess( Operation: " + sOperationType + ", OperationSubType: " + sOperationSubType + ", Product: " + sProductName + " Parent Id: " + sParentProcessWorkspaceId + ")");
+        WasdiLog.debugLog("ProcessingResources.runProcess( Operation: " + sOperationType + ", OperationSubType: " + sOperationSubType + ", Product: " + sProductName + " Parent Id: " + sParentProcessWorkspaceId + ")");
         
         PrimitiveResult oResult = new PrimitiveResult();
 

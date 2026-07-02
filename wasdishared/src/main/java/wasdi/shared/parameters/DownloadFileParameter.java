@@ -27,11 +27,6 @@ public class DownloadFileParameter extends BaseParameter{
     private String downloadPassword;
     
     /**
-     * SessionId
-     */
-    private String queue;
-    
-    /**
      * Product Bounding Box
      */
     private String boundingBox;
@@ -65,14 +60,6 @@ public class DownloadFileParameter extends BaseParameter{
 
     public void setUrl(String sUrl) {
         this.url = sUrl;
-    }
-
-    public String getQueue() {
-        return queue;
-    }
-
-    public void setQueue(String sQueue) {
-        this.queue = sQueue;
     }
 
     public String getBoundingBox() {

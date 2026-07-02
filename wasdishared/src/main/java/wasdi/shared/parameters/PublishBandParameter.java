@@ -12,11 +12,6 @@ public class PublishBandParameter extends BaseParameter{
     private String fileName;
     
     /**
-     * Legacy name of the rabbit queue
-     */
-    private String queue;
-    
-    /**
      * Name of the band
      */
     private String bandName;
@@ -32,14 +27,6 @@ public class PublishBandParameter extends BaseParameter{
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
-    }
-
-    public String getQueue() {
-        return queue;
-    }
-
-    public void setQueue(String queue) {
-        this.queue = queue;
     }
 
     public String getBandName() {
