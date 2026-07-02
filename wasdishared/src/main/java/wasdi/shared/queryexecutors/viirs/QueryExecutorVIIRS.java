@@ -278,12 +278,12 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 					SimpleFeatureCollection oIntersectedFeatures = grabFeaturesInBoundingBox(oVIIRSQuery.west, oVIIRSQuery.south, oVIIRSQuery.east, oVIIRSQuery.north, oFeatureSource);
 					
 					if (oIntersectedFeatures != null) {
-						SimpleFeatureIterator oIterator = oIntersectedFeatures.features();
-						
-						while (oIterator.hasNext()) {
-							SimpleFeature oFeature = oIterator.next();
-							asSections.add(oFeature.getAttribute("name").toString() + ";" + oFeature.getAttribute("the_geom").toString());
-						}
+						try (SimpleFeatureIterator oIterator = oIntersectedFeatures.features()) {
+				            while (oIterator.hasNext()) {
+				                SimpleFeature oFeature = oIterator.next();
+				                asSections.add(oFeature.getAttribute("name").toString() + ";" + oFeature.getAttribute("the_geom").toString());
+				            }							
+						}				       
 					}			
 				}
 				finally {
