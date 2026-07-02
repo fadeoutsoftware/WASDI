@@ -499,7 +499,7 @@ def run():
 
     bUseWorkspaceId = False
     # Sanity check the workspace, if not set use empty workspace
-    if sWorkspace is None:
+    if sWorkspace in ("", None):
         sWorkspace = ""
         sWorkspaceId = _getEnvironmentVariable("WASDI_WORKSPACE_ID")
         debugLog("WASDI_WORKSPACE_ID value: " + str(sWorkspaceId))
