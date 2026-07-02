@@ -86,7 +86,8 @@ public class WasdiFileUtils {
 						"csv",
 						"htm",
 						"html",
-						"md"
+						"md",
+						"json"
 				)
 		);
 		
