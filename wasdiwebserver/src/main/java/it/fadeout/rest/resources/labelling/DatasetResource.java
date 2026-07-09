@@ -82,8 +82,11 @@ public class DatasetResource {
 				
 				if (oDataset.getOwner().equals(oUser.getUserId())) {
 					oDatasetListViewModel.userRole = "OWNER";	
-				}
-				else {
+				} else if (oDataset.getReviewers() != null && oDataset.getReviewers().contains(oUser.getUserId())) {
+					oDatasetListViewModel.userRole = "REVIEWER";
+				} else if (oDataset.getAnnotators() != null && oDataset.getAnnotators().contains(oUser.getUserId())) {
+					oDatasetListViewModel.userRole = "ANNOTATOR";
+				} else {
 					oDatasetListViewModel.userRole = "GUEST";
 				}
 				oDatasetListViewModel.bbox = oDataset.getBbox();
@@ -103,6 +106,64 @@ public class DatasetResource {
 			return Response.ok(aoDataasetsList).build();
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("DatasetResource.getList error: " + oEx);
+			return Response.serverError().build();
+		}
+	}
+	
+	@DELETE
+	@Path("/leave")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response leaveProject(@HeaderParam("x-session-token") String sSessionId, @QueryParam("datasetId") String sDatasetId) {
+		
+		WasdiLog.debugLog("DatasetResource.leaveProject");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		// 1. Domain Check
+		if (oUser == null) {
+			WasdiLog.warnLog("DatasetResource.leaveProject: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+
+		try {
+			DatasetProjectRepository oDatasetRepository = new DatasetProjectRepository();
+			DatasetProject oDataset = oDatasetRepository.getDataset(sDatasetId);
+			
+			if (oDataset == null) {
+				WasdiLog.warnLog("DatasetResource.leaveProject: dataset not found");
+				return Response.status(Status.BAD_REQUEST).build();
+			}			
+			
+			// 2. Prevent the Owner from leaving (they must delete the project instead)
+			if (oDataset.getOwner().equals(oUser.getUserId())) {
+				WasdiLog.warnLog("DatasetResource.leaveProject: Owner cannot leave the project.");
+				return Response.status(Status.BAD_REQUEST).build();		
+			}
+			
+			boolean bRemoved = false;
+			
+			// 3. Find them and remove them!
+			if (oDataset.getAnnotators() != null && oDataset.getAnnotators().contains(oUser.getUserId())) {
+				oDataset.getAnnotators().remove(oUser.getUserId());
+				bRemoved = true;
+			}
+			
+			if (oDataset.getReviewers() != null && oDataset.getReviewers().contains(oUser.getUserId())) {
+				oDataset.getReviewers().remove(oUser.getUserId());
+				bRemoved = true;
+			}
+			
+			if (!bRemoved) {
+				WasdiLog.warnLog("DatasetResource.leaveProject: user is not part of the Dataset");
+				return Response.status(Status.BAD_REQUEST).build();				
+			}
+			
+			// 4. Save the changes to MongoDB
+			oDatasetRepository.updateDataset(oDataset);
+			
+			return Response.ok().build();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("DatasetResource.leaveProject error: " + oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -490,6 +551,8 @@ public class DatasetResource {
 				oDataset.getReviewers().add(sUserId);
 			}
 			
+			oDatasetRepository.updateDataset(oDataset);
+			
 			return Response.ok().build();
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("DatasetResource.addCollaborator error: " + oEx);
@@ -553,7 +616,7 @@ public class DatasetResource {
 				for (String sReviewer : oDataset.getReviewers()) {
 					if (sReviewer.equals(sUserId)) {
 						bExisting = true;
-						oDataset.getAnnotators().remove(sUserId);
+						oDataset.getReviewers().remove(sUserId);
 						break;
 					}
 				}				
@@ -563,6 +626,7 @@ public class DatasetResource {
 				WasdiLog.warnLog("DatasetResource.deleteCollaborator: user is not part of the Dataset as collaborator");
 				return Response.status(Status.BAD_REQUEST).build();				
 			}
+			oDatasetRepository.updateDataset(oDataset);
 			
 			return Response.ok().build();
 		} catch (Exception oEx) {
