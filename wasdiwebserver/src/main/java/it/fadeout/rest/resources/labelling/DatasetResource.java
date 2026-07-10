@@ -3,7 +3,10 @@ package it.fadeout.rest.resources.labelling;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -22,6 +25,7 @@ import org.joda.time.DateTimeUtils;
 
 import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.WorkspaceResource;
+import wasdi.shared.business.labelling.Attribute;
 import wasdi.shared.business.labelling.DatasetProject;
 import wasdi.shared.business.labelling.LabellingProjectRoles;
 import wasdi.shared.business.users.User;
@@ -33,6 +37,7 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ClientMessageCodes;
 import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.labelling.attributes.AttributeViewModel;
 import wasdi.shared.viewmodels.labelling.datasets.DatasetCollaboratorViewModel;
 import wasdi.shared.viewmodels.labelling.datasets.DatasetListViewModel;
 import wasdi.shared.viewmodels.labelling.datasets.DatasetViewModel;
@@ -656,68 +661,187 @@ public class DatasetResource {
 	public Response exportDataset(@HeaderParam("x-session-token") String sSessionId, ExportDatasetViewModel oExportViewModel) {
 		
 		WasdiLog.debugLog("DatasetResource.exportDataset");
-
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
-		// 1. Session Check
 		if (oUser == null) {
-			WasdiLog.warnLog("DatasetResource.exportDataset: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 		
-		if (oExportViewModel == null || Utils.isNullOrEmpty(oExportViewModel.projectId)) {
-			WasdiLog.warnLog("DatasetResource.exportDataset: invalid payload");
-			return Response.status(Status.BAD_REQUEST).build();
-		}
-
 		try {
-			// 2. Fetch the Project
 			DatasetProjectRepository oDatasetRepository = new DatasetProjectRepository();
 			DatasetProject oDataset = oDatasetRepository.getDataset(oExportViewModel.projectId);
 			
 			if (oDataset == null) {
-				WasdiLog.warnLog("DatasetResource.exportDataset: dataset not found");
 				return Response.status(Status.NOT_FOUND).build();
 			}			
 			
-			// (Security and Filtering commented out for now as requested)
-
-			// 3. Fetch the Labels
 			LabelRepository oLabelRepo = new LabelRepository();
 			List<Label> aoAllLabels = oLabelRepo.getLabelsByDataset(oDataset.getId());
 			
 			if (aoAllLabels == null || aoAllLabels.isEmpty()) {
-				WasdiLog.warnLog("DatasetResource.exportDataset: No labels found");
 				return Response.status(Status.NOT_FOUND).entity("No labels found").build();
 			}
 
-			// 4. Create the Streaming ZIP Output
+			// ── THE MISSING PIECE: Filter out unvalidated labels! ──
+			if ("validated".equalsIgnoreCase(oExportViewModel.labelFilter)) {
+				aoAllLabels = aoAllLabels.stream()
+						.filter(Label::isValidated) // Or .getIsValidated() depending on your getter
+						.collect(Collectors.toList());
+				
+				if (aoAllLabels.isEmpty()) {
+					return Response.status(Status.NOT_FOUND).entity("No validated labels found for this project.").build();
+				}
+			}
+
+			// 1. Group labels by Geometry Type (Just like your Python script!)
+			Map<String, List<Label>> dictGDFs = new HashMap<>();
+			dictGDFs.put("Points", new ArrayList<>());
+			dictGDFs.put("Lines", new ArrayList<>());
+			dictGDFs.put("Polygons", new ArrayList<>());
+
+			for (Label lbl : aoAllLabels) {
+				if (lbl.isPoint()) dictGDFs.get("Points").add(lbl);
+				else if (lbl.isLine()) dictGDFs.get("Lines").add(lbl);
+				else if (lbl.isPolygon() || lbl.isMultiPolygon()) dictGDFs.get("Polygons").add(lbl);
+			}
+
+			// 2. Create the Streaming ZIP Output
 			StreamingOutput oStream = new StreamingOutput() {
 				@Override
 				public void write(OutputStream output) throws IOException, WebApplicationException {
 					try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(output)) {
 						
-						// ── THE FIX: EXPORT AS JSON TO BYPASS GEOTOOLS ──
-						java.util.zip.ZipEntry entry = new java.util.zip.ZipEntry("labels_export.json");
-						zos.putNextEntry(entry);
-						
-						// Use Jackson ObjectMapper (which WASDI already has) to write the labels to the ZIP
-						com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-						byte[] jsonBytes = mapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(aoAllLabels);
-						
-						zos.write(jsonBytes);
-						zos.closeEntry();
+						// ── A. EXPORT SHAPEFILES ──
+						java.nio.file.Path oTempDirPath = java.nio.file.Files.createTempDirectory("wasdi_shape_export_");
+						java.io.File oTempDir = oTempDirPath.toFile();
 
-						// B. Write Raw Imagery into the ZIP (Commented out for now)
-						/*
-						if (oExportViewModel.includeRawData) {
-							// ProductRepository oProductRepo = new ProductRepository();
-							// List<Product> aoImages = oProductRepo.getProductsByWorkspace(oDataset.getWorkspaceId());
-							// for (Product oImg : aoImages) {
-							//     writeImageToZip(zos, oImg);
-							// }
+						try {
+							org.geotools.data.shapefile.ShapefileDataStoreFactory dataStoreFactory = new org.geotools.data.shapefile.ShapefileDataStoreFactory();
+							org.geotools.geojson.geom.GeometryJSON gjson = new org.geotools.geojson.geom.GeometryJSON();
+
+							for (Map.Entry<String, List<Label>> entry : dictGDFs.entrySet()) {
+								String sGeomType = entry.getKey();
+								List<Label> aoTypeLabels = entry.getValue();
+								
+								if (aoTypeLabels.isEmpty()) continue;
+
+								// 1. Dynamically build the GeoTools Schema String
+								String sGeomClass = sGeomType.equals("Points") ? "Point" : (sGeomType.equals("Lines") ? "LineString" : "Polygon");
+								StringBuilder sSchemaBuilder = new StringBuilder("the_geom:" + sGeomClass + ":srid=4326,lblId:String,annotator:String,validated:Boolean");
+								
+								// Check the first label to extract dynamic template attributes safely!
+								Label oFirstLabel = aoTypeLabels.get(0);
+								List<String> aoSafeDynamicKeys = new ArrayList<>();
+								
+								if (oFirstLabel.getAttributes() != null) {
+									for (Attribute attr : oFirstLabel.getAttributes()) {
+										// YOUR PYTHON FIX TRANSLATED TO JAVA: Truncate to 10 chars!
+										String sSafeKey = attr.getName().length() > 10 ? attr.getName().substring(0, 10) : attr.getName();
+										
+										// GeoTools needs to know the data type
+										// Convert the type enum to a string safely
+										String sTypeString = (attr.getType() != null) ? attr.getType().name() : "STRING";
+										
+										// GeoTools needs to know the data type
+										String sDataType = sTypeString.equalsIgnoreCase("INTEGER") ? "Integer" : 
+														  (sTypeString.equalsIgnoreCase("FLOAT") ? "Double" : "String"); 
+										sSchemaBuilder.append(",").append(sSafeKey).append(":").append(sDataType);
+										aoSafeDynamicKeys.add(attr.getName()); // Keep track of original name to fetch value later
+									}
+								}
+
+								// 2. Create the GeoTools Feature Builder
+								String sFileName = oDataset.getName().replaceAll(" ", "_") + "_" + sGeomType;
+								org.opengis.feature.simple.SimpleFeatureType sFeatureType = org.geotools.data.DataUtilities.createType(sFileName, sSchemaBuilder.toString());
+								org.geotools.feature.simple.SimpleFeatureBuilder featureBuilder = new org.geotools.feature.simple.SimpleFeatureBuilder(sFeatureType);
+								org.geotools.feature.DefaultFeatureCollection collection = new org.geotools.feature.DefaultFeatureCollection();
+
+								// 3. Populate Features
+								// 3. Populate Features
+								for (Label oLabel : aoTypeLabels) {
+									try {
+										// ── THE FIX: Wrap the String in a StringReader ──
+										java.io.Reader stringReader = new java.io.StringReader(oLabel.getGeometry());
+										org.locationtech.jts.geom.Geometry geometry = gjson.read(stringReader);
+										
+										featureBuilder.add(geometry);
+										featureBuilder.add(oLabel.getId());
+										featureBuilder.add(oLabel.getAnnotator());
+										featureBuilder.add(oLabel.isValidated());
+										
+										// Append dynamic attributes in the exact order we defined them
+										if (oLabel.getAttributes() != null) {
+											for (String originalKey : aoSafeDynamicKeys) {
+												Object val = oLabel.getAttributes().stream()
+													.filter(a -> a.getName().equals(originalKey))
+													.map(Attribute::getValue).findFirst().orElse("");
+												featureBuilder.add(val);
+											}
+										}
+										
+										collection.add(featureBuilder.buildFeature(null));
+									} catch (Exception ex) {
+										WasdiLog.warnLog("Skipping invalid geometry: " + ex.getMessage());
+									}
+								}
+
+
+								// 4. Write to temp Shapefile
+								java.io.File oShapefile = new java.io.File(oTempDir, sFileName + ".shp");
+								Map<String, java.io.Serializable> params = new java.util.HashMap<>();
+								params.put("url", oShapefile.toURI().toURL());
+								params.put("create spatial index", Boolean.TRUE);
+
+								org.geotools.data.shapefile.ShapefileDataStore newDataStore = (org.geotools.data.shapefile.ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
+								newDataStore.createSchema(sFeatureType);
+
+								// ── THE FIX: Pull featureStore OUTSIDE the try() parentheses ──
+								org.geotools.data.simple.SimpleFeatureStore featureStore = 
+									(org.geotools.data.simple.SimpleFeatureStore) newDataStore.getFeatureSource(newDataStore.getTypeNames()[0]);
+
+								// ── ONLY the transaction goes INSIDE the try() parentheses ──
+								try (org.geotools.data.Transaction transaction = new org.geotools.data.DefaultTransaction("create")) {
+									featureStore.setTransaction(transaction);
+									featureStore.addFeatures(collection);
+									transaction.commit();
+								}
+								
+								newDataStore.dispose();
+
+								// 5. Copy all 4 shapefile parts (.shp, .shx, .dbf, .prj) into the ZIP
+								java.io.File[] aoGeneratedFiles = oTempDir.listFiles((dir, name) -> name.startsWith(sFileName));
+								if (aoGeneratedFiles != null) {
+									for (java.io.File oGenFile : aoGeneratedFiles) {
+										zos.putNextEntry(new java.util.zip.ZipEntry("labels/" + sGeomType + "/" + oGenFile.getName()));
+										java.nio.file.Files.copy(oGenFile.toPath(), zos);
+										zos.closeEntry();
+									}
+								}
+							}
+						} finally {
+							// CLEANUP TEMP DIR
+							java.io.File[] aoFilesToDelete = oTempDir.listFiles();
+							if (aoFilesToDelete != null) {
+								for (java.io.File f : aoFilesToDelete) f.delete();
+							}
+							oTempDir.delete();
 						}
-						*/
+
+						// ── B. EXPORT RAW IMAGERY ──
+						if (oExportViewModel.includeRawData) {
+							/*ProductRepository oProductRepo = new ProductRepository();
+							List<Product> aoImages = oProductRepo.getProductsByWorkspace(oDataset.getWorkspaceId());
+							
+							for (Product oImg : aoImages) {
+								java.io.File oPhysicalFile = new java.io.File(oImg.getFilePath()); // Or however your Java backend resolves file paths
+								if (oPhysicalFile.exists()) {
+									zos.putNextEntry(new java.util.zip.ZipEntry("raw_images/" + oImg.getFileName()));
+									java.nio.file.Files.copy(oPhysicalFile.toPath(), zos);
+									zos.closeEntry();
+								}
+							}*/
+						}
+
 					} catch (Exception e) {
 						WasdiLog.errorLog("Error writing zip stream: " + e.getMessage());
 						throw new WebApplicationException("Error generating zip", e);
@@ -725,7 +849,6 @@ public class DatasetResource {
 				}
 			};
 
-			// 5. Return the ZIP stream safely
 			String sSafeName = oDataset.getName().replaceAll("[^a-zA-Z0-9_-]", "_");
 			return Response.ok(oStream)
 					.type("application/zip")
@@ -737,7 +860,6 @@ public class DatasetResource {
 			return Response.serverError().build();
 		}
 	}
-	
 	
 	
 

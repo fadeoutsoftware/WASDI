@@ -16,7 +16,25 @@
     <name>wasdiwebserver</name>
     <version>${revision}</version>
     <packaging>war</packaging>
-
+    
+    <repositories>
+    <repository>
+        <id>osgeo</id>
+        <name>OSGeo Release Repository</name>
+        <url>https://repo.osgeo.org/repository/release/</url>
+        <snapshots><enabled>false</enabled></snapshots>
+        <releases><enabled>true</enabled></releases>
+    </repository>
+</repositories>
+<!--<repositories>
+        <repository>
+            <id>osgeo</id>
+            <name>OSGeo Release Repository</name>
+            <url>https://repo.osgeo.org/repository/release/</url>
+            <snapshots><enabled>false</enabled></snapshots>
+            <releases><enabled>true</enabled></releases>
+        </repository>
+    </repositories>!-->
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
@@ -39,6 +57,7 @@
         <sVersionJersey2>2.45</sVersionJersey2>
         <sVersionServletApi>2.5</sVersionServletApi>
         <sVersionStripeJava>22.0.0</sVersionStripeJava>
+
     </properties>
 
     <build>
@@ -222,6 +241,21 @@
 			<artifactId>jersey-container-servlet-core</artifactId>
 			<version>${sVersionJersey2}</version>
 		</dependency>
+		<dependency>
+		    <groupId>org.geotools</groupId>
+		    <artifactId>gt-geojson</artifactId>
+		    <version>28.2</version> 
+		</dependency>
+				<dependency>
+		    <groupId>org.geotools</groupId>
+		    <artifactId>gt-epsg-hsql</artifactId>
+		    <version>28.2</version>
+		</dependency>
+		<!--<dependency>
+	        <groupId>org.geotools</groupId>
+	        <artifactId>gt-shapefile</artifactId>
+	        <version>28.2</version> 
+    	</dependency>!-->
         
         <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
         <dependency>
