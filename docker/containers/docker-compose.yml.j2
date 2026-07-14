@@ -1232,6 +1232,7 @@ services:
       - "traefik.http.routers.r_ai-assistant.tls=true"
 {% endif %}
       - "traefik.http.services.s_ai-assistant.loadbalancer.server.port=8000"
+      - "traefik.http.services.s_ai-assistant.loadbalancer.responseForwarding.flushInterval=100ms"
 {% if ( aoAssistantServerPorts | length ) > 0 %}
     ports:
 {% for sAssistantServerCurrentPort in aoAssistantServerPorts %}
