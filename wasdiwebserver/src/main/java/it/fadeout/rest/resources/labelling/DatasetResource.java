@@ -37,7 +37,6 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ClientMessageCodes;
 import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.labelling.attributes.AttributeViewModel;
 import wasdi.shared.viewmodels.labelling.datasets.DatasetCollaboratorViewModel;
 import wasdi.shared.viewmodels.labelling.datasets.DatasetListViewModel;
 import wasdi.shared.viewmodels.labelling.datasets.DatasetViewModel;

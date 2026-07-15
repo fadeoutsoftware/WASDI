@@ -163,10 +163,11 @@ public class MongoDatasetProjectRepositoryBackend  extends MongoRepository  impl
 			
 			// ── THE FIX: Expand the OR statement to check the arrays ──
 			Bson oFilter = Filters.or(
+					new Document("public", true),
 					new Document("owner", sUserId),
 					new Document("annotators", sUserId), // Checks if sUserId is anywhere inside the annotators array
-					new Document("reviewers", sUserId),  // Checks if sUserId is anywhere inside the reviewers array
-					new Document("isPublic", true)
+					new Document("reviewers", sUserId)  // Checks if sUserId is anywhere inside the reviewers array
+					
 			);
 			
 			FindIterable<Document> oDocuments = getCollection(m_sThisCollection).find(oFilter).sort(new Document("name", 1));
