@@ -25,11 +25,18 @@ import org.joda.time.DateTimeUtils;
 
 import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.WorkspaceResource;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.business.labelling.Attribute;
 import wasdi.shared.business.labelling.DatasetProject;
 import wasdi.shared.business.labelling.LabellingProjectRoles;
+import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserAccessRights;
+import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.labelling.Label;
+import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.UserResourcePermissionRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.labelling.DatasetProjectRepository;
 import wasdi.shared.data.labelling.LabelRepository;
 import wasdi.shared.utils.Utils;
@@ -514,6 +521,14 @@ public class DatasetResource {
 				WasdiLog.warnLog("DatasetResource.addCollaborator: target user is the owner, bad request");
 				return Response.status(Status.BAD_REQUEST).build();		
 			}
+
+			// Validate Destination User exists
+			UserRepository oUserRepository = new UserRepository();
+			User oDestinationUser = oUserRepository.getUser(sUserId);
+			if (oDestinationUser == null) {
+				WasdiLog.warnLog("DatasetResource.addCollaborator: Destination user does not exist");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Target user does not exist")).build();
+			}
 			
 			boolean bExisting = false;
 			
@@ -554,6 +569,39 @@ public class DatasetResource {
 			else if (sRole.equals(LabellingProjectRoles.REVIEWER.name())) {
 				oDataset.getReviewers().add(sUserId);
 			}
+
+			// ── THE FIX: Add the user to the linked workspace ──
+			String sWorkspaceId = oDataset.getWorkspaceId();
+			
+			if (!Utils.isNullOrEmpty(sWorkspaceId)) {
+				WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+				Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+				
+				if (oWorkspace != null) {
+					UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+
+					// Check if the workspace is already shared with this user
+					if (!oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sUserId, sWorkspaceId)) {
+						
+						// Grant READ access to the underlying imagery
+						String sRights = UserAccessRights.READ.getAccessRight();
+						
+						UserResourcePermission oWorkspaceSharing = new UserResourcePermission(
+								ResourceTypes.WORKSPACE.getResourceType(), 
+								sWorkspaceId, 
+								sUserId, 
+								oWorkspace.getUserId(), 
+								oUser.getUserId(), 
+								sRights
+						);
+
+						oUserResourcePermissionRepository.insertPermission(oWorkspaceSharing);	
+						WasdiLog.debugLog("DatasetResource.addCollaborator: Automatically shared workspace " + sWorkspaceId + " with user " + sUserId);
+					} else {
+						WasdiLog.debugLog("DatasetResource.addCollaborator: Workspace already shared with user " + sUserId);
+					}
+				}
+			}
 			
 			oDatasetRepository.updateDataset(oDataset);
 			
@@ -562,7 +610,7 @@ public class DatasetResource {
 			WasdiLog.errorLog("DatasetResource.addCollaborator error: " + oEx);
 			return Response.serverError().build();
 		}
-	}		
+	}	
 
 	
 	@DELETE

@@ -22,6 +22,7 @@ public class AttributeViewModel {
 	    oVM.categories = new ArrayList<>();
 	    oVM.colours = new ArrayList<>();
 	    oVM.value = oAttribute.getValue();
+	    oVM.isMandatory = oAttribute.isMandatory();
 
 	    if (oAttribute.getCategories() != null) {
 	        oVM.categories.addAll(oAttribute.getCategories());
@@ -40,6 +41,8 @@ public class AttributeViewModel {
 	    oAttribute.setName(oAttributeViewModel.name);
 	    oAttribute.setType(AttributeType.valueOf(oAttributeViewModel.type.toUpperCase()));
 	    oAttribute.setValue(oAttributeViewModel.value);
+	    
+	    oAttribute.setMandatory(oAttributeViewModel.isMandatory);
 
 	    // Guard against null lists
 	    if (oAttributeViewModel.categories != null) {
