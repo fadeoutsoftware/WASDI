@@ -146,7 +146,11 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		} else if (!sRes.endsWith(".h5") && sTitle.startsWith("VNP")) {
 			sRes += ".h5";
 		} else if (!sRes.endsWith(".nc") && !sRes.endsWith(".zip") && sTitle.startsWith("SWOT")) {
-			sRes += ".nc";
+			if (sTitle.startsWith("SWOT_L2_HR_LakeSP")) sRes += ".zip";
+			else {
+				WasdiLog.warnLog("ResponseTranslatorLpDaac.getTitle. Could not find file extension. Assuming '.nc'");
+				sRes += ".nc";
+			}
 		}
 		
 		return sRes;
@@ -376,6 +380,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 				}
 				else if (!Utils.isNullOrEmpty(sDownloadTitle) && sDownloadTitle.startsWith("Download " + sTitle)) {
 					sLink = sHref;
+					break;
 				}
 			}
 		} 
