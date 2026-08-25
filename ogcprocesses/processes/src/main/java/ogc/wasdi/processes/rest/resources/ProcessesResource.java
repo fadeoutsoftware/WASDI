@@ -834,7 +834,7 @@ public class ProcessesResource {
             		
             		// Self link
             		Link oSelfLink = new Link();
-            		oSelfLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+sProcessID+"/execution");
+            				oSelfLink.setHref(OgcProcesses.s_sBaseAddress+"jobs/"+sProcessWorkspaceId);
             		oSelfLink.setRel("self");
             		oSelfLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
             		
@@ -842,11 +842,16 @@ public class ProcessesResource {
             		
             		// Alternate html link
             		Link oHtmlLink = new Link();
-            		oHtmlLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+sProcessID+"/execution");
+            				oHtmlLink.setHref(OgcProcesses.s_sBaseAddress+"jobs/"+sProcessWorkspaceId);
             		oHtmlLink.setRel("alternate");
             		oHtmlLink.setType("text/html");
             		
             		oStatusInfo.getLinks().add(oHtmlLink);    		
+				Link oMonitorLink = new Link();
+				oMonitorLink.setHref(OgcProcesses.s_sBaseAddress+"jobs/"+sProcessWorkspaceId);
+				oMonitorLink.setRel("monitor");
+				oMonitorLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
+				oStatusInfo.getLinks().add(oMonitorLink);
             		
             		oResponse = Response.status(Status.CREATED).entity(oStatusInfo);
             		oResponse = OgcProcesses.addLinkHeaders(oResponse, oStatusInfo.getLinks());
@@ -895,8 +900,11 @@ public class ProcessesResource {
                 }
                 
                 // Add the location link
-        		String sLocationLink = OgcProcesses.s_sBaseAddress + "/jobs/" + sProcessWorkspaceId;
+        		String sLocationLink = OgcProcesses.s_sBaseAddress + "jobs/" + sProcessWorkspaceId;
         		oResponse = oResponse.header("Location", sLocationLink);                
+        		if (!bAsync) {
+        			oResponse = oResponse.header("Link", "<" + sLocationLink + ">; rel=\"monitor\"");
+        		}
             }
     		
     		if (bAddPreferenceAppliedHeader) {

@@ -334,6 +334,21 @@ public class JobsResource {
     		oHtmlLink.setType("text/html");
     		
     		oStatusInfo.getLinks().add(oHtmlLink);    		
+			if (StatusCode.SUCCESSFUL.equals(oStatusInfo.getStatus())) {
+				Link oResultsLink = new Link();
+				oResultsLink.setHref(OgcProcesses.s_sBaseAddress+"jobs/"+sJobId+"/results");
+				oResultsLink.setRel("http://www.opengis.net/def/rel/ogc/1.0/results");
+				oResultsLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
+				oStatusInfo.getLinks().add(oResultsLink);
+			}
+			else if (StatusCode.ACCEPTED.equals(oStatusInfo.getStatus())
+					|| StatusCode.RUNNING.equals(oStatusInfo.getStatus())) {
+				Link oMonitorLink = new Link();
+				oMonitorLink.setHref(OgcProcesses.s_sBaseAddress+"jobs/"+sJobId);
+				oMonitorLink.setRel("monitor");
+				oMonitorLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
+				oStatusInfo.getLinks().add(oMonitorLink);
+			}
     		
     		ResponseBuilder oResponse = Response.status(Status.OK).entity(oStatusInfo);
     		oResponse = OgcProcesses.addLinkHeaders(oResponse, oStatusInfo.getLinks());
