@@ -60,19 +60,21 @@ public class OgcProcesses extends ResourceConfig {
 	@PostConstruct
 	public void initOgcProcesses() throws URISyntaxException {
 		
-		String sPath = new File(WasdiLog.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
-		System.out.println(sPath);
 		WasdiLog.debugLog("WASDI OGC-Processes Server start");
 		
 		String sConfigFilePath = "/etc/wasdi/wasdiConfig.json";
 		
-		if (Utils.isNullOrEmpty(m_oServletConfig.getInitParameter("ConfigFilePath")) == false){
-			sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");
+		if (m_oServletConfig!=null) {
+			if (Utils.isNullOrEmpty(m_oServletConfig.getInitParameter("ConfigFilePath")) == false){
+				sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");
+			}
 		}
-		
+
 		if (!WasdiConfig.readConfig(sConfigFilePath)) {
 			WasdiLog.errorLog("ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
 		}
+
+		WasdiLog.initLogger(WasdiConfig.Current.logLevelServer);
 				
 		OgcProcesses.s_sBaseAddress = WasdiConfig.Current.ogcProcessesApi.baseAddress;
 		

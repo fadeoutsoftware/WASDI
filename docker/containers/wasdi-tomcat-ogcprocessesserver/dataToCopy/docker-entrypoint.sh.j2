@@ -189,7 +189,7 @@ function createOrUpdateUser() {
     if [[ -z "${iCurrentLine}" ]]
     then
         echo "[ENTRYPOINT] The user does not exist"
-        createUser "${sUserName}" "${sUserPassword}" "${sUserRoles}"
+        createUser "${sUserName}" "${sUserPassword}" "${sUserRole}"
         iReturnCode=${?}
     else
         echo "[ENTRYPOINT] The user exists"
