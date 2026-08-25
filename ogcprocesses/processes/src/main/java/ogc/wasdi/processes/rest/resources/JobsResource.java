@@ -132,16 +132,16 @@ public class JobsResource {
     			WasdiLog.debugLog("JobsResource.getJobsList: got " + aoAllProcs.size() + " processes. Start filtering");
     			
     			// Apply the requierd filters
-    			filterProcessWorkspaceListFromProcesses(aoAllProcs, asProcesses.toArray(new String[0]));
-    			filterProcessWorkspaceListFromStatus(aoAllProcs, asStatus.toArray(new String[0]));
+    			filterProcessWorkspaceListFromProcesses(aoAllProcs, asProcesses == null ? null : asProcesses.toArray(new String[0]));
+    			filterProcessWorkspaceListFromStatus(aoAllProcs, asStatus == null ? null : asStatus.toArray(new String[0]));
     			filterProcessWorkspaceListFromDateTime(aoAllProcs, sDateTime);
-    			filterProcessWorkspaceListFromMinDuration(aoAllProcs, aiMinDuration.toArray(new Integer[0]));
-    			filterProcessWorkspaceListFromMaxDuration(aoAllProcs, aiMaxDuration.toArray(new Integer[0]));
+    			filterProcessWorkspaceListFromMinDuration(aoAllProcs, aiMinDuration == null ? null : aiMinDuration.toArray(new Integer[0]));
+    			filterProcessWorkspaceListFromMaxDuration(aoAllProcs, aiMaxDuration == null ? null : aiMaxDuration.toArray(new Integer[0]));
     			
     			WasdiLog.debugLog("JobsResource.getJobsList: processes after filter: " + aoAllProcs.size());
     			
     			// Make a cycle to the filtered results to extract the valid ones
-    			for (int iProcs = oiOffset; iProcs<oiOffset+oiLimit; oiOffset++) {
+				for (int iProcs = oiOffset; iProcs<oiOffset+oiLimit; iProcs++) {
     				
     				if (iProcs>=aoAllProcs.size()) break;
     				
@@ -747,11 +747,12 @@ public class JobsResource {
 			if (aoProcWsList.size()==0) return;
 			
 			if (asStatus == null) {
-				asStatus = new String[4];
-				asStatus[0] = StatusCode.RUNNING.name();
-				asStatus[1] = StatusCode.SUCCESSFUL.name();
-				asStatus[2] = StatusCode.FAILED.name();
-				asStatus[3] = StatusCode.DISMISSED.name();
+				asStatus = new String[5];
+				asStatus[0] = StatusCode.ACCEPTED.name();
+				asStatus[1] = StatusCode.RUNNING.name();
+				asStatus[2] = StatusCode.SUCCESSFUL.name();
+				asStatus[3] = StatusCode.FAILED.name();
+				asStatus[4] = StatusCode.DISMISSED.name();
 			}
 			
 			ArrayList<String> asWasdiAllowedStatusCodes = convertStatuses(asStatus);
