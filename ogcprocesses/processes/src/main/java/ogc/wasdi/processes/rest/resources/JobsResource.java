@@ -746,7 +746,7 @@ public class JobsResource {
 			if (aoProcWsList == null) return;
 			if (aoProcWsList.size()==0) return;
 			
-			if (asStatus == null) {
+			if (asStatus == null || asStatus.length == 0) {
 				asStatus = new String[5];
 				asStatus[0] = StatusCode.ACCEPTED.name();
 				asStatus[1] = StatusCode.RUNNING.name();
