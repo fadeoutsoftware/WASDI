@@ -514,6 +514,42 @@ public class ProcessesResource {
 						oOutputDescription.setKeywords(null);
 						
 						oProcessViewModel.getOutputs().put("mixed_output", oOutputDescription);
+						
+						// Bbox input, so testJobCreationInputInlineBbox has something to target
+						InputDescription oBboxInputDescription = new InputDescription();
+						oBboxInputDescription.setSchema(new BboxSchema());
+						oBboxInputDescription.setMinOccurs(0);
+						oBboxInputDescription.setMaxOccurs(1);
+						oBboxInputDescription.setMetadata(null);
+						oBboxInputDescription.setKeywords(null);
+						oBboxInputDescription.setTitle("Bbox Input");
+						
+						oProcessViewModel.getInputs().put("bbox_input", oBboxInputDescription);
+						
+						// Array input, so testJobCreationInputArray has something to target
+						ArraySchema oArraySchema = new ArraySchema();
+						oArraySchema.items = new StringSchema();
+						
+						InputDescription oArrayInputDescription = new InputDescription();
+						oArrayInputDescription.setSchema(oArraySchema);
+						oArrayInputDescription.setMinOccurs(0);
+						oArrayInputDescription.setMaxOccurs(1);
+						oArrayInputDescription.setMetadata(null);
+						oArrayInputDescription.setKeywords(null);
+						oArrayInputDescription.setTitle("Array Input");
+						
+						oProcessViewModel.getInputs().put("array_input", oArrayInputDescription);
+						
+						// Pause input, so testJobResultsExceptionResultsNotReady does not skip itself
+						InputDescription oPauseInputDescription = new InputDescription();
+						oPauseInputDescription.setSchema(new NumericSchema());
+						oPauseInputDescription.setMinOccurs(0);
+						oPauseInputDescription.setMaxOccurs(1);
+						oPauseInputDescription.setMetadata(null);
+						oPauseInputDescription.setKeywords(null);
+						oPauseInputDescription.setTitle("Pause");
+						
+						oProcessViewModel.getInputs().put("pause", oPauseInputDescription);
 					}					
 				}
 			}
