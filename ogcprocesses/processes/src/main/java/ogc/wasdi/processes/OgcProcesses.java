@@ -287,7 +287,15 @@ public class OgcProcesses extends ResourceConfig {
 				String sFinalLink = "<" + sUri + ">";
 				
 				if (!Utils.isNullOrEmpty(oLink.getRel())) {
-					sFinalLink += "; rel=\"" + oLink.getRel() + "\"";
+					String sRel = oLink.getRel();
+					// RFC 8288 allows a single relation-type unquoted: keep simple tokens (self/alternate/monitor/up)
+					// unquoted for interop with clients doing a plain "rel=xxx" substring match; quote URI-style rel values
+					if (sRel.matches("[a-zA-Z0-9_-]+")) {
+						sFinalLink += "; rel=" + sRel;
+					}
+					else {
+						sFinalLink += "; rel=\"" + sRel + "\"";
+					}
 				}
 				
 				if (!Utils.isNullOrEmpty(oLink.getType())) {

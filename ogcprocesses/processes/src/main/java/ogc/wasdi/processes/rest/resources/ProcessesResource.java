@@ -918,7 +918,7 @@ public class ProcessesResource {
         		String sLocationLink = OgcProcesses.s_sBaseAddress + "jobs/" + sProcessWorkspaceId;
         		oResponse = oResponse.header("Location", sLocationLink);                
         		if (!bAsync) {
-        			oResponse = oResponse.header("Link", "<" + sLocationLink + ">; rel=\"monitor\"");
+        			oResponse = oResponse.header("Link", "<" + sLocationLink + ">; rel=monitor");
         		}
             }
     		
