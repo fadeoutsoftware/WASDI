@@ -595,6 +595,21 @@ public class ProcessesResource {
 	    		return Response.status(Status.BAD_REQUEST).entity(oApiException).header("WWW-Authenticate", "Basic").build();				
 			}
 			
+			// Complex inputs (objects) must carry a value/href/bbox: reject anything else as an invalid parameter
+			@SuppressWarnings("unchecked")
+			Map<String, Object> aoInputsToValidate = (Map<String, Object>) aoExecute.get("inputs");
+			String sInvalidInputKey = getFirstStructurallyInvalidInputKey(aoInputsToValidate);
+			
+			if (sInvalidInputKey != null) {
+				WasdiLog.debugLog("ProcessesResource.executeApplication: invalid input " + sInvalidInputKey);
+				ApiException oApiException = new ApiException();
+				oApiException.setTitle("InvalidParameterValue");
+				oApiException.setType("InvalidParameterValue");
+				oApiException.setDetail("Input \"" + sInvalidInputKey + "\" has an invalid value");
+				oApiException.setStatus(400);
+				return Response.status(Status.BAD_REQUEST).entity(oApiException).build();
+			}
+			
 			// Read the processor entity
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessID);			
@@ -1156,6 +1171,31 @@ public class ProcessesResource {
 		}
     	
     	return aoAllControls;
+    }
+    
+    /**
+     * Checks the raw "inputs" map from an execute request for structurally invalid complex values.
+     * A complex (object) input must carry either "value", "href" or "bbox"; anything else is not
+     * a valid OGC API Processes input encoding.
+     * @param aoInputs Map of input name to value, as received in the execute request body
+     * @return the key of the first structurally invalid input found, or null if all inputs are valid
+     */
+    protected String getFirstStructurallyInvalidInputKey(Map<String, Object> aoInputs) {
+    	if (aoInputs == null) return null;
+    	
+    	for (Map.Entry<String, Object> oEntry : aoInputs.entrySet()) {
+    		Object oValue = oEntry.getValue();
+    		
+    		if (oValue instanceof Map) {
+    			Map<?, ?> oValueMap = (Map<?, ?>) oValue;
+    			
+    			if (!oValueMap.containsKey("value") && !oValueMap.containsKey("href") && !oValueMap.containsKey("bbox")) {
+    				return oEntry.getKey();
+    			}
+    		}
+    	}
+    	
+    	return null;
     }
     
     /**
