@@ -102,6 +102,10 @@ public abstract class WasdiProcessorEngine {
 			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type EoepcaProcessorEngine");
 			return new EoepcaProcessorEngine();
 		}
+		else if (sType.equals(ProcessorTypes.OGC_APP_PACKAGE)) {
+			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type OgcAppPackageProcessorEngine");
+			return new OgcAppPackageProcessorEngine();
+		}
 		else if (sType.equals(ProcessorTypes.PYTHON_PIP_2)) {
 			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type PythonPipProcessorEngine2");
 			return new PythonPipProcessorEngine2();
