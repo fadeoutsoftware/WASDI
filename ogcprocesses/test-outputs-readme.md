@@ -155,17 +155,6 @@ by RFC 8288.
 
 ---
 
-## Legitimate SKIPs (not defects, no action needed)
-
-`hellowasdiworld` does not declare these input types, so the corresponding tests
-correctly skip themselves:
-
-- `testJobCreationInputInlineBbox` - "No input of type bounding box found."
-- `testJobCreationInputArray` - "No input of type array found."
-- `testJobResultsExceptionResultsNotReady` - "No input with id pause found."
-
----
-
 ## Summary for ESA/APEx sign-off
 
 Of the remaining CORE failures, none represent a defect in `ogcprocesses`:
@@ -178,4 +167,5 @@ Of the remaining CORE failures, none represent a defect in `ogcprocesses`:
 | testJobCreationInputInlineBinary | ETS environment issue | missing test fixture file, CANTTELL |
 | testJobResultsSync | ETS parsing bug | doesn't strip `<`/`>` from `Link` header value |
 
-All other CORE requirements pass. Latest known result: **Pass 38 / Fail 4 / Skip 3 / Total 45.**
+Latest known result: **Pass 40 / Fail 5 / Skip 0 / Total 45.** All 5 remaining failures
+are accounted for above and are test-suite issues, not `ogcprocesses` defects.
