@@ -2002,6 +2002,19 @@ public class DockerUtils {
      * @return The Id of the container if created, empty string in case of problems
      */
     public String run(String sImageName, String sImageVersion, List<String> asArg, boolean bAlwaysRecreateContainer,  ArrayList<String> asAdditionalMountPoints, boolean bAutoRemove) {
+    	// Legacy behaviour: mount the whole WASDI base path (all users/workspaces) at /data/wasdi
+    	return run(sImageName, sImageVersion, asArg, bAlwaysRecreateContainer, asAdditionalMountPoints, bAutoRemove, PathsConfig.getWasdiBasePath());
+    }
+
+    /**
+     * Create and Run a container, choosing which host folder is mounted at /data/wasdi
+     * @param sImageName Name of the image
+     * @param sImageVersion Version
+     * @param asArg Args to be passed as CMD parameter
+     * @param sHostDataFolderToMount Host folder to mount at /data/wasdi (e.g. the whole WASDI base path, or a single workspace folder)
+     * @return The Id of the container if created, empty string in case of problems
+     */
+    public String run(String sImageName, String sImageVersion, List<String> asArg, boolean bAlwaysRecreateContainer,  ArrayList<String> asAdditionalMountPoints, boolean bAutoRemove, String sHostDataFolderToMount) {
 
         try {
         	
@@ -2088,14 +2101,14 @@ public class DockerUtils {
             		// Create the Payload to send to create the container
             		CreateParams oContainerCreateParams = new CreateParams();
             		
-            		// Set the user
-            		oContainerCreateParams.User = m_sWasdiSystemUserName+":"+m_sWasdiSystemGroupName;
+            		// Numeric uid:gid, not the user/group name: the image (e.g. an externally pulled one) may have no matching /etc/passwd entry
+            		oContainerCreateParams.User = m_iWasdiSystemUserId+":"+m_iWasdiSystemGroupId;
             		
             		// Set the image
             		oContainerCreateParams.Image = sImageName;            		
             		
-            		// Mount the /data/wasdi/ folder
-            		oContainerCreateParams.HostConfig.Binds.add(PathsConfig.getWasdiBasePath()+":"+"/data/wasdi");
+            		// Mount the /data/wasdi/ folder (either the whole WASDI base path, or, for engines that support it, just one workspace)
+            		oContainerCreateParams.HostConfig.Binds.add(sHostDataFolderToMount+":"+"/data/wasdi");
             		
             		// Set the network mode
             		oContainerCreateParams.HostConfig.NetworkMode = m_sDockerNetworkMode;

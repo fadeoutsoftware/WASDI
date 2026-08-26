@@ -51,6 +51,12 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 	 */
 	protected static final String DOCKERFILE_NAME = "Dockerfile";
 
+	/**
+	 * Fixed container-side mount point of the workspace folder (matches DockerUtils' own convention).
+	 * Reserved for the upcoming STAC stage-in/out host-to-container path translation.
+	 */
+	protected static final String CONTAINER_DATA_FOLDER = "/data/wasdi";
+
 	public OgcAppPackageProcessorEngine() {
 		super();
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
@@ -299,7 +305,10 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 			processWorkspaceLog("Starting the Application container");
 			WasdiLog.debugLog("OgcAppPackageProcessorEngine.run: command line " + asCommand);
 
-			String sContainerId = oDockerUtils.run(sImageName, sImageVersion, asCommand, true, null, false);
+			// Unlike generic shell-exec containers, an OGC app only needs (and should only see) its own workspace
+			String sHostWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
+
+			String sContainerId = oDockerUtils.run(sImageName, sImageVersion, asCommand, true, null, false, sHostWorkspacePath);
 
 			if (Utils.isNullOrEmpty(sContainerId)) {
 				processWorkspaceLog("Impossible to start the Application container");
