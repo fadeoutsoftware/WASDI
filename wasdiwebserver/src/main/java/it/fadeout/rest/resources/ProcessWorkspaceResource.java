@@ -38,6 +38,7 @@ import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.NodeRepository;
+import wasdi.shared.data.OgcProcessesTaskRepository;
 import wasdi.shared.data.ParametersRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
@@ -218,20 +219,27 @@ public class ProcessWorkspaceResource {
 
 			// Get Process List
 			List<ProcessWorkspace> aoProcess = null;
+			
+			// Get Process List
+			aoProcess = oRepository.getProcessByUser(oUser.getUserId());				
+			
+			List<String> asOgcTasks = null;
 
 			if (bOgc) {
-				// Get Process List
-				aoProcess = oRepository.getOGCProcessByUser(oUser.getUserId());				
-			}
-			else {
-				// Get Process List
-				aoProcess = oRepository.getProcessByUser(oUser.getUserId());				
+				OgcProcessesTaskRepository oOgcProcessesTaskRepository = new OgcProcessesTaskRepository();
+				asOgcTasks = oOgcProcessesTaskRepository.getProcessWsIds(oUser.getUserId());				
 			}
 
 			// For each
 			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
 				// Create View Model
 				ProcessWorkspace oProcess = aoProcess.get(iProcess);
+				
+				// If we are filtering OGC processes, check if this specific proc ws is marked as ogc
+				if (asOgcTasks != null && bOgc) {
+					if (asOgcTasks.contains(oProcess.getProcessObjId()) == false) continue;
+				}
+				
 				aoProcessList.add(ProcessWorkspaceViewModel.buildProcessWorkspaceViewModel(oProcess));
 			}
 		}

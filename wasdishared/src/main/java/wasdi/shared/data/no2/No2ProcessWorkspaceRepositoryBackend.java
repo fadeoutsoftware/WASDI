@@ -327,11 +327,6 @@ public class No2ProcessWorkspaceRepositoryBackend extends No2Repository implemen
 	}
 
 	@Override
-	public List<ProcessWorkspace> getOGCProcessByUser(String sUserId) {
-		return getProcessByUser(sUserId);
-	}
-
-	@Override
 	public List<ProcessWorkspace> getCreatedProcesses() {
 		return getProcessesByStatusAndOps(ProcessStatus.CREATED.name(), null, LauncherOperations.DOWNLOAD.name(), LauncherOperations.RUNIDL.name());
 	}

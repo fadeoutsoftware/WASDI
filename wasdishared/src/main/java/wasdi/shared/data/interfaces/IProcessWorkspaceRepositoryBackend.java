@@ -52,8 +52,6 @@ public interface IProcessWorkspaceRepositoryBackend {
 
 	List<ProcessWorkspace> getProcessByUser(String sUserId);
 
-	List<ProcessWorkspace> getOGCProcessByUser(String sUserId);
-
 	List<ProcessWorkspace> getCreatedProcesses();
 
 	List<ProcessWorkspace> getCreatedProcessesByNode(String sComputingNodeCode);

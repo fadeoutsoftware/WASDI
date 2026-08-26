@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -51,6 +52,8 @@ import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
 @Path("jobs")
 public class JobsResource {
 	
+	// Cache of processor name -> processor id, thread safe for concurrent requests
+	protected Map<String, String> m_oProcessorIdCache = new ConcurrentHashMap<>();
 
 	/**
 	 * Get a list of the OGC jobs for this user.
@@ -164,6 +167,11 @@ public class JobsResource {
         		Link oNextLink = new Link();
         		
         		int iNewOffset = oiOffset + oiLimit;
+        		        		
+        		if (asProcesses == null) asProcesses = new ArrayList<String>();
+        		if (asStatus == null) asStatus = new ArrayList<String>();
+        		if (aiMaxDuration == null) aiMaxDuration = new ArrayList<Integer>();
+        		if (aiMinDuration == null) aiMinDuration = new ArrayList<Integer>();
         		
         		String sAddress = getJobsListNextLinkAddress(oiLimit, iNewOffset, asTypes.toArray(new String[0]), asProcesses.toArray(new String[0]), asStatus.toArray(new String[0]), sDateTime, aiMinDuration.toArray(new Integer[0]), aiMaxDuration.toArray(new Integer[0]));
         		
@@ -607,11 +615,21 @@ public class JobsResource {
     		oInfo.setJobID(oProcWs.getProcessObjId());
     		oInfo.setMessage(oProcWs.getProductName());
     		
-    		ProcessorRepository oProcessorRepository = new ProcessorRepository();
-    		Processor oProcessor = oProcessorRepository.getProcessorByName(oProcWs.getProductName());
+    		String sProcessorName = oProcWs.getProductName();
+    		String sProcessorId = m_oProcessorIdCache.get(sProcessorName);
     		
-    		if (oProcessor!=null) {
-    			oInfo.setProcessID(oProcessor.getProcessorId());
+    		if (sProcessorId == null) {
+    			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+    			Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
+    			
+    			if (oProcessor!=null) {
+    				sProcessorId = oProcessor.getProcessorId();
+    				m_oProcessorIdCache.put(sProcessorName, sProcessorId);
+    			}
+    		}
+    		
+    		if (sProcessorId!=null) {
+    			oInfo.setProcessID(sProcessorId);
     		}
     		
     		oInfo.setProgress(oProcWs.getProgressPerc());

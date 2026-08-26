@@ -1,5 +1,7 @@
 package wasdi.shared.data.interfaces;
 
+import java.util.List;
+
 import wasdi.shared.business.OgcProcessesTask;
 
 /**
@@ -18,4 +20,6 @@ public interface IOgcProcessesTaskRepositoryBackend {
 	boolean updateOgcProcessesTask(OgcProcessesTask oOgcProcessesTask);
 
 	OgcProcessesTask getOgcProcessesTask(String sProcessWorkspaceId);
+
+	List<String> getProcessWsIds(String sUserId);
 }

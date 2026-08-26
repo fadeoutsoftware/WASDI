@@ -499,26 +499,6 @@ public class SqliteProcessWorkspaceRepositoryBackend extends SqliteRepository im
 
         return new ArrayList<>();
     }
-
-    /**
-     * Get the list of the OGC Processes API triggered processworkspaces for a user
-     * @param sUserId User Identifier
-     * @return List of OGC Process Workspace of this user
-     */
-    public List<ProcessWorkspace> getOGCProcessByUser(String sUserId) {
-
-        try {
-        	return queryList(
-        			"SELECT data FROM " + m_sThisCollection + " WHERE json_extract(data,'$.userId') = ?" +
-        			" ORDER BY json_extract(data,'$.operationTimestamp') DESC, json_extract(data,'$.operationDate') DESC",
-        			new Object[]{sUserId}, ProcessWorkspace.class);
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("ProcessWorkspaceRepository.getOGCProcessByUser: exception ", oEx);
-        }
-
-        return new ArrayList<>();
-    }
-
     
     /**
      * Get the list of created processes NOT Download or IDL
