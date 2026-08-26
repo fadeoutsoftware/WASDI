@@ -4,7 +4,8 @@ import wasdi.shared.viewmodels.ogcprocesses.Schema;
 
 public class NumericSchema extends Schema {
 	public NumericSchema() {
-		type = "numeric";
+		// "numeric" is not a valid JSON Schema type; the correct type is "integer"
+		type = "integer";
 	}
 	
 	public Integer minimum;
