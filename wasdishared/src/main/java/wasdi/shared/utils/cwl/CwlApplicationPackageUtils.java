@@ -332,9 +332,10 @@ public class CwlApplicationPackageUtils {
 	/**
 	 * Builds the CWL job order (the document cwltool expects as its second argument) from the
 	 * WASDI job input values, keyed by the Workflow's own input ids. Directory-typed inputs are
-	 * wrapped as CWL Directory objects ({class: Directory, path: ...}); every other value (incl.
-	 * arrays, for a scattered input) is passed through as-is, since cwltool resolves scatter,
-	 * steps wiring and expressions itself.
+	 * wrapped as CWL Directory objects ({class: Directory, path: ...}) - or, for a Directory[]
+	 * input whose value is already a list of paths (see stage-in), as a list of such objects.
+	 * Every other value (incl. arrays, for a scattered scalar input) is passed through as-is,
+	 * since cwltool resolves scatter, steps wiring and expressions itself.
 	 * 
 	 * @param oWorkflow Workflow node
 	 * @param oJobInputValues WASDI job input values, keyed by Workflow input ids
@@ -365,18 +366,33 @@ public class CwlApplicationPackageUtils {
 
 			String sCleanType = sType.replace("?", "").replace("[]", "").trim();
 
-			if ("Directory".equalsIgnoreCase(sCleanType) && oValue != null) {
-				Map<String, Object> oDirectoryValue = new LinkedHashMap<>();
-				oDirectoryValue.put("class", "Directory");
-				oDirectoryValue.put("path", oValue.toString());
-				oJobOrder.put(sInputId, oDirectoryValue);
+			if (!"Directory".equalsIgnoreCase(sCleanType) || oValue == null) {
+				oJobOrder.put(sInputId, oValue);
+				continue;
+			}
+
+			if (oValue instanceof List) {
+				List<Object> aoDirectoryValues = new ArrayList<>();
+
+				for (Object oElement : (List<Object>) oValue) {
+					aoDirectoryValues.add(toDirectoryValue(oElement));
+				}
+
+				oJobOrder.put(sInputId, aoDirectoryValues);
 			}
 			else {
-				oJobOrder.put(sInputId, oValue);
+				oJobOrder.put(sInputId, toDirectoryValue(oValue));
 			}
 		}
 
 		return oJobOrder;
+	}
+
+	private static Map<String, Object> toDirectoryValue(Object oPath) {
+		Map<String, Object> oDirectoryValue = new LinkedHashMap<>();
+		oDirectoryValue.put("class", "Directory");
+		oDirectoryValue.put("path", oPath.toString());
+		return oDirectoryValue;
 	}
 
 	/**

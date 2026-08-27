@@ -482,10 +482,11 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 	}
 
 	/**
-	 * Resolves every Directory-typed Workflow input by staging-in the STAC Item it references
-	 * (see {@link StacStageInUtils}), and replaces its raw job value (the STAC Item url) with
-	 * the resulting container-visible local path.
+	 * Resolves every Directory-typed Workflow input by staging-in the STAC Item(s) it references
+	 * (see {@link StacStageInUtils}), and replaces its raw job value (a STAC Item url, or a list
+	 * of them for a Directory[] input) with the resulting local path(s).
 	 */
+	@SuppressWarnings("unchecked")
 	protected boolean stageInDirectoryInputs(Map<String, Object> oWorkflowNode, Map<String, Object> oJobInputValues, String sHostWorkspacePath) {
 
 		List<String> asDirectoryInputIds = CwlApplicationPackageUtils.getInputIdsOfType(oWorkflowNode, "Directory");
@@ -496,6 +497,30 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 
 			if (oRawValue == null) {
 				WasdiLog.warnLog("OgcAppPackageProcessorEngine.stageInDirectoryInputs: no value provided for Directory input [" + sInputId + "], skipping it");
+				continue;
+			}
+
+			if (oRawValue instanceof List) {
+
+				// A Directory[] input: one STAC Item url per array element, staged into its own indexed subfolder
+				List<Object> aoRawValues = (List<Object>) oRawValue;
+				List<String> asStagedPaths = new ArrayList<>();
+
+				for (int iIndex = 0; iIndex < aoRawValues.size(); iIndex++) {
+
+					String sHostStagingFolder = sHostWorkspacePath + STAC_STAGE_IN_FOLDER_NAME + "/" + sInputId + "/" + iIndex;
+
+					File oStagedFolder = StacStageInUtils.stageInStacItem(String.valueOf(aoRawValues.get(iIndex)), sHostStagingFolder, m_oProcessWorkspaceLogger);
+
+					if (oStagedFolder == null) {
+						WasdiLog.errorLog("OgcAppPackageProcessorEngine.stageInDirectoryInputs: impossible to stage-in input [" + sInputId + "][" + iIndex + "]");
+						return false;
+					}
+
+					asStagedPaths.add(oStagedFolder.getAbsolutePath());
+				}
+
+				oJobInputValues.put(sInputId, asStagedPaths);
 				continue;
 			}
 
