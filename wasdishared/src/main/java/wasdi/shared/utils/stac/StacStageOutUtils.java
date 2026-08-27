@@ -2,8 +2,10 @@ package wasdi.shared.utils.stac;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -149,5 +151,116 @@ public class StacStageOutUtils {
 			WasdiLog.warnLog("StacStageOutUtils.extractBboxString: impossible to parse the item bbox");
 			return "";
 		}
+	}
+
+	/**
+	 * Parses cwltool's own final result document (the JSON it prints to stdout, describing which
+	 * File/Directory correspond to which declared Workflow output - this is the authoritative
+	 * source of "what did this run actually produce", covering scatter/multi-step/subworkflow
+	 * outputs that a simple CWL outputBinding.glob re-implementation could never resolve correctly.
+	 * 
+	 * @param oResultJsonFile the file the cwltool invocation's stdout was redirected to
+	 * @return the parsed result document, or null if it does not exist / cannot be parsed
+	 */
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> parseCwltoolResult(File oResultJsonFile) {
+		try {
+			if (oResultJsonFile == null || !oResultJsonFile.exists()) {
+				WasdiLog.warnLog("StacStageOutUtils.parseCwltoolResult: result file not found");
+				return null;
+			}
+
+			return new ObjectMapper().readValue(oResultJsonFile, Map.class);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("StacStageOutUtils.parseCwltoolResult: exception parsing " + oResultJsonFile, oEx);
+			return null;
+		}
+	}
+
+	/**
+	 * Recursively collects every local file referenced by cwltool's result document: walks every
+	 * declared Workflow output value, following File "path"/"location" entries, Directory entries
+	 * (recursing into their own local folder content) and arrays (for scattered/array outputs).
+	 * 
+	 * @param oCwltoolResult parsed cwltool result document (see {@link #parseCwltoolResult(File)})
+	 * @return the set of local files referenced, in no particular order
+	 */
+	public static Set<File> collectCwltoolOutputFiles(Map<String, Object> oCwltoolResult) {
+
+		Set<File> aoFiles = new LinkedHashSet<>();
+
+		if (oCwltoolResult == null) return aoFiles;
+
+		for (Object oOutputValue : oCwltoolResult.values()) {
+			collectFilesFromValue(oOutputValue, aoFiles);
+		}
+
+		return aoFiles;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void collectFilesFromValue(Object oValue, Set<File> aoFiles) {
+
+		if (oValue instanceof List) {
+			for (Object oElement : (List<Object>) oValue) {
+				collectFilesFromValue(oElement, aoFiles);
+			}
+			return;
+		}
+
+		if (!(oValue instanceof Map)) return;
+
+		Map<String, Object> oValueMap = (Map<String, Object>) oValue;
+		String sClass = String.valueOf(oValueMap.get("class"));
+		String sPath = resolveLocalPath(oValueMap);
+
+		if ("File".equals(sClass)) {
+			if (sPath != null) {
+				File oFile = new File(sPath);
+				if (oFile.exists()) aoFiles.add(oFile);
+			}
+		}
+		else if ("Directory".equals(sClass)) {
+			if (sPath != null) {
+				File oDirectory = new File(sPath);
+				collectFilesRecursively(oDirectory, aoFiles);
+			}
+		}
+
+		// Some cwltool outputs (e.g. Directory "listing") nest further File/Directory objects
+		Object oListing = oValueMap.get("listing");
+
+		if (oListing instanceof List) {
+			for (Object oListedValue : (List<Object>) oListing) {
+				collectFilesFromValue(oListedValue, aoFiles);
+			}
+		}
+	}
+
+	private static void collectFilesRecursively(File oFolder, Set<File> aoFiles) {
+		if (oFolder == null || !oFolder.exists()) return;
+
+		File[] aoContent = oFolder.listFiles();
+
+		if (aoContent == null) return;
+
+		for (File oEntry : aoContent) {
+			if (oEntry.isDirectory()) collectFilesRecursively(oEntry, aoFiles);
+			else aoFiles.add(oEntry);
+		}
+	}
+
+	private static String resolveLocalPath(Map<String, Object> oValueMap) {
+		Object oPath = oValueMap.get("path");
+
+		if (oPath != null) return oPath.toString();
+
+		Object oLocation = oValueMap.get("location");
+
+		if (oLocation == null) return null;
+
+		String sLocation = oLocation.toString();
+		return sLocation.startsWith("file://") ? sLocation.substring("file://".length()) : sLocation;
 	}
 }

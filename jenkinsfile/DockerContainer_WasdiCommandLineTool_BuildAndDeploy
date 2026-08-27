@@ -59,7 +59,7 @@ pipeline {
             --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sEnvironmentLower} \
             --diff \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiGdalContainer=true sDeployWasdiSen2corContainer=true sDeployWasdiSnaphuContainer=true'
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiCwlContainer=true sDeployWasdiGdalContainer=true sDeployWasdiSen2corContainer=true sDeployWasdiSnaphuContainer=true'
         """,
         label: "Build the container(s)"
       }
@@ -89,7 +89,7 @@ pipeline {
             --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiGdalContainer=true sDeployWasdiSen2corContainer=true sDeployWasdiSnaphuContainer=true'
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiCwlContainer=true sDeployWasdiGdalContainer=true sDeployWasdiSen2corContainer=true sDeployWasdiSnaphuContainer=true'
         """,
         label: "Clean the Docker image(s)"
       }

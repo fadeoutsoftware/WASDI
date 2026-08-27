@@ -15,6 +15,7 @@ pipeline {
     booleanParam(name: 'PUSH_wasdi_launcher',                      defaultValue: true, description: 'Tag and push wasdi-launcher')
     booleanParam(name: 'PUSH_wasdi_toolbox',                       defaultValue: true, description: 'Tag and push wasdi-toolbox')
     booleanParam(name: 'PUSH_wasdi_gdal',                          defaultValue: true, description: 'Tag and push wasdi-gdal')
+    booleanParam(name: 'PUSH_wasdi_cwl',                           defaultValue: true, description: 'Tag and push wasdi-cwl')
     booleanParam(name: 'PUSH_wasdi_snaphu',                        defaultValue: true, description: 'Tag and push wasdi-snaphu')
     booleanParam(name: 'PUSH_wasdi_sen2cor',                       defaultValue: true, description: 'Tag and push wasdi-sen2cor')
     booleanParam(name: 'PUSH_wasdi_utils',                         defaultValue: true, description: 'Tag and push wasdi-utils')
@@ -76,6 +77,7 @@ pipeline {
           [ "${params.PUSH_wasdi_launcher}"                      = "true" ] && tag_and_push "wasdi-launcher"                      "wasdi/wasdi:wasdi-launcher"
           [ "${params.PUSH_wasdi_toolbox}"                       = "true" ] && tag_and_push "wasdi-toolbox"                       "wasdi/wasdi:wasdi-toolbox"
           [ "${params.PUSH_wasdi_gdal}"                          = "true" ] && tag_and_push "wasdi-gdal"                          "wasdi/wasdi:wasdi-gdal"
+          [ "${params.PUSH_wasdi_cwl}"                           = "true" ] && tag_and_push "wasdi-cwl"                           "wasdi/wasdi:wasdi-cwl"
           [ "${params.PUSH_wasdi_snaphu}"                        = "true" ] && tag_and_push "wasdi-snaphu"                        "wasdi/wasdi:wasdi-snaphu"
           [ "${params.PUSH_wasdi_sen2cor}"                       = "true" ] && tag_and_push "wasdi-sen2cor"                       "wasdi/wasdi:wasdi-sen2cor"
           [ "${params.PUSH_wasdi_utils}"                         = "true" ] && tag_and_push "wasdi-utils"                         "wasdi/wasdi:wasdi-utils"

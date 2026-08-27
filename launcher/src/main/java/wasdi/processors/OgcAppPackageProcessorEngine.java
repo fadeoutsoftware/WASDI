@@ -1,14 +1,12 @@
 package wasdi.processors;
 
 import java.io.File;
-import java.nio.file.FileSystems;
-import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +25,7 @@ import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.config.PathsConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
@@ -43,7 +42,6 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.stac.StacStageInUtils;
 import wasdi.shared.utils.stac.StacStageOutUtils;
 import wasdi.shared.viewmodels.products.ProductViewModel;
-import wasdi.shared.utils.stac.StacStageInUtils;
 
 /**
  * Processor Engine for the OGC Best Practice for Earth Observation Application Package
@@ -52,11 +50,16 @@ import wasdi.shared.utils.stac.StacStageInUtils;
  * Unlike {@link EoepcaProcessorEngine}, that pushes a WASDI-generated Application Package
  * to an external EOEPCA/ADES platform, this engine makes WASDI itself the "Platform": the
  * user uploads a ready-made Application Package (a CWL document, with either its own
- * Dockerfile/source or a reference to an already published image), and WASDI builds/pulls
- * the container and runs it locally as a one-shot CWL CommandLineTool.
+ * Dockerfile/source or references to already published images), and WASDI runs it locally.
  * 
- * v1 scope: single Workflow + single CommandLineTool, no multi-step workflows, no
- * File/Directory (STAC) stage-in/out yet.
+ * The actual CWL execution (steps wiring, scatter, expressions, subworkflows...) is delegated
+ * to the real cwltool reference runner, invoked inside the dedicated "wasdi-cwl" image, which
+ * in turn drives the host Docker Engine (via the bind-mounted docker.sock) to run each
+ * CommandLineTool's own container - the same "sibling containers" pattern already used
+ * everywhere else in WASDI, not nested Docker-in-Docker.
+ * 
+ * WASDI's own responsibilities stay: building/pushing the image for self-contained packages,
+ * workspace mounting, STAC stage-in/out, and registering results as WASDI products.
  * 
  * @author p.campanella
  */
@@ -68,8 +71,7 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 	protected static final String DOCKERFILE_NAME = "Dockerfile";
 
 	/**
-	 * Fixed container-side mount point of the workspace folder (matches DockerUtils' own convention).
-	 * Reserved for the upcoming STAC stage-in/out host-to-container path translation.
+	 * Fixed container-side mount point of the workspace folder (matches DockerUtils' own convention)
 	 */
 	protected static final String CONTAINER_DATA_FOLDER = "/data/wasdi";
 
@@ -79,24 +81,43 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 	protected static final String STAC_STAGE_IN_FOLDER_NAME = ".stac-in";
 
 	/**
-	 * Workspace subfolder used as the container working directory, one folder per run, so
-	 * declared outputs survive the container and can be staged-out into the workspace
+	 * Workspace subfolder used for a single cwltool run: the (copied) resolved CWL document,
+	 * the job order, and cwltool's own --outdir all live there, so everything a run needs is
+	 * inside the single mounted workspace folder
 	 */
-	protected static final String STAGE_OUT_FOLDER_NAME = ".stac-out";
+	protected static final String CWL_RUN_FOLDER_NAME = ".cwl-run";
+
+	/**
+	 * Name of the CWL document rewritten at deploy time (e.g. with WASDI's own built image
+	 * reference), the one actually used at run time
+	 */
+	protected static final String RESOLVED_CWL_FILE_NAME = "resolved-app-package.cwl";
+
+	protected static final String JOB_ORDER_FILE_NAME = "job-order.yml";
+
+	protected static final String CWLTOOL_RESULT_FILE_NAME = "cwltool-result.json";
+
+	/**
+	 * Name/version of the WASDI-authored image that runs cwltool itself (built/published by a
+	 * separate CI pipeline, not by this engine)
+	 */
+	protected static final String CWL_RUNNER_IMAGE_NAME = "wasdi-cwl";
+	protected static final String CWL_RUNNER_IMAGE_VERSION = "latest";
 
 	public OgcAppPackageProcessorEngine() {
 		super();
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
 		m_sDockerTemplatePath += ProcessorTypes.getTemplateFolder(ProcessorTypes.OGC_APP_PACKAGE);
 
-		// A CWL CommandLineTool is a one-shot CLI application, not a long running REST server
+		// cwltool drives its own containers one-shot: this engine never runs a long-lived REST server
 		m_bRunAfterDeploy = false;
 	}
 
 	/**
 	 * Deploys the Application Package: unzips it, parses the CWL document, derives the WASDI
 	 * parameter sample from the Workflow inputs, and either builds the user provided Dockerfile
-	 * or pulls the image referenced in the CWL DockerRequirement.
+	 * (rewriting every CommandLineTool's dockerPull to point at it) or validates that every
+	 * CommandLineTool already references an external, already published image.
 	 */
 	@Override
 	public boolean deploy(ProcessorParameter oParameter, boolean bFirstDeploy) {
@@ -163,14 +184,16 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 			}
 
 			Map<String, Object> oWorkflowNode = CwlApplicationPackageUtils.getWorkflowNode(oCwlDocument);
-			Map<String, Object> oCommandLineToolNode = CwlApplicationPackageUtils.getCommandLineToolNode(oCwlDocument);
+			List<Map<String, Object>> aoCommandLineToolNodes = CwlApplicationPackageUtils.getAllCommandLineToolNodes(oCwlDocument);
 
-			if (oWorkflowNode == null || oCommandLineToolNode == null) {
-				return logDeployErrorAndClean("the CWL document must contain a Workflow class and a CommandLineTool class (OGC BP Requirement 7)", bFirstDeploy);
+			if (oWorkflowNode == null || aoCommandLineToolNodes.isEmpty()) {
+				return logDeployErrorAndClean("the CWL document must contain a Workflow class and at least one CommandLineTool class (OGC BP Requirement 7)", bFirstDeploy);
 			}
 
-			if (Utils.isNullOrEmpty(String.valueOf(oCommandLineToolNode.get("id"))) || oCommandLineToolNode.get("baseCommand") == null) {
-				return logDeployErrorAndClean("the CommandLineTool must declare an id and a baseCommand (OGC BP Requirement 8)", bFirstDeploy);
+			for (Map<String, Object> oCommandLineToolNode : aoCommandLineToolNodes) {
+				if (Utils.isNullOrEmpty(String.valueOf(oCommandLineToolNode.get("id"))) || oCommandLineToolNode.get("baseCommand") == null) {
+					return logDeployErrorAndClean("every CommandLineTool must declare an id and a baseCommand (OGC BP Requirement 8)", bFirstDeploy);
+				}
 			}
 
 			// Derive and store the WASDI parameter sample from the Workflow inputs
@@ -210,22 +233,24 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 				if (Utils.isNullOrEmpty(sPushedImageAddress)) {
 					return logDeployErrorAndClean("impossible to push the built image", bFirstDeploy);
 				}
+
+				// A single embedded Dockerfile is used for every CommandLineTool of this package (v1 limitation)
+				for (Map<String, Object> oCommandLineToolNode : aoCommandLineToolNodes) {
+					CwlApplicationPackageUtils.setDockerPull(oCommandLineToolNode, sPushedImageAddress);
+				}
 			}
 			else {
-
-				String sDockerPull = CwlApplicationPackageUtils.getDockerPull(oCommandLineToolNode);
-
-				if (Utils.isNullOrEmpty(sDockerPull)) {
-					return logDeployErrorAndClean("no Dockerfile in the package and no DockerRequirement.dockerPull in the CWL: impossible to get a container image", bFirstDeploy);
+				for (Map<String, Object> oCommandLineToolNode : aoCommandLineToolNodes) {
+					if (Utils.isNullOrEmpty(CwlApplicationPackageUtils.getDockerPull(oCommandLineToolNode))) {
+						return logDeployErrorAndClean("no Dockerfile in the package and a CommandLineTool has no DockerRequirement.dockerPull: impossible to get a container image", bFirstDeploy);
+					}
 				}
 
-				processWorkspaceLog("Application Package references the external image " + sDockerPull + ": pulling it");
+				processWorkspaceLog("Application Package references external image(s): cwltool will pull them at run time");
+			}
 
-				DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder);
-
-				if (!oDockerUtils.pull(sDockerPull, "")) {
-					WasdiLog.warnLog("OgcAppPackageProcessorEngine.deploy: impossible to pull " + sDockerPull + ", it may already be available locally: we will try again when the app is run");
-				}
+			if (!CwlApplicationPackageUtils.writeYamlDocument(oCwlDocument, new File(sProcessorFolder, RESOLVED_CWL_FILE_NAME))) {
+				return logDeployErrorAndClean("impossible to write the resolved CWL document", bFirstDeploy);
 			}
 
 			if (bFirstDeploy) {
@@ -243,9 +268,10 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 	}
 
 	/**
-	 * Runs the Application Package: builds the container command line from the CWL
-	 * CommandLineTool and the WASDI job parameters, starts the container once, and waits
-	 * for it to exit.
+	 * Runs the Application Package: stages-in the STAC Directory inputs, builds the CWL job
+	 * order, and invokes cwltool (inside the "wasdi-cwl" image) once for the whole Workflow -
+	 * cwltool itself resolves steps, scatter, expressions and subworkflows. Stages-out whatever
+	 * cwltool reports as the Workflow's actual outputs.
 	 */
 	@Override
 	public boolean run(ProcessorParameter oParameter) {
@@ -259,6 +285,8 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 		ProcessWorkspace oProcessWorkspace = m_oProcessWorkspace;
+
+		File oHostRunFolder = null;
 
 		try {
 			checkAndCreateWorkspaceFolder(oParameter);
@@ -279,113 +307,126 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 
 			String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
 
-			File oCwlFile = CwlApplicationPackageUtils.findCwlFile(sProcessorFolder);
+			File oResolvedCwlFile = new File(sProcessorFolder, RESOLVED_CWL_FILE_NAME);
 
-			if (oCwlFile == null) {
+			if (!oResolvedCwlFile.exists()) {
+				// Backward compatibility: a processor deployed before this engine started writing a resolved copy
+				oResolvedCwlFile = CwlApplicationPackageUtils.findCwlFile(sProcessorFolder);
+			}
+
+			if (oResolvedCwlFile == null) {
 				processWorkspaceLog("No CWL file found for this Application Package");
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
 				return false;
 			}
 
-			Map<String, Object> oCwlDocument = CwlApplicationPackageUtils.loadCwlDocument(oCwlFile);
+			Map<String, Object> oCwlDocument = CwlApplicationPackageUtils.loadCwlDocument(oResolvedCwlFile);
 			Map<String, Object> oWorkflowNode = CwlApplicationPackageUtils.getWorkflowNode(oCwlDocument);
-			Map<String, Object> oCommandLineToolNode = CwlApplicationPackageUtils.getCommandLineToolNode(oCwlDocument);
+			String sWorkflowId = CwlApplicationPackageUtils.getWorkflowId(oWorkflowNode);
 
-			if (oCommandLineToolNode == null) {
-				processWorkspaceLog("Impossible to parse the CommandLineTool from the CWL document");
+			if (oWorkflowNode == null || Utils.isNullOrEmpty(sWorkflowId)) {
+				processWorkspaceLog("Impossible to parse the Workflow from the CWL document");
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
 				return false;
 			}
 
-			// The job values are keyed by Workflow input ids: resolve them to the CommandLineTool's own input ids
-			Map<String, Object> oWorkflowInputValues = decodeJobInputValues(oParameter.getJson());
-			Map<String, Object> oJobInputValues = CwlApplicationPackageUtils.mapWorkflowValuesToToolInputs(oWorkflowNode, oWorkflowInputValues);
+			// The job values are keyed by the Workflow's own input ids: cwltool resolves the rest (steps, scatter, ...) itself
+			Map<String, Object> oJobInputValues = decodeJobInputValues(oParameter.getJson());
 
 			String sHostWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
 
-			if (!stageInDirectoryInputs(oCommandLineToolNode, oJobInputValues, sHostWorkspacePath)) {
+			if (!stageInDirectoryInputs(oWorkflowNode, oJobInputValues, sHostWorkspacePath)) {
 				processWorkspaceLog("Impossible to stage-in one of the STAC inputs");
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
 				return false;
 			}
 
-			List<String> asCommand = CwlApplicationPackageUtils.buildCommandLine(oCommandLineToolNode, oJobInputValues);
+			Map<String, Object> oJobOrder = CwlApplicationPackageUtils.buildJobOrder(oWorkflowNode, oJobInputValues);
 
-			boolean bHasOwnDockerfile = new File(sProcessorFolder, DOCKERFILE_NAME).exists();
+			// Everything a run needs (CWL document, job order, cwltool's own --outdir) lives in a single per-run workspace subfolder
+			String sHostRunFolder = sHostWorkspacePath + CWL_RUN_FOLDER_NAME + "/" + oParameter.getProcessObjId() + "/";
+			oHostRunFolder = new File(sHostRunFolder);
+			oHostRunFolder.mkdirs();
+			// The wasdi-cwl container runs as a fixed numeric uid (see DockerUtils.run), not necessarily the launcher's own user
+			oHostRunFolder.setWritable(true, false);
+			oHostRunFolder.setExecutable(true, false);
+
+			File oRunCwlFile = new File(oHostRunFolder, oResolvedCwlFile.getName());
+			FileUtils.copyFile(oResolvedCwlFile, oRunCwlFile);
+
+			File oJobOrderFile = new File(oHostRunFolder, JOB_ORDER_FILE_NAME);
+
+			if (!CwlApplicationPackageUtils.writeYamlDocument(oJobOrder, oJobOrderFile)) {
+				processWorkspaceLog("Impossible to write the CWL job order");
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+				return false;
+			}
+
+			String sContainerRunFolder = translateHostPathToContainerPath(sHostWorkspacePath, sHostRunFolder);
+			String sContainerCwlFile = sContainerRunFolder + "/" + oRunCwlFile.getName();
+			String sContainerJobOrderFile = sContainerRunFolder + "/" + JOB_ORDER_FILE_NAME;
+			String sContainerResultFile = sContainerRunFolder + "/" + CWLTOOL_RESULT_FILE_NAME;
+
+			ArrayList<String> asAdditionalMountPoints = new ArrayList<>();
+			String sDockerApiAddress = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+
+			if (!Utils.isNullOrEmpty(sDockerApiAddress) && sDockerApiAddress.startsWith("unix://")) {
+				String sDockerSocketPath = sDockerApiAddress.substring("unix://".length());
+				// The wasdi-cwl container needs the same "sibling containers" access to the host Docker Engine the launcher itself already has
+				asAdditionalMountPoints.add(sDockerSocketPath + ":" + sDockerSocketPath);
+			}
+			else {
+				WasdiLog.warnLog("OgcAppPackageProcessorEngine.run: the Docker API address is not a unix socket, cwltool may not be able to reach the Docker Engine");
+			}
 
 			m_sDockerRegistry = getDockerRegisterAddress();
 
-			String sImageName;
-			String sImageVersion;
-			DockerUtils oDockerUtils;
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, m_sDockerRegistry, m_oProcessWorkspaceLogger);
 
-			if (bHasOwnDockerfile) {
-				// Self-built image: follows the usual wasdi/<name>:<version> naming convention
-				oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, m_sDockerRegistry, m_oProcessWorkspaceLogger);
-				sImageName = sProcessorName;
-				sImageVersion = oProcessor.getVersion();
-			}
-			else {
-				// Externally referenced image: use the dockerPull reference as-is, no registry prefix
-				oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder);
-				sImageName = CwlApplicationPackageUtils.getDockerPull(oCommandLineToolNode);
-				sImageVersion = null;
+			// Best effort: the wasdi-cwl image may already be available locally
+			String sRunnerImageFullName = Utils.isNullOrEmpty(m_sDockerRegistry)
+					? (CWL_RUNNER_IMAGE_NAME + ":" + CWL_RUNNER_IMAGE_VERSION)
+					: (m_sDockerRegistry + "/" + CWL_RUNNER_IMAGE_NAME + ":" + CWL_RUNNER_IMAGE_VERSION);
+			oDockerUtils.pull(sRunnerImageFullName, "");
 
-				if (Utils.isNullOrEmpty(sImageName)) {
-					processWorkspaceLog("No DockerRequirement.dockerPull found in the CWL document");
-					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
-					return false;
-				}
+			String sCwltoolCommand = "cwltool --outdir " + sContainerRunFolder + " " + sContainerCwlFile + "#" + sWorkflowId + " " + sContainerJobOrderFile + " > " + sContainerResultFile;
+			List<String> asCommand = List.of("sh", "-c", sCwltoolCommand);
 
-				// Best effort: the image may already be available locally from the deploy step
-				oDockerUtils.pull(sImageName, "");
-			}
+			processWorkspaceLog("Starting the Application (cwltool)");
+			WasdiLog.debugLog("OgcAppPackageProcessorEngine.run: cwltool command " + sCwltoolCommand);
 
-			processWorkspaceLog("Starting the Application container");
-			WasdiLog.debugLog("OgcAppPackageProcessorEngine.run: command line " + asCommand);
-
-			// The working dir is a run-specific folder inside the (mounted) workspace, so declared outputs survive the container
-			String sHostOutputFolder = sHostWorkspacePath + STAGE_OUT_FOLDER_NAME + "/" + oParameter.getProcessObjId() + "/";
-			File oHostOutputFolder = new File(sHostOutputFolder);
-			oHostOutputFolder.mkdirs();
-			// The container runs as a fixed numeric uid (see DockerUtils.run), not necessarily the launcher's own user: make sure it can write here
-			oHostOutputFolder.setWritable(true, false);
-			oHostOutputFolder.setExecutable(true, false);
-			String sContainerWorkingDir = translateHostPathToContainerPath(sHostWorkspacePath, sHostOutputFolder);
-
-			String sContainerId = oDockerUtils.run(sImageName, sImageVersion, asCommand, true, null, false, sHostWorkspacePath, sContainerWorkingDir);
+			String sContainerId = oDockerUtils.run(CWL_RUNNER_IMAGE_NAME, CWL_RUNNER_IMAGE_VERSION, asCommand, true, asAdditionalMountPoints, false, sHostWorkspacePath, sContainerRunFolder);
 
 			if (Utils.isNullOrEmpty(sContainerId)) {
-				processWorkspaceLog("Impossible to start the Application container");
+				processWorkspaceLog("Impossible to start the cwltool container");
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
 				return false;
 			}
 
 			ProcessStatus oFinalStatus = waitForContainerCompletion(oDockerUtils, sContainerId, oProcessor, oProcessWorkspaceRepository, oProcessWorkspace);
 
-			// Surface the container stdout/stderr to the user, same as the docker build logs do
+			// Surface cwltool's own progress/log output to the user, same as the docker build logs do
 			String sContainerLogs = oDockerUtils.getContainerLogsByContainerId(sContainerId);
 
 			if (!Utils.isNullOrEmpty(sContainerLogs)) {
-				processWorkspaceLog("Application output:");
+				processWorkspaceLog("cwltool output:");
 				processWorkspaceLog(sContainerLogs);
 			}
 
-			WasdiLog.debugLog("OgcAppPackageProcessorEngine.run: container output " + sContainerLogs);
+			WasdiLog.debugLog("OgcAppPackageProcessorEngine.run: cwltool output " + sContainerLogs);
 
 			if (oFinalStatus == ProcessStatus.DONE) {
-				stageOutOutputs(oCommandLineToolNode, sHostOutputFolder, sHostWorkspacePath, oParameter);
-			}
 
-			// This is just the container's scratch working dir: its content was already copied into the workspace above
-			try {
-				FileUtils.deleteDirectory(oHostOutputFolder);
-			}
-			catch (Exception oCleanupEx) {
-				WasdiLog.warnLog("OgcAppPackageProcessorEngine.run: impossible to clean up the output staging folder " + sHostOutputFolder);
-			}
+				Map<String, Object> oCwltoolResult = StacStageOutUtils.parseCwltoolResult(new File(oHostRunFolder, CWLTOOL_RESULT_FILE_NAME));
 
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, oFinalStatus, 100);
+				if (oCwltoolResult == null) {
+					processWorkspaceLog("Impossible to read the cwltool result, cannot stage-out the outputs");
+					oFinalStatus = ProcessStatus.ERROR;
+				}
+				else {
+					stageOutOutputs(oHostRunFolder, sHostWorkspacePath, oParameter, oCwltoolResult);
+				}
+			}
 
 			try {
 				oDockerUtils.removeContainer(sContainerId, true);
@@ -393,6 +434,8 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 			catch (Exception oRemoveEx) {
 				WasdiLog.warnLog("OgcAppPackageProcessorEngine.run: impossible to remove the container " + sContainerId);
 			}
+
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, oFinalStatus, 100);
 
 			if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
 				oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
@@ -411,6 +454,16 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 			return false;
 		}
 		finally {
+			// This is just cwltool's scratch working dir: its content was already copied into the workspace above
+			if (oHostRunFolder != null) {
+				try {
+					FileUtils.deleteDirectory(oHostRunFolder);
+				}
+				catch (Exception oCleanupEx) {
+					WasdiLog.warnLog("OgcAppPackageProcessorEngine.run: impossible to clean up the run folder " + oHostRunFolder.getAbsolutePath());
+				}
+			}
+
 			if (oProcessWorkspace != null) {
 				m_oProcessWorkspace.setStatus(oProcessWorkspace.getStatus());
 			}
@@ -418,13 +471,13 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 	}
 
 	/**
-	 * Resolves every Directory-typed CommandLineTool input by staging-in the STAC Item it
-	 * references (see {@link StacStageInUtils}), and replaces its raw job value (the STAC Item
-	 * url) with the resulting container-visible local path.
+	 * Resolves every Directory-typed Workflow input by staging-in the STAC Item it references
+	 * (see {@link StacStageInUtils}), and replaces its raw job value (the STAC Item url) with
+	 * the resulting container-visible local path.
 	 */
-	protected boolean stageInDirectoryInputs(Map<String, Object> oCommandLineTool, Map<String, Object> oJobInputValues, String sHostWorkspacePath) {
+	protected boolean stageInDirectoryInputs(Map<String, Object> oWorkflowNode, Map<String, Object> oJobInputValues, String sHostWorkspacePath) {
 
-		List<String> asDirectoryInputIds = CwlApplicationPackageUtils.getInputIdsOfType(oCommandLineTool, "Directory");
+		List<String> asDirectoryInputIds = CwlApplicationPackageUtils.getInputIdsOfType(oWorkflowNode, "Directory");
 
 		for (String sInputId : asDirectoryInputIds) {
 
@@ -463,78 +516,45 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 	}
 
 	/**
-	 * Stages-out the run's outputs, merging two sources (by file name, first-wins):
-	 * - the Application's own local STAC Catalog (catalog.json, OGC BP Req 5), if present,
-	 *   used to resolve Items/Assets and their bounding box;
-	 * - the CWL "outputs" declarations (outputBinding.glob), always applied too, as a safety
-	 *   net for files whose STAC asset link is missing/wrong (real Application Packages are
-	 *   not always bug-free) or when there is no local STAC catalog at all.
-	 * Every resolved file is copied into the workspace and registered as a WASDI product.
+	 * Stages-out the run's outputs, using cwltool's own result document as the authoritative
+	 * list of produced files (see {@link StacStageOutUtils#collectCwltoolOutputFiles}). If the
+	 * Application also wrote its own local STAC catalog (OGC BP Req 5), its bbox metadata is
+	 * reused for the matching files. Every resolved file is copied into the workspace and
+	 * registered as a WASDI product.
 	 */
-	protected void stageOutOutputs(Map<String, Object> oCommandLineTool, String sHostOutputFolder, String sHostWorkspacePath, ProcessorParameter oParameter) {
+	protected void stageOutOutputs(File oHostRunFolder, String sHostWorkspacePath, ProcessorParameter oParameter, Map<String, Object> oCwltoolResult) {
 
 		try {
-			File oOutputFolder = new File(sHostOutputFolder);
+			Set<File> aoOutputFiles = StacStageOutUtils.collectCwltoolOutputFiles(oCwltoolResult);
 
-			if (!oOutputFolder.exists()) {
-				WasdiLog.warnLog("OgcAppPackageProcessorEngine.stageOutOutputs: output folder not found, nothing to stage-out");
+			if (aoOutputFiles.isEmpty()) {
+				processWorkspaceLog("cwltool reported no output files to stage-out");
 				return;
 			}
 
-			// Keyed by file name so the two sources merge cleanly, STAC entries (with a bbox) taking priority
-			Map<String, StacStageOutUtils.StagedOutFile> oStagedOutFilesByName = new LinkedHashMap<>();
-
-			List<StacStageOutUtils.StagedOutFile> aoStacStagedOutFiles = StacStageOutUtils.parseLocalOutputCatalog(oOutputFolder, m_oProcessWorkspaceLogger);
+			// Best effort: reuse the bbox metadata from the Application's own local STAC catalog, if any
+			Map<String, String> oBboxByFileName = new HashMap<>();
+			List<StacStageOutUtils.StagedOutFile> aoStacStagedOutFiles = StacStageOutUtils.parseLocalOutputCatalog(oHostRunFolder, m_oProcessWorkspaceLogger);
 
 			if (aoStacStagedOutFiles != null) {
-				processWorkspaceLog("Application produced a local STAC catalog: using it to stage-out the outputs");
-
 				for (StacStageOutUtils.StagedOutFile oStagedOutFile : aoStacStagedOutFiles) {
-					oStagedOutFilesByName.put(oStagedOutFile.file.getName(), oStagedOutFile);
+					oBboxByFileName.put(oStagedOutFile.file.getName(), oStagedOutFile.bbox);
 				}
 			}
 
-			List<CwlApplicationPackageUtils.CwlOutputBinding> aoOutputs = CwlApplicationPackageUtils.getCommandLineToolOutputs(oCommandLineTool);
+			for (File oOutputFile : aoOutputFiles) {
 
-			for (CwlApplicationPackageUtils.CwlOutputBinding oOutput : aoOutputs) {
-
-				String sCleanType = Utils.isNullOrEmpty(oOutput.type) ? "" : oOutput.type.replace("?", "").replace("[]", "");
-
-				List<File> aoMatched;
-
-				if ("Directory".equalsIgnoreCase(sCleanType)) {
-					aoMatched = matchGlob(oOutputFolder, ".");
-				}
-				else if ("File".equalsIgnoreCase(sCleanType)) {
-					aoMatched = matchGlob(oOutputFolder, oOutput.glob);
-				}
-				else {
-					WasdiLog.debugLog("OgcAppPackageProcessorEngine.stageOutOutputs: output [" + oOutput.id + "] has type [" + oOutput.type + "], stdout/stage-out for it is not supported yet");
-					continue;
-				}
-
-				for (File oFile : aoMatched) {
-					oStagedOutFilesByName.putIfAbsent(oFile.getName(), new StacStageOutUtils.StagedOutFile(oFile, ""));
-				}
-			}
-
-			if (oStagedOutFilesByName.isEmpty()) {
-				processWorkspaceLog("No declared output file found to stage-out");
-				return;
-			}
-
-			for (StacStageOutUtils.StagedOutFile oStagedOutFile : oStagedOutFilesByName.values()) {
-
-				File oOutputFile = oStagedOutFile.file;
-
-				// This is WASDI's own stage-in manifest, not an application result
+				// This is WASDI's own stage-in/out bookkeeping, not an application result
 				if (oOutputFile.getName().equals("catalog.json")) continue;
+				if (oOutputFile.getName().equals(JOB_ORDER_FILE_NAME)) continue;
+				if (oOutputFile.getName().equals(CWLTOOL_RESULT_FILE_NAME)) continue;
 
 				try {
 					File oWorkspaceFile = new File(sHostWorkspacePath, oOutputFile.getName());
 					FileUtils.copyFile(oOutputFile, oWorkspaceFile);
 
-					addOutputProductToWorkspace(oWorkspaceFile, oParameter, oStagedOutFile.bbox);
+					String sBbox = oBboxByFileName.getOrDefault(oOutputFile.getName(), "");
+					addOutputProductToWorkspace(oWorkspaceFile, oParameter, sBbox);
 
 					processWorkspaceLog("Output added to the workspace: " + oWorkspaceFile.getName());
 				}
@@ -546,36 +566,6 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 		catch (Exception oEx) {
 			WasdiLog.errorLog("OgcAppPackageProcessorEngine.stageOutOutputs: exception", oEx);
 		}
-	}
-
-	/**
-	 * Lists the top-level files of a folder matching a (simple) CWL glob: "." (or empty) means
-	 * every file, anything else is matched as a java.nio.file glob pattern
-	 */
-	protected List<File> matchGlob(File oFolder, String sGlob) {
-
-		List<File> aoMatches = new ArrayList<>();
-
-		File[] aoFiles = oFolder.listFiles();
-
-		if (aoFiles == null) return aoMatches;
-
-		if (Utils.isNullOrEmpty(sGlob) || sGlob.equals(".")) {
-			for (File oFile : aoFiles) {
-				if (oFile.isFile()) aoMatches.add(oFile);
-			}
-			return aoMatches;
-		}
-
-		PathMatcher oMatcher = FileSystems.getDefault().getPathMatcher("glob:" + sGlob);
-
-		for (File oFile : aoFiles) {
-			if (oFile.isFile() && oMatcher.matches(oFile.toPath().getFileName())) {
-				aoMatches.add(oFile);
-			}
-		}
-
-		return aoMatches;
 	}
 
 	/**
@@ -740,7 +730,9 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 
 	/**
 	 * Force the redeploy of the Application: rebuilds the image if the package has its own
-	 * Dockerfile, otherwise just re-pulls the referenced external image.
+	 * Dockerfile (rewriting every CommandLineTool's dockerPull to point at it), otherwise just
+	 * validates every CommandLineTool still references an external image. Either way, refreshes
+	 * the parameter sample and the resolved CWL document.
 	 */
 	@Override
 	public boolean redeploy(ProcessorParameter oParameter) {
@@ -772,12 +764,15 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 
 		Map<String, Object> oCwlDocument = CwlApplicationPackageUtils.loadCwlDocument(oCwlFile);
 		Map<String, Object> oWorkflowNode = CwlApplicationPackageUtils.getWorkflowNode(oCwlDocument);
-		Map<String, Object> oCommandLineToolNode = CwlApplicationPackageUtils.getCommandLineToolNode(oCwlDocument);
+		List<Map<String, Object>> aoCommandLineToolNodes = CwlApplicationPackageUtils.getAllCommandLineToolNodes(oCwlDocument);
+
+		if (oWorkflowNode == null || aoCommandLineToolNodes.isEmpty()) {
+			WasdiLog.errorLog("OgcAppPackageProcessorEngine.redeploy: impossible to parse the Workflow/CommandLineTool from the CWL document");
+			return false;
+		}
 
 		// Refresh the parameter sample in case the user replaced the CWL document
-		if (oWorkflowNode != null) {
-			oProcessor.setParameterSample(CwlApplicationPackageUtils.buildParameterSampleJson(oWorkflowNode));
-		}
+		oProcessor.setParameterSample(CwlApplicationPackageUtils.buildParameterSampleJson(oWorkflowNode));
 
 		boolean bHasOwnDockerfile = new File(sProcessorFolder, DOCKERFILE_NAME).exists();
 
@@ -798,7 +793,6 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 
 			String sNewVersion = StringUtils.incrementIntegerString(oProcessor.getVersion());
 			oProcessor.setVersion(sNewVersion);
-			oProcessorRepository.updateProcessor(oProcessor);
 
 			m_sDockerImageName = oDockerUtils.build();
 
@@ -809,30 +803,30 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 
 			String sPushedImageAddress = pushImageInRegisters(oProcessor);
 
-			return !Utils.isNullOrEmpty(sPushedImageAddress);
+			if (Utils.isNullOrEmpty(sPushedImageAddress)) {
+				WasdiLog.errorLog("OgcAppPackageProcessorEngine.redeploy: impossible to push the built image");
+				return false;
+			}
+
+			for (Map<String, Object> oCommandLineToolNode : aoCommandLineToolNodes) {
+				CwlApplicationPackageUtils.setDockerPull(oCommandLineToolNode, sPushedImageAddress);
+			}
 		}
 		else {
-
-			if (oCommandLineToolNode == null) {
-				WasdiLog.errorLog("OgcAppPackageProcessorEngine.redeploy: impossible to parse the CommandLineTool from the CWL document");
-				return false;
+			for (Map<String, Object> oCommandLineToolNode : aoCommandLineToolNodes) {
+				if (Utils.isNullOrEmpty(CwlApplicationPackageUtils.getDockerPull(oCommandLineToolNode))) {
+					WasdiLog.errorLog("OgcAppPackageProcessorEngine.redeploy: a CommandLineTool has no DockerRequirement.dockerPull found in the CWL document");
+					return false;
+				}
 			}
-
-			String sDockerPull = CwlApplicationPackageUtils.getDockerPull(oCommandLineToolNode);
-
-			if (Utils.isNullOrEmpty(sDockerPull)) {
-				WasdiLog.errorLog("OgcAppPackageProcessorEngine.redeploy: no DockerRequirement.dockerPull found in the CWL document");
-				return false;
-			}
-
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder);
 
 			String sNewVersion = StringUtils.incrementIntegerString(oProcessor.getVersion());
 			oProcessor.setVersion(sNewVersion);
-			oProcessorRepository.updateProcessor(oProcessor);
-
-			return oDockerUtils.pull(sDockerPull, "");
 		}
+
+		oProcessorRepository.updateProcessor(oProcessor);
+
+		return CwlApplicationPackageUtils.writeYamlDocument(oCwlDocument, new File(sProcessorFolder, RESOLVED_CWL_FILE_NAME));
 	}
 
 	/**
@@ -860,7 +854,7 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 	}
 
 	/**
-	 * A CWL CommandLineTool has no notion of "add a library": redeploy is the way to update it
+	 * A CWL Application Package has no notion of "add a library": redeploy is the way to update it
 	 */
 	@Override
 	public boolean libraryUpdate(ProcessorParameter oParameter) {

@@ -9,18 +9,18 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
- * Utility methods to read an OGC Best Practice for Earth Observation Application Package
- * (see https://docs.ogc.org/bp/20-089r1.html), i.e. a CWL document with a single "Workflow"
- * class and a single "CommandLineTool" class.
+ * Utility methods to read (and lightly rewrite) an OGC Best Practice for Earth Observation
+ * Application Package (see https://docs.ogc.org/bp/20-089r1.html), i.e. a CWL document with a
+ * "Workflow" class and one or more "CommandLineTool" classes.
  * 
- * This is the "consumer" side counterpart of the CWL generation done, for the EOEPCA
- * processor engine, by the wasdi-processor.cwl.j2 template.
- * 
- * NOTE: v1 scope only, no multi-step Workflow, no Directory/File (STAC) inputs.
+ * The actual CWL execution semantics (steps wiring, scatter, expressions, subworkflows, ...) are
+ * NOT reimplemented here: they are delegated to the real cwltool reference runner. This class only
+ * covers what WASDI itself needs around that: locating/parsing the document, deriving the WASDI
+ * parameter sample from the Workflow's own inputs, building the CWL job order for a run, and
+ * rewriting a CommandLineTool's DockerRequirement when WASDI built the image itself.
  * 
  * @author p.campanella
  */
@@ -82,6 +82,24 @@ public class CwlApplicationPackageUtils {
 	}
 
 	/**
+	 * Writes a parsed (and possibly rewritten) YAML document - a CWL document or a CWL job order - to a file
+	 * @param oDocument Map representation of the document
+	 * @param oOutputFile Destination file
+	 * @return true if written correctly
+	 */
+	public static boolean writeYamlDocument(Map<String, Object> oDocument, File oOutputFile) {
+		try {
+			ObjectMapper oYamlMapper = new ObjectMapper(new YAMLFactory());
+			oYamlMapper.writeValue(oOutputFile, oDocument);
+			return true;
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("CwlApplicationPackageUtils.writeYamlDocument: exception writing " + oOutputFile, oEx);
+			return false;
+		}
+	}
+
+	/**
 	 * Gets the "$graph" entry with class "Workflow" from a parsed CWL document
 	 * @param oCwlDocument Parsed CWL document
 	 * @return Workflow node as a Map, or null if not found
@@ -100,51 +118,44 @@ public class CwlApplicationPackageUtils {
 	}
 
 	/**
-	 * A CWL CommandLineTool declared output: id, type and (if any) the outputBinding.glob pattern
+	 * Gets every "$graph" entry with class "CommandLineTool" from a parsed CWL document (a
+	 * multi-step Workflow can reference more than one CommandLineTool, each with its own image)
+	 * @param oCwlDocument Parsed CWL document
+	 * @return list of CommandLineTool nodes, possibly empty
 	 */
-	public static class CwlOutputBinding {
-		public String id;
-		public String type;
-		public String glob;
+	@SuppressWarnings("unchecked")
+	public static List<Map<String, Object>> getAllCommandLineToolNodes(Map<String, Object> oCwlDocument) {
+
+		List<Map<String, Object>> aoNodes = new ArrayList<>();
+
+		if (oCwlDocument == null) return aoNodes;
+
+		Object oGraph = oCwlDocument.get("$graph");
+
+		if (!(oGraph instanceof List)) return aoNodes;
+
+		for (Object oNode : (List<Object>) oGraph) {
+			if (!(oNode instanceof Map)) continue;
+
+			Map<String, Object> oNodeMap = (Map<String, Object>) oNode;
+
+			if ("CommandLineTool".equals(oNodeMap.get("class"))) {
+				aoNodes.add(oNodeMap);
+			}
+		}
+
+		return aoNodes;
 	}
 
 	/**
-	 * Lists the CommandLineTool's declared "outputs" (id, type, outputBinding.glob)
-	 * @param oCommandLineTool CommandLineTool node
-	 * @return list of declared outputs
+	 * Gets the Workflow node's own "id", needed to invoke cwltool as "&lt;file&gt;#&lt;id&gt;"
+	 * @param oWorkflow Workflow node
+	 * @return the id, or an empty string if not found
 	 */
-	@SuppressWarnings("unchecked")
-	public static List<CwlOutputBinding> getCommandLineToolOutputs(Map<String, Object> oCommandLineTool) {
-
-		List<CwlOutputBinding> aoOutputs = new ArrayList<>();
-
-		if (oCommandLineTool == null) return aoOutputs;
-
-		Object oOutputs = oCommandLineTool.get("outputs");
-
-		if (!(oOutputs instanceof Map)) return aoOutputs;
-
-		for (Map.Entry<String, Object> oEntry : ((Map<String, Object>) oOutputs).entrySet()) {
-
-			if (!(oEntry.getValue() instanceof Map)) continue;
-
-			Map<String, Object> oOutputDefinition = (Map<String, Object>) oEntry.getValue();
-
-			CwlOutputBinding oOutput = new CwlOutputBinding();
-			oOutput.id = oEntry.getKey();
-			oOutput.type = String.valueOf(oOutputDefinition.getOrDefault("type", "File"));
-
-			Object oOutputBinding = oOutputDefinition.get("outputBinding");
-
-			if (oOutputBinding instanceof Map) {
-				Object oGlob = ((Map<String, Object>) oOutputBinding).get("glob");
-				oOutput.glob = oGlob == null ? null : oGlob.toString();
-			}
-
-			aoOutputs.add(oOutput);
-		}
-
-		return aoOutputs;
+	public static String getWorkflowId(Map<String, Object> oWorkflow) {
+		if (oWorkflow == null) return "";
+		Object oId = oWorkflow.get("id");
+		return oId == null ? "" : oId.toString();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -233,6 +244,42 @@ public class CwlApplicationPackageUtils {
 	}
 
 	/**
+	 * Rewrites (in place) a CommandLineTool's DockerRequirement.dockerPull, e.g. to point at the
+	 * image WASDI itself built and pushed for a self-contained Application Package. Normalizes
+	 * to whichever of "requirements"/"hints" list-or-map form the node already used, preserving
+	 * any other declared requirement/hint.
+	 * 
+	 * @param oCommandLineTool CommandLineTool node to rewrite
+	 * @param sDockerPull the new image reference
+	 */
+	@SuppressWarnings("unchecked")
+	public static void setDockerPull(Map<String, Object> oCommandLineTool, String sDockerPull) {
+
+		if (oCommandLineTool == null) return;
+
+		Object oRequirements = oCommandLineTool.get("requirements");
+
+		if (oRequirements instanceof List) {
+			List<Object> aoRequirements = (List<Object>) oRequirements;
+			aoRequirements.removeIf(oReq -> (oReq instanceof Map) && "DockerRequirement".equals(((Map<String, Object>) oReq).get("class")));
+
+			Map<String, Object> oDockerRequirement = new LinkedHashMap<>();
+			oDockerRequirement.put("class", "DockerRequirement");
+			oDockerRequirement.put("dockerPull", sDockerPull);
+			aoRequirements.add(oDockerRequirement);
+		}
+		else {
+			Map<String, Object> oRequirementsMap = (oRequirements instanceof Map) ? (Map<String, Object>) oRequirements : new LinkedHashMap<>();
+
+			Map<String, Object> oDockerRequirement = new LinkedHashMap<>();
+			oDockerRequirement.put("dockerPull", sDockerPull);
+			oRequirementsMap.put("DockerRequirement", oDockerRequirement);
+
+			oCommandLineTool.put("requirements", oRequirementsMap);
+		}
+	}
+
+	/**
 	 * Builds a WASDI JSON parameter sample from the "inputs" section of the CWL Workflow node.
 	 * Values are taken from the CWL "default", or a type-consistent empty value otherwise.
 	 * 
@@ -283,169 +330,58 @@ public class CwlApplicationPackageUtils {
 	}
 
 	/**
-	 * Translates WASDI job input values, keyed by Workflow input ids, into values keyed by the
-	 * single step's CommandLineTool input ids, resolving the Workflow "steps.&lt;step&gt;.in" mapping
-	 * (e.g. a Workflow input "proj" bound to a CommandLineTool input "epsg" via "in: { epsg: proj }").
-	 * 
-	 * v1 scope: single step workflow. If the steps/in mapping cannot be read, falls back to the
-	 * values as-is (same behaviour as before, i.e. assumes matching ids).
+	 * Builds the CWL job order (the document cwltool expects as its second argument) from the
+	 * WASDI job input values, keyed by the Workflow's own input ids. Directory-typed inputs are
+	 * wrapped as CWL Directory objects ({class: Directory, path: ...}); every other value (incl.
+	 * arrays, for a scattered input) is passed through as-is, since cwltool resolves scatter,
+	 * steps wiring and expressions itself.
 	 * 
 	 * @param oWorkflow Workflow node
-	 * @param oWorkflowInputValues WASDI job input values, keyed by Workflow input ids
-	 * @return values keyed by the CommandLineTool input ids
+	 * @param oJobInputValues WASDI job input values, keyed by Workflow input ids
+	 * @return the job order, ready to be written to YAML
 	 */
 	@SuppressWarnings("unchecked")
-	public static Map<String, Object> mapWorkflowValuesToToolInputs(Map<String, Object> oWorkflow, Map<String, Object> oWorkflowInputValues) {
+	public static Map<String, Object> buildJobOrder(Map<String, Object> oWorkflow, Map<String, Object> oJobInputValues) {
 
-		if (oWorkflowInputValues == null) oWorkflowInputValues = new LinkedHashMap<>();
+		Map<String, Object> oJobOrder = new LinkedHashMap<>();
 
-		try {
-			if (oWorkflow == null) return oWorkflowInputValues;
+		if (oWorkflow == null || oJobInputValues == null) return oJobOrder;
 
-			Object oSteps = oWorkflow.get("steps");
+		Object oInputs = oWorkflow.get("inputs");
 
-			if (!(oSteps instanceof Map) || ((Map<String, Object>) oSteps).isEmpty()) return oWorkflowInputValues;
+		if (!(oInputs instanceof Map)) return oJobOrder;
 
-			// v1: single step workflow, take the first (and only) one
-			Object oFirstStep = ((Map<String, Object>) oSteps).values().iterator().next();
+		for (Map.Entry<String, Object> oEntry : ((Map<String, Object>) oInputs).entrySet()) {
 
-			if (!(oFirstStep instanceof Map)) return oWorkflowInputValues;
+			String sInputId = oEntry.getKey();
 
-			Object oIn = ((Map<String, Object>) oFirstStep).get("in");
+			if (!oJobInputValues.containsKey(sInputId)) continue;
 
-			if (!(oIn instanceof Map)) return oWorkflowInputValues;
+			Object oValue = oJobInputValues.get(sInputId);
 
-			Map<String, Object> oToolInputValues = new LinkedHashMap<>();
+			String sType = (oEntry.getValue() instanceof Map)
+					? String.valueOf(((Map<String, Object>) oEntry.getValue()).getOrDefault("type", "string"))
+					: String.valueOf(oEntry.getValue());
 
-			for (Map.Entry<String, Object> oInEntry : ((Map<String, Object>) oIn).entrySet()) {
+			String sCleanType = sType.replace("?", "").replace("[]", "").trim();
 
-				String sToolInputId = oInEntry.getKey();
-				Object oSource = oInEntry.getValue();
-
-				// "in" entries are usually the plain Workflow input id, but can also be an object with a "source" field
-				String sWorkflowInputId = (oSource instanceof Map) ? String.valueOf(((Map<String, Object>) oSource).get("source")) : String.valueOf(oSource);
-
-				if (oWorkflowInputValues.containsKey(sWorkflowInputId)) {
-					oToolInputValues.put(sToolInputId, oWorkflowInputValues.get(sWorkflowInputId));
-				}
+			if ("Directory".equalsIgnoreCase(sCleanType) && oValue != null) {
+				Map<String, Object> oDirectoryValue = new LinkedHashMap<>();
+				oDirectoryValue.put("class", "Directory");
+				oDirectoryValue.put("path", oValue.toString());
+				oJobOrder.put(sInputId, oDirectoryValue);
 			}
+			else {
+				oJobOrder.put(sInputId, oValue);
+			}
+		}
 
-			return oToolInputValues;
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("CwlApplicationPackageUtils.mapWorkflowValuesToToolInputs: exception, falling back to the values as-is", oEx);
-			return oWorkflowInputValues;
-		}
+		return oJobOrder;
 	}
 
 	/**
-	 * Builds the command line (as a list of args, baseCommand included) to run the
-	 * CommandLineTool container, mapping the CWL "inputs" (sorted by inputBinding.position)
-	 * on the values found in the WASDI job parameters.
-	 * 
-	 * @param oCommandLineTool CommandLineTool node
-	 * @param oJobInputValues WASDI job input values, keyed by CommandLineTool input ids (see {@link #mapWorkflowValuesToToolInputs})
-	 * @return ordered list of command line arguments
-	 */
-	@SuppressWarnings("unchecked")
-	public static List<String> buildCommandLine(Map<String, Object> oCommandLineTool, Map<String, Object> oJobInputValues) {
-
-		List<String> asCommand = new ArrayList<>();
-
-		if (oCommandLineTool == null) return asCommand;
-
-		if (oJobInputValues == null) oJobInputValues = new LinkedHashMap<>();
-
-		// Base Command: can be a single string or a list of strings
-		Object oBaseCommand = oCommandLineTool.get("baseCommand");
-
-		if (oBaseCommand instanceof List) {
-			for (Object oCommandPart : (List<Object>) oBaseCommand) {
-				asCommand.add(String.valueOf(oCommandPart));
-			}
-		}
-		else if (oBaseCommand != null) {
-			asCommand.add(oBaseCommand.toString());
-		}
-
-		// Positional args: merge fixed "arguments" entries and the "inputs" bound to job values
-		List<PositionalArg> aoPositionalArgs = new ArrayList<>();
-
-		Object oArguments = oCommandLineTool.get("arguments");
-
-		if (oArguments instanceof List) {
-			int iPosition = 0;
-			for (Object oArgument : (List<Object>) oArguments) {
-				aoPositionalArgs.add(new PositionalArg(iPosition++, String.valueOf(oArgument)));
-			}
-		}
-
-		Object oInputs = oCommandLineTool.get("inputs");
-
-		if (oInputs instanceof Map) {
-			for (Map.Entry<String, Object> oEntry : ((Map<String, Object>) oInputs).entrySet()) {
-
-				if (!(oEntry.getValue() instanceof Map)) continue;
-
-				Map<String, Object> oInputDefinition = (Map<String, Object>) oEntry.getValue();
-				Object oInputBinding = oInputDefinition.get("inputBinding");
-
-				if (!(oInputBinding instanceof Map)) continue;
-
-				Map<String, Object> oInputBindingMap = (Map<String, Object>) oInputBinding;
-
-				int iPosition = toInt(oInputBindingMap.get("position"), Integer.MAX_VALUE);
-				String sPrefix = oInputBindingMap.get("prefix") == null ? null : oInputBindingMap.get("prefix").toString();
-
-				String sType = String.valueOf(oInputDefinition.getOrDefault("type", "string"));
-
-				if (isUnsupportedType(sType)) {
-					WasdiLog.warnLog("CwlApplicationPackageUtils.buildCommandLine: input [" + oEntry.getKey() + "] has type [" + sType + "], File inputs are not supported yet, skipping it");
-					continue;
-				}
-
-				Object oValue = oJobInputValues.containsKey(oEntry.getKey()) ? oJobInputValues.get(oEntry.getKey()) : oInputDefinition.get("default");
-
-				if (oValue == null) {
-					WasdiLog.warnLog("CwlApplicationPackageUtils.buildCommandLine: no value found for input [" + oEntry.getKey() + "], skipping it");
-					continue;
-				}
-
-				if (sType.replace("?", "").equalsIgnoreCase("boolean")) {
-					if (Boolean.parseBoolean(oValue.toString()) && !Utils.isNullOrEmpty(sPrefix)) {
-						aoPositionalArgs.add(new PositionalArg(iPosition, sPrefix));
-					}
-					continue;
-				}
-
-				if (!Utils.isNullOrEmpty(sPrefix)) {
-					aoPositionalArgs.add(new PositionalArg(iPosition, sPrefix));
-					// Give the value the same position + a fraction so it stays right after its prefix
-					aoPositionalArgs.add(new PositionalArg(iPosition, oValue.toString()));
-				}
-				else {
-					aoPositionalArgs.add(new PositionalArg(iPosition, oValue.toString()));
-				}
-			}
-		}
-
-		aoPositionalArgs.sort((oFirst, oSecond) -> Integer.compare(oFirst.position, oSecond.position));
-
-		for (PositionalArg oPositionalArg : aoPositionalArgs) {
-			asCommand.add(oPositionalArg.value);
-		}
-
-		return asCommand;
-	}
-
-	private static boolean isUnsupportedType(String sType) {
-		String sCleanType = sType.replace("?", "").replace("[]", "").trim();
-		return sCleanType.equalsIgnoreCase("File");
-	}
-
-	/**
-	 * Lists the ids of the CommandLineTool (or Workflow) "inputs" that are declared with the
-	 * given CWL type (e.g. "Directory"), used to find which job values need STAC stage-in.
+	 * Lists the ids of the Workflow's (or a CommandLineTool's) "inputs" that are declared with
+	 * the given CWL type (e.g. "Directory"), used to find which job values need STAC stage-in.
 	 * 
 	 * @param oToolOrWorkflow CommandLineTool or Workflow node
 	 * @param sType CWL type to match (e.g. "Directory")
@@ -490,29 +426,6 @@ public class CwlApplicationPackageUtils {
 				return false;
 			default:
 				return "";
-		}
-	}
-
-	private static int toInt(Object oValue, int iDefault) {
-		if (oValue == null) return iDefault;
-		try {
-			return Integer.parseInt(oValue.toString());
-		}
-		catch (Exception oEx) {
-			return iDefault;
-		}
-	}
-
-	/**
-	 * Small helper class to keep a command line argument together with its CWL position
-	 */
-	private static class PositionalArg {
-		int position;
-		String value;
-
-		PositionalArg(int position, String value) {
-			this.position = position;
-			this.value = value;
 		}
 	}
 }
