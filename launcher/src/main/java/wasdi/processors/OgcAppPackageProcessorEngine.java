@@ -28,6 +28,7 @@ import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
 import wasdi.shared.utils.docker.containersViewModels.constants.ContainerStates;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.stac.StacStageInUtils;
 
 /**
  * Processor Engine for the OGC Best Practice for Earth Observation Application Package
@@ -56,6 +57,11 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 	 * Reserved for the upcoming STAC stage-in/out host-to-container path translation.
 	 */
 	protected static final String CONTAINER_DATA_FOLDER = "/data/wasdi";
+
+	/**
+	 * Workspace subfolder where STAC Directory inputs are staged-in, one folder per input id
+	 */
+	protected static final String STAC_STAGE_IN_FOLDER_NAME = ".stac-in";
 
 	public OgcAppPackageProcessorEngine() {
 		super();
@@ -261,6 +267,7 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 			}
 
 			Map<String, Object> oCwlDocument = CwlApplicationPackageUtils.loadCwlDocument(oCwlFile);
+			Map<String, Object> oWorkflowNode = CwlApplicationPackageUtils.getWorkflowNode(oCwlDocument);
 			Map<String, Object> oCommandLineToolNode = CwlApplicationPackageUtils.getCommandLineToolNode(oCwlDocument);
 
 			if (oCommandLineToolNode == null) {
@@ -269,7 +276,18 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 				return false;
 			}
 
-			Map<String, Object> oJobInputValues = decodeJobInputValues(oParameter.getJson());
+			// The job values are keyed by Workflow input ids: resolve them to the CommandLineTool's own input ids
+			Map<String, Object> oWorkflowInputValues = decodeJobInputValues(oParameter.getJson());
+			Map<String, Object> oJobInputValues = CwlApplicationPackageUtils.mapWorkflowValuesToToolInputs(oWorkflowNode, oWorkflowInputValues);
+
+			String sHostWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
+
+			if (!stageInDirectoryInputs(oCommandLineToolNode, oJobInputValues, sHostWorkspacePath)) {
+				processWorkspaceLog("Impossible to stage-in one of the STAC inputs");
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+				return false;
+			}
+
 			List<String> asCommand = CwlApplicationPackageUtils.buildCommandLine(oCommandLineToolNode, oJobInputValues);
 
 			boolean bHasOwnDockerfile = new File(sProcessorFolder, DOCKERFILE_NAME).exists();
@@ -306,8 +324,6 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 			WasdiLog.debugLog("OgcAppPackageProcessorEngine.run: command line " + asCommand);
 
 			// Unlike generic shell-exec containers, an OGC app only needs (and should only see) its own workspace
-			String sHostWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
-
 			String sContainerId = oDockerUtils.run(sImageName, sImageVersion, asCommand, true, null, false, sHostWorkspacePath);
 
 			if (Utils.isNullOrEmpty(sContainerId)) {
@@ -358,6 +374,51 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 				m_oProcessWorkspace.setStatus(oProcessWorkspace.getStatus());
 			}
 		}
+	}
+
+	/**
+	 * Resolves every Directory-typed CommandLineTool input by staging-in the STAC Item it
+	 * references (see {@link StacStageInUtils}), and replaces its raw job value (the STAC Item
+	 * url) with the resulting container-visible local path.
+	 */
+	protected boolean stageInDirectoryInputs(Map<String, Object> oCommandLineTool, Map<String, Object> oJobInputValues, String sHostWorkspacePath) {
+
+		List<String> asDirectoryInputIds = CwlApplicationPackageUtils.getInputIdsOfType(oCommandLineTool, "Directory");
+
+		for (String sInputId : asDirectoryInputIds) {
+
+			Object oRawValue = oJobInputValues.get(sInputId);
+
+			if (oRawValue == null) {
+				WasdiLog.warnLog("OgcAppPackageProcessorEngine.stageInDirectoryInputs: no value provided for Directory input [" + sInputId + "], skipping it");
+				continue;
+			}
+
+			String sHostStagingFolder = sHostWorkspacePath + STAC_STAGE_IN_FOLDER_NAME + "/" + sInputId;
+
+			processWorkspaceLog("Staging-in STAC input [" + sInputId + "]");
+
+			File oStagedFolder = StacStageInUtils.stageInStacItem(oRawValue.toString(), sHostStagingFolder);
+
+			if (oStagedFolder == null) {
+				WasdiLog.errorLog("OgcAppPackageProcessorEngine.stageInDirectoryInputs: impossible to stage-in input [" + sInputId + "]");
+				return false;
+			}
+
+			oJobInputValues.put(sInputId, translateHostPathToContainerPath(sHostWorkspacePath, oStagedFolder.getAbsolutePath()));
+		}
+
+		return true;
+	}
+
+	/**
+	 * Translates a host path inside the current job's workspace folder into the equivalent
+	 * container path (the workspace folder is bind-mounted at CONTAINER_DATA_FOLDER, see run())
+	 */
+	protected String translateHostPathToContainerPath(String sHostWorkspacePath, String sHostPath) {
+		String sNormalizedWorkspacePath = sHostWorkspacePath.endsWith("/") ? sHostWorkspacePath : sHostWorkspacePath + "/";
+		String sRelativePath = sHostPath.startsWith(sNormalizedWorkspacePath) ? sHostPath.substring(sNormalizedWorkspacePath.length()) : sHostPath;
+		return CONTAINER_DATA_FOLDER + "/" + sRelativePath;
 	}
 
 	/**

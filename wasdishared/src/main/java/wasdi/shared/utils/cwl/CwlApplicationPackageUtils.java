@@ -235,12 +235,68 @@ public class CwlApplicationPackageUtils {
 	}
 
 	/**
+	 * Translates WASDI job input values, keyed by Workflow input ids, into values keyed by the
+	 * single step's CommandLineTool input ids, resolving the Workflow "steps.&lt;step&gt;.in" mapping
+	 * (e.g. a Workflow input "proj" bound to a CommandLineTool input "epsg" via "in: { epsg: proj }").
+	 * 
+	 * v1 scope: single step workflow. If the steps/in mapping cannot be read, falls back to the
+	 * values as-is (same behaviour as before, i.e. assumes matching ids).
+	 * 
+	 * @param oWorkflow Workflow node
+	 * @param oWorkflowInputValues WASDI job input values, keyed by Workflow input ids
+	 * @return values keyed by the CommandLineTool input ids
+	 */
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> mapWorkflowValuesToToolInputs(Map<String, Object> oWorkflow, Map<String, Object> oWorkflowInputValues) {
+
+		if (oWorkflowInputValues == null) oWorkflowInputValues = new LinkedHashMap<>();
+
+		try {
+			if (oWorkflow == null) return oWorkflowInputValues;
+
+			Object oSteps = oWorkflow.get("steps");
+
+			if (!(oSteps instanceof Map) || ((Map<String, Object>) oSteps).isEmpty()) return oWorkflowInputValues;
+
+			// v1: single step workflow, take the first (and only) one
+			Object oFirstStep = ((Map<String, Object>) oSteps).values().iterator().next();
+
+			if (!(oFirstStep instanceof Map)) return oWorkflowInputValues;
+
+			Object oIn = ((Map<String, Object>) oFirstStep).get("in");
+
+			if (!(oIn instanceof Map)) return oWorkflowInputValues;
+
+			Map<String, Object> oToolInputValues = new LinkedHashMap<>();
+
+			for (Map.Entry<String, Object> oInEntry : ((Map<String, Object>) oIn).entrySet()) {
+
+				String sToolInputId = oInEntry.getKey();
+				Object oSource = oInEntry.getValue();
+
+				// "in" entries are usually the plain Workflow input id, but can also be an object with a "source" field
+				String sWorkflowInputId = (oSource instanceof Map) ? String.valueOf(((Map<String, Object>) oSource).get("source")) : String.valueOf(oSource);
+
+				if (oWorkflowInputValues.containsKey(sWorkflowInputId)) {
+					oToolInputValues.put(sToolInputId, oWorkflowInputValues.get(sWorkflowInputId));
+				}
+			}
+
+			return oToolInputValues;
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("CwlApplicationPackageUtils.mapWorkflowValuesToToolInputs: exception, falling back to the values as-is", oEx);
+			return oWorkflowInputValues;
+		}
+	}
+
+	/**
 	 * Builds the command line (as a list of args, baseCommand included) to run the
 	 * CommandLineTool container, mapping the CWL "inputs" (sorted by inputBinding.position)
 	 * on the values found in the WASDI job parameters.
 	 * 
 	 * @param oCommandLineTool CommandLineTool node
-	 * @param oJobInputValues WASDI job input values (decoded from the ProcessorParameter json)
+	 * @param oJobInputValues WASDI job input values, keyed by CommandLineTool input ids (see {@link #mapWorkflowValuesToToolInputs})
 	 * @return ordered list of command line arguments
 	 */
 	@SuppressWarnings("unchecked")
@@ -295,8 +351,8 @@ public class CwlApplicationPackageUtils {
 
 				String sType = String.valueOf(oInputDefinition.getOrDefault("type", "string"));
 
-				if (isUnsupportedStageInOutType(sType)) {
-					WasdiLog.warnLog("CwlApplicationPackageUtils.buildCommandLine: input [" + oEntry.getKey() + "] has type [" + sType + "], File/Directory (STAC) inputs are not supported yet, skipping it");
+				if (isUnsupportedType(sType)) {
+					WasdiLog.warnLog("CwlApplicationPackageUtils.buildCommandLine: input [" + oEntry.getKey() + "] has type [" + sType + "], File inputs are not supported yet, skipping it");
 					continue;
 				}
 
@@ -334,9 +390,42 @@ public class CwlApplicationPackageUtils {
 		return asCommand;
 	}
 
-	private static boolean isUnsupportedStageInOutType(String sType) {
+	private static boolean isUnsupportedType(String sType) {
 		String sCleanType = sType.replace("?", "").replace("[]", "").trim();
-		return sCleanType.equalsIgnoreCase("File") || sCleanType.equalsIgnoreCase("Directory");
+		return sCleanType.equalsIgnoreCase("File");
+	}
+
+	/**
+	 * Lists the ids of the CommandLineTool (or Workflow) "inputs" that are declared with the
+	 * given CWL type (e.g. "Directory"), used to find which job values need STAC stage-in.
+	 * 
+	 * @param oToolOrWorkflow CommandLineTool or Workflow node
+	 * @param sType CWL type to match (e.g. "Directory")
+	 * @return list of input ids matching the type
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<String> getInputIdsOfType(Map<String, Object> oToolOrWorkflow, String sType) {
+
+		List<String> asMatchingIds = new ArrayList<>();
+
+		if (oToolOrWorkflow == null) return asMatchingIds;
+
+		Object oInputs = oToolOrWorkflow.get("inputs");
+
+		if (!(oInputs instanceof Map)) return asMatchingIds;
+
+		for (Map.Entry<String, Object> oEntry : ((Map<String, Object>) oInputs).entrySet()) {
+
+			if (!(oEntry.getValue() instanceof Map)) continue;
+
+			String sInputType = String.valueOf(((Map<String, Object>) oEntry.getValue()).getOrDefault("type", "string"));
+
+			if (sInputType.replace("?", "").replace("[]", "").trim().equalsIgnoreCase(sType)) {
+				asMatchingIds.add(oEntry.getKey());
+			}
+		}
+
+		return asMatchingIds;
 	}
 
 	private static Object defaultValueForType(String sType) {
