@@ -91,7 +91,7 @@ public class CatalogResources {
 			}
 
 			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
-			
+			String sWorkspaceOwner = "";
 			boolean bPublicWorkspaceAccess = false;
 
 			if (oUser == null) {
@@ -103,6 +103,7 @@ public class CatalogResources {
 				if (oWorkspace != null) {
 					if (oWorkspace.isPublic()) {
 						bPublicWorkspaceAccess = true;
+						sWorkspaceOwner = oWorkspace.getUserId();
 					}
 				}
 				
@@ -126,7 +127,9 @@ public class CatalogResources {
 			ResponseBuilder oResponseBuilder = null;
 			
 			if (oFile == null) {
-				oFile = PermissionsUtils.getFileFromS3Volume(oUser.getUserId(), sFileName, sWorkspaceId, sProcessObjId);
+				String sUser = sWorkspaceOwner;
+				if (oUser != null) sUser = oUser.getUserId();
+				oFile = PermissionsUtils.getFileFromS3Volume(sUser, sFileName, sWorkspaceId, sProcessObjId);
 			}
 			
 			if(oFile == null) {				

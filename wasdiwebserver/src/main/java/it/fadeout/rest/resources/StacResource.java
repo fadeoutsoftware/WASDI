@@ -71,10 +71,8 @@ public class StacResource {
 
 	private static final List<String> CONFORMANCE_CLASSES = Arrays.asList(
 			"https://api.stacspec.org/v1.0.0/core",
-			"https://api.stacspec.org/v1.0.0/ogcapi-features",
 			"https://api.stacspec.org/v1.0.0/collections",
 			"http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core",
-			"http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/oas30",
 			"http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson");
 
 	private static final int DEFAULT_ITEMS_LIMIT = 20;
@@ -90,14 +88,16 @@ public class StacResource {
 			String sSelfUrl = getBaseUrl() + "stac";
 
 			StacCatalog oCatalog = new StacCatalog();
-			oCatalog.setId("wasdi");
+			oCatalog.setId("wasdi-stac-root");
 			oCatalog.setTitle("WASDI STAC Catalog");
-			oCatalog.setDescription("STAC entry point exposing WASDI Workspaces as Collections and their files as Items");
+			oCatalog.setDescription("WASDI Workspace STAC Catalog");
 			oCatalog.setConformsTo(CONFORMANCE_CLASSES);
 
 			List<StacLink> aoLinks = new ArrayList<>();
 			aoLinks.add(new StacLink(sSelfUrl, "self", MediaType.APPLICATION_JSON, "This document"));
 			aoLinks.add(new StacLink(sSelfUrl, "root", MediaType.APPLICATION_JSON, "This document"));
+			// Points to the public STAC API Core OpenAPI definition (we don't publish our own yet)
+			aoLinks.add(new StacLink("https://api.stacspec.org/v1.0.0/core/openapi.yaml", "service-desc", "application/vnd.oai.openapi+json;version=3.0", "OpenAPI Definition"));
 			aoLinks.add(new StacLink(sSelfUrl + "/conformance", "conformance", MediaType.APPLICATION_JSON, "Conformance classes"));
 			aoLinks.add(new StacLink(sSelfUrl + "/collections", "data", MediaType.APPLICATION_JSON, "List of Collections"));
 			oCatalog.setLinks(aoLinks);
