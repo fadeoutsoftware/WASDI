@@ -318,6 +318,16 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 
 			ProcessStatus oFinalStatus = waitForContainerCompletion(oDockerUtils, sContainerId, oProcessor, oProcessWorkspaceRepository, oProcessWorkspace);
 
+			// Surface the container stdout/stderr to the user, same as the docker build logs do
+			String sContainerLogs = oDockerUtils.getContainerLogsByContainerId(sContainerId);
+
+			if (!Utils.isNullOrEmpty(sContainerLogs)) {
+				processWorkspaceLog("Application output:");
+				processWorkspaceLog(sContainerLogs);
+			}
+
+			WasdiLog.debugLog("OgcAppPackageProcessorEngine.run: container output " + sContainerLogs);
+
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, oFinalStatus, 100);
 
 			try {
