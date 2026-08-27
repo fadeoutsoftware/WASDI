@@ -1,6 +1,7 @@
 package wasdi.processors;
 
 import java.io.File;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -397,7 +398,8 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 			List<String> asCommand = List.of("sh", "-c", sCwltoolCommand);
 
 			processWorkspaceLog("Starting the Application (cwltool)");
-			processWorkspaceLog("Input Params " + oParameter.getJson() );
+			String sDecodedParams = URLDecoder.decode(oParameter.getJson(), java.nio.charset.StandardCharsets.UTF_8.toString());
+			processWorkspaceLog("Input Params " + sDecodedParams );
 			WasdiLog.debugLog("OgcAppPackageProcessorEngine.run: cwltool command " + sCwltoolCommand);
 
 			String sContainerId = oDockerUtils.run(CWL_RUNNER_IMAGE_NAME, CWL_RUNNER_IMAGE_VERSION, asCommand, true, asAdditionalMountPoints, false, sHostWorkspacePath, sContainerRunFolder);
@@ -502,22 +504,35 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 
 			if (oRawValue instanceof List) {
 
-				// A Directory[] input: one STAC Item url per array element, staged into its own indexed subfolder
+				// A Directory[] input: one STAC Item url per array element, staged into its own indexed subfolder.
+				// Duplicate urls within the same array are staged only once and their folder reused, to avoid re-downloading the same assets.
 				List<Object> aoRawValues = (List<Object>) oRawValue;
 				List<String> asStagedPaths = new ArrayList<>();
+				Map<String, String> oAlreadyStagedByUrl = new HashMap<>();
 
 				for (int iIndex = 0; iIndex < aoRawValues.size(); iIndex++) {
 
+					String sItemUrl = extractStacItemUrl(aoRawValues.get(iIndex));
+
+					String sAlreadyStagedPath = oAlreadyStagedByUrl.get(sItemUrl);
+
+					if (sAlreadyStagedPath != null) {
+						asStagedPaths.add(sAlreadyStagedPath);
+						continue;
+					}
+
 					String sHostStagingFolder = sHostWorkspacePath + STAC_STAGE_IN_FOLDER_NAME + "/" + sInputId + "/" + iIndex;
 
-					File oStagedFolder = StacStageInUtils.stageInStacItem(String.valueOf(aoRawValues.get(iIndex)), sHostStagingFolder, m_oProcessWorkspaceLogger);
+					File oStagedFolder = StacStageInUtils.stageInStacItem(sItemUrl, sHostStagingFolder, m_oProcessWorkspaceLogger);
 
 					if (oStagedFolder == null) {
 						WasdiLog.errorLog("OgcAppPackageProcessorEngine.stageInDirectoryInputs: impossible to stage-in input [" + sInputId + "][" + iIndex + "]");
 						return false;
 					}
 
-					asStagedPaths.add(oStagedFolder.getAbsolutePath());
+					String sStagedPath = oStagedFolder.getAbsolutePath();
+					oAlreadyStagedByUrl.put(sItemUrl, sStagedPath);
+					asStagedPaths.add(sStagedPath);
 				}
 
 				oJobInputValues.put(sInputId, asStagedPaths);
@@ -526,7 +541,7 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 
 			String sHostStagingFolder = sHostWorkspacePath + STAC_STAGE_IN_FOLDER_NAME + "/" + sInputId;
 
-			File oStagedFolder = StacStageInUtils.stageInStacItem(oRawValue.toString(), sHostStagingFolder, m_oProcessWorkspaceLogger);
+			File oStagedFolder = StacStageInUtils.stageInStacItem(extractStacItemUrl(oRawValue), sHostStagingFolder, m_oProcessWorkspaceLogger);
 
 			if (oStagedFolder == null) {
 				WasdiLog.errorLog("OgcAppPackageProcessorEngine.stageInDirectoryInputs: impossible to stage-in input [" + sInputId + "]");
@@ -538,6 +553,23 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Extracts the STAC Item url out of a raw Directory-input value: accepts a plain string, or an OGC
+	 * API Processes "complex value" object carrying it under "href" or "value" (possibly nested).
+	 */
+	@SuppressWarnings("unchecked")
+	protected static String extractStacItemUrl(Object oRawValue) {
+
+		if (oRawValue instanceof Map) {
+			Map<String, Object> oValueMap = (Map<String, Object>) oRawValue;
+
+			if (oValueMap.containsKey("href")) return extractStacItemUrl(oValueMap.get("href"));
+			if (oValueMap.containsKey("value")) return extractStacItemUrl(oValueMap.get("value"));
+		}
+
+		return String.valueOf(oRawValue);
 	}
 
 	/**
