@@ -379,15 +379,8 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 				WasdiLog.warnLog("OgcAppPackageProcessorEngine.run: the Docker API address is not a unix socket, cwltool may not be able to reach the Docker Engine");
 			}
 
-			m_sDockerRegistry = getDockerRegisterAddress();
-
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, m_sDockerRegistry, m_oProcessWorkspaceLogger);
-
-			// Best effort: the wasdi-cwl image may already be available locally
-			String sRunnerImageFullName = Utils.isNullOrEmpty(m_sDockerRegistry)
-					? (CWL_RUNNER_IMAGE_NAME + ":" + CWL_RUNNER_IMAGE_VERSION)
-					: (m_sDockerRegistry + "/" + CWL_RUNNER_IMAGE_NAME + ":" + CWL_RUNNER_IMAGE_VERSION);
-			oDockerUtils.pull(sRunnerImageFullName, "");
+			// wasdi-cwl is a host-provisioned "system image" (like wasdi-gdal, wasdi-sen2cor, ...), never pulled from a registry
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, "", m_oProcessWorkspaceLogger);
 
 			String sCwltoolCommand = "cwltool --outdir " + sContainerRunFolder + " " + sContainerCwlFile + "#" + sWorkflowId + " " + sContainerJobOrderFile + " > " + sContainerResultFile;
 			List<String> asCommand = List.of("sh", "-c", sCwltoolCommand);
