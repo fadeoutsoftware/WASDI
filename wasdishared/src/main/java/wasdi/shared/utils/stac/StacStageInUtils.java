@@ -1,10 +1,13 @@
 package wasdi.shared.utils.stac;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,6 +31,12 @@ import wasdi.shared.viewmodels.HttpCallResponse;
  */
 public class StacStageInUtils {
 
+	/**
+	 * Name of the marker file used to remember, for a staging folder, which STAC Item url it was
+	 * last staged from, so a later stage-in for the same url/folder can just reuse it
+	 */
+	protected static final String SOURCE_URL_MARKER_FILE_NAME = ".source-url";
+
 	private StacStageInUtils() {
 		// private constructor to hide the public implicit one
 	}
@@ -49,6 +58,22 @@ public class StacStageInUtils {
 			}
 
 			File oStagingFolder = new File(sHostStagingFolder);
+
+			File oSourceUrlMarkerFile = new File(oStagingFolder, SOURCE_URL_MARKER_FILE_NAME);
+			File oCatalogFile = new File(oStagingFolder, "catalog.json");
+
+			if (oCatalogFile.exists() && oSourceUrlMarkerFile.exists()) {
+				String sStagedUrl = FileUtils.readFileToString(oSourceUrlMarkerFile, StandardCharsets.UTF_8).trim();
+
+				if (sStacItemUrl.equals(sStagedUrl)) {
+					WasdiLog.debugLog("StacStageInUtils.stageInStacItem: already staged-in for this STAC Item, reusing it");
+					return oStagingFolder;
+				}
+
+				WasdiLog.debugLog("StacStageInUtils.stageInStacItem: staging folder refers to a different STAC Item, re-staging it");
+				FileUtils.deleteDirectory(oStagingFolder);
+			}
+
 			oStagingFolder.mkdirs();
 			// The container that will read this folder runs as a fixed numeric uid, not necessarily the launcher's own user
 			oStagingFolder.setReadable(true, false);
@@ -115,6 +140,8 @@ public class StacStageInUtils {
 			oJsonMapper.writeValue(oItemJsonFile, oItem);
 
 			writeLocalCatalog(oStagingFolder, sItemId);
+
+			FileUtils.writeStringToFile(new File(oStagingFolder, SOURCE_URL_MARKER_FILE_NAME), sStacItemUrl, StandardCharsets.UTF_8);
 
 			WasdiLog.debugLog("StacStageInUtils.stageInStacItem: stage-in done in " + oStagingFolder.getAbsolutePath());
 

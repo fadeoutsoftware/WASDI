@@ -6,10 +6,9 @@ import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,6 +41,7 @@ import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
 import wasdi.shared.utils.docker.containersViewModels.constants.ContainerStates;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.stac.StacStageInUtils;
+import wasdi.shared.utils.stac.StacStageOutUtils;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 import wasdi.shared.utils.stac.StacStageInUtils;
 
@@ -377,6 +377,14 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 				stageOutOutputs(oCommandLineToolNode, sHostOutputFolder, sHostWorkspacePath, oParameter);
 			}
 
+			// This is just the container's scratch working dir: its content was already copied into the workspace above
+			try {
+				FileUtils.deleteDirectory(oHostOutputFolder);
+			}
+			catch (Exception oCleanupEx) {
+				WasdiLog.warnLog("OgcAppPackageProcessorEngine.run: impossible to clean up the output staging folder " + sHostOutputFolder);
+			}
+
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, oFinalStatus, 100);
 
 			try {
@@ -455,10 +463,13 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 	}
 
 	/**
-	 * Stages-out the CommandLineTool's declared outputs: for a Directory output (glob ".", the
-	 * whole working directory) every top-level file produced is a candidate; for a File output,
-	 * its outputBinding.glob is matched against the files in the working directory. Every
-	 * matching file is copied into the workspace and registered as a WASDI product.
+	 * Stages-out the run's outputs, merging two sources (by file name, first-wins):
+	 * - the Application's own local STAC Catalog (catalog.json, OGC BP Req 5), if present,
+	 *   used to resolve Items/Assets and their bounding box;
+	 * - the CWL "outputs" declarations (outputBinding.glob), always applied too, as a safety
+	 *   net for files whose STAC asset link is missing/wrong (real Application Packages are
+	 *   not always bug-free) or when there is no local STAC catalog at all.
+	 * Every resolved file is copied into the workspace and registered as a WASDI product.
 	 */
 	protected void stageOutOutputs(Map<String, Object> oCommandLineTool, String sHostOutputFolder, String sHostWorkspacePath, ProcessorParameter oParameter) {
 
@@ -470,31 +481,51 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 				return;
 			}
 
-			List<CwlApplicationPackageUtils.CwlOutputBinding> aoOutputs = CwlApplicationPackageUtils.getCommandLineToolOutputs(oCommandLineTool);
+			// Keyed by file name so the two sources merge cleanly, STAC entries (with a bbox) taking priority
+			Map<String, StacStageOutUtils.StagedOutFile> oStagedOutFilesByName = new LinkedHashMap<>();
 
-			Set<File> aoFilesToIngest = new LinkedHashSet<>();
+			List<StacStageOutUtils.StagedOutFile> aoStacStagedOutFiles = StacStageOutUtils.parseLocalOutputCatalog(oOutputFolder, m_oProcessWorkspaceLogger);
+
+			if (aoStacStagedOutFiles != null) {
+				processWorkspaceLog("Application produced a local STAC catalog: using it to stage-out the outputs");
+
+				for (StacStageOutUtils.StagedOutFile oStagedOutFile : aoStacStagedOutFiles) {
+					oStagedOutFilesByName.put(oStagedOutFile.file.getName(), oStagedOutFile);
+				}
+			}
+
+			List<CwlApplicationPackageUtils.CwlOutputBinding> aoOutputs = CwlApplicationPackageUtils.getCommandLineToolOutputs(oCommandLineTool);
 
 			for (CwlApplicationPackageUtils.CwlOutputBinding oOutput : aoOutputs) {
 
 				String sCleanType = Utils.isNullOrEmpty(oOutput.type) ? "" : oOutput.type.replace("?", "").replace("[]", "");
 
+				List<File> aoMatched;
+
 				if ("Directory".equalsIgnoreCase(sCleanType)) {
-					aoFilesToIngest.addAll(matchGlob(oOutputFolder, "."));
+					aoMatched = matchGlob(oOutputFolder, ".");
 				}
 				else if ("File".equalsIgnoreCase(sCleanType)) {
-					aoFilesToIngest.addAll(matchGlob(oOutputFolder, oOutput.glob));
+					aoMatched = matchGlob(oOutputFolder, oOutput.glob);
 				}
 				else {
 					WasdiLog.debugLog("OgcAppPackageProcessorEngine.stageOutOutputs: output [" + oOutput.id + "] has type [" + oOutput.type + "], stdout/stage-out for it is not supported yet");
+					continue;
+				}
+
+				for (File oFile : aoMatched) {
+					oStagedOutFilesByName.putIfAbsent(oFile.getName(), new StacStageOutUtils.StagedOutFile(oFile, ""));
 				}
 			}
 
-			if (aoFilesToIngest.isEmpty()) {
+			if (oStagedOutFilesByName.isEmpty()) {
 				processWorkspaceLog("No declared output file found to stage-out");
 				return;
 			}
 
-			for (File oOutputFile : aoFilesToIngest) {
+			for (StacStageOutUtils.StagedOutFile oStagedOutFile : oStagedOutFilesByName.values()) {
+
+				File oOutputFile = oStagedOutFile.file;
 
 				// This is WASDI's own stage-in manifest, not an application result
 				if (oOutputFile.getName().equals("catalog.json")) continue;
@@ -503,7 +534,7 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 					File oWorkspaceFile = new File(sHostWorkspacePath, oOutputFile.getName());
 					FileUtils.copyFile(oOutputFile, oWorkspaceFile);
 
-					addOutputProductToWorkspace(oWorkspaceFile, oParameter);
+					addOutputProductToWorkspace(oWorkspaceFile, oParameter, oStagedOutFile.bbox);
 
 					processWorkspaceLog("Output added to the workspace: " + oWorkspaceFile.getName());
 				}
@@ -550,8 +581,12 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 	/**
 	 * Registers a staged-out file as a WASDI product (DownloadedFile + ProductWorkspace),
 	 * same DB pattern used by the Ingest operation, without going through its REST/queue flow.
+	 * 
+	 * @param oFile Staged-out file, already copied into the workspace
+	 * @param oParameter Processor Parameter of the run
+	 * @param sBbox Bounding box in WASDI's own "north,west,south,east" format, or empty if unknown
 	 */
-	protected void addOutputProductToWorkspace(File oFile, ProcessorParameter oParameter) {
+	protected void addOutputProductToWorkspace(File oFile, ProcessorParameter oParameter, String sBbox) {
 		try {
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			DownloadedFile oExistingDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(oFile.getAbsolutePath());
@@ -591,6 +626,10 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 				ProductWorkspace oProductWorkspace = new ProductWorkspace();
 				oProductWorkspace.setProductName(oFile.getAbsolutePath());
 				oProductWorkspace.setWorkspaceId(oParameter.getWorkspace());
+
+				if (!Utils.isNullOrEmpty(sBbox)) {
+					oProductWorkspace.setBbox(sBbox);
+				}
 
 				if (!oProductWorkspaceRepository.insertProductWorkspace(oProductWorkspace)) {
 					WasdiLog.errorLog("OgcAppPackageProcessorEngine.addOutputProductToWorkspace: impossible to link " + oFile.getName() + " to the workspace");
