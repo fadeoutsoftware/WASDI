@@ -102,8 +102,9 @@ public class StacResource {
 
 			return Response.ok(oCatalog).build();
 		}
-		catch (Exception oEx) {
+		catch (Throwable oEx) {
 			WasdiLog.errorLog("StacResource.getLandingPage: exception " + oEx.toString());
+			oEx.printStackTrace();
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
@@ -127,9 +128,9 @@ public class StacResource {
 	@GET
 	@Path("/collections")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getCollections(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId) {
+	public Response getCollections(@HeaderParam("x-session-token") String sSessionId) {
 		try {
-			User oUser = resolveUser(sSessionId, sTokenSessionId);
+			User oUser = resolveUser(sSessionId);
 
 			List<Workspace> aoWorkspaces = getAccessibleWorkspaces(oUser);
 
@@ -149,8 +150,9 @@ public class StacResource {
 
 			return Response.ok(oResponse).build();
 		}
-		catch (Exception oEx) {
+		catch (Throwable oEx) {
 			WasdiLog.errorLog("StacResource.getCollections: exception " + oEx.toString());
+			oEx.printStackTrace();
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
@@ -161,9 +163,9 @@ public class StacResource {
 	@GET
 	@Path("/collections/{workspaceId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getCollection(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId, @PathParam("workspaceId") String sWorkspaceId) {
+	public Response getCollection(@HeaderParam("x-session-token") String sSessionId, @PathParam("workspaceId") String sWorkspaceId) {
 		try {
-			User oUser = resolveUser(sSessionId, sTokenSessionId);
+			User oUser = resolveUser(sSessionId);
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
@@ -178,8 +180,9 @@ public class StacResource {
 
 			return Response.ok(buildCollection(oWorkspace)).build();
 		}
-		catch (Exception oEx) {
+		catch (Throwable oEx) {
 			WasdiLog.errorLog("StacResource.getCollection: exception " + oEx.toString());
+			oEx.printStackTrace();
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
@@ -191,11 +194,11 @@ public class StacResource {
 	@GET
 	@Path("/collections/{workspaceId}/items")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getItems(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId,
+	public Response getItems(@HeaderParam("x-session-token") String sSessionId,
 			@PathParam("workspaceId") String sWorkspaceId, @QueryParam("limit") Integer iLimit, @QueryParam("next") Integer iOffset,
 			@QueryParam("bbox") String sBboxFilter, @QueryParam("datetime") String sDatetimeFilter) {
 		try {
-			User oUser = resolveUser(sSessionId, sTokenSessionId);
+			User oUser = resolveUser(sSessionId);
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
@@ -232,7 +235,7 @@ public class StacResource {
 				if (adBboxFilter != null && !bboxIntersects(adBboxFilter, adItemBbox)) continue;
 				if (asDatetimeFilter != null && !matchesDatetimeFilter(asDatetimeFilter, oDownloadedFile)) continue;
 
-				aoMatchingItems.add(buildItem(oProductWorkspace, oDownloadedFile, sWorkspaceId, sTokenSessionId != null ? sTokenSessionId : sSessionId));
+				aoMatchingItems.add(buildItem(oProductWorkspace, oDownloadedFile, sWorkspaceId, sSessionId));
 			}
 
 			int iNumberMatched = aoMatchingItems.size();
@@ -258,8 +261,9 @@ public class StacResource {
 
 			return Response.ok(oItemCollection).build();
 		}
-		catch (Exception oEx) {
+		catch (Throwable oEx) {
 			WasdiLog.errorLog("StacResource.getItems: exception " + oEx.toString());
+			oEx.printStackTrace();
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
@@ -270,10 +274,10 @@ public class StacResource {
 	@GET
 	@Path("/collections/{workspaceId}/items/{fileId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getItem(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId,
+	public Response getItem(@HeaderParam("x-session-token") String sSessionId,
 			@PathParam("workspaceId") String sWorkspaceId, @PathParam("fileId") String sFileId) {
 		try {
-			User oUser = resolveUser(sSessionId, sTokenSessionId);
+			User oUser = resolveUser(sSessionId);
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
@@ -296,12 +300,13 @@ public class StacResource {
 			String sWorkspacePath = PathsConfig.getWorkspacePath(oWorkspace.getUserId(), sWorkspaceId);
 			DownloadedFile oDownloadedFile = getDownloadedFile(sWorkspacePath, sFileId);
 
-			StacItem oItem = buildItem(oProductWorkspace, oDownloadedFile, sWorkspaceId, sTokenSessionId != null ? sTokenSessionId : sSessionId);
+			StacItem oItem = buildItem(oProductWorkspace, oDownloadedFile, sWorkspaceId, sSessionId);
 
 			return Response.ok(oItem).build();
 		}
-		catch (Exception oEx) {
+		catch (Throwable oEx) {
 			WasdiLog.errorLog("StacResource.getItem: exception " + oEx.toString());
+			oEx.printStackTrace();
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
@@ -310,12 +315,10 @@ public class StacResource {
 	 * Resolves the caller's session to a User, returning null (anonymous) instead of failing when
 	 * no valid session is provided: STAC endpoints must stay browsable without authentication.
 	 */
-	private User resolveUser(String sSessionId, String sTokenSessionId) {
-		String sEffectiveSessionId = !Utils.isNullOrEmpty(sSessionId) ? sSessionId : sTokenSessionId;
+	private User resolveUser(String sSessionId) {
+		if (Utils.isNullOrEmpty(sSessionId)) return null;
 
-		if (Utils.isNullOrEmpty(sEffectiveSessionId)) return null;
-
-		return Wasdi.getUserFromSession(sEffectiveSessionId);
+		return Wasdi.getUserFromSession(sSessionId);
 	}
 
 	/**
@@ -351,8 +354,8 @@ public class StacResource {
 			}
 		}
 
-		for (Workspace oWorkspace : oWorkspaceRepository.getWorkspacesList()) {
-			if (oWorkspace.isPublic() && !oWorkspacesById.containsKey(oWorkspace.getWorkspaceId())) {
+		for (Workspace oWorkspace : oWorkspaceRepository.getPublicWorkspaces()) {
+			if (!oWorkspacesById.containsKey(oWorkspace.getWorkspaceId())) {
 				oWorkspacesById.put(oWorkspace.getWorkspaceId(), oWorkspace);
 			}
 		}

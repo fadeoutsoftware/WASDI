@@ -317,6 +317,24 @@ public class MongoWorkspaceRepositoryBackend extends MongoRepository implements 
 	}
 
 	@Override
+	public List<Workspace> getPublicWorkspaces() {
+
+		final ArrayList<Workspace> aoReturnList = new ArrayList<Workspace>();
+
+		try {
+
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("public", true));
+
+			fillList(aoReturnList, oWSDocuments, Workspace.class);
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("WorkspaceRepository.getPublicWorkspaces: error: ", oEx);
+		}
+
+		return aoReturnList;
+	}
+
+	@Override
 	public List<Workspace> getWorkspacesList() {
 
 		final ArrayList<Workspace> aoReturnList = new ArrayList<Workspace>();
