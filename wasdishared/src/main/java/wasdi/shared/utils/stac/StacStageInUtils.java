@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.ProcessWorkspaceLogger;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
 /**
@@ -50,7 +51,7 @@ public class StacStageInUtils {
 	 * @return the (host) staging folder containing the local catalog.json, or null in case of problems
 	 */
 	@SuppressWarnings("unchecked")
-	public static File stageInStacItem(String sStacItemUrl, String sHostStagingFolder) {
+	public static File stageInStacItem(String sStacItemUrl, String sHostStagingFolder, ProcessWorkspaceLogger oProcessWorkspaceLogger) {
 		try {
 			if (Utils.isNullOrEmpty(sStacItemUrl)) {
 				WasdiLog.errorLog("StacStageInUtils.stageInStacItem: the STAC Item url is null or empty");
@@ -80,6 +81,10 @@ public class StacStageInUtils {
 			oStagingFolder.setExecutable(true, false);
 
 			WasdiLog.debugLog("StacStageInUtils.stageInStacItem: fetching STAC Item " + sStacItemUrl);
+
+            if (oProcessWorkspaceLogger != null) {
+                oProcessWorkspaceLogger.log("Fetching STAC Item " + sStacItemUrl);
+            }
 
 			HttpCallResponse oResponse = HttpUtils.httpGet(sStacItemUrl);
 

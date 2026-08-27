@@ -71,11 +71,6 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 	protected static final String DOCKERFILE_NAME = "Dockerfile";
 
 	/**
-	 * Fixed container-side mount point of the workspace folder (matches DockerUtils' own convention)
-	 */
-	protected static final String CONTAINER_DATA_FOLDER = "/data/wasdi";
-
-	/**
 	 * Workspace subfolder where STAC Directory inputs are staged-in, one folder per input id
 	 */
 	protected static final String STAC_STAGE_IN_FOLDER_NAME = ".stac-in";
@@ -362,12 +357,27 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 				return false;
 			}
 
-			String sContainerRunFolder = translateHostPathToContainerPath(sHostWorkspacePath, sHostRunFolder);
+			String sContainerRunFolder = sHostRunFolder.replaceAll("/+$", "");
 			String sContainerCwlFile = sContainerRunFolder + "/" + oRunCwlFile.getName();
 			String sContainerJobOrderFile = sContainerRunFolder + "/" + JOB_ORDER_FILE_NAME;
 			String sContainerResultFile = sContainerRunFolder + "/" + CWLTOOL_RESULT_FILE_NAME;
 
+			// cwltool creates scratch/staging folders of its own (by default under /tmp) and, using the shared
+			// docker.sock, asks the HOST Docker daemon to bind-mount them into the sibling CommandLineTool
+			// containers it starts. The daemon resolves those paths against the real host filesystem, so any
+			// path cwltool computes (its own tmp dirs, and every staged Directory input) must be a real host
+			// path, not a WASDI-internal container remap. So the workspace is mounted here at the SAME
+			// absolute path as on the host (identity mount), and cwltool's own scratch dirs are pinned inside it.
+			String sHostTmpFolder = sHostRunFolder + "tmp/";
+			File oHostTmpFolder = new File(sHostTmpFolder);
+			oHostTmpFolder.mkdirs();
+			oHostTmpFolder.setWritable(true, false);
+			oHostTmpFolder.setExecutable(true, false);
+
 			ArrayList<String> asAdditionalMountPoints = new ArrayList<>();
+			String sIdentityWorkspacePath = sHostWorkspacePath.replaceAll("/+$", "");
+			asAdditionalMountPoints.add(sIdentityWorkspacePath + ":" + sIdentityWorkspacePath);
+
 			String sDockerApiAddress = WasdiConfig.Current.dockers.internalDockerAPIAddress;
 
 			if (!Utils.isNullOrEmpty(sDockerApiAddress) && sDockerApiAddress.startsWith("unix://")) {
@@ -382,7 +392,8 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 			// wasdi-cwl is a host-provisioned "system image" (like wasdi-gdal, wasdi-sen2cor, ...), never pulled from a registry
 			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, "", m_oProcessWorkspaceLogger);
 
-			String sCwltoolCommand = "cwltool --outdir " + sContainerRunFolder + " " + sContainerCwlFile + "#" + sWorkflowId + " " + sContainerJobOrderFile + " > " + sContainerResultFile;
+			String sCwltoolCommand = "cwltool --tmpdir-prefix " + sHostTmpFolder + " --tmp-outdir-prefix " + sHostTmpFolder
+					+ " --outdir " + sContainerRunFolder + " " + sContainerCwlFile + "#" + sWorkflowId + " " + sContainerJobOrderFile + " > " + sContainerResultFile;
 			List<String> asCommand = List.of("sh", "-c", sCwltoolCommand);
 
 			processWorkspaceLog("Starting the Application (cwltool)");
@@ -483,29 +494,18 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 
 			String sHostStagingFolder = sHostWorkspacePath + STAC_STAGE_IN_FOLDER_NAME + "/" + sInputId;
 
-			processWorkspaceLog("Staging-in STAC input [" + sInputId + "]");
-
-			File oStagedFolder = StacStageInUtils.stageInStacItem(oRawValue.toString(), sHostStagingFolder);
+			File oStagedFolder = StacStageInUtils.stageInStacItem(oRawValue.toString(), sHostStagingFolder, m_oProcessWorkspaceLogger);
 
 			if (oStagedFolder == null) {
 				WasdiLog.errorLog("OgcAppPackageProcessorEngine.stageInDirectoryInputs: impossible to stage-in input [" + sInputId + "]");
 				return false;
 			}
 
-			oJobInputValues.put(sInputId, translateHostPathToContainerPath(sHostWorkspacePath, oStagedFolder.getAbsolutePath()));
+			// The workspace is mounted at an identity path for the wasdi-cwl container (see run()), so the host path is also the container path
+			oJobInputValues.put(sInputId, oStagedFolder.getAbsolutePath());
 		}
 
 		return true;
-	}
-
-	/**
-	 * Translates a host path inside the current job's workspace folder into the equivalent
-	 * container path (the workspace folder is bind-mounted at CONTAINER_DATA_FOLDER, see run())
-	 */
-	protected String translateHostPathToContainerPath(String sHostWorkspacePath, String sHostPath) {
-		String sNormalizedWorkspacePath = sHostWorkspacePath.endsWith("/") ? sHostWorkspacePath : sHostWorkspacePath + "/";
-		String sRelativePath = sHostPath.startsWith(sNormalizedWorkspacePath) ? sHostPath.substring(sNormalizedWorkspacePath.length()) : sHostPath;
-		return CONTAINER_DATA_FOLDER + "/" + sRelativePath;
 	}
 
 	/**
