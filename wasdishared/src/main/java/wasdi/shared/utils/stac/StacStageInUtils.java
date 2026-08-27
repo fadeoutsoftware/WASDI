@@ -68,6 +68,11 @@ public class StacStageInUtils {
 
 				if (sStacItemUrl.equals(sStagedUrl)) {
 					WasdiLog.debugLog("StacStageInUtils.stageInStacItem: already staged-in for this STAC Item, reusing it");
+
+                    if (oProcessWorkspaceLogger != null) {
+                        oProcessWorkspaceLogger.log("Already staged-in for " + sStacItemUrl + ", reusing it");
+                    }
+
 					return oStagingFolder;
 				}
 

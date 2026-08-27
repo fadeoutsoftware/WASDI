@@ -397,6 +397,7 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 			List<String> asCommand = List.of("sh", "-c", sCwltoolCommand);
 
 			processWorkspaceLog("Starting the Application (cwltool)");
+			processWorkspaceLog("Input Params " + oParameter.getJson() );
 			WasdiLog.debugLog("OgcAppPackageProcessorEngine.run: cwltool command " + sCwltoolCommand);
 
 			String sContainerId = oDockerUtils.run(CWL_RUNNER_IMAGE_NAME, CWL_RUNNER_IMAGE_VERSION, asCommand, true, asAdditionalMountPoints, false, sHostWorkspacePath, sContainerRunFolder);
@@ -414,7 +415,13 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 
 			if (!Utils.isNullOrEmpty(sContainerLogs)) {
 				processWorkspaceLog("cwltool output:");
-				processWorkspaceLog(sContainerLogs);
+
+				// One process log row per call: split so each container log line shows up as its own row, not one giant blob
+				for (String sLogLine : sContainerLogs.split("\\r?\\n")) {
+					if (!Utils.isNullOrEmpty(sLogLine)) {
+						processWorkspaceLog(sLogLine);
+					}
+				}
 			}
 
 			WasdiLog.debugLog("OgcAppPackageProcessorEngine.run: cwltool output " + sContainerLogs);
