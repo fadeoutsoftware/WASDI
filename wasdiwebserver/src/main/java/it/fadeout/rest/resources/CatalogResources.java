@@ -29,10 +29,12 @@ import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.business.users.User;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.utils.MissionUtils;
@@ -89,16 +91,33 @@ public class CatalogResources {
 			}
 
 			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
+			
+			boolean bPublicWorkspaceAccess = false;
 
 			if (oUser == null) {
-				WasdiLog.warnLog("CatalogResources.downloadEntryByName: invalid session");
-				return Response.status(Status.UNAUTHORIZED).build();
+				WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+				Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+				
+				
+				
+				if (oWorkspace != null) {
+					if (oWorkspace.isPublic()) {
+						bPublicWorkspaceAccess = true;
+					}
+				}
+				
+				if (!bPublicWorkspaceAccess) {
+					WasdiLog.warnLog("CatalogResources.downloadEntryByName: invalid session");
+					return Response.status(Status.UNAUTHORIZED).build();					
+				}
 			}
 			
-			// Check if the user can access the workspace
-			if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-				WasdiLog.warnLog("CatalogResources.downloadEntryByName: user cannot access workspace");
-				return Response.status(Status.FORBIDDEN).build();				
+			if (!bPublicWorkspaceAccess) {
+				// Check if the user can access the workspace
+				if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+					WasdiLog.warnLog("CatalogResources.downloadEntryByName: user cannot access workspace");
+					return Response.status(Status.FORBIDDEN).build();				
+				}				
 			}
 			
 			// Get the File object

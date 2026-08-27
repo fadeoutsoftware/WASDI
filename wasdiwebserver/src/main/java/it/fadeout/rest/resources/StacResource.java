@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.Node;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.users.User;
@@ -27,6 +28,7 @@ import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
+import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
@@ -228,14 +230,14 @@ public class StacResource {
 
 			for (ProductWorkspace oProductWorkspace : aoAllProducts) {
 
-				DownloadedFile oDownloadedFile = getDownloadedFile(sWorkspacePath, oProductWorkspace.getProductName());
+				DownloadedFile oDownloadedFile = getDownloadedFile(sWorkspacePath + extractFileName(oProductWorkspace.getProductName()));
 
 				double[] adItemBbox = toStacBbox(!Utils.isNullOrEmpty(oProductWorkspace.getBbox()) ? oProductWorkspace.getBbox() : (oDownloadedFile != null ? oDownloadedFile.getBoundingBox() : null));
 
 				if (adBboxFilter != null && !bboxIntersects(adBboxFilter, adItemBbox)) continue;
 				if (asDatetimeFilter != null && !matchesDatetimeFilter(asDatetimeFilter, oDownloadedFile)) continue;
 
-				aoMatchingItems.add(buildItem(oProductWorkspace, oDownloadedFile, sWorkspaceId, sSessionId));
+				aoMatchingItems.add(buildItem(oWorkspace, oProductWorkspace, oDownloadedFile, sSessionId));
 			}
 
 			int iNumberMatched = aoMatchingItems.size();
@@ -291,16 +293,23 @@ public class StacResource {
 			}
 
 			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-			ProductWorkspace oProductWorkspace = oProductWorkspaceRepository.getProductWorkspace(sFileId, sWorkspaceId);
+			ProductWorkspace oProductWorkspace = null;
+
+			for (ProductWorkspace oCandidate : oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId)) {
+				if (extractFileName(oCandidate.getProductName()).equals(sFileId)) {
+					oProductWorkspace = oCandidate;
+					break;
+				}
+			}
 
 			if (oProductWorkspace == null) {
 				return Response.status(Status.NOT_FOUND).build();
 			}
 
 			String sWorkspacePath = PathsConfig.getWorkspacePath(oWorkspace.getUserId(), sWorkspaceId);
-			DownloadedFile oDownloadedFile = getDownloadedFile(sWorkspacePath, sFileId);
+			DownloadedFile oDownloadedFile = getDownloadedFile(sWorkspacePath + extractFileName(oProductWorkspace.getProductName()));
 
-			StacItem oItem = buildItem(oProductWorkspace, oDownloadedFile, sWorkspaceId, sSessionId);
+			StacItem oItem = buildItem(oWorkspace, oProductWorkspace, oDownloadedFile, sSessionId);
 
 			return Response.ok(oItem).build();
 		}
@@ -404,7 +413,7 @@ public class StacResource {
 
 			for (ProductWorkspace oProductWorkspace : aoProducts) {
 
-				DownloadedFile oDownloadedFile = getDownloadedFile(sWorkspacePath, oProductWorkspace.getProductName());
+				DownloadedFile oDownloadedFile = getDownloadedFile(sWorkspacePath + extractFileName(oProductWorkspace.getProductName()));
 
 				double[] adBbox = toStacBbox(!Utils.isNullOrEmpty(oProductWorkspace.getBbox()) ? oProductWorkspace.getBbox() : (oDownloadedFile != null ? oDownloadedFile.getBoundingBox() : null));
 
@@ -451,11 +460,16 @@ public class StacResource {
 
 	/**
 	 * Builds a STAC Item from a ProductWorkspace (+ its DownloadedFile entry, if any, for extra metadata).
+	 * The asset href targets whichever node the Workspace actually lives on (WASDI is multi-node, and
+	 * the download endpoint - unlike the STAC metadata endpoints - is served locally by that node).
 	 */
-	private StacItem buildItem(ProductWorkspace oProductWorkspace, DownloadedFile oDownloadedFile, String sWorkspaceId, String sSessionId) {
+	private StacItem buildItem(Workspace oWorkspace, ProductWorkspace oProductWorkspace, DownloadedFile oDownloadedFile, String sSessionId) {
+
+		String sWorkspaceId = oWorkspace.getWorkspaceId();
+		String sFileName = extractFileName(oProductWorkspace.getProductName());
 
 		StacItem oItem = new StacItem();
-		oItem.setId(oProductWorkspace.getProductName());
+		oItem.setId(sFileName);
 		oItem.setCollection(sWorkspaceId);
 
 		double[] adBbox = toStacBbox(!Utils.isNullOrEmpty(oProductWorkspace.getBbox()) ? oProductWorkspace.getBbox() : (oDownloadedFile != null ? oDownloadedFile.getBoundingBox() : null));
@@ -479,13 +493,13 @@ public class StacResource {
 
 		Map<String, StacAsset> oAssets = new HashMap<>();
 		StacAsset oDataAsset = new StacAsset();
-		oDataAsset.setHref(buildDownloadHref(sWorkspaceId, oProductWorkspace.getProductName(), sSessionId));
-		oDataAsset.setTitle(oProductWorkspace.getProductName());
+		oDataAsset.setHref(buildDownloadHref(resolveNodeBaseUrl(oWorkspace), sWorkspaceId, sFileName, sSessionId));
+		oDataAsset.setTitle(sFileName);
 		oDataAsset.setRoles(Arrays.asList("data"));
 		oAssets.put("data", oDataAsset);
 		oItem.setAssets(oAssets);
 
-		String sSelfUrl = getBaseUrl() + "stac/collections/" + sWorkspaceId + "/items/" + encodePathSegment(oProductWorkspace.getProductName());
+		String sSelfUrl = getBaseUrl() + "stac/collections/" + sWorkspaceId + "/items/" + encodePathSegment(sFileName);
 
 		List<StacLink> aoLinks = new ArrayList<>();
 		aoLinks.add(new StacLink(sSelfUrl, "self", MediaType.APPLICATION_JSON, "This document"));
@@ -500,15 +514,48 @@ public class StacResource {
 	 * Looks up the DownloadedFile entry for a product, if any: not every ProductWorkspace has one
 	 * (e.g. entries created outside the ingest flow), so this can legitimately return null.
 	 */
-	private DownloadedFile getDownloadedFile(String sWorkspacePath, String sProductName) {
+	private DownloadedFile getDownloadedFile(String sFullPath) {
 		try {
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-			return oDownloadedFilesRepository.getDownloadedFileByPath(sWorkspacePath + sProductName);
+			return oDownloadedFilesRepository.getDownloadedFileByPath(sFullPath);
 		}
 		catch (Exception oEx) {
 			WasdiLog.warnLog("StacResource.getDownloadedFile: exception " + oEx.toString());
 			return null;
 		}
+	}
+
+	/**
+	 * Extracts the bare filename out of a ProductWorkspace.productName value, whether it is already
+	 * a bare filename or a full absolute path - never expose our internal filesystem layout externally.
+	 */
+	private String extractFileName(String sProductNameOrPath) {
+		int iLastSeparator = Math.max(sProductNameOrPath.lastIndexOf('/'), sProductNameOrPath.lastIndexOf('\\'));
+		return iLastSeparator >= 0 ? sProductNameOrPath.substring(iLastSeparator + 1) : sProductNameOrPath;
+	}
+
+	/**
+	 * Resolves the base API url to use for the (node-local) download endpoint: this node's own url
+	 * when the Workspace lives here (nodeCode null/empty/matching), the target node's own url otherwise.
+	 */
+	private String resolveNodeBaseUrl(Workspace oWorkspace) {
+		String sNodeCode = oWorkspace.getNodeCode();
+
+		if (Utils.isNullOrEmpty(sNodeCode) || sNodeCode.equals(WasdiConfig.Current.nodeCode)) {
+			return getBaseUrl();
+		}
+
+		NodeRepository oNodeRepository = new NodeRepository();
+		Node oNode = oNodeRepository.getNodeByCode(sNodeCode);
+
+		if (oNode == null || Utils.isNullOrEmpty(oNode.getNodeBaseAddress())) {
+			WasdiLog.warnLog("StacResource.resolveNodeBaseUrl: node [" + sNodeCode + "] not found or has no base address, falling back to this node's url");
+			return getBaseUrl();
+		}
+
+		String sUrl = oNode.getNodeBaseAddress();
+		if (!sUrl.endsWith("/")) sUrl += "/";
+		return sUrl;
 	}
 
 	/**
@@ -581,12 +628,13 @@ public class StacResource {
 	}
 
 	/**
-	 * Builds a download href reusing the existing catalog download endpoint, embedding the caller's
-	 * own session token (v1 limitation: the link is only valid as long as that session is).
+	 * Builds a download href reusing the existing catalog download endpoint on the given (node-local)
+	 * base url, embedding the caller's own session token (v1 limitation: the link is only valid as
+	 * long as that session is).
 	 */
-	private String buildDownloadHref(String sWorkspaceId, String sFileName, String sSessionId) {
+	private String buildDownloadHref(String sBaseUrl, String sWorkspaceId, String sFileName, String sSessionId) {
 		try {
-			String sHref = getBaseUrl() + "catalog/downloadbyname?filename=" + URLEncoder.encode(sFileName, StandardCharsets.UTF_8.toString())
+			String sHref = sBaseUrl + "catalog/downloadbyname?filename=" + URLEncoder.encode(sFileName, StandardCharsets.UTF_8.toString())
 					+ "&workspace=" + URLEncoder.encode(sWorkspaceId, StandardCharsets.UTF_8.toString());
 
 			if (!Utils.isNullOrEmpty(sSessionId)) {
