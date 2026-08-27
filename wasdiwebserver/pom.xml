@@ -47,6 +47,7 @@
         <sVersionGoogleApiClient>2.8.1</sVersionGoogleApiClient>
         <sVersionHttpClient>4.5.14</sVersionHttpClient>
         <sVersionJackson>2.20.1</sVersionJackson>
+        <sVersionJacksonAnnotations>2.20</sVersionJacksonAnnotations>
         <sVersionJavaApiForKml>2.2.1</sVersionJavaApiForKml>
         <sVersionJavaxWebsocketApi>1.1</sVersionJavaxWebsocketApi>
         <sVersionJson>20250517</sVersionJson>
@@ -181,6 +182,14 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${sVersionJackson}</version>
+        </dependency>
+        <!-- Pinned explicitly: jersey-media-json-jackson transitively pulls an older jackson-annotations
+             that Maven can end up preferring over the one jackson-databind needs, causing a
+             java.lang.NoSuchMethodError at runtime (JsonProperty.isRequired() missing) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${sVersionJacksonAnnotations}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
         <dependency>
