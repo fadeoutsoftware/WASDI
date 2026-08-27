@@ -1,9 +1,15 @@
 package wasdi.processors;
 
 import java.io.File;
+import java.nio.file.FileSystems;
+import java.nio.file.PathMatcher;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,13 +18,20 @@ import org.apache.commons.io.FileUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.LauncherMain;
+import wasdi.io.WasdiProductReader;
+import wasdi.io.WasdiProductReaderFactory;
+import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.DownloadedFileCategory;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.config.PathsConfig;
+import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.StringUtils;
@@ -28,6 +41,8 @@ import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
 import wasdi.shared.utils.docker.containersViewModels.constants.ContainerStates;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.stac.StacStageInUtils;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 import wasdi.shared.utils.stac.StacStageInUtils;
 
 /**
@@ -62,6 +77,12 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 	 * Workspace subfolder where STAC Directory inputs are staged-in, one folder per input id
 	 */
 	protected static final String STAC_STAGE_IN_FOLDER_NAME = ".stac-in";
+
+	/**
+	 * Workspace subfolder used as the container working directory, one folder per run, so
+	 * declared outputs survive the container and can be staged-out into the workspace
+	 */
+	protected static final String STAGE_OUT_FOLDER_NAME = ".stac-out";
 
 	public OgcAppPackageProcessorEngine() {
 		super();
@@ -323,8 +344,16 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 			processWorkspaceLog("Starting the Application container");
 			WasdiLog.debugLog("OgcAppPackageProcessorEngine.run: command line " + asCommand);
 
-			// Unlike generic shell-exec containers, an OGC app only needs (and should only see) its own workspace
-			String sContainerId = oDockerUtils.run(sImageName, sImageVersion, asCommand, true, null, false, sHostWorkspacePath);
+			// The working dir is a run-specific folder inside the (mounted) workspace, so declared outputs survive the container
+			String sHostOutputFolder = sHostWorkspacePath + STAGE_OUT_FOLDER_NAME + "/" + oParameter.getProcessObjId() + "/";
+			File oHostOutputFolder = new File(sHostOutputFolder);
+			oHostOutputFolder.mkdirs();
+			// The container runs as a fixed numeric uid (see DockerUtils.run), not necessarily the launcher's own user: make sure it can write here
+			oHostOutputFolder.setWritable(true, false);
+			oHostOutputFolder.setExecutable(true, false);
+			String sContainerWorkingDir = translateHostPathToContainerPath(sHostWorkspacePath, sHostOutputFolder);
+
+			String sContainerId = oDockerUtils.run(sImageName, sImageVersion, asCommand, true, null, false, sHostWorkspacePath, sContainerWorkingDir);
 
 			if (Utils.isNullOrEmpty(sContainerId)) {
 				processWorkspaceLog("Impossible to start the Application container");
@@ -343,6 +372,10 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 			}
 
 			WasdiLog.debugLog("OgcAppPackageProcessorEngine.run: container output " + sContainerLogs);
+
+			if (oFinalStatus == ProcessStatus.DONE) {
+				stageOutOutputs(oCommandLineToolNode, sHostOutputFolder, sHostWorkspacePath, oParameter);
+			}
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, oFinalStatus, 100);
 
@@ -419,6 +452,154 @@ public class OgcAppPackageProcessorEngine extends DockerProcessorEngine {
 		String sNormalizedWorkspacePath = sHostWorkspacePath.endsWith("/") ? sHostWorkspacePath : sHostWorkspacePath + "/";
 		String sRelativePath = sHostPath.startsWith(sNormalizedWorkspacePath) ? sHostPath.substring(sNormalizedWorkspacePath.length()) : sHostPath;
 		return CONTAINER_DATA_FOLDER + "/" + sRelativePath;
+	}
+
+	/**
+	 * Stages-out the CommandLineTool's declared outputs: for a Directory output (glob ".", the
+	 * whole working directory) every top-level file produced is a candidate; for a File output,
+	 * its outputBinding.glob is matched against the files in the working directory. Every
+	 * matching file is copied into the workspace and registered as a WASDI product.
+	 */
+	protected void stageOutOutputs(Map<String, Object> oCommandLineTool, String sHostOutputFolder, String sHostWorkspacePath, ProcessorParameter oParameter) {
+
+		try {
+			File oOutputFolder = new File(sHostOutputFolder);
+
+			if (!oOutputFolder.exists()) {
+				WasdiLog.warnLog("OgcAppPackageProcessorEngine.stageOutOutputs: output folder not found, nothing to stage-out");
+				return;
+			}
+
+			List<CwlApplicationPackageUtils.CwlOutputBinding> aoOutputs = CwlApplicationPackageUtils.getCommandLineToolOutputs(oCommandLineTool);
+
+			Set<File> aoFilesToIngest = new LinkedHashSet<>();
+
+			for (CwlApplicationPackageUtils.CwlOutputBinding oOutput : aoOutputs) {
+
+				String sCleanType = Utils.isNullOrEmpty(oOutput.type) ? "" : oOutput.type.replace("?", "").replace("[]", "");
+
+				if ("Directory".equalsIgnoreCase(sCleanType)) {
+					aoFilesToIngest.addAll(matchGlob(oOutputFolder, "."));
+				}
+				else if ("File".equalsIgnoreCase(sCleanType)) {
+					aoFilesToIngest.addAll(matchGlob(oOutputFolder, oOutput.glob));
+				}
+				else {
+					WasdiLog.debugLog("OgcAppPackageProcessorEngine.stageOutOutputs: output [" + oOutput.id + "] has type [" + oOutput.type + "], stdout/stage-out for it is not supported yet");
+				}
+			}
+
+			if (aoFilesToIngest.isEmpty()) {
+				processWorkspaceLog("No declared output file found to stage-out");
+				return;
+			}
+
+			for (File oOutputFile : aoFilesToIngest) {
+
+				// This is WASDI's own stage-in manifest, not an application result
+				if (oOutputFile.getName().equals("catalog.json")) continue;
+
+				try {
+					File oWorkspaceFile = new File(sHostWorkspacePath, oOutputFile.getName());
+					FileUtils.copyFile(oOutputFile, oWorkspaceFile);
+
+					addOutputProductToWorkspace(oWorkspaceFile, oParameter);
+
+					processWorkspaceLog("Output added to the workspace: " + oWorkspaceFile.getName());
+				}
+				catch (Exception oEx) {
+					WasdiLog.errorLog("OgcAppPackageProcessorEngine.stageOutOutputs: impossible to stage-out " + oOutputFile.getAbsolutePath(), oEx);
+				}
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("OgcAppPackageProcessorEngine.stageOutOutputs: exception", oEx);
+		}
+	}
+
+	/**
+	 * Lists the top-level files of a folder matching a (simple) CWL glob: "." (or empty) means
+	 * every file, anything else is matched as a java.nio.file glob pattern
+	 */
+	protected List<File> matchGlob(File oFolder, String sGlob) {
+
+		List<File> aoMatches = new ArrayList<>();
+
+		File[] aoFiles = oFolder.listFiles();
+
+		if (aoFiles == null) return aoMatches;
+
+		if (Utils.isNullOrEmpty(sGlob) || sGlob.equals(".")) {
+			for (File oFile : aoFiles) {
+				if (oFile.isFile()) aoMatches.add(oFile);
+			}
+			return aoMatches;
+		}
+
+		PathMatcher oMatcher = FileSystems.getDefault().getPathMatcher("glob:" + sGlob);
+
+		for (File oFile : aoFiles) {
+			if (oFile.isFile() && oMatcher.matches(oFile.toPath().getFileName())) {
+				aoMatches.add(oFile);
+			}
+		}
+
+		return aoMatches;
+	}
+
+	/**
+	 * Registers a staged-out file as a WASDI product (DownloadedFile + ProductWorkspace),
+	 * same DB pattern used by the Ingest operation, without going through its REST/queue flow.
+	 */
+	protected void addOutputProductToWorkspace(File oFile, ProcessorParameter oParameter) {
+		try {
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			DownloadedFile oExistingDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(oFile.getAbsolutePath());
+
+			ProductViewModel oProductViewModel = null;
+
+			try {
+				WasdiProductReader oReader = WasdiProductReaderFactory.getProductReader(oFile);
+				oProductViewModel = oReader.getProductViewModel();
+			}
+			catch (Exception oReadEx) {
+				WasdiLog.warnLog("OgcAppPackageProcessorEngine.addOutputProductToWorkspace: impossible to read the product metadata for " + oFile.getName() + ", registering it with minimal info");
+			}
+
+			if (oProductViewModel == null) {
+				oProductViewModel = new ProductViewModel();
+				oProductViewModel.setName(oFile.getName());
+				oProductViewModel.setFileName(oFile.getName());
+			}
+
+			if (oExistingDownloadedFile == null) {
+				DownloadedFile oDownloadedFile = new DownloadedFile();
+				oDownloadedFile.setFileName(oFile.getName());
+				oDownloadedFile.setFilePath(oFile.getAbsolutePath());
+				oDownloadedFile.setProductViewModel(oProductViewModel);
+				oDownloadedFile.setRefDate(new Date());
+				oDownloadedFile.setCategory(DownloadedFileCategory.COMPUTED.name());
+
+				if (!oDownloadedFilesRepository.insertDownloadedFile(oDownloadedFile)) {
+					WasdiLog.errorLog("OgcAppPackageProcessorEngine.addOutputProductToWorkspace: impossible to insert the downloaded file entry for " + oFile.getName());
+				}
+			}
+
+			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+
+			if (!oProductWorkspaceRepository.existsProductWorkspace(oFile.getAbsolutePath(), oParameter.getWorkspace())) {
+				ProductWorkspace oProductWorkspace = new ProductWorkspace();
+				oProductWorkspace.setProductName(oFile.getAbsolutePath());
+				oProductWorkspace.setWorkspaceId(oParameter.getWorkspace());
+
+				if (!oProductWorkspaceRepository.insertProductWorkspace(oProductWorkspace)) {
+					WasdiLog.errorLog("OgcAppPackageProcessorEngine.addOutputProductToWorkspace: impossible to link " + oFile.getName() + " to the workspace");
+				}
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("OgcAppPackageProcessorEngine.addOutputProductToWorkspace: exception", oEx);
+		}
 	}
 
 	/**

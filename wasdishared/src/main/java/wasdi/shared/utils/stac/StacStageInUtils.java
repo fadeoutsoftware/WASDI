@@ -50,6 +50,9 @@ public class StacStageInUtils {
 
 			File oStagingFolder = new File(sHostStagingFolder);
 			oStagingFolder.mkdirs();
+			// The container that will read this folder runs as a fixed numeric uid, not necessarily the launcher's own user
+			oStagingFolder.setReadable(true, false);
+			oStagingFolder.setExecutable(true, false);
 
 			WasdiLog.debugLog("StacStageInUtils.stageInStacItem: fetching STAC Item " + sStacItemUrl);
 
@@ -67,6 +70,8 @@ public class StacStageInUtils {
 
 			File oItemFolder = new File(oStagingFolder, sItemId);
 			oItemFolder.mkdirs();
+			oItemFolder.setReadable(true, false);
+			oItemFolder.setExecutable(true, false);
 
 			Object oAssets = oItem.get("assets");
 

@@ -99,6 +99,54 @@ public class CwlApplicationPackageUtils {
 		return getGraphNodeByClass(oCwlDocument, "CommandLineTool");
 	}
 
+	/**
+	 * A CWL CommandLineTool declared output: id, type and (if any) the outputBinding.glob pattern
+	 */
+	public static class CwlOutputBinding {
+		public String id;
+		public String type;
+		public String glob;
+	}
+
+	/**
+	 * Lists the CommandLineTool's declared "outputs" (id, type, outputBinding.glob)
+	 * @param oCommandLineTool CommandLineTool node
+	 * @return list of declared outputs
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<CwlOutputBinding> getCommandLineToolOutputs(Map<String, Object> oCommandLineTool) {
+
+		List<CwlOutputBinding> aoOutputs = new ArrayList<>();
+
+		if (oCommandLineTool == null) return aoOutputs;
+
+		Object oOutputs = oCommandLineTool.get("outputs");
+
+		if (!(oOutputs instanceof Map)) return aoOutputs;
+
+		for (Map.Entry<String, Object> oEntry : ((Map<String, Object>) oOutputs).entrySet()) {
+
+			if (!(oEntry.getValue() instanceof Map)) continue;
+
+			Map<String, Object> oOutputDefinition = (Map<String, Object>) oEntry.getValue();
+
+			CwlOutputBinding oOutput = new CwlOutputBinding();
+			oOutput.id = oEntry.getKey();
+			oOutput.type = String.valueOf(oOutputDefinition.getOrDefault("type", "File"));
+
+			Object oOutputBinding = oOutputDefinition.get("outputBinding");
+
+			if (oOutputBinding instanceof Map) {
+				Object oGlob = ((Map<String, Object>) oOutputBinding).get("glob");
+				oOutput.glob = oGlob == null ? null : oGlob.toString();
+			}
+
+			aoOutputs.add(oOutput);
+		}
+
+		return aoOutputs;
+	}
+
 	@SuppressWarnings("unchecked")
 	private static Map<String, Object> getGraphNodeByClass(Map<String, Object> oCwlDocument, String sClass) {
 		try {
