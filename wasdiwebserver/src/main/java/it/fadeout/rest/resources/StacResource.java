@@ -18,6 +18,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.Explode;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.enums.ParameterStyle;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 import it.fadeout.Wasdi;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
@@ -166,7 +172,7 @@ public class StacResource {
 	@GET
 	@Path("/collections/{workspaceId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getCollection(@HeaderParam("x-session-token") String sSessionId, @PathParam("workspaceId") String sWorkspaceId) {
+	public Response getCollection(@HeaderParam("x-session-token") String sSessionId, @PathParam("collectionId") String sWorkspaceId) {
 		try {
 			User oUser = resolveUser(sSessionId);
 
@@ -198,8 +204,42 @@ public class StacResource {
 	@Path("/collections/{workspaceId}/items")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getItems(@HeaderParam("x-session-token") String sSessionId,
-			@PathParam("workspaceId") String sWorkspaceId, @QueryParam("limit") Integer iLimit, @QueryParam("next") Integer iOffset,
-			@QueryParam("bbox") String sBboxFilter, @QueryParam("datetime") String sDatetimeFilter) {
+			@PathParam("collectionId") String sWorkspaceId,
+			@Parameter(
+		            name = "limit",
+		            in = ParameterIn.QUERY,
+		            description = "The optional limit parameter of the items to return",
+		            required = false,
+		            style = ParameterStyle.FORM,
+		            explode = Explode.FALSE,
+		            schema = @Schema(type = "integer", defaultValue = "10", minimum = "1", maximum = "10000")
+		        )			
+			@QueryParam("limit") Integer iLimit, 
+			@QueryParam("next") Integer iOffset,
+			@Parameter(
+		            name = "bbox",
+		            in = ParameterIn.QUERY,
+		            description = "Only features that intersect the bounding box (west, south, east, north)",
+		            required = false,
+		            style = ParameterStyle.FORM,
+		            explode = Explode.FALSE,
+		            array = @ArraySchema(
+		                schema = @Schema(type = "number"),
+		                minItems = 4,
+		                maxItems = 6
+		            )
+		        )		
+			@QueryParam("bbox") String sBboxFilter,
+			@Parameter(
+		            name = "datetime",
+		            in = ParameterIn.QUERY,
+		            description = "Either a date-time or an interval, open or closed",
+		            required = false,
+		            style = ParameterStyle.FORM,
+		            explode = Explode.FALSE,
+		            schema = @Schema(type = "string")
+		        )			
+			@QueryParam("datetime") String sDatetimeFilter) {
 		try {
 			User oUser = resolveUser(sSessionId);
 
@@ -278,7 +318,7 @@ public class StacResource {
 	@Path("/collections/{workspaceId}/items/{fileId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getItem(@HeaderParam("x-session-token") String sSessionId,
-			@PathParam("workspaceId") String sWorkspaceId, @PathParam("fileId") String sFileId) {
+			@PathParam("collectionId") String sWorkspaceId, @PathParam("fileId") String sFileId) {
 		try {
 			User oUser = resolveUser(sSessionId);
 
