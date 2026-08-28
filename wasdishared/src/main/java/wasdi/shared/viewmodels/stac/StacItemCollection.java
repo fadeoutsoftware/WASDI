@@ -8,6 +8,7 @@ import java.util.List;
 public class StacItemCollection {
 
 	private String type = "FeatureCollection";
+	private String timeStamp;
 	private List<StacItem> features;
 	private List<StacLink> links;
 	private Integer numberMatched;
@@ -52,4 +53,12 @@ public class StacItemCollection {
 	public void setNumberReturned(Integer numberReturned) {
 		this.numberReturned = numberReturned;
 	}
+	
+	public String getTimeStamp() {
+		return timeStamp;
+	}
+
+	public void setTimeStamp(String timeStamp) {
+		this.timeStamp = timeStamp;
+	}	
 }

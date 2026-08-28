@@ -2,6 +2,7 @@ package it.fadeout.rest.resources;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -170,7 +171,7 @@ public class StacResource {
 	 * Returns metadata, and the spatial/temporal extent, of a single Workspace as a STAC Collection.
 	 */
 	@GET
-	@Path("/collections/{workspaceId}")
+	@Path("/collections/{collectionId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getCollection(@HeaderParam("x-session-token") String sSessionId, @PathParam("collectionId") String sWorkspaceId) {
 		try {
@@ -201,8 +202,8 @@ public class StacResource {
 	 * "limit"/"next", and optionally filtered by "bbox" and/or "datetime".
 	 */
 	@GET
-	@Path("/collections/{workspaceId}/items")
-	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/collections/{collectionId}/items")
+	@Produces({"application/geo+json", MediaType.APPLICATION_JSON})
 	public Response getItems(@HeaderParam("x-session-token") String sSessionId,
 			@PathParam("collectionId") String sWorkspaceId,
 			@Parameter(
@@ -215,6 +216,15 @@ public class StacResource {
 		            schema = @Schema(type = "integer", defaultValue = "10", minimum = "1", maximum = "10000")
 		        )			
 			@QueryParam("limit") Integer iLimit, 
+			@Parameter(
+				    name = "next",
+				    in = ParameterIn.QUERY,
+				    description = "Continuation token / offset for pagination",
+				    required = false,
+				    style = ParameterStyle.FORM,
+				    explode = Explode.FALSE,
+				    schema = @Schema(type = "integer")
+			)			
 			@QueryParam("next") Integer iOffset,
 			@Parameter(
 		            name = "bbox",
@@ -287,6 +297,7 @@ public class StacResource {
 			List<StacItem> aoPageItems = aoMatchingItems.subList(iFromIndex, iToIndex);
 
 			StacItemCollection oItemCollection = new StacItemCollection();
+			oItemCollection.setTimeStamp(Instant.now().toString());
 			oItemCollection.setFeatures(aoPageItems);
 			oItemCollection.setNumberMatched(iNumberMatched);
 			oItemCollection.setNumberReturned(aoPageItems.size());
@@ -294,7 +305,9 @@ public class StacResource {
 			String sItemsSelfUrl = getBaseUrl() + "stac/collections/" + sWorkspaceId + "/items";
 
 			List<StacLink> aoLinks = new ArrayList<>();
-			aoLinks.add(new StacLink(sItemsSelfUrl, "self", MediaType.APPLICATION_JSON, "This document"));
+			aoLinks.add(new StacLink(sItemsSelfUrl, "self", "application/geo+json", "This document"));
+			aoLinks.add(new StacLink(getBaseUrl() + "stac/collections/" + sWorkspaceId, "collection", "application/json", "Parent Collection"));
+			aoLinks.add(new StacLink(sItemsSelfUrl + "?f=html", "alternate", "text/html", "This document as HTML"));
 
 			if (iToIndex < iNumberMatched) {
 				aoLinks.add(new StacLink(sItemsSelfUrl + "?limit=" + iLimit + "&next=" + iToIndex, "next", MediaType.APPLICATION_JSON, "Next page"));
@@ -315,7 +328,7 @@ public class StacResource {
 	 * Returns a single file of a Workspace as a STAC Item.
 	 */
 	@GET
-	@Path("/collections/{workspaceId}/items/{fileId}")
+	@Path("/collections/{collectionId}/items/{fileId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getItem(@HeaderParam("x-session-token") String sSessionId,
 			@PathParam("collectionId") String sWorkspaceId, @PathParam("fileId") String sFileId) {
