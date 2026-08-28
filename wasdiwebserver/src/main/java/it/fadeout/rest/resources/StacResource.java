@@ -84,6 +84,7 @@ public class StacResource {
 	private static final List<String> CONFORMANCE_CLASSES = Arrays.asList(
 			"https://api.stacspec.org/v1.0.0/core",
 			"https://api.stacspec.org/v1.0.0/collections",
+			"https://api.stacspec.org/v1.0.0/ogcapi-features",
 			"http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core",
 			"http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson");
 
@@ -332,6 +333,8 @@ public class StacResource {
 			List<StacLink> aoLinks = new ArrayList<>();
 			aoLinks.add(new StacLink(sItemsSelfUrl, "self", "application/geo+json", "This document"));
 			aoLinks.add(new StacLink(getBaseUrl() + "stac/collections/" + sWorkspaceId, "collection", "application/json", "Parent Collection"));
+			aoLinks.add(new StacLink(getBaseUrl() + "stac", "root", MediaType.APPLICATION_JSON, "Landing Page"));
+			aoLinks.add(new StacLink(getBaseUrl() + "stac/collections/" + sWorkspaceId, "parent", MediaType.APPLICATION_JSON, "Parent Collection"));
 			aoLinks.add(new StacLink(sItemsSelfUrl + "?f=html", "alternate", "text/html", "This document as HTML"));
 
 			if (iToIndex < iNumberMatched) {
@@ -478,6 +481,7 @@ public class StacResource {
 		List<StacLink> aoLinks = new ArrayList<>();
 		aoLinks.add(new StacLink(sSelfUrl, "self", MediaType.APPLICATION_JSON, "This document"));
 		aoLinks.add(new StacLink(getBaseUrl() + "stac", "root", MediaType.APPLICATION_JSON, "Landing Page"));
+		aoLinks.add(new StacLink(getBaseUrl() + "stac", "parent", MediaType.APPLICATION_JSON, "Parent Catalog"));
 			aoLinks.add(new StacLink(sSelfUrl + "/items", "items", "application/geo+json", "Items of this Collection"));
 		oCollection.setLinks(aoLinks);
 
@@ -596,6 +600,7 @@ public class StacResource {
 		List<StacLink> aoLinks = new ArrayList<>();
 		aoLinks.add(new StacLink(sSelfUrl, "self", "application/geo+json", "This document"));
 		aoLinks.add(new StacLink(getBaseUrl() + "stac/collections/" + sWorkspaceId, "collection", MediaType.APPLICATION_JSON, "Parent Collection"));
+		aoLinks.add(new StacLink(getBaseUrl() + "stac/collections/" + sWorkspaceId, "parent", MediaType.APPLICATION_JSON, "Parent Collection"));
 		aoLinks.add(new StacLink(getBaseUrl() + "stac", "root", MediaType.APPLICATION_JSON, "Landing Page"));
 		oItem.setLinks(aoLinks);
 

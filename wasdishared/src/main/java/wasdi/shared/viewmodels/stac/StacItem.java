@@ -3,6 +3,7 @@ package wasdi.shared.viewmodels.stac;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -16,6 +17,7 @@ public class StacItem {
 	private String type = "Feature";
 
 	private String id;
+	@JsonInclude(JsonInclude.Include.ALWAYS)
 	private StacGeometry geometry;
 	private List<Double> bbox;
 	private Map<String, Object> properties;

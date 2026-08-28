@@ -5,8 +5,10 @@ import java.util.Map;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.HttpHeaders;
 
 import io.swagger.v3.oas.integration.OpenApiContextLocator;
 import io.swagger.v3.core.util.Json;
@@ -38,7 +40,7 @@ public class StacOpenApiResource {
 			"application/vnd.oai.openapi+json",
 			"application/openapi+json"
 	})
-	public Response getStacOpenApi() {
+	public Response getStacOpenApi(@Context HttpHeaders oHeaders) {
 		try {
 			OpenApiContext oContext = OpenApiContextLocator.getInstance().getOpenApiContext(OPENAPI_CONTEXT_ID);
 
@@ -79,7 +81,13 @@ public class StacOpenApiResource {
 			String sOpenApiJson = Json.mapper().writeValueAsString(oStacOpenApi);
 			sOpenApiJson = sOpenApiJson.replace("\"style\":\"FORM\"", "\"style\":\"form\"");
 
-			return Response.ok(sOpenApiJson, MediaType.APPLICATION_JSON).build();
+			String sResponseMediaType = MediaType.APPLICATION_JSON;
+			if (oHeaders != null && oHeaders.getRequestHeader(HttpHeaders.ACCEPT) != null
+					&& oHeaders.getRequestHeader(HttpHeaders.ACCEPT).stream().anyMatch(sAccept -> sAccept.contains("application/vnd.oai.openapi+json;version=3.0"))) {
+				sResponseMediaType = "application/vnd.oai.openapi+json;version=3.0";
+			}
+
+			return Response.ok(sOpenApiJson, sResponseMediaType).build();
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("StacOpenApiResource.getStacOpenApi: error ", oEx);
