@@ -3,6 +3,8 @@ package it.fadeout.rest.resources;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,6 +20,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriInfo;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.Explode;
@@ -138,7 +143,9 @@ public class StacResource {
 	@GET
 	@Path("/collections")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getCollections(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getCollections(
+			@Parameter(name = "x-session-token", in = ParameterIn.HEADER, description = "Optional WASDI session token. Omit it to access public collections anonymously", required = false, schema = @Schema(type = "string"))
+			@HeaderParam("x-session-token") String sSessionId) {
 		try {
 			User oUser = resolveUser(sSessionId);
 
@@ -173,7 +180,11 @@ public class StacResource {
 	@GET
 	@Path("/collections/{collectionId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getCollection(@HeaderParam("x-session-token") String sSessionId, @PathParam("collectionId") String sWorkspaceId) {
+	public Response getCollection(
+			@Parameter(name = "x-session-token", in = ParameterIn.HEADER, description = "Optional WASDI session token. Omit it to access a public collection anonymously", required = false, schema = @Schema(type = "string"))
+			@HeaderParam("x-session-token") String sSessionId,
+			@Parameter(name = "collectionId", in = ParameterIn.PATH, description = "Identifier of the collection (WASDI workspace)", required = true, schema = @Schema(type = "string"))
+			@PathParam("collectionId") String sWorkspaceId) {
 		try {
 			User oUser = resolveUser(sSessionId);
 
@@ -204,14 +215,16 @@ public class StacResource {
 	@GET
 	@Path("/collections/{collectionId}/items")
 	@Produces({"application/geo+json", MediaType.APPLICATION_JSON})
-	public Response getItems(@HeaderParam("x-session-token") String sSessionId,
+	public Response getItems(
+			@Parameter(name = "x-session-token", in = ParameterIn.HEADER, description = "Optional WASDI session token. Omit it to access a public collection anonymously", required = false, schema = @Schema(type = "string"))
+			@HeaderParam("x-session-token") String sSessionId,
+			@Parameter(name = "collectionId", in = ParameterIn.PATH, description = "Identifier of the collection (WASDI workspace)", required = true, schema = @Schema(type = "string"))
 			@PathParam("collectionId") String sWorkspaceId,
 			@Parameter(
 		            name = "limit",
 		            in = ParameterIn.QUERY,
 		            description = "The optional limit parameter of the items to return",
 		            required = false,
-		            style = ParameterStyle.FORM,
 		            explode = Explode.FALSE,
 		            schema = @Schema(type = "integer", defaultValue = "10", minimum = "1", maximum = "10000")
 		        )			
@@ -221,7 +234,6 @@ public class StacResource {
 				    in = ParameterIn.QUERY,
 				    description = "Continuation token / offset for pagination",
 				    required = false,
-				    style = ParameterStyle.FORM,
 				    explode = Explode.FALSE,
 				    schema = @Schema(type = "integer")
 			)			
@@ -231,12 +243,11 @@ public class StacResource {
 		            in = ParameterIn.QUERY,
 		            description = "Only features that intersect the bounding box (west, south, east, north)",
 		            required = false,
-		            style = ParameterStyle.FORM,
 		            explode = Explode.FALSE,
 		            array = @ArraySchema(
 		                schema = @Schema(type = "number"),
 		                minItems = 4,
-		                maxItems = 6
+						maxItems = 4
 		            )
 		        )		
 			@QueryParam("bbox") String sBboxFilter,
@@ -245,12 +256,14 @@ public class StacResource {
 		            in = ParameterIn.QUERY,
 		            description = "Either a date-time or an interval, open or closed",
 		            required = false,
-		            style = ParameterStyle.FORM,
 		            explode = Explode.FALSE,
 		            schema = @Schema(type = "string")
 		        )			
-			@QueryParam("datetime") String sDatetimeFilter) {
+			@QueryParam("datetime") String sDatetimeFilter,
+			@Context UriInfo oUriInfo) {
 		try {
+			if (!hasOnlySupportedItemsQueryParameters(oUriInfo)) return Response.status(Status.BAD_REQUEST).build();
+
 			User oUser = resolveUser(sSessionId);
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
@@ -264,9 +277,11 @@ public class StacResource {
 				return Response.status(oUser == null ? Status.UNAUTHORIZED : Status.FORBIDDEN).build();
 			}
 
-			if (iLimit == null || iLimit <= 0) iLimit = DEFAULT_ITEMS_LIMIT;
+			if (iLimit == null) iLimit = DEFAULT_ITEMS_LIMIT;
+			if (iLimit <= 0) return Response.status(Status.BAD_REQUEST).build();
 			if (iLimit > MAX_ITEMS_LIMIT) iLimit = MAX_ITEMS_LIMIT;
-			if (iOffset == null || iOffset < 0) iOffset = 0;
+			if (iOffset == null) iOffset = 0;
+			if (iOffset < 0) return Response.status(Status.BAD_REQUEST).build();
 
 			String sWorkspaceOwnerId = oWorkspace.getUserId();
 			String sWorkspacePath = PathsConfig.getWorkspacePath(sWorkspaceOwnerId, sWorkspaceId);
@@ -275,7 +290,10 @@ public class StacResource {
 			List<ProductWorkspace> aoAllProducts = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
 
 			double[] adBboxFilter = Utils.isNullOrEmpty(sBboxFilter) ? null : parseStacBboxParam(sBboxFilter);
+			if (!Utils.isNullOrEmpty(sBboxFilter) && adBboxFilter == null) return Response.status(Status.BAD_REQUEST).build();
+
 			String[] asDatetimeFilter = Utils.isNullOrEmpty(sDatetimeFilter) ? null : sDatetimeFilter.split("/", -1);
+			if (asDatetimeFilter != null && !isValidDatetimeFilter(asDatetimeFilter)) return Response.status(Status.BAD_REQUEST).build();
 
 			List<StacItem> aoMatchingItems = new ArrayList<>();
 
@@ -285,8 +303,8 @@ public class StacResource {
 
 				double[] adItemBbox = toStacBbox(!Utils.isNullOrEmpty(oProductWorkspace.getBbox()) ? oProductWorkspace.getBbox() : (oDownloadedFile != null ? oDownloadedFile.getBoundingBox() : null));
 
-				if (adBboxFilter != null && !bboxIntersects(adBboxFilter, adItemBbox)) continue;
-				if (asDatetimeFilter != null && !matchesDatetimeFilter(asDatetimeFilter, oDownloadedFile)) continue;
+				if (adBboxFilter != null && adItemBbox != null && !bboxIntersects(adBboxFilter, adItemBbox)) continue;
+				if (asDatetimeFilter != null && oDownloadedFile != null && !matchesDatetimeFilter(asDatetimeFilter, oDownloadedFile)) continue;
 
 				aoMatchingItems.add(buildItem(oWorkspace, oProductWorkspace, oDownloadedFile, sSessionId));
 			}
@@ -310,7 +328,10 @@ public class StacResource {
 			aoLinks.add(new StacLink(sItemsSelfUrl + "?f=html", "alternate", "text/html", "This document as HTML"));
 
 			if (iToIndex < iNumberMatched) {
-				aoLinks.add(new StacLink(sItemsSelfUrl + "?limit=" + iLimit + "&next=" + iToIndex, "next", MediaType.APPLICATION_JSON, "Next page"));
+				String sNextUrl = sItemsSelfUrl + "?limit=" + iLimit + "&next=" + iToIndex;
+				if (!Utils.isNullOrEmpty(sBboxFilter)) sNextUrl += "&bbox=" + encodeQueryValue(sBboxFilter);
+				if (!Utils.isNullOrEmpty(sDatetimeFilter)) sNextUrl += "&datetime=" + encodeQueryValue(sDatetimeFilter);
+				aoLinks.add(new StacLink(sNextUrl, "next", "application/geo+json", "Next page"));
 			}
 
 			oItemCollection.setLinks(aoLinks);
@@ -330,8 +351,13 @@ public class StacResource {
 	@GET
 	@Path("/collections/{collectionId}/items/{fileId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getItem(@HeaderParam("x-session-token") String sSessionId,
-			@PathParam("collectionId") String sWorkspaceId, @PathParam("fileId") String sFileId) {
+	public Response getItem(
+			@Parameter(name = "x-session-token", in = ParameterIn.HEADER, description = "Optional WASDI session token. Omit it to access a public collection anonymously", required = false, schema = @Schema(type = "string"))
+			@HeaderParam("x-session-token") String sSessionId,
+			@Parameter(name = "collectionId", in = ParameterIn.PATH, description = "Identifier of the collection (WASDI workspace)", required = true, schema = @Schema(type = "string"))
+			@PathParam("collectionId") String sWorkspaceId,
+			@Parameter(name = "fileId", in = ParameterIn.PATH, description = "Identifier of the item (WASDI file name)", required = true, schema = @Schema(type = "string"))
+			@PathParam("fileId") String sFileId) {
 		try {
 			User oUser = resolveUser(sSessionId);
 
@@ -436,6 +462,8 @@ public class StacResource {
 		oCollection.setId(oWorkspace.getWorkspaceId());
 		oCollection.setTitle(oWorkspace.getName());
 		oCollection.setDescription("WASDI Workspace \"" + oWorkspace.getName() + "\"");
+		oCollection.setItemType("feature");
+		oCollection.setCrs(Arrays.asList("http://www.opengis.net/def/crs/OGC/1.3/CRS84"));
 		oCollection.setExtent(computeExtent(oWorkspace));
 
 		String sSelfUrl = getBaseUrl() + "stac/collections/" + oWorkspace.getWorkspaceId();
@@ -637,6 +665,47 @@ public class StacResource {
 		catch (Exception oEx) {
 			WasdiLog.warnLog("StacResource.parseStacBboxParam: invalid bbox param " + sBboxParam);
 			return null;
+		}
+	}
+
+	private boolean isValidDatetimeFilter(String[] asDatetimeFilter) {
+		if (asDatetimeFilter.length == 1) return isValidRfc3339DateTime(asDatetimeFilter[0]);
+		if (asDatetimeFilter.length != 2) return false;
+
+		return isValidRfc3339DateTimeOrOpen(asDatetimeFilter[0]) && isValidRfc3339DateTimeOrOpen(asDatetimeFilter[1]);
+	}
+
+	private boolean hasOnlySupportedItemsQueryParameters(UriInfo oUriInfo) {
+		if (oUriInfo == null) return true;
+
+		MultivaluedMap<String, String> oQueryParameters = oUriInfo.getQueryParameters();
+		for (String sQueryParameterName : oQueryParameters.keySet()) {
+			if (!Arrays.asList("limit", "next", "bbox", "datetime").contains(sQueryParameterName)) return false;
+		}
+
+		return true;
+	}
+
+	private boolean isValidRfc3339DateTimeOrOpen(String sDateTime) {
+		return Utils.isNullOrEmpty(sDateTime) || "..".equals(sDateTime) || isValidRfc3339DateTime(sDateTime);
+	}
+
+	private boolean isValidRfc3339DateTime(String sDateTime) {
+		try {
+			Instant.parse(sDateTime);
+			return true;
+		}
+		catch (DateTimeParseException oEx) {
+			return false;
+		}
+	}
+
+	private String encodeQueryValue(String sValue) {
+		try {
+			return URLEncoder.encode(sValue, StandardCharsets.UTF_8.toString());
+		}
+		catch (Exception oEx) {
+			return sValue;
 		}
 	}
 

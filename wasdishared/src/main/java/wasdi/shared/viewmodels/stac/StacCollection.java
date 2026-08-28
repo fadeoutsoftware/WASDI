@@ -18,6 +18,8 @@ public class StacCollection {
 	private String title;
 	private String description;
 	private String license = "proprietary";
+	private String itemType = "feature";
+	private List<String> crs;
 	private List<String> keywords;
 	private StacExtent extent;
 	private List<StacLink> links;
@@ -68,6 +70,22 @@ public class StacCollection {
 
 	public void setLicense(String license) {
 		this.license = license;
+	}
+
+	public String getItemType() {
+		return itemType;
+	}
+
+	public void setItemType(String itemType) {
+		this.itemType = itemType;
+	}
+
+	public List<String> getCrs() {
+		return crs;
+	}
+
+	public void setCrs(List<String> crs) {
+		this.crs = crs;
 	}
 
 	public List<String> getKeywords() {
