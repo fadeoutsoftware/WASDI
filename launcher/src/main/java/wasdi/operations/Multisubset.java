@@ -108,10 +108,11 @@ public class Multisubset extends Operation {
 
                 // Output format
                 asArgs.add("-of");
-                asArgs.add(GdalFileFormats.GTiff);
+                asArgs.add(GdalFileFormats.COG);
                 asArgs.add("-co");
-                // TO BE TESTED
                 asArgs.add("COMPRESS=LZW");
+                asArgs.add("-co");
+                asArgs.add("NUM_THREADS=ALL_CPUS");
 
                 asArgs.add("-projwin");
                 // ulx uly lrx lry:

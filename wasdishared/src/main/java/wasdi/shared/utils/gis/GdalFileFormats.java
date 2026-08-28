@@ -4,4 +4,5 @@ public class GdalFileFormats {
     public static String GTiff = "GTiff";
     public static String DIMAP = "DIMAP";
     public static String VRT = "VRT";
+    public static String COG = "COG";
 }
