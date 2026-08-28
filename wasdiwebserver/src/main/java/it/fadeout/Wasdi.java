@@ -27,7 +27,13 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
+import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
+import io.swagger.v3.oas.integration.OpenApiContextLocator;
+import io.swagger.v3.oas.integration.SwaggerConfiguration;
+import io.swagger.v3.oas.integration.api.OpenApiContext;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.servers.Server;
 import it.fadeout.providers.JerseyMapperProvider;
 import it.fadeout.rest.resources.AuthResource;
 import it.fadeout.rest.resources.ProcessWorkspaceResource;
@@ -130,7 +136,51 @@ public class Wasdi extends ResourceConfig {
 		register(JerseyMapperProvider.class);
 		register(org.glassfish.jersey.media.multipart.MultiPartFeature.class);
 		packages(true, "it.fadeout.rest.resources");
+		
 		register(OpenApiResource.class);
+	}
+	
+	private void updateOpenApiServerUrl() {
+		try {
+			String sBaseUrl = WasdiConfig.Current.baseUrl;
+			
+			if (sBaseUrl.endsWith("/")) sBaseUrl = sBaseUrl.substring(0, sBaseUrl.length()-1);
+			
+			// Configure the OpenAPI Server model
+	        Server oServer = new Server();
+	        oServer.setUrl(sBaseUrl);
+	        oServer.setDescription("WASDI Server Base URL");
+
+	        OpenAPI oOpenAPI = new OpenAPI().servers(Collections.singletonList(oServer));
+
+	        // Pass configuration to Swagger Engine
+	        SwaggerConfiguration oSwaggerConfig = new SwaggerConfiguration()
+	                .openAPI(oOpenAPI)
+	                .prettyPrint(true)
+	                .resourcePackages(Collections.singleton("it.fadeout.rest.resources"));
+
+	        try {
+	            JaxrsOpenApiContextBuilder<?> oContextBuilder = new JaxrsOpenApiContextBuilder<>()
+	                    .openApiConfiguration(oSwaggerConfig);
+
+	            OpenApiContext oContext = oContextBuilder.buildContext(true);
+
+	            // Register as the default context in the locator
+	            OpenApiContextLocator.getInstance().putOpenApiContext(
+	            		"openapi.context.id.default", 
+	                    oContext
+	            );
+	            
+	            WasdiLog.debugLog("Wasdi.updateOpenApiServerUrl: OpenAPI base URL set to " + sBaseUrl);
+	        } 
+	        catch (Exception oEx) {
+	            WasdiLog.errorLog("Wasdi.updateOpenApiServerUrl: " + oEx.getMessage());
+	        }
+			
+		}
+		catch(Exception oEx) {
+			WasdiLog.errorLog("Wasdi.updateOpenApiServerUrl: " + oEx.getMessage());
+		}
 	}
 
 	/**
@@ -160,7 +210,9 @@ public class Wasdi extends ResourceConfig {
 			WasdiLog.warnLog("Wasdi.initWasdi: ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
 		}
 		
-		WasdiLog.initLogger(WasdiConfig.Current.logLevelServer);	
+		WasdiLog.initLogger(WasdiConfig.Current.logLevelServer);
+		
+		updateOpenApiServerUrl();
 		
 		// set nfs properties download folder
 		String sUserHome = System.getProperty("user.home");
