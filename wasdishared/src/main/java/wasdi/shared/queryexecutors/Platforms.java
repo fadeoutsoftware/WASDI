@@ -53,6 +53,8 @@ public class Platforms {
 	
 	public static String GLOBATHY = "GLOBATHY";
 	
+	public static String TERESA_SUP = "TERESA_SUP";
+	
 	/**
 	 * Link to the globathy collection that can be used from a mini wasdi or external wasdi to use the main one as 
 	 * data provider
