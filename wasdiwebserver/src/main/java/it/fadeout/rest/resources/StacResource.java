@@ -229,7 +229,7 @@ public class StacResource {
 		            explode = Explode.FALSE,
 		            schema = @Schema(type = "integer", defaultValue = "10", minimum = "1", maximum = "10000")
 		        )			
-			@QueryParam("limit") Integer iLimit, 
+			@QueryParam("limit") String sLimit, 
 			@Parameter(
 				    name = "next",
 				    in = ParameterIn.QUERY,
@@ -239,7 +239,7 @@ public class StacResource {
 				    explode = Explode.FALSE,
 				    schema = @Schema(type = "integer")
 			)			
-			@QueryParam("next") Integer iOffset,
+			@QueryParam("next") String sNext,
 			@Parameter(
 		            name = "bbox",
 		            in = ParameterIn.QUERY,
@@ -264,7 +264,8 @@ public class StacResource {
 		            schema = @Schema(type = "string")
 		        )			
 			@QueryParam("datetime") String sDatetimeFilter,
-			@Context UriInfo oUriInfo) {
+			@Context UriInfo oUriInfo) 
+	{
 		try {
 			if (!hasOnlySupportedItemsQueryParameters(oUriInfo)) return Response.status(Status.BAD_REQUEST).build();
 
@@ -281,10 +282,12 @@ public class StacResource {
 				return Response.status(oUser == null ? Status.UNAUTHORIZED : Status.FORBIDDEN).build();
 			}
 
-			if (iLimit == null) iLimit = DEFAULT_ITEMS_LIMIT;
+			Integer iLimit = parseIntegerQueryParameter(sLimit, DEFAULT_ITEMS_LIMIT);
+			if (iLimit == null) return Response.status(Status.BAD_REQUEST).build();
 			if (iLimit <= 0) return Response.status(Status.BAD_REQUEST).build();
 			if (iLimit > MAX_ITEMS_LIMIT) iLimit = MAX_ITEMS_LIMIT;
-			if (iOffset == null) iOffset = 0;
+			Integer iOffset = parseIntegerQueryParameter(sNext, 0);
+			if (iOffset == null) return Response.status(Status.BAD_REQUEST).build();
 			if (iOffset < 0) return Response.status(Status.BAD_REQUEST).build();
 
 			String sWorkspaceOwnerId = oWorkspace.getUserId();
@@ -680,6 +683,17 @@ public class StacResource {
 		if (asDatetimeFilter.length != 2) return false;
 
 		return isValidRfc3339DateTimeOrOpen(asDatetimeFilter[0]) && isValidRfc3339DateTimeOrOpen(asDatetimeFilter[1]);
+	}
+
+	private Integer parseIntegerQueryParameter(String sValue, int iDefaultValue) {
+		if (sValue == null) return iDefaultValue;
+
+		try {
+			return Integer.valueOf(sValue);
+		}
+		catch (NumberFormatException oEx) {
+			return null;
+		}
 	}
 
 	private boolean hasOnlySupportedItemsQueryParameters(UriInfo oUriInfo) {
