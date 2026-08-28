@@ -48,7 +48,6 @@
         <sVersionHttpClient>4.5.14</sVersionHttpClient>
         <sVersionJackson>2.20.1</sVersionJackson>
         <sVersionJacksonAnnotations>2.20</sVersionJacksonAnnotations>
-        <sVersionJavaApiForKml>2.2.1</sVersionJavaApiForKml>
         <sVersionJavaxWebsocketApi>1.1</sVersionJavaxWebsocketApi>
         <sVersionJson>20250517</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
@@ -202,12 +201,6 @@
             <artifactId>javax.websocket-api</artifactId>
             <version>${sVersionJavaxWebsocketApi}</version>
             <scope>provided</scope>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/de.micromata.jak/JavaAPIforKml -->
-        <dependency>
-            <groupId>de.micromata.jak</groupId>
-            <artifactId>JavaAPIforKml</artifactId>
-            <version>${sVersionJavaApiForKml}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.stripe/stripe-java -->
         <dependency>

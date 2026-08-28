@@ -24,15 +24,6 @@ import org.nfs.orbits.sat.Satellite;
 import org.nfs.orbits.sat.SensorMode;
 import org.nfs.orbits.sat.SwathArea;
 
-import de.micromata.opengis.kml.v_2_2_0.AltitudeMode;
-import de.micromata.opengis.kml.v_2_2_0.Boundary;
-import de.micromata.opengis.kml.v_2_2_0.ColorMode;
-import de.micromata.opengis.kml.v_2_2_0.Coordinate;
-import de.micromata.opengis.kml.v_2_2_0.Kml;
-import de.micromata.opengis.kml.v_2_2_0.KmlFactory;
-import de.micromata.opengis.kml.v_2_2_0.LinearRing;
-import de.micromata.opengis.kml.v_2_2_0.Placemark;
-import de.micromata.opengis.kml.v_2_2_0.StyleState;
 import it.fadeout.Wasdi;
 import it.fadeout.business.InstanceFinder;
 import satLib.astro.time.Time;
@@ -54,16 +45,16 @@ import wasdi.shared.viewmodels.plan.SensorViewModel;
  * 	.Download the relative kml file
  *  .Get the actual position of satellites
  * 
- * @author p.campanella
- *
- */
-@Path("/searchorbit")
-public class OpportunitySearchResource {
-	
-	
+	 * @author p.campanella
+	 *
+	 */
+	@Path("/searchorbit")
+	public class OpportunitySearchResource {
+
+
 	/**
 	 * Search new acquisition possibilities
-	 * @param sSessionId User session 
+	 * @param sSessionId User session
 	 * @param OpportunitiesSearch Input filters view model
 	 * @return List of Coverage Swath Result View Models, each representing a possible acquisition
 	 */
@@ -84,7 +75,7 @@ public class OpportunitySearchResource {
 				WasdiLog.warnLog("OpportunitySearchResource.search: invalid session");
 				return aoCoverageSwathResultViewModels;
 			}
-			
+
 			// set nfs properties download
 			String userHome = System.getProperty("user.home");
 			String Nfs = System.getProperty("nfs.data.download");
@@ -424,72 +415,6 @@ public class OpportunitySearchResource {
 			WasdiLog.errorLog("OpportunitySearchResource.getSatelliteTrack( " + sSatname + " ): " + oE);
 		}
 		return oReturnViewModel;
-	}
-	
-	/**
-	 * Returns a KML with the acquisition opportunity
-	 * @param sSessionId User Session
-	 * @param sText
-	 * @param sFootPrint
-	 * @return
-	 */
-	@GET
-	@Path("/getkmlsearchresults")
-	@Produces({ "application/xml" })
-	@Consumes(MediaType.APPLICATION_XML)
-	public Kml getKmlSearchResults(@HeaderParam("x-session-token") String sSessionId, @QueryParam("text") String sText,
-			@QueryParam("footPrint") String sFootPrint) {
-		WasdiLog.debugLog("OpportunitySearchResource.getKmlSearchResults( Text: " + sText + ", Footprint: " + sFootPrint + " )");
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-
-		if (oUser == null) {
-			WasdiLog.warnLog("OpportunitySearchResource.getKmlSearchResults: invalid session");
-			return null;
-		}
-		if (sFootPrint.isEmpty() || sText.isEmpty()) {
-			return null;
-		}
-		Kml kml = null;
-		try {
-			String[] asPoints = Utils.convertPolygonToArray(sFootPrint);
-			kml = KmlFactory.createKml();
-
-			// get coordinates
-			Boundary oOuterBoundaryIs = new Boundary();
-			LinearRing oLinearRing = new LinearRing();
-			List<Coordinate> aoCoordinates = new ArrayList<Coordinate>();
-			for (String string : asPoints) {
-				string = string.replaceAll(" ", ",");
-				Coordinate oCoordinate = new Coordinate(string);
-
-				aoCoordinates.add(oCoordinate);
-
-			}
-
-			oLinearRing.setCoordinates(aoCoordinates);
-
-			oOuterBoundaryIs.setLinearRing(oLinearRing);
-
-			// set placemark
-			Placemark oPlacemark = kml.createAndSetPlacemark().withName(sText).withVisibility(true);
-			// styleLine
-			oPlacemark.createAndAddStyleMap().createAndAddPair().withKey(StyleState.NORMAL).createAndSetStyle()
-			.createAndSetLineStyle().withColor("FF0000FF").withColorMode(ColorMode.NORMAL).withWidth(1);
-
-			// set polystyle
-			oPlacemark.createAndAddStyleMap().createAndAddPair().createAndSetStyle().createAndSetPolyStyle()
-			.withColor("FF0000FF").withColorMode(ColorMode.NORMAL).withFill(true).withOutline(true);
-
-			// set polygon
-			oPlacemark.createAndSetPolygon().withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND).withExtrude(false)
-			.withOuterBoundaryIs(oOuterBoundaryIs);
-
-			kml.setFeature(oPlacemark);
-		} catch (Exception oE) {
-			WasdiLog.errorLog("OpportunitySearchResource.getKmlSearchResults( Text: " + sText + ", Footprint: " + sFootPrint + " ): " + oE);
-		}
-
-		return kml;
 	}
 	
 	/**

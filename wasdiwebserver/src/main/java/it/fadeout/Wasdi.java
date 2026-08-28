@@ -12,9 +12,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -32,6 +34,7 @@ import io.swagger.v3.oas.integration.OpenApiContextLocator;
 import io.swagger.v3.oas.integration.SwaggerConfiguration;
 import io.swagger.v3.oas.integration.api.OpenApiContext;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 import it.fadeout.providers.JerseyMapperProvider;
 import it.fadeout.rest.resources.AuthResource;
@@ -146,18 +149,24 @@ public class Wasdi extends ResourceConfig {
 			
 			if (sBaseUrl.endsWith("/")) sBaseUrl = sBaseUrl.substring(0, sBaseUrl.length()-1);
 			
+			Info oInfo = new Info().title("WASDI REST API").version("1.0.0").description("WASDI APEx compliant REST and STAC API");			
+			
 			// Configure the OpenAPI Server model
 	        Server oServer = new Server();
 	        oServer.setUrl(sBaseUrl);
 	        oServer.setDescription("WASDI Server Base URL");
 
-	        OpenAPI oOpenAPI = new OpenAPI().servers(Collections.singletonList(oServer));
+	        OpenAPI oOpenAPI = new OpenAPI().info(oInfo).servers(Collections.singletonList(oServer));
+	        
+	        Set<String> aoScannedPackages = new HashSet<>();
+	        aoScannedPackages.add("it.fadeout.rest.resources");	        
 
 	        // Pass configuration to Swagger Engine
 	        SwaggerConfiguration oSwaggerConfig = new SwaggerConfiguration()
 	                .openAPI(oOpenAPI)
 	                .prettyPrint(true)
-	                .resourcePackages(Collections.singleton("it.fadeout.rest.resources"));
+	                .resourcePackages(aoScannedPackages);
+	                //.resourcePackages(Collections.singleton("it.fadeout.rest.resources"));
 
 	        try {
 	            JaxrsOpenApiContextBuilder<?> oContextBuilder = new JaxrsOpenApiContextBuilder<>().openApiConfiguration(oSwaggerConfig);
@@ -241,7 +250,7 @@ public class Wasdi extends ResourceConfig {
 			// Read the configuration of KeyCloak		
 			s_sKeyCloakIntrospectionUrl = WasdiConfig.Current.keycloack.introspectAddress;
 			s_sClientId = WasdiConfig.Current.keycloack.confidentialClient;
-			s_sClientSecret = WasdiConfig.Current.keycloack.clientSecret;			
+			s_sClientSecret = WasdiConfig.Current.keycloack.clientSecret;
 		}
 		
 		// Computational nodes need to configure also the local dababase
