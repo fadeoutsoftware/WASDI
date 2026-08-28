@@ -98,7 +98,7 @@ public class StacResource {
 			aoLinks.add(new StacLink(sSelfUrl, "root", MediaType.APPLICATION_JSON, "This document"));
 						
 			
-			aoLinks.add(new StacLink(getBaseUrl() + "openapi.yaml", "service-desc", "application/vnd.oai.openapi+json;version=3.0", "OpenAPI Definition"));
+			aoLinks.add(new StacLink(getBaseUrl() + "openapi.json", "service-desc", "application/vnd.oai.openapi+json;version=3.0", "OpenAPI Definition"));
 			aoLinks.add(new StacLink(sSelfUrl + "/conformance", "conformance", MediaType.APPLICATION_JSON, "Conformance classes"));
 			aoLinks.add(new StacLink(sSelfUrl + "/collections", "data", MediaType.APPLICATION_JSON, "List of Collections"));
 			oCatalog.setLinks(aoLinks);
