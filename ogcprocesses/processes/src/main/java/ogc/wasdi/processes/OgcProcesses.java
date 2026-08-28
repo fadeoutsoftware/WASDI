@@ -4,8 +4,10 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
@@ -16,8 +18,16 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
+import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
+import io.swagger.v3.oas.integration.OpenApiContextLocator;
+import io.swagger.v3.oas.integration.SwaggerConfiguration;
+import io.swagger.v3.oas.integration.api.OpenApiContext;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
 import ogc.wasdi.processes.providers.JerseyMapperProvider;
 import ogc.wasdi.processes.providers.OgcProcessesViewModelBodyWriter;
+import ogc.wasdi.processes.rest.resources.OgcProcessesOpenApiResource;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.users.*;
@@ -51,6 +61,42 @@ public class OgcProcesses extends ResourceConfig {
 		register(JacksonFeature.class);
 		register(JerseyMapperProvider.class);
 		register(OgcProcessesViewModelBodyWriter.class);
+		register(OgcProcessesOpenApiResource.class);
+	}
+
+	private void updateOpenApiServerUrl() {
+		try {
+			String sBaseUrl = WasdiConfig.Current.ogcProcessesApi.baseAddress;
+
+			if (sBaseUrl.endsWith("/")) sBaseUrl = sBaseUrl.substring(0, sBaseUrl.length() - 1);
+
+			Info oInfo = new Info()
+					.title("WASDI OGC API - Processes")
+					.version("1.0.0")
+					.description(WasdiConfig.Current.ogcProcessesApi.landingDescription);
+
+			Server oServer = new Server();
+			oServer.setUrl(sBaseUrl);
+			oServer.setDescription("WASDI OGC Processes Server Base URL");
+
+			Set<String> aoScannedPackages = new HashSet<>();
+			aoScannedPackages.add("ogc.wasdi.processes.rest.resources");
+
+			SwaggerConfiguration oSwaggerConfig = new SwaggerConfiguration()
+					.openAPI(new OpenAPI().info(oInfo).servers(java.util.Collections.singletonList(oServer)))
+					.prettyPrint(true)
+					.resourcePackages(aoScannedPackages);
+
+			JaxrsOpenApiContextBuilder<?> oContextBuilder = new JaxrsOpenApiContextBuilder<>()
+					.openApiConfiguration(oSwaggerConfig);
+			OpenApiContext oContext = oContextBuilder.buildContext(true);
+			OpenApiContextLocator.getInstance().putOpenApiContext("openapi.context.id.default", oContext);
+
+			WasdiLog.debugLog("OgcProcesses.updateOpenApiServerUrl: OpenAPI base URL set to " + sBaseUrl);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("OgcProcesses.updateOpenApiServerUrl: " + oEx.getMessage());
+		}
 	}
 
 	/**
@@ -86,6 +132,8 @@ public class OgcProcesses extends ResourceConfig {
 		OgcProcesses.s_sBaseAddress = WasdiConfig.Current.ogcProcessesApi.baseAddress;
 		
 		if (!OgcProcesses.s_sBaseAddress.endsWith("/")) OgcProcesses.s_sBaseAddress += "/";
+
+		updateOpenApiServerUrl();
 		
 		// Read MongoDb Configuration
 		try {

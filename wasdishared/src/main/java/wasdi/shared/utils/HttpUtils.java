@@ -500,6 +500,58 @@ public final class HttpUtils {
 	 * @param asHeaders headers to use
 	 * @throws IOException
 	 */
+	public static HttpCallResponse httpPostFile(String sUrl, InputStream oInputStream, String sFileName, Map<String, String> asHeaders) {
+		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
+		String sBoundary = "**WASDIlib**" + UUID.randomUUID().toString() + "**WASDIlib**";
+
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			oConnection.setReadTimeout(WasdiConfig.Current.readTimeout);
+			oConnection.setConnectTimeout(WasdiConfig.Current.connectionTimeout);
+			oConnection.setDoOutput(true);
+			oConnection.setDoInput(true);
+			oConnection.setUseCaches(false);
+			oConnection.setChunkedStreamingMode(8192);
+
+			if (asHeaders != null) {
+				for (Entry<String, String> oHeader : asHeaders.entrySet()) {
+					oConnection.setRequestProperty(oHeader.getKey(), oHeader.getValue());
+				}
+			}
+
+			oConnection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + sBoundary);
+			oConnection.setRequestProperty("Connection", "Keep-Alive");
+			oConnection.setRequestProperty("User-Agent", "WasdiLib.Java");
+
+			try (DataOutputStream oOutputStream = new DataOutputStream(oConnection.getOutputStream())) {
+				oOutputStream.writeBytes("--" + sBoundary + "\r\n");
+				oOutputStream.writeBytes("Content-Disposition: form-data; name=\"file\"; filename=\"" + sFileName + "\"\r\n");
+				oOutputStream.writeBytes("Content-Type: " + URLConnection.guessContentTypeFromName(sFileName) + "\r\n");
+				oOutputStream.writeBytes("Content-Transfer-Encoding: binary\r\n\r\n");
+				Util.copyStream(oInputStream, oOutputStream);
+				oOutputStream.writeBytes("\r\n--" + sBoundary + "--\r\n");
+				oOutputStream.flush();
+			}
+
+			int iResponseCode = oConnection.getResponseCode();
+			oHttpCallResponse.setResponseCode(iResponseCode);
+			try (InputStream oResponseStream = iResponseCode >= 200 && iResponseCode <= 299
+					? oConnection.getInputStream() : oConnection.getErrorStream();
+					ByteArrayOutputStream oResponseBody = new ByteArrayOutputStream()) {
+				if (oResponseStream != null) {
+					Util.copyStream(oResponseStream, oResponseBody);
+				}
+				oHttpCallResponse.setResponseBody(oResponseBody.toString());
+			}
+			oConnection.disconnect();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("HttpUtils.httpPostFile: exception posting multipart file", oEx);
+		}
+
+		return oHttpCallResponse;
+	}
+
 	public static boolean httpPostFile(String sUrl, String sFileName, Map<String, String> asHeaders) throws IOException {
 		//local file -> automatically checks for null
 		File oFile = new File(sFileName);
