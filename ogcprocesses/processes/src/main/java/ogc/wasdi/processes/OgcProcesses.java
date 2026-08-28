@@ -59,6 +59,7 @@ public class OgcProcesses extends ResourceConfig {
 	public OgcProcesses() {
 		packages(true, "ogc.wasdi.processes.rest.resources");
 		register(JacksonFeature.class);
+		register(org.glassfish.jersey.media.multipart.MultiPartFeature.class);
 		register(JerseyMapperProvider.class);
 		register(OgcProcessesViewModelBodyWriter.class);
 		register(OgcProcessesOpenApiResource.class);
