@@ -9,6 +9,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import io.swagger.v3.oas.integration.OpenApiContextLocator;
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.integration.api.OpenApiContext;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
@@ -75,7 +76,10 @@ public class StacOpenApiResource {
 			oStacOpenApi.setComponents(oFullOpenApi.getComponents());
 			oStacOpenApi.setTags(oFullOpenApi.getTags());
 
-			return Response.ok(oStacOpenApi).build();
+			String sOpenApiJson = Json.mapper().writeValueAsString(oStacOpenApi);
+			sOpenApiJson = sOpenApiJson.replace("\"style\":\"FORM\"", "\"style\":\"form\"");
+
+			return Response.ok(sOpenApiJson, MediaType.APPLICATION_JSON).build();
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("StacOpenApiResource.getStacOpenApi: error ", oEx);

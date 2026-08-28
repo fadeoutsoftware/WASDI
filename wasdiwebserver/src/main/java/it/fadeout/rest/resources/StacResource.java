@@ -225,6 +225,7 @@ public class StacResource {
 		            in = ParameterIn.QUERY,
 		            description = "The optional limit parameter of the items to return",
 		            required = false,
+				    style = ParameterStyle.FORM,
 		            explode = Explode.FALSE,
 		            schema = @Schema(type = "integer", defaultValue = "10", minimum = "1", maximum = "10000")
 		        )			
@@ -234,6 +235,7 @@ public class StacResource {
 				    in = ParameterIn.QUERY,
 				    description = "Continuation token / offset for pagination",
 				    required = false,
+				    style = ParameterStyle.FORM,
 				    explode = Explode.FALSE,
 				    schema = @Schema(type = "integer")
 			)			
@@ -243,6 +245,7 @@ public class StacResource {
 		            in = ParameterIn.QUERY,
 		            description = "Only features that intersect the bounding box (west, south, east, north)",
 		            required = false,
+		            style = ParameterStyle.FORM,
 		            explode = Explode.FALSE,
 		            array = @ArraySchema(
 		                schema = @Schema(type = "number"),
@@ -256,6 +259,7 @@ public class StacResource {
 		            in = ParameterIn.QUERY,
 		            description = "Either a date-time or an interval, open or closed",
 		            required = false,
+		            style = ParameterStyle.FORM,
 		            explode = Explode.FALSE,
 		            schema = @Schema(type = "string")
 		        )			
