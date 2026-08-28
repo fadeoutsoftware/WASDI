@@ -6,8 +6,13 @@ import logging
 import time
 from datetime import datetime
 from pystac_client import Client
+from data_provider_utils import DataProviderUtils
 
-s_sDataProviderName = ''
+
+s_sDataProviderName = 'TERESA_SUP'
+s_sESAStacAPI = "https://eoresults.esa.int/stac/"
+
+
 
 def stringIsNullOrEmpty(sString):
     return sString is None or sString == ""
@@ -28,8 +33,38 @@ def executeCount(sInputFilePath, sOutputFilePath):
         sys.exit(1)
     
     aoReturnObject = {}
-    # TODO: Make the query and return the total count
+
     iResultCount = 0
+
+    # read the parameters
+    aoFilters = aoInputQuery.get("filters")
+
+    if not aoFilters:
+        logging.warning(f'executeCount: filters not found')
+        sys.exit(1)
+
+    sDataset = aoFilters.get("dataset")
+    sBasin = aoFilters.get("basin").replace("_", "")
+    sYear = aoFilters.get("year")
+    sResolution = aoFilters.get("resolution")
+
+    sCollection = sDataset
+    if sDataset not in ['TRWSI', 'SWSI']:
+        sCollection = "ET_GWU_BWU"
+
+    if not (sDataset and sBasin and sYear and sResolution):
+        logging.warning(f"executeCount. Missing some parameters")
+        sys.exit(1)
+
+    oStacClient = Client.open(s_sESAStacAPI)
+    oSearchResult = oStacClient.search(collections=[f'TERESA_{sCollection}'])
+    sExpectedItemIdStart = f"{sDataset}-{sBasin}-{sResolution}-"
+    print("expected item id " + sExpectedItemIdStart)
+    
+    for oItem in oSearchResult.items():
+        print(oItem.id)
+        if oItem.id.startswith(sExpectedItemIdStart):
+            iResultCount = 1
 
     aoReturnObject["count"] = iResultCount
 
@@ -57,8 +92,6 @@ def executeAndRetrieve(sInputFilePath, sOutputFilePath):
         logging.warning(f'executeAndRetrieve: input file: {sInputFilePath} is None')
         sys.exit(1)
         
-    # TODO: Make the query, get the result and convert to QueryResultViewModels
-
     # read the parameters
     aoFilters = aoInputQuery.get("filters")
 
@@ -79,7 +112,7 @@ def executeAndRetrieve(sInputFilePath, sOutputFilePath):
         logging.warning(f"execeuteAndRetrieve. Missing some parameters")
         sys.exit(1)
 
-    oStacClient = Client.open("https://eoresults.esa.int/stac/")
+    oStacClient = Client.open(s_sESAStacAPI)
     oSearchResult = oStacClient.search(collections=[f'TERESA_{sCollection}'])
     sExpectedItemIdStart = f"{sDataset}-{sBasin}-{sResolution}-"
     print("expected item id " + sExpectedItemIdStart)
@@ -93,15 +126,15 @@ def executeAndRetrieve(sInputFilePath, sOutputFilePath):
             oResult = {}
             sFileSize = oItem.assets["PRODUCT"].extra_fields["file:size"]
             sDate = oItem.properties["datetime"]
-            oResult["title"] = oItem.id
+            oResult["title"] = oItem.id         # attenzione! Title deve essere il file name, che e' diverso dall'od. Il file name lo ricavo dal ref. TODO: cambiare
             oResult["id"] = oItem.id
             oResult["link"] = sDownloadLink
-            oResult["summary"] = f'Date: , Instrument: {sDataset}, Mode: {sBasin}, Satellite: TERESA_SUP, Size:{sFileSize}'
+            oResult["summary"] = f'Date: {sDate}, Instrument: {sDataset}, Mode: {sBasin}, Satellite: TERESA_SUP, Size:{sFileSize}'
             oResult["provider"] = s_sDataProviderName
             oResult["platform"] = "TERESA_SUP"
             aoReturnList.append(oResult)
             break
-        
+
     try:
         with open(sOutputFilePath, 'w') as oFile:
             json.dump(aoReturnList, oFile)
@@ -140,10 +173,6 @@ def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
 
     if aoDataProviderConfig is None:
         logging.warning(f'executeDownloadFile:  wasdiConfig file is None: {sWasdiConfigFilePath}')
-        
-    sTargetFolder = aoInputParameters.get("downloadDirectory", "")
-    sTargetFileName = aoInputParameters.get("downloadFileName", "")
-    iMaxRetry = aoInputParameters.get("maxRetry", 1)
 
     # find the configuration for the data provider
     oDataProviderConfig = None
@@ -158,8 +187,22 @@ def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
         logging.warning(f"executeDownloadFile: no configuration found for {s_sDataProviderName}. Impossible to continue")
         sys.exit(1)
 
+    oDownloadFileViewModel = DataProviderUtils.getDownloadFileViewModel(sInputFilePath)
+    
+    if oDownloadFileViewModel is None:
+        logging.warning(f"executeDownloadFile: Impossible to read the Download File View Model")
+        sys.exit(1)
+        
+    sTargetFolder = aoInputParameters.get("downloadDirectory", "")
+    sTargetFileName = aoInputParameters.get("downloadFileName", "")
+    sUrl = oDownloadFileViewModel.url
 
-    # TODO: Download the file in sTargetFolder + sTargetFileName
+    if sUrl.startswith("https://"):
+        bDownloaded = DataProviderUtils.downloadFile(sUrl, sDownloadedFilePath)
+
+    if not bDownloaded:
+            sDownloadedFilePath = ""
+
     sDownloadedFilePath = sTargetFolder + sTargetFileName
 
     oRes = {
