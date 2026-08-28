@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang3.StringUtils;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import wasdi.shared.business.Organization;
 import wasdi.shared.business.SnapWorkflow;
@@ -87,6 +88,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/usersByPartialName")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Search users by partial name", description="Search users by partial name. The user must be an admin to access this endpoint.")
 	public Response findUsersByPartialName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("partialName") String sPartialName) {
 		
 		try {
@@ -137,6 +139,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/workspacesByPartialName")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response findWorkspacesByPartialName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("partialName") String sPartialName) {
 
@@ -179,6 +182,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/resourceByPartialName")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response findResourceByPartialName(@HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("resourceType") String sResourceType,
 			@QueryParam("partialName") String sPartialName,
@@ -433,6 +437,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/processorsByPartialName")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response findProcessorsByPartialName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("partialName") String sPartialName) {
 
@@ -474,6 +479,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/resourcePermissions")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response findResourcePermissions(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("resourceType") String sResourceType,
 			@QueryParam("resourceId") String sResourceId,
@@ -521,6 +527,7 @@ public class AdminDashboardResource {
 	@POST
 	@Path("/resourcePermissions")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response addResourcePermission(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("resourceType") String sResourceType,
 			@QueryParam("resourceId") String sResourceId,
@@ -673,6 +680,7 @@ public class AdminDashboardResource {
 	@DELETE
 	@Path("/resourcePermissions")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response removeResourcePermission(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("resourceType") String sResourceType,
 			@QueryParam("resourceId") String sResourceId,
@@ -809,6 +817,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("resourcePermissions/types")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response getResourceTypes(@HeaderParam("x-session-token") String sSessionId) {
 		WasdiLog.debugLog("AdminDashboardResource.getResourceTypes");
 		try {
@@ -832,6 +841,7 @@ public class AdminDashboardResource {
 	@PUT
 	@Path("/metrics")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response updateMetricsEntry(@HeaderParam("x-session-token") String sSessionId, MetricsEntry oMetricsEntry) {
 
 		// Validate Session
@@ -866,6 +876,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/metrics/latest")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response getLatestMetricsEntry(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("nodeCode") String sNodeCode) {
 
@@ -901,6 +912,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/users/list")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response getUsersList(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("partialName") String sPartialName,
 			@QueryParam("offset") Integer iOffset, @QueryParam("limit") Integer iLimit,
@@ -991,6 +1003,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/users/summary")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response getUsersSummary(@HeaderParam("x-session-token") String sSessionId) {
 		
 		WasdiLog.debugLog("AdminDashboardResource.getUsersSummary");
@@ -1063,6 +1076,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/users")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response getUsersDetails(@HeaderParam("x-session-token") String sSessionId, @QueryParam("userId") String sTargetUser) {
 		
 		WasdiLog.debugLog("AdminDashboardResource.getUsersDetails for " + sTargetUser);
@@ -1107,6 +1121,7 @@ public class AdminDashboardResource {
 	@PUT
 	@Path("/users")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response updateUsersDetails(@HeaderParam("x-session-token") String sSessionId, FullUserViewModel oUserViewModel) {
 		
 		WasdiLog.debugLog("AdminDashboardResource.updateUsersDetails");
@@ -1166,6 +1181,7 @@ public class AdminDashboardResource {
 	@DELETE
 	@Path("/users")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response deleteUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("userId") String sTargetUser) {
 		
 		WasdiLog.debugLog("AdminDashboardResource.deleteUser for " + sTargetUser);
@@ -1214,6 +1230,7 @@ public class AdminDashboardResource {
 	@DELETE
 	@Path("/cleanProcessesQueue")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response cleanProcessesQueue(@HeaderParam("x-session-token") String sSessionId) {
 		
 		try {
@@ -1253,6 +1270,7 @@ public class AdminDashboardResource {
 	@DELETE
 	@Path("/cleanOldProcesses")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response cleanOldProcessWorkspaces(@HeaderParam("x-session-token") String sSessionId) {
 		
 		try {

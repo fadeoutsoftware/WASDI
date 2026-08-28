@@ -12,6 +12,7 @@ import ucar.nc2.NetcdfFiles;
 import ucar.nc2.Variable;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.gis.GdalFileFormats;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
@@ -156,7 +157,7 @@ public class MeteOceanProductReader extends WasdiProductReader {
 			asArgs.add("WRITE_BOTTOMUP=NO");
 			
 			asArgs.add("-of");
-			asArgs.add("VRT");
+			asArgs.add(GdalFileFormats.VRT);
 			
 			String sGdalInput = "NETCDF:\"" + sInputFile+ "\":" + sBand;
 			

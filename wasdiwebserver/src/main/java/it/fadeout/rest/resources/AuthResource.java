@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.json.JSONObject;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import it.fadeout.services.AuthProviderService;
 import it.fadeout.services.KeycloakService;
@@ -115,6 +116,7 @@ public class AuthResource {
 	@POST
 	@Path("/login")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public UserViewModel login(LoginInfo oLoginInfo) {
 
 		try {
@@ -353,6 +355,7 @@ public class AuthResource {
 	@GET
 	@Path("/checksession")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public UserViewModel checkSession(@HeaderParam("x-session-token") String sSessionId) {
 		try {
 			// Check if we can see the user from the session
@@ -391,6 +394,7 @@ public class AuthResource {
 	@GET
 	@Path("/logout")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public PrimitiveResult logout(@HeaderParam("x-session-token") String sSessionId) {
 		WasdiLog.debugLog("AuthResource.logout");
 		
@@ -438,6 +442,7 @@ public class AuthResource {
 	@POST
 	@Path("/upload/createaccount")
 	@Produces({"application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public Response createSftpAccount(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
 		
 		WasdiLog.debugLog("AuthResource.createSftpAccount: Called for Mail " + sEmail);
@@ -510,6 +515,7 @@ public class AuthResource {
 	@GET
 	@Path("/upload/existsaccount")
 	@Produces({"application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public boolean existsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 		WasdiLog.debugLog("AuthResource.ExistsSftpAccount");
 
@@ -544,6 +550,7 @@ public class AuthResource {
 	@GET
 	@Path("/upload/list")
 	@Produces({"application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public String[] listSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 
 		WasdiLog.debugLog("AuthResource.ListSftpAccount");
@@ -572,6 +579,7 @@ public class AuthResource {
 	@DELETE
 	@Path("/upload/removeaccount")
 	@Produces({"application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public Response removeSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 
 		WasdiLog.debugLog("AuthResource.removeSftpAccount");
@@ -604,6 +612,7 @@ public class AuthResource {
 	@POST
 	@Path("/upload/updatepassword")
 	@Produces({"application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public Response updateSftpPassword(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
 
 		WasdiLog.debugLog("AuthResource.updateSftpPassword Mail: " + sEmail);
@@ -651,6 +660,7 @@ public class AuthResource {
 	@POST
 	@Path("/register")
 	@Produces({"application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public PrimitiveResult userRegistration(RegistrationInfoViewModel oRegistrationInfoViewModel) 
 	{
 		try{
@@ -774,6 +784,7 @@ public class AuthResource {
 	@GET
 	@Path("/validateNewUser")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public PrimitiveResult validateNewUser(@QueryParam("email") String sUserId, @QueryParam("validationCode") String sToken  ) {
 		WasdiLog.debugLog("AuthResource.validateNewUser UserId: " + sUserId + " Token: " + sToken);
 
@@ -881,6 +892,7 @@ public class AuthResource {
 	@POST
 	@Path("/editUserDetails")
 	@Produces({"application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public UserViewModel editUserDetails(@HeaderParam("x-session-token") String sSessionId, UserViewModel oInputUserVM ) {
 
 		WasdiLog.debugLog("AuthResource.editUserDetails");
@@ -954,6 +966,7 @@ public class AuthResource {
 	@POST
 	@Path("/changePassword")
 	@Produces({"application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public PrimitiveResult changePassword(@HeaderParam("x-session-token") String sSessionId, ChangeUserPasswordViewModel oChangePasswordViewModel) {
 
 		WasdiLog.debugLog("AuthResource.changePassword");
@@ -1012,6 +1025,7 @@ public class AuthResource {
 	@GET
 	@Path("/lostPassword")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public PrimitiveResult lostPassword(@QueryParam("userId") String sUserId ) {
 
 		WasdiLog.debugLog("AuthResource.lostPassword: sUserId: " + sUserId);
@@ -1214,6 +1228,7 @@ public class AuthResource {
 	@GET
 	@Path("/config")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response getClientConfig(@HeaderParam("x-session-token") String sSessionId) {
 
 		WasdiLog.debugLog("AuthResource.getClientConfig");
@@ -1240,6 +1255,7 @@ public class AuthResource {
 	@GET
 	@Path("/privatemissions")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "", description="")
 	public Response getPrivateMissions(@HeaderParam("x-session-token") String sSessionId) {
 		
 		WasdiLog.debugLog("AuthResource.getPrivateMissions");
@@ -1289,7 +1305,8 @@ public class AuthResource {
 	}
 	
 	@GET
-	@Path("/skin")	
+	@Path("/skin")
+	@Operation(summary = "", description="")
 	public Response getSkin(@HeaderParam("x-session-token") String sSessionId, @QueryParam("skin") String sSkin) {
 		try {
 			

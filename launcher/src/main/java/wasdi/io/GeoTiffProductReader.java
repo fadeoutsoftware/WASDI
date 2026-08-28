@@ -9,6 +9,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.gis.GdalBandInfo;
+import wasdi.shared.utils.gis.GdalFileFormats;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -237,7 +238,7 @@ public class GeoTiffProductReader extends WasdiProductReader {
         asArgs.add("-b");
         asArgs.add(String.valueOf(iBandIndex));
         asArgs.add("-of");
-        asArgs.add("GTiff");
+        asArgs.add(GdalFileFormats.GTiff);
         asArgs.add(m_oProductFile.getAbsolutePath());
         asArgs.add(sOutputPath);
 
@@ -258,7 +259,7 @@ public class GeoTiffProductReader extends WasdiProductReader {
         asWarpArgs.add("-t_srs");
         asWarpArgs.add("EPSG:4326");
         asWarpArgs.add("-of");
-        asWarpArgs.add("GTiff");
+        asWarpArgs.add(GdalFileFormats.GTiff);
         asWarpArgs.add(sInputPath);
         asWarpArgs.add(sOutputPath);
 

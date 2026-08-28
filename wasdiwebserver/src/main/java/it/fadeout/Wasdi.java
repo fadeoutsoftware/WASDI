@@ -27,6 +27,7 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import it.fadeout.providers.JerseyMapperProvider;
 import it.fadeout.rest.resources.AuthResource;
 import it.fadeout.rest.resources.ProcessWorkspaceResource;
@@ -129,6 +130,7 @@ public class Wasdi extends ResourceConfig {
 		register(JerseyMapperProvider.class);
 		register(org.glassfish.jersey.media.multipart.MultiPartFeature.class);
 		packages(true, "it.fadeout.rest.resources");
+		register(OpenApiResource.class);
 	}
 
 	/**
