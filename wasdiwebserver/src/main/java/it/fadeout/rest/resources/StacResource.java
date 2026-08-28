@@ -250,7 +250,7 @@ public class StacResource {
 		            array = @ArraySchema(
 		                schema = @Schema(type = "number"),
 		                minItems = 4,
-						maxItems = 4
+						maxItems = 6
 		            )
 		        )		
 			@QueryParam("bbox") String sBboxFilter,
@@ -354,7 +354,7 @@ public class StacResource {
 	 */
 	@GET
 	@Path("/collections/{collectionId}/items/{fileId}")
-	@Produces(MediaType.APPLICATION_JSON)
+	@Produces({"application/geo+json", MediaType.APPLICATION_JSON})
 	public Response getItem(
 			@Parameter(name = "x-session-token", in = ParameterIn.HEADER, description = "Optional WASDI session token. Omit it to access a public collection anonymously", required = false, schema = @Schema(type = "string"))
 			@HeaderParam("x-session-token") String sSessionId,
@@ -563,6 +563,9 @@ public class StacResource {
 		if (adBbox != null) {
 			oItem.setBbox(Arrays.asList(adBbox[0], adBbox[1], adBbox[2], adBbox[3]));
 			oItem.setGeometry(buildBboxGeometry(adBbox));
+		}
+		else {
+			oItem.setGeometry(null);
 		}
 
 		Map<String, Object> oProperties = new HashMap<>();
