@@ -155,13 +155,8 @@ public class Wasdi extends ResourceConfig {
 	        Server oServer = new Server();
 	        oServer.setUrl(sBaseUrl);
 	        oServer.setDescription("WASDI Server Base URL");
-			
-	        Server oStacServer = new Server();
-	        oStacServer.setUrl(sBaseUrl + "/stac");
-	        oStacServer.setDescription("WASDI STAC Server URL");
-	        
+				        
 	        ArrayList<Server> aoServers = new ArrayList<>();
-	        aoServers.add(oStacServer);
 	        aoServers.add(oServer);
 
 	        OpenAPI oOpenAPI = new OpenAPI().info(oInfo).servers(aoServers);
