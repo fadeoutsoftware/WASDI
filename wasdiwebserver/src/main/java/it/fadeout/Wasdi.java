@@ -28,7 +28,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
 import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
-import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import io.swagger.v3.oas.integration.OpenApiContextLocator;
 import io.swagger.v3.oas.integration.SwaggerConfiguration;
 import io.swagger.v3.oas.integration.api.OpenApiContext;
@@ -37,6 +36,7 @@ import io.swagger.v3.oas.models.servers.Server;
 import it.fadeout.providers.JerseyMapperProvider;
 import it.fadeout.rest.resources.AuthResource;
 import it.fadeout.rest.resources.ProcessWorkspaceResource;
+import it.fadeout.rest.resources.WasdiOpenApiResource;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -137,7 +137,7 @@ public class Wasdi extends ResourceConfig {
 		register(org.glassfish.jersey.media.multipart.MultiPartFeature.class);
 		packages(true, "it.fadeout.rest.resources");
 		
-		register(OpenApiResource.class);
+		register(WasdiOpenApiResource.class);
 	}
 	
 	private void updateOpenApiServerUrl() {
@@ -160,16 +160,12 @@ public class Wasdi extends ResourceConfig {
 	                .resourcePackages(Collections.singleton("it.fadeout.rest.resources"));
 
 	        try {
-	            JaxrsOpenApiContextBuilder<?> oContextBuilder = new JaxrsOpenApiContextBuilder<>()
-	                    .openApiConfiguration(oSwaggerConfig);
+	            JaxrsOpenApiContextBuilder<?> oContextBuilder = new JaxrsOpenApiContextBuilder<>().openApiConfiguration(oSwaggerConfig);
 
 	            OpenApiContext oContext = oContextBuilder.buildContext(true);
 
 	            // Register as the default context in the locator
-	            OpenApiContextLocator.getInstance().putOpenApiContext(
-	            		"openapi.context.id.default", 
-	                    oContext
-	            );
+	            OpenApiContextLocator.getInstance().putOpenApiContext("openapi.context.id.default",  oContext);
 	            
 	            WasdiLog.debugLog("Wasdi.updateOpenApiServerUrl: OpenAPI base URL set to " + sBaseUrl);
 	        } 
