@@ -96,8 +96,9 @@ public class StacResource {
 			List<StacLink> aoLinks = new ArrayList<>();
 			aoLinks.add(new StacLink(sSelfUrl, "self", MediaType.APPLICATION_JSON, "This document"));
 			aoLinks.add(new StacLink(sSelfUrl, "root", MediaType.APPLICATION_JSON, "This document"));
-			// Points to the public STAC API Core OpenAPI definition (we don't publish our own yet)
-			aoLinks.add(new StacLink("https://api.stacspec.org/v1.0.0/core/openapi.yaml", "service-desc", "application/vnd.oai.openapi+json;version=3.0", "OpenAPI Definition"));
+						
+			
+			aoLinks.add(new StacLink(getBaseUrl() + "openapi.yaml", "service-desc", "application/vnd.oai.openapi+json;version=3.0", "OpenAPI Definition"));
 			aoLinks.add(new StacLink(sSelfUrl + "/conformance", "conformance", MediaType.APPLICATION_JSON, "Conformance classes"));
 			aoLinks.add(new StacLink(sSelfUrl + "/collections", "data", MediaType.APPLICATION_JSON, "List of Collections"));
 			oCatalog.setLinks(aoLinks);
