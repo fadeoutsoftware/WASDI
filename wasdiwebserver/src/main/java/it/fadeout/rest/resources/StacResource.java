@@ -475,7 +475,7 @@ public class StacResource {
 		List<StacLink> aoLinks = new ArrayList<>();
 		aoLinks.add(new StacLink(sSelfUrl, "self", MediaType.APPLICATION_JSON, "This document"));
 		aoLinks.add(new StacLink(getBaseUrl() + "stac", "root", MediaType.APPLICATION_JSON, "Landing Page"));
-		aoLinks.add(new StacLink(sSelfUrl + "/items", "items", MediaType.APPLICATION_JSON, "Items of this Collection"));
+			aoLinks.add(new StacLink(sSelfUrl + "/items", "items", "application/geo+json", "Items of this Collection"));
 		oCollection.setLinks(aoLinks);
 
 		return oCollection;
@@ -591,7 +591,7 @@ public class StacResource {
 		String sSelfUrl = getBaseUrl() + "stac/collections/" + sWorkspaceId + "/items/" + encodePathSegment(sFileName);
 
 		List<StacLink> aoLinks = new ArrayList<>();
-		aoLinks.add(new StacLink(sSelfUrl, "self", MediaType.APPLICATION_JSON, "This document"));
+		aoLinks.add(new StacLink(sSelfUrl, "self", "application/geo+json", "This document"));
 		aoLinks.add(new StacLink(getBaseUrl() + "stac/collections/" + sWorkspaceId, "collection", MediaType.APPLICATION_JSON, "Parent Collection"));
 		aoLinks.add(new StacLink(getBaseUrl() + "stac", "root", MediaType.APPLICATION_JSON, "Landing Page"));
 		oItem.setLinks(aoLinks);
