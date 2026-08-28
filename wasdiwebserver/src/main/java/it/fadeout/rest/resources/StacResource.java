@@ -64,7 +64,7 @@ import wasdi.shared.viewmodels.stac.StacTemporalExtent;
  * 
  * @author p.campanella
  */
-@Path("/stac")
+@Path("")
 public class StacResource {
 
 	private static final String STAC_VERSION = "1.0.0";
@@ -99,8 +99,8 @@ public class StacResource {
 						
 			
 			aoLinks.add(new StacLink(getBaseUrl() + "openapi.json", "service-desc", "application/vnd.oai.openapi+json;version=3.0", "OpenAPI Definition"));
-			aoLinks.add(new StacLink(sSelfUrl + "/conformance", "conformance", MediaType.APPLICATION_JSON, "Conformance classes"));
-			aoLinks.add(new StacLink(sSelfUrl + "/collections", "data", MediaType.APPLICATION_JSON, "List of Collections"));
+			aoLinks.add(new StacLink(getBaseUrl() + "conformance", "conformance", MediaType.APPLICATION_JSON, "Conformance classes"));
+			aoLinks.add(new StacLink(getBaseUrl() + "collections", "data", MediaType.APPLICATION_JSON, "List of Collections"));
 			oCatalog.setLinks(aoLinks);
 
 			return Response.ok(oCatalog).build();
