@@ -3,6 +3,8 @@ OGC API - Processes
 
 WASDI is compliant with the `OGC API - Processes standard <https://ogcapi.ogc.org/processes/>`_. It provides an OGC API - Processes interface to run WASDI applications and to deploy applications created according to the Application Package Best Practice.
 
+The service `landing page <https://www.wasdi.net/ogcprocesses/rest>`_ and its `OpenAPI description <https://www.wasdi.net/ogcprocesses/rest/openapi.json>`_ are available online.
+
 Exposed Endpoints
 -----------------
 

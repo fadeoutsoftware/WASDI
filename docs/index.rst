@@ -123,7 +123,7 @@ If you already know WASDI features and you are a Python developer check out the 
 Reference center
 ---------------------------
 
-WASDI allows users and developer to interact though **libraries** and **APIs**. Find the reference of your language library on the left menu.
+WASDI allows users and developer to interact though **libraries** and **APIs**. Find the reference of your language library on the left menu. The WASDI REST API `OpenAPI description <https://www.wasdi.net/wasdiwebserver/docs>`_ is also available.
 
 
 OGC API Processes Compatibility
