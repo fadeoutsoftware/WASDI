@@ -103,6 +103,10 @@
                     <!-- Merges META-INF/services across all dependencies (SNAP, Logback, NetCDF, etc.) -->
                     <transformers>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                            <resource>META-INF/services/org.xmlpull.v1.XmlPullParserFactory</resource>
+                            <file>resources/META-INF/services/org.xmlpull.v1.XmlPullParserFactory</file>
+                        </transformer>
                     </transformers>
                 </configuration>
                 <executions>
