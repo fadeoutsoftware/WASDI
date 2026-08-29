@@ -28,6 +28,7 @@
         <sVersionServletApi>2.5</sVersionServletApi>
         <sVersionMavenCompilerPlugin>3.11.0</sVersionMavenCompilerPlugin>
         <sVersionMavenWarPlugin>3.4.0</sVersionMavenWarPlugin>
+        <sVersionJersey2>2.48</sVersionJersey2>
     </properties>
 
     <build>
