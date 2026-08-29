@@ -85,10 +85,6 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>${sVersionMavenShadePlugin}</version>
                 <configuration>
-                    <!-- Merges META-INF/services across all dependencies (SNAP, Logback, NetCDF, etc.) -->
-                    <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                    </transformers>
                     <filters>
                         <filter>
                             <artifact>*:*</artifact>
@@ -99,9 +95,15 @@
                                 <exclude>META-INF/ECLIPSEF.RSA</exclude>
                                 <exclude>META-INF/ECLIPSEF.SF</exclude>
                                 <exclude>META-INF/eclipse.inf</exclude>
+								<!-- Exclude the raw unmerged XmlPull service provider files -->
+                    			<exclude>META-INF/services/org.xmlpull.v1.XmlPullParserFactory</exclude>                                
                             </excludes>
                         </filter>
-                    </filters>
+                    </filters>                
+                    <!-- Merges META-INF/services across all dependencies (SNAP, Logback, NetCDF, etc.) -->
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                    </transformers>
                 </configuration>
                 <executions>
                     <execution>
@@ -226,6 +228,13 @@
             <artifactId>smos-kit</artifactId>
             <version>${sVersionSMOSTbx}</version>
         </dependency>
+        
+		<!-- Modern XmlPull Parser required by SNAP 14 / XStream -->
+		<dependency>
+		    <groupId>io.github.x-stream</groupId>
+		    <artifactId>mxparser</artifactId>
+		    <version>1.2.2</version>
+		</dependency>        
 
         <!-- JLINDA -->
         <dependency>

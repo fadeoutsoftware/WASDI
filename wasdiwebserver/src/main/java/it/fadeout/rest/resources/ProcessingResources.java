@@ -10,6 +10,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.users.User;
@@ -61,6 +62,7 @@ public class ProcessingResources {
     @POST
     @Path("mosaic")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "", description="")
     public PrimitiveResult mosaic(@HeaderParam("x-session-token") String sSessionId,
                                   @QueryParam("name") String sDestinationProductName,
                                   @QueryParam("workspace") String sWorkspaceId,
@@ -82,6 +84,7 @@ public class ProcessingResources {
     @POST
     @Path("regrid")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "", description="")
     public PrimitiveResult regrid(@HeaderParam("x-session-token") String sSessionId,
                                   @QueryParam("name") String sDestinationProductName,
                                   @QueryParam("workspace") String sWorkspaceId,
@@ -105,6 +108,7 @@ public class ProcessingResources {
     @POST
     @Path("subset")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "", description="")
     public PrimitiveResult subset(@HeaderParam("x-session-token") String sSessionId,
                                   @QueryParam("source") String sSourceProductName,
                                   @QueryParam("name") String sDestinationProductName,
@@ -138,6 +142,7 @@ public class ProcessingResources {
     @POST
     @Path("multisubset")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "", description="")
     public PrimitiveResult multiSubset(@HeaderParam("x-session-token") String sSessionId,
                                        @QueryParam("source") String sSourceProductName,
                                        @QueryParam("name") String sDestinationProductName,
@@ -150,6 +155,7 @@ public class ProcessingResources {
     @POST
     @Path("conversion/sen2cor")
     //@Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "", description="")
     public Response sen2CorConversion(@HeaderParam("x-session-token") String sSessionId,
                                       @QueryParam("productName") String sProductName,
                                       @QueryParam("workspace") String sWorkspaceId,
@@ -334,6 +340,7 @@ public class ProcessingResources {
     @POST
     @Path("run")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "", description="")
     public PrimitiveResult runProcess(@HeaderParam("x-session-token") String sSessionId,
                                       @QueryParam("operation") String sOperationType, @QueryParam("name") String
                                               sProductName, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("subtype") String

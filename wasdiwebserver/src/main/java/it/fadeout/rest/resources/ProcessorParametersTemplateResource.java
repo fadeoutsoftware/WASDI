@@ -20,6 +20,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorParametersTemplate;
@@ -67,6 +68,7 @@ public class ProcessorParametersTemplateResource {
 	@DELETE
 	@Path("/delete")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Delete parameter template", description="Deletes a processor parameter template. If the calling user is the owner, the template and all associated permissions are removed. If shared user, only their access is revoked.")
 	public Response deleteProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("templateId") String sTemplateId) {
 
@@ -136,6 +138,7 @@ public class ProcessorParametersTemplateResource {
 	@POST
 	@Path("/update")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Update parameter template", description="Updates the name, description, and parameter values of an existing processor parameter template. User must have write permissions.")
 	public Response updateProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId, ProcessorParametersTemplateDetailViewModel oDetailViewModel) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.updateProcessorParametersTemplate");
 
@@ -183,6 +186,7 @@ public class ProcessorParametersTemplateResource {
 	@POST
 	@Path("/add")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Create parameter template", description="Creates a new processor parameter template with predefined values for a specific processor. The calling user becomes the template owner.")
 	public Response addProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId, ProcessorParametersTemplateDetailViewModel oDetailViewModel) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate");
 
@@ -250,6 +254,7 @@ public class ProcessorParametersTemplateResource {
 	@GET
 	@Path("/get")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Get parameter template details", description="Returns the full details of a specific parameter template by ID, including all parameter values and metadata. User must have access to the template.")
 	public Response getProcessorParameterTemplateById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("templateId") String sTemplateId) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.getProcessorParametersTemplateById");
 
@@ -298,6 +303,7 @@ public class ProcessorParametersTemplateResource {
 	@GET
 	@Path("/getlist")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "List processor parameter templates", description="Returns all parameter templates available for a specific processor, including owned and shared templates. Includes readOnly flag for each template.")
 	public Response getProcessorParametersTemplatesListByProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.getProcessorParametersTemplatesListByProcessor");
 
@@ -368,6 +374,7 @@ public class ProcessorParametersTemplateResource {
 	@PUT
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Share parameter template with user", description="Grants a user access to a parameter template with specified rights (READ or WRITE). Sends notification email. Cannot share with self (unless admin) or owner.")
 	public PrimitiveResult shareProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorParametersTemplate") String sProcessorParametersTemplateId, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
 
@@ -515,6 +522,7 @@ public class ProcessorParametersTemplateResource {
 	@GET
 	@Path("share/byprocessorParametersTemplate")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get users with template access", description="Returns a list of all users who have been granted access to a parameter template, including their user IDs and permission levels.")
 	public List<ProcessorParametersTemplateSharingViewModel> getEnabledUsersSharedProcTemplates(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorParametersTemplate") String sProcessorParametersTemplateId) {
 
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.getEnabledUsersSharedProcTemplates( WS: " + sProcessorParametersTemplateId + " )");
@@ -570,6 +578,7 @@ public class ProcessorParametersTemplateResource {
 	@DELETE
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Revoke template access from user", description="Removes a user's access to a shared parameter template. Only template owner or users with write permissions can revoke sharing.")
 	public PrimitiveResult deleteUserSharedProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorParametersTemplate") String sProcessorParametersTemplateId, @QueryParam("userId") String sUserId) {
 

@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import it.fadeout.services.ProcessWorkspaceService;
 import wasdi.shared.LauncherOperations;
@@ -90,6 +91,7 @@ public class WorkspaceResource {
 	@GET
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get user workspaces", description = "Returns workspaces owned by or shared with the authenticated user, including sharing details and node availability metadata.")
 	public List<WorkspaceListInfoViewModel> getListByUser(@HeaderParam("x-session-token") String sSessionId) {
 		
 		WasdiLog.debugLog("WorkspaceResource.getListByUser");
@@ -243,6 +245,7 @@ public class WorkspaceResource {
 	@GET
 	@Path("getws")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get workspace details", description = "Returns a workspace editor view model with routing, storage, process, cloud, SLA, and sharing information.")
 	public WorkspaceEditorViewModel getWorkspaceEditorViewModel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId) {
 
 		WasdiLog.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel( WS: " + sWorkspaceId + ")");
@@ -357,6 +360,7 @@ public class WorkspaceResource {
 	@GET
 	@Path("create")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Create workspace", description = "Creates a workspace with an optional name and node. When no node is specified, selects one using score, user default, and system fallback rules.")
 	public PrimitiveResult createWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName, @QueryParam("node") String sNodeCode) {
 
 		WasdiLog.debugLog("WorkspaceResource.createWorkspace(" + sName + ", " + sNodeCode + " )");
@@ -447,6 +451,7 @@ public class WorkspaceResource {
 	@POST
 	@Path("update")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Update workspace", description = "Updates writable workspace metadata and node settings, resolving duplicate workspace names automatically.")
 	public WorkspaceEditorViewModel updateWorkspace(@HeaderParam("x-session-token") String sSessionId, WorkspaceEditorViewModel oWorkspaceEditorViewModel) {
 
 		WasdiLog.debugLog("WorkspaceResource.updateWorkspace");
@@ -550,6 +555,7 @@ public class WorkspaceResource {
 	@DELETE
 	@Path("delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Delete workspace", description = "Deletes an owned workspace and selected files or layers, terminating related resources as needed. Non-owners remove only their sharing.")
 	public Response deleteWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspace") String sWorkspaceId, @QueryParam("deletelayer") Boolean bDeleteLayer,
 			@QueryParam("deletefile") Boolean bDeleteFile) {
@@ -802,6 +808,7 @@ public class WorkspaceResource {
 	@PUT
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Share workspace with user", description = "Grants a user READ or WRITE access to a workspace after validating requester, target, and ownership constraints, then sends a notification.")
 	public PrimitiveResult shareWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspace") String sWorkspaceId, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
 
@@ -931,6 +938,7 @@ public class WorkspaceResource {
 	@GET
 	@Path("share/byworkspace")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get workspace sharings", description = "Returns users with explicit access to a workspace and their assigned permission levels.")
 	public List<WorkspaceSharingViewModel> getEnabledUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId) {
 
 		WasdiLog.debugLog("WorkspaceResource.getEnabledUsersSharedWorksace( WS: " + sWorkspaceId + " )");
@@ -978,6 +986,7 @@ public class WorkspaceResource {
 	@DELETE
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Remove workspace sharing", description = "Removes a user's workspace sharing when requested by that user, a workspace writer or owner, or an administrator.")
 	public PrimitiveResult deleteUserSharedWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspace") String sWorkspaceId, @QueryParam("userId") String sUserId) {
 
@@ -1081,6 +1090,7 @@ public class WorkspaceResource {
 	@GET
 	@Path("wsnamebyid")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get workspace name", description = "Returns the plain-text name of an accessible workspace identified by its workspace identifier.")
 	public Response getWorkspaceNameById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId ) {
 
 		if (Utils.isNullOrEmpty(sWorkspaceId)) {

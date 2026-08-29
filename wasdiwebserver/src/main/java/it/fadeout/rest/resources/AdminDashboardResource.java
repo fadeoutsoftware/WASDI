@@ -139,7 +139,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/workspacesByPartialName")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "Search workspaces by partial name", description="Returns a list of workspaces whose name matches the given partial string. The search string must be at least 3 characters long. Only accessible to admin users.")
 	public Response findWorkspacesByPartialName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("partialName") String sPartialName) {
 
@@ -182,7 +182,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/resourceByPartialName")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "Search WASDI resources by partial name", description="Returns a paginated list of WASDI resources (WORKSPACE, PROCESSOR, SUBSCRIPTION, ORGANIZATION, WORKFLOW, STYLE) whose name matches the given partial string. The resource type must be specified. Results can be paginated using offset and limit. Only accessible to admin users.")
 	public Response findResourceByPartialName(@HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("resourceType") String sResourceType,
 			@QueryParam("partialName") String sPartialName,
@@ -437,7 +437,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/processorsByPartialName")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "Search processors by partial name", description="Returns a list of deployed processors whose name matches the given partial string. The search string must be at least 3 characters long. Only accessible to admin users.")
 	public Response findProcessorsByPartialName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("partialName") String sPartialName) {
 
@@ -479,7 +479,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/resourcePermissions")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "Get resource permissions", description="Returns the list of sharing permissions recorded for a resource, optionally filtered by resource type, resource ID, and/or user ID. At least one filter parameter must be provided. Non-admin users may query permissions for resources of type MISSION.")
 	public Response findResourcePermissions(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("resourceType") String sResourceType,
 			@QueryParam("resourceId") String sResourceId,
@@ -527,7 +527,7 @@ public class AdminDashboardResource {
 	@POST
 	@Path("/resourcePermissions")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "Grant user access to resource", description="Grants a user access to a specific resource. The operation is delegated to the resource-type-specific share logic (e.g., workspace sharing, processor sharing). If no valid rights value is supplied, READ access is assigned by default.")
 	public Response addResourcePermission(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("resourceType") String sResourceType,
 			@QueryParam("resourceId") String sResourceId,
@@ -680,7 +680,7 @@ public class AdminDashboardResource {
 	@DELETE
 	@Path("/resourcePermissions")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "Remove resource sharing permission", description="Removes a sharing permission, revoking a user's access to a specific resource. The operation is delegated to the resource-type-specific unshare logic.")
 	public Response removeResourcePermission(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("resourceType") String sResourceType,
 			@QueryParam("resourceId") String sResourceId,
@@ -817,7 +817,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("resourcePermissions/types")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "Get available resource types", description="Returns the list of available WASDI resource type names (e.g., WORKSPACE, PROCESSOR, SUBSCRIPTION, ORGANIZATION, WORKFLOW, STYLE, MISSION). Useful to populate resource-type drop-downs in admin UIs.")
 	public Response getResourceTypes(@HeaderParam("x-session-token") String sSessionId) {
 		WasdiLog.debugLog("AdminDashboardResource.getResourceTypes");
 		try {
@@ -841,7 +841,7 @@ public class AdminDashboardResource {
 	@PUT
 	@Path("/metrics")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "Store or update node metrics", description="Stores or updates a metrics entry for a WASDI node. Nodes periodically push their hardware status (CPU usage, memory, disk, software licenses) to the main node via this endpoint so that WASDI can select the best node at runtime.")
 	public Response updateMetricsEntry(@HeaderParam("x-session-token") String sSessionId, MetricsEntry oMetricsEntry) {
 
 		// Validate Session
@@ -876,7 +876,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/metrics/latest")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "Get latest node metrics", description="Returns the most recent metrics entry recorded for the specified node. If no nodeCode is provided the repository may return the globally latest entry.")
 	public Response getLatestMetricsEntry(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("nodeCode") String sNodeCode) {
 
@@ -912,7 +912,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/users/list")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "List registered users", description="Returns a paginated and sortable list of registered WASDI users. Results can be filtered by a partial name match and sorted by name, surname, or userId in ascending or descending order.")
 	public Response getUsersList(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("partialName") String sPartialName,
 			@QueryParam("offset") Integer iOffset, @QueryParam("limit") Integer iLimit,
@@ -1003,7 +1003,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/users/summary")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "Get users summary statistics", description="Returns a summary overview of all registered users, grouped by subscription type (NONE, FREE, STANDARD, PROFESSIONAL), plus the total number of organizations. Intended for dashboard KPIs.")
 	public Response getUsersSummary(@HeaderParam("x-session-token") String sSessionId) {
 		
 		WasdiLog.debugLog("AdminDashboardResource.getUsersSummary");
@@ -1076,7 +1076,7 @@ public class AdminDashboardResource {
 	@GET
 	@Path("/users")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "Get user profile details", description="Returns the full profile details of a specific user identified by their userId, including account status, subscription type, role, registration and confirmation dates, and preferred node.")
 	public Response getUsersDetails(@HeaderParam("x-session-token") String sSessionId, @QueryParam("userId") String sTargetUser) {
 		
 		WasdiLog.debugLog("AdminDashboardResource.getUsersDetails for " + sTargetUser);
@@ -1121,7 +1121,7 @@ public class AdminDashboardResource {
 	@PUT
 	@Path("/users")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "Update user profile", description="Updates the editable profile fields of an existing user (name, surname, role, description, link, preferred node, public nick name, registration date). The target user is identified by the userId contained in the request body.")
 	public Response updateUsersDetails(@HeaderParam("x-session-token") String sSessionId, FullUserViewModel oUserViewModel) {
 		
 		WasdiLog.debugLog("AdminDashboardResource.updateUsersDetails");
@@ -1181,7 +1181,7 @@ public class AdminDashboardResource {
 	@DELETE
 	@Path("/users")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "Delete user account", description="Permanently deletes a user account and all resources associated with it. This operation is irreversible.")
 	public Response deleteUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("userId") String sTargetUser) {
 		
 		WasdiLog.debugLog("AdminDashboardResource.deleteUser for " + sTargetUser);
@@ -1230,7 +1230,7 @@ public class AdminDashboardResource {
 	@DELETE
 	@Path("/cleanProcessesQueue")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "Drain process queue", description="Marks all processes that are stuck in CREATED state as ERROR, effectively draining the process queue. Useful when a node crash leaves processes in an unfinished state.")
 	public Response cleanProcessesQueue(@HeaderParam("x-session-token") String sSessionId) {
 		
 		try {
@@ -1270,7 +1270,7 @@ public class AdminDashboardResource {
 	@DELETE
 	@Path("/cleanOldProcesses")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	@Operation(summary = "", description="")
+	@Operation(summary = "Clean stale processes", description="Marks stale past process workspace entries as ERROR. Intended to clean up old or orphaned process records that were never properly closed.")
 	public Response cleanOldProcessWorkspaces(@HeaderParam("x-session-token") String sSessionId) {
 		
 		try {

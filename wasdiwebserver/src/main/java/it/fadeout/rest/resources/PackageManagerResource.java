@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response.Status;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import it.fadeout.threads.UpdateProcessorEnvironmentWorker;
 import wasdi.shared.LauncherOperations;
@@ -71,6 +72,7 @@ public class PackageManagerResource {
 	@GET
 	@Path("/listPackages")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Get processor packages", description="Returns a list of all packages installed in a processor's environment, organized by status (outdated, up-to-date, all). User must have access to the processor.")
 	public Response getListPackages(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) {
 		WasdiLog.debugLog("PackageManagerResource.getListPackages( " + "Name: " + sName + ", " + " )");
 		
@@ -144,6 +146,7 @@ public class PackageManagerResource {
 	@GET
 	@Path("/environmentActions")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Get environment action history", description="Returns a log of all package management actions executed on a processor's environment (installations, updates, removals). User must have access to the processor.")
 	public Response getEnvironmentActionsList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) {
 		WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList( " + "Name: " + sName + ", " + " )");
 		
@@ -196,6 +199,7 @@ public class PackageManagerResource {
 	@GET
 	@Path("/managerVersion")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Get package manager version", description="Returns the version and configuration of the package manager (e.g., conda, pip) installed in a processor's environment. Reads cached packagesInfo.json or makes live query.")
 	public Response getManagerVersion(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) {
 		WasdiLog.debugLog("PackageManagerResource.getManagerVersion( " + "Name: " + sName + " )");
 		
@@ -274,6 +278,7 @@ public class PackageManagerResource {
 	@GET
 	@Path("/environmentupdate")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Update processor environment", description="Forces an update of a processor's package environment, optionally targeting a specific package or action. Triggers async operation on all WASDI nodes.")
 	public Response environmentUpdate(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId,
@@ -403,6 +408,7 @@ public class PackageManagerResource {
 	@GET
 	@Path("/reset")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Reset package environment", description="Resets a processor's package environment to clean state, clearing all action history and reinstalling base packages. Async operation across all nodes.")
 	public Response resetActionList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("workspace") String sWorkspaceId) {
 		WasdiLog.debugLog("PackageManagerResource.resetActionList( " + "processorId: " + sProcessorId + ", " + " )");
 		

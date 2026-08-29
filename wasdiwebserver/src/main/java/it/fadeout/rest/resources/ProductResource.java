@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import it.fadeout.threads.DeleteProductWorker;
 import wasdi.shared.LauncherOperations;
@@ -76,6 +77,7 @@ public class ProductResource {
     @GET
     @Path("addtows")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "Add product to workspace", description = "Adds a product file already present on the node filesystem to a workspace. An existing workspace link is treated as success.")
     public PrimitiveResult addProductToWorkspace(@HeaderParam("x-session-token") String sSessionId,
                                                  @QueryParam("name") String sProductName, @QueryParam("workspace") String sWorkspaceId) {
         try {
@@ -153,6 +155,7 @@ public class ProductResource {
     @GET
     @Path("byname")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "Get product by name", description = "Returns one georeferenced product by file name from a workspace accessible to the authenticated user.")
     public GeorefProductViewModel getByProductName(@HeaderParam("x-session-token") String sSessionId,
                                                    @QueryParam("name") String sProductName, @QueryParam("workspace") String sWorkspaceId) {
         try {
@@ -206,6 +209,7 @@ public class ProductResource {
     @GET
     @Path("metadatabyname")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "Get product metadata", description = "Returns product metadata. When metadata has not been generated, starts a READMETADATA process and returns a placeholder indicating generation is in progress.")
     public MetadataViewModel getMetadataByProductName(@HeaderParam("x-session-token") String sSessionId,
                                                       @QueryParam("name") String sProductName, @QueryParam("workspace") String sWorkspaceId) {
 
@@ -312,6 +316,7 @@ public class ProductResource {
     @GET
     @Path("/byws")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "Get workspace products", description = "Returns the full product list for a workspace, including bounding boxes, styles, and descriptions while omitting embedded metadata to reduce payload size.")
     public List<GeorefProductViewModel> getListByWorkspace(@HeaderParam("x-session-token") String sSessionId,
                                                            @QueryParam("workspace") String sWorkspaceId) {
 
@@ -406,6 +411,7 @@ public class ProductResource {
     @GET
     @Path("/bywslight")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "Get light workspace product list", description = "Returns a lightweight product list for initial workspace display, including product names, friendly names, and bounding boxes.")
     public List<GeorefProductViewModel> getLightListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId) {
 
         WasdiLog.debugLog("ProductResource.getLightListByWorkspace( WS: " + sWorkspaceId + " )");
@@ -467,6 +473,7 @@ public class ProductResource {
     @GET
     @Path("/namesbyws")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "Get workspace product names", description = "Returns only the file names of products contained in the specified workspace.")
     public ArrayList<String> getNamesByWorkspace(@HeaderParam("x-session-token") String sSessionId,
                                                  @QueryParam("workspace") String sWorkspaceId) {
 
@@ -543,6 +550,7 @@ public class ProductResource {
     @POST
     @Path("/update")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "Update product details", description = "Updates editable product fields such as friendly name, style, and description. Style changes are also applied to associated GeoServer layers when possible.")
     public Response updateProductViewModel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, ProductViewModel oProductViewModel) {
 
         WasdiLog.debugLog("ProductResource.updateProductViewModel( WS: " + sWorkspaceId + ", ... )");
@@ -703,6 +711,7 @@ public class ProductResource {
     @POST
     @Path("/uploadfile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Operation(summary = "Upload and ingest product", description = "Uploads a multipart file to a writable workspace and starts an INGEST launcher process, with optional name, style, and platform values.")
     public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("style") String sStyle, @QueryParam("platform") String sPlatformType) throws Exception {
         WasdiLog.debugLog("ProductResource.uploadfile( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " )");
 
@@ -801,6 +810,7 @@ public class ProductResource {
     @POST
     @Path("/uploadfilebylib")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Operation(summary = "Upload product without ingestion", description = "Uploads a multipart file to a writable workspace without starting ingestion. This endpoint is intended for library clients.")
     public Response uploadFileByLib(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName) throws Exception {
         WasdiLog.debugLog("ProductResource.uploadFileByLib( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " )");
 
@@ -872,6 +882,7 @@ public class ProductResource {
     @GET
     @Path("delete")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "Delete workspace product", description = "Deletes a product from a workspace and can optionally remove its files, sidecar data, and published layers. Storage accounting and notifications are updated.")
     public PrimitiveResult deleteProduct(@HeaderParam("x-session-token") String sSessionId,
                                          @QueryParam("name") String sProductName, @QueryParam("deletefile") Boolean bDeleteFile,
                                          @QueryParam("workspace") String sWorkspaceId, @QueryParam("deletelayer") Boolean bDeleteLayer) {
@@ -1177,6 +1188,7 @@ public class ProductResource {
     @Path("deletelist")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({"application/json", "application/xml", "text/xml" })
+    @Operation(summary = "Delete multiple workspace products", description = "Starts asynchronous deletion of the product names supplied in the request body, with optional file and published-layer removal.")
     public PrimitiveResult deleteMultipleProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("deletefile") Boolean bDeleteFile,
                                          @QueryParam("workspace") String sWorkspaceId, @QueryParam("deletelayer") Boolean bDeleteLayer,
                                          List<String> asProductList) {

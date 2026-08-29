@@ -6,6 +6,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import wasdi.shared.business.users.User;
 import wasdi.shared.utils.MailUtils;
@@ -34,6 +35,7 @@ public class WasdiResource {
 	@GET
 	@Path("/hello")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Check service availability", description = "Returns a simple greeting used to verify that the WASDI REST service is available.")
 	public PrimitiveResult hello() {
 		WasdiLog.debugLog("WasdiResource.hello");
 		PrimitiveResult oResult = new PrimitiveResult();
@@ -48,6 +50,7 @@ public class WasdiResource {
 	@POST
 	@Path("/feedback")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Send user feedback", description = "Sends an authenticated user's feedback message by email after validating that its title and message are present.")
 	public PrimitiveResult feedback(@HeaderParam("x-session-token") String sSessionId, FeedbackViewModel oFeedback) {
 		WasdiLog.debugLog("WasdiResource.feedback");
 

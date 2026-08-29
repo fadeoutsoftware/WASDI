@@ -24,6 +24,7 @@ import org.nfs.orbits.sat.Satellite;
 import org.nfs.orbits.sat.SensorMode;
 import org.nfs.orbits.sat.SwathArea;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import it.fadeout.business.InstanceFinder;
 import satLib.astro.time.Time;
@@ -62,6 +63,7 @@ import wasdi.shared.viewmodels.plan.SensorViewModel;
 	@Path("/search")
 	@Produces({ "application/xml", "application/json", "text/html" })
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Search acquisition opportunities", description="Searches for acquisition opportunities (satellite overpasses) matching the specified parameters (location/AOI, satellite, temporal window, etc.). Returns a list of CoverageSwathResultViewModel containing predicted pass times and coverage details.")
 	public ArrayList<CoverageSwathResultViewModel> search(@HeaderParam("x-session-token") String sSessionId,
 			OpportunitiesSearchViewModel OpportunitiesSearch) {
 		WasdiLog.debugLog("OpportunitySearchResource.Search");
@@ -360,6 +362,7 @@ import wasdi.shared.viewmodels.plan.SensorViewModel;
 	@Path("/track/{satellitename}")
 	@Produces({ "application/xml", "application/json", "text/html" })
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Get satellite orbit track", description="Retrieves the current orbital track (ground path) for a specified satellite. Returns predicted positions and coverage footprint for mission planning.")
 	public SatelliteOrbitResultViewModel getSatelliteTrack(@HeaderParam("x-session-token") String sSessionId, @PathParam("satellitename") String sSatname) {
 		
 		SatelliteOrbitResultViewModel oReturnViewModel = new SatelliteOrbitResultViewModel();
@@ -427,6 +430,7 @@ import wasdi.shared.viewmodels.plan.SensorViewModel;
 	@Path("/updatetrack/{satellitesname}")
 	@Produces({ "application/xml", "application/json", "text/html" })
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Get updated satellite tracks", description="Retrieves updated orbital tracks for one or more satellites (names separated by hyphens). Returns an array of SatelliteOrbitResultViewModel, one per satellite, with current ephemeris data.")
 	public ArrayList<SatelliteOrbitResultViewModel> getUpdatedSatelliteTrack(
 			@HeaderParam("x-session-token") String sSessionId, @PathParam("satellitesname") String sSatName) {
 
@@ -511,6 +515,7 @@ import wasdi.shared.viewmodels.plan.SensorViewModel;
 	@Produces({ "application/xml", "application/json", "text/html" })
 	// @Consumes(MediaType.APP)
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Get supported satellites", description="Returns a list of all satellites supported by WASDI for opportunity search, including name, platform code, and acquisition capabilities.")
 	public ArrayList<SatelliteResourceViewModel> getSatellitesResources(@HeaderParam("x-session-token") String sSessionId) {
 		
 		WasdiLog.debugLog("OpportunitySearchResource.getSatellitesResources");

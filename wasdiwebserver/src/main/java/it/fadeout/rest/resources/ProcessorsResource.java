@@ -44,6 +44,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
@@ -146,6 +147,7 @@ public class ProcessorsResource  {
 	@Path("/uploadprocessor")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Upload processor", description="Uploads and deploys a new processor/application with multipart file upload. Validates processor name, type, and parameters. Returns processor ID. Auto-deploys to main node asynchronously.")
 	public PrimitiveResult uploadProcessor( @FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
 											@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName,
 											@QueryParam("version") String sVersion,	@QueryParam("description") String sDescription,
@@ -368,6 +370,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/getdeployed")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Get deployed processors", description="Returns list of all accessible processors (owned, public, or shared with user). Includes metadata, logo, status, and readOnly flags based on user permissions.")
 	public List<DeployedProcessorViewModel> getDeployedProcessors(@HeaderParam("x-session-token") String sSessionId) throws Exception {
 
 		ArrayList<DeployedProcessorViewModel> aoRet = new ArrayList<>(); 
@@ -456,6 +459,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/getprocessor")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Get processor details", description="Returns detailed information for a specific processor by ID or name. Includes configuration, deployment status, pricing, and user access permissions.")
 	public DeployedProcessorViewModel getSingleDeployedProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("name") String sProcessorName) throws Exception {
 
 		DeployedProcessorViewModel oDeployedProcessorViewModel = new DeployedProcessorViewModel(); 
@@ -580,6 +584,7 @@ public class ProcessorsResource  {
 	@POST
 	@Path("/getmarketlist")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Get marketplace processors (filtered)", description="Returns paginated list of marketplace processors with filtering by category, publisher, price, and search term. Supports sorting by name/date/price.")
 	public List<AppListViewModel> getMarketPlaceAppList(@HeaderParam("x-session-token") String sSessionId, AppFilterViewModel oFilters) throws Exception {
 
 		ArrayList<AppListViewModel> aoRet = new ArrayList<>(); 
@@ -757,6 +762,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/getmarketdetail")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Get marketplace processor details", description="Returns detailed marketplace info including description, pricing, reviews/ratings, images, categories, and download count for a processor.")
 	public Response getMarketPlaceAppDetail(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorname") String sProcessorName) throws Exception {
 		sProcessorName = URLDecoder.decode(sProcessorName, StandardCharsets.UTF_8.name());
 		WasdiLog.debugLog("ProcessorsResource.getMarketPlaceAppDetail");
@@ -927,6 +933,7 @@ public class ProcessorsResource  {
 	@POST
 	@Path("/run")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Run processor (POST)", description="Executes a processor with parameters in request body (supports long parameter lists). Returns RunningProcessorViewModel with execution ID and status. Async execution via launcher.")
 	public RunningProcessorViewModel runPost(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("workspace") String sWorkspaceId,
 			@QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("notify") Boolean bNotify, String sEncodedJson) throws Exception {
@@ -951,6 +958,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/run")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Run processor (GET)", description="Executes a processor with query parameters (supports shorter parameter lists). Returns RunningProcessorViewModel with execution ID and status. Async execution via launcher.")
 	public RunningProcessorViewModel run(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("encodedJson") String sEncodedJson,
 			@QueryParam("workspace") String sWorkspaceId,
@@ -1218,6 +1226,7 @@ public class ProcessorsResource  {
 	@POST
 	@Path("/getcredits")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Calculate execution credits", description="Calculates the credit cost for running a processor with specified parameters. Computes based on processor pricing, area/subscription models, and user's available credits.")
 	public Response getCreditsForRun(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, String sEncodedJson) throws Exception {
 		WasdiLog.debugLog("ProcessorsResource.getCreditsForRun( Processor id: " + sProcessorId + " )");
 		
@@ -1406,6 +1415,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/help")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Get processor help", description="Returns the help/documentation file for a processor. Reads the processor's help file from deployment directory. Returns empty if no help available.")
 	public PrimitiveResult help(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) throws Exception {
 		WasdiLog.debugLog("ProcessorsResource.help( Name: " + sName + " )");
 		PrimitiveResult oPrimitiveResult = new PrimitiveResult();
@@ -1469,6 +1479,7 @@ public class ProcessorsResource  {
 	@POST
 	@Path("/logs/add")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "Add execution log entry", description="Logs a single line of text to the execution log of a running process. Can be called by the processor itself to track progress. Persisted in database when logging is enabled.")
 	public Response addLog(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processworkspace") String sProcessWorkspaceId, String sLog) {
 		try {
 			
@@ -1520,6 +1531,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/logs/count")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Get execution log line count", description="Returns the total number of log entries for a running process execution. User must have access to the process workspace.")
 	public int countLogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processworkspace") String sProcessWorkspaceId){
 		
 		WasdiLog.debugLog("ProcessorResource.countLogs( ProcWsId: " + sProcessWorkspaceId + " )");
@@ -1565,6 +1577,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/logs/list")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Get paginated execution logs", description="Returns log entries for a process execution with optional range pagination (startrow/endrow inclusive). Returns all if range not specified.")
 	public ArrayList<ProcessorLogViewModel> getLogs(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processworkspace") String sProcessWorkspaceId,
 			//note: range extremes are included
@@ -1634,6 +1647,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/nodedelete")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Delete processor (node-specific)", description="Deletes processor files on a computing node. Can only be called on non-main nodes. Triggers async DELETEPROCESSOR operation locally. For distributed cleanup.")
 	public Response nodeDeleteProcessor(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId,
@@ -1731,6 +1745,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/delete")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Delete processor (main)", description="Permanently deletes a processor from main node. Owner or admin only. Also updates all computing nodes. For shared processors, removes user's access only.")
 	public Response deleteProcessor(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId) {
@@ -1890,6 +1905,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/redeploy")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Redeploy processor", description="Redeploys a processor across all WASDI nodes. Sets deployment-in-progress flag and triggers async REDEPLOYPROCESSOR operation. User must have write permissions.")
 	public Response redeployProcessor(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId) {
@@ -2007,6 +2023,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/libupdate")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Update processor libraries", description="Forces update of processor dependencies and libraries. Propagates to all computing nodes. Triggers async LIBRARYUPDATE operation with ongoing deployment flag.")
 	public Response libraryUpdate(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId) {
@@ -2121,6 +2138,7 @@ public class ProcessorsResource  {
 	@POST
 	@Path("/update")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Update processor metadata", description="Updates processor description, public/private status, parameter sample, and execution timeout. JSON validation included. User must have write permissions.")
 	public Response updateProcessor(DeployedProcessorViewModel oUpdatedProcessorVM, @HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
 		
 		WasdiLog.debugLog("ProcessorResources.updateProcessor( Processor: " + sProcessorId + " )");
@@ -2204,6 +2222,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/cleadbuildflag")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Clear deployment flag", description="Clears the deployment-in-progress flag for a processor. Used when deployment hangs/fails to reset state. Admin-only operation.")
 	public Response cleanBuildFlag(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
 		
 		WasdiLog.debugLog("ProcessorResources.cleanBuildFlag( Processor: " + sProcessorId + " )");
@@ -2264,6 +2283,7 @@ public class ProcessorsResource  {
 	@Path("/updatefiles")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Update processor files", description="Uploads and replaces processor source code via multipart file upload. Triggers async redeploy. Validates permissions and schedules REDEPLOYPROCESSOR.")
 	public Response updateProcessorFiles(@FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId,
@@ -2485,6 +2505,7 @@ public class ProcessorsResource  {
 	@POST
 	@Path("/updatedetails")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Update processor marketplace details", description="Updates processor name, categories, contact, subscription/on-demand pricing, and marketplace visibility. Integrates with Stripe for payment configuration.")
 	public Response updateProcessorDetails(AppDetailViewModel oUpdatedProcessorVM, @HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId) {
 		
@@ -2726,6 +2747,7 @@ public class ProcessorsResource  {
 	@POST
 	@Path("/addAppPayment")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Record app purchase", description="Creates a payment record for a processor on-demand run purchase. Validates subscription, generates unique payment ID, stores in database.")
 	public Response addAppPayment(@HeaderParam("x-session-token") String sSessionId, AppPaymentViewModel oAppPaymentVM) {
 
 		try {
@@ -2813,6 +2835,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/stripe/onDemandPaymentUrl")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Get Stripe payment URL", description="Returns Stripe payment link for on-demand processor purchase. Validates subscription and payment eligibility before returning URL.")
 	public Response getStripeOnDemandPaymentUrl(@HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("processor") String sProcessorId, @QueryParam("appPayment") String sAppPaymentId) {
 
@@ -2891,6 +2914,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/isAppPurchased")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Check app purchase status", description="Verifies if processor run was purchased or if user has exemption (owner/shared). Checks for valid unused payment records.")
 	public Response checkAppPurchase(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processor")String sProcessorId) {
 		
 		try {
@@ -3035,6 +3059,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/byAppPaymentId")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Get payment details", description="Retrieves payment information by payment ID, including processor ID, purchase date, and status.")
 	public Response getAppPaymentById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("appPayment") String sAppPaymentId) {
 		
 		if (Utils.isNullOrEmpty(sAppPaymentId)) {
@@ -3091,6 +3116,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/stripe/confirmation/{CHECKOUT_SESSION_ID}")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Confirm Stripe payment (webhook)", description="Stripe webhook endpoint that confirms payment completion. Validates with Stripe, updates payment record status to success. Returns HTML close window.")
 	public String confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
 		WasdiLog.debugLog("ProcessorResource.confirmation. sCheckoutSessionId: " + sCheckoutSessionId);
 
@@ -3170,6 +3196,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("downloadprocessor")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@Operation(summary = "Download processor", description="Downloads processor source code as ZIP file. User must have access permission. Returns file stream for browser download.")
 	public Response downloadProcessor(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("token") String sTokenSessionId,
 			@QueryParam("processorId") String sProcessorId)
@@ -3234,6 +3261,7 @@ public class ProcessorsResource  {
 	@PUT
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Share processor with user", description="Grants a user access to a processor with specified rights (READ or WRITE). Sends notification email. Cannot auto-share or share with owner.")
 	public PrimitiveResult shareProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("userId") String sUserId, @QueryParam("rights") String sRights) {
 
 		WasdiLog.debugLog("ProcessorsResource.shareProcessor(ProcessorId: " + sProcessorId + ", User: " + sUserId + " )");
@@ -3349,6 +3377,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("share/byprocessor")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get users with processor access", description="Returns list of all users who have been granted access to processor, including their permission levels.")
 	public List<ProcessorSharingViewModel> getEnabledUsersSharedProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
 
 		WasdiLog.debugLog("ProcessorsResource.getEnabledUsersSharedProcessor( Processor: " + sProcessorId + " )");
@@ -3410,6 +3439,7 @@ public class ProcessorsResource  {
 	@DELETE
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Revoke processor access from user", description="Removes a user's access to a shared processor. Only processor owner or users with write permissions can revoke.")
 	public PrimitiveResult deleteUserSharingProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("userId") String sUserId) {
 
 		WasdiLog.debugLog("ProcessorsResource.deleteUserSharedProcessor( ProcId: " + sProcessorId + ", User:" + sUserId + " )");
@@ -3476,6 +3506,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/ui")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Get processor UI configuration", description="Returns JSON UI configuration/schema for a processor. Used by frontend to render dynamic UI based on processor definition.")
 	public Response getUI(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) throws Exception {
 		WasdiLog.debugLog("ProcessorsResource.getUI( Name: " + sName + " )");
 		sName = URLDecoder.decode(sName, StandardCharsets.UTF_8.name());
@@ -3532,6 +3563,7 @@ public class ProcessorsResource  {
 	@POST
 	@Path("/saveui")
 	@Produces({ "application/json", "text/xml" })
+	@Operation(summary = "Save processor UI configuration", description="Updates processor UI JSON configuration with user's custom layout/schema. Validates JSON and requires write permissions.")
 	public Response saveUI(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName, String sUIJson) throws Exception {
 		WasdiLog.debugLog("ProcessorsResource.saveUI( Name: " + sName + " )");
 		
@@ -3600,6 +3632,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("getcwl")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@Operation(summary = "Get CWL descriptor", description="Downloads processor's Common Workflow Language descriptor (CWL) file. Used for workflow integration and Kubernetes deployment.")
 	public Response getCWLDescriptor(@QueryParam("processorName") String sProcessorName)
 	{			
 
@@ -3646,6 +3679,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/logs/build")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "Get processor build logs", description="Returns build/deployment logs for a processor. User must have access to processor. Helps debug deployment issues.")
 	public Response getProcessorBuildLogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
 		try {
 			// Check User 
