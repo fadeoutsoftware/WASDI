@@ -45,8 +45,8 @@
         <sVersionJavaxPersistenceApi>2.2</sVersionJavaxPersistenceApi>
         <sVersionImmutables>2.10.1</sVersionImmutables>
         <sVersionGeoTools>28.6</sVersionGeoTools>
-        <sVersionJersey2>2.46</sVersionJersey2>
         <sVersionMercurius>1.0</sVersionMercurius>
+        <sVersionJersey2>2.48</sVersionJersey2>
     </properties>
 
     <build>
@@ -190,14 +190,7 @@
             <artifactId>json</artifactId>
             <version>${sVersionJson}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-        <!--dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>${sVersionGson}</version>
-        <dependency-->
         <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
-        <!-- Override the old 2.0.1 pulled transitively by geoserver-manager; docker-java requires >= 2.2 -->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -283,22 +276,29 @@
 		   <artifactId>gt-geopkg</artifactId>
 		   <version>${sVersionGeoTools}</version>
 		</dependency>        
-		
 		<dependency>
 		    <groupId>org.geotools</groupId>
 		    <artifactId>gt-geotiff</artifactId>
 		    <version>${sVersionGeoTools}</version>
 		</dependency>
-		
 		<dependency>
 		    <groupId>org.geotools</groupId>
 		    <artifactId>gt-coverage</artifactId>
 		    <version>${sVersionGeoTools}</version>
 		</dependency>
-		
 		<dependency>
 		    <groupId>org.geotools</groupId>
 		    <artifactId>gt-referencing</artifactId>
+		    <version>${sVersionGeoTools}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.geotools</groupId>
+		    <artifactId>gt-geojson</artifactId>
+		    <version>${sVersionGeoTools}</version> 
+		</dependency>
+				<dependency>
+		    <groupId>org.geotools</groupId>
+		    <artifactId>gt-epsg-hsql</artifactId>
 		    <version>${sVersionGeoTools}</version>
 		</dependency>
 				
@@ -335,11 +335,14 @@
     </dependencies>
 
     <repositories>
-        <repository>
-            <id>GeoSolutions</id>
-            <url>http://maven.geo-solutions.it/</url>
-        </repository>
-        <repository>
+	    <repository>
+	        <id>osgeo</id>
+	        <name>OSGeo Release Repository</name>
+	        <url>https://repo.osgeo.org/repository/release/</url>
+	        <snapshots><enabled>false</enabled></snapshots>
+	        <releases><enabled>true</enabled></releases>
+	    </repository>
+	    <repository>
             <id>snap-repo-public</id>
             <name>Public Maven Repository for SNAP</name>
             <url>https://nexus.snap-ci.ovh/repository/snap-maven-public/</url>

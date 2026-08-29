@@ -17,24 +17,6 @@
     <version>${revision}</version>
     <packaging>war</packaging>
     
-    <repositories>
-    <repository>
-        <id>osgeo</id>
-        <name>OSGeo Release Repository</name>
-        <url>https://repo.osgeo.org/repository/release/</url>
-        <snapshots><enabled>false</enabled></snapshots>
-        <releases><enabled>true</enabled></releases>
-    </repository>
-</repositories>
-<!--<repositories>
-        <repository>
-            <id>osgeo</id>
-            <name>OSGeo Release Repository</name>
-            <url>https://repo.osgeo.org/repository/release/</url>
-            <snapshots><enabled>false</enabled></snapshots>
-            <releases><enabled>true</enabled></releases>
-        </repository>
-    </repositories>!-->
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
@@ -45,7 +27,6 @@
         <sVersionCommonsNet>3.12.0</sVersionCommonsNet>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionGoogleApiClient>2.8.1</sVersionGoogleApiClient>
-        <sVersionHttpClient>4.5.14</sVersionHttpClient>
         <sVersionJackson>2.20.1</sVersionJackson>
         <sVersionJacksonAnnotations>2.20</sVersionJacksonAnnotations>
         <sVersionJavaxWebsocketApi>1.1</sVersionJavaxWebsocketApi>
@@ -54,9 +35,9 @@
         <sVersionMavenCompilerPlugin>3.11.0</sVersionMavenCompilerPlugin>
         <sVersionMavenWarPlugin>3.4.0</sVersionMavenWarPlugin>
         <sVersionOrbit>1.0.2</sVersionOrbit>
-        <sVersionJersey2>2.45</sVersionJersey2>
         <sVersionServletApi>2.5</sVersionServletApi>
         <sVersionStripeJava>22.0.0</sVersionStripeJava>
+        <sVersionJersey2>2.48</sVersionJersey2>
     </properties>
 
     <build>
@@ -163,12 +144,6 @@
             <version>${sVersionServletApi}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${sVersionHttpClient}</version>
-        </dependency>        
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider -->
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -241,17 +216,7 @@
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-servlet-core</artifactId>
 			<version>${sVersionJersey2}</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.geotools</groupId>
-		    <artifactId>gt-geojson</artifactId>
-		    <version>28.2</version> 
-		</dependency>
-				<dependency>
-		    <groupId>org.geotools</groupId>
-		    <artifactId>gt-epsg-hsql</artifactId>
-		    <version>28.2</version>
-		</dependency>
+		</dependency>		
 		<dependency>
 		    <groupId>io.swagger.core.v3</groupId>
 		    <artifactId>swagger-jaxrs2</artifactId>
