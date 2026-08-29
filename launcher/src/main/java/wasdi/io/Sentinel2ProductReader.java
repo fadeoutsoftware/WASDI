@@ -20,6 +20,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.gis.GdalFileFormats;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -217,7 +218,7 @@ public class Sentinel2ProductReader extends WasdiProductReader {
             asArgs.add("-t_srs");
             asArgs.add("EPSG:4326");
             asArgs.add("-of");
-            asArgs.add("GTiff");
+            asArgs.add(GdalFileFormats.GTiff);
                         
             asArgs.add("-co");
             asArgs.add("PHOTOMETRIC=RGB");

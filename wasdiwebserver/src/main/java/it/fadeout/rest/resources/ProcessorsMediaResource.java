@@ -22,6 +22,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.Comment;
@@ -67,6 +68,7 @@ public class ProcessorsMediaResource {
 	@GET
 	@Path("categories/get")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Get processor categories", description="Returns a list of all available processor/application categories for filtering and organizing processors in the marketplace.")
 	public Response getCategories(@HeaderParam("x-session-token") String sSessionId) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.getCategories");
@@ -97,6 +99,7 @@ public class ProcessorsMediaResource {
 	@DELETE
 	@Path("/reviews/delete")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Delete processor review", description="Deletes a review written by the authenticated user for a processor. Also removes all comments associated with the deleted review.")
 	public Response deleteReview(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("reviewId") String sReviewId ) {
 		
 		try {
@@ -163,6 +166,7 @@ public class ProcessorsMediaResource {
 	@DELETE
 	@Path("/comments/delete")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Delete review comment", description="Deletes a comment written by the authenticated user on a processor review. Only the comment author can delete their own comment.")
 	public Response deleteComment(@HeaderParam("x-session-token") String sSessionId, @QueryParam("reviewId") String sReviewId, @QueryParam("commentId") String sCommentId ) {
 		
 		try {
@@ -225,6 +229,7 @@ public class ProcessorsMediaResource {
 	@POST
 	@Path("/reviews/update")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Update processor review", description="Updates an existing review's rating (1-5) and text content. User must be the review owner. Changes are immediately visible.")
 	public Response updateReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.updateReview");
@@ -270,6 +275,7 @@ public class ProcessorsMediaResource {
 	@POST
 	@Path("/comments/update")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Update review comment", description="Updates the text content of an existing comment. User must be the comment author. Changes take effect immediately.")
 	public Response updateComment(@HeaderParam("x-session-token") String sSessionId, CommentDetailViewModel oCommentViewModel) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.updateComment");
@@ -310,6 +316,7 @@ public class ProcessorsMediaResource {
 	@POST
 	@Path("/reviews/add")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Add processor review", description="Creates a new review/rating (1-5 stars) for a processor. Each user can only submit one review per processor. Requires processor access.")
 	public Response addReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {//
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.addReview");
@@ -378,6 +385,7 @@ public class ProcessorsMediaResource {
 	@POST
 	@Path("/comments/add")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Add comment to review", description="Adds a comment to an existing processor review. Requires access to the processor. Limited comments per review.")
 	public Response addComment(@HeaderParam("x-session-token") String sSessionId, CommentDetailViewModel oCommentViewModel) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.addComment");
@@ -446,6 +454,7 @@ public class ProcessorsMediaResource {
 	@GET
 	@Path("/reviews/getlist")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Get paginated processor reviews", description="Returns paginated reviews for a processor with statistics (average rating, total votes). Includes flag indicating if current user already voted. Sortable and pageable.")
 	public Response getReviewListByProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorName") String sProcessorName, @QueryParam("page") Integer iPage, @QueryParam("itemsperpage") Integer iItemsPerPage) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.getReviewListByProcessor");
@@ -514,6 +523,7 @@ public class ProcessorsMediaResource {
 	@GET
 	@Path("/comments/getlist")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Get review comments", description="Returns all comments associated with a specific review, displaying user names and timestamps. User must have access to the processor.")
 	public Response getCommentListByReview(@HeaderParam("x-session-token") String sSessionId, @QueryParam("reviewId") String sReviewId) {
 		WasdiLog.debugLog("ProcessorsMediaResource.getCommentListByReview");
 
@@ -568,6 +578,7 @@ public class ProcessorsMediaResource {
 	@GET
 	@Path("/publisher/getlist")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Get WASDI publishers", description="Returns a list of WASDI processor publishers (organizations/users with published applications), filtered by user permissions and accessibility.")
 	public Response getPublishers(@HeaderParam("x-session-token") String sSessionId) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.getPublishers");

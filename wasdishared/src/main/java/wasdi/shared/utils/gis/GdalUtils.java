@@ -11,6 +11,7 @@ import wasdi.shared.parameters.settings.MosaicSetting;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.ProcessWorkspaceLogger;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
 import wasdi.shared.utils.runtime.ShellExecReturn;
@@ -342,48 +343,59 @@ public class GdalUtils {
 			return false;
 		}
 		
-		String sOuptutFile = oMosaicParameter.getDestinationProductName();
+		String sOutputFile = oMosaicParameter.getDestinationProductName();
 		String sOutputFileFormat = "GeoTIFF";
 		
 		if (!Utils.isNullOrEmpty(oMosaicSetting.getOutputFormat())) {
 			sOutputFileFormat = oMosaicSetting.getOutputFormat();
 		}
 		
+		// Get Base Path
+		String sWorkspacePath = PathsConfig.getWorkspacePath(oMosaicParameter);
+		// Output of the final gdal shell exec
+		ShellExecReturn oShellExecReturn = null;
+		
+		
 		try {
-			String sGdalCommand = "gdal_merge.py";
 			
-			String sOutputFormat = snapFormat2GDALFormat(sOutputFileFormat);
-			Boolean bVrt = false;
+			ArrayList<String> asInputProducts = new ArrayList<String>();
 			
-			if (sOutputFormat.equals("VRT")) {
-				sGdalCommand = "gdalbuildvrt";
-				bVrt = true;
-			}
-			
-			sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
-			
-			ArrayList<String> asArgs = new ArrayList<String>();
-			asArgs.add(sGdalCommand);
-			
-			if (!bVrt) {
+			// for each product
+			for (int iProducts = 0; iProducts<oMosaicSetting.getSources().size(); iProducts ++) {
 				
-				WasdiLog.debugLog("NOT Virtual mosaic - set params for gdal_merge.py");
+				// Get full path
+				String sProductFile = sWorkspacePath+oMosaicSetting.getSources().get(iProducts);
+								
+				// Check if the file exists
+				File oFile = new File(sProductFile);
+								
+				// This is not promising
+				if (oFile.exists()) {
+					WasdiLog.debugLog("GdalUtils.runGDALMosaic: Adding input Product [" + iProducts +"] = " + sProductFile);
+					asInputProducts.add(sProductFile);
+				}
+			}			
+			
+			
+			// Get the output format
+			String sOutputFormat = snapFormat2GDALFormat(sOutputFileFormat);
+			
+			if (sOutputFormat.equals(GdalFileFormats.DIMAP)) {
+				// For DIMAP we use gdal merge
+				
+				String sGdalCommand = GdalUtils.adjustGdalFolder("gdal_merge.py");
+				ArrayList<String> asArgs = new ArrayList<String>();
+				asArgs.add(sGdalCommand);
+				
+				WasdiLog.debugLog("Mosaic.runGDALMosaic: " + GdalFileFormats.DIMAP + " - Set params for gdal_merge.py");
 				
 				// Output file
 				asArgs.add("-o");
-				asArgs.add(PathsConfig.getWorkspacePath(oMosaicParameter) + sOuptutFile);
+				asArgs.add(PathsConfig.getWorkspacePath(oMosaicParameter) + sOutputFile);
 				
 				// Output format
 				asArgs.add("-of");
 				asArgs.add(sOutputFormat);
-				
-				if (sOutputFormat.equals("GTiff")) {
-					asArgs.add("-co");
-					asArgs.add("COMPRESS=LZW");
-					
-					asArgs.add("-co");
-					asArgs.add("BIGTIFF=YES");
-				}
 				
 				// Set No Data for input 
 				if (oMosaicSetting.getInputIgnoreValue()!= null) {
@@ -406,10 +418,21 @@ public class GdalUtils {
 					asArgs.add(""+ oMosaicSetting.getPixelSizeX());
 					asArgs.add("" + oMosaicSetting.getPixelSizeY());
 				}				
-			}
-			else {
 				
-				WasdiLog.debugLog("Virtual mosaic - set params for gdalbuildvrt");
+				// Input Produts
+				asArgs.addAll(asInputProducts);
+				
+				// Run the command
+				oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
+								
+			}
+			else if (sOutputFormat.equals(GdalFileFormats.VRT)) {
+				
+				String sGdalCommand = GdalUtils.adjustGdalFolder("gdalbuildvrt");
+				ArrayList<String> asArgs = new ArrayList<String>();
+				asArgs.add(sGdalCommand);
+				
+				WasdiLog.debugLog("Mosaic.runGDALMosaic: Virtual mosaic - set params for gdalbuildvrt");
 				
 				// Set No Data for input 
 				if (oMosaicSetting.getInputIgnoreValue()!= null) {
@@ -420,52 +443,96 @@ public class GdalUtils {
 				// Set no data for mosaics 
 				if (oMosaicSetting.getNoDataValue() != null) {
 					asArgs.add("-vrtnodata");
-					asArgs.add(""+oMosaicSetting.getNoDataValue());				
-					
-					// Could not find this param for vrt..
-					//asArgs.add("-init");
-					//asArgs.add(""+m_oMosaicSetting.getNoDataValue());
+					asArgs.add(""+oMosaicSetting.getNoDataValue());
 				}
 				
 			
-				asArgs.add(PathsConfig.getWorkspacePath(oMosaicParameter) + sOuptutFile);
-			}
-						
-			// Get Base Path
-			String sWorkspacePath = PathsConfig.getWorkspacePath(oMosaicParameter);
-			
-			// for each product
-			for (int iProducts = 0; iProducts<oMosaicSetting.getSources().size(); iProducts ++) {
+				asArgs.add(PathsConfig.getWorkspacePath(oMosaicParameter) + sOutputFile);
 				
-				// Get full path
-				String sProductFile = sWorkspacePath+oMosaicSetting.getSources().get(iProducts);
+				// Add input products 
+				asArgs.addAll(asInputProducts);
+				
+				// Run the command
+				oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
 								
-				// Check if the file exists
-				File oFile = new File(sProductFile);
-								
-				// This is not promising
-				if (oFile.exists()) {
-					WasdiLog.debugLog("GdalUtils.runGDALMosaic: Adding input Product [" + iProducts +"] = " + sProductFile);
-					asArgs.add(sProductFile);
-				}
+			}
+			else {
+				WasdiLog.debugLog("Mosaic.runGDALMosaic:: " + GdalFileFormats.GTiff + " - Set params for COG GeoTiff");
+
+	            String sTempVrtFile = sWorkspacePath + sOutputFile + ".tmp.vrt";
+	            String sFinalOutputFile = sWorkspacePath + sOutputFile;
+
+	            // Build a VRT mosaic
+	            ArrayList<String> asVrtArgs = new ArrayList<>();
+	            asVrtArgs.add(GdalUtils.adjustGdalFolder("gdalbuildvrt"));
+
+	            if (oMosaicSetting.getInputIgnoreValue() != null) {
+	                asVrtArgs.add("-srcnodata");
+	                asVrtArgs.add("" + oMosaicSetting.getInputIgnoreValue());
+	            }
+
+	            if (oMosaicSetting.getNoDataValue() != null) {
+	                asVrtArgs.add("-vrtnodata");
+	                asVrtArgs.add("" + oMosaicSetting.getNoDataValue());
+	            }
+
+	            asVrtArgs.add(sTempVrtFile);
+
+	            // Add source files
+	            asVrtArgs.addAll(asInputProducts);
+
+	            // Make the virtual mosaic
+	            ShellExecReturn oVrtExecReturn = RunTimeUtils.shellExec(asVrtArgs, true, true, true, true);
+	            
+	            if (oVrtExecReturn!=null) {
+		            WasdiLog.debugLog("Mosaic.runGDALMosaic: COG virtual mosaic output = " + oVrtExecReturn.getOperationLogs());
+					if (oPWLogger!=null) {
+						oPWLogger.log("Mosaic logs = " + oVrtExecReturn.getOperationLogs());
+					}	            	            	
+	            }
+
+	            // Translate VRT to COG
+	            ArrayList<String> asTranslateArgs = new ArrayList<>();
+	            asTranslateArgs.add(GdalUtils.adjustGdalFolder("gdal_translate"));
+	            asTranslateArgs.add("-of");
+	            asTranslateArgs.add("COG");
+	            
+	            // COG Creation Options
+	            asTranslateArgs.add("-co");
+	            asTranslateArgs.add("COMPRESS=LZW");
+	            asTranslateArgs.add("-co");
+	            asTranslateArgs.add("BIGTIFF=YES");
+	            asTranslateArgs.add("-co");
+	            asTranslateArgs.add("NUM_THREADS=ALL_CPUS");
+
+	            // Input VRT and Output COG
+	            asTranslateArgs.add(sTempVrtFile);
+	            asTranslateArgs.add(sFinalOutputFile);
+
+	            oShellExecReturn = RunTimeUtils.shellExec(asTranslateArgs, true, true, true, true);
+	            
+	            // Clean up temporary VRT file
+	            WasdiFileUtils.deleteFile(sTempVrtFile);
 			}
 			
-			// Run the command
-			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
-			
-			// Is there an output to log?
-			if (!Utils.isNullOrEmpty(oShellExecReturn.getOperationLogs())) {
-				WasdiLog.debugLog("Mosaic.runGDALMosaic: logs = " + oShellExecReturn.getOperationLogs());
-				if (oPWLogger!=null) {
-					oPWLogger.log("Mosaic logs = " + oShellExecReturn.getOperationLogs());
-				}
+			if (oShellExecReturn!=null) {
+				// Is there an output to log?
+				if (!Utils.isNullOrEmpty(oShellExecReturn.getOperationLogs())) {
+					WasdiLog.debugLog("Mosaic.runGDALMosaic: logs = " + oShellExecReturn.getOperationLogs());
+					if (oPWLogger!=null) {
+						oPWLogger.log("Mosaic logs = " + oShellExecReturn.getOperationLogs());
+					}
+				}				
+			}
+			else {
+				WasdiLog.errorLog("Mosaic.runGDALMosaic: oShellExecReturn is null");
 			}
 			
-			File oOutputFile = new File(sWorkspacePath+sOuptutFile); 
+			File oOutputFile = new File(sWorkspacePath+sOutputFile); 
 			
 			if (oOutputFile.exists()) {
 				// Done
-				WasdiLog.infoLog("Mosaic.runGDALMosaic: created GDAL file = " + sOuptutFile);				
+				WasdiLog.infoLog("Mosaic.runGDALMosaic: created GDAL file = " + sOutputFile);				
 			}
 			else {
 				
@@ -480,15 +547,15 @@ public class GdalUtils {
 				}				
 				
     			
-    			File oOutputFile2 = new File(sWorkspacePath+sOuptutFile); 
+    			File oOutputFile2 = new File(sWorkspacePath+sOutputFile); 
     			
     			if (oOutputFile2.exists()) {
     				// Done
-    				WasdiLog.infoLog("Mosaic.runGDALMosaic: created GDAL file = " + sOuptutFile);				
+    				WasdiLog.infoLog("Mosaic.runGDALMosaic: created GDAL file = " + sOutputFile);				
     			}
     			else {
     				// Error
-    				WasdiLog.errorLog("Mosaic.runGDALMosaic: error creating mosaic, the output file  = " + sOuptutFile + " does not exists");
+    				WasdiLog.errorLog("Mosaic.runGDALMosaic: error creating mosaic, the output file  = " + sOutputFile + " does not exists");
     				if (oPWLogger!=null) {
     					oPWLogger.log("Mosaic error creating mosaic, the output file does not exists ");
     				}    				
@@ -498,7 +565,7 @@ public class GdalUtils {
 			
 		} 
         catch (Throwable e) {
-			WasdiLog.errorLog("Mosaic.runGDALMosaic: Exception generating output Product " + PathsConfig.getWorkspacePath(oMosaicParameter) + sOuptutFile);
+			WasdiLog.errorLog("Mosaic.runGDALMosaic: Exception generating output Product " + PathsConfig.getWorkspacePath(oMosaicParameter) + sOutputFile);
 			WasdiLog.errorLog("Mosaic.runGDALMosaic: " + e.toString());
 			return false;
 		}
@@ -520,13 +587,13 @@ public class GdalUtils {
 
         switch (sFormatName) {
             case "GeoTIFF":
-                return "GTiff";
+                return GdalFileFormats.GTiff;
             case "BEAM-DIMAP":
-                return "DIMAP";
+                return GdalFileFormats.DIMAP;
             case "VRT":
-                return "VRT";
+                return GdalFileFormats.VRT;
             default:
-                return "GTiff";
+                return GdalFileFormats.GTiff;
         }
     }	
 }

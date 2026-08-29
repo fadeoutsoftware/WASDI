@@ -18,6 +18,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import wasdi.shared.business.Organization;
 import wasdi.shared.business.Subscription;
@@ -67,6 +68,7 @@ public class OrganizationResource {
 	@GET
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get user's organizations", description="Returns a list of organizations owned by or shared with the authenticated user. Includes a readOnly flag indicating whether the user can modify each organization.")
 	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId) {
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -128,6 +130,7 @@ public class OrganizationResource {
 	@GET
 	@Path("/byId")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get organization details", description="Returns the full details of a specific organization by ID, including name, description, member count, and configuration. User must have access to the organization.")
 	public Response getOrganizationViewModel(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("organization") String sOrganizationId) {
 		WasdiLog.debugLog("OrganizationResource.getOrganizationViewModel( Organization: " + sOrganizationId + ")");
@@ -196,6 +199,7 @@ public class OrganizationResource {
 	@POST
 	@Path("/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Create organization", description="Creates a new organization with the provided name and description. The calling user becomes the owner. Organization names must be globally unique.")
 	public Response createOrganization(@HeaderParam("x-session-token") String sSessionId, OrganizationEditorViewModel oOrganizationEditorViewModel) {
 		WasdiLog.debugLog("OrganizationResource.createOrganization");
 		
@@ -247,6 +251,7 @@ public class OrganizationResource {
 	@PUT
 	@Path("/update")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Update organization details", description="Updates an organization's name, description, and configuration. User must be the owner or have write permissions. Organization names must remain globally unique.")
 	public Response upateOrganization(@HeaderParam("x-session-token") String sSessionId, OrganizationEditorViewModel oOrganizationEditorViewModel) {
 		WasdiLog.debugLog("OrganizationResource.updateOrganization");
 		
@@ -305,6 +310,7 @@ public class OrganizationResource {
 	@DELETE
 	@Path("/delete")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Delete organization", description="Permanently deletes an organization and revokes all associated user permissions. Only the organization owner can delete it. This operation is irreversible.")
 	public Response deleteOrganization(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("organization") String sOrganizationId) {
 		WasdiLog.debugLog("OrganizationResource.deleteOrganization( Organization: " + sOrganizationId + " )");
@@ -381,6 +387,7 @@ public class OrganizationResource {
 	@POST
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Share organization with user", description="Grants a user access to an organization with specified rights (READ or WRITE). Sends notification email to the recipient. Cannot share with self (unless admin) or with the owner.")
 	public Response shareOrganization(@HeaderParam("x-session-token") String sSessionId, @QueryParam("organization") String sOrganizationId, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
 
 		WasdiLog.debugLog("OrganizationResource.ShareOrganization( Organization: " + sOrganizationId + ", User: " + sDestinationUserId + " )");
@@ -487,6 +494,7 @@ public class OrganizationResource {
 	@GET
 	@Path("share/byorganization")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get users with organization access", description="Returns a list of all users who have been granted access to the organization, including their user IDs and permission levels.")
 	public Response getEnabledUsersSharedOrganization(@HeaderParam("x-session-token") String sSessionId, @QueryParam("organization") String sOrganizationId) {
 
 		WasdiLog.debugLog("OrganizationResource.getEnabledUsersSharedOrganization( Organization: " + sOrganizationId + " )");
@@ -539,6 +547,7 @@ public class OrganizationResource {
 	@DELETE
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Revoke organization access from user", description="Removes a user's access to a shared organization. Only organization owner or users with write permissions can revoke sharing.")
 	public Response deleteUserSharedOrganization(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("organization") String sOrganizationId, @QueryParam("userId") String sUserId) {
 

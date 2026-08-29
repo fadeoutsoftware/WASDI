@@ -14,6 +14,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.users.ResourceTypes;
@@ -53,6 +54,7 @@ public class NodeResource {
 	@GET
 	@Path("/allnodes")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get all available WASDI nodes", description="Returns a list of all active WASDI nodes that the user has access to. Admins see all active nodes, non-admins see only shared and active nodes, or their default node. Passing all=true also returns inactive nodes (admin only).")
 	public List<NodeViewModel> getAllNodes(@HeaderParam("x-session-token") String sSessionId, @QueryParam("all") Boolean bAlsoNotActive) {
 		
 		WasdiLog.debugLog("NodeResource.getAllNodes( Session: " + sSessionId + ")");
@@ -139,6 +141,7 @@ public class NodeResource {
 	@PUT
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Share node with user", description="Grants a user access to a specific node with the specified rights level (READ, WRITE, or ADMIN). The node must already exist. Admin users can share nodes they own with other users.")
 	public PrimitiveResult shareNode(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("node") String sNodeCode, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
 
@@ -258,6 +261,7 @@ public class NodeResource {
 	@GET
 	@Path("share/bynode")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get users with node access", description="Returns a list of all users who have been granted access to a specific node, including their user IDs and access rights.")
 	public List<NodeSharingViewModel> getEnableUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("node") String sNodeCode) {
 
 		WasdiLog.debugLog("NodeResource.getEnableUsersSharedWorksace( WS: " + sNodeCode + " )");
@@ -299,6 +303,7 @@ public class NodeResource {
 	@DELETE
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Revoke node access from user", description="Removes a user's access to a shared node. Only node owners/admins can revoke sharing permissions.")
 	public PrimitiveResult deleteUserSharedNode(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("node") String sNodeCode, @QueryParam("userId") String sUserId) {
 
@@ -358,6 +363,7 @@ public class NodeResource {
 	 */
 	@GET
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get node details", description="Returns full details of a specific WASDI node including configuration, status, and capabilities. Admin users only.")
 	public Response getNode(@HeaderParam("x-session-token") String sSessionId, @QueryParam("node") String sNodeCode) {
 		
 		WasdiLog.debugLog("NodeResource.getNode( Session: " + sSessionId + ", NodeCode " + sNodeCode + " )");
@@ -399,6 +405,7 @@ public class NodeResource {
 	
 	@POST
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Create a new WASDI node", description="Creates a new WASDI node with the specified configuration (code, base address, API credentials, etc.). Admin users only. The node code must be unique.")
 	public Response createNode(@HeaderParam("x-session-token") String sSessionId, NodeFullViewModel oNodeViewModel) {
 		
 		WasdiLog.debugLog("NodeResource.createNode( Session: " + sSessionId + " )");
@@ -455,6 +462,7 @@ public class NodeResource {
 	
 	@PUT
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Update node configuration", description="Updates an existing WASDI node's configuration parameters. Admin users only. The node must already exist.")
 	public Response updateNode(@HeaderParam("x-session-token") String sSessionId, NodeFullViewModel oNodeViewModel) {
 		
 		WasdiLog.debugLog("NodeResource.updateNode( Session: " + sSessionId + " )");

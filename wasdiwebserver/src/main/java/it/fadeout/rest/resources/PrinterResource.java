@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.swagger.v3.oas.annotations.Operation;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrinterViewModel;
@@ -31,6 +32,7 @@ public class PrinterResource {
     @Path("/storemap")
     @Produces({ "application/xml", "application/json", "text/xml" })
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Store map for printing", description="Submits a map for printing with specified format (PDF/PNG), base map, center coordinates, and scale. Communicates with external print server and returns a UUID for later retrieval.")
     public Response storemap(PrinterViewModel oPrinterViewModel) {
     	if(oPrinterViewModel == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -102,6 +104,7 @@ public class PrinterResource {
 
     @GET
     @Produces({ "application/pdf", "image/png" ,"text/xml"})
+    @Operation(summary = "Retrieve printed map", description="Retrieves a previously stored map from the print server by UUID. Returns the rendered output in the format originally requested (PDF or PNG).")
     public Response print(@QueryParam("uuid") String sUUID) {
         if (sUUID == null || sUUID.trim().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)

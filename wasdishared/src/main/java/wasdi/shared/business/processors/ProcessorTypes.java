@@ -18,6 +18,7 @@ public class ProcessorTypes {
 	public static String JUPYTER_NOTEBOOK = "jupyter-notebook";
 	public static String CSHARP = "csharp";
 	public static String EOEPCA = "eoepca";
+	public static String OGC_APP_PACKAGE = "ogc_app_package";
 	public static String PYTHON_PIP_2 = "python_pip_2";
 	public static String PIP_ONESHOT = "pip_oneshot";
 	public static String PYTHON_PIP_2_UBUNTU_20 = "python_pip_2_ubuntu_20";
@@ -40,6 +41,7 @@ public class ProcessorTypes {
 		else if (sProcessorType.equals(JUPYTER_NOTEBOOK)) return "jupyter-notebook";
 		else if (sProcessorType.equals(CSHARP)) return "csharp";
 		else if (sProcessorType.equals(EOEPCA)) return "eoepca";
+		else if (sProcessorType.equals(OGC_APP_PACKAGE)) return "ogcAppPackage";
 		else if (sProcessorType.equals(PYTHON_PIP_2)) return "python_pip_2";
 		else if (sProcessorType.equals(PIP_ONESHOT)) return "pip_oneshot";
 		else if (sProcessorType.equals(PYTHON_PIP_2_UBUNTU_20)) return "wasdiUbuntuFocalPython";

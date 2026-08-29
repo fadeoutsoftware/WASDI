@@ -17,6 +17,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.JupyterNotebook;
@@ -62,6 +63,7 @@ public class ConsoleResource {
 	@POST
 	@Path("/create")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Create or resume a Jupyter Notebook", description="Creates or resumes a Jupyter Notebook instance for the given workspace. If a notebook already exists and is reachable, its URL is returned immediately. If the IP of the calling client is new, the Traefik firewall rule is updated to allow it. If the notebook is absent or stale, a new Docker container is launched asynchronously via the WASDI launcher. Requires a valid subscription.")
 	public PrimitiveResult create(@Context HttpServletRequest oRequest, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspaceId") String sWorkspaceId) {
 		WasdiLog.infoLog("ConsoleResource.create( WorkspaceId: " + sWorkspaceId + " )");
 
@@ -286,6 +288,7 @@ public class ConsoleResource {
 	@GET
 	@Path("/active")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Check if notebook container is active", description="Checks whether the Jupyter Notebook container for the specified workspace is currently up and reachable. Returns the notebook URL when active.")
 	public PrimitiveResult isJupyterNotebookActive(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspaceId") String sWorkspaceId) {
 		WasdiLog.debugLog("ConsoleResource.isJupyterNotebookActive( WS: " + sWorkspaceId + " )");
@@ -354,6 +357,7 @@ public class ConsoleResource {
 	@GET
 	@Path("/ready")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Check if notebook is ready", description="Checks whether the Jupyter Notebook container is both active (reachable) and up-to-date. Returns the notebook URL when both conditions are met. Returns a standard HTTP error code (not just a PrimitiveResult) on access or session failures.")
 	public Response isNotebookReady(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspaceId") String sWorkspaceId) {
 		
 		try {

@@ -163,6 +163,19 @@ public class SqliteWorkspaceRepositoryBackend extends SqliteRepository implement
     }
 
     @Override
+    public List<Workspace> getPublicWorkspaces() {
+
+        try {
+            return findAllWhere("public", true, Workspace.class);
+
+        } catch (Exception oEx) {
+            WasdiLog.errorLog("WorkspaceRepository.getPublicWorkspaces: error: ", oEx);
+        }
+
+        return new ArrayList<>();
+    }
+
+    @Override
     public List<Workspace> getWorkspacesSortedByOldestUpdate(String sUserId) {
 
         try {

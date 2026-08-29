@@ -38,6 +38,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import wasdi.shared.LauncherOperations;
@@ -94,6 +95,7 @@ public class WorkflowsResource {
     @POST
     @Path("/uploadfile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Operation(summary = "Upload workflow file", description = "Uploads a new SNAP workflow XML file, stores its metadata, and detects its input and output graph nodes.")
     public Response uploadFile(@FormDataParam("file") InputStream oFileInputStream,
                                 @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId,
                                 @QueryParam("name") String sName, @QueryParam("description") String sDescription,
@@ -179,6 +181,7 @@ public class WorkflowsResource {
     @POST
     @Path("/updatefile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Operation(summary = "Update workflow file", description = "Replaces an existing workflow XML file and refreshes the input and output node identifiers stored in its metadata.")
     public Response updateFile(@FormDataParam("file") InputStream oFileInputStream,
                                     @HeaderParam("x-session-token") String sSessionId,
                                     @QueryParam("workflowid") String sWorkflowId) {
@@ -283,6 +286,7 @@ public class WorkflowsResource {
     @Path("/getxml")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
+    @Operation(summary = "Get workflow XML", description = "Returns the XML content of an accessible workflow by its identifier.")
     public Response getXML(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId) {
 
         WasdiLog.debugLog("WorkflowsResource.getXML( Workflow Id : " + sWorkflowId + ");");
@@ -341,6 +345,7 @@ public class WorkflowsResource {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)    
     @Path("/updatexml")
+    @Operation(summary = "Update workflow XML", description = "Updates an existing workflow from XML text in the request body by delegating to the workflow-file update operation.")
     public Response updateXML(@HeaderParam("x-session-token") String sSessionId,
                                  @QueryParam("workflowId") String sWorkflowId, String sGraphXml) {
 
@@ -366,6 +371,7 @@ public class WorkflowsResource {
     @POST
     @Path("/updateparams")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Operation(summary = "Update workflow parameters", description = "Updates an existing workflow's name, description, and public visibility after validating write permissions.")
     public Response updateParams(
             @HeaderParam("x-session-token") String sSessionId,
             @QueryParam("workflowid") String sWorkflowId,
@@ -415,6 +421,7 @@ public class WorkflowsResource {
     @GET
     @Path("/getbyuser")
     @Produces({ "application/json", "text/xml" })
+    @Operation(summary = "Get visible workflows", description = "Returns workflows owned by, shared with, or public to the authenticated user, including sharing and read-only information.")
     public ArrayList<SnapWorkflowViewModel> getWorkflowsByUser(@HeaderParam("x-session-token") String sSessionId) {
         WasdiLog.debugLog("WorkflowsResource.getWorkflowsByUser");
         
@@ -502,6 +509,7 @@ public class WorkflowsResource {
      */
     @GET
     @Path("/delete")
+    @Operation(summary = "Delete workflow", description = "Deletes an owned workflow, its file, and sharing records. For a non-owner with shared access, removes only that user's sharing.")
     public Response delete(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId) {
         WasdiLog.debugLog("WorkflowsResource.delete( Workflow: " + sWorkflowId + " )");
         try {
@@ -582,6 +590,7 @@ public class WorkflowsResource {
     @PUT
     @Path("share/add")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "Share workflow with user", description = "Grants a user READ or WRITE access to a workflow after validating the requester and target, then sends a notification email.")
     public PrimitiveResult shareWorkflow(@HeaderParam("x-session-token") String sSessionId,
                                          @QueryParam("workflowId") String sWorkflowId, @QueryParam("userId") String sUserId, @QueryParam("rights") String sRights) {
 
@@ -698,6 +707,7 @@ public class WorkflowsResource {
     @DELETE
     @Path("share/delete")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "Remove workflow sharing", description = "Removes a user's workflow sharing when requested by that shared user, the workflow owner, or an authorized administrator.")
     public PrimitiveResult deleteUserSharingWorkflow(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId, @QueryParam("userId") String sUserId) {
 
         WasdiLog.debugLog("WorkflowsResource.deleteUserSharedWorkflow( ProcId: " + sWorkflowId + ", User:" + sUserId + " )");
@@ -771,6 +781,7 @@ public class WorkflowsResource {
     @GET
     @Path("share/byworkflow")
     @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "Get workflow sharings", description = "Returns users with explicit access to a workflow and their assigned permission levels.")
     public List<WorkflowSharingViewModel> getEnableUsersSharedWorkflow(@HeaderParam("x-session-token") String
                                                                                sSessionId, @QueryParam("workflowId") String sWorkflowId) {
         ArrayList<WorkflowSharingViewModel> oResult = new ArrayList<WorkflowSharingViewModel>();
@@ -829,6 +840,7 @@ public class WorkflowsResource {
     @POST
     @Path("/run")
     @Produces({ "application/json", "text/xml" })
+    @Operation(summary = "Run workflow", description = "Executes an accessible SNAP workflow in a writable workspace, downloading its XML from the owning node when necessary and launching a GRAPH process.")
     public PrimitiveResult run(@HeaderParam("x-session-token") String sSessionId,
                                                       @QueryParam("workspace") String sWorkspaceId,
                                                       @QueryParam("parent") String sParentProcessWorkspaceId,
@@ -981,6 +993,7 @@ public class WorkflowsResource {
     @GET
     @Path("download")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Operation(summary = "Download workflow XML", description = "Streams an accessible workflow XML file by identifier, accepting authentication through the header or browser token query parameter.")
     public Response download(@HeaderParam("x-session-token") String sSessionId,
                                       @QueryParam("token") String sTokenSessionId,
                                       @QueryParam("workflowId") String sWorkflowId) {
@@ -1056,6 +1069,7 @@ public class WorkflowsResource {
     @Path("/byname")
     @Consumes({ "application/json", "text/xml" })
     @Produces({ "application/json", "text/xml" })
+    @Operation(summary = "Get workflow by name", description = "Returns an accessible workflow and its XML content by workflow name.")
     public Response getWorkflowByName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sWorkflowName) {
 
         WasdiLog.debugLog("WorkflowsResource.getWorkflowByName(  Name : " + sWorkflowName + ");");

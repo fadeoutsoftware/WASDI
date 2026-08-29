@@ -17,6 +17,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import wasdi.shared.business.Project;
 import wasdi.shared.business.Subscription;
@@ -57,6 +58,7 @@ public class ProjectResource {
 	@GET
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get user projects", description = "Returns projects available to the authenticated user across accessible subscriptions, optionally restricted to valid projects.")
 	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("valid") Boolean bValid) {
 		
 		if (bValid == null) bValid = false;
@@ -161,6 +163,7 @@ public class ProjectResource {
 	@GET
 	@Path("/bysubscription")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get subscription projects", description = "Returns the projects belonging to a subscription after validating the authenticated user's access.")
 	public Response getListBySubscription(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("subscription") String sSubscriptionId) {
 		WasdiLog.debugLog("ProjectResource.getListBySubscription(Subscription: " + sSubscriptionId + ")");
@@ -225,6 +228,7 @@ public class ProjectResource {
 	@GET
 	@Path("/byId")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get project details", description = "Returns the detailed view model for a project accessible to the authenticated user.")
 	public Response getProjectViewModel(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("project") String sProjectId) {
 		WasdiLog.debugLog("ProjectResource.getProjectViewModel( Project: " + sProjectId + ")");
@@ -279,6 +283,7 @@ public class ProjectResource {
 	@POST
 	@Path("/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Create project", description = "Creates a project, resolving duplicate names automatically, and optionally makes it the active project for the target user.")
 	public Response createProject(@HeaderParam("x-session-token") String sSessionId, ProjectEditorViewModel oProjectEditorViewModel) {
 		
 		WasdiLog.debugLog("ProjectResource.createProject( Project: " + oProjectEditorViewModel.toString() + ")");
@@ -337,6 +342,7 @@ public class ProjectResource {
 	@PUT
 	@Path("/update")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Update project", description = "Updates an existing project, enforces a unique name, and adjusts the user's active project when requested.")
 	public Response upateProject(@HeaderParam("x-session-token") String sSessionId, ProjectEditorViewModel oProjectEditorViewModel) {
 		WasdiLog.debugLog("ProjectResource.updateProject( Project: " + oProjectEditorViewModel.toString() + ")");
 
@@ -423,6 +429,7 @@ public class ProjectResource {
 	@PUT
 	@Path("/active")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Change active project", description = "Changes or clears the active project and corresponding subscription. Changing another user's selection requires administrator privileges.")
 	public Response changeActiveProject(@HeaderParam("x-session-token") String sSessionId, @QueryParam("project") String sProjectId, @QueryParam("target") String sTargetUserId) {
 		WasdiLog.debugLog("ProjectResource.changeActiveProject( ProjectId: " + sProjectId + ")");
 
@@ -489,6 +496,7 @@ public class ProjectResource {
 	@DELETE
 	@Path("/delete")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Delete project", description = "Deletes a project after validating its identifier and the authenticated user's permissions.")
 	public Response deleteProject(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("project") String sProjectId) {
 		WasdiLog.debugLog("ProjectResource.deleteProject( Project: " + sProjectId + " )");

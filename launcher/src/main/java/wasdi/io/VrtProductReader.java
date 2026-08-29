@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.gis.GdalFileFormats;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
@@ -37,7 +38,7 @@ public class VrtProductReader extends WasdiProductReader {
         	
         	// Create the sub folder
         	NodeGroupViewModel oNodeGroupViewModel = new NodeGroupViewModel();
-        	oNodeGroupViewModel.setNodeName("VRT");
+        	oNodeGroupViewModel.setNodeName(GdalFileFormats.VRT);
         	
         	// Create the single band representing the shape
         	BandViewModel oBandViewModel = new BandViewModel();

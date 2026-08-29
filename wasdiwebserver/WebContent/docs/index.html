@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WASDI API Documentation</title>
+  <!-- Load WebJar CSS -->
+  <link rel="stylesheet" type="text/css" href="../webjars/swagger-ui/5.32.14/swagger-ui.css" />
+  <link rel="stylesheet" type="text/css" href="../webjars/swagger-ui/5.32.14/index.css" />
+</head>
+<body>
+  <div id="swagger-ui"></div>
+
+  <!-- Load WebJar JS -->
+  <script src="../webjars/swagger-ui/5.32.14/swagger-ui-bundle.js"></script>
+  <script src="../webjars/swagger-ui/5.32.14/swagger-ui-standalone-preset.js"></script>
+  
+  <script>
+    window.onload = function() {
+      window.ui = SwaggerUIBundle({
+        url: "../rest/openapi.json", 
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout"
+      });
+    };
+  </script>
+</body>
+</html>

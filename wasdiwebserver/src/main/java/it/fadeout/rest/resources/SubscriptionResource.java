@@ -22,6 +22,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import it.fadeout.services.StripeService;
 import wasdi.shared.business.Organization;
@@ -86,6 +87,7 @@ public class SubscriptionResource {
 	@GET
 	@Path("/active")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get active subscription", description = "Returns the authenticated user's active subscription from the set of currently valid subscriptions.")
 	public Response getActiveByUser(@HeaderParam("x-session-token") String sSessionId) {
 		
 
@@ -145,6 +147,7 @@ public class SubscriptionResource {
 	@GET
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get user subscriptions", description = "Returns subscriptions available to the authenticated user through ownership, sharing, or organization permissions, optionally restricted to valid subscriptions.")
 	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("valid") Boolean bValid) {
 		
 		if (bValid == null) bValid = false;
@@ -178,6 +181,7 @@ public class SubscriptionResource {
 	@GET
 	@Path("/count")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Count subscriptions", description = "Returns the total number of subscriptions. This endpoint is restricted to administrators.")
 	public Response getSubscriptionsCount(@HeaderParam("x-session-token") String sSessionId) {
 		
 		WasdiLog.debugLog("SubscriptionResource.getSubscriptionsCount");
@@ -224,6 +228,7 @@ public class SubscriptionResource {
 	@GET
 	@Path("/byId")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get subscription details", description = "Returns the full view model for a subscription accessible to the authenticated user.")
 	public Response getSubscriptionViewModel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("subscription") String sSubscriptionId) {
 		WasdiLog.debugLog("SubscriptionResource.getSubscriptionViewModel( Subscription: " + sSubscriptionId + ")");
 
@@ -290,6 +295,7 @@ public class SubscriptionResource {
 	@POST
 	@Path("/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Create subscription", description = "Creates a subscription and its default project, resolving duplicate names. Non-administrators may create subscriptions only for themselves.")
 	public Response createSubscription(@HeaderParam("x-session-token") String sSessionId, SubscriptionViewModel oSubscriptionViewModel) {
 		WasdiLog.debugLog("SubscriptionResource.createSubscription( Subscription: " + oSubscriptionViewModel.toString() + ")");
 
@@ -362,6 +368,7 @@ public class SubscriptionResource {
 	@PUT
 	@Path("/update")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Update subscription", description = "Updates an existing subscription. Non-administrator callers cannot alter its successful-purchase state.")
 	public Response upateSubscription(@HeaderParam("x-session-token") String sSessionId, SubscriptionViewModel oSubscriptionViewModel) {
 		WasdiLog.debugLog("SubscriptionResource.updateSubscription");
 
@@ -433,6 +440,7 @@ public class SubscriptionResource {
 	@DELETE
 	@Path("/delete")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Delete subscription", description = "Deletes an owned subscription with its sharings and projects, or removes only the caller's sharing when the caller is not its owner.")
 	public Response deleteSubscription(@HeaderParam("x-session-token") String sSessionId, @QueryParam("subscription") String sSubscriptionId) {
 		
 		WasdiLog.debugLog("SubscriptionResource.deleteSubscription( Subscription: " + sSubscriptionId + " )");
@@ -519,6 +527,7 @@ public class SubscriptionResource {
 	@GET
 	@Path("/types")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get subscription types", description = "Returns the subscription types currently available on the platform.")
 	public Response getSubscriptionTypes(@HeaderParam("x-session-token") String sSessionId) {
 		WasdiLog.debugLog("SubscriptionResource.getSubscriptionTypes");
 		try {
@@ -541,6 +550,7 @@ public class SubscriptionResource {
 	@POST
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Share subscription with user", description = "Grants a user READ or WRITE access to a subscription after validating the requester, target user, and ownership constraints.")
 	public Response shareSubscription(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("subscription") String sSubscriptionId, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
 
@@ -630,6 +640,7 @@ public class SubscriptionResource {
 	@GET
 	@Path("share/bysubscription")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Get subscription sharings", description = "Returns users who have explicit access to a subscription and their assigned permission levels.")
 	public Response getEnableUsersSharedSubscription(@HeaderParam("x-session-token") String sSessionId, @QueryParam("subscription") String sSubscriptionId) {
 
 		WasdiLog.debugLog("SubscriptionResource.getEnableUsersSharedSubscription( Subscription: " + sSubscriptionId + " )");
@@ -680,6 +691,7 @@ public class SubscriptionResource {
 	@DELETE
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Remove subscription sharing", description = "Removes one user's sharing from a subscription after validating owner, writer, administrator, and beneficiary rules.")
 	public Response deleteUserSharedSubscription(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("subscription") String sSubscriptionId, @QueryParam("userId") String sUserId) {
 
@@ -776,6 +788,7 @@ public class SubscriptionResource {
 	@GET
 	@Path("/stripe/paymentUrl")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Get subscription payment URL", description = "Creates a Stripe checkout URL for the selected subscription type and optionally associates the purchase with a workspace.")
 	public Response getStripePaymentUrl(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("subscription") String sSubscriptionId, @QueryParam("workspace") String sWorkspaceId) {
 		WasdiLog.debugLog("SubscriptionResource.getStripePaymentUrl( " + "Subscription: " + sSubscriptionId + ", "
@@ -864,6 +877,7 @@ public class SubscriptionResource {
 	@GET
 	@Path("/stripe/confirmation/{CHECKOUT_SESSION_ID}")
 	@Produces({"application/json", "application/xml", "text/xml" })
+	@Operation(summary = "Confirm subscription payment", description = "Handles the Stripe checkout callback, verifies payment details, activates the subscription, and optionally notifies the associated workspace.")
 	public Response confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
 		WasdiLog.debugLog("SubscriptionResource.confirmation( sCheckoutSessionId: " + sCheckoutSessionId + ")");
 
@@ -953,6 +967,7 @@ public class SubscriptionResource {
 	@GET
 	@Path("/list")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "List subscriptions for administration", description = "Returns a filtered, sorted, and paginated subscription list for the administration dashboard. This endpoint is restricted to administrators.")
 	public Response getSortedList(@HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("userfilter") String sUserFilter, 
 			@QueryParam("idfilter") String sIdFilter, 
@@ -1194,136 +1209,4 @@ public class SubscriptionResource {
 		return new SubscriptionTypeViewModel(oSubscriptionType.name(), oSubscriptionType.getTypeName(), oSubscriptionType.getTypeDescription());
 	}
 	
-	
-
-// 2025-07-14: Moved to PermissionUtils: kept here some time 
-//	/**
-//	 * Extract a List of subscriptions for the user
-//	 * @param oUser Target User
-//	 * @param bValid True to get only valid subscriptions
-//	 * @return
-//	 */
-//	protected List<SubscriptionListViewModel> getUsersSubscriptionsList(User oUser, boolean bValid) {
-//		
-//		List<SubscriptionListViewModel> aoSubscriptionLVM = new ArrayList<>();
-//
-//		// Domain Check
-//		if (oUser == null) {
-//			WasdiLog.warnLog("SubscriptionResource.getUsersSubscriptionsList: invalid session");
-//			return aoSubscriptionLVM;
-//		}
-//
-//		try {
-//			// 1. subscriptions directly owned by the user
-//			// 2. subscriptions belonging to organizations owned by the user
-//			// 3. subscriptions belonging to organizations shared with the user
-//			// 4. subscriptions shared with the user on individual basis
-//
-//
-//			// Get the list of Subscriptions owned by the user
-//			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-//			List<Subscription> aoOwnedSubscriptions = oSubscriptionRepository.getSubscriptionsByUser(oUser.getUserId());
-//
-//			Set<String> asOwnedSubscriptionIds = aoOwnedSubscriptions.stream().map(Subscription::getSubscriptionId).collect(Collectors.toSet());
-//			Set<String> asOrganizationIdsOfOwnedSubscriptions = aoOwnedSubscriptions.stream().map(Subscription::getOrganizationId).filter(Objects::nonNull).collect(Collectors.toSet());
-//			Map<String, String> aoOrganizationNamesOfOwnedSubscriptions = getOrganizationNamesById(asOrganizationIdsOfOwnedSubscriptions);
-//
-//			// For each
-//			for (Subscription oSubscription : aoOwnedSubscriptions) {
-//				
-//				if (bValid) {
-//					if (!oSubscription.isValid()) continue;
-//				}				
-//				
-//				// Create View Model
-//				SubscriptionListViewModel oSubscriptionViewModel = Subscription.convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), aoOrganizationNamesOfOwnedSubscriptions.get(oSubscription.getOrganizationId()), "owner");
-//				
-//				if (oSubscriptionViewModel != null) {
-//					oSubscriptionViewModel.setOrganizationId(oSubscription.getOrganizationId());
-//					oSubscriptionViewModel.setReadOnly(false);
-//					aoSubscriptionLVM.add(oSubscriptionViewModel);
-//				}
-//				else {
-//					WasdiLog.warnLog("SubscriptionResource.getUsersSubscriptionsList: Error converting a Owned Subscription, jumping");
-//				}
-//			}
-//			
-//			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-//			
-//			// Get the list of Subscriptions shared by organizations
-//			Set<String> asOrganizationIdsOfOwnedByOrSharedWithUser = new OrganizationResource().getIdsOfOrganizationsOwnedByOrSharedWithUser(oUser.getUserId());
-//			Map<String, String> aoOrganizationNamesOfOwnedByOrSharedWithUser = getOrganizationNamesById(asOrganizationIdsOfOwnedByOrSharedWithUser);
-//			
-//			List<Subscription> aoOrganizationalSubscriptions = getSubscriptionsSharedByOrganizations(asOrganizationIdsOfOwnedByOrSharedWithUser);
-//			
-//			for (Subscription oSubscription : aoOrganizationalSubscriptions) {
-//				if (!asOwnedSubscriptionIds.contains(oSubscription.getSubscriptionId())) {
-//					
-//					boolean bToAdd=true;
-//
-//					if (bValid) {
-//						bToAdd = oSubscription.isValid();
-//					}
-//					
-//					
-//					if (bToAdd) {
-//						SubscriptionListViewModel oSubscriptionViewModel = Subscription.convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), aoOrganizationNamesOfOwnedByOrSharedWithUser.get(oSubscription.getOrganizationId()), "shared by " + aoOrganizationNamesOfOwnedByOrSharedWithUser.get(oSubscription.getOrganizationId()));
-//						
-//						if (oSubscriptionViewModel != null) {
-//							
-//							oSubscriptionViewModel.setReadOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId()));
-//							aoSubscriptionLVM.add(oSubscriptionViewModel);
-//						}
-//						else {
-//							WasdiLog.warnLog("SubscriptionResource.getUsersSubscriptionsList: Error converting an Organization Subscription, jumping");
-//						}
-//					}
-//				}
-//			}
-//			
-//
-//			// Get the list of Subscriptions shared with this user
-//			List<Subscription> aoSharedSubscriptions = getSubscriptionsSharedWithUser(oUser.getUserId());
-//			List<UserResourcePermission> aoSubscriptionSharings = oUserResourcePermissionRepository.getSubscriptionSharingsByUserId(oUser.getUserId());
-//
-//			Map<String, String> aoSubscriptionUser = aoSubscriptionSharings.stream().collect(Collectors.toMap(UserResourcePermission::getResourceId, UserResourcePermission::getUserId));
-//
-//
-//			List<String> asOrganizationIdsOfDirectSubscriptionSharings = aoSharedSubscriptions.stream().map(Subscription::getOrganizationId).collect(Collectors.toList());
-//
-//			Map<String, String> asNamesOfOrganizationsOfDirectSubscriptionSharings = getOrganizationNamesById(asOrganizationIdsOfDirectSubscriptionSharings);
-//
-//			for (Subscription oSubscription : aoSharedSubscriptions) {
-//				
-//				boolean bToAdd=true;
-//
-//				if (bValid) {
-//					bToAdd = oSubscription.isValid();
-//				}
-//				
-//				if (bToAdd) {
-//					SubscriptionListViewModel oSubscriptionViewModel = Subscription.convertSubscriptionToViewModel(oSubscription, oUser.getUserId(),
-//							asNamesOfOrganizationsOfDirectSubscriptionSharings.get(oSubscription.getOrganizationId()),
-//							"shared by " + aoSubscriptionUser.get(oSubscription.getSubscriptionId()));
-//	
-//					if (oSubscriptionViewModel!=null) {
-//						oSubscriptionViewModel.setReadOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId()));
-//						aoSubscriptionLVM.add(oSubscriptionViewModel);
-//					}
-//					else {
-//						WasdiLog.warnLog("SubscriptionResource.getUsersSubscriptionsList: Error converting a Shared Subscription, jumping");
-//					}						
-//				}
-//			}
-//			
-//			return aoSubscriptionLVM;
-//		} 
-//		catch (Exception oEx) {
-//			WasdiLog.errorLog("SubscriptionResource.getUsersSubscriptionsList error: " + oEx);
-//			return aoSubscriptionLVM;
-//		}		
-//	}
-//		
-
-
 }

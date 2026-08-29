@@ -24,15 +24,18 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.business.users.User;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.utils.MissionUtils;
@@ -70,6 +73,7 @@ public class CatalogResources {
 	@GET
 	@Path("downloadbyname")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@Operation(summary = "", description="")
 	public Response downloadEntryByName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("token") String sTokenSessionId,
 			@QueryParam("filename") String sFileName,
@@ -89,16 +93,34 @@ public class CatalogResources {
 			}
 
 			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
+			String sWorkspaceOwner = "";
+			boolean bPublicWorkspaceAccess = false;
 
 			if (oUser == null) {
-				WasdiLog.warnLog("CatalogResources.downloadEntryByName: invalid session");
-				return Response.status(Status.UNAUTHORIZED).build();
+				WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+				Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+				
+				
+				
+				if (oWorkspace != null) {
+					if (oWorkspace.isPublic()) {
+						bPublicWorkspaceAccess = true;
+						sWorkspaceOwner = oWorkspace.getUserId();
+					}
+				}
+				
+				if (!bPublicWorkspaceAccess) {
+					WasdiLog.warnLog("CatalogResources.downloadEntryByName: invalid session");
+					return Response.status(Status.UNAUTHORIZED).build();					
+				}
 			}
 			
-			// Check if the user can access the workspace
-			if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-				WasdiLog.warnLog("CatalogResources.downloadEntryByName: user cannot access workspace");
-				return Response.status(Status.FORBIDDEN).build();				
+			if (!bPublicWorkspaceAccess) {
+				// Check if the user can access the workspace
+				if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+					WasdiLog.warnLog("CatalogResources.downloadEntryByName: user cannot access workspace");
+					return Response.status(Status.FORBIDDEN).build();				
+				}				
 			}
 			
 			// Get the File object
@@ -107,7 +129,9 @@ public class CatalogResources {
 			ResponseBuilder oResponseBuilder = null;
 			
 			if (oFile == null) {
-				oFile = PermissionsUtils.getFileFromS3Volume(oUser.getUserId(), sFileName, sWorkspaceId, sProcessObjId);
+				String sUser = sWorkspaceOwner;
+				if (oUser != null) sUser = oUser.getUserId();
+				oFile = PermissionsUtils.getFileFromS3Volume(sUser, sFileName, sWorkspaceId, sProcessObjId);
 			}
 			
 			if(oFile == null) {				
@@ -168,6 +192,7 @@ public class CatalogResources {
 	@Path("fileOnNode")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	@Consumes({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public Response checkFileByNode(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId)
 	{	
 		WasdiLog.debugLog("CatalogResources.checkFileByNode");
@@ -216,6 +241,7 @@ public class CatalogResources {
 	@GET
 	@Path("checkdownloadavaialibitybyname")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "", description="")
  	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId, @QueryParam("procws") String sProcessObjId, @QueryParam("volumepath") String sVolumePath)
 	{
 		try {
@@ -327,6 +353,7 @@ public class CatalogResources {
 	@PUT
 	@Path("/upload/ingest")
 	@Produces({"application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public Response ingestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle, @QueryParam("platform") String sPlatform) {
 		
 		if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) sParentProcessWorkspaceId = "";
@@ -416,6 +443,7 @@ public class CatalogResources {
 	@GET
 	@Path("/upload/ingestinws")
 	@Produces({"application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public PrimitiveResult ingestFileInWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle, @QueryParam("platform") String sPlatform) {
 		
 		// Create the result object
@@ -521,6 +549,7 @@ public class CatalogResources {
 	@GET
 	@Path("/copytosfpt")
 	@Produces({"application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public PrimitiveResult copyFileToSftp(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("path") String sRelativePath) {
 		
 		// Create the result object
@@ -623,6 +652,7 @@ public class CatalogResources {
 	@PUT
 	@Path("/upload/ftp")
 	@Produces({"application/json", "text/xml"})
+	@Operation(summary = "Transfer a file to an external SFTP server", description="Transfers a file from the workspace to an external SFTP server using the provided credentials and paths. Returns a PrimitiveResult indicating the success or failure of the operation.")
 	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId,
 			FtpTransferViewModel oFtpTransferVM) {
@@ -690,6 +720,7 @@ public class CatalogResources {
 	@GET
 	@Path("/properties")
 	@Produces({"application/json", "text/xml"})
+	@Operation(summary = "Get product properties", description="Retrieves the properties of a product file within the specified workspace. Optionally calculates and returns the file checksum if requested.")
 	public Response getProductProperties(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspace") String sWorkspaceId, @QueryParam("file") String sFileName, @QueryParam("getchecksum") Boolean bGetChecksum) {
 		

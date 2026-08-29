@@ -14,6 +14,7 @@ import wasdi.shared.parameters.MultiSubsetParameter;
 import wasdi.shared.parameters.settings.MultiSubsetSetting;
 import wasdi.shared.payloads.MultiSubsetPayload;
 import wasdi.shared.utils.EndMessageProvider;
+import wasdi.shared.utils.gis.GdalFileFormats;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
@@ -107,10 +108,11 @@ public class Multisubset extends Operation {
 
                 // Output format
                 asArgs.add("-of");
-                asArgs.add("GTiff");
+                asArgs.add(GdalFileFormats.COG);
                 asArgs.add("-co");
-                // TO BE TESTED
                 asArgs.add("COMPRESS=LZW");
+                asArgs.add("-co");
+                asArgs.add("NUM_THREADS=ALL_CPUS");
 
                 asArgs.add("-projwin");
                 // ulx uly lrx lry:

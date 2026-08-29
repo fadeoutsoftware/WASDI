@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response.Status;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import it.fadeout.services.ProvidersCatalog;
 import wasdi.shared.LauncherOperations;
@@ -87,6 +88,7 @@ public class FileBufferResource {
 		@GET
 	@Path("share")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "Share a product between workspaces", description="Copies a product (file/dataset) from one workspace to another. The product must exist in the origin workspace. Supports optional bounding box filtering and parent process tracking. Returns the operation status including product URL and metadata.")
 	public Response share(@HeaderParam("x-session-token") String sSessionId,
 									@QueryParam("originWorkspaceId") String sOriginWorkspaceId,
 									@QueryParam("destinationWorkspaceId") String sDestinationWorkspaceId,
@@ -284,6 +286,7 @@ public class FileBufferResource {
 	@GET
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "Import product (query parameters form)", description="Initiates an asynchronous import of a product (file or dataset) into a workspace. This is a query-parameter version of the POST download endpoint. Automatically creates a process with the provided metadata (file URL, provider, bounding box, parent process). Delegates to imageImport() internally.")
 	public PrimitiveResult download(@HeaderParam("x-session-token") String sSessionId,
 									@QueryParam("fileUrl") String sFileUrl,
 									@QueryParam("name") String sFileName,
@@ -321,6 +324,7 @@ public class FileBufferResource {
 	@POST
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "Import product (request body form)", description="Initiates an asynchronous import of a product (file or dataset) into a workspace. Accepts ImageImportViewModel in request body with all import parameters. Validates input, creates a process with the provided metadata, and schedules it via WASDI launcher. Returns a PrimitiveResult with process details.")
 	public PrimitiveResult imageImport(@HeaderParam("x-session-token") String sSessionId, ImageImportViewModel oImageImportViewModel) {
 		
 		PrimitiveResult oResult = new PrimitiveResult();
@@ -523,6 +527,7 @@ public class FileBufferResource {
 	@GET
 	@Path("publishband")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "", description="")
 	public RabbitMessageViewModel publishBand(	@HeaderParam("x-session-token") String sSessionId,
 												@QueryParam("fileUrl") String sFileUrl,
 												@QueryParam("workspace") String sWorkspaceId,

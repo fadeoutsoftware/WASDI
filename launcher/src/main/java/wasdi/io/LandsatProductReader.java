@@ -18,6 +18,7 @@ import org.json.JSONObject;
 
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.gis.GdalFileFormats;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -298,7 +299,7 @@ public class LandsatProductReader extends WasdiProductReader {
 			asWarpArgs.add("-t_srs");
 			asWarpArgs.add("EPSG:4326");
 			asWarpArgs.add("-of");
-			asWarpArgs.add("GTiff");
+			asWarpArgs.add(GdalFileFormats.GTiff);
 			asWarpArgs.add(oBandFile.getAbsolutePath());
 			asWarpArgs.add(sOutputPath);
 

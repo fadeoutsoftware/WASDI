@@ -10,6 +10,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import wasdi.shared.business.users.User;
 import wasdi.shared.config.CatalogueConfig;
@@ -57,6 +58,7 @@ public class OpenSearchResource {
 	@GET
 	@Path("/query/count")
 	@Produces({ "application/xml", "application/json", "text/html" })
+	@Operation(summary = "Count results for a search query", description="Executes a search query against the specified data provider(s) and returns only the total count of matching results, without retrieving the actual product details.")
 	public int count(@HeaderParam("x-session-token") String sSessionId, @QueryParam("query") String sQuery, @QueryParam("providers") String sProviders) {
 		
 		try {
@@ -138,6 +140,7 @@ public class OpenSearchResource {
 	@GET
 	@Path("/query")
 	@Produces({ "application/json", "text/html" })
+	@Operation(summary = "Search data provider(s)", description="Executes a paginated search query against the specified data provider(s) and returns results as QueryResultViewModel array. Supports offset/limit pagination and sorting. Provider defaults to AUTO to query multiple providers in sequence.")
 	public QueryResultViewModel[] search(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("providers") String sProvider, @QueryParam("query") String sQuery,
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
@@ -241,6 +244,7 @@ public class OpenSearchResource {
 	@GET
 	@Path("/providers")
 	@Produces({ "application/json", "text/html" })
+	@Operation(summary = "Get available data providers", description="Returns a list of all configured data providers (ESA, USGS, NOAA, etc.) available for querying. Each provider entry includes name, description, and URL.")
 	public ArrayList<DataProviderViewModel> getDataProviders(@HeaderParam("x-session-token") String sSessionId) {
 		WasdiLog.debugLog("OpenSearchResource.getDataProviders");
 		try {
@@ -282,6 +286,7 @@ public class OpenSearchResource {
 	@POST
 	@Path("/query/countlist")
 	@Produces({ "application/xml", "application/json", "text/html" })
+	@Operation(summary = "Count results for multiple queries", description="Executes multiple search queries against the specified data provider(s) and returns the total combined count of matching results. Accepts an ArrayList of query strings in the request body.")
 	public int countList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("providers") String sProviders, ArrayList<String> asQueries) {
 		
 		String sQuery = "";
@@ -383,6 +388,7 @@ public class OpenSearchResource {
 	@POST
 	@Path("/querylist")
 	@Produces({ "application/json", "text/html" })
+	@Operation(summary = "Search with multiple queries", description="Executes multiple search queries against the specified data provider(s) and returns combined results as an array of QueryResultViewModel. Accepts an ArrayList of query strings in the request body.")
 	public QueryResultViewModel[] searchList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("providers") String sProvider, ArrayList<String> asQueries) {
 
 		WasdiLog.debugLog("OpenSearchResource.searchList( Providers: " + sProvider + " )");

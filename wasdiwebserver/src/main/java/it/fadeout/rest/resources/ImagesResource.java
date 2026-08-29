@@ -24,6 +24,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.processors.Processor;
@@ -71,6 +72,7 @@ public class ImagesResource {
 	@POST
 	@Path("/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Operation(summary = "Upload an image", description="Uploads an image file to a specified collection and folder. Supports optional image resizing and thumbnail generation. Returns the image location URL if successful.")
 	public Response uploadImage(@FormDataParam("image") InputStream oInputFileStream, @FormDataParam("image") FormDataContentDisposition oFileMetaData,
 										@HeaderParam("x-session-token") String sSessionId, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName,
 										@QueryParam("resize") Boolean obResize, @QueryParam("thumbnail") Boolean obThumbnail) {
@@ -248,6 +250,7 @@ public class ImagesResource {
 	 */
 	@GET
 	@Path("/get")
+	@Operation(summary = "Get image by name", description="Retrieves an image from a collection/folder by name. Supports authentication via either x-session-token header or token query parameter. Returns the image as a byte stream.")
 	public Response getImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName) {
 		
 		try {
@@ -358,6 +361,7 @@ public class ImagesResource {
 	 */
 	@DELETE
 	@Path("/delete")
+	@Operation(summary = "Delete an image", description="Deletes an image from a collection/folder. User must own the image or have authorization. Returns standard HTTP response status.")
 	public Response deleteImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName) {
 		
 		WasdiLog.debugLog("ImagesResource.deleteImage( Collection: " + sCollection + ", Image Name: " + sImageName + " )");
@@ -431,6 +435,7 @@ public class ImagesResource {
 	@POST
 	@Path("/processors/logo/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Operation(summary = "Upload processor logo", description="Uploads and sets a logo image for a processor. The image is auto-resized and a thumbnail is generated. The logo link is stored in the processor record.")
 	public Response uploadProcessorLogo(@FormDataParam("image") InputStream oInputFileStream, @FormDataParam("image") FormDataContentDisposition oFileMetaData,
 										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
 		
@@ -497,6 +502,7 @@ public class ImagesResource {
 	@POST
 	@Path("/processors/gallery/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Operation(summary = "Upload processor gallery image", description="Uploads a gallery/marketing image for a processor. Multiple images can be uploaded to build a processor gallery. All images are stored in the processor's folder.")
 	public Response uploadProcessorImage(@FormDataParam("image") InputStream oFileInputStream, @FormDataParam("image") FormDataContentDisposition oFileMetaData,
 										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
 		
@@ -564,6 +570,7 @@ public class ImagesResource {
 	 */
 	@GET
 	@Path("/exists")
+	@Operation(summary = "Check if image exists", description="Checks whether an image with a given name exists in a collection/folder. Useful for UI validation before upload operations. Returns a boolean result.")
 	public Response existsImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName) {
 		
 		try {
