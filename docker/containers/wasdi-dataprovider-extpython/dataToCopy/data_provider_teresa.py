@@ -46,14 +46,13 @@ def executeCount(sInputFilePath, sOutputFilePath):
 
     sDataset = aoFilters.get("dataset")
     sBasin = aoFilters.get("basin").replace("_", "")
-    sYear = aoFilters.get("year")
     sResolution = aoFilters.get("resolution")
 
     sCollection = sDataset
     if sDataset not in ['TRWSI', 'SWSI']:
         sCollection = "ET_GWU_BWU"
 
-    if not (sDataset and sBasin and sYear and sResolution):
+    if not (sDataset and sBasin and sResolution):
         logging.warning(f"executeCount. Missing some parameters")
         sys.exit(1)
 
@@ -101,14 +100,13 @@ def executeAndRetrieve(sInputFilePath, sOutputFilePath):
 
     sDataset = aoFilters.get("dataset")
     sBasin = aoFilters.get("basin").replace("_", "")
-    sYear = aoFilters.get("year")
     sResolution = aoFilters.get("resolution")
 
     sCollection = sDataset
     if sDataset not in ['TRWSI', 'SWSI']:
         sCollection = "ET_GWU_BWU"
 
-    if not (sDataset and sBasin and sYear and sResolution):
+    if not (sDataset and sBasin and sResolution):
         logging.warning(f"execeuteAndRetrieve. Missing some parameters")
         sys.exit(1)
 
