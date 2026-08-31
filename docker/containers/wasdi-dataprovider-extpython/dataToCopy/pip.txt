@@ -1,1 +1,2 @@
 copernicusmarine
+pystac-client
