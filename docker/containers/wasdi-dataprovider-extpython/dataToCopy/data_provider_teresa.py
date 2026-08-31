@@ -7,6 +7,7 @@ import time
 from datetime import datetime
 from pystac_client import Client
 from data_provider_utils import DataProviderUtils
+from pathlib import Path
 
 
 s_sDataProviderName = 'TERESA_SUP'
@@ -59,10 +60,9 @@ def executeCount(sInputFilePath, sOutputFilePath):
     oStacClient = Client.open(s_sESAStacAPI)
     oSearchResult = oStacClient.search(collections=[f'TERESA_{sCollection}'])
     sExpectedItemIdStart = f"{sDataset}-{sBasin}-{sResolution}-"
-    print("expected item id " + sExpectedItemIdStart)
+    logging.debug("executeCount: expected item id " + sExpectedItemIdStart)
     
     for oItem in oSearchResult.items():
-        print(oItem.id)
         if oItem.id.startswith(sExpectedItemIdStart):
             iResultCount = 1
 
@@ -115,18 +115,17 @@ def executeAndRetrieve(sInputFilePath, sOutputFilePath):
     oStacClient = Client.open(s_sESAStacAPI)
     oSearchResult = oStacClient.search(collections=[f'TERESA_{sCollection}'])
     sExpectedItemIdStart = f"{sDataset}-{sBasin}-{sResolution}-"
-    print("expected item id " + sExpectedItemIdStart)
+    logging.debug("execeuteAndRetrieve. Expected item id " + sExpectedItemIdStart)
     aoReturnList = []
     
     for oItem in oSearchResult.items():
-        print(oItem.id)
         if oItem.id.startswith(sExpectedItemIdStart):
             sHref = oItem.assets["PRODUCT"].href
             sDownloadLink = "https://eoresults.esa.int" + sHref
             oResult = {}
             sFileSize = oItem.assets["PRODUCT"].extra_fields["file:size"]
             sDate = oItem.properties["datetime"]
-            oResult["title"] = oItem.id         # attenzione! Title deve essere il file name, che e' diverso dall'od. Il file name lo ricavo dal ref. TODO: cambiare
+            oResult["title"] = sHref.split("/")[-1]         # attenzione! Title deve essere il file name, che e' diverso dall'od. Il file name lo ricavo dal ref. TODO: cambiare
             oResult["id"] = oItem.id
             oResult["link"] = sDownloadLink
             oResult["summary"] = f'Date: {sDate}, Instrument: {sDataset}, Mode: {sBasin}, Satellite: TERESA_SUP, Size:{sFileSize}'
@@ -196,7 +195,9 @@ def executeDownloadFile(sInputFilePath, sOutputFilePath, sWasdiConfigFilePath):
     sTargetFolder = aoInputParameters.get("downloadDirectory", "")
     sTargetFileName = aoInputParameters.get("downloadFileName", "")
     sUrl = oDownloadFileViewModel.url
+    sDownloadedFilePath = str(Path(sTargetFolder) / sTargetFileName)
 
+    bDownloaded = False
     if sUrl.startswith("https://"):
         bDownloaded = DataProviderUtils.downloadFile(sUrl, sDownloadedFilePath)
 
@@ -235,9 +236,11 @@ def getFileName(sInputFilePath, sOutputFilePath):
         sys.exit(1)
         
     sUrl = aoInputQuery.get("url","")
-    # TODO: Extract the file name from the Url
+
     sFileName = ""
-    
+    if sUrl:
+        sFileName = sUrl.split("/")[-1]
+
     oRes = {
         'fileName': sFileName
     }    
@@ -261,16 +264,14 @@ if __name__ == '__main__':
     asArgs = sys.argv
 
     try:
-        """
         if asArgs is None or len(asArgs) < 5:
             logging.error("__main__: no arguments passed to the data provider")
             sys.exit(1)
-        """
 
-        sOperation = "0" # asArgs[1]
-        sInputFile = "C:/temp/teresa_sup_input_3a099c97-e703-4d86-90d2-353eb5ca3758" # asArgs[2]
-        sOutputFile = "C:/temp/teresa_sup_outpt_fd06058d-22b9-4c19-87c1-2e209fd8f4cf" # asArgs[3]
-        sWasdiConfigFile = "C:/temp/wasdi/wasdiLocalTESTConfig_develop.json" # asArgs[4]
+        sOperation = asArgs[1]
+        sInputFile = asArgs[2]
+        sOutputFile = asArgs[3]
+        sWasdiConfigFile = asArgs[4]
 
         # first argument asArgs[0] is the name of the file - we are not interested in it
         logging.debug('__main__: operation ' + sOperation)
