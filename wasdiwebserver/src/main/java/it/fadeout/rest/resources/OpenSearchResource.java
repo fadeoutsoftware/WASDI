@@ -9,6 +9,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.container.ContainerRequestContext;
 
 import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
@@ -238,17 +240,17 @@ public class OpenSearchResource {
 	
 	/**
 	 * Get the list of Data Providers
-	 * @param sSessionId User Session
+	 * @param oRequestContext JAX-RS request context with authenticated user
 	 * @return List of Search Provider View Models
 	 */
 	@GET
 	@Path("/providers")
 	@Produces({ "application/json", "text/html" })
 	@Operation(summary = "Get available data providers", description="Returns a list of all configured data providers (ESA, USGS, NOAA, etc.) available for querying. Each provider entry includes name, description, and URL.")
-	public ArrayList<DataProviderViewModel> getDataProviders(@HeaderParam("x-session-token") String sSessionId) {
+	public ArrayList<DataProviderViewModel> getDataProviders(@Context ContainerRequestContext oRequestContext) {
 		WasdiLog.debugLog("OpenSearchResource.getDataProviders");
 		try {
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			if (oUser == null) {
 				WasdiLog.warnLog("OpenSearchResource.getDataProviders: invalid session");
 				return null;
