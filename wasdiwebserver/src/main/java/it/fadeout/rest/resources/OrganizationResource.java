@@ -9,17 +9,17 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import io.swagger.v3.oas.annotations.Operation;
-import it.fadeout.Wasdi;
 import wasdi.shared.business.Organization;
 import wasdi.shared.business.Subscription;
 import wasdi.shared.business.users.ResourceTypes;
@@ -69,9 +69,9 @@ public class OrganizationResource {
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get user's organizations", description="Returns a list of organizations owned by or shared with the authenticated user. Includes a readOnly flag indicating whether the user can modify each organization.")
-	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getListByUser(@Context ContainerRequestContext oRequestContext) {
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {
@@ -131,13 +131,13 @@ public class OrganizationResource {
 	@Path("/byId")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get organization details", description="Returns the full details of a specific organization by ID, including name, description, member count, and configuration. User must have access to the organization.")
-	public Response getOrganizationViewModel(@HeaderParam("x-session-token") String sSessionId,
+	public Response getOrganizationViewModel(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("organization") String sOrganizationId) {
 		WasdiLog.debugLog("OrganizationResource.getOrganizationViewModel( Organization: " + sOrganizationId + ")");
 
 		OrganizationViewModel oOrganizationViewModel = new OrganizationViewModel();
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("OrganizationResource.getOrganizationViewModel: invalid session");
@@ -200,7 +200,7 @@ public class OrganizationResource {
 	@Path("/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Create organization", description="Creates a new organization with the provided name and description. The calling user becomes the owner. Organization names must be globally unique.")
-	public Response createOrganization(@HeaderParam("x-session-token") String sSessionId, OrganizationEditorViewModel oOrganizationEditorViewModel) {
+	public Response createOrganization(@Context ContainerRequestContext oRequestContext, OrganizationEditorViewModel oOrganizationEditorViewModel) {
 		WasdiLog.debugLog("OrganizationResource.createOrganization");
 		
 		if (oOrganizationEditorViewModel == null) {
@@ -208,7 +208,7 @@ public class OrganizationResource {
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_ORGANIZATION.name())).build();			
 		}
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("OrganizationResource.createOrganization: invalid session");
@@ -252,7 +252,7 @@ public class OrganizationResource {
 	@Path("/update")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Update organization details", description="Updates an organization's name, description, and configuration. User must be the owner or have write permissions. Organization names must remain globally unique.")
-	public Response upateOrganization(@HeaderParam("x-session-token") String sSessionId, OrganizationEditorViewModel oOrganizationEditorViewModel) {
+	public Response upateOrganization(@Context ContainerRequestContext oRequestContext, OrganizationEditorViewModel oOrganizationEditorViewModel) {
 		WasdiLog.debugLog("OrganizationResource.updateOrganization");
 		
 		if (oOrganizationEditorViewModel == null) {
@@ -260,7 +260,7 @@ public class OrganizationResource {
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_ORGANIZATION.name())).build();			
 		}
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("OrganizationResource.updateOrganization: invalid session");
@@ -311,11 +311,11 @@ public class OrganizationResource {
 	@Path("/delete")
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Delete organization", description="Permanently deletes an organization and revokes all associated user permissions. Only the organization owner can delete it. This operation is irreversible.")
-	public Response deleteOrganization(@HeaderParam("x-session-token") String sSessionId,
+	public Response deleteOrganization(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("organization") String sOrganizationId) {
 		WasdiLog.debugLog("OrganizationResource.deleteOrganization( Organization: " + sOrganizationId + " )");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("OrganizationResource.deleteOrganization: invalid session");
@@ -388,12 +388,12 @@ public class OrganizationResource {
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Share organization with user", description="Grants a user access to an organization with specified rights (READ or WRITE). Sends notification email to the recipient. Cannot share with self (unless admin) or with the owner.")
-	public Response shareOrganization(@HeaderParam("x-session-token") String sSessionId, @QueryParam("organization") String sOrganizationId, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
+	public Response shareOrganization(@Context ContainerRequestContext oRequestContext, @QueryParam("organization") String sOrganizationId, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
 
 		WasdiLog.debugLog("OrganizationResource.ShareOrganization( Organization: " + sOrganizationId + ", User: " + sDestinationUserId + " )");
 
 		// Validate Session
-		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequesterUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oRequesterUser == null) {
 			WasdiLog.warnLog("OrganizationResource.shareOrganization: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
@@ -495,7 +495,7 @@ public class OrganizationResource {
 	@Path("share/byorganization")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get users with organization access", description="Returns a list of all users who have been granted access to the organization, including their user IDs and permission levels.")
-	public Response getEnabledUsersSharedOrganization(@HeaderParam("x-session-token") String sSessionId, @QueryParam("organization") String sOrganizationId) {
+	public Response getEnabledUsersSharedOrganization(@Context ContainerRequestContext oRequestContext, @QueryParam("organization") String sOrganizationId) {
 
 		WasdiLog.debugLog("OrganizationResource.getEnabledUsersSharedOrganization( Organization: " + sOrganizationId + " )");
 
@@ -503,7 +503,7 @@ public class OrganizationResource {
 		List<UserResourcePermission> aoOrganizationSharing = null;
 		List<OrganizationSharingViewModel> aoOrganizationSharingViewModels = new ArrayList<>();
 
-		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+		User oOwnerUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oOwnerUser == null) {
 			WasdiLog.warnLog("OrganizationResource.getEnableUsersSharedOrganization: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
@@ -548,13 +548,13 @@ public class OrganizationResource {
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Revoke organization access from user", description="Removes a user's access to a shared organization. Only organization owner or users with write permissions can revoke sharing.")
-	public Response deleteUserSharedOrganization(@HeaderParam("x-session-token") String sSessionId,
+	public Response deleteUserSharedOrganization(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("organization") String sOrganizationId, @QueryParam("userId") String sUserId) {
 
 		WasdiLog.debugLog("OrganizationResource.deleteUserSharedOrganization( Organization: " + sOrganizationId + ", User:" + sUserId + " )");
 
 		// Validate Session
-		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequestingUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oRequestingUser == null) {
 			WasdiLog.warnLog("OrganizationResource.deleteUserSharedOrganization: invalid session");

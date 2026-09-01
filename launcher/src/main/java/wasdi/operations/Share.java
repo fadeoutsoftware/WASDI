@@ -1,7 +1,6 @@
 package wasdi.operations;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;

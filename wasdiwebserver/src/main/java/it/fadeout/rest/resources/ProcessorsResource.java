@@ -25,13 +25,14 @@ import java.util.stream.Stream;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -39,7 +40,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -148,13 +148,15 @@ public class ProcessorsResource  {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Upload processor", description="Uploads and deploys a new processor/application with multipart file upload. Validates processor name, type, and parameters. Returns processor ID. Auto-deploys to main node asynchronously.")
-	public PrimitiveResult uploadProcessor( @FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
+	public PrimitiveResult uploadProcessor( @FormDataParam("file") InputStream oInputStreamForFile, @Context ContainerRequestContext oRequestContext, 
 											@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName,
 											@QueryParam("version") String sVersion,	@QueryParam("description") String sDescription,
 											@QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample,
 											@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout, @QueryParam("force") Boolean bForce) throws Exception {
 		
 		if (bForce == null) bForce = Boolean.FALSE;
+		
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 		
 		WasdiLog.debugLog("ProcessorsResource.uploadProcessor( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description"
 				+ sDescription + ", Type: " + sType + ", ParamsSample: " + sParamsSample + " )");
@@ -181,7 +183,7 @@ public class ProcessorsResource  {
 				return oResult;
 			}
 
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.uploadProcessor: invalid session");
 				oResult.setIntValue(401);
@@ -371,14 +373,14 @@ public class ProcessorsResource  {
 	@Path("/getdeployed")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Get deployed processors", description="Returns list of all accessible processors (owned, public, or shared with user). Includes metadata, logo, status, and readOnly flags based on user permissions.")
-	public List<DeployedProcessorViewModel> getDeployedProcessors(@HeaderParam("x-session-token") String sSessionId) throws Exception {
+	public List<DeployedProcessorViewModel> getDeployedProcessors(@Context ContainerRequestContext oRequestContext) throws Exception {
 
 		ArrayList<DeployedProcessorViewModel> aoRet = new ArrayList<>(); 
 		WasdiLog.debugLog("ProcessorsResource.getDeployedProcessors");
 		
 		try {
 			// Check User 
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.getDeployedProcessors: invalid session");
@@ -460,14 +462,14 @@ public class ProcessorsResource  {
 	@Path("/getprocessor")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Get processor details", description="Returns detailed information for a specific processor by ID or name. Includes configuration, deployment status, pricing, and user access permissions.")
-	public DeployedProcessorViewModel getSingleDeployedProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("name") String sProcessorName) throws Exception {
+	public DeployedProcessorViewModel getSingleDeployedProcessor(@Context ContainerRequestContext oRequestContext, @QueryParam("processorId") String sProcessorId, @QueryParam("name") String sProcessorName) throws Exception {
 
 		DeployedProcessorViewModel oDeployedProcessorViewModel = new DeployedProcessorViewModel(); 
 		WasdiLog.debugLog("ProcessorsResource.getSingleDeployedProcessor");
 		
 		try {
 			// Check User
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.getSingleDeployedProcessor: invalid session");
@@ -585,14 +587,14 @@ public class ProcessorsResource  {
 	@Path("/getmarketlist")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Get marketplace processors (filtered)", description="Returns paginated list of marketplace processors with filtering by category, publisher, price, and search term. Supports sorting by name/date/price.")
-	public List<AppListViewModel> getMarketPlaceAppList(@HeaderParam("x-session-token") String sSessionId, AppFilterViewModel oFilters) throws Exception {
+	public List<AppListViewModel> getMarketPlaceAppList(@Context ContainerRequestContext oRequestContext, AppFilterViewModel oFilters) throws Exception {
 
 		ArrayList<AppListViewModel> aoRet = new ArrayList<>(); 
 		WasdiLog.debugLog("ProcessorsResource.getMarketPlaceAppList");
 		
 		try {
 			// Check User 
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.getMarketPlaceAppList: invalid session");
@@ -763,13 +765,13 @@ public class ProcessorsResource  {
 	@Path("/getmarketdetail")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Get marketplace processor details", description="Returns detailed marketplace info including description, pricing, reviews/ratings, images, categories, and download count for a processor.")
-	public Response getMarketPlaceAppDetail(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorname") String sProcessorName) throws Exception {
+	public Response getMarketPlaceAppDetail(@Context ContainerRequestContext oRequestContext, @QueryParam("processorname") String sProcessorName) throws Exception {
 		sProcessorName = URLDecoder.decode(sProcessorName, StandardCharsets.UTF_8.name());
 		WasdiLog.debugLog("ProcessorsResource.getMarketPlaceAppDetail");
 		
 		try {
 			// Check User 
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.getMarketPlaceAppDetail: invalid session");
@@ -934,10 +936,12 @@ public class ProcessorsResource  {
 	@Path("/run")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Run processor (POST)", description="Executes a processor with parameters in request body (supports long parameter lists). Returns RunningProcessorViewModel with execution ID and status. Async execution via launcher.")
-	public RunningProcessorViewModel runPost(@HeaderParam("x-session-token") String sSessionId,
+	public RunningProcessorViewModel runPost(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("name") String sName, @QueryParam("workspace") String sWorkspaceId,
 			@QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("notify") Boolean bNotify, String sEncodedJson) throws Exception {
 		WasdiLog.debugLog("ProcessorsResource.runPost( Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " )");
+		
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 		return internalRun(sSessionId, sName, sEncodedJson, sWorkspaceId, sParentProcessWorkspaceId, bNotify);
 	}
 	
@@ -959,13 +963,14 @@ public class ProcessorsResource  {
 	@Path("/run")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Run processor (GET)", description="Executes a processor with query parameters (supports shorter parameter lists). Returns RunningProcessorViewModel with execution ID and status. Async execution via launcher.")
-	public RunningProcessorViewModel run(@HeaderParam("x-session-token") String sSessionId,
+	public RunningProcessorViewModel run(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("name") String sName, @QueryParam("encodedJson") String sEncodedJson,
 			@QueryParam("workspace") String sWorkspaceId,
 			@QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("notify") Boolean bNotify) throws Exception {
 		
 		
 		WasdiLog.debugLog("ProcessorsResource.run: run@GET");
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 		return internalRun(sSessionId, sName, sEncodedJson, sWorkspaceId, sParentProcessWorkspaceId, bNotify);
 	}
 	
@@ -1227,7 +1232,7 @@ public class ProcessorsResource  {
 	@Path("/getcredits")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Calculate execution credits", description="Calculates the credit cost for running a processor with specified parameters. Computes based on processor pricing, area/subscription models, and user's available credits.")
-	public Response getCreditsForRun(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, String sEncodedJson) throws Exception {
+	public Response getCreditsForRun(@Context ContainerRequestContext oRequestContext, @QueryParam("processorId") String sProcessorId, String sEncodedJson) throws Exception {
 		WasdiLog.debugLog("ProcessorsResource.getCreditsForRun( Processor id: " + sProcessorId + " )");
 		
 				
@@ -1244,7 +1249,7 @@ public class ProcessorsResource  {
 			}
 			
 			// Check User 
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.getCreditsForRun: invalid session");
@@ -1416,14 +1421,14 @@ public class ProcessorsResource  {
 	@Path("/help")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Get processor help", description="Returns the help/documentation file for a processor. Reads the processor's help file from deployment directory. Returns empty if no help available.")
-	public PrimitiveResult help(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) throws Exception {
+	public PrimitiveResult help(@Context ContainerRequestContext oRequestContext, @QueryParam("name") String sName) throws Exception {
 		WasdiLog.debugLog("ProcessorsResource.help( Name: " + sName + " )");
 		PrimitiveResult oPrimitiveResult = new PrimitiveResult();
 		oPrimitiveResult.setBoolValue(false);
 		
 		try {
 			// Check User 
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.help: invalid session");
@@ -1480,7 +1485,7 @@ public class ProcessorsResource  {
 	@Path("/logs/add")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	@Operation(summary = "Add execution log entry", description="Logs a single line of text to the execution log of a running process. Can be called by the processor itself to track progress. Persisted in database when logging is enabled.")
-	public Response addLog(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processworkspace") String sProcessWorkspaceId, String sLog) {
+	public Response addLog(@Context ContainerRequestContext oRequestContext, @QueryParam("processworkspace") String sProcessWorkspaceId, String sLog) {
 		try {
 			
 			if (!WasdiConfig.Current.logAppsOnDb) {
@@ -1489,7 +1494,7 @@ public class ProcessorsResource  {
 			}
 			
 			// Check User 
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.addLog: invalid session");
@@ -1532,12 +1537,12 @@ public class ProcessorsResource  {
 	@Path("/logs/count")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Get execution log line count", description="Returns the total number of log entries for a running process execution. User must have access to the process workspace.")
-	public int countLogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processworkspace") String sProcessWorkspaceId){
+	public int countLogs(@Context ContainerRequestContext oRequestContext, @QueryParam("processworkspace") String sProcessWorkspaceId){
 		
 		WasdiLog.debugLog("ProcessorResource.countLogs( ProcWsId: " + sProcessWorkspaceId + " )");
 		int iResult = -1;
 		try {
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 	
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorResource.countLogs: invalid session");
@@ -1578,7 +1583,7 @@ public class ProcessorsResource  {
 	@Path("/logs/list")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Get paginated execution logs", description="Returns log entries for a process execution with optional range pagination (startrow/endrow inclusive). Returns all if range not specified.")
-	public ArrayList<ProcessorLogViewModel> getLogs(@HeaderParam("x-session-token") String sSessionId,
+	public ArrayList<ProcessorLogViewModel> getLogs(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("processworkspace") String sProcessWorkspaceId,
 			//note: range extremes are included
 			@QueryParam("startrow") Integer iStartRow, @QueryParam("endrow") Integer iEndRow) {
@@ -1588,7 +1593,7 @@ public class ProcessorsResource  {
 		try {
 			
 			// Check User 
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.getLogs: invalid session");
@@ -1648,18 +1653,19 @@ public class ProcessorsResource  {
 	@Path("/nodedelete")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Delete processor (node-specific)", description="Deletes processor files on a computing node. Can only be called on non-main nodes. Triggers async DELETEPROCESSOR operation locally. For distributed cleanup.")
-	public Response nodeDeleteProcessor(@HeaderParam("x-session-token") String sSessionId,
+	public Response nodeDeleteProcessor(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId,
 			@QueryParam("processorName") String sProcessorName,
 			@QueryParam("processorType") String sProcessorType,
 			@QueryParam("version") String sVersion) {
-		WasdiLog.debugLog("ProcessorResources.nodeDeleteProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
+		WasdiLog.debugLog("ProcessorResources.nodeDeleteProcessor( Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
 		
 		try {
 			
 			// Check session
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 			// Check user
 			if (oUser==null) {
@@ -1746,14 +1752,15 @@ public class ProcessorsResource  {
 	@Path("/delete")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Delete processor (main)", description="Permanently deletes a processor from main node. Owner or admin only. Also updates all computing nodes. For shared processors, removes user's access only.")
-	public Response deleteProcessor(@HeaderParam("x-session-token") String sSessionId,
+	public Response deleteProcessor(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId) {
 		WasdiLog.debugLog("ProcessorResources.deleteProcessor( Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
 		
 		try {
 			// Check the session
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 			
 			// Check the user
 			if (oUser==null) {
@@ -1906,13 +1913,14 @@ public class ProcessorsResource  {
 	@Path("/redeploy")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Redeploy processor", description="Redeploys a processor across all WASDI nodes. Sets deployment-in-progress flag and triggers async REDEPLOYPROCESSOR operation. User must have write permissions.")
-	public Response redeployProcessor(@HeaderParam("x-session-token") String sSessionId,
+	public Response redeployProcessor(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId) {
 		WasdiLog.debugLog("ProcessorResources.redeployProcessor( Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
 	
 		try {
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorResources.redeployProcessor: invalid session");
@@ -1999,7 +2007,7 @@ public class ProcessorsResource  {
 			else {
 				if (WasdiConfig.Current.isMainNode()) {
 					WasdiLog.warnLog("ProcessorResource.redeployProcessor: error triggering the operation, clean deployment flag");
-					cleanBuildFlag(sSessionId, sProcessorId);					
+					cleanBuildFlag(oRequestContext, sProcessorId);					
 				}
 				
 				return Response.serverError().build();
@@ -2024,14 +2032,15 @@ public class ProcessorsResource  {
 	@Path("/libupdate")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Update processor libraries", description="Forces update of processor dependencies and libraries. Propagates to all computing nodes. Triggers async LIBRARYUPDATE operation with ongoing deployment flag.")
-	public Response libraryUpdate(@HeaderParam("x-session-token") String sSessionId,
+	public Response libraryUpdate(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId) {
 		WasdiLog.debugLog("ProcessorResources.libraryUpdate( Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
 		
 		try {
 			
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorResources.libraryUpdate: invalid session");
@@ -2114,7 +2123,7 @@ public class ProcessorsResource  {
 			else {
 				if (WasdiConfig.Current.isMainNode()) {
 					WasdiLog.warnLog("ProcessorResource.libraryUpdate: error triggering the operation, clean deployment flag");
-					cleanBuildFlag(sSessionId, sProcessorId);					
+					cleanBuildFlag(oRequestContext, sProcessorId);					
 				}
 				
 				return Response.serverError().build();
@@ -2139,12 +2148,12 @@ public class ProcessorsResource  {
 	@Path("/update")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Update processor metadata", description="Updates processor description, public/private status, parameter sample, and execution timeout. JSON validation included. User must have write permissions.")
-	public Response updateProcessor(DeployedProcessorViewModel oUpdatedProcessorVM, @HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
+	public Response updateProcessor(DeployedProcessorViewModel oUpdatedProcessorVM, @Context ContainerRequestContext oRequestContext, @QueryParam("processorId") String sProcessorId) {
 		
 		WasdiLog.debugLog("ProcessorResources.updateProcessor( Processor: " + sProcessorId + " )");
 		
 		try {
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			
 			// Check the user
 			if (oUser==null) {
@@ -2223,12 +2232,12 @@ public class ProcessorsResource  {
 	@Path("/cleadbuildflag")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Clear deployment flag", description="Clears the deployment-in-progress flag for a processor. Used when deployment hangs/fails to reset state. Admin-only operation.")
-	public Response cleanBuildFlag(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
+	public Response cleanBuildFlag(@Context ContainerRequestContext oRequestContext, @QueryParam("processorId") String sProcessorId) {
 		
 		WasdiLog.debugLog("ProcessorResources.cleanBuildFlag( Processor: " + sProcessorId + " )");
 		
 		try {
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			
 			// Check the user
 			if (oUser==null) {
@@ -2284,7 +2293,7 @@ public class ProcessorsResource  {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Update processor files", description="Uploads and replaces processor source code via multipart file upload. Triggers async redeploy. Validates permissions and schedules REDEPLOYPROCESSOR.")
-	public Response updateProcessorFiles(@FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
+	public Response updateProcessorFiles(@FormDataParam("file") InputStream oInputStreamForFile, @Context ContainerRequestContext oRequestContext, 
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId,
 			@QueryParam("file") String sInputFileName) {
@@ -2295,7 +2304,9 @@ public class ProcessorsResource  {
 		
 		try {
 			// Check User 
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
+			
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.updateProcessorFiles: invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
@@ -2471,7 +2482,7 @@ public class ProcessorsResource  {
 						WasdiLog.warnLog("ProcessorsResource.updateProcessorFiles: error scheduling LIBRARYUPDATE process");
 						if (WasdiConfig.Current.isMainNode()) {
 							WasdiLog.warnLog("ProcessorResource.libraryUpdate: error triggering the operation, clean deployment flag");
-							cleanBuildFlag(sSessionId, sProcessorId);					
+							cleanBuildFlag(oRequestContext, sProcessorId);					
 						}
 						
 						return Response.serverError().build();
@@ -2506,13 +2517,13 @@ public class ProcessorsResource  {
 	@Path("/updatedetails")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Update processor marketplace details", description="Updates processor name, categories, contact, subscription/on-demand pricing, and marketplace visibility. Integrates with Stripe for payment configuration.")
-	public Response updateProcessorDetails(AppDetailViewModel oUpdatedProcessorVM, @HeaderParam("x-session-token") String sSessionId,
+	public Response updateProcessorDetails(AppDetailViewModel oUpdatedProcessorVM, @Context ContainerRequestContext oRequestContext,
 			@QueryParam("processorId") String sProcessorId) {
 		
 		WasdiLog.debugLog("ProcessorResources.updateProcessorDetails( Processor: " + sProcessorId + " )");
 		
 		try {
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorResources.updateProcessorDetails: invalid session");
@@ -2748,7 +2759,7 @@ public class ProcessorsResource  {
 	@Path("/addAppPayment")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Record app purchase", description="Creates a payment record for a processor on-demand run purchase. Validates subscription, generates unique payment ID, stores in database.")
-	public Response addAppPayment(@HeaderParam("x-session-token") String sSessionId, AppPaymentViewModel oAppPaymentVM) {
+	public Response addAppPayment(@Context ContainerRequestContext oRequestContext, AppPaymentViewModel oAppPaymentVM) {
 
 		try {
 			// check request parameters
@@ -2763,7 +2774,7 @@ public class ProcessorsResource  {
 			Double dBuyDate = Utils.getDateAsDouble(Utils.getYyyyMMddTZDate(oAppPaymentVM.getBuyDate()));
 
 			// check existence of the user
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			if (oUser == null) {
 				WasdiLog.warnLog("ProcessorResource.createAppPayment: invalid session");
 				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
@@ -2836,7 +2847,7 @@ public class ProcessorsResource  {
 	@Path("/stripe/onDemandPaymentUrl")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Get Stripe payment URL", description="Returns Stripe payment link for on-demand processor purchase. Validates subscription and payment eligibility before returning URL.")
-	public Response getStripeOnDemandPaymentUrl(@HeaderParam("x-session-token") String sSessionId, 
+	public Response getStripeOnDemandPaymentUrl(@Context ContainerRequestContext oRequestContext, 
 			@QueryParam("processor") String sProcessorId, @QueryParam("appPayment") String sAppPaymentId) {
 
 		try {
@@ -2844,7 +2855,7 @@ public class ProcessorsResource  {
 				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Empty request parameters")).build();
 			}
 			
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser == null) {
 				WasdiLog.warnLog("ProcessorsResource.getStripeOnDemandPaymentUrl: invalid session");
@@ -2915,7 +2926,7 @@ public class ProcessorsResource  {
 	@Path("/isAppPurchased")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Check app purchase status", description="Verifies if processor run was purchased or if user has exemption (owner/shared). Checks for valid unused payment records.")
-	public Response checkAppPurchase(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processor")String sProcessorId) {
+	public Response checkAppPurchase(@Context ContainerRequestContext oRequestContext, @QueryParam("processor")String sProcessorId) {
 		
 		try {
 			
@@ -2924,7 +2935,9 @@ public class ProcessorsResource  {
 				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Processor id not specified")).build();
 			}
 		
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
+			
 			if (oUser == null) {
 				WasdiLog.warnLog("ProcessorsResource.checkAppPurchase: invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
@@ -3060,7 +3073,7 @@ public class ProcessorsResource  {
 	@Path("/byAppPaymentId")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Get payment details", description="Retrieves payment information by payment ID, including processor ID, purchase date, and status.")
-	public Response getAppPaymentById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("appPayment") String sAppPaymentId) {
+	public Response getAppPaymentById(@Context ContainerRequestContext oRequestContext, @QueryParam("appPayment") String sAppPaymentId) {
 		
 		if (Utils.isNullOrEmpty(sAppPaymentId)) {
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Payment id not specified")).build();
@@ -3068,7 +3081,7 @@ public class ProcessorsResource  {
 		
 		WasdiLog.debugLog("ProcessorResource.getAppPaymentById. Payment id: " + sAppPaymentId);
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProcessorResource.getAppPaymentById: invalid session");
@@ -3197,7 +3210,7 @@ public class ProcessorsResource  {
 	@Path("downloadprocessor")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@Operation(summary = "Download processor", description="Downloads processor source code as ZIP file. User must have access permission. Returns file stream for browser download.")
-	public Response downloadProcessor(@HeaderParam("x-session-token") String sSessionId,
+	public Response downloadProcessor(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("token") String sTokenSessionId,
 			@QueryParam("processorId") String sProcessorId)
 	{			
@@ -3205,6 +3218,7 @@ public class ProcessorsResource  {
 		WasdiLog.debugLog("ProcessorsResource.downloadProcessor( processorId: " + sProcessorId);
 		
 		try {
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 			
 			// Use the right token
             if( Utils.isNullOrEmpty(sSessionId) == false) {
@@ -3262,12 +3276,12 @@ public class ProcessorsResource  {
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Share processor with user", description="Grants a user access to a processor with specified rights (READ or WRITE). Sends notification email. Cannot auto-share or share with owner.")
-	public PrimitiveResult shareProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("userId") String sUserId, @QueryParam("rights") String sRights) {
+	public PrimitiveResult shareProcessor(@Context ContainerRequestContext oRequestContext, @QueryParam("processorId") String sProcessorId, @QueryParam("userId") String sUserId, @QueryParam("rights") String sRights) {
 
 		WasdiLog.debugLog("ProcessorsResource.shareProcessor(ProcessorId: " + sProcessorId + ", User: " + sUserId + " )");
 
 		// Validate Session
-		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequesterUser = (User) oRequestContext.getProperty("authenticated-user");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 
@@ -3378,12 +3392,12 @@ public class ProcessorsResource  {
 	@Path("share/byprocessor")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get users with processor access", description="Returns list of all users who have been granted access to processor, including their permission levels.")
-	public List<ProcessorSharingViewModel> getEnabledUsersSharedProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
+	public List<ProcessorSharingViewModel> getEnabledUsersSharedProcessor(@Context ContainerRequestContext oRequestContext, @QueryParam("processorId") String sProcessorId) {
 
 		WasdiLog.debugLog("ProcessorsResource.getEnabledUsersSharedProcessor( Processor: " + sProcessorId + " )");
 
 		// Validate Session
-		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+		User oOwnerUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 
 		if (oOwnerUser == null) {
@@ -3440,14 +3454,14 @@ public class ProcessorsResource  {
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Revoke processor access from user", description="Removes a user's access to a shared processor. Only processor owner or users with write permissions can revoke.")
-	public PrimitiveResult deleteUserSharingProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("userId") String sUserId) {
+	public PrimitiveResult deleteUserSharingProcessor(@Context ContainerRequestContext oRequestContext, @QueryParam("processorId") String sProcessorId, @QueryParam("userId") String sUserId) {
 
 		WasdiLog.debugLog("ProcessorsResource.deleteUserSharedProcessor( ProcId: " + sProcessorId + ", User:" + sUserId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		try {
 			// Validate Session
-			User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
+			User oRequestingUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oRequestingUser == null) {
 				WasdiLog.warnLog("ProcessorsResource.deleteUserSharedProcessor: invalid session");
@@ -3507,13 +3521,13 @@ public class ProcessorsResource  {
 	@Path("/ui")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Get processor UI configuration", description="Returns JSON UI configuration/schema for a processor. Used by frontend to render dynamic UI based on processor definition.")
-	public Response getUI(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) throws Exception {
+	public Response getUI(@Context ContainerRequestContext oRequestContext, @QueryParam("name") String sName) throws Exception {
 		WasdiLog.debugLog("ProcessorsResource.getUI( Name: " + sName + " )");
 		sName = URLDecoder.decode(sName, StandardCharsets.UTF_8.name());
 		
 		try {
 			// Check User 
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.getUI: session invalid");
@@ -3564,12 +3578,12 @@ public class ProcessorsResource  {
 	@Path("/saveui")
 	@Produces({ "application/json", "text/xml" })
 	@Operation(summary = "Save processor UI configuration", description="Updates processor UI JSON configuration with user's custom layout/schema. Validates JSON and requires write permissions.")
-	public Response saveUI(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName, String sUIJson) throws Exception {
+	public Response saveUI(@Context ContainerRequestContext oRequestContext, @QueryParam("name") String sName, String sUIJson) throws Exception {
 		WasdiLog.debugLog("ProcessorsResource.saveUI( Name: " + sName + " )");
 		
 		try {
 			// Check User 
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.saveUI: session invalid");
@@ -3680,10 +3694,10 @@ public class ProcessorsResource  {
 	@Path("/logs/build")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	@Operation(summary = "Get processor build logs", description="Returns build/deployment logs for a processor. User must have access to processor. Helps debug deployment issues.")
-	public Response getProcessorBuildLogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
+	public Response getProcessorBuildLogs(@Context ContainerRequestContext oRequestContext, @QueryParam("processorId") String sProcessorId) {
 		try {
 			// Check User 
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ProcessorsResource.getProcessorBuildLogs: invalid session");

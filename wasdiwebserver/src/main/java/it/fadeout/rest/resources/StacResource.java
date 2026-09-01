@@ -4,7 +4,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,16 +11,16 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -146,8 +145,10 @@ public class StacResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getCollections(
 			@Parameter(name = "x-session-token", in = ParameterIn.HEADER, description = "Optional WASDI session token. Omit it to access public collections anonymously", required = false, schema = @Schema(type = "string"))
-			@HeaderParam("x-session-token") String sSessionId) {
+			@Context ContainerRequestContext oRequestContext) {
 		try {
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
+			
 			User oUser = resolveUser(sSessionId);
 
 			List<Workspace> aoWorkspaces = getAccessibleWorkspaces(oUser);
@@ -183,10 +184,11 @@ public class StacResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getCollection(
 			@Parameter(name = "x-session-token", in = ParameterIn.HEADER, description = "Optional WASDI session token. Omit it to access a public collection anonymously", required = false, schema = @Schema(type = "string"))
-			@HeaderParam("x-session-token") String sSessionId,
+			@Context ContainerRequestContext oRequestContext,
 			@Parameter(name = "collectionId", in = ParameterIn.PATH, description = "Identifier of the collection (WASDI workspace)", required = true, schema = @Schema(type = "string"))
 			@PathParam("collectionId") String sWorkspaceId) {
 		try {
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 			User oUser = resolveUser(sSessionId);
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
@@ -218,7 +220,7 @@ public class StacResource {
 	@Produces({"application/geo+json", MediaType.APPLICATION_JSON})
 	public Response getItems(
 			@Parameter(name = "x-session-token", in = ParameterIn.HEADER, description = "Optional WASDI session token. Omit it to access a public collection anonymously", required = false, schema = @Schema(type = "string"))
-			@HeaderParam("x-session-token") String sSessionId,
+			@Context ContainerRequestContext oRequestContext,
 			@Parameter(name = "collectionId", in = ParameterIn.PATH, description = "Identifier of the collection (WASDI workspace)", required = true, schema = @Schema(type = "string"))
 			@PathParam("collectionId") String sWorkspaceId,
 			@Parameter(
@@ -269,7 +271,8 @@ public class StacResource {
 	{
 		try {
 			if (!hasOnlySupportedItemsQueryParameters(oUriInfo)) return Response.status(Status.BAD_REQUEST).build();
-
+			
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 			User oUser = resolveUser(sSessionId);
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
@@ -363,12 +366,13 @@ public class StacResource {
 	@Produces({"application/geo+json", MediaType.APPLICATION_JSON})
 	public Response getItem(
 			@Parameter(name = "x-session-token", in = ParameterIn.HEADER, description = "Optional WASDI session token. Omit it to access a public collection anonymously", required = false, schema = @Schema(type = "string"))
-			@HeaderParam("x-session-token") String sSessionId,
+			@Context ContainerRequestContext oRequestContext,
 			@Parameter(name = "collectionId", in = ParameterIn.PATH, description = "Identifier of the collection (WASDI workspace)", required = true, schema = @Schema(type = "string"))
 			@PathParam("collectionId") String sWorkspaceId,
 			@Parameter(name = "fileId", in = ParameterIn.PATH, description = "Identifier of the item (WASDI file name)", required = true, schema = @Schema(type = "string"))
 			@PathParam("fileId") String sFileId) {
 		try {
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 			User oUser = resolveUser(sSessionId);
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
@@ -417,7 +421,7 @@ public class StacResource {
 	private User resolveUser(String sSessionId) {
 		if (Utils.isNullOrEmpty(sSessionId)) return null;
 
-		return Wasdi.getUserFromSession(sSessionId);
+		return (User) Wasdi.getUserFromSession(sSessionId);
 	}
 
 	/**

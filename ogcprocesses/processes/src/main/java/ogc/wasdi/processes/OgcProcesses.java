@@ -38,6 +38,8 @@ import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.auth.AuthTokenUtil;
+import wasdi.shared.utils.auth.KeycloakUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
 import wasdi.shared.viewmodels.HttpCallResponse;
@@ -149,10 +151,17 @@ public class OgcProcesses extends ResourceConfig {
 	}
 	
 	/**
-	 * Get the User object from the session Id
-	 * It checks first in Key Cloak and later on the local session mechanism.
-	 * @param sSessionId
-	 * @return
+	 * Get the User object from the session Id or JWT token.
+	 * Supports multiple authentication methods with priority order:
+	 * 1. x-session-token header (WASDI legacy sessionId)
+	 * 2. Authorization Bearer JWT token (APEx M2M / OAuth2 client credentials)
+	 * 3. Authorization Bearer wasdi-<sessionId> (legacy wrapped sessionId)
+	 * 4. Basic HTTP auth (user:sessionId)
+	 * 5. Validation mode override (for testing)
+	 * 
+	 * @param sSessionId WASDI session token from x-session-token header
+	 * @param sAuthorization HTTP Authorization header (Bearer or Basic)
+	 * @return Authenticated User object or null if authentication fails
 	 */
 	public static User getUserFromSession(String sSessionId, String sAuthorization) {
 		
@@ -160,102 +169,243 @@ public class OgcProcesses extends ResourceConfig {
 		
 		try {
 			
-    		// Check if we have our session header
-    		if (Utils.isNullOrEmpty(sSessionId)) {
-    			// Try to get it from the basic http auth
-    			sSessionId = OgcProcesses.getSessionIdFromBasicAuthentication(sAuthorization);
+    		// Priority 1: Check if we have x-session-token header
+    		if (!Utils.isNullOrEmpty(sSessionId)) {
+    			return validateAndGetUserFromSessionId(sSessionId);
     		}
     		
-    		if (Utils.isNullOrEmpty(sSessionId)) {
+    		// Priority 2: Check if we have Authorization header
+    		if (!Utils.isNullOrEmpty(sAuthorization)) {
+    			String sToken = AuthTokenUtil.extractTokenFromAuthHeader(sAuthorization);
     			
-    			if (WasdiConfig.Current.ogcProcessesApi.validationModeOn) {
-    				if (!Utils.isNullOrEmpty(WasdiConfig.Current.ogcProcessesApi.validationUserId)) {
-    					if (!Utils.isNullOrEmpty(WasdiConfig.Current.ogcProcessesApi.validationSessionId)) {
-    						
-    						WasdiLog.warnLog("OgcProcesses.getUserFromSession: VALIDATION MODE ON - AUTO LOGIN");
-    						
-    						UserRepository oUserRepo = new UserRepository();
-    						oUser = oUserRepo.getUser(WasdiConfig.Current.ogcProcessesApi.validationUserId);
-    						
-    						if (oUser == null) {
-    							WasdiLog.errorLog("OgcProcesses.getUserFromSession: VALIDATION MODE Invalid validation user");
-    							return null;
-    						}
-    						
-    						sSessionId=WasdiConfig.Current.ogcProcessesApi.validationSessionId;
-    						
-    						SessionRepository oSessionRepository = new SessionRepository();
-    						UserSession oSession = oSessionRepository.getSession(sSessionId);
-    						
-    						if (oSession == null) {
-    							oSession = new UserSession();
-    							oSession.setLoginDate(Utils.nowInMillis());
-    							oSession.setLastTouch(Utils.nowInMillis());
-    							oSession.setSessionId(sSessionId);
-    							oSession.setUserId(WasdiConfig.Current.ogcProcessesApi.validationUserId);
-    							
-    							oSessionRepository.insertSession(oSession);
-    						}
-    						
+    			if (!Utils.isNullOrEmpty(sToken)) {
+    				// Check if it's a JWT Bearer token (APEx M2M scenario)
+    				if (AuthTokenUtil.appearsToBeJWT(sToken) && !AuthTokenUtil.isLegacyWasdiToken(sToken)) {
+    					WasdiLog.debugLog("OgcProcesses.getUserFromSession: JWT Bearer token detected");
+    					oUser = handleJWTAuthentication(sToken);
+    					if (oUser != null) {
     						return oUser;
     					}
-    					
     				}
+    				
+    				// Check if it's legacy wrapped sessionId ("Bearer wasdi-<sessionId>")
+    				if (AuthTokenUtil.isLegacyWasdiToken(sToken)) {
+    					WasdiLog.debugLog("OgcProcesses.getUserFromSession: legacy wrapped sessionId detected");
+    					String sUnwrappedSessionId = AuthTokenUtil.extractLegacySessionId(sToken);
+    					return validateAndGetUserFromSessionId(sUnwrappedSessionId);
+    				}
+    				
+    				// Fallback: treat token as raw sessionId
+    				WasdiLog.debugLog("OgcProcesses.getUserFromSession: treating Authorization token as sessionId");
+    				return validateAndGetUserFromSessionId(sToken);
     			}
     			
-    			return null;
+    			// Priority 3: Try Basic HTTP auth (user:sessionId format)
+    			WasdiLog.debugLog("OgcProcesses.getUserFromSession: attempting Basic HTTP auth");
+    			sSessionId = getSessionIdFromBasicAuthentication(sAuthorization);
+    			if (!Utils.isNullOrEmpty(sSessionId)) {
+    				return validateAndGetUserFromSessionId(sSessionId);
+    			}
     		}
     		
-			// Check The Session with Keycloak
-			String sUserId = null;
-			
-			try  {
-				//introspect
-				String sPayload = "token=" + sSessionId;
-				Map<String,String> asHeaders = new HashMap<>();
-				asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-				
-				HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(WasdiConfig.Current.keycloack.introspectAddress, sPayload, asHeaders, WasdiConfig.Current.keycloack.client + ":" + WasdiConfig.Current.keycloack.clientSecret); 
-				String sResponse = oHttpCallResponse.getResponseBody();
-				JSONObject oJSON = null;
-				if(!Utils.isNullOrEmpty(sResponse)) {
-					oJSON = new JSONObject(sResponse);
-				}
-				if(null!=oJSON) {
-					sUserId = oJSON.optString("preferred_username", null);
-				}				
-			}
-			catch (Exception oKeyEx) {
-				WasdiLog.debugLog("OgcProcesses.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
-			}
-
-
-			if(!Utils.isNullOrEmpty(sUserId)) {
-				UserRepository oUserRepo = new UserRepository();
-				oUser = oUserRepo.getUser(sUserId);
-			} else {
-				//check session against DB
-				
-				SessionRepository oSessionRepository = new SessionRepository();
-				UserSession oUserSession = oSessionRepository.getSession(sSessionId);
-				
-				if(null==oUserSession) {
-					return null;
-				} else {
-					sUserId = oUserSession.getUserId();
-				}
-				if(!Utils.isNullOrEmpty(sUserId)){
-					UserRepository oUserRepository = new UserRepository();
-					oUser = oUserRepository.getUser(sUserId);
-				} else {
-					return null;
-				}
-			}
+    		// Priority 4: Validation mode override (for testing)
+    		if (WasdiConfig.Current.ogcProcessesApi.validationModeOn) {
+    			if (!Utils.isNullOrEmpty(WasdiConfig.Current.ogcProcessesApi.validationUserId)) {
+    				if (!Utils.isNullOrEmpty(WasdiConfig.Current.ogcProcessesApi.validationSessionId)) {
+    					WasdiLog.warnLog("OgcProcesses.getUserFromSession: VALIDATION MODE ON - AUTO LOGIN");
+    					return getValidationModeUser();
+    				}
+    			}
+    		}
+    		
+    		// No authentication found
+    		WasdiLog.debugLog("OgcProcesses.getUserFromSession: no valid authentication found");
+    		return null;
+    		
 		} catch (Exception oE) {
-			WasdiLog.debugLog("OgcProcesses.getUserFromSession: something bad happened: " + oE);
+			WasdiLog.errorLog("OgcProcesses.getUserFromSession: exception during authentication: " + oE.getMessage());
 		}
 
 		return oUser;
+	}
+	
+	/**
+	 * Validate sessionId and return authenticated User.
+	 * Queries SessionRepository and then UserRepository.
+	 * 
+	 * @param sSessionId WASDI session ID from database
+	 * @return User object or null if session is invalid/expired
+	 */
+	private static User validateAndGetUserFromSessionId(String sSessionId) {
+		try {
+			if (Utils.isNullOrEmpty(sSessionId)) {
+				return null;
+			}
+			
+			SessionRepository oSessionRepository = new SessionRepository();
+			UserSession oUserSession = oSessionRepository.getSession(sSessionId);
+			
+			if (oUserSession == null) {
+				WasdiLog.debugLog("OgcProcesses.validateAndGetUserFromSessionId: session not found: " + sSessionId);
+				return null;
+			}
+			
+			String sUserId = oUserSession.getUserId();
+			if (Utils.isNullOrEmpty(sUserId)) {
+				return null;
+			}
+			
+			UserRepository oUserRepository = new UserRepository();
+			User oUser = oUserRepository.getUser(sUserId);
+			
+			if (oUser == null) {
+				WasdiLog.warnLog("OgcProcesses.validateAndGetUserFromSessionId: user not found for session: " + sSessionId);
+			}
+			
+			return oUser;
+		} catch (Exception oE) {
+			WasdiLog.errorLog("OgcProcesses.validateAndGetUserFromSessionId: " + oE.getMessage());
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Handle JWT Bearer token authentication (APEx M2M scenario).
+	 * Validates JWT, extracts userId, creates/updates M2M session, returns User.
+	 * 
+	 * @param sJwtToken Keycloak JWT access token
+	 * @return Authenticated User object or null if JWT validation fails
+	 */
+	private static User handleJWTAuthentication(String sJwtToken) {
+		try {
+			// Validate JWT and extract userId from token claims
+			String sUserId = KeycloakUtils.validateJwtAndGetUserId(sJwtToken);
+			
+			if (Utils.isNullOrEmpty(sUserId)) {
+				WasdiLog.warnLog("OgcProcesses.handleJWTAuthentication: JWT validation failed or no userId extracted");
+				return null;
+			}
+			
+			WasdiLog.debugLog("OgcProcesses.handleJWTAuthentication: JWT valid for user: " + sUserId);
+			
+			// Get or create M2M session for this JWT user
+			UserSession oSession = getOrCreateSessionFromJWT(sUserId);
+			if (oSession == null) {
+				WasdiLog.errorLog("OgcProcesses.handleJWTAuthentication: failed to create/get M2M session for user: " + sUserId);
+				return null;
+			}
+			
+			// Get user object from repository
+			UserRepository oUserRepo = new UserRepository();
+			User oUser = oUserRepo.getUser(sUserId);
+			
+			if (oUser == null) {
+				WasdiLog.warnLog("OgcProcesses.handleJWTAuthentication: user not found in DB for JWT userId: " + sUserId);
+				return null;
+			}
+			
+			WasdiLog.debugLog("OgcProcesses.handleJWTAuthentication: successfully authenticated JWT user: " + sUserId);
+			return oUser;
+		} catch (Exception oE) {
+			WasdiLog.errorLog("OgcProcesses.handleJWTAuthentication: " + oE.getMessage());
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Get or create a lightweight M2M session for JWT-authenticated user.
+	 * Sessions created from JWT are persistent (no short expiry) since they
+	 * represent M2M client credentials flow rather than user login.
+	 * 
+	 * @param sUserId User ID from JWT claims
+	 * @return M2M UserSession or null on error
+	 */
+	private static UserSession getOrCreateSessionFromJWT(String sUserId) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId)) {
+				return null;
+			}
+			
+			SessionRepository oSessionRepository = new SessionRepository();
+			
+			// Try to get existing active M2M session for this user
+			// (might be from previous M2M calls within token lifetime)
+			List<UserSession> aoSessions = oSessionRepository.getAllActiveSessions(sUserId);
+			UserSession oSession = null;
+			
+			// Find most recent active M2M session
+			if (aoSessions != null && !aoSessions.isEmpty()) {
+				for (UserSession oS : aoSessions) {
+					// M2M sessions are identifiable; reuse if valid
+					// For now, just take the first one (most recent)
+					oSession = oS;
+					break;
+				}
+			}
+			
+			// If no existing session, create new M2M session
+			if (oSession == null) {
+				oSession = new UserSession();
+				// Generate unique M2M session ID
+				oSession.setSessionId(java.util.UUID.randomUUID().toString());
+				oSession.setUserId(sUserId);
+				oSession.setLoginDate(Utils.nowInMillis());
+				oSession.setLastTouch(Utils.nowInMillis());
+				// Note: M2M sessions don't have a short expiry; they're valid as long as JWT is valid
+				
+				WasdiLog.debugLog("OgcProcesses.getOrCreateSessionFromJWT: creating new M2M session for user: " + sUserId);
+				oSessionRepository.insertSession(oSession);
+			} else {
+				// Refresh existing M2M session
+				oSession.setLastTouch(Utils.nowInMillis());
+				WasdiLog.debugLog("OgcProcesses.getOrCreateSessionFromJWT: refreshing existing M2M session for user: " + sUserId);
+				oSessionRepository.touchSession(oSession);
+			}
+			
+			return oSession;
+		} catch (Exception oE) {
+			WasdiLog.errorLog("OgcProcesses.getOrCreateSessionFromJWT: " + oE.getMessage());
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Get user in validation mode (for testing/debugging).
+	 * Creates or validates a test session.
+	 * 
+	 * @return Test User object or null if validation mode not properly configured
+	 */
+	private static User getValidationModeUser() {
+		try {
+			UserRepository oUserRepo = new UserRepository();
+			User oUser = oUserRepo.getUser(WasdiConfig.Current.ogcProcessesApi.validationUserId);
+			
+			if (oUser == null) {
+				WasdiLog.errorLog("OgcProcesses.getValidationModeUser: configured validation user not found");
+				return null;
+			}
+			
+			SessionRepository oSessionRepository = new SessionRepository();
+			UserSession oSession = oSessionRepository.getSession(WasdiConfig.Current.ogcProcessesApi.validationSessionId);
+			
+			if (oSession == null) {
+				oSession = new UserSession();
+				oSession.setLoginDate(Utils.nowInMillis());
+				oSession.setLastTouch(Utils.nowInMillis());
+				oSession.setSessionId(WasdiConfig.Current.ogcProcessesApi.validationSessionId);
+				oSession.setUserId(WasdiConfig.Current.ogcProcessesApi.validationUserId);
+				oSessionRepository.insertSession(oSession);
+			}
+			
+			return oUser;
+		} catch (Exception oE) {
+			WasdiLog.errorLog("OgcProcesses.getValidationModeUser: " + oE.getMessage());
+		}
+		
+		return null;
 	}
 	
 	/**

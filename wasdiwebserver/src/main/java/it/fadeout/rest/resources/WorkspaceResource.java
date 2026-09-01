@@ -9,12 +9,12 @@ import java.util.Map;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -92,11 +92,11 @@ public class WorkspaceResource {
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get user workspaces", description = "Returns workspaces owned by or shared with the authenticated user, including sharing details and node availability metadata.")
-	public List<WorkspaceListInfoViewModel> getListByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public List<WorkspaceListInfoViewModel> getListByUser(@Context ContainerRequestContext oRequestContext) {
 		
 		WasdiLog.debugLog("WorkspaceResource.getListByUser");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		List<WorkspaceListInfoViewModel> aoUserWorkspacesList = new ArrayList<>();
 		
@@ -246,13 +246,13 @@ public class WorkspaceResource {
 	@Path("getws")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get workspace details", description = "Returns a workspace editor view model with routing, storage, process, cloud, SLA, and sharing information.")
-	public WorkspaceEditorViewModel getWorkspaceEditorViewModel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId) {
+	public WorkspaceEditorViewModel getWorkspaceEditorViewModel(@Context ContainerRequestContext oRequestContext, @QueryParam("workspace") String sWorkspaceId, @QueryParam("remind") Boolean bRemind) {
 
 		WasdiLog.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel( WS: " + sWorkspaceId + ")");
 
 		WorkspaceEditorViewModel oWorkspaceEditorViewModel = new WorkspaceEditorViewModel();
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("WorkspaceResource.getWorkspaceEditorViewModel: invalid session");
@@ -271,6 +271,10 @@ public class WorkspaceResource {
 				WasdiLog.warnLog("WorkspaceResource.getWorkspaceEditorViewModel: user cannot access workspace info, aborting");
 				return oWorkspaceEditorViewModel;
 			}
+			
+			if (bRemind == null) {
+				bRemind = Boolean.FALSE;
+			}			
 
 			// Create repo
 			WorkspaceRepository oWSRepository = new WorkspaceRepository();
@@ -329,6 +333,12 @@ public class WorkspaceResource {
 				oWorkspaceEditorViewModel.setCloudProvider("wasdi");
 				oWorkspaceEditorViewModel.setActiveNode(true);
 			}
+			
+			if (bRemind) {
+				oUser.setLastWorkspace(sWorkspaceId);
+				UserRepository oUserRepository = new UserRepository();
+				oUserRepository.updateUser(oUser);
+			}
 
 			// Get Sharings
 			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository.getWorkspaceSharingsByWorkspaceId(oWorkspace.getWorkspaceId());
@@ -361,14 +371,15 @@ public class WorkspaceResource {
 	@Path("create")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Create workspace", description = "Creates a workspace with an optional name and node. When no node is specified, selects one using score, user default, and system fallback rules.")
-	public PrimitiveResult createWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName, @QueryParam("node") String sNodeCode) {
+	public PrimitiveResult createWorkspace(@Context ContainerRequestContext oRequestContext, @QueryParam("name") String sName, @QueryParam("node") String sNodeCode) {
 
 		WasdiLog.debugLog("WorkspaceResource.createWorkspace(" + sName + ", " + sNodeCode + " )");
 
 		// sName and sNodeCode can be null, and will be defaulted
 
 		// Validate Session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 		
 		if (oUser == null) {
 			WasdiLog.warnLog("WorkspaceResource.createWorkspace: invalid session");
@@ -452,12 +463,12 @@ public class WorkspaceResource {
 	@Path("update")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Update workspace", description = "Updates writable workspace metadata and node settings, resolving duplicate workspace names automatically.")
-	public WorkspaceEditorViewModel updateWorkspace(@HeaderParam("x-session-token") String sSessionId, WorkspaceEditorViewModel oWorkspaceEditorViewModel) {
+	public WorkspaceEditorViewModel updateWorkspace(@Context ContainerRequestContext oRequestContext, WorkspaceEditorViewModel oWorkspaceEditorViewModel) {
 
 		WasdiLog.debugLog("WorkspaceResource.updateWorkspace");
 
 		// Validate Session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		if (oUser == null) {
 			WasdiLog.warnLog("WorkspaceResource.updateWorkspace: invalid session");
@@ -499,6 +510,7 @@ public class WorkspaceResource {
 			oWorkspace.setName(sName);
 			oWorkspace.setUserId(oWorkspaceEditorViewModel.getUserId());
 			oWorkspace.setWorkspaceId(oWorkspaceEditorViewModel.getWorkspaceId());
+			oWorkspace.setPublic(oWorkspaceEditorViewModel.isPublic());
 			
 			if (oExistingWorkspace != null) {
 				oWorkspace.setStorageSize(oExistingWorkspace.getStorageSize());
@@ -556,17 +568,19 @@ public class WorkspaceResource {
 	@Path("delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Delete workspace", description = "Deletes an owned workspace and selected files or layers, terminating related resources as needed. Non-owners remove only their sharing.")
-	public Response deleteWorkspace(@HeaderParam("x-session-token") String sSessionId,
+	public Response deleteWorkspace(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("workspace") String sWorkspaceId, @QueryParam("deletelayer") Boolean bDeleteLayer,
 			@QueryParam("deletefile") Boolean bDeleteFile) {
 
-		WasdiLog.debugLog("WorkspaceResource.deleteWorkspace( WS: " + sWorkspaceId + ", DeleteLayer: " + bDeleteLayer + ", DeleteFile: " + bDeleteFile + " SessionId: " + sSessionId + ")");
+		WasdiLog.debugLog("WorkspaceResource.deleteWorkspace( WS: " + sWorkspaceId + ", DeleteLayer: " + bDeleteLayer + ", DeleteFile: " + bDeleteFile );
 		User oUser = null;
+		
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 		
 		//preliminary checks
 		try {
 			// Validate Session
-			oUser = Wasdi.getUserFromSession(sSessionId);
+			oUser = (User) oRequestContext.getProperty("authenticated-user");
 			
 			if (oUser == null) {
 				WasdiLog.warnLog("WorkspaceResource.deleteWorkspace: invalid session");
@@ -809,7 +823,7 @@ public class WorkspaceResource {
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Share workspace with user", description = "Grants a user READ or WRITE access to a workspace after validating requester, target, and ownership constraints, then sends a notification.")
-	public PrimitiveResult shareWorkspace(@HeaderParam("x-session-token") String sSessionId,
+	public PrimitiveResult shareWorkspace(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("workspace") String sWorkspaceId, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
 
 		WasdiLog.debugLog("WorkspaceResource.ShareWorkspace( WS: " + sWorkspaceId + ", User: " + sDestinationUserId + " )");
@@ -819,7 +833,7 @@ public class WorkspaceResource {
 
 
 		// Validate Session
-		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequesterUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		if (oRequesterUser == null) {
 			WasdiLog.warnLog("WorkspaceResource.shareWorkspace: invalid session");
@@ -939,14 +953,14 @@ public class WorkspaceResource {
 	@Path("share/byworkspace")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get workspace sharings", description = "Returns users with explicit access to a workspace and their assigned permission levels.")
-	public List<WorkspaceSharingViewModel> getEnabledUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId) {
+	public List<WorkspaceSharingViewModel> getEnabledUsersSharedWorksace(@Context ContainerRequestContext oRequestContext, @QueryParam("workspace") String sWorkspaceId) {
 
 		WasdiLog.debugLog("WorkspaceResource.getEnabledUsersSharedWorksace( WS: " + sWorkspaceId + " )");
 	
 		List<UserResourcePermission> aoWorkspaceSharing = null;
 		List<WorkspaceSharingViewModel> aoWorkspaceSharingViewModels = new ArrayList<WorkspaceSharingViewModel>();
 
-		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+		User oOwnerUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oOwnerUser == null) {
 			WasdiLog.warnLog("WorkspaceResource.getEnabledUsersSharedWorksace: invalid session");
 			return aoWorkspaceSharingViewModels;
@@ -987,7 +1001,7 @@ public class WorkspaceResource {
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Remove workspace sharing", description = "Removes a user's workspace sharing when requested by that user, a workspace writer or owner, or an administrator.")
-	public PrimitiveResult deleteUserSharedWorkspace(@HeaderParam("x-session-token") String sSessionId,
+	public PrimitiveResult deleteUserSharedWorkspace(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("workspace") String sWorkspaceId, @QueryParam("userId") String sUserId) {
 
 		WasdiLog.debugLog("WorkspaceResource.deleteUserSharedWorkspace( WS: " + sWorkspaceId + ", User:" + sUserId + " )");
@@ -995,7 +1009,7 @@ public class WorkspaceResource {
 		oResult.setBoolValue(false);
 		
 		// Validate Session
-		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequestingUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oRequestingUser == null) {
 			WasdiLog.warnLog("WorkspaceResource.deleteUserSharedWorkspace: invalid session");
@@ -1091,14 +1105,14 @@ public class WorkspaceResource {
 	@Path("wsnamebyid")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get workspace name", description = "Returns the plain-text name of an accessible workspace identified by its workspace identifier.")
-	public Response getWorkspaceNameById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId ) {
+	public Response getWorkspaceNameById(@Context ContainerRequestContext oRequestContext, @QueryParam("workspace") String sWorkspaceId ) {
 
 		if (Utils.isNullOrEmpty(sWorkspaceId)) {
 			WasdiLog.warnLog("WorkspaceResource.getWorkspaceNameById: workspace is null or empty, aborting");
 			return Response.status(Status.BAD_REQUEST).entity("workspaceId is null or empty").build();
 		}
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (null == oUser) {
 			WasdiLog.warnLog("WorkspaceResource.getWorkspaceNameById: session is invalid, aborting");
 			return Response.status(Status.UNAUTHORIZED).entity("session invalid").build();

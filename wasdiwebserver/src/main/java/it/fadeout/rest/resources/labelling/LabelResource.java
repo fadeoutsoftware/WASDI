@@ -6,16 +6,16 @@ import java.util.UUID;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import it.fadeout.Wasdi;
 import wasdi.shared.business.labelling.Attribute;
 import wasdi.shared.business.labelling.DatasetProject;
 import wasdi.shared.business.labelling.Label;
@@ -39,11 +39,11 @@ public class LabelResource {
 	@GET
 	@Path("/byimage")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getByImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("datasetId") String sDatasetId, @QueryParam("imageName") String sImageName) {
+	public Response getByImage(@Context ContainerRequestContext oRequestContext, @QueryParam("datasetId") String sDatasetId, @QueryParam("imageName") String sImageName) {
 
 		WasdiLog.debugLog("LabelResource.getByImage");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		List<LabelViewModel> aoLabelsViewModels = new ArrayList<>();
 
 		if (oUser == null) {
@@ -84,11 +84,11 @@ public class LabelResource {
 	@GET
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("labelId") String sLabelId) {
+	public Response getById(@Context ContainerRequestContext oRequestContext, @QueryParam("labelId") String sLabelId) {
 
 		WasdiLog.debugLog("LabelResource.getById");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("LabelResource.getById: invalid session");
@@ -125,11 +125,11 @@ public class LabelResource {
 	@POST
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response create(@HeaderParam("x-session-token") String sSessionId, LabelViewModel oLabelViewModel) {
+	public Response create(@Context ContainerRequestContext oRequestContext, LabelViewModel oLabelViewModel) {
 
 		WasdiLog.debugLog("LabelResource.create");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("LabelResource.create: invalid session");
@@ -166,11 +166,11 @@ public class LabelResource {
 	@PUT
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response update(@HeaderParam("x-session-token") String sSessionId, LabelViewModel oLabelViewModel) {
+	public Response update(@Context ContainerRequestContext oRequestContext, LabelViewModel oLabelViewModel) {
 
 		WasdiLog.debugLog("LabelResource.update");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("LabelResource.update: invalid session");
@@ -210,11 +210,11 @@ public class LabelResource {
 	@DELETE
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response delete(@HeaderParam("x-session-token") String sSessionId, @QueryParam("labelId") String sLabelId) {
+	public Response delete(@Context ContainerRequestContext oRequestContext, @QueryParam("labelId") String sLabelId) {
 
 		WasdiLog.debugLog("LabelResource.delete");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("LabelResource.delete: invalid session");
@@ -253,11 +253,11 @@ public class LabelResource {
 	@GET
 	@Path("/approve")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response approve(@HeaderParam("x-session-token") String sSessionId, @QueryParam("labelId") String sLabelId) {
+	public Response approve(@Context ContainerRequestContext oRequestContext, @QueryParam("labelId") String sLabelId) {
 
 		WasdiLog.debugLog("LabelResource.approve");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("LabelResource.approve: invalid session");
@@ -331,11 +331,11 @@ public class LabelResource {
 	@GET
 	@Path("/reject")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response reject(@HeaderParam("x-session-token") String sSessionId, @QueryParam("labelId") String sLabelId) {
+	public Response reject(@Context ContainerRequestContext oRequestContext, @QueryParam("labelId") String sLabelId) {
 
 		WasdiLog.debugLog("LabelResource.reject");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("LabelResource.reject: invalid session");
@@ -390,11 +390,11 @@ public class LabelResource {
 	@POST
 	@Path("/addNote")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response addNote(@HeaderParam("x-session-token") String sSessionId, NoteRequestViewModel oRequest) {
+	public Response addNote(@Context ContainerRequestContext oRequestContext, NoteRequestViewModel oRequest) {
 
 		WasdiLog.debugLog("LabelResource.addNote");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("LabelResource.addNote: invalid session");
@@ -459,11 +459,11 @@ public class LabelResource {
 	@POST
 	@Path("/resolveNote")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response resolveNote(@HeaderParam("x-session-token") String sSessionId, ResolveNoteRequestViewModel oRequest) {
+	public Response resolveNote(@Context ContainerRequestContext oRequestContext, ResolveNoteRequestViewModel oRequest) {
 
 		WasdiLog.debugLog("LabelResource.resolveNote");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("LabelResource.resolveNote: invalid session");

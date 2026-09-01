@@ -2,16 +2,16 @@ package it.fadeout.rest.resources.labelling;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import it.fadeout.Wasdi;
 import wasdi.shared.business.labelling.DatasetProject;
 import wasdi.shared.business.labelling.ImageStyle;
 import wasdi.shared.business.users.User;
@@ -29,11 +29,11 @@ public class ImageStyleResource {
 	@GET
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("styleId") String sStyleId) {
+	public Response getById(@Context ContainerRequestContext oRequestContext, @QueryParam("styleId") String sStyleId) {
 
 		WasdiLog.debugLog("ImageStyleResource.getById");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ImageStyleResource.getById: invalid session");
@@ -70,11 +70,11 @@ public class ImageStyleResource {
 	@POST
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response create(@HeaderParam("x-session-token") String sSessionId, ImageStyleViewModel oImageStyleViewModel) {
+	public Response create(@Context ContainerRequestContext oRequestContext, ImageStyleViewModel oImageStyleViewModel) {
 
 		WasdiLog.debugLog("ImageStyleResource.create");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ImageStyleResource.create: invalid session");
@@ -109,11 +109,11 @@ public class ImageStyleResource {
 	@PUT
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response update(@HeaderParam("x-session-token") String sSessionId, ImageStyleViewModel oImageStyleViewModel) {
+	public Response update(@Context ContainerRequestContext oRequestContext, ImageStyleViewModel oImageStyleViewModel) {
 
 		WasdiLog.debugLog("ImageStyleResource.update");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ImageStyleResource.update: invalid session");
@@ -153,11 +153,11 @@ public class ImageStyleResource {
 	@DELETE
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response delete(@HeaderParam("x-session-token") String sSessionId, @QueryParam("imageStyleId") String sImageStyleId) {
+	public Response delete(@Context ContainerRequestContext oRequestContext, @QueryParam("imageStyleId") String sImageStyleId) {
 
 		WasdiLog.debugLog("ImageStyleResource.delete");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ImageStyleResource.delete: invalid session");

@@ -6,12 +6,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.HttpHeaders;
 
-import io.swagger.v3.oas.integration.OpenApiContextLocator;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.integration.OpenApiContextLocator;
 import io.swagger.v3.oas.integration.api.OpenApiContext;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;

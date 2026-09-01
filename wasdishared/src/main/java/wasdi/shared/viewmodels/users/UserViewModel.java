@@ -29,8 +29,16 @@ public class UserViewModel {
 	private String role;
 	private Set<String> grantedAuthorities;
 	
+	private String lastWorkspace;
+	
+	private String accessToken;
+	private String refreshToken;
+	private int expiresIn;
+	
 	//singleton pattern
 	private static UserViewModel s_oInvalid;
+	
+	
 	
     static {
     	UserViewModel oViewModel = new UserViewModel();
@@ -181,5 +189,37 @@ public class UserViewModel {
 
 	public void setSkin(String skin) {
 		this.skin = skin;
+	}
+
+	public String getLastWorkspace() {
+		return lastWorkspace;
+	}
+
+	public void setLastWorkspace(String lastWorkspace) {
+		this.lastWorkspace = lastWorkspace;
+	}
+
+	public String getAccessToken() {
+		return accessToken;
+	}
+
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
+	}
+
+	public String getRefreshToken() {
+		return refreshToken;
+	}
+
+	public void setRefreshToken(String refreshToken) {
+		this.refreshToken = refreshToken;
+	}
+
+	public int getExpiresIn() {
+		return expiresIn;
+	}
+
+	public void setExpiresIn(int expiresIn) {
+		this.expiresIn = expiresIn;
 	}
 }

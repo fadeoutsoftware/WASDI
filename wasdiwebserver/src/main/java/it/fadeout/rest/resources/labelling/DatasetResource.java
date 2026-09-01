@@ -10,30 +10,30 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.joda.time.DateTimeUtils;
 
-import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.WorkspaceResource;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.labelling.Attribute;
 import wasdi.shared.business.labelling.DatasetProject;
+import wasdi.shared.business.labelling.Label;
 import wasdi.shared.business.labelling.LabellingProjectRoles;
 import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserAccessRights;
 import wasdi.shared.business.users.UserResourcePermission;
-import wasdi.shared.business.labelling.Label;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
@@ -55,11 +55,11 @@ public class DatasetResource {
 	@GET
 	@Path("/list")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getList(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getList(@Context ContainerRequestContext oRequestContext) {
 		
 		WasdiLog.debugLog("DatasetResource.getPublicList");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		List<DatasetListViewModel> aoDataasetsList = new ArrayList<>();
 
@@ -124,11 +124,11 @@ public class DatasetResource {
 	@DELETE
 	@Path("/leave")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response leaveProject(@HeaderParam("x-session-token") String sSessionId, @QueryParam("datasetId") String sDatasetId) {
+	public Response leaveProject(@Context ContainerRequestContext oRequestContext, @QueryParam("datasetId") String sDatasetId) {
 		
 		WasdiLog.debugLog("DatasetResource.leaveProject");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// 1. Domain Check
 		if (oUser == null) {
@@ -182,11 +182,11 @@ public class DatasetResource {
 	@GET
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("datasetId") String sDatasetId) {
+	public Response getById(@Context ContainerRequestContext oRequestContext, @QueryParam("datasetId") String sDatasetId) {
 		
 		WasdiLog.debugLog("DatasetResource.getById");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {
@@ -247,11 +247,11 @@ public class DatasetResource {
 	@GET
 	@Path("/collaborators")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getCollaborators(@HeaderParam("x-session-token") String sSessionId, @QueryParam("datasetId") String sDatasetId) {
+	public Response getCollaborators(@Context ContainerRequestContext oRequestContext, @QueryParam("datasetId") String sDatasetId) {
 		
 		WasdiLog.debugLog("DatasetResource.getCollaborators");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		ArrayList<DatasetCollaboratorViewModel> aoCollaborators = new ArrayList<>();
 
@@ -306,10 +306,10 @@ public class DatasetResource {
 	@POST
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response create(@HeaderParam("x-session-token") String sSessionId, DatasetViewModel oDatasetViewModel) {
+	public Response create(@Context ContainerRequestContext oRequestContext, DatasetViewModel oDatasetViewModel) {
 		WasdiLog.debugLog("DatasetResource.create");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {
@@ -352,7 +352,7 @@ public class DatasetResource {
 			oDataset.getTasks().addAll(oDatasetViewModel.tasks);
 			oDataset.setTemplateId(oDatasetViewModel.templateId);
 			WorkspaceResource oWorkspaceResource = new WorkspaceResource();
-			PrimitiveResult oPrimitiveResult = oWorkspaceResource.createWorkspace(sSessionId, "labelling_"+oDatasetViewModel.name, "");
+			PrimitiveResult oPrimitiveResult = oWorkspaceResource.createWorkspace(oRequestContext, "labelling_"+oDatasetViewModel.name, "");
 			if (oPrimitiveResult == null) {
 				WasdiLog.errorLog("DatasetResource.create: we could not create the workspace associated to the dataset.. not good at all...");
 				return Response.serverError().build();				
@@ -373,10 +373,10 @@ public class DatasetResource {
 	@PUT
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response update(@HeaderParam("x-session-token") String sSessionId, DatasetViewModel oDatasetViewModel) {
+	public Response update(@Context ContainerRequestContext oRequestContext, DatasetViewModel oDatasetViewModel) {
 		WasdiLog.debugLog("DatasetResource.update");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {
@@ -438,10 +438,10 @@ public class DatasetResource {
 	@DELETE
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response delete(@HeaderParam("x-session-token") String sSessionId, @QueryParam("datasetId") String sDatasetId) {
+	public Response delete(@Context ContainerRequestContext oRequestContext, @QueryParam("datasetId") String sDatasetId) {
 		WasdiLog.debugLog("DatasetResource.delete");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {
@@ -469,7 +469,7 @@ public class DatasetResource {
 			}
 			
 			WorkspaceResource oWorkspaceResource = new WorkspaceResource();
-			oWorkspaceResource.deleteWorkspace(sSessionId, oDataset.getWorkspaceId(), true, true);
+			oWorkspaceResource.deleteWorkspace(oRequestContext, oDataset.getWorkspaceId(), true, true);
 			
 			oDatasetRepository.deleteDataset(sDatasetId);
 			
@@ -484,11 +484,11 @@ public class DatasetResource {
 	@POST
 	@Path("/collaborators")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response addCollaborator(@HeaderParam("x-session-token") String sSessionId, @QueryParam("datasetId") String sDatasetId, @QueryParam("userId") String sUserId, @QueryParam("roleId") String sRole) {
+	public Response addCollaborator(@Context ContainerRequestContext oRequestContext, @QueryParam("datasetId") String sDatasetId, @QueryParam("userId") String sUserId, @QueryParam("roleId") String sRole) {
 		
 		WasdiLog.debugLog("DatasetResource.addCollaborator");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {
@@ -616,11 +616,11 @@ public class DatasetResource {
 	@DELETE
 	@Path("/collaborators")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response deleteCollaborator(@HeaderParam("x-session-token") String sSessionId, @QueryParam("datasetId") String sDatasetId, @QueryParam("userId") String sUserId) {
+	public Response deleteCollaborator(@Context ContainerRequestContext oRequestContext, @QueryParam("datasetId") String sDatasetId, @QueryParam("userId") String sUserId) {
 		
 		WasdiLog.debugLog("DatasetResource.deleteCollaborator");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {
@@ -705,10 +705,10 @@ public class DatasetResource {
 	@POST
 	@Path("/export")
 	@Produces("application/zip")
-	public Response exportDataset(@HeaderParam("x-session-token") String sSessionId, ExportDatasetViewModel oExportViewModel) {
+	public Response exportDataset(@Context ContainerRequestContext oRequestContext, ExportDatasetViewModel oExportViewModel) {
 		
 		WasdiLog.debugLog("DatasetResource.exportDataset");
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();

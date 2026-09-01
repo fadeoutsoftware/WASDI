@@ -8,11 +8,11 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -64,7 +64,7 @@ public class ConsoleResource {
 	@Path("/create")
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Create or resume a Jupyter Notebook", description="Creates or resumes a Jupyter Notebook instance for the given workspace. If a notebook already exists and is reachable, its URL is returned immediately. If the IP of the calling client is new, the Traefik firewall rule is updated to allow it. If the notebook is absent or stale, a new Docker container is launched asynchronously via the WASDI launcher. Requires a valid subscription.")
-	public PrimitiveResult create(@Context HttpServletRequest oRequest, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspaceId") String sWorkspaceId) {
+	public PrimitiveResult create(@Context HttpServletRequest oRequest, @Context ContainerRequestContext oRequestContext, @QueryParam("workspaceId") String sWorkspaceId) {
 		WasdiLog.infoLog("ConsoleResource.create( WorkspaceId: " + sWorkspaceId + " )");
 
 		PrimitiveResult oResult = new PrimitiveResult();
@@ -73,7 +73,7 @@ public class ConsoleResource {
 		try {
 			
 			// Check the session token
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			
 			if (oUser == null) {
 				WasdiLog.warnLog("ConsoleResource.create: invalid session");
@@ -82,6 +82,7 @@ public class ConsoleResource {
 			}
 
 			String sUserId = oUser.getUserId();
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 			//check the user can access the workspace
 			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {
@@ -222,7 +223,7 @@ public class ConsoleResource {
 					// restart JN instance
 					// update JN instance
 					oJupyterNotebookRepository.deleteJupyterNotebook(sJupyterNotebookCode);
-					return create(oRequest, sSessionId, sWorkspaceId);
+					return create(oRequest, oRequestContext, sWorkspaceId);
 				}
 
 			} 
@@ -289,14 +290,14 @@ public class ConsoleResource {
 	@Path("/active")
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Check if notebook container is active", description="Checks whether the Jupyter Notebook container for the specified workspace is currently up and reachable. Returns the notebook URL when active.")
-	public PrimitiveResult isJupyterNotebookActive(@HeaderParam("x-session-token") String sSessionId,
+	public PrimitiveResult isJupyterNotebookActive(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("workspaceId") String sWorkspaceId) {
 		WasdiLog.debugLog("ConsoleResource.isJupyterNotebookActive( WS: " + sWorkspaceId + " )");
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ConsoleResource.isJupyterNotebookActive: invalid session");
@@ -358,12 +359,12 @@ public class ConsoleResource {
 	@Path("/ready")
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Check if notebook is ready", description="Checks whether the Jupyter Notebook container is both active (reachable) and up-to-date. Returns the notebook URL when both conditions are met. Returns a standard HTTP error code (not just a PrimitiveResult) on access or session failures.")
-	public Response isNotebookReady(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspaceId") String sWorkspaceId) {
+	public Response isNotebookReady(@Context ContainerRequestContext oRequestContext, @QueryParam("workspaceId") String sWorkspaceId) {
 		
 		try {
 			
 			// Verify the user
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser == null) {
 				WasdiLog.warnLog("ConsoleResource.isNotebookReady: invalid session");

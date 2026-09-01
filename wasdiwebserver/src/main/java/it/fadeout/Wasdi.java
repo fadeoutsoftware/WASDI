@@ -36,6 +36,7 @@ import io.swagger.v3.oas.integration.api.OpenApiContext;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
+import it.fadeout.filters.AuthenticationFilter;
 import it.fadeout.providers.JerseyMapperProvider;
 import it.fadeout.rest.resources.AuthResource;
 import it.fadeout.rest.resources.ProcessWorkspaceResource;
@@ -134,9 +135,9 @@ public class Wasdi extends ResourceConfig {
 	 * Constructor: bind the classes and the resources classes
 	 */
 	public Wasdi() {
-		register(new WasdiBinder());
 		register(JacksonFeature.class);
 		register(JerseyMapperProvider.class);
+		register(AuthenticationFilter.class);
 		register(org.glassfish.jersey.media.multipart.MultiPartFeature.class);
 		packages(true, "it.fadeout.rest.resources");
 		
@@ -405,7 +406,9 @@ public class Wasdi extends ResourceConfig {
 					oJSON = new JSONObject(sResponse);
 					
 					if(oJSON != null) {
-						sUserId = oJSON.optString("preferred_username", null);
+						if (oJSON.optBoolean("active", false)) {
+							sUserId = oJSON.optString("preferred_username", null);
+						}
 					}					
 				}
 				

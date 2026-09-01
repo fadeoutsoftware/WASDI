@@ -6,17 +6,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import io.swagger.v3.oas.annotations.Operation;
-import it.fadeout.Wasdi;
 import it.fadeout.services.StripeService;
 import wasdi.shared.business.CreditsPackage;
 import wasdi.shared.business.users.User;
@@ -47,7 +47,7 @@ public class CreditsPackageResource {
 	@Path("/types")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get available credit package types", description="Returns the list of credit package types available for purchase, including their names, descriptions, and pricing. The response structure mirrors subscription types.")
-	public Response getCreditsPackages(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getCreditsPackages(@Context ContainerRequestContext oRequestContext) {
 		WasdiLog.debugLog("CreditsResource.getCreditsPackages");
 		try {
 			return Response.ok(convert(Arrays.asList(CreditPackageType.values()))).build();
@@ -68,12 +68,12 @@ public class CreditsPackageResource {
 	@Path("/totalbyuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get user's total available credits", description="Returns the total remaining credit balance for the authenticated user. Aggregates all purchased credit packages minus consumed credits.")
-	public Response getTotalCreditsByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getTotalCreditsByUser(@Context ContainerRequestContext oRequestContext) {
 		WasdiLog.debugLog("CreditsResource.getTotalCreditsByUser");
 		
 		try {
 			
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser == null) {
 				WasdiLog.warnLog("CreditsResource.getTotalCreditsByUser: invalid session");
@@ -101,11 +101,11 @@ public class CreditsPackageResource {
 	@Path("/listbyuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "List user's credit packages", description="Returns a list of all credit packages purchased by the authenticated user, including purchase date, credit amount, type, and expiration info. Results can be sorted by purchase date in ascending or descending order.")
-	public Response getCreditsListByUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("ascendingOrder") boolean bBuyDateAscendingOrder) {
+	public Response getCreditsListByUser(@Context ContainerRequestContext oRequestContext, @QueryParam("ascendingOrder") boolean bBuyDateAscendingOrder) {
 		WasdiLog.debugLog("CreditsResource.getCreditsListByUser");
 		
 		try {	
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser == null) {
 				WasdiLog.warnLog("CreditsResource.getCreditsListByUser: invalid session");
@@ -137,10 +137,10 @@ public class CreditsPackageResource {
 	@Path("/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Create a new credit package", description="Creates a new credit package purchase record for the authenticated user. The package type must be one of the defined types. A buyDate is recorded. Returns a SuccessResponse containing the generated package ID.")
-	public Response addCreditPackage(@HeaderParam("x-session-token") String sSessionId, CreditsPackageViewModel oCreditsPackageViewModel) {
+	public Response addCreditPackage(@Context ContainerRequestContext oRequestContext, CreditsPackageViewModel oCreditsPackageViewModel) {
 		WasdiLog.debugLog("CreditsResource.addCreditPackage");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("CreditsResource.addCreditPackage: invalid session");
@@ -208,11 +208,11 @@ public class CreditsPackageResource {
 	@Path("/stripe/paymentUrl")
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Generate Stripe payment checkout URL", description="Generates a Stripe Checkout URL for a credit package. The client uses this URL to redirect the user to Stripe's hosted checkout page. The creditPackageId is embedded as a clientReferenceId in the Stripe session for later correlation with the confirmation callback.")
-	public Response getStripePaymentUrl(@HeaderParam("x-session-token") String sSessionId,
+	public Response getStripePaymentUrl(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("creditPackageId") String sCreditPackageId) {
 		WasdiLog.debugLog("CreditsResource.getStripePaymentUrl( " + "Credits package id: " + sCreditPackageId + ")");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("CreditsResource.getStripePaymentUrl: invalid session");
