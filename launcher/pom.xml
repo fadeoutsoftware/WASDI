@@ -18,7 +18,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.release>21</maven.compiler.release>
+    	<maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
         <sVersionAssertjCore>3.27.7</sVersionAssertjCore>
@@ -31,17 +31,13 @@
         <sVersionMavenJarPlugin>3.3.0</sVersionMavenJarPlugin>
         <sVersionMavenShadePlugin>3.5.0</sVersionMavenShadePlugin>
         <sVersionNetcdfAll>5.5.2</sVersionNetcdfAll>
-        <sVersionOkHttp>5.5.0</sVersionOkHttp>
-        <sVersionMicrowavetbx>14.0.0</sVersionMicrowavetbx>
-        <sVersionOpticaltbx>14.0.0</sVersionOpticaltbx>
-        <sVersionSnap>14.0.0</sVersionSnap>
-        <sVersionSMOSTbx>14.0.0</sVersionSMOSTbx>
+        <sVersionOkHttp>5.3.0</sVersionOkHttp>
+        <sVersionMicrowavetbx>13.0.0</sVersionMicrowavetbx>
+        <sVersionOpticaltbx>13.0.0</sVersionOpticaltbx>
+        <sVersionSnap>13.0.0</sVersionSnap>
+        <sVersionSMOSTbx>11.0.0</sVersionSMOSTbx>
         <sVersionSshj>0.40.0</sVersionSshj>
         <sVersionLogback>1.5.33</sVersionLogback>
-        <!-- SNAP's snap-engine-kit still pulls the old 1.3.3.2-SNAP imageio-ext fork (via ceres-jai),
-             which wins dependency mediation over the 1.4.7 line required by gt-geotiff's cog stack.
-             This mismatch breaks the CogImageInputStreamSpi ServiceLoader instantiation at runtime. -->
-        <sVersionImageioExt>1.4.7</sVersionImageioExt>
     </properties>
 
     <build>
@@ -83,7 +79,6 @@
                     </execution>
                 </executions>
             </plugin>
-            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -99,19 +94,9 @@
                                 <exclude>META-INF/ECLIPSEF.RSA</exclude>
                                 <exclude>META-INF/ECLIPSEF.SF</exclude>
                                 <exclude>META-INF/eclipse.inf</exclude>
-								<!-- Exclude the raw unmerged XmlPull service provider files -->
-                    			<exclude>META-INF/services/org.xmlpull.v1.XmlPullParserFactory</exclude>                                
                             </excludes>
                         </filter>
-                    </filters>                
-                    <!-- Merges META-INF/services across all dependencies (SNAP, Logback, NetCDF, etc.) -->
-                    <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
-                            <resource>META-INF/services/org.xmlpull.v1.XmlPullParserFactory</resource>
-                            <file>resources/META-INF/services/org.xmlpull.v1.XmlPullParserFactory</file>
-                        </transformer>
-                    </transformers>
+                    </filters>
                 </configuration>
                 <executions>
                     <execution>
@@ -122,7 +107,6 @@
                     </execution>
                 </executions>
             </plugin>
-            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -132,177 +116,713 @@
                         <manifest>
                             <mainClass>wasdi.LauncherMain</mainClass>
                         </manifest>
-                        <manifestEntries>
-                            <Implementation-Title>com.sun.media.imageio</Implementation-Title>
-                            <Implementation-Version>1.0_01</Implementation-Version>
-                            <Specification-Vendor>Sun Microsystems, Inc.</Specification-Vendor>
-                            <Implementation-Vendor>Sun Microsystems, Inc.</Implementation-Vendor>
-                            <Specification-Title>Java Advanced Imaging Image I/O Tools</Specification-Title>
-                            <OpenIDE-Module-Specification-Version>unknown</OpenIDE-Module-Specification-Version>
-                        </manifestEntries>                        
+			            <manifestEntries>
+			              <Implementation-Title>com.sun.media.imageio</Implementation-Title>
+			              
+			              <Implementation-Version>1.0_01</Implementation-Version>
+			              <Specification-Vendor>Sun Microsystems, Inc.</Specification-Vendor>
+			              <Implementation-Vendor>Sun Microsystems, Inc.</Implementation-Vendor>
+			              <Specification-Title>Java Advanced Imaging Image I/O Tools</Specification-Title>
+			              <OpenIDE-Module-Specification-Version>unknown</OpenIDE-Module-Specification-Version>
+			              <!--key>value</key>
+			              <key>value</key>
+			              <key>value</key>
+			              <key>value</key>
+			              <key>value</key-->
+			            </manifestEntries>                        
                     </archive>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
-    <dependencyManagement>
-        <dependencies>
-            <!-- Force a single, consistent imageio-ext version across SNAP and geotools/cog,
-                 instead of letting the old SNAP fork (1.3.3.2-SNAP) win dependency mediation. -->
-            <dependency>
-                <groupId>it.geosolutions.imageio-ext</groupId>
-                <artifactId>imageio-ext-tiff</artifactId>
-                <version>${sVersionImageioExt}</version>
-            </dependency>
-            <dependency>
-                <groupId>it.geosolutions.imageio-ext</groupId>
-                <artifactId>imageio-ext-utilities</artifactId>
-                <version>${sVersionImageioExt}</version>
-            </dependency>
-            <dependency>
-                <groupId>it.geosolutions.imageio-ext</groupId>
-                <artifactId>imageio-ext-geocore</artifactId>
-                <version>${sVersionImageioExt}</version>
-            </dependency>
-            <dependency>
-                <groupId>it.geosolutions.imageio-ext</groupId>
-                <artifactId>imageio-ext-streams</artifactId>
-                <version>${sVersionImageioExt}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
-        <!-- Utilities & External Libraries -->
+        <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>${sVersionOkHttp}</version>
         </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk18on</artifactId>
-            <version>${sVersionBcpkixJdk15on}</version>
-        </dependency>
+        <!-- Bouncy Castle is necessary to enable outgoing ssh connections -->
+		<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
+			<version>${sVersionBcpkixJdk15on}</version>
+		</dependency>
+        <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
         <dependency>
             <groupId>commons-cli</groupId>
             <artifactId>commons-cli</artifactId>
             <version>${sVersionCommonsCli}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>${sVersionJson}</version>
         </dependency>
+        <!-- https://search.maven.org/artifact/com.hierynomus/sshj -->
         <dependency>
             <groupId>com.hierynomus</groupId>
             <artifactId>sshj</artifactId>
             <version>${sVersionSshj}</version>
         </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${sVersionLogback}</version>
             <scope>compile</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-core -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
             <version>${sVersionLogback}</version>
             <scope>compile</scope>
         </dependency>
-
-        <!-- SNAP & TOOLBOX KIT AGGREGATORS -->
         
-        <!-- SNAP Core Engine Kit (Replaces individual snap-core, snap-bigtiff, snap-gdal-writer, etc.) -->
+        <!-- SNAP -->
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-engine-kit</artifactId>
+            <artifactId>snap-core</artifactId>
             <version>${sVersionSnap}</version>
-            <type>pom</type>
         </dependency>
-
-        <!-- Microwave Toolbox Kit (Replaces individual sar-op-*, microwavetbx-rcp, etc.) -->
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-engine-utilities</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-bigtiff</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-geotiff</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-rcp</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-raster</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-jp2-reader</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-land-cover</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-hdf5-writer</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-rtp-codec</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-arcbingrid-reader</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-getasse30-dem</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-pgx-reader</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-znap</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>   
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-gdal-writer</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-sta</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-change-detection</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-classification</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-cluster-analysis</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-pixel-extraction</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>             
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-temporal-percentile</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>             
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-watermask</artifactId>
+            <version>${sVersionSnap}</version>
+        </dependency>             
+        
+        <!-- S1 -->
         <dependency>
             <groupId>eu.esa.microwavetbx</groupId>
             <artifactId>microwavetbx-kit</artifactId>
             <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>microwavetbx-rcp</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-cloud</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-commons</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-io</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-io-ephemeris</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-io-gdal</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-calibration</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-feature-extraction</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-insar</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-insar-ui</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
             <exclusions>
-                <!-- Retained your specific H2 exclusion to avoid class shadowing with Nitrite 4.x -->
+                <!-- h2gis:1.5.0 (transitive via snap-product-library-v2) pulls h2:1.4.197
+                     which shadows the h2-mvstore:2.x classes needed by Nitrite 4.x -->
                 <exclusion>
                     <groupId>com.h2database</groupId>
                     <artifactId>h2</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
-
-        <!-- Radarsat Toolbox Kit -->
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-sar-processing</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-sar-processing-ui</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-sentinel1</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-sentinel1-ui</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-utilities</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-op-utilities-ui</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
+		
+        
+        <!--  Radarsat -->
+        <dependency>
+            <groupId>org.csa.rstb</groupId>
+            <artifactId>rstb-io</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>
         <dependency>
             <groupId>org.csa.rstb</groupId>
             <artifactId>rstb-kit</artifactId>
             <version>${sVersionMicrowavetbx}</version>
         </dependency>
-
-        <!-- Optical Toolbox Kit (Replaces individual S2, S3, Landsat, MODIS, and Sentinel-3 readers) -->
         <dependency>
-            <groupId>eu.esa.opt</groupId>
-            <artifactId>opttbx-kit</artifactId>
-            <version>${sVersionOpticaltbx}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.xml.parsers</groupId>
-                    <artifactId>jaxp-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!-- SMOS Toolbox Kit -->
+            <groupId>org.csa.rstb</groupId>
+            <artifactId>rstb-op-calibration</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency> 
         <dependency>
-            <groupId>org.esa.smostbx</groupId>
-            <artifactId>smos-kit</artifactId>
-            <version>${sVersionSMOSTbx}</version>
-        </dependency>
+            <groupId>org.csa.rstb</groupId>
+            <artifactId>rstb-op-classification</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>             
+        <dependency>
+            <groupId>org.csa.rstb</groupId>
+            <artifactId>rstb-op-polarimetric-tools</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>                        
+        <dependency>
+            <groupId>org.csa.rstb</groupId>
+            <artifactId>rstb-op-soil-moisture</artifactId>
+            <version>${sVersionMicrowavetbx}</version>
+        </dependency>                          
         
-		<!-- Modern XmlPull Parser required by SNAP 14 / XStream -->
-		<dependency>
-		    <groupId>io.github.x-stream</groupId>
-		    <artifactId>mxparser</artifactId>
-		    <version>1.2.2</version>
-		</dependency>        
-
         <!-- JLINDA -->
         <dependency>
-            <groupId>org.jlinda</groupId>
-            <artifactId>jlinda-nest</artifactId>
-            <version>${sVersionMicrowavetbx}</version>
+  			<groupId>org.jlinda</groupId>
+  			<artifactId>jlinda-nest</artifactId>
+  			<version>${sVersionMicrowavetbx}</version>
+		</dependency>
+        
+        <!-- S2 -->
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-preferences-ui</artifactId>
+            <version>${sVersionOpticaltbx}</version>
         </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-s2msi-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>            
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-s2msi-reader-ui</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-jp2-writer</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-commons</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-spot-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-spot6-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-alos-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
+        </dependency>        
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-mosaic</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-mosaic-ui</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-s2msi-mci</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-s2msi-mci-ui</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-rapideye-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-deimos-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>       
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-sta-adapters-help</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>      
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-radiometric-indices</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-radiometric-indices-ui</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-biophysical</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-reflectance-to-radiance</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>        
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-grm</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-land-cover</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-s2msi-resampler</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>        
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-muscate-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-pleiades-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+			<exclusions>
+			     <exclusion>
+			       <groupId>javax.xml.parsers</groupId>
+			       <artifactId>jaxp-api</artifactId>
+			     </exclusion>
+			   </exclusions>               
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-forest-cover-change</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-kompsat2-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-worldview2-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-spectral-angle-mapper</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-coregistration</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-ikonos-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-worldview2esa-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-ecostress-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-prisma</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>          
 
-        <!-- Additional Drivers & Testing -->
+		
+		<!-- S3 -->
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-aatsr-sst</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-arc</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-atsr-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-avhrr-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-c2rcc</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-dos</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-flhmci</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-fub-wew</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-fu-operator</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-landsat-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-meris-operators-ui</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-meris-operators</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-merisl3-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>		        
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-modis-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>	
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-mphchl</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>	
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-rad2refl</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-olci-preprocessing</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-owt-classification</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-probav-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-sentinel3-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-sentinel3-reader-ui</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-slstr-pdu-stitching</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-slstr-regrid</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-spot-vgt-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-enmap-reader</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-seadas-reader</artifactId>
+            <version>1.10.2</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-unmix</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			
+		<dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-ecostress-swath2grid</artifactId>
+            <version>${sVersionOpticaltbx}</version>
+        </dependency>			        
+        
+        <!-- SMOS -->
+   		<dependency>
+            <groupId>org.esa.smostbx</groupId>
+            <artifactId>smos-reader</artifactId>
+            <version>${sVersionSMOSTbx}</version>
+        </dependency>	     
+   		<dependency>
+            <groupId>org.esa.smostbx</groupId>
+            <artifactId>smos-ee2netcdf</artifactId>
+            <version>${sVersionSMOSTbx}</version>
+        </dependency>        
+
+        <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${sVersionAssertjCore}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/edu.ucar/netcdfAll -->
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>netcdfAll</artifactId>
             <version>${sVersionNetcdfAll}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/junit/junit -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${sVersionJunit}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.github.albfernandez/juniversalchardet -->
+        <!--  Charset detector  -->
         <dependency>
             <groupId>com.github.albfernandez</groupId>
             <artifactId>juniversalchardet</artifactId>
             <version>${sVersionJUniversalChardet}</version>
         </dependency>
-        
-        <!-- WASDI Shared Module -->
+        <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
         <dependency>
             <groupId>fadeout.software.wasdi</groupId>
             <artifactId>wasdishared</artifactId>
