@@ -9,7 +9,6 @@ import java.util.Map;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -247,7 +246,7 @@ public class WorkspaceResource {
 	@Path("getws")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get workspace details", description = "Returns a workspace editor view model with routing, storage, process, cloud, SLA, and sharing information.")
-	public WorkspaceEditorViewModel getWorkspaceEditorViewModel(@Context ContainerRequestContext oRequestContext, @QueryParam("workspace") String sWorkspaceId) {
+	public WorkspaceEditorViewModel getWorkspaceEditorViewModel(@Context ContainerRequestContext oRequestContext, @QueryParam("workspace") String sWorkspaceId, @QueryParam("remind") Boolean bRemind) {
 
 		WasdiLog.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel( WS: " + sWorkspaceId + ")");
 
@@ -272,6 +271,10 @@ public class WorkspaceResource {
 				WasdiLog.warnLog("WorkspaceResource.getWorkspaceEditorViewModel: user cannot access workspace info, aborting");
 				return oWorkspaceEditorViewModel;
 			}
+			
+			if (bRemind == null) {
+				bRemind = Boolean.FALSE;
+			}			
 
 			// Create repo
 			WorkspaceRepository oWSRepository = new WorkspaceRepository();
@@ -329,6 +332,12 @@ public class WorkspaceResource {
 			else {
 				oWorkspaceEditorViewModel.setCloudProvider("wasdi");
 				oWorkspaceEditorViewModel.setActiveNode(true);
+			}
+			
+			if (bRemind) {
+				oUser.setLastWorkspace(sWorkspaceId);
+				UserRepository oUserRepository = new UserRepository();
+				oUserRepository.updateUser(oUser);
 			}
 
 			// Get Sharings

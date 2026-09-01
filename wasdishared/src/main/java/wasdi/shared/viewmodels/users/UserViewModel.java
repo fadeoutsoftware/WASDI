@@ -29,6 +29,8 @@ public class UserViewModel {
 	private String role;
 	private Set<String> grantedAuthorities;
 	
+	private String lastWorkspace;
+	
 	//singleton pattern
 	private static UserViewModel s_oInvalid;
 	
@@ -181,5 +183,13 @@ public class UserViewModel {
 
 	public void setSkin(String skin) {
 		this.skin = skin;
+	}
+
+	public String getLastWorkspace() {
+		return lastWorkspace;
+	}
+
+	public void setLastWorkspace(String lastWorkspace) {
+		this.lastWorkspace = lastWorkspace;
 	}
 }

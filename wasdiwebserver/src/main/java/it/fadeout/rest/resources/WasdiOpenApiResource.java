@@ -1,11 +1,5 @@
 package it.fadeout.rest.resources;
 
-import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
-import io.swagger.v3.oas.integration.OpenApiContextLocator;
-import io.swagger.v3.oas.integration.api.OpenApiContext;
-import io.swagger.v3.oas.models.OpenAPI;
-import wasdi.shared.utils.log.WasdiLog;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -14,6 +8,11 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
+import io.swagger.v3.oas.integration.OpenApiContextLocator;
+import io.swagger.v3.oas.integration.api.OpenApiContext;
+import io.swagger.v3.oas.models.OpenAPI;
+import wasdi.shared.utils.log.WasdiLog;
 
 @Path("/openapi.json")
 public class WasdiOpenApiResource {

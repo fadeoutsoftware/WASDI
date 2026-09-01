@@ -7,9 +7,11 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.ext.Provider;
 
 import it.fadeout.Wasdi;
+import wasdi.shared.data.UserRepository;
 import wasdi.shared.business.users.User;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.auth.AuthTokenUtil;
+import wasdi.shared.utils.auth.KeycloakUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -157,8 +159,15 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 	 * @return User object if valid, null otherwise
 	 */
 	private User validateJWTToken(String sJwtToken) {
-		// TODO: Phase 2 - Implement JWT validation with Keycloak
-		WasdiLog.debugLog("AuthenticationFilter.validateJWTToken: JWT validation not yet implemented (Phase 2)");
+		try {
+			String sUserId = KeycloakUtils.validateJwtAndGetUserId(sJwtToken);
+			if (!Utils.isNullOrEmpty(sUserId)) {
+				return new UserRepository().getUser(sUserId);
+			}
+		} catch (Exception oEx) {
+			WasdiLog.warnLog("AuthenticationFilter.validateJWTToken: error validating JWT token: " + oEx);
+			return null;
+		}
 		return null;
 	}
 }

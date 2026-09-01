@@ -135,7 +135,6 @@ public class Wasdi extends ResourceConfig {
 	 * Constructor: bind the classes and the resources classes
 	 */
 	public Wasdi() {
-		register(new WasdiBinder());
 		register(JacksonFeature.class);
 		register(JerseyMapperProvider.class);
 		register(AuthenticationFilter.class);
@@ -407,7 +406,9 @@ public class Wasdi extends ResourceConfig {
 					oJSON = new JSONObject(sResponse);
 					
 					if(oJSON != null) {
-						sUserId = oJSON.optString("preferred_username", null);
+						if (oJSON.optBoolean("active", false)) {
+							sUserId = oJSON.optString("preferred_username", null);
+						}
 					}					
 				}
 				

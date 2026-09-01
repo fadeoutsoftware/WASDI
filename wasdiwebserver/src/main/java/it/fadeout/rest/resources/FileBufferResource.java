@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
-import javax.inject.Inject;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -20,7 +18,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
-import it.fadeout.services.ProvidersCatalog;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DataProvider;
 import wasdi.shared.business.DownloadedFile;
@@ -30,6 +27,7 @@ import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.users.User;
+import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
@@ -68,13 +66,7 @@ import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
  */
 @Path("/filebuffer")
 public class FileBufferResource {
-		
-	/**
-	 * Providers Catalogue
-	 */
-	@Inject
-	ProvidersCatalog m_oDataProviderCatalog;
-
+	
 	/**
 	 * Trigger a sharing of an image (from one workspace to another) in WASDI.
 	 * The method checks the input, create the parameter and call WASDI.runProcess
@@ -408,7 +400,7 @@ public class FileBufferResource {
 			DataProvider oProvider = null;
 			
 			if (Utils.isNullOrEmpty(sProvider)) {
-				oProvider = m_oDataProviderCatalog.getDefaultProvider(WasdiConfig.Current.nodeCode);
+				oProvider = getDefaultProvider(WasdiConfig.Current.nodeCode);
 				
 				sProvider = oProvider.getName();
 				
@@ -418,7 +410,7 @@ public class FileBufferResource {
 				}
 				
 			} else {
-				oProvider = m_oDataProviderCatalog.getProvider(sProvider);
+				oProvider = getProvider(sProvider);
 			}
 
 			WasdiLog.debugLog("FileBufferResource.imageImport: provider: " + oProvider.getName());
@@ -642,4 +634,38 @@ public class FileBufferResource {
 		return oReturnValue;
 
 	}
+	
+    public DataProvider getProvider(String sName) {
+
+        DataProvider oProvider = new DataProvider();
+
+        // if it's a registered provider, fill the object with the data from the configuration file
+        DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(sName); 
+        
+
+        if (oDataProviderConfig != null) {
+            oProvider.setName(sName);
+            oProvider.setOSUser(oDataProviderConfig.user);
+            oProvider.setOSPassword(oDataProviderConfig.password);
+            oProvider.setDescription(oDataProviderConfig.description);
+            oProvider.setLink(oDataProviderConfig.link);
+        }
+
+        return oProvider;
+    }
+    
+    /**
+     * Get the default data provider for node
+     */
+    public DataProvider getDefaultProvider(String sNode) {
+    	NodeRepository oNodeRepository = new NodeRepository();
+        DataProvider oProvider = new DataProvider();
+        Node oNode = oNodeRepository.getNodeByCode(sNode);
+        if (oNode != null) {
+            String sDefaultProvider = oNode.getDefaultProvider();
+            oProvider = getProvider(sDefaultProvider);
+        }
+        return oProvider;
+    }
+	
 }

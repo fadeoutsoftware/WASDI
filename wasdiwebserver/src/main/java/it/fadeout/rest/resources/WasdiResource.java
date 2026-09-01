@@ -1,7 +1,6 @@
 package it.fadeout.rest.resources;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -9,7 +8,6 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 
 import io.swagger.v3.oas.annotations.Operation;
-import it.fadeout.Wasdi;
 import wasdi.shared.business.users.User;
 import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.Utils;

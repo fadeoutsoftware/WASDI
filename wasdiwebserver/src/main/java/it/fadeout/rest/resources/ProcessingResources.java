@@ -2,7 +2,6 @@ package it.fadeout.rest.resources;
 
 import java.io.IOException;
 
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;

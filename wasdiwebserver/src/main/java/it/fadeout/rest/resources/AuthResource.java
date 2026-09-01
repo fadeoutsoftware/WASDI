@@ -1,16 +1,13 @@
 package it.fadeout.rest.resources;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
-import java.util.HashMap;
 
-import javax.inject.Inject;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -24,9 +21,6 @@ import org.json.JSONObject;
 
 import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
-import it.fadeout.services.AuthProviderService;
-import it.fadeout.services.KeycloakService;
-import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.Project;
 import wasdi.shared.business.Subscription;
@@ -50,6 +44,7 @@ import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.auth.KeycloakUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.missions.PrivateMissionViewModel;
@@ -91,13 +86,7 @@ import wasdi.shared.viewmodels.users.UserViewModel;
  */
 @Path("/auth")
 public class AuthResource {
-		
-	/**
-	 * Keycloak Auth Provider Service
-	 */
-	@Inject
-	AuthProviderService m_oKeycloakService;
-
+	
 	/**
 	 * Authentication Helper
 	 */
@@ -134,7 +123,8 @@ public class AuthResource {
 				oUserVM.setType(UserType.PROFESSIONAL.name());
 				oUserVM.setPublicNickName("user");
 				oUserVM.setSkin("wasdi");
-				oUserVM.setRole(UserApplicationRole.ADMIN.getRole());				
+				oUserVM.setRole(UserApplicationRole.ADMIN.getRole());
+				oUserVM.setLastWorkspace("");
 				
 				// Create a new session
 				SessionRepository oSessionRepository = new SessionRepository();
@@ -182,7 +172,7 @@ public class AuthResource {
 				WasdiLog.debugLog("AuthResource.login: user not found: " + sLowerCaseUserId + ", check if this is the first access");
 				
 				// Try to retrieve info about this user 
-				String sUserInfo = m_oKeycloakService.getUserData(m_oKeycloakService.getToken(), sLowerCaseUserId);
+				String sUserInfo = KeycloakUtils.getUserData(KeycloakUtils.getToken(), sLowerCaseUserId);
 				
 				if (Utils.isNullOrEmpty(sUserInfo)) {
 					// No, something did not work well
@@ -257,7 +247,7 @@ public class AuthResource {
 			}
 
 			// First try to Authenticate using keycloak
-			String sAuthResult = m_oKeycloakService.login(sLowerCaseUserId, oLoginInfo.getUserPassword());
+			String sAuthResult = KeycloakUtils.login(sLowerCaseUserId, oLoginInfo.getUserPassword());
 			
 			boolean bLoginSuccess = false;
 			
@@ -265,7 +255,7 @@ public class AuthResource {
 
 			if(!Utils.isNullOrEmpty(sRefreshToken)) { 
 				bLoginSuccess = true;
-				m_oKeycloakService.logout(sRefreshToken);
+				KeycloakUtils.logout(sRefreshToken);
 			} 
 			else {
 				// Try to log in with the WASDI old password
@@ -310,6 +300,8 @@ public class AuthResource {
 				else {
 					oUserVM.setRole(UserApplicationRole.USER.getRole());
 				}
+				
+				oUserVM.setLastWorkspace(oUser.getLastWorkspace());
 
 				WasdiLog.debugLog("AuthResource.login: access succeeded, sSessionId: "+oSession.getSessionId());
 				
@@ -380,7 +372,10 @@ public class AuthResource {
 			if (Utils.isNullOrEmpty(oUserVM.getPublicNickName())) {
 				String sPublicNick = oUserVM.getName();
 				oUserVM.setPublicNickName(sPublicNick);
-			}			
+			}	
+			
+			oUserVM.setLastWorkspace(oUser.getLastWorkspace());
+			
 			return oUserVM;
 		} catch (Exception oE) {
 			WasdiLog.errorLog("AuthResource.checkSession: " + oE);
@@ -427,235 +422,13 @@ public class AuthResource {
 				oResult.setBoolValue(false);
 			}
 
-		} else {
-			
-			//boolean bResult = m_oKeycloakService.logout(sSessionId);
-			//oResult.setBoolValue(bResult);
-			
+		}
+		else {
 			return PrimitiveResult.getInvalid();
 		}
 		return oResult;
 	}	
-	
-	/**
-	 * create an sftp account for the user
-	 * @param sSessionId User session
-	 * @param sEmail mail of the user
-	 * @return http response
-	 */
-	@POST
-	@Path("/upload/createaccount")
-	@Produces({"application/json", "text/xml"})
-	@Operation(summary = "Create an SFTP upload account for the authenticated user", description="Creates an SFTP upload account for the authenticated user and sends the generated credentials (username and password) to the provided e-mail address.")
-	public Response createSftpAccount(@Context ContainerRequestContext oRequestContext, String sEmail) {
-		
-		WasdiLog.debugLog("AuthResource.createSftpAccount: Called for Mail " + sEmail);
-		
-		// Validate the inputs
-		if(Utils.isNullOrEmpty(sEmail)) {
-			WasdiLog.debugLog("AuthResource.createSftpAccount: email null or empty, aborting");
-			return Response.status(Status.BAD_REQUEST).build();
-		}
-//		try {
-//			InternetAddress oEmailAddr = new InternetAddress(sEmail);
-//			oEmailAddr.validate();
-//		} catch (AddressException oEx) {
-//			WasdiLog.errorLog("AuthResource.createSftpAccount: email is invalid, aborting");
-//			return Response.status(Status.BAD_REQUEST).build();
-//		}
-		
-		try {	
-			
-			// Check the user
-			User oUser = (User) oRequestContext.getProperty("authenticated-user");
-			if (oUser == null) {
-				WasdiLog.debugLog("AuthResource.createSftpAccount: session invalid or user not found, aborting");
-				return Response.status(Status.UNAUTHORIZED).build();
-			}
-			
-			// Get the User Id
-			String sAccount = oUser.getUserId();
-			if(Utils.isNullOrEmpty(sAccount)) {
-				WasdiLog.debugLog("AuthResource.createSftpAccount: userid is null, aborting");
-				return Response.serverError().build();
-			}
-	
-			// Search for the sftp service
-			String sWsAddress = WasdiConfig.Current.sftp.sftpManagementWSServiceAddress;
-			if (Utils.isNullOrEmpty(sWsAddress)) {
-				sWsAddress = "ws://localhost:6703";
-				WasdiLog.debugLog("AuthResource.createSftpAccount: sWsAddress is null or empty, defaulting to " + sWsAddress);
-			}
-	
-			// Manager instance
-			SFTPManager oManager = new SFTPManager(sWsAddress);
-			String sPassword = Utils.generateRandomPassword();
-	
-			// Try to create the account
-			if (!oManager.createAccount(sAccount, sPassword)) {
-	
-				WasdiLog.debugLog("AuthResource.createSftpAccount: error creating sftp account");
-				return Response.serverError().build();
-			}
-	
-			// Sent the credentials to the user
-			if(!sendSftpPasswordEmail(sEmail, sAccount, sPassword)) {
-				return Response.serverError().build();
-			}
-	
-			// All is done
-			return Response.ok().build();
-		}catch (Exception oE) {
-			WasdiLog.errorLog("AuthResource.createSftpAccount: " + oE);
-		}
-		return Response.serverError().build();
-	}
-	
-	/**
-	 * Check if an sftp account exists for the user
-	 * @param sSessionId User session
-	 * @return true if exists, false otherwise
-	 */
-	@GET
-	@Path("/upload/existsaccount")
-	@Produces({"application/json", "text/xml"})
-	@Operation(summary = "Check if SFTP account exists for authenticated user", description="Checks whether an SFTP account already exists for the authenticated user. Returns false also on invalid session; does not return HTTP error codes.")
-	public boolean existsSftpAccount(@Context ContainerRequestContext oRequestContext) {
-		WasdiLog.debugLog("AuthResource.ExistsSftpAccount");
 
-		User oUser = (User) oRequestContext.getProperty("authenticated-user");
-		if (oUser == null) {
-			WasdiLog.debugLog("AuthResource.existsSftpAccount: invalid session");
-			return false;
-		}
-		String sAccount = oUser.getUserId();		
-
-		// Get the service address
-		String wsAddress = WasdiConfig.Current.sftp.sftpManagementWSServiceAddress;
-		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
-		SFTPManager oManager = new SFTPManager(wsAddress);
-
-		Boolean bRes = null;
-		try{
-			// Check the user
-			bRes = oManager.checkUser(sAccount);
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("AuthResource.existsSftpAccount: error " + oEx.toString());
-			bRes = false;
-		}
-		return bRes;
-	}
-	
-	/**
-	 * get the list of files in the sftp of the user
-	 * @param sSessionId user session
-	 * @return list of string, each representing the name of a file in the user sftp account
-	 */
-	@GET
-	@Path("/upload/list")
-	@Produces({"application/json", "text/xml"})
-	@Operation(summary = "List files in authenticated user's SFTP account", description="Returns the list of file names present in the authenticated user's SFTP account. Returns null on invalid session; does not return HTTP error codes.")
-	public String[] listSftpAccount(@Context ContainerRequestContext oRequestContext) {
-
-		WasdiLog.debugLog("AuthResource.ListSftpAccount");
-
-		User oUser = (User) oRequestContext.getProperty("authenticated-user");
-		if (oUser == null) {
-			WasdiLog.debugLog("AuthResource.listSftpAccount: invalid session");
-			return null;
-		}	
-		String sAccount = oUser.getUserId();		
-
-		// Get Service Address
-		String wsAddress = WasdiConfig.Current.sftp.sftpManagementWSServiceAddress;
-		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
-		SFTPManager oManager = new SFTPManager(wsAddress);
-
-		// Return the list
-		return oManager.list(sAccount);
-	}
-	
-	/**
-	 * Remove the sftp account of the user
-	 * @param sSessionId user session
-	 * @return http standard response
-	 */
-	@DELETE
-	@Path("/upload/removeaccount")
-	@Produces({"application/json", "text/xml"})
-	@Operation(summary = "Remove SFTP account for authenticated user", description="Removes the SFTP account of the authenticated user.")
-	public Response removeSftpAccount(@Context ContainerRequestContext oRequestContext) {
-
-		WasdiLog.debugLog("AuthResource.removeSftpAccount");
-
-		User oUser = (User) oRequestContext.getProperty("authenticated-user");
-
-		if (oUser == null) {
-			WasdiLog.debugLog("AuthResource.removeSftpAccount: invalid session");
-			return Response.status(Status.UNAUTHORIZED).build();
-		}
-
-		String sAccount = oUser.getUserId();
-
-		// Get service address
-		String wsAddress = WasdiConfig.Current.sftp.sftpManagementWSServiceAddress;
-		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
-		SFTPManager oManager = new SFTPManager(wsAddress);
-
-		// Remove the account
-		return oManager.removeAccount(sAccount) ? Response.ok().build() : Response.status(Status.INTERNAL_SERVER_ERROR).build();
-	}
-	
-	/**
-	 * Update sftp password of a user: it creates a new password and 
-	 * send it to the mail received in input
-	 * @param sSessionId user session
-	 * @param sEmail user id /mail used for sftp account
-	 * @return std http response
-	 */
-	@POST
-	@Path("/upload/updatepassword")
-	@Produces({"application/json", "text/xml"})
-	@Operation(summary = "Generate new SFTP password and send to email", description="Generates a new random SFTP password for the authenticated user and sends it to the provided e-mail address.")
-	public Response updateSftpPassword(@Context ContainerRequestContext oRequestContext, String sEmail) {
-
-		WasdiLog.debugLog("AuthResource.updateSftpPassword Mail: " + sEmail);
-
-		if(!m_oCredentialPolicy.validEmail(sEmail)) {
-			WasdiLog.debugLog("AuthResource.updateSftpPassword Mail: invalid mail");
-			return Response.status(Status.BAD_REQUEST).build();
-		}
-
-		User oUser = (User) oRequestContext.getProperty("authenticated-user");
-
-		if(null == oUser) {
-			WasdiLog.debugLog("AuthResource.updateSftpPassword Mail: invalid session");
-			return Response.status(Status.UNAUTHORIZED).build(); 
-		}
-
-		String sAccount = oUser.getUserId();
-
-		// Get the service address
-		String wsAddress = WasdiConfig.Current.sftp.sftpManagementWSServiceAddress;
-		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
-		SFTPManager oManager = new SFTPManager(wsAddress);
-
-		// New Password
-		String sPassword = Utils.generateRandomPassword();
-
-		// Try to update
-		if (!oManager.updatePassword(sAccount, sPassword)) {
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
-
-		// Send password to the user
-		if(!sendSftpPasswordEmail(sEmail, sAccount, sPassword)) {
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
-
-		return Response.ok().build();
-	}
-	
 	/**
 	 * Register a new user
 	 * @param oRegistrationInfoViewModel Registration Informations
@@ -706,12 +479,7 @@ public class AuthResource {
 				//let's check it's a legit one (against kc)  
 				//otherwise someone might call this api even if the user is not registered on KC
 				
-				if (m_oKeycloakService==null) {
-					WasdiLog.debugLog("AuthResource.userRegistration: m_oKeycloakService is NULL!! Creating it...");
-					m_oKeycloakService = new KeycloakService();
-				}
-				
-				User oNewUser = m_oKeycloakService.getUser(sLowerCasedUserId);
+				User oNewUser = KeycloakUtils.getUser(sLowerCasedUserId);
 				
 				if(null==oNewUser) {
 					PrimitiveResult oResult = new PrimitiveResult();
@@ -1109,7 +877,7 @@ public class AuthResource {
 				//else nothing is returned here and in the end 500 is returned
 				break;
 			case "KEYCLOAK":
-				return m_oKeycloakService.requirePasswordUpdateViaEmail(sUserId);
+				return KeycloakUtils.requirePasswordUpdateViaEmail(sUserId);
 			default:
 				break;
 			}

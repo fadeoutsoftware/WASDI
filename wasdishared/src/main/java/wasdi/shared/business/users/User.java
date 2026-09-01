@@ -120,6 +120,11 @@ public class User {
 	 * Skin profile of the user
 	 */
 	private String skin = "wasdi";
+	
+	/**
+	 * Last user workspace
+	 */
+	private String lastWorkspace = "";
 
 	static {
     	s_oInvalid = new User();
@@ -340,5 +345,13 @@ public class User {
 
 	public void setSkin(String skin) {
 		this.skin = skin;
+	}
+
+	public String getLastWorkspace() {
+		return lastWorkspace;
+	}
+
+	public void setLastWorkspace(String lastWorkspace) {
+		this.lastWorkspace = lastWorkspace;
 	}
 }

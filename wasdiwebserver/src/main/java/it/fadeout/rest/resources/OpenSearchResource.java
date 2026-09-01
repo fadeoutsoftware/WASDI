@@ -4,16 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 
 import io.swagger.v3.oas.annotations.Operation;
-import it.fadeout.Wasdi;
 import wasdi.shared.business.users.User;
 import wasdi.shared.config.CatalogueConfig;
 import wasdi.shared.config.DataProviderConfig;

@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -25,17 +24,16 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.joda.time.DateTimeUtils;
 
-import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.WorkspaceResource;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.labelling.Attribute;
 import wasdi.shared.business.labelling.DatasetProject;
+import wasdi.shared.business.labelling.Label;
 import wasdi.shared.business.labelling.LabellingProjectRoles;
 import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserAccessRights;
 import wasdi.shared.business.users.UserResourcePermission;
-import wasdi.shared.business.labelling.Label;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;

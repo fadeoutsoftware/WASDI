@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -17,7 +16,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import io.swagger.v3.oas.annotations.Operation;
-import it.fadeout.Wasdi;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;

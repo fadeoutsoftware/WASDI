@@ -2,7 +2,6 @@ package it.fadeout.rest.resources.labelling;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -13,7 +12,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import it.fadeout.Wasdi;
 import wasdi.shared.business.labelling.DatasetProject;
 import wasdi.shared.business.labelling.ImageStyle;
 import wasdi.shared.business.users.User;
