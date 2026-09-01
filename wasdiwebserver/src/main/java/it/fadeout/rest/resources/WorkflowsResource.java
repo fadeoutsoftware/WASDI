@@ -25,6 +25,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -97,7 +99,7 @@ public class WorkflowsResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Operation(summary = "Upload workflow file", description = "Uploads a new SNAP workflow XML file, stores its metadata, and detects its input and output graph nodes.")
     public Response uploadFile(@FormDataParam("file") InputStream oFileInputStream,
-                                @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId,
+                                @Context ContainerRequestContext oRequestContext, @QueryParam("workspace") String sWorkspaceId,
                                 @QueryParam("name") String sName, @QueryParam("description") String sDescription,
                                 @QueryParam("public") Boolean bPublic) {
 
@@ -106,7 +108,7 @@ public class WorkflowsResource {
         try {
         	
             // Check authorization
-            User oUser = Wasdi.getUserFromSession(sSessionId);
+            User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
             if (oUser == null) {
             	WasdiLog.warnLog("WorkflowsResource.uploadFile: invalid session");
@@ -183,13 +185,13 @@ public class WorkflowsResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Operation(summary = "Update workflow file", description = "Replaces an existing workflow XML file and refreshes the input and output node identifiers stored in its metadata.")
     public Response updateFile(@FormDataParam("file") InputStream oFileInputStream,
-                                    @HeaderParam("x-session-token") String sSessionId,
+                                    @Context ContainerRequestContext oRequestContext,
                                     @QueryParam("workflowid") String sWorkflowId) {
         WasdiLog.debugLog("WorkflowsResource.updateFile( InputStream, WorkflowId: " + sWorkflowId);
 
         try {
             // Check authorization
-            User oUser = Wasdi.getUserFromSession(sSessionId);
+            User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
             if (oUser == null) {
             	WasdiLog.warnLog("WorkflowsResource.updateFile: invalid session");
@@ -287,14 +289,14 @@ public class WorkflowsResource {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     @Operation(summary = "Get workflow XML", description = "Returns the XML content of an accessible workflow by its identifier.")
-    public Response getXML(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId) {
+    public Response getXML(@Context ContainerRequestContext oRequestContext, @QueryParam("workflowId") String sWorkflowId) {
 
         WasdiLog.debugLog("WorkflowsResource.getXML( Workflow Id : " + sWorkflowId + ");");
         String sXml = "";
         
         try {
             // Check authorization
-            User oUser = Wasdi.getUserFromSession(sSessionId);
+            User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
             if (oUser == null) {
             	WasdiLog.warnLog("WorkflowsResource.getXML: invalid session");
@@ -346,12 +348,14 @@ public class WorkflowsResource {
     @Produces(MediaType.APPLICATION_XML)    
     @Path("/updatexml")
     @Operation(summary = "Update workflow XML", description = "Updates an existing workflow from XML text in the request body by delegating to the workflow-file update operation.")
-    public Response updateXML(@HeaderParam("x-session-token") String sSessionId,
+    public Response updateXML(@Context ContainerRequestContext oRequestContext,
                                  @QueryParam("workflowId") String sWorkflowId, String sGraphXml) {
 
         // convert string to file and invoke updateGraphFile
         WasdiLog.debugLog("WorkflowsResource.updateXML: workflowId " + sWorkflowId + " invoke WorkflowsResource.updateFile");
-        return updateFile(new ByteArrayInputStream(sGraphXml.getBytes(Charset.forName("UTF-8"))), sSessionId, sWorkflowId);
+        String sSessionId = (String) oRequestContext.getProperty("session-id");
+        
+        return updateFile(new ByteArrayInputStream(sGraphXml.getBytes(Charset.forName("UTF-8"))), oRequestContext, sWorkflowId);
     }
 
 
@@ -373,7 +377,7 @@ public class WorkflowsResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Operation(summary = "Update workflow parameters", description = "Updates an existing workflow's name, description, and public visibility after validating write permissions.")
     public Response updateParams(
-            @HeaderParam("x-session-token") String sSessionId,
+            @Context ContainerRequestContext oRequestContext,
             @QueryParam("workflowid") String sWorkflowId,
             @QueryParam("name") String sName,
             @QueryParam("description") String sDescription,
@@ -383,7 +387,7 @@ public class WorkflowsResource {
 
         WasdiLog.debugLog("WorkflowsResource.updateParams( InputStream, Workflow: " + sName + ", WorkflowId: " + sWorkflowId);
         
-        User oUser = Wasdi.getUserFromSession(sSessionId);
+        User oUser = (User) oRequestContext.getProperty("authenticated-user");
         
         if (oUser == null) {
         	WasdiLog.warnLog("WorkflowsResource.updateParams: invalid session");
@@ -422,10 +426,10 @@ public class WorkflowsResource {
     @Path("/getbyuser")
     @Produces({ "application/json", "text/xml" })
     @Operation(summary = "Get visible workflows", description = "Returns workflows owned by, shared with, or public to the authenticated user, including sharing and read-only information.")
-    public ArrayList<SnapWorkflowViewModel> getWorkflowsByUser(@HeaderParam("x-session-token") String sSessionId) {
+    public ArrayList<SnapWorkflowViewModel> getWorkflowsByUser(@Context ContainerRequestContext oRequestContext) {
         WasdiLog.debugLog("WorkflowsResource.getWorkflowsByUser");
         
-        User oUser = Wasdi.getUserFromSession(sSessionId);
+        User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
         if (oUser == null) {
             WasdiLog.warnLog("WorkflowsResource.getWorkflowsByUser: invalid session");
@@ -510,11 +514,11 @@ public class WorkflowsResource {
     @GET
     @Path("/delete")
     @Operation(summary = "Delete workflow", description = "Deletes an owned workflow, its file, and sharing records. For a non-owner with shared access, removes only that user's sharing.")
-    public Response delete(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId) {
+    public Response delete(@Context ContainerRequestContext oRequestContext, @QueryParam("workflowId") String sWorkflowId) {
         WasdiLog.debugLog("WorkflowsResource.delete( Workflow: " + sWorkflowId + " )");
         try {
             // Check User
-            User oUser = Wasdi.getUserFromSession(sSessionId);
+            User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
             if (oUser == null) {
                 WasdiLog.warnLog("WorkflowsResource.delete: invalid session");
@@ -591,7 +595,7 @@ public class WorkflowsResource {
     @Path("share/add")
     @Produces({"application/xml", "application/json", "text/xml"})
     @Operation(summary = "Share workflow with user", description = "Grants a user READ or WRITE access to a workflow after validating the requester and target, then sends a notification email.")
-    public PrimitiveResult shareWorkflow(@HeaderParam("x-session-token") String sSessionId,
+    public PrimitiveResult shareWorkflow(@Context ContainerRequestContext oRequestContext,
                                          @QueryParam("workflowId") String sWorkflowId, @QueryParam("userId") String sUserId, @QueryParam("rights") String sRights) {
 
         WasdiLog.debugLog("WorkflowsResource.shareWorkflow(Workflow : " + sWorkflowId + ", User: " + sUserId + " )");
@@ -601,7 +605,7 @@ public class WorkflowsResource {
         SnapWorkflowRepository oWorkflowRepository = new SnapWorkflowRepository();
         
         // Validate Session
-        User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+        User oRequesterUser = (User) oRequestContext.getProperty("authenticated-user");
         PrimitiveResult oResult = new PrimitiveResult();
         oResult.setBoolValue(false);
 
@@ -708,14 +712,14 @@ public class WorkflowsResource {
     @Path("share/delete")
     @Produces({"application/xml", "application/json", "text/xml"})
     @Operation(summary = "Remove workflow sharing", description = "Removes a user's workflow sharing when requested by that shared user, the workflow owner, or an authorized administrator.")
-    public PrimitiveResult deleteUserSharingWorkflow(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId, @QueryParam("userId") String sUserId) {
+    public PrimitiveResult deleteUserSharingWorkflow(@Context ContainerRequestContext oRequestContext, @QueryParam("workflowId") String sWorkflowId, @QueryParam("userId") String sUserId) {
 
         WasdiLog.debugLog("WorkflowsResource.deleteUserSharedWorkflow( ProcId: " + sWorkflowId + ", User:" + sUserId + " )");
         PrimitiveResult oResult = new PrimitiveResult();
         oResult.setBoolValue(false);
         try {
             // Validate Session
-            User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+            User oOwnerUser = (User) oRequestContext.getProperty("authenticated-user");
 
             if (oOwnerUser == null) {
                 WasdiLog.warnLog("WorkflowsResource.deleteUserSharedWorkflow: invalid session");
@@ -782,13 +786,12 @@ public class WorkflowsResource {
     @Path("share/byworkflow")
     @Produces({"application/xml", "application/json", "text/xml"})
     @Operation(summary = "Get workflow sharings", description = "Returns users with explicit access to a workflow and their assigned permission levels.")
-    public List<WorkflowSharingViewModel> getEnableUsersSharedWorkflow(@HeaderParam("x-session-token") String
-                                                                               sSessionId, @QueryParam("workflowId") String sWorkflowId) {
+    public List<WorkflowSharingViewModel> getEnableUsersSharedWorkflow(@Context ContainerRequestContext oRequestContext, @QueryParam("workflowId") String sWorkflowId) {
         ArrayList<WorkflowSharingViewModel> oResult = new ArrayList<WorkflowSharingViewModel>();
         WasdiLog.debugLog("WorkflowsResource.getEnableUsersSharedWorkflow(  Workflow : " + sWorkflowId + " )");
 
         // Validate Session
-        User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
+        User oRequestingUser = (User) oRequestContext.getProperty("authenticated-user");
 
         if (oRequestingUser == null) {
             WasdiLog.warnLog("WorkflowsResource.getEnableUsersSharedWorkflow: invalid session");
@@ -841,7 +844,7 @@ public class WorkflowsResource {
     @Path("/run")
     @Produces({ "application/json", "text/xml" })
     @Operation(summary = "Run workflow", description = "Executes an accessible SNAP workflow in a writable workspace, downloading its XML from the owning node when necessary and launching a GRAPH process.")
-    public PrimitiveResult run(@HeaderParam("x-session-token") String sSessionId,
+    public PrimitiveResult run(@Context ContainerRequestContext oRequestContext,
                                                       @QueryParam("workspace") String sWorkspaceId,
                                                       @QueryParam("parent") String sParentProcessWorkspaceId,
                                                       SnapWorkflowViewModel oSnapWorkflowViewModel) {
@@ -849,7 +852,8 @@ public class WorkflowsResource {
         PrimitiveResult oResult = new PrimitiveResult();
         WasdiLog.debugLog("WorkflowsResource.run( Ws: " + sWorkspaceId + ", ... )");
         
-        User oUser = Wasdi.getUserFromSession(sSessionId);
+        User oUser = (User) oRequestContext.getProperty("authenticated-user");
+        String sSessionId = (String) oRequestContext.getProperty("session-id");
         
         if (oUser == null) {
             WasdiLog.warnLog("WorkflowsResource.run: invalid session");
@@ -994,7 +998,7 @@ public class WorkflowsResource {
     @Path("download")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Operation(summary = "Download workflow XML", description = "Streams an accessible workflow XML file by identifier, accepting authentication through the header or browser token query parameter.")
-    public Response download(@HeaderParam("x-session-token") String sSessionId,
+    public Response download(@Context ContainerRequestContext oRequestContext,
                                       @QueryParam("token") String sTokenSessionId,
                                       @QueryParam("workflowId") String sWorkflowId) {
 
@@ -1002,6 +1006,8 @@ public class WorkflowsResource {
 
         try {
 
+        	String sSessionId = (String) oRequestContext.getProperty("session-id");
+        	
             if (Utils.isNullOrEmpty(sSessionId) == false) {
                 sTokenSessionId = sSessionId;
             }
@@ -1070,13 +1076,13 @@ public class WorkflowsResource {
     @Consumes({ "application/json", "text/xml" })
     @Produces({ "application/json", "text/xml" })
     @Operation(summary = "Get workflow by name", description = "Returns an accessible workflow and its XML content by workflow name.")
-    public Response getWorkflowByName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sWorkflowName) {
+    public Response getWorkflowByName(@Context ContainerRequestContext oRequestContext, @QueryParam("name") String sWorkflowName) {
 
         WasdiLog.debugLog("WorkflowsResource.getWorkflowByName(  Name : " + sWorkflowName + ");");
         
         try {
             // Check authorization
-            User oUser = Wasdi.getUserFromSession(sSessionId);
+            User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
             if (oUser == null) {
             	WasdiLog.warnLog("WorkflowsResource.getWorkflowByName: invalid session");

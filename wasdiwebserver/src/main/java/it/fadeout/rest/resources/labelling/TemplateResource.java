@@ -11,6 +11,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -35,11 +37,11 @@ public class TemplateResource {
 	@GET
 	@Path("/list")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getListByUser(@Context ContainerRequestContext oRequestContext) {
 		
 		WasdiLog.debugLog("TemplateResource.getListByUser");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		List<TemplateListViewModel> aoTemplatesList = new ArrayList<>();
 
@@ -92,11 +94,11 @@ public class TemplateResource {
 	@GET
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("templateId") String sTemplateId) {
+	public Response getById(@Context ContainerRequestContext oRequestContext, @QueryParam("templateId") String sTemplateId) {
 		
 		WasdiLog.debugLog("TemplateResource.getById");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {
@@ -156,10 +158,10 @@ public class TemplateResource {
 	@POST
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response create(@HeaderParam("x-session-token") String sSessionId, TemplateViewModel oTemplateViewModel) {
+	public Response create(@Context ContainerRequestContext oRequestContext, TemplateViewModel oTemplateViewModel) {
 		WasdiLog.debugLog("TemplateResource.create");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {
@@ -213,10 +215,10 @@ public class TemplateResource {
 	@PUT
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response update(@HeaderParam("x-session-token") String sSessionId, TemplateViewModel oTemplateViewModel) {
+	public Response update(@Context ContainerRequestContext oRequestContext, TemplateViewModel oTemplateViewModel) {
 		WasdiLog.debugLog("TemplateResource.update");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {
@@ -277,10 +279,10 @@ public class TemplateResource {
 	@DELETE
 	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response delete(@HeaderParam("x-session-token") String sSessionId, @QueryParam("templateId") String sTemplateId) {
+	public Response delete(@Context ContainerRequestContext oRequestContext, @QueryParam("templateId") String sTemplateId) {
 		WasdiLog.debugLog("TemplateResource.delete");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {

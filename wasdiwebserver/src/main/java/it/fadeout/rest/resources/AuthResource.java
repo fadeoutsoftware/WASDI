@@ -15,6 +15,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -356,10 +358,10 @@ public class AuthResource {
 	@Path("/checksession")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	@Operation(summary = "Validate an existing session token", description="Validates an existing session token and returns the user profile associated with it. Used by the client to verify that a stored session is still active. Returns an invalid UserViewModel (userId empty) when the session is not valid rather than an HTTP error code.")
-	public UserViewModel checkSession(@HeaderParam("x-session-token") String sSessionId) {
+	public UserViewModel checkSession(@Context ContainerRequestContext oRequestContext) {
 		try {
 			// Check if we can see the user from the session
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			
 			if (oUser == null) {
 				WasdiLog.debugLog("AuthResource.checkSession: invalid session");
@@ -395,15 +397,17 @@ public class AuthResource {
 	@Path("/logout")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	@Operation(summary = "Invalidate the current session", description="Invalidates the given session, deleting the session record from the database. Returns a PrimitiveResult indicating whether the operation succeeded. Returns an invalid PrimitiveResult when the session is not found.")
-	public PrimitiveResult logout(@HeaderParam("x-session-token") String sSessionId) {
+	public PrimitiveResult logout(@Context ContainerRequestContext oRequestContext) {
 		WasdiLog.debugLog("AuthResource.logout");
 		
 		// Try to get the user
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			return PrimitiveResult.getInvalid();
 		}
+		
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 		PrimitiveResult oResult = null;
 		
@@ -443,7 +447,7 @@ public class AuthResource {
 	@Path("/upload/createaccount")
 	@Produces({"application/json", "text/xml"})
 	@Operation(summary = "Create an SFTP upload account for the authenticated user", description="Creates an SFTP upload account for the authenticated user and sends the generated credentials (username and password) to the provided e-mail address.")
-	public Response createSftpAccount(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
+	public Response createSftpAccount(@Context ContainerRequestContext oRequestContext, String sEmail) {
 		
 		WasdiLog.debugLog("AuthResource.createSftpAccount: Called for Mail " + sEmail);
 		
@@ -463,7 +467,7 @@ public class AuthResource {
 		try {	
 			
 			// Check the user
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			if (oUser == null) {
 				WasdiLog.debugLog("AuthResource.createSftpAccount: session invalid or user not found, aborting");
 				return Response.status(Status.UNAUTHORIZED).build();
@@ -516,10 +520,10 @@ public class AuthResource {
 	@Path("/upload/existsaccount")
 	@Produces({"application/json", "text/xml"})
 	@Operation(summary = "Check if SFTP account exists for authenticated user", description="Checks whether an SFTP account already exists for the authenticated user. Returns false also on invalid session; does not return HTTP error codes.")
-	public boolean existsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
+	public boolean existsSftpAccount(@Context ContainerRequestContext oRequestContext) {
 		WasdiLog.debugLog("AuthResource.ExistsSftpAccount");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oUser == null) {
 			WasdiLog.debugLog("AuthResource.existsSftpAccount: invalid session");
 			return false;
@@ -551,11 +555,11 @@ public class AuthResource {
 	@Path("/upload/list")
 	@Produces({"application/json", "text/xml"})
 	@Operation(summary = "List files in authenticated user's SFTP account", description="Returns the list of file names present in the authenticated user's SFTP account. Returns null on invalid session; does not return HTTP error codes.")
-	public String[] listSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
+	public String[] listSftpAccount(@Context ContainerRequestContext oRequestContext) {
 
 		WasdiLog.debugLog("AuthResource.ListSftpAccount");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oUser == null) {
 			WasdiLog.debugLog("AuthResource.listSftpAccount: invalid session");
 			return null;
@@ -580,11 +584,11 @@ public class AuthResource {
 	@Path("/upload/removeaccount")
 	@Produces({"application/json", "text/xml"})
 	@Operation(summary = "Remove SFTP account for authenticated user", description="Removes the SFTP account of the authenticated user.")
-	public Response removeSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
+	public Response removeSftpAccount(@Context ContainerRequestContext oRequestContext) {
 
 		WasdiLog.debugLog("AuthResource.removeSftpAccount");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.debugLog("AuthResource.removeSftpAccount: invalid session");
@@ -613,7 +617,7 @@ public class AuthResource {
 	@Path("/upload/updatepassword")
 	@Produces({"application/json", "text/xml"})
 	@Operation(summary = "Generate new SFTP password and send to email", description="Generates a new random SFTP password for the authenticated user and sends it to the provided e-mail address.")
-	public Response updateSftpPassword(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
+	public Response updateSftpPassword(@Context ContainerRequestContext oRequestContext, String sEmail) {
 
 		WasdiLog.debugLog("AuthResource.updateSftpPassword Mail: " + sEmail);
 
@@ -622,7 +626,7 @@ public class AuthResource {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if(null == oUser) {
 			WasdiLog.debugLog("AuthResource.updateSftpPassword Mail: invalid session");
@@ -893,7 +897,7 @@ public class AuthResource {
 	@Path("/editUserDetails")
 	@Produces({"application/json", "text/xml"})
 	@Operation(summary = "Update authenticated user profile", description="Allows an authenticated user to update their own profile fields: name, surname, link, description, and public nick name. Returns the updated UserViewModel. Returns invalid UserViewModel on validation failure or invalid session.")
-	public UserViewModel editUserDetails(@HeaderParam("x-session-token") String sSessionId, UserViewModel oInputUserVM ) {
+	public UserViewModel editUserDetails(@Context ContainerRequestContext oRequestContext, UserViewModel oInputUserVM ) {
 
 		WasdiLog.debugLog("AuthResource.editUserDetails");
 		//note: sSessionId validity is automatically checked later
@@ -912,12 +916,14 @@ public class AuthResource {
 
 		try {
 			//note: session validity is automatically checked		
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			if(null == oUser) {
 				//Maybe the user didn't exist, or failed for some other reasons
 				WasdiLog.debugLog("AuthResource.editUserDetails: invalid session");
 				return UserViewModel.getInvalid();
 			}
+			
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 			//update
 			oUser.setName(oInputUserVM.getName());
@@ -967,7 +973,7 @@ public class AuthResource {
 	@Path("/changePassword")
 	@Produces({"application/json", "text/xml"})
 	@Operation(summary = "Change WASDI password for authenticated user", description="Changes the WASDI password of the authenticated user. Requires the current password for verification before accepting the new one. Returns PrimitiveResult with boolValue=true on success, or invalid result on invalid session, wrong current password, or policy violation.")
-	public PrimitiveResult changePassword(@HeaderParam("x-session-token") String sSessionId, ChangeUserPasswordViewModel oChangePasswordViewModel) {
+	public PrimitiveResult changePassword(@Context ContainerRequestContext oRequestContext, ChangeUserPasswordViewModel oChangePasswordViewModel) {
 
 		WasdiLog.debugLog("AuthResource.changePassword");
 
@@ -984,7 +990,7 @@ public class AuthResource {
 
 		try {
 			//validity is automatically checked		
-			User oUserId = Wasdi.getUserFromSession(sSessionId);
+			User oUserId = (User) oRequestContext.getProperty("authenticated-user");
 			if(null == oUserId) {
 				//Maybe the user didn't exist, or failed for some other reasons
 				WasdiLog.debugLog("AuthResource.changePassword: invalid session");
@@ -1229,11 +1235,11 @@ public class AuthResource {
 	@Path("/config")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get client UI configuration", description="Returns the client UI configuration object for the authenticated user. The configuration is resolved from the missions repository and includes data-provider settings and feature flags relevant to the user's context.")
-	public Response getClientConfig(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getClientConfig(@Context ContainerRequestContext oRequestContext) {
 
 		WasdiLog.debugLog("AuthResource.getClientConfig");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {
@@ -1256,11 +1262,11 @@ public class AuthResource {
 	@Path("/privatemissions")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get private missions accessible to user", description="Returns the list of private missions accessible to the authenticated user, including missions they own and missions that have been shared with them (with their permission level).")
-	public Response getPrivateMissions(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getPrivateMissions(@Context ContainerRequestContext oRequestContext) {
 		
 		WasdiLog.debugLog("AuthResource.getPrivateMissions");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// domain Check
 		if (oUser == null) {
@@ -1307,14 +1313,14 @@ public class AuthResource {
 	@GET
 	@Path("/skin")
 	@Operation(summary = "Get branding and UI configuration for skin", description="Returns the branding and UI configuration for the specified skin name. Used by the client to apply the correct colours, logos, and feature flags on start-up. Query parameter 'skin' is optional and defaults to the server-configured default skin.")
-	public Response getSkin(@HeaderParam("x-session-token") String sSessionId, @QueryParam("skin") String sSkin) {
+	public Response getSkin(@Context ContainerRequestContext oRequestContext, @QueryParam("skin") String sSkin) {
 		try {
 			
 			if (Utils.isNullOrEmpty(sSkin)) sSkin = WasdiConfig.Current.defaultSkin;
 			
 			WasdiLog.debugLog("AuthResource.getSkin( skin: " + sSkin + ")");
 			
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("AuthResource.getSkin: invalid user or session");

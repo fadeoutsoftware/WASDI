@@ -19,6 +19,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -88,12 +90,12 @@ public class SubscriptionResource {
 	@Path("/active")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get active subscription", description = "Returns the authenticated user's active subscription from the set of currently valid subscriptions.")
-	public Response getActiveByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getActiveByUser(@Context ContainerRequestContext oRequestContext) {
 		
 
 		WasdiLog.debugLog("SubscriptionResource.getActiveByUser");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {
@@ -148,13 +150,13 @@ public class SubscriptionResource {
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get user subscriptions", description = "Returns subscriptions available to the authenticated user through ownership, sharing, or organization permissions, optionally restricted to valid subscriptions.")
-	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("valid") Boolean bValid) {
+	public Response getListByUser(@Context ContainerRequestContext oRequestContext, @QueryParam("valid") Boolean bValid) {
 		
 		if (bValid == null) bValid = false;
 
 		WasdiLog.debugLog("SubscriptionResource.getListByUser");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {
@@ -182,11 +184,11 @@ public class SubscriptionResource {
 	@Path("/count")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Count subscriptions", description = "Returns the total number of subscriptions. This endpoint is restricted to administrators.")
-	public Response getSubscriptionsCount(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getSubscriptionsCount(@Context ContainerRequestContext oRequestContext) {
 		
 		WasdiLog.debugLog("SubscriptionResource.getSubscriptionsCount");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("SubscriptionResource.getSubscriptionsCount: invalid session");
@@ -229,12 +231,12 @@ public class SubscriptionResource {
 	@Path("/byId")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get subscription details", description = "Returns the full view model for a subscription accessible to the authenticated user.")
-	public Response getSubscriptionViewModel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("subscription") String sSubscriptionId) {
+	public Response getSubscriptionViewModel(@Context ContainerRequestContext oRequestContext, @QueryParam("subscription") String sSubscriptionId) {
 		WasdiLog.debugLog("SubscriptionResource.getSubscriptionViewModel( Subscription: " + sSubscriptionId + ")");
 
 		SubscriptionViewModel oSubscriptionViewModel = new SubscriptionViewModel();
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("SubscriptionResource.getSubscriptionViewModel: invalid session");
@@ -296,10 +298,11 @@ public class SubscriptionResource {
 	@Path("/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Create subscription", description = "Creates a subscription and its default project, resolving duplicate names. Non-administrators may create subscriptions only for themselves.")
-	public Response createSubscription(@HeaderParam("x-session-token") String sSessionId, SubscriptionViewModel oSubscriptionViewModel) {
+	public Response createSubscription(@Context ContainerRequestContext oRequestContext, SubscriptionViewModel oSubscriptionViewModel) {
 		WasdiLog.debugLog("SubscriptionResource.createSubscription( Subscription: " + oSubscriptionViewModel.toString() + ")");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("SubscriptionResource.createSubscription: invalid session");
@@ -344,7 +347,7 @@ public class SubscriptionResource {
 				oProjectEditorViewModel.setActiveProject(oTargetUser.getActiveProjectId() == null);
 				oProjectEditorViewModel.setTargetUser(sUserId);
 
-				new ProjectResource().createProject(sSessionId, oProjectEditorViewModel);
+				new ProjectResource().createProject(oRequestContext, oProjectEditorViewModel);
 
 				return Response.ok(new SuccessResponse(oSubscription.getSubscriptionId())).build();
 			} 
@@ -369,10 +372,10 @@ public class SubscriptionResource {
 	@Path("/update")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Update subscription", description = "Updates an existing subscription. Non-administrator callers cannot alter its successful-purchase state.")
-	public Response upateSubscription(@HeaderParam("x-session-token") String sSessionId, SubscriptionViewModel oSubscriptionViewModel) {
+	public Response upateSubscription(@Context ContainerRequestContext oRequestContext, SubscriptionViewModel oSubscriptionViewModel) {
 		WasdiLog.debugLog("SubscriptionResource.updateSubscription");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("SubscriptionResource.updateSubscription: invalid session");
@@ -441,12 +444,12 @@ public class SubscriptionResource {
 	@Path("/delete")
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Delete subscription", description = "Deletes an owned subscription with its sharings and projects, or removes only the caller's sharing when the caller is not its owner.")
-	public Response deleteSubscription(@HeaderParam("x-session-token") String sSessionId, @QueryParam("subscription") String sSubscriptionId) {
+	public Response deleteSubscription(@Context ContainerRequestContext oRequestContext, @QueryParam("subscription") String sSubscriptionId) {
 		
 		WasdiLog.debugLog("SubscriptionResource.deleteSubscription( Subscription: " + sSubscriptionId + " )");
 		
 		// Check the user id
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("SubscriptionResource.deleteSubscription: invalid session");
@@ -528,7 +531,7 @@ public class SubscriptionResource {
 	@Path("/types")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get subscription types", description = "Returns the subscription types currently available on the platform.")
-	public Response getSubscriptionTypes(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getSubscriptionTypes(@Context ContainerRequestContext oRequestContext) {
 		WasdiLog.debugLog("SubscriptionResource.getSubscriptionTypes");
 		try {
 			return Response.ok(convert(Arrays.asList(SubscriptionType.values()))).build();
@@ -551,13 +554,13 @@ public class SubscriptionResource {
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Share subscription with user", description = "Grants a user READ or WRITE access to a subscription after validating the requester, target user, and ownership constraints.")
-	public Response shareSubscription(@HeaderParam("x-session-token") String sSessionId,
+	public Response shareSubscription(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("subscription") String sSubscriptionId, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
 
 		WasdiLog.debugLog("SubscriptionResource.shareSubscription( WS: " + sSubscriptionId + ", User: " + sDestinationUserId + " )");
 
 		// Validate Session
-		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequestingUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oRequestingUser == null) {
 			WasdiLog.warnLog("SubscriptionResource.shareSubscription: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
@@ -641,7 +644,7 @@ public class SubscriptionResource {
 	@Path("share/bysubscription")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get subscription sharings", description = "Returns users who have explicit access to a subscription and their assigned permission levels.")
-	public Response getEnableUsersSharedSubscription(@HeaderParam("x-session-token") String sSessionId, @QueryParam("subscription") String sSubscriptionId) {
+	public Response getEnableUsersSharedSubscription(@Context ContainerRequestContext oRequestContext, @QueryParam("subscription") String sSubscriptionId) {
 
 		WasdiLog.debugLog("SubscriptionResource.getEnableUsersSharedSubscription( Subscription: " + sSubscriptionId + " )");
 
@@ -649,7 +652,7 @@ public class SubscriptionResource {
 		List<UserResourcePermission> aoSubscriptionSharing = null;
 		List<SubscriptionSharingViewModel> aoSubscriptionSharingViewModels = new ArrayList<SubscriptionSharingViewModel>();
 
-		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequestingUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		if (oRequestingUser == null) {
 			WasdiLog.warnLog("SubscriptionResource.getEnableUsersSharedSubscription: invalid session");
@@ -692,13 +695,13 @@ public class SubscriptionResource {
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Remove subscription sharing", description = "Removes one user's sharing from a subscription after validating owner, writer, administrator, and beneficiary rules.")
-	public Response deleteUserSharedSubscription(@HeaderParam("x-session-token") String sSessionId,
+	public Response deleteUserSharedSubscription(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("subscription") String sSubscriptionId, @QueryParam("userId") String sUserId) {
 
 		WasdiLog.debugLog("SubscriptionResource.deleteUserSharedSubscription( WS: " + sSubscriptionId + ", User:" + sUserId + " )");
 
 		// Validate Session
-		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequestingUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oRequestingUser == null) {
 			WasdiLog.warnLog("SubscriptionResource.deleteUserSharedSubscription: invalid session");
@@ -789,12 +792,12 @@ public class SubscriptionResource {
 	@Path("/stripe/paymentUrl")
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Get subscription payment URL", description = "Creates a Stripe checkout URL for the selected subscription type and optionally associates the purchase with a workspace.")
-	public Response getStripePaymentUrl(@HeaderParam("x-session-token") String sSessionId,
+	public Response getStripePaymentUrl(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("subscription") String sSubscriptionId, @QueryParam("workspace") String sWorkspaceId) {
 		WasdiLog.debugLog("SubscriptionResource.getStripePaymentUrl( " + "Subscription: " + sSubscriptionId + ", "
 				+ "Workspace: " + sWorkspaceId + ")");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("SubscriptionResource.getStripePaymentUrl: invalid session");
@@ -968,7 +971,7 @@ public class SubscriptionResource {
 	@Path("/list")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "List subscriptions for administration", description = "Returns a filtered, sorted, and paginated subscription list for the administration dashboard. This endpoint is restricted to administrators.")
-	public Response getSortedList(@HeaderParam("x-session-token") String sSessionId, 
+	public Response getSortedList(@Context ContainerRequestContext oRequestContext, 
 			@QueryParam("userfilter") String sUserFilter, 
 			@QueryParam("idfilter") String sIdFilter, 
 			@QueryParam("namefilter") String sNameFilter,
@@ -980,7 +983,7 @@ public class SubscriptionResource {
 
 		WasdiLog.debugLog("SubscriptionResource.getList");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {

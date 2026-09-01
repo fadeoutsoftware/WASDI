@@ -24,6 +24,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -97,7 +99,7 @@ public class StyleResource {
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Upload style file", description = "Uploads a new SLD style, creates its database record, publishes it to GeoServer, and generates a preview image. Style names must be unique.")
 	public Response uploadFile(@FormDataParam("file") InputStream oFileInputStream,
-			@HeaderParam("x-session-token") String sSessionId,
+			@Context ContainerRequestContext oRequestContext,
 			@QueryParam("name") String sName, @QueryParam("description") String sDescription,
 			@QueryParam("public") Boolean bPublic) {
 		WasdiLog.debugLog("StyleResource.uploadFile( Name: " + sName + ", Descr: " + sDescription + ", Public: " + bPublic + " )");
@@ -107,7 +109,8 @@ public class StyleResource {
 
 		try {
 			// Session checking
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 			if (oUser == null) {
 				WasdiLog.warnLog("StyleResource.uploadFile: invalid session");
@@ -163,7 +166,7 @@ public class StyleResource {
 			//geoserver-side work
 			geoServerAddStyle(oStyleSldFile.getPath());
 			
-			updateStylePreview(sName, sSessionId);
+			updateStylePreview(sName, oRequestContext);
 						
 			oResult.setBoolValue(true);
 			return Response.ok().entity(oResult).build();
@@ -191,7 +194,7 @@ public class StyleResource {
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Update style file", description = "Replaces an existing style's SLD content from a plain or zipped upload, refreshes GeoServer and its preview, and propagates changes to compute nodes.")
 	public Response updateFile(@FormDataParam("file") InputStream oFileInputStream,
-			@HeaderParam("x-session-token") String sSessionId,
+			@Context ContainerRequestContext oRequestContext,
 			@QueryParam("styleId") String sStyleId,
 			@QueryParam("zipped") Boolean bZipped) {
 		
@@ -206,7 +209,8 @@ public class StyleResource {
 
 
 			// Session checking
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 			if (oUser == null) {
 				WasdiLog.warnLog("StyleResource.updateFile: invalid session");
@@ -315,7 +319,7 @@ public class StyleResource {
 			//geoserver-side work
 			geoServerUpdateStyleIfExists(oStyle.getName(), oStyleSldFile.getPath());
 			
-			updateStylePreview(oStyle.getName(), sSessionId);
+			updateStylePreview(oStyle.getName(), oRequestContext);
 		} catch (Exception oEx2) {
 			WasdiLog.errorLog("StyleResource.updateFile: " + oEx2);
 			return Response.serverError().build();
@@ -335,7 +339,7 @@ public class StyleResource {
 	@Produces(MediaType.APPLICATION_XML)
 	@Operation(summary = "Get style XML", description = "Returns the XML content of an accessible style's SLD file.")
 	public Response getXML(
-			@HeaderParam("x-session-token") String sSessionId,
+			@Context ContainerRequestContext oRequestContext,
 			@QueryParam("styleId") String sStyleId) {
 		
 		WasdiLog.debugLog("StyleResource.getXML( Style Id : " + sStyleId + ");");
@@ -344,7 +348,7 @@ public class StyleResource {
 
 		try {
 			// Session checking
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser == null) {
 				WasdiLog.warnLog("StyleResource.getXML: invalid session");
@@ -395,13 +399,13 @@ public class StyleResource {
 	@Path("/updatexml")
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Update style XML", description = "Updates an existing style from SLD XML text by delegating to the style-file update workflow.")
-	public Response updateXML(@HeaderParam("x-session-token") String sSessionId,
+	public Response updateXML(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("styleId") String sStyleId,
 			@FormDataParam("styleXml") String sStyleXml) {
 		WasdiLog.debugLog("StyleResource.updateXML: StyleId " + sStyleId + " invoke StyleResource.updateFile");
 
 		// convert string to file and invoke updateGraphFile
-		return updateFile(new ByteArrayInputStream(sStyleXml.getBytes(Charset.forName("UTF-8"))), sSessionId, sStyleId, false);
+		return updateFile(new ByteArrayInputStream(sStyleXml.getBytes(Charset.forName("UTF-8"))), oRequestContext, sStyleId, false);
 	}
 
 	/**
@@ -418,14 +422,14 @@ public class StyleResource {
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Update style parameters", description = "Updates an accessible style's description and public visibility after validating write permissions.")
 	public Response updateParams(
-			@HeaderParam("x-session-token") String sSessionId,
+			@Context ContainerRequestContext oRequestContext,
 			@QueryParam("styleId") String sStyleId,
 			@QueryParam("description") String sDescription,
 			@QueryParam("public") Boolean bPublic) {
 		WasdiLog.debugLog("StyleResource.updateParams( StyleId: " + sStyleId);
 
 		// Session checking
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("StyleResource.updateParams: invalid session");
@@ -469,11 +473,12 @@ public class StyleResource {
 	@Path("/getbyuser")
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Get visible styles", description = "Returns styles owned by, shared with, or public to the authenticated user, including permission and preview-image information.")
-	public List<StyleViewModel> getStylesByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public List<StyleViewModel> getStylesByUser(@Context ContainerRequestContext oRequestContext) {
 		WasdiLog.debugLog("StyleResource.getStylesByUser");
 
 		// Session checking
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("StyleResource.getStylesByUser: invalid session");
@@ -509,7 +514,7 @@ public class StyleResource {
 				
 				String sImageName = oStyleViewModel.getName() + ".png";
 				
-				Response oResponse = oImageResource.existsImage(sSessionId, sSessionId, ImagesCollections.STYLES.getFolder(), "", sImageName);
+				Response oResponse = oImageResource.existsImage(oRequestContext, sSessionId, ImagesCollections.STYLES.getFolder(), "", sImageName);
 				
 				if (oResponse.getStatus() == 200) {
 					oStyleViewModel.setImgLink(getStyleImageLink(sImageName, sSessionId));					
@@ -537,7 +542,7 @@ public class StyleResource {
 					
 					String sImageName = oStyleViewModel.getName() + ".png";
 					
-					Response oResponse = oImageResource.existsImage(sSessionId, sSessionId, ImagesCollections.STYLES.getFolder(), "", sImageName);
+					Response oResponse = oImageResource.existsImage(oRequestContext, sSessionId, ImagesCollections.STYLES.getFolder(), "", sImageName);
 					
 					if (oResponse.getStatus() == 200) {
 						oStyleViewModel.setImgLink(getStyleImageLink(sImageName, sSessionId));					
@@ -578,7 +583,7 @@ public class StyleResource {
 	@Path("/delete")
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Delete style", description = "Deletes a style on the main node and propagates cleanup to compute nodes, GeoServer, local files, and sharing records. Shared users remove only their sharing.")
-	public Response deleteStyle(@HeaderParam("x-session-token") String sSessionId, @QueryParam("styleId") String sStyleId) {
+	public Response deleteStyle(@Context ContainerRequestContext oRequestContext, @QueryParam("styleId") String sStyleId) {
 		
 		WasdiLog.debugLog("StyleResource.deleteStyle( Style: " + sStyleId + " )");
 
@@ -590,7 +595,8 @@ public class StyleResource {
 
 		try {
 			// Session checking
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 			// Check the user
 			if (oUser == null) {
@@ -655,10 +661,10 @@ public class StyleResource {
 	@Path("/nodedelete")
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Delete style from node", description = "Deletes style artifacts from a compute node as part of the main-node deletion propagation workflow.")
-	public Response nodeDeleteStyle(@HeaderParam("x-session-token") String sSessionId,
+	public Response nodeDeleteStyle(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("styleId") String sStyleId,
 			@QueryParam("styleName") String sStyleName) {
-		WasdiLog.debugLog("StyleResource.nodeDeleteStyle( Session: " + sSessionId + ", Style: " + sStyleName + " )");
+		WasdiLog.debugLog("StyleResource.nodeDeleteStyle( Style: " + sStyleName + " )");
 
 		// This API is allowed ONLY on computed nodes
 		if (WasdiConfig.Current.isMainNode()) {
@@ -667,7 +673,7 @@ public class StyleResource {
 		}
 
 		try {
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			// Check user
 			if (oUser == null) {
@@ -698,7 +704,7 @@ public class StyleResource {
 	@Path("share/add")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	@Operation(summary = "Share style with user", description = "Grants a user READ or WRITE access to a style after validating the target and the requester's sharing permissions, then sends a notification.")
-	public PrimitiveResult shareStyle(@HeaderParam("x-session-token") String sSessionId,
+	public PrimitiveResult shareStyle(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("styleId") String sStyleId, @QueryParam("userId") String sUserId, @QueryParam("rights") String sRights) {
 		WasdiLog.debugLog("StyleResource.shareStyle(  Style : " + sStyleId + ", User: " + sUserId + " )");
 
@@ -707,7 +713,7 @@ public class StyleResource {
 		StyleRepository oStyleRepository = new StyleRepository();
 
 		// Validate Session
-		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequestingUser = (User) oRequestContext.getProperty("authenticated-user");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 
@@ -811,7 +817,7 @@ public class StyleResource {
 	@Path("share/delete")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	@Operation(summary = "Remove style sharing", description = "Removes a user's style sharing when requested by the shared user, style owner, or an administrator.")
-	public PrimitiveResult deleteUserSharingStyle(@HeaderParam("x-session-token") String sSessionId,
+	public PrimitiveResult deleteUserSharingStyle(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("styleId") String sStyleId, @QueryParam("userId") String sUserId) {
 		WasdiLog.debugLog("StyleResource.deleteUserSharedStyle( ProcId: " + sStyleId + ", User:" + sUserId + " )");
 
@@ -820,7 +826,7 @@ public class StyleResource {
 
 		try {
 			// Validate Session
-			User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+			User oOwnerUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oOwnerUser == null) {
 				WasdiLog.warnLog("StyleResource.deleteUserSharedStyle: invalid session");
@@ -876,13 +882,13 @@ public class StyleResource {
 	@Path("share/bystyle")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	@Operation(summary = "Get style sharings", description = "Returns users with explicit access to a style and their assigned permission levels.")
-	public List<StyleSharingViewModel> getEnabledUsersSharedStyle(@HeaderParam("x-session-token") String sSessionId, @QueryParam("styleId") String sStyleId) {
+	public List<StyleSharingViewModel> getEnabledUsersSharedStyle(@Context ContainerRequestContext oRequestContext, @QueryParam("styleId") String sStyleId) {
 		List<StyleSharingViewModel> oResult = new ArrayList<>();
 
 		WasdiLog.debugLog("StyleResource.getEnabledUsersSharedStyle(  Style : " + sStyleId + " )");
 
 		// Validate Session
-		User oAskingUser = Wasdi.getUserFromSession(sSessionId);
+		User oAskingUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oAskingUser == null) {
 			WasdiLog.warnLog("StyleResource.getEnabledUsersSharedStyle: invalid session");
@@ -919,12 +925,14 @@ public class StyleResource {
 	@Path("download")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@Operation(summary = "Download style by identifier", description = "Streams an accessible style's SLD file by style identifier, accepting authentication through the header or browser token query parameter.")
-	public Response download(@HeaderParam("x-session-token") String sSessionId,
+	public Response download(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("token") String sTokenSessionId,
 			@QueryParam("styleId") String sStyleId) {
 		WasdiLog.debugLog("StyleResource.download( StyleId: " + sStyleId + " )");
 
 		try {
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
+			
 			if (!Utils.isNullOrEmpty(sSessionId)) {
 				sTokenSessionId = sSessionId;
 			}
@@ -951,12 +959,14 @@ public class StyleResource {
 	@Path("downloadbyname")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@Operation(summary = "Download style by name", description = "Streams an accessible style's SLD file by style name, accepting authentication through the header or browser token query parameter.")
-	public Response downloadByName(@HeaderParam("x-session-token") String sSessionId,
+	public Response downloadByName(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("token") String sTokenSessionId,
 			@QueryParam("style") String sStyle) {
 		WasdiLog.debugLog("StyleResource.downloadByName( StyleId: " + sStyle + " )");
 
 		try {
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
+			
 			if (!Utils.isNullOrEmpty(sSessionId)) {
 				sTokenSessionId = sSessionId;
 			}
@@ -1235,7 +1245,7 @@ public class StyleResource {
 	 * @param sName Style Name
 	 * @param sSessionId User Session Id
 	 */
-	protected void updateStylePreview(String sName, String sSessionId) {
+	protected void updateStylePreview(String sName, ContainerRequestContext oRequestContext) {
 		
 		
 		try {		
@@ -1251,7 +1261,7 @@ public class StyleResource {
 				FormDataContentDispositionBuilder oFormDataContentDispositionBuilder = FormDataContentDisposition.name(sImageName);
 				
 				
-				oImagesResource.uploadImage(oByteArrayInputStream, oFormDataContentDispositionBuilder.fileName(sImageName).build(), sSessionId, ImagesCollections.STYLES.getFolder(), "", sImageName, true, true);
+				oImagesResource.uploadImage(oByteArrayInputStream, oFormDataContentDispositionBuilder.fileName(sImageName).build(), oRequestContext, ImagesCollections.STYLES.getFolder(), "", sImageName, true, true);
 			}
 			else {
 				WasdiLog.errorLog("StyleResource.updateStylePreview: the WMS request returned " + oHttpCallResponse.getResponseCode());

@@ -61,12 +61,12 @@ public class OpenSearchResource {
 	@Path("/query/count")
 	@Produces({ "application/xml", "application/json", "text/html" })
 	@Operation(summary = "Count results for a search query", description="Executes a search query against the specified data provider(s) and returns only the total count of matching results, without retrieving the actual product details.")
-	public int count(@HeaderParam("x-session-token") String sSessionId, @QueryParam("query") String sQuery, @QueryParam("providers") String sProviders) {
+	public int count(@Context ContainerRequestContext oRequestContext, @QueryParam("query") String sQuery, @QueryParam("providers") String sProviders) {
 		
 		try {
 			
 			// Check the session
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			
 			if (oUser == null) {
 				WasdiLog.warnLog("OpenSearchResource.count: invalid session");
@@ -143,7 +143,7 @@ public class OpenSearchResource {
 	@Path("/query")
 	@Produces({ "application/json", "text/html" })
 	@Operation(summary = "Search data provider(s)", description="Executes a paginated search query against the specified data provider(s) and returns results as QueryResultViewModel array. Supports offset/limit pagination and sorting. Provider defaults to AUTO to query multiple providers in sequence.")
-	public QueryResultViewModel[] search(@HeaderParam("x-session-token") String sSessionId,
+	public QueryResultViewModel[] search(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("providers") String sProvider, @QueryParam("query") String sQuery,
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder) {
@@ -152,7 +152,7 @@ public class OpenSearchResource {
 				sQuery + ", Offset: " + sOffset + ", Limit: " + sLimit + ", SortedBy: " + sSortedBy + ", Order: " + sOrder + " )");
 		
 		// Domain Check
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		if (oUser == null) {
 			WasdiLog.warnLog("OpenSearchResource.search: invalid session");
@@ -289,7 +289,7 @@ public class OpenSearchResource {
 	@Path("/query/countlist")
 	@Produces({ "application/xml", "application/json", "text/html" })
 	@Operation(summary = "Count results for multiple queries", description="Executes multiple search queries against the specified data provider(s) and returns the total combined count of matching results. Accepts an ArrayList of query strings in the request body.")
-	public int countList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("providers") String sProviders, ArrayList<String> asQueries) {
+	public int countList(@Context ContainerRequestContext oRequestContext, @QueryParam("providers") String sProviders, ArrayList<String> asQueries) {
 		
 		String sQuery = "";
 
@@ -297,7 +297,7 @@ public class OpenSearchResource {
 		try {
 			
 			// Validate the input			
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			if (oUser == null) {
 				WasdiLog.warnLog("OpenSearchResource.countList, session: invalid");
 				return -1;
@@ -391,13 +391,13 @@ public class OpenSearchResource {
 	@Path("/querylist")
 	@Produces({ "application/json", "text/html" })
 	@Operation(summary = "Search with multiple queries", description="Executes multiple search queries against the specified data provider(s) and returns combined results as an array of QueryResultViewModel. Accepts an ArrayList of query strings in the request body.")
-	public QueryResultViewModel[] searchList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("providers") String sProvider, ArrayList<String> asQueries) {
+	public QueryResultViewModel[] searchList(@Context ContainerRequestContext oRequestContext, @QueryParam("providers") String sProvider, ArrayList<String> asQueries) {
 
 		WasdiLog.debugLog("OpenSearchResource.searchList( Providers: " + sProvider + " )");
 		try { 
 			
 			// Validate the User
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			if (oUser == null) {
 				WasdiLog.warnLog("OpenSearchResource.searchList, session is invalid");
 				return null;

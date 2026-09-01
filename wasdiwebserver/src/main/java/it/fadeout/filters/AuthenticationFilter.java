@@ -34,6 +34,7 @@ import wasdi.shared.utils.log.WasdiLog;
 public class AuthenticationFilter implements ContainerRequestFilter {
 	
 	private static final String CONTEXT_USER_KEY = "authenticated-user";
+	private static final String CONTEXT_SESSION_ID = "session-id";
 	private static final String HEADER_SESSION_TOKEN = "x-session-token";
 	private static final String HEADER_AUTHORIZATION = "Authorization";
 	
@@ -41,10 +42,11 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 	public void filter(ContainerRequestContext oRequestContext) throws IOException {
 		
 		User oUser = null;
+		String sToken = "";
 		
 		try {
 			// Try to get token from headers
-			String sToken = extractToken(oRequestContext);
+			sToken = extractToken(oRequestContext);
 			
 			if (!Utils.isNullOrEmpty(sToken)) {
 				// Validate token and get user
@@ -57,6 +59,14 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 		
 		// Always set user in context (can be null - endpoints will handle)
 		oRequestContext.setProperty(CONTEXT_USER_KEY, oUser);
+		
+		if (!Utils.isNullOrEmpty(sToken)) {
+			if (AuthTokenUtil.isLegacyWasdiToken(sToken)) {
+				// Legacy token - extract session ID and check DB
+				sToken = AuthTokenUtil.extractLegacySessionId(sToken);
+			} 
+		}
+		oRequestContext.setProperty(CONTEXT_SESSION_ID, sToken);
 	}
 	
 	/**

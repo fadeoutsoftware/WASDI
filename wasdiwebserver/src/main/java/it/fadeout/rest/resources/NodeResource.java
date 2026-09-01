@@ -11,6 +11,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -55,14 +57,14 @@ public class NodeResource {
 	@Path("/allnodes")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get all available WASDI nodes", description="Returns a list of all active WASDI nodes that the user has access to. Admins see all active nodes, non-admins see only shared and active nodes, or their default node. Passing all=true also returns inactive nodes (admin only).")
-	public List<NodeViewModel> getAllNodes(@HeaderParam("x-session-token") String sSessionId, @QueryParam("all") Boolean bAlsoNotActive) {
+	public List<NodeViewModel> getAllNodes(@Context ContainerRequestContext oRequestContext, @QueryParam("all") Boolean bAlsoNotActive) {
 		
-		WasdiLog.debugLog("NodeResource.getAllNodes( Session: " + sSessionId + ")");
+		WasdiLog.debugLog("NodeResource.getAllNodes()");
 		
 		if (bAlsoNotActive == null) bAlsoNotActive = false;
 		
 		// Check the user
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		if (oUser == null) {
 			WasdiLog.warnLog("NodeResource.getAllNodes: invalid session");
@@ -142,7 +144,7 @@ public class NodeResource {
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Share node with user", description="Grants a user access to a specific node with the specified rights level (READ, WRITE, or ADMIN). The node must already exist. Admin users can share nodes they own with other users.")
-	public PrimitiveResult shareNode(@HeaderParam("x-session-token") String sSessionId,
+	public PrimitiveResult shareNode(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("node") String sNodeCode, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
 
 		WasdiLog.debugLog("NodeResource.ShareNode( Node: " + sNodeCode + ", User: " + sDestinationUserId + " )");
@@ -152,7 +154,7 @@ public class NodeResource {
 		
 
 		// Validate Session
-		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequesterUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oRequesterUser == null) {
 			WasdiLog.warnLog("NodeResource.shareNode: invalid session");
 
@@ -262,7 +264,7 @@ public class NodeResource {
 	@Path("share/bynode")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get users with node access", description="Returns a list of all users who have been granted access to a specific node, including their user IDs and access rights.")
-	public List<NodeSharingViewModel> getEnableUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("node") String sNodeCode) {
+	public List<NodeSharingViewModel> getEnableUsersSharedWorksace(@Context ContainerRequestContext oRequestContext, @QueryParam("node") String sNodeCode) {
 
 		WasdiLog.debugLog("NodeResource.getEnableUsersSharedWorksace( WS: " + sNodeCode + " )");
 
@@ -270,7 +272,7 @@ public class NodeResource {
 		List<UserResourcePermission> aoNodeSharing = null;
 		List<NodeSharingViewModel> aoNodeSharingViewModels = new ArrayList<NodeSharingViewModel>();
 
-		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+		User oOwnerUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oOwnerUser == null) {
 			WasdiLog.warnLog("NodeResource.getEnableUsersSharedWorksace: invalid session");
 			return aoNodeSharingViewModels;
@@ -304,14 +306,14 @@ public class NodeResource {
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Revoke node access from user", description="Removes a user's access to a shared node. Only node owners/admins can revoke sharing permissions.")
-	public PrimitiveResult deleteUserSharedNode(@HeaderParam("x-session-token") String sSessionId,
+	public PrimitiveResult deleteUserSharedNode(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("node") String sNodeCode, @QueryParam("userId") String sUserId) {
 
 		WasdiLog.debugLog("NodeResource.deleteUserSharedNode( WS: " + sNodeCode + ", User:" + sUserId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		// Validate Session
-		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequestingUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oRequestingUser == null) {
 			WasdiLog.warnLog("NodeResource.deleteUserSharedNode: invalid session");
@@ -364,12 +366,12 @@ public class NodeResource {
 	@GET
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get node details", description="Returns full details of a specific WASDI node including configuration, status, and capabilities. Admin users only.")
-	public Response getNode(@HeaderParam("x-session-token") String sSessionId, @QueryParam("node") String sNodeCode) {
+	public Response getNode(@Context ContainerRequestContext oRequestContext, @QueryParam("node") String sNodeCode) {
 		
-		WasdiLog.debugLog("NodeResource.getNode( Session: " + sSessionId + ", NodeCode " + sNodeCode + " )");
+		WasdiLog.debugLog("NodeResource.getNode( Session: NodeCode " + sNodeCode + " )");
 		
 		// Check the user
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		if (oUser == null) {
 			WasdiLog.warnLog("NodeResource.getNode: invalid session");
@@ -406,12 +408,12 @@ public class NodeResource {
 	@POST
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Create a new WASDI node", description="Creates a new WASDI node with the specified configuration (code, base address, API credentials, etc.). Admin users only. The node code must be unique.")
-	public Response createNode(@HeaderParam("x-session-token") String sSessionId, NodeFullViewModel oNodeViewModel) {
+	public Response createNode(@Context ContainerRequestContext oRequestContext, NodeFullViewModel oNodeViewModel) {
 		
-		WasdiLog.debugLog("NodeResource.createNode( Session: " + sSessionId + " )");
+		WasdiLog.debugLog("NodeResource.createNode()");
 		
 		// Check the user
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		if (oUser == null) {
 			WasdiLog.warnLog("NodeResource.createNode: invalid session");
@@ -463,12 +465,12 @@ public class NodeResource {
 	@PUT
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Update node configuration", description="Updates an existing WASDI node's configuration parameters. Admin users only. The node must already exist.")
-	public Response updateNode(@HeaderParam("x-session-token") String sSessionId, NodeFullViewModel oNodeViewModel) {
+	public Response updateNode(@Context ContainerRequestContext oRequestContext, NodeFullViewModel oNodeViewModel) {
 		
-		WasdiLog.debugLog("NodeResource.updateNode( Session: " + sSessionId + " )");
+		WasdiLog.debugLog("NodeResource.updateNode()");
 		
 		// Check the user
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		if (oUser == null) {
 			WasdiLog.warnLog("NodeResource.updateNode: invalid session");

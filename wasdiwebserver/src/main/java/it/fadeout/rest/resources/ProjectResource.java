@@ -14,6 +14,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -59,13 +61,13 @@ public class ProjectResource {
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get user projects", description = "Returns projects available to the authenticated user across accessible subscriptions, optionally restricted to valid projects.")
-	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("valid") Boolean bValid) {
+	public Response getListByUser(@Context ContainerRequestContext oRequestContext, @QueryParam("valid") Boolean bValid) {
 		
 		if (bValid == null) bValid = false;
 
 		WasdiLog.debugLog("ProjectResource.getListByUser");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		List<ProjectListViewModel> aoProjectList = new ArrayList<>();
 
@@ -82,10 +84,7 @@ public class ProjectResource {
 			// Create repo
 			ProjectRepository oProjectRepository = new ProjectRepository();
 
-			Response oResponse = new SubscriptionResource().getListByUser(sSessionId, bValid);
-
-			@SuppressWarnings("unchecked")
-			List<SubscriptionListViewModel> aoSubscriptionLVMs = (List<SubscriptionListViewModel>) oResponse.getEntity();
+			List<SubscriptionListViewModel> aoSubscriptionLVMs = PermissionsUtils.getUsersSubscriptionsList(oUser, bValid);
 			
 			if (aoSubscriptionLVMs==null) {
 				WasdiLog.debugLog("ProjectResource.getListByUser: aoSubscriptionLVMs is null");
@@ -164,11 +163,11 @@ public class ProjectResource {
 	@Path("/bysubscription")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get subscription projects", description = "Returns the projects belonging to a subscription after validating the authenticated user's access.")
-	public Response getListBySubscription(@HeaderParam("x-session-token") String sSessionId,
+	public Response getListBySubscription(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("subscription") String sSubscriptionId) {
 		WasdiLog.debugLog("ProjectResource.getListBySubscription(Subscription: " + sSubscriptionId + ")");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {
@@ -229,13 +228,13 @@ public class ProjectResource {
 	@Path("/byId")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Get project details", description = "Returns the detailed view model for a project accessible to the authenticated user.")
-	public Response getProjectViewModel(@HeaderParam("x-session-token") String sSessionId,
+	public Response getProjectViewModel(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("project") String sProjectId) {
 		WasdiLog.debugLog("ProjectResource.getProjectViewModel( Project: " + sProjectId + ")");
 
 		ProjectViewModel oVM = new ProjectViewModel();
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProjectResource.getProjectViewModel: invalid session");
@@ -284,11 +283,11 @@ public class ProjectResource {
 	@Path("/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Create project", description = "Creates a project, resolving duplicate names automatically, and optionally makes it the active project for the target user.")
-	public Response createProject(@HeaderParam("x-session-token") String sSessionId, ProjectEditorViewModel oProjectEditorViewModel) {
+	public Response createProject(@Context ContainerRequestContext oRequestContext, ProjectEditorViewModel oProjectEditorViewModel) {
 		
 		WasdiLog.debugLog("ProjectResource.createProject( Project: " + oProjectEditorViewModel.toString() + ")");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProjectResource.createProject: invalid session");
@@ -316,7 +315,7 @@ public class ProjectResource {
 
 			if (oProjectRepository.insertProject(oProject)) {
 				if (oProjectEditorViewModel.isActiveProject()) {
-					this.changeActiveProject(sSessionId, oProject.getProjectId(), oProjectEditorViewModel.getTargetUser());
+					this.changeActiveProject(oRequestContext, oProject.getProjectId(), oProjectEditorViewModel.getTargetUser());
 				}
 
 				return Response.ok(new SuccessResponse(oProject.getProjectId())).build();
@@ -343,10 +342,10 @@ public class ProjectResource {
 	@Path("/update")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Update project", description = "Updates an existing project, enforces a unique name, and adjusts the user's active project when requested.")
-	public Response upateProject(@HeaderParam("x-session-token") String sSessionId, ProjectEditorViewModel oProjectEditorViewModel) {
+	public Response upateProject(@Context ContainerRequestContext oRequestContext, ProjectEditorViewModel oProjectEditorViewModel) {
 		WasdiLog.debugLog("ProjectResource.updateProject( Project: " + oProjectEditorViewModel.toString() + ")");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProjectResource.updateProject: invalid session");
@@ -394,7 +393,7 @@ public class ProjectResource {
 			if (oProjectRepository.updateProject(oProject)) {
 
 				if (oProjectEditorViewModel.isActiveProject()) {
-					this.changeActiveProject(sSessionId, oProject.getProjectId(), oProjectEditorViewModel.getTargetUser());
+					this.changeActiveProject(oRequestContext, oProject.getProjectId(), oProjectEditorViewModel.getTargetUser());
 				} 
 				else if (oProject.getProjectId().equals(oUser.getActiveProjectId())) {
 					UserRepository oUserRepository = new UserRepository();
@@ -430,10 +429,10 @@ public class ProjectResource {
 	@Path("/active")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	@Operation(summary = "Change active project", description = "Changes or clears the active project and corresponding subscription. Changing another user's selection requires administrator privileges.")
-	public Response changeActiveProject(@HeaderParam("x-session-token") String sSessionId, @QueryParam("project") String sProjectId, @QueryParam("target") String sTargetUserId) {
+	public Response changeActiveProject(@Context ContainerRequestContext oRequestContext, @QueryParam("project") String sProjectId, @QueryParam("target") String sTargetUserId) {
 		WasdiLog.debugLog("ProjectResource.changeActiveProject( ProjectId: " + sProjectId + ")");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProjectResource.changeActiveProject: invalid session");
@@ -497,11 +496,11 @@ public class ProjectResource {
 	@Path("/delete")
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Delete project", description = "Deletes a project after validating its identifier and the authenticated user's permissions.")
-	public Response deleteProject(@HeaderParam("x-session-token") String sSessionId,
+	public Response deleteProject(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("project") String sProjectId) {
 		WasdiLog.debugLog("ProjectResource.deleteProject( Project: " + sProjectId + " )");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProjectResource.deleteProject: invalid session");

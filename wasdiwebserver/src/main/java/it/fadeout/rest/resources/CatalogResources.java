@@ -19,6 +19,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -74,7 +76,7 @@ public class CatalogResources {
 	@Path("downloadbyname")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@Operation(summary = "", description="")
-	public Response downloadEntryByName(@HeaderParam("x-session-token") String sSessionId,
+	public Response downloadEntryByName(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("token") String sTokenSessionId,
 			@QueryParam("filename") String sFileName,
 			@QueryParam("workspace") String sWorkspaceId,
@@ -86,6 +88,8 @@ public class CatalogResources {
 		WasdiLog.debugLog("CatalogResources.downloadEntryByName( FileName: " + sFileName + ", Ws: " + sWorkspaceId);
 		
 		try {
+			
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 			
 			// Check session
 			if( Utils.isNullOrEmpty(sSessionId) == false) {
@@ -354,7 +358,7 @@ public class CatalogResources {
 	@Path("/upload/ingest")
 	@Produces({"application/json", "text/xml"})
 	@Operation(summary = "", description="")
-	public Response ingestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle, @QueryParam("platform") String sPlatform) {
+	public Response ingestFile(@Context ContainerRequestContext oRequestContext, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle, @QueryParam("platform") String sPlatform) {
 		
 		if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) sParentProcessWorkspaceId = "";
 		if (Utils.isNullOrEmpty(sStyle)) sStyle = "";
@@ -367,7 +371,7 @@ public class CatalogResources {
 		WasdiLog.debugLog("CatalogResource.ingestFile File: " + sFile + " Ws: " + sWorkspaceId + " ParentId " + sParentProcessWorkspaceId + " Style " + sStyle);
 
 		// Check user session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		if (oUser == null) {
 			WasdiLog.warnLog("CatalogResource.ingestFile: invalid session");
@@ -385,6 +389,8 @@ public class CatalogResources {
 				return Response.status(Status.UNAUTHORIZED).build();			
 			}			
 		}
+		
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 		
 		String sUserId = oUser.getUserId();		
 
@@ -444,7 +450,7 @@ public class CatalogResources {
 	@Path("/upload/ingestinws")
 	@Produces({"application/json", "text/xml"})
 	@Operation(summary = "", description="")
-	public PrimitiveResult ingestFileInWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle, @QueryParam("platform") String sPlatform) {
+	public PrimitiveResult ingestFileInWorkspace(@Context ContainerRequestContext oRequestContext, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle, @QueryParam("platform") String sPlatform) {
 		
 		// Create the result object
 		PrimitiveResult oResult = new PrimitiveResult();
@@ -452,7 +458,7 @@ public class CatalogResources {
 		WasdiLog.debugLog("CatalogResource.ingestFileInWorkspace: file " + sFile + " workspace: " + sWorkspaceId);
 
 		// Check the user session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oUser == null) {
 			WasdiLog.warnLog("CatalogResource.ingestFileInWorkspace: invalid session");
 			oResult.setBoolValue(false);
@@ -474,6 +480,8 @@ public class CatalogResources {
 		
 		// Get the user account
 		String sUserId = oUser.getUserId();
+		
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 		
 		// Get the file path		
 		String sFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
@@ -550,7 +558,7 @@ public class CatalogResources {
 	@Path("/copytosfpt")
 	@Produces({"application/json", "text/xml"})
 	@Operation(summary = "", description="")
-	public PrimitiveResult copyFileToSftp(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("path") String sRelativePath) {
+	public PrimitiveResult copyFileToSftp(@Context ContainerRequestContext oRequestContext, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("path") String sRelativePath) {
 		
 		// Create the result object
 		PrimitiveResult oResult = new PrimitiveResult();
@@ -558,7 +566,7 @@ public class CatalogResources {
 		WasdiLog.debugLog("CatalogResource.copyFileToSftp: file " + sFile + " from workspace: " + sWorkspaceId);
 
 		// Check the user session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		if (oUser == null) {
 			WasdiLog.warnLog("CatalogResource.copyFileToSftp: computed file path: invalid session");
@@ -615,6 +623,7 @@ public class CatalogResources {
 		}
 		
 		try {
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 			
 			// Crete the ingest parameter
 			String sProcessObjId = Utils.getRandomName();
@@ -653,7 +662,7 @@ public class CatalogResources {
 	@Path("/upload/ftp")
 	@Produces({"application/json", "text/xml"})
 	@Operation(summary = "Transfer a file to an external SFTP server", description="Transfers a file from the workspace to an external SFTP server using the provided credentials and paths. Returns a PrimitiveResult indicating the success or failure of the operation.")
-	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId,
+	public PrimitiveResult ftpTransferFile(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId,
 			FtpTransferViewModel oFtpTransferVM) {
 		
@@ -668,7 +677,7 @@ public class CatalogResources {
 			return oResult;
 		}
 		
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		if(null==oUser) {
 			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
@@ -686,6 +695,7 @@ public class CatalogResources {
 		}		
 				
 		String sUserId = oUser.getUserId();
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 		try {
 			WasdiLog.debugLog("CatalogResource.ftpTransferFile: prepare parameters");
@@ -721,12 +731,12 @@ public class CatalogResources {
 	@Path("/properties")
 	@Produces({"application/json", "text/xml"})
 	@Operation(summary = "Get product properties", description="Retrieves the properties of a product file within the specified workspace. Optionally calculates and returns the file checksum if requested.")
-	public Response getProductProperties(@HeaderParam("x-session-token") String sSessionId,
+	public Response getProductProperties(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("workspace") String sWorkspaceId, @QueryParam("file") String sFileName, @QueryParam("getchecksum") Boolean bGetChecksum) {
 		
 		WasdiLog.debugLog("CatalogResource.getProductProperties ws="+sWorkspaceId + " file: " + sFileName);
 		
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		if(oUser==null) {
 			WasdiLog.warnLog("CatalogResource.getProductProperties: invalid user or session");

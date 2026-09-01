@@ -11,6 +11,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -89,7 +91,7 @@ public class FileBufferResource {
 	@Path("share")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	@Operation(summary = "Share a product between workspaces", description="Copies a product (file/dataset) from one workspace to another. The product must exist in the origin workspace. Supports optional bounding box filtering and parent process tracking. Returns the operation status including product URL and metadata.")
-	public Response share(@HeaderParam("x-session-token") String sSessionId,
+	public Response share(@Context ContainerRequestContext oRequestContext,
 									@QueryParam("originWorkspaceId") String sOriginWorkspaceId,
 									@QueryParam("destinationWorkspaceId") String sDestinationWorkspaceId,
 									@QueryParam("productName") String sProductName,
@@ -106,7 +108,8 @@ public class FileBufferResource {
 		
 		try {
 			// Check User and Session
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 			
 			if (oUser == null) {
 				WasdiLog.warnLog("FileBufferResource.share: invalid session");
@@ -287,7 +290,7 @@ public class FileBufferResource {
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	@Operation(summary = "Import product (query parameters form)", description="Initiates an asynchronous import of a product (file or dataset) into a workspace. This is a query-parameter version of the POST download endpoint. Automatically creates a process with the provided metadata (file URL, provider, bounding box, parent process). Delegates to imageImport() internally.")
-	public PrimitiveResult download(@HeaderParam("x-session-token") String sSessionId,
+	public PrimitiveResult download(@Context ContainerRequestContext oRequestContext,
 									@QueryParam("fileUrl") String sFileUrl,
 									@QueryParam("name") String sFileName,
 									@QueryParam("provider") String sProvider,
@@ -297,7 +300,8 @@ public class FileBufferResource {
 									@QueryParam("platform") String sPlatform)
 			throws IOException
 	{
-		WasdiLog.debugLog("FileBufferResource.download, session: " + sSessionId + " fileName: " + sFileName);
+		WasdiLog.debugLog("FileBufferResource.download, fileName: " + sFileName);
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 		ImageImportViewModel oImageImportViewModel = new ImageImportViewModel();
 
@@ -309,7 +313,7 @@ public class FileBufferResource {
 		oImageImportViewModel.setParent(sParentProcessWorkspaceId);
 		oImageImportViewModel.setPlatformType(sPlatform);
 
-		return this.imageImport(sSessionId, oImageImportViewModel);
+		return this.imageImport(oRequestContext, oImageImportViewModel);
 	}
 
 	/**
@@ -325,7 +329,7 @@ public class FileBufferResource {
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	@Operation(summary = "Import product (request body form)", description="Initiates an asynchronous import of a product (file or dataset) into a workspace. Accepts ImageImportViewModel in request body with all import parameters. Validates input, creates a process with the provided metadata, and schedules it via WASDI launcher. Returns a PrimitiveResult with process details.")
-	public PrimitiveResult imageImport(@HeaderParam("x-session-token") String sSessionId, ImageImportViewModel oImageImportViewModel) {
+	public PrimitiveResult imageImport(@Context ContainerRequestContext oRequestContext, ImageImportViewModel oImageImportViewModel) {
 		
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -335,7 +339,8 @@ public class FileBufferResource {
 			WasdiLog.debugLog("FileBufferResource.imageImport");
 			
 			// We get the user from session
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 			if (oUser==null) {
 				// Invalid credentials
@@ -528,7 +533,7 @@ public class FileBufferResource {
 	@Path("publishband")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	@Operation(summary = "", description="")
-	public RabbitMessageViewModel publishBand(	@HeaderParam("x-session-token") String sSessionId,
+	public RabbitMessageViewModel publishBand(	@Context ContainerRequestContext oRequestContext,
 												@QueryParam("fileUrl") String sFileUrl,
 												@QueryParam("workspace") String sWorkspaceId,
 												@QueryParam("band") String sBand,
@@ -540,7 +545,8 @@ public class FileBufferResource {
 			WasdiLog.debugLog("FileBufferResource.publishBand");
 			
 			// Check Authentication
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 			if (oUser==null) {
 				WasdiLog.warnLog("FileBufferResource.publishBand: invalid session"); 
 				return oReturnValue;
