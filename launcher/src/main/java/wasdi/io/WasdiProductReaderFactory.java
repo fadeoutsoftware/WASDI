@@ -146,6 +146,18 @@ public class WasdiProductReaderFactory {
 			return new MeteOceanProductReader(oFile);
 		}
 		
+		if (oFile.getName().toUpperCase().startsWith("TRWSI_") 
+					|| oFile.getName().toUpperCase().startsWith("SWSI_")
+					|| oFile.getName().toUpperCase().startsWith("GWU_SW_")
+					|| oFile.getName().toUpperCase().startsWith("ET_SW_")
+					|| oFile.getName().toUpperCase().startsWith("ET_TIR_")) {
+			if (oFile.getName().toLowerCase().endsWith(".zip")) {
+				WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating TERESA zip File Reader for " + oFile.getName());
+				return new TeresaZipFileReader(oFile);
+			}
+				
+		}
+		
 		if (oFile.getName().toLowerCase().endsWith(".nc")) {
 			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating CM NetCDF File Reader for " + oFile.getName());
 			return new CmNcProductReader(oFile);
