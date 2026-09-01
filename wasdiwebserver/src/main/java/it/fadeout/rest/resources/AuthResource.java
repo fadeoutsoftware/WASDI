@@ -291,19 +291,19 @@ public class AuthResource {
 				}
 				
 				oUserVM.setLastWorkspace(oUser.getLastWorkspace());
+				SessionRepository oSessionRepository = new SessionRepository();
+				UserSession oSession = oSessionRepository.insertUniqueSession(oUser.getUserId());
+				if(null==oSession || Utils.isNullOrEmpty(oSession.getSessionId())) {
+					WasdiLog.debugLog("AuthResource.login: could not insert session in DB, aborting");
+					return UserViewModel.getInvalid();
+				}
+				oUserVM.setSessionId(oSession.getSessionId());
 				if (oKeycloakLoginResponse != null) {
 					oUserVM.setAccessToken(oKeycloakLoginResponse.optString("access_token", ""));
 					oUserVM.setRefreshToken(oKeycloakLoginResponse.optString("refresh_token", ""));
 					oUserVM.setExpiresIn(oKeycloakLoginResponse.optInt("expires_in", 0));
 					WasdiLog.debugLog("AuthResource.login: Keycloak access succeeded");
 				} else {
-					SessionRepository oSessionRepository = new SessionRepository();
-					UserSession oSession = oSessionRepository.insertUniqueSession(oUser.getUserId());
-					if(null==oSession || Utils.isNullOrEmpty(oSession.getSessionId())) {
-						WasdiLog.debugLog("AuthResource.login: could not insert session in DB, aborting");
-						return UserViewModel.getInvalid();
-					}
-					oUserVM.setSessionId(oSession.getSessionId());
 					WasdiLog.debugLog("AuthResource.login: legacy access succeeded, sSessionId: "+oSession.getSessionId());
 				}
 				
