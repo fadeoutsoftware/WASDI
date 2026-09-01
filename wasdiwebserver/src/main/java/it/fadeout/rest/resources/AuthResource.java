@@ -52,6 +52,7 @@ import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.users.ChangeUserPasswordViewModel;
 import wasdi.shared.viewmodels.users.LoginInfo;
 import wasdi.shared.viewmodels.users.RegistrationInfoViewModel;
+import wasdi.shared.viewmodels.users.RefreshTokenViewModel;
 import wasdi.shared.viewmodels.users.SkinViewModel;
 import wasdi.shared.viewmodels.users.UserViewModel;
 
@@ -250,12 +251,10 @@ public class AuthResource {
 			String sAuthResult = KeycloakUtils.login(sLowerCaseUserId, oLoginInfo.getUserPassword());
 			
 			boolean bLoginSuccess = false;
-			
-			String sRefreshToken = getRefreshTokenFromLoginResponse(sAuthResult);
+			JSONObject oKeycloakLoginResponse = getKeycloakLoginResponse(sAuthResult);
 
-			if(!Utils.isNullOrEmpty(sRefreshToken)) { 
+			if(oKeycloakLoginResponse != null) {
 				bLoginSuccess = true;
-				KeycloakUtils.logout(sRefreshToken);
 			} 
 			else {
 				// Try to log in with the WASDI old password
@@ -270,22 +269,12 @@ public class AuthResource {
 				//Clear all old, expired sessions
 				Wasdi.clearUserExpiredSessions(oUser);
 				
-				// Create a new session
-				SessionRepository oSessionRepository = new SessionRepository();
-				UserSession oSession = oSessionRepository.insertUniqueSession(oUser.getUserId());
-				
-				if(null==oSession || Utils.isNullOrEmpty(oSession.getSessionId())) {
-					WasdiLog.debugLog("AuthResource.login: could not insert session in DB, aborting");
-					return UserViewModel.getInvalid();
-				}
-				
 				//populate view model
 				UserViewModel oUserVM = new UserViewModel();
 				oUserVM.setName(oUser.getName());
 				oUserVM.setSurname(oUser.getSurname());
 				oUserVM.setUserId(oUser.getUserId());
 				oUserVM.setAuthProvider(oUser.getAuthServiceProvider());
-				oUserVM.setSessionId(oSession.getSessionId());
 				oUserVM.setType(PermissionsUtils.getUserType(oUser));
 				oUserVM.setPublicNickName(oUser.getPublicNickName());
 				oUserVM.setSkin(oUser.getSkin());
@@ -302,8 +291,21 @@ public class AuthResource {
 				}
 				
 				oUserVM.setLastWorkspace(oUser.getLastWorkspace());
-
-				WasdiLog.debugLog("AuthResource.login: access succeeded, sSessionId: "+oSession.getSessionId());
+				if (oKeycloakLoginResponse != null) {
+					oUserVM.setAccessToken(oKeycloakLoginResponse.optString("access_token", ""));
+					oUserVM.setRefreshToken(oKeycloakLoginResponse.optString("refresh_token", ""));
+					oUserVM.setExpiresIn(oKeycloakLoginResponse.optInt("expires_in", 0));
+					WasdiLog.debugLog("AuthResource.login: Keycloak access succeeded");
+				} else {
+					SessionRepository oSessionRepository = new SessionRepository();
+					UserSession oSession = oSessionRepository.insertUniqueSession(oUser.getUserId());
+					if(null==oSession || Utils.isNullOrEmpty(oSession.getSessionId())) {
+						WasdiLog.debugLog("AuthResource.login: could not insert session in DB, aborting");
+						return UserViewModel.getInvalid();
+					}
+					oUserVM.setSessionId(oSession.getSessionId());
+					WasdiLog.debugLog("AuthResource.login: legacy access succeeded, sSessionId: "+oSession.getSessionId());
+				}
 				
 				return oUserVM;
 			} else {
@@ -315,6 +317,72 @@ public class AuthResource {
 		}
 
 		return UserViewModel.getInvalid();
+	}
+
+	/**
+	 * Refresh a Keycloak access token without exposing the confidential-client secret.
+	 *
+	 * @param oRefreshRequest request containing a Keycloak refresh token
+	 * @return refreshed access and refresh tokens, or an invalid user view model
+	 */
+	@POST
+	@Path("/refresh")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "Refresh Keycloak tokens", description = "Exchanges a Keycloak refresh token for a new access-token pair using WASDI's confidential client credentials. Returns an invalid UserViewModel when the refresh token is expired or invalid.")
+	public UserViewModel refresh(RefreshTokenViewModel oRefreshRequest) {
+		try {
+			if (oRefreshRequest == null) {
+				return UserViewModel.getInvalid();
+			}
+
+			String sRefreshToken = oRefreshRequest.getRefreshToken();
+			String sAuthResult = KeycloakUtils.refreshToken(sRefreshToken);
+			JSONObject oKeycloakRefreshResponse = getKeycloakLoginResponse(sAuthResult);
+			if (oKeycloakRefreshResponse == null) {
+				return UserViewModel.getInvalid();
+			}
+
+			String sAccessToken = oKeycloakRefreshResponse.optString("access_token", "");
+			String sUserId = KeycloakUtils.validateJwtAndGetUserId(sAccessToken);
+			if (Utils.isNullOrEmpty(sUserId)) {
+				return UserViewModel.getInvalid();
+			}
+
+			User oUser = new UserRepository().getUser(sUserId);
+			if (oUser == null) {
+				return UserViewModel.getInvalid();
+			}
+
+			UserViewModel oUserVM = new UserViewModel();
+			oUserVM.setUserId(oUser.getUserId());
+			oUserVM.setAccessToken(sAccessToken);
+			oUserVM.setRefreshToken(oKeycloakRefreshResponse.optString("refresh_token", ""));
+			oUserVM.setExpiresIn(oKeycloakRefreshResponse.optInt("expires_in", 0));
+			return oUserVM;
+		} catch (Exception oEx) {
+			WasdiLog.warnLog("AuthResource.refresh: " + oEx);
+		}
+
+		return UserViewModel.getInvalid();
+	}
+
+	protected JSONObject getKeycloakLoginResponse(String sAuthResult) {
+		if (Utils.isNullOrEmpty(sAuthResult)) {
+			return null;
+		}
+
+		try {
+			JSONObject oAuthResponse = new JSONObject(sAuthResult);
+			String sAccessToken = oAuthResponse.optString("access_token", "");
+			String sRefreshToken = oAuthResponse.optString("refresh_token", "");
+			if (!Utils.isNullOrEmpty(sAccessToken) && !Utils.isNullOrEmpty(sRefreshToken)) {
+				return oAuthResponse;
+			}
+		} catch (Exception oE) {
+			WasdiLog.errorLog("AuthResource.getKeycloakLoginResponse: could not parse login response: " + oE);
+		}
+
+		return null;
 	}
 	
 	/**

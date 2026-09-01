@@ -118,18 +118,43 @@ public class KeycloakUtils {
 		sPayload += "&grant_type=password&username=" + sUser;
 		// Url Encoding of the password 
 		try{
-		sPayload += "&password=" + URLEncoder.encode(sPassword, StandardCharsets.UTF_8.toString());
+			sPayload += "&password=" + URLEncoder.encode(sPassword, StandardCharsets.UTF_8.toString());
 		}
 		catch (Exception e){
-		WasdiLog.debugLog("KeycloakService.login: Exception on encoding URL " + e.getMessage());	
+			WasdiLog.debugLog("KeycloakService.login: Exception on encoding URL " + e.getMessage());	
 		}
 		
 		Map<String, String> asHeaders = new HashMap<>();
 		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 		HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, asHeaders); 
 		String sAuthResult = oHttpCallResponse.getResponseBody();
-		WasdiLog.debugLog("KeycloakService.login: auth result: " + sAuthResult);
+		
 		return sAuthResult;
+	}
+
+	/**
+	 * Exchanges a Keycloak refresh token for a new token pair.
+	 *
+	 * @param sRefreshToken refresh token supplied by the client
+	 * @return Keycloak token response or an empty string in case of error
+	 */
+	public static String refreshToken(String sRefreshToken) {
+		if (Utils.isNullOrEmpty(sRefreshToken) || WasdiConfig.Current.keycloack == null) {
+			return "";
+		}
+
+		try {
+			String sPayload = "client_id=" + WasdiConfig.Current.keycloack.confidentialClient
+					+ "&client_secret=" + WasdiConfig.Current.keycloack.clientSecret
+					+ "&grant_type=refresh_token&refresh_token=" + URLEncoder.encode(sRefreshToken, StandardCharsets.UTF_8.toString());
+			Map<String, String> asHeaders = new HashMap<>();
+			asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+			return HttpUtils.httpPost(WasdiConfig.Current.keycloack.authTokenAddress, sPayload, asHeaders).getResponseBody();
+		} catch (Exception oEx) {
+			WasdiLog.warnLog("KeycloakUtils.refreshToken: " + oEx);
+		}
+
+		return "";
 	}
 	
 	
