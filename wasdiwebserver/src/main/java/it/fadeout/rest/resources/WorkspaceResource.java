@@ -510,6 +510,7 @@ public class WorkspaceResource {
 			oWorkspace.setName(sName);
 			oWorkspace.setUserId(oWorkspaceEditorViewModel.getUserId());
 			oWorkspace.setWorkspaceId(oWorkspaceEditorViewModel.getWorkspaceId());
+			oWorkspace.setPublic(oWorkspaceEditorViewModel.isPublic());
 			
 			if (oExistingWorkspace != null) {
 				oWorkspace.setStorageSize(oExistingWorkspace.getStorageSize());
