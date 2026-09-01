@@ -38,6 +38,10 @@
         <sVersionSMOSTbx>14.0.0</sVersionSMOSTbx>
         <sVersionSshj>0.40.0</sVersionSshj>
         <sVersionLogback>1.5.33</sVersionLogback>
+        <!-- SNAP's snap-engine-kit still pulls the old 1.3.3.2-SNAP imageio-ext fork (via ceres-jai),
+             which wins dependency mediation over the 1.4.7 line required by gt-geotiff's cog stack.
+             This mismatch breaks the CogImageInputStreamSpi ServiceLoader instantiation at runtime. -->
+        <sVersionImageioExt>1.4.7</sVersionImageioExt>
     </properties>
 
     <build>
@@ -141,6 +145,33 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Force a single, consistent imageio-ext version across SNAP and geotools/cog,
+                 instead of letting the old SNAP fork (1.3.3.2-SNAP) win dependency mediation. -->
+            <dependency>
+                <groupId>it.geosolutions.imageio-ext</groupId>
+                <artifactId>imageio-ext-tiff</artifactId>
+                <version>${sVersionImageioExt}</version>
+            </dependency>
+            <dependency>
+                <groupId>it.geosolutions.imageio-ext</groupId>
+                <artifactId>imageio-ext-utilities</artifactId>
+                <version>${sVersionImageioExt}</version>
+            </dependency>
+            <dependency>
+                <groupId>it.geosolutions.imageio-ext</groupId>
+                <artifactId>imageio-ext-geocore</artifactId>
+                <version>${sVersionImageioExt}</version>
+            </dependency>
+            <dependency>
+                <groupId>it.geosolutions.imageio-ext</groupId>
+                <artifactId>imageio-ext-streams</artifactId>
+                <version>${sVersionImageioExt}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- Utilities & External Libraries -->
