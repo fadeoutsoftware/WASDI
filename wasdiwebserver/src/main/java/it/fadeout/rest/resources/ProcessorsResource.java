@@ -41,6 +41,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -151,7 +152,7 @@ public class ProcessorsResource  {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces({"application/json", "application/xml", "text/xml" })
 	@Operation(summary = "Upload processor", description="Uploads and deploys a new processor/application with multipart file upload. Validates processor name, type, and parameters. Returns processor ID. Auto-deploys to main node asynchronously.")
-	public PrimitiveResult uploadProcessor( @FormDataParam("file") InputStream oInputStreamForFile, @Context ContainerRequestContext oRequestContext, 
+	public PrimitiveResult uploadProcessor( @FormDataParam("file") FormDataBodyPart oProcessorFilePart, @Context ContainerRequestContext oRequestContext, 
 											@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName,
 											@QueryParam("version") String sVersion,	@QueryParam("description") String sDescription,
 											@QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample,
@@ -176,6 +177,7 @@ public class ProcessorsResource  {
 		}
 
 		try {
+			InputStream oInputStreamForFile = oProcessorFilePart != null ? oProcessorFilePart.getEntityAs(InputStream.class) : null;
 			boolean bHasUploadSource = oInputStreamForFile != null;
 			boolean bHasGitSource = !bHasUploadSource && !Utils.isNullOrEmpty(sGitRepositoryUrl);
 			if (!bHasUploadSource && !bHasGitSource) {
