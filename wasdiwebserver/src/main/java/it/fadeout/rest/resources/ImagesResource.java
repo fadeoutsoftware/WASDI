@@ -10,11 +10,12 @@ import java.io.OutputStream;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -24,6 +25,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.processors.Processor;
@@ -71,14 +73,15 @@ public class ImagesResource {
 	@POST
 	@Path("/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Operation(summary = "Upload an image", description="Uploads an image file to a specified collection and folder. Supports optional image resizing and thumbnail generation. Returns the image location URL if successful.")
 	public Response uploadImage(@FormDataParam("image") InputStream oInputFileStream, @FormDataParam("image") FormDataContentDisposition oFileMetaData,
-										@HeaderParam("x-session-token") String sSessionId, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName,
+										@Context ContainerRequestContext oRequestContext, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName,
 										@QueryParam("resize") Boolean obResize, @QueryParam("thumbnail") Boolean obThumbnail) {
 		
 		try {
 			WasdiLog.debugLog("ImagesResource.uploadImage( collection: " + sCollection + " sImageName: " + sImageName +")");
 			
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ImagesResource.uploadImage: invalid user or session");
@@ -248,9 +251,11 @@ public class ImagesResource {
 	 */
 	@GET
 	@Path("/get")
-	public Response getImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName) {
+	@Operation(summary = "Get image by name", description="Retrieves an image from a collection/folder by name. Supports authentication via either x-session-token header or token query parameter. Returns the image as a byte stream.")
+	public Response getImage(@Context ContainerRequestContext oRequestContext, @QueryParam("token") String sTokenSessionId, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName) {
 		
 		try {
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 			
 			// Check session
 			if( Utils.isNullOrEmpty(sSessionId) == false) {
@@ -358,11 +363,12 @@ public class ImagesResource {
 	 */
 	@DELETE
 	@Path("/delete")
-	public Response deleteImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName) {
+	@Operation(summary = "Delete an image", description="Deletes an image from a collection/folder. User must own the image or have authorization. Returns standard HTTP response status.")
+	public Response deleteImage(@Context ContainerRequestContext oRequestContext, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName) {
 		
 		WasdiLog.debugLog("ImagesResource.deleteImage( Collection: " + sCollection + ", Image Name: " + sImageName + " )");
 		
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser==null) {
 			WasdiLog.warnLog("ImagesResource.deleteImage: user or session invalid");
@@ -431,13 +437,15 @@ public class ImagesResource {
 	@POST
 	@Path("/processors/logo/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Operation(summary = "Upload processor logo", description="Uploads and sets a logo image for a processor. The image is auto-resized and a thumbnail is generated. The logo link is stored in the processor record.")
 	public Response uploadProcessorLogo(@FormDataParam("image") InputStream oInputFileStream, @FormDataParam("image") FormDataContentDisposition oFileMetaData,
-										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+										@Context ContainerRequestContext oRequestContext, @QueryParam("processorId") String sProcessorId ) {
 		
 		try {
 			WasdiLog.debugLog("ImagesResource.uploadProcessorLogo( ProcId: " + sProcessorId + ")");
 			
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("ImagesResource.uploadProcessorLogo: invalid user or session");
@@ -467,7 +475,7 @@ public class ImagesResource {
 				sFileName += "."+ FilenameUtils.getExtension(sInputFileName);
 			} 
 			
-			Response oResponse = uploadImage(oInputFileStream, oFileMetaData, sSessionId, "processors", oProcessor.getName(), sFileName, true, true);
+			Response oResponse = uploadImage(oInputFileStream, oFileMetaData, oRequestContext, "processors", oProcessor.getName(), sFileName, true, true);
 			
 			if (oResponse.getStatus()==200) {
 				oProcessor.setLogo(ImageResourceUtils.getImageLink(ImagesCollections.PROCESSORS.getFolder(), oProcessor.getName(), sFileName));
@@ -497,12 +505,14 @@ public class ImagesResource {
 	@POST
 	@Path("/processors/gallery/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Operation(summary = "Upload processor gallery image", description="Uploads a gallery/marketing image for a processor. Multiple images can be uploaded to build a processor gallery. All images are stored in the processor's folder.")
 	public Response uploadProcessorImage(@FormDataParam("image") InputStream oFileInputStream, @FormDataParam("image") FormDataContentDisposition oFileMetaData,
-										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+										@Context ContainerRequestContext oRequestContext, @QueryParam("processorId") String sProcessorId ) {
 		
 		WasdiLog.debugLog("ImagesResource.uploadProcessorImage( ProcId: " + sProcessorId + " )");
 		
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 		if (oUser==null) {
 			WasdiLog.warnLog("ImagesResource.uploadProcessorImage: user or session invalid");
@@ -541,7 +551,7 @@ public class ImagesResource {
 	    	return Response.status(Status.BAD_REQUEST).build();
 		}
 		
-		Response oResponse = uploadImage(oFileInputStream, oFileMetaData, sSessionId, "processors", oProcessor.getName(), sAvaibleFileName, null, true);
+		Response oResponse = uploadImage(oFileInputStream, oFileMetaData, oRequestContext, "processors", oProcessor.getName(), sAvaibleFileName, null, true);
 		
 		if (oResponse.getStatus() == 200) {
 			String sImageLink = ImageResourceUtils.getImageLink(ImagesCollections.PROCESSORS.getFolder(), oProcessor.getName(), sAvaibleFileName);
@@ -564,9 +574,11 @@ public class ImagesResource {
 	 */
 	@GET
 	@Path("/exists")
-	public Response existsImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName) {
+	@Operation(summary = "Check if image exists", description="Checks whether an image with a given name exists in a collection/folder. Useful for UI validation before upload operations. Returns a boolean result.")
+	public Response existsImage(@Context ContainerRequestContext oRequestContext, @QueryParam("token") String sTokenSessionId, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName) {
 		
 		try {
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 			
 			// Check session
 			if( Utils.isNullOrEmpty(sSessionId) == false) {

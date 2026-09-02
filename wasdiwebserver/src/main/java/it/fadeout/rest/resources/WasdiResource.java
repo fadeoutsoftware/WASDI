@@ -1,12 +1,13 @@
 package it.fadeout.rest.resources;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 
-import it.fadeout.Wasdi;
+import io.swagger.v3.oas.annotations.Operation;
 import wasdi.shared.business.users.User;
 import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.Utils;
@@ -34,6 +35,7 @@ public class WasdiResource {
 	@GET
 	@Path("/hello")
 	@Produces({ "application/xml", "application/json", "text/xml" })
+	@Operation(summary = "Check service availability", description = "Returns a simple greeting used to verify that the WASDI REST service is available.")
 	public PrimitiveResult hello() {
 		WasdiLog.debugLog("WasdiResource.hello");
 		PrimitiveResult oResult = new PrimitiveResult();
@@ -48,10 +50,13 @@ public class WasdiResource {
 	@POST
 	@Path("/feedback")
 	@Produces({ "application/json", "text/xml" })
-	public PrimitiveResult feedback(@HeaderParam("x-session-token") String sSessionId, FeedbackViewModel oFeedback) {
+	@Operation(summary = "Send user feedback", description = "Sends an authenticated user's feedback message by email after validating that its title and message are present.")
+	public PrimitiveResult feedback(@Context ContainerRequestContext oRequestContext, FeedbackViewModel oFeedback) {
 		WasdiLog.debugLog("WasdiResource.feedback");
 
 		PrimitiveResult oPrimitiveResult = new PrimitiveResult();
+		
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 		if (Utils.isNullOrEmpty(sSessionId)) {
 			WasdiLog.warnLog("WasdiResource.feedback: invalid session");
@@ -67,7 +72,7 @@ public class WasdiResource {
 			return oPrimitiveResult;
 		}
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
 			oPrimitiveResult.setIntValue(401);

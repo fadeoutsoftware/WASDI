@@ -21,6 +21,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.gis.GdalFileFormats;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -156,7 +157,7 @@ public class Sentinel1ProductReader extends WasdiProductReader {
             ArrayList<String> asArgs = new ArrayList<String>();
             asArgs.add(sGdalCommand);
             asArgs.add("-of");
-            asArgs.add("GTiff");
+            asArgs.add(GdalFileFormats.GTiff);
             asArgs.add(oSource.sDatasetPath);
             asArgs.add(sOutputPath);
 

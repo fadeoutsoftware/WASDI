@@ -11,16 +11,17 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import it.fadeout.Wasdi;
+import io.swagger.v3.oas.annotations.Operation;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorParametersTemplate;
 import wasdi.shared.business.users.ResourceTypes;
@@ -67,7 +68,8 @@ public class ProcessorParametersTemplateResource {
 	@DELETE
 	@Path("/delete")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response deleteProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId,
+	@Operation(summary = "Delete parameter template", description="Deletes a processor parameter template. If the calling user is the owner, the template and all associated permissions are removed. If shared user, only their access is revoked.")
+	public Response deleteProcessorParametersTemplate(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("templateId") String sTemplateId) {
 
 		try {
@@ -78,7 +80,7 @@ public class ProcessorParametersTemplateResource {
 
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.deleteProcessorParametersTemplate(sProcessorId: " + sTemplateId + ")");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Check the user session
 		if (oUser == null) {
@@ -136,11 +138,12 @@ public class ProcessorParametersTemplateResource {
 	@POST
 	@Path("/update")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response updateProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId, ProcessorParametersTemplateDetailViewModel oDetailViewModel) {
+	@Operation(summary = "Update parameter template", description="Updates the name, description, and parameter values of an existing processor parameter template. User must have write permissions.")
+	public Response updateProcessorParametersTemplate(@Context ContainerRequestContext oRequestContext, ProcessorParametersTemplateDetailViewModel oDetailViewModel) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.updateProcessorParametersTemplate");
 
 		// Check the user session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oUser == null) {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.updateProcessorParametersTemplate: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
@@ -183,11 +186,12 @@ public class ProcessorParametersTemplateResource {
 	@POST
 	@Path("/add")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response addProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId, ProcessorParametersTemplateDetailViewModel oDetailViewModel) {
+	@Operation(summary = "Create parameter template", description="Creates a new processor parameter template with predefined values for a specific processor. The calling user becomes the template owner.")
+	public Response addProcessorParametersTemplate(@Context ContainerRequestContext oRequestContext, ProcessorParametersTemplateDetailViewModel oDetailViewModel) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate");
 
 		// Check the user session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		if (oUser == null) {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: invalid user");
@@ -250,11 +254,12 @@ public class ProcessorParametersTemplateResource {
 	@GET
 	@Path("/get")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response getProcessorParameterTemplateById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("templateId") String sTemplateId) {
+	@Operation(summary = "Get parameter template details", description="Returns the full details of a specific parameter template by ID, including all parameter values and metadata. User must have access to the template.")
+	public Response getProcessorParameterTemplateById(@Context ContainerRequestContext oRequestContext, @QueryParam("templateId") String sTemplateId) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.getProcessorParametersTemplateById");
 
 		// Check the user session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oUser == null) {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.getProcessorParametersTemplateById: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
@@ -298,11 +303,12 @@ public class ProcessorParametersTemplateResource {
 	@GET
 	@Path("/getlist")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response getProcessorParametersTemplatesListByProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
+	@Operation(summary = "List processor parameter templates", description="Returns all parameter templates available for a specific processor, including owned and shared templates. Includes readOnly flag for each template.")
+	public Response getProcessorParametersTemplatesListByProcessor(@Context ContainerRequestContext oRequestContext, @QueryParam("processorId") String sProcessorId) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.getProcessorParametersTemplatesListByProcessor");
 
 		// Check the user session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oUser == null) {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.getProcessorParametersTemplatesListByProcessor: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
@@ -368,7 +374,8 @@ public class ProcessorParametersTemplateResource {
 	@PUT
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult shareProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId,
+	@Operation(summary = "Share parameter template with user", description="Grants a user access to a parameter template with specified rights (READ or WRITE). Sends notification email. Cannot share with self (unless admin) or owner.")
+	public PrimitiveResult shareProcessorParametersTemplate(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("processorParametersTemplate") String sProcessorParametersTemplateId, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
 
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate( Template Id: " + sProcessorParametersTemplateId + ", User: " + sDestinationUserId + " )");
@@ -377,7 +384,7 @@ public class ProcessorParametersTemplateResource {
 		oResult.setBoolValue(false);
 
 		// Validate Session
-		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequesterUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oRequesterUser == null) {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: invalid session");
 
@@ -515,7 +522,8 @@ public class ProcessorParametersTemplateResource {
 	@GET
 	@Path("share/byprocessorParametersTemplate")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<ProcessorParametersTemplateSharingViewModel> getEnabledUsersSharedProcTemplates(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorParametersTemplate") String sProcessorParametersTemplateId) {
+	@Operation(summary = "Get users with template access", description="Returns a list of all users who have been granted access to a parameter template, including their user IDs and permission levels.")
+	public List<ProcessorParametersTemplateSharingViewModel> getEnabledUsersSharedProcTemplates(@Context ContainerRequestContext oRequestContext, @QueryParam("processorParametersTemplate") String sProcessorParametersTemplateId) {
 
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.getEnabledUsersSharedProcTemplates( WS: " + sProcessorParametersTemplateId + " )");
 
@@ -523,7 +531,7 @@ public class ProcessorParametersTemplateResource {
 		List<UserResourcePermission> aoProcessorParametersTemplateSharing = null;
 		List<ProcessorParametersTemplateSharingViewModel> aoProcessorParametersTemplateSharingViewModels = new ArrayList<>();
 
-		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+		User oOwnerUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oOwnerUser == null) {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.getEnabledUsersSharedProcTemplates: invalid session");
 			return aoProcessorParametersTemplateSharingViewModels;
@@ -570,14 +578,15 @@ public class ProcessorParametersTemplateResource {
 	@DELETE
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult deleteUserSharedProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId,
+	@Operation(summary = "Revoke template access from user", description="Removes a user's access to a shared parameter template. Only template owner or users with write permissions can revoke sharing.")
+	public PrimitiveResult deleteUserSharedProcessorParametersTemplate(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("processorParametersTemplate") String sProcessorParametersTemplateId, @QueryParam("userId") String sUserId) {
 
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.deleteUserSharedProcessorParametersTemplate( WS: " + sProcessorParametersTemplateId + ", User:" + sUserId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		// Validate Session
-		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequestingUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oRequestingUser == null) {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.deleteUserSharedProcessorParametersTemplate: invalid session");

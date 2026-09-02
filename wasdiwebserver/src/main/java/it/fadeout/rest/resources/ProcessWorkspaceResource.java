@@ -11,11 +11,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -24,6 +25,7 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import it.fadeout.services.ProcessWorkspaceService;
 import wasdi.shared.LauncherOperations;
@@ -38,6 +40,7 @@ import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.NodeRepository;
+import wasdi.shared.data.OgcProcessesTaskRepository;
 import wasdi.shared.data.ParametersRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
@@ -105,7 +108,8 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/byws")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public ArrayList<ProcessWorkspaceViewModel> getProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId,
+	@Operation(summary = "Get processes by workspace", description = "Returns process workspaces for a workspace, with optional status, operation type, name, date range, and pagination filters.")
+	public ArrayList<ProcessWorkspaceViewModel> getProcessByWorkspace(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("workspace") String sWorkspaceId, @QueryParam("status") String sStatus,
 			@QueryParam("operationType") String sOperationType,
 			@QueryParam("namePattern") String sNamePattern,
@@ -125,7 +129,7 @@ public class ProcessWorkspaceResource {
 				return aoProcessList;
 			}
 			
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			if (oUser == null) {
 				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessByWorkspace: invalid session");
 				return aoProcessList;
@@ -195,7 +199,8 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/byusr")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<ProcessWorkspaceViewModel> getProcessByUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("ogc") Boolean bOgcOnly) {
+	@Operation(summary = "Get processes by user", description = "Returns process workspaces for the authenticated user. The optional ogc flag restricts results to OGC processes.")
+	public ArrayList<ProcessWorkspaceViewModel> getProcessByUser(@Context ContainerRequestContext oRequestContext, @QueryParam("ogc") Boolean bOgcOnly) {
 		
 		WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByUser");
 		
@@ -203,7 +208,7 @@ public class ProcessWorkspaceResource {
 
 		try {
 			// Domain Check
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			if(null == oUser) {
 				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessByUser: invalid session");
 				return aoProcessList;
@@ -218,20 +223,27 @@ public class ProcessWorkspaceResource {
 
 			// Get Process List
 			List<ProcessWorkspace> aoProcess = null;
+			
+			// Get Process List
+			aoProcess = oRepository.getProcessByUser(oUser.getUserId());				
+			
+			List<String> asOgcTasks = null;
 
 			if (bOgc) {
-				// Get Process List
-				aoProcess = oRepository.getOGCProcessByUser(oUser.getUserId());				
-			}
-			else {
-				// Get Process List
-				aoProcess = oRepository.getProcessByUser(oUser.getUserId());				
+				OgcProcessesTaskRepository oOgcProcessesTaskRepository = new OgcProcessesTaskRepository();
+				asOgcTasks = oOgcProcessesTaskRepository.getProcessWsIds(oUser.getUserId());				
 			}
 
 			// For each
 			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
 				// Create View Model
 				ProcessWorkspace oProcess = aoProcess.get(iProcess);
+				
+				// If we are filtering OGC processes, check if this specific proc ws is marked as ogc
+				if (asOgcTasks != null && bOgc) {
+					if (asOgcTasks.contains(oProcess.getProcessObjId()) == false) continue;
+				}
+				
 				aoProcessList.add(ProcessWorkspaceViewModel.buildProcessWorkspaceViewModel(oProcess));
 			}
 		}
@@ -255,8 +267,9 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/byapp")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "Get processor execution history", description = "Returns process history for a processor and the authenticated user, merging results from active compute nodes when called on the main node.")
 	public ArrayList<ProcessHistoryViewModel> getProcessByApplication(
-			@HeaderParam("x-session-token") String sSessionId,
+			@Context ContainerRequestContext oRequestContext,
 			@QueryParam("processorName") String sProcessorName) {
 		
 		ArrayList<ProcessHistoryViewModel> aoProcessList = new ArrayList<ProcessHistoryViewModel>();
@@ -264,11 +277,13 @@ public class ProcessWorkspaceResource {
 		try {
 			WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication  sProcessorName=" + sProcessorName);
 			
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
+			
 			if(null == oUser) {
 				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessByApplication: invalid session");
 				return aoProcessList;
-			}			
+			}
 			
 			// Domain Check
 			if(Utils.isNullOrEmpty(sProcessorName)) {
@@ -398,16 +413,18 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/appstats")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public AppStatsViewModel getApplicationStatistics(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorName") String sProcessorName) {
+	@Operation(summary = "Get processor run statistics", description = "Returns aggregated run statistics for a processor, merging statistics from active compute nodes when called on the main node.")
+	public AppStatsViewModel getApplicationStatistics(@Context ContainerRequestContext oRequestContext, @QueryParam("processorName") String sProcessorName) {
 		
 		AppStatsViewModel oReturnStats = new AppStatsViewModel();
 		oReturnStats.setApplicationName(sProcessorName);
 		
 		try {			
 			
-			WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics( Session: " + sSessionId + ", processorName: " + sProcessorName + " )");
+			WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics(  processorName: " + sProcessorName + " )");
 			
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 			
 			if(oUser == null) {
 				WasdiLog.warnLog("ProcessWorkspaceResource.getApplicationStatistics: invalid session");
@@ -543,10 +560,11 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/lastbyws")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<ProcessWorkspaceViewModel> getLastProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId) {
+	@Operation(summary = "Get latest workspace processes", description = "Returns the latest process workspaces for the specified workspace, up to the repository-defined limit.")
+	public ArrayList<ProcessWorkspaceViewModel> getLastProcessByWorkspace(@Context ContainerRequestContext oRequestContext, @QueryParam("workspace") String sWorkspaceId) {
 		
 		WasdiLog.debugLog("ProcessWorkspaceRepository.getLastProcessByWorkspace( WS: " + sWorkspaceId + " )");
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
 
@@ -598,11 +616,12 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/lastbyusr")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<ProcessWorkspaceViewModel> getLastProcessByUser(@HeaderParam("x-session-token") String sSessionId) {
+	@Operation(summary = "Get latest user processes", description = "Returns the latest process workspaces for the authenticated user, up to the repository-defined limit.")
+	public ArrayList<ProcessWorkspaceViewModel> getLastProcessByUser(@Context ContainerRequestContext oRequestContext) {
 		
 		WasdiLog.debugLog("ProcessWorkspaceResource.getLastProcessByUser");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
 
@@ -645,14 +664,15 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/summary")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ProcessWorkspaceSummaryViewModel getSummary(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId) {
+	@Operation(summary = "Get process summary", description = "Returns waiting and running process counters for the authenticated user and overall totals, optionally filtered by workspace.")
+	public ProcessWorkspaceSummaryViewModel getSummary(@Context ContainerRequestContext oRequestContext, @QueryParam("workspace") String sWorkspaceId) {
 		
 		WasdiLog.debugLog("ProcessWorkspaceResource.getSummary");
 		ProcessWorkspaceSummaryViewModel oSummaryViewModel = new ProcessWorkspaceSummaryViewModel();
 
 		try {
 			
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			// Domain Check
 			if (oUser == null) {
@@ -692,12 +712,15 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/delete")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response deleteProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("procws") String sToKillProcessObjId, @QueryParam("treeKill") Boolean bKillTheEntireTree) {
+	@Operation(summary = "Stop a process", description = "Stops a process workspace through the process service and can optionally terminate its complete process tree.")
+	public Response deleteProcess(@Context ContainerRequestContext oRequestContext, @QueryParam("procws") String sToKillProcessObjId, @QueryParam("treeKill") Boolean bKillTheEntireTree) {
 
 		WasdiLog.debugLog("ProcessWorkspaceResource.deleteProcess( Process: " + sToKillProcessObjId + ", treeKill: " + bKillTheEntireTree + " )");
 
 		try {
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
+			
 			// Domain Check
 			if (oUser == null) {
 				WasdiLog.warnLog("ProcessWorkspaceResource.deleteProcess: invalid session");
@@ -751,11 +774,12 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/byid")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ProcessWorkspaceViewModel getProcessById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("procws") String sProcessWorkspaceId) {
+	@Operation(summary = "Get process by identifier", description = "Returns one process workspace by process object identifier. Invalid, inaccessible, or failed lookups return a model with ERROR status.")
+	public ProcessWorkspaceViewModel getProcessById(@Context ContainerRequestContext oRequestContext, @QueryParam("procws") String sProcessWorkspaceId) {
 		
 		WasdiLog.debugLog("ProcessWorkspaceResource.getProcessById( ProcWsId: " + sProcessWorkspaceId + " )");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		ProcessWorkspaceViewModel oProcess = new ProcessWorkspaceViewModel();
 		
@@ -800,11 +824,12 @@ public class ProcessWorkspaceResource {
 	@POST
 	@Path("/statusbyid")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<String> getStatusProcessesById(@HeaderParam("x-session-token") String sSessionId, ArrayList<String> asProcessesWorkspaceId) {
+	@Operation(summary = "Get multiple process statuses", description = "Returns statuses for the process identifiers supplied in the request body, preserving input order and using ERROR for invalid or unreachable entries.")
+	public ArrayList<String> getStatusProcessesById(@Context ContainerRequestContext oRequestContext, ArrayList<String> asProcessesWorkspaceId) {
 				
 		WasdiLog.debugLog("ProcessWorkspaceResource.getStatusProcessesById");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		ArrayList<String> asReturnStatusList = new ArrayList<String>();
 		ArrayList<String> asFullReturnStatusList = new ArrayList<String>();
@@ -882,10 +907,11 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/getstatusbyid")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public String getProcessStatusById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("procws") String sProcessObjId) {
+	@Operation(summary = "Get process status", description = "Returns the status of one process workspace, or ERROR when the session, identifier, access check, or lookup is invalid.")
+	public String getProcessStatusById(@Context ContainerRequestContext oRequestContext, @QueryParam("procws") String sProcessObjId) {
 		WasdiLog.debugLog("ProcessWorkspaceResource.getProcessStatusById(" + sProcessObjId + " )" );
 		try {
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			
 			if(null == oUser) {
 				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessStatusById: invalid session" );
@@ -929,13 +955,14 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/updatebyid")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ProcessWorkspaceViewModel updateProcessById(@HeaderParam("x-session-token") String sSessionId,
+	@Operation(summary = "Update process status", description = "Updates a process status and optional progress percentage, with optional RabbitMQ notification, and returns the updated process workspace.")
+	public ProcessWorkspaceViewModel updateProcessById(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("procws") String sProcessObjId, @QueryParam("status") String sNewStatus,
 			@QueryParam("perc") int iPerc, @QueryParam("sendrabbit") String sSendToRabbit) {
 		
 		WasdiLog.debugLog("ProcessWorkspaceResource.updateProcessById( ProcWsId: " + sProcessObjId + ", Status: " + sNewStatus + ", Perc: " + iPerc + ", SendRabbit:" + sSendToRabbit + " )" );
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		ProcessWorkspaceViewModel oProcess = new ProcessWorkspaceViewModel();
 
@@ -1026,8 +1053,11 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/setpayload")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ProcessWorkspaceViewModel setProcessPayloadGET(@HeaderParam("x-session-token") String sSessionId,
+	@Operation(summary = "Set process payload", description = "Sets the payload of a process workspace using query parameters and returns the updated process workspace.")
+	public ProcessWorkspaceViewModel setProcessPayloadGET(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("procws") String sProcessObjId, @QueryParam("payload") String sPayload) {
+		
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 		return internalSetPaylod(sSessionId, sProcessObjId, sPayload);
 	}
 	
@@ -1041,8 +1071,11 @@ public class ProcessWorkspaceResource {
 	@POST
 	@Path("/setpayload")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ProcessWorkspaceViewModel setProcessPayloadPOST(@HeaderParam("x-session-token") String sSessionId,
+	@Operation(summary = "Set process payload from body", description = "Sets the payload of a process workspace from the request body and returns the updated process workspace.")
+	public ProcessWorkspaceViewModel setProcessPayloadPOST(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("procws") String sProcessObjId, String sPayload) {
+		
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 		return internalSetPaylod(sSessionId, sProcessObjId, sPayload);
 	}	
 	
@@ -1105,11 +1138,12 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/setsubpid")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ProcessWorkspaceViewModel setSubProcessPid(@HeaderParam("x-session-token") String sSessionId, @QueryParam("procws") String sProcessObjId, @QueryParam("subpid") int iSubPid) {
+	@Operation(summary = "Set subprocess identifier", description = "Sets the subprocess operating-system identifier for a process workspace and returns the updated process workspace.")
+	public ProcessWorkspaceViewModel setSubProcessPid(@Context ContainerRequestContext oRequestContext, @QueryParam("procws") String sProcessObjId, @QueryParam("subpid") int iSubPid) {
 		
 		WasdiLog.debugLog("ProcessWorkspaceResource.setSubProcessPid( ProcWsId: " + sProcessObjId +", SubPid: " + iSubPid + " )" );
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		ProcessWorkspaceViewModel oProcess = new ProcessWorkspaceViewModel();
 
@@ -1158,12 +1192,13 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/payload")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public String getPayload(@HeaderParam("x-session-token") String sSessionId, @QueryParam("procws") String sProcessObjId) {
+	@Operation(summary = "Get process payload", description = "Returns the payload stored for a process workspace, or null when the request is unauthorized, invalid, or fails.")
+	public String getPayload(@Context ContainerRequestContext oRequestContext, @QueryParam("procws") String sProcessObjId) {
 
 		WasdiLog.debugLog("ProcessWorkspaceResource.getPayload(" + sProcessObjId + " )" );
 
 		try {
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			
 			if(null == oUser) {
 				WasdiLog.warnLog("ProcessWorkspaceResource.getPayload: invalid session" );
@@ -1188,7 +1223,8 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/runningTime/UI")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Long getRunningTimeByUserAndInterval(@HeaderParam("x-session-token") String sSessionId, 
+	@Operation(summary = "Get user running time", description = "Returns processing time in milliseconds for a user in a date interval. Administrators may query other users; results are merged across compute nodes.")
+	public Long getRunningTimeByUserAndInterval(@Context ContainerRequestContext oRequestContext, 
 			@QueryParam("userId") String sTargetUserId,
 			@QueryParam("dateFrom") String sDateFrom, @QueryParam("dateTo") String sDateTo) {
 
@@ -1196,7 +1232,8 @@ public class ProcessWorkspaceResource {
 
 		Long lRunningTime = null;
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProcessWorkspaceResource.getRunningTimeByUserAndInterval: invalid session");
@@ -1283,13 +1320,15 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/runningTime/SP")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Map<String, Map<String, Long>> getRunningTimeBySubscriptionAndProject(@HeaderParam("x-session-token") String sSessionId) {
+	@Operation(summary = "Get project running times", description = "Returns processing time grouped by subscription and project for subscriptions available to the authenticated user, merging results across nodes.")
+	public Map<String, Map<String, Long>> getRunningTimeBySubscriptionAndProject(@Context ContainerRequestContext oRequestContext) {
 
 		WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject");
 
 		Map<String, Map<String, Long>> aoRunningTimeBySubscriptionByProject = new HashMap<String, Map<String,Long>>();
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: invalid session");
@@ -1385,7 +1424,8 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/runningtimeproject")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response getOverallRunningTimeProject(@HeaderParam("x-session-token") String sSessionId) {
+	@Operation(summary = "Get overall project computing time", description = "Returns computing time for all users, grouped by projects in subscriptions available to the authenticated user.")
+	public Response getOverallRunningTimeProject(@Context ContainerRequestContext oRequestContext) {
 
 		WasdiLog.debugLog("ProcessWorkspaceResource.getOverallRunningTimeProject");
 
@@ -1396,7 +1436,8 @@ public class ProcessWorkspaceResource {
 
 		try {
 			
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 			
 
 			if (oUser == null) {
@@ -1487,7 +1528,8 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/runningtimeproject/byuser")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response getProjectRunningTimeByUser(@HeaderParam("x-session-token") String sSessionId) {
+	@Operation(summary = "Get user project computing time", description = "Returns computing time for the authenticated user, grouped by subscription and project.")
+	public Response getProjectRunningTimeByUser(@Context ContainerRequestContext oRequestContext) {
 
 		WasdiLog.debugLog("ProcessWorkspaceResource.getProjectRunningTimeByUser");
 
@@ -1496,7 +1538,8 @@ public class ProcessWorkspaceResource {
 		
 		try {
 			
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 			if (oUser == null) {
 				WasdiLog.warnLog("ProcessWorkspaceResource.getProjectRunningTimeByUser: invalid session");
@@ -1582,11 +1625,12 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/paramsbyid")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response getProcessParameters(@HeaderParam("x-session-token") String sSessionId, @QueryParam("procws") String sProcessWorkspaceId) {
+	@Operation(summary = "Get process parameters", description = "Returns the stored JSON parameters for a process workspace when its underlying parameter record is a processor parameter.")
+	public Response getProcessParameters(@Context ContainerRequestContext oRequestContext, @QueryParam("procws") String sProcessWorkspaceId) {
 		
 		WasdiLog.debugLog("ProcessWorkspaceResource.getProcessParameters( ProcWsId: " + sProcessWorkspaceId + " )");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		ProcessWorkspaceViewModel oProcess = new ProcessWorkspaceViewModel();
 		
@@ -1851,23 +1895,27 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/queuesStatus")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public List<ProcessWorkspaceAggregatedViewModel> getQueuesStatus(@HeaderParam("x-session-token") String sSessionId,
+	@Operation(summary = "Get scheduler queue status", description = "Returns queue counts aggregated by operation type, subtype, and status for the local node or an optionally selected remote node.")
+	public List<ProcessWorkspaceAggregatedViewModel> getQueuesStatus(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("nodeCode") String sNodeCode,
 			@QueryParam("statuses") String sStatuses) {
 		WasdiLog.debugLog("ProcessWorkspaceResource.getQueuesStatus");
 		
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 		return ProcessWorkspaceResource.getNodeQueuesStatus(sSessionId, sNodeCode, sStatuses);
 	}
 
 	@GET
 	@Path("/nodesByScore")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public List<NodeScoreByProcessWorkspaceViewModel> getNodesSortedByScore(@HeaderParam("x-session-token") String sSessionId) {
+	@Operation(summary = "Get nodes by scheduler score", description = "Returns nodes sorted by process-workspace resource pressure score. This endpoint is restricted to administrators.")
+	public List<NodeScoreByProcessWorkspaceViewModel> getNodesSortedByScore(@Context ContainerRequestContext oRequestContext) {
 		WasdiLog.debugLog("ProcessWorkspaceResource.getNodesSortedByScore");
 
 		List<NodeScoreByProcessWorkspaceViewModel> aoViewModels = new ArrayList<>();
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProcessWorkspaceResource.getNodesSortedByScore: invalid session");

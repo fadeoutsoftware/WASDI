@@ -10,7 +10,8 @@ public enum ResourceTypes {
 	PARAMETER("processorparameterstemplate"),
 	NODE("node"),
 	VOLUME("volume"),
-	MISSION("mission");
+	MISSION("mission"),
+	LABELLINGDATASET("labellingdataset");
 
 	private final String resourceType;
 

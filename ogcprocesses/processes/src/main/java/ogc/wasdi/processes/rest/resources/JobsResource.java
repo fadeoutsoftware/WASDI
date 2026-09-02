@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -21,17 +22,14 @@ import javax.ws.rs.core.Response.Status;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import ogc.wasdi.processes.OgcProcesses;
-import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.OgcProcessesTask;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.processors.*;
-import wasdi.shared.business.users.*;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.users.User;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.DownloadedFilesRepository;
-import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.OgcProcessesTaskRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -54,6 +52,8 @@ import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
 @Path("jobs")
 public class JobsResource {
 	
+	// Cache of processor name -> processor id, thread safe for concurrent requests
+	protected Map<String, String> m_oProcessorIdCache = new ConcurrentHashMap<>();
 
 	/**
 	 * Get a list of the OGC jobs for this user.
@@ -118,7 +118,7 @@ public class JobsResource {
 					String sResponse = oHttpCallResponse.getResponseBody();
 					
 					if (Utils.isNullOrEmpty(sResponse)==false) {
-						ArrayList<ProcessWorkspaceViewModel> aoProcWs = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<ArrayList<ProcessWorkspaceViewModel>>(){});
+						ArrayList<ProcessWorkspaceViewModel> aoProcWs = wasdi.shared.data.mongo.MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<ArrayList<ProcessWorkspaceViewModel>>(){});
 						aoAllProcs.addAll(aoProcWs);
 					}
 				}
@@ -135,16 +135,16 @@ public class JobsResource {
     			WasdiLog.debugLog("JobsResource.getJobsList: got " + aoAllProcs.size() + " processes. Start filtering");
     			
     			// Apply the requierd filters
-    			filterProcessWorkspaceListFromProcesses(aoAllProcs, asProcesses.toArray(new String[0]));
-    			filterProcessWorkspaceListFromStatus(aoAllProcs, asStatus.toArray(new String[0]));
+    			filterProcessWorkspaceListFromProcesses(aoAllProcs, asProcesses == null ? null : asProcesses.toArray(new String[0]));
+    			filterProcessWorkspaceListFromStatus(aoAllProcs, asStatus == null ? null : asStatus.toArray(new String[0]));
     			filterProcessWorkspaceListFromDateTime(aoAllProcs, sDateTime);
-    			filterProcessWorkspaceListFromMinDuration(aoAllProcs, aiMinDuration.toArray(new Integer[0]));
-    			filterProcessWorkspaceListFromMaxDuration(aoAllProcs, aiMaxDuration.toArray(new Integer[0]));
+    			filterProcessWorkspaceListFromMinDuration(aoAllProcs, aiMinDuration == null ? null : aiMinDuration.toArray(new Integer[0]));
+    			filterProcessWorkspaceListFromMaxDuration(aoAllProcs, aiMaxDuration == null ? null : aiMaxDuration.toArray(new Integer[0]));
     			
     			WasdiLog.debugLog("JobsResource.getJobsList: processes after filter: " + aoAllProcs.size());
     			
     			// Make a cycle to the filtered results to extract the valid ones
-    			for (int iProcs = oiOffset; iProcs<oiOffset+oiLimit; oiOffset++) {
+				for (int iProcs = oiOffset; iProcs<oiOffset+oiLimit; iProcs++) {
     				
     				if (iProcs>=aoAllProcs.size()) break;
     				
@@ -167,6 +167,11 @@ public class JobsResource {
         		Link oNextLink = new Link();
         		
         		int iNewOffset = oiOffset + oiLimit;
+        		        		
+        		if (asProcesses == null) asProcesses = new ArrayList<String>();
+        		if (asStatus == null) asStatus = new ArrayList<String>();
+        		if (aiMaxDuration == null) aiMaxDuration = new ArrayList<Integer>();
+        		if (aiMinDuration == null) aiMinDuration = new ArrayList<Integer>();
         		
         		String sAddress = getJobsListNextLinkAddress(oiLimit, iNewOffset, asTypes.toArray(new String[0]), asProcesses.toArray(new String[0]), asStatus.toArray(new String[0]), sDateTime, aiMinDuration.toArray(new Integer[0]), aiMaxDuration.toArray(new Integer[0]));
         		
@@ -337,6 +342,21 @@ public class JobsResource {
     		oHtmlLink.setType("text/html");
     		
     		oStatusInfo.getLinks().add(oHtmlLink);    		
+			if (StatusCode.SUCCESSFUL.equals(oStatusInfo.getStatus())) {
+				Link oResultsLink = new Link();
+				oResultsLink.setHref(OgcProcesses.s_sBaseAddress+"jobs/"+sJobId+"/results");
+				oResultsLink.setRel("http://www.opengis.net/def/rel/ogc/1.0/results");
+				oResultsLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
+				oStatusInfo.getLinks().add(oResultsLink);
+			}
+			else if (StatusCode.ACCEPTED.equals(oStatusInfo.getStatus())
+					|| StatusCode.RUNNING.equals(oStatusInfo.getStatus())) {
+				Link oMonitorLink = new Link();
+				oMonitorLink.setHref(OgcProcesses.s_sBaseAddress+"jobs/"+sJobId);
+				oMonitorLink.setRel("monitor");
+				oMonitorLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
+				oStatusInfo.getLinks().add(oMonitorLink);
+			}
     		
     		ResponseBuilder oResponse = Response.status(Status.OK).entity(oStatusInfo);
     		oResponse = OgcProcesses.addLinkHeaders(oResponse, oStatusInfo.getLinks());
@@ -595,11 +615,21 @@ public class JobsResource {
     		oInfo.setJobID(oProcWs.getProcessObjId());
     		oInfo.setMessage(oProcWs.getProductName());
     		
-    		ProcessorRepository oProcessorRepository = new ProcessorRepository();
-    		Processor oProcessor = oProcessorRepository.getProcessorByName(oProcWs.getProductName());
+    		String sProcessorName = oProcWs.getProductName();
+    		String sProcessorId = m_oProcessorIdCache.get(sProcessorName);
     		
-    		if (oProcessor!=null) {
-    			oInfo.setProcessID(oProcessor.getProcessorId());
+    		if (sProcessorId == null) {
+    			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+    			Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
+    			
+    			if (oProcessor!=null) {
+    				sProcessorId = oProcessor.getProcessorId();
+    				m_oProcessorIdCache.put(sProcessorName, sProcessorId);
+    			}
+    		}
+    		
+    		if (sProcessorId!=null) {
+    			oInfo.setProcessID(sProcessorId);
     		}
     		
     		oInfo.setProgress(oProcWs.getProgressPerc());
@@ -734,12 +764,13 @@ public class JobsResource {
 			if (aoProcWsList == null) return;
 			if (aoProcWsList.size()==0) return;
 			
-			if (asStatus == null) {
-				asStatus = new String[4];
-				asStatus[0] = StatusCode.RUNNING.name();
-				asStatus[1] = StatusCode.SUCCESSFUL.name();
-				asStatus[2] = StatusCode.FAILED.name();
-				asStatus[3] = StatusCode.DISMISSED.name();
+			if (asStatus == null || asStatus.length == 0) {
+				asStatus = new String[5];
+				asStatus[0] = StatusCode.ACCEPTED.name();
+				asStatus[1] = StatusCode.RUNNING.name();
+				asStatus[2] = StatusCode.SUCCESSFUL.name();
+				asStatus[3] = StatusCode.FAILED.name();
+				asStatus[4] = StatusCode.DISMISSED.name();
 			}
 			
 			ArrayList<String> asWasdiAllowedStatusCodes = convertStatuses(asStatus);

@@ -1,29 +1,26 @@
 package it.fadeout.rest.resources;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
-import java.util.HashMap;
 
-import javax.inject.Inject;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.json.JSONObject;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
-import it.fadeout.services.AuthProviderService;
-import it.fadeout.services.KeycloakService;
-import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.Project;
 import wasdi.shared.business.Subscription;
@@ -47,6 +44,7 @@ import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.MailUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.auth.KeycloakUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.missions.PrivateMissionViewModel;
@@ -54,6 +52,7 @@ import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.users.ChangeUserPasswordViewModel;
 import wasdi.shared.viewmodels.users.LoginInfo;
 import wasdi.shared.viewmodels.users.RegistrationInfoViewModel;
+import wasdi.shared.viewmodels.users.RefreshTokenViewModel;
 import wasdi.shared.viewmodels.users.SkinViewModel;
 import wasdi.shared.viewmodels.users.UserViewModel;
 
@@ -88,13 +87,7 @@ import wasdi.shared.viewmodels.users.UserViewModel;
  */
 @Path("/auth")
 public class AuthResource {
-		
-	/**
-	 * Keycloak Auth Provider Service
-	 */
-	@Inject
-	AuthProviderService m_oKeycloakService;
-
+	
 	/**
 	 * Authentication Helper
 	 */
@@ -115,6 +108,7 @@ public class AuthResource {
 	@POST
 	@Path("/login")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "Authenticate user with credentials", description="Authenticates a user with their credentials. The system tries Keycloak first and falls back to the legacy WASDI password store. On first login of a Keycloak-verified user, their account is automatically registered in WASDI. On success, a new session token is created and returned inside the UserViewModel. Note: On failure, returns an invalid UserViewModel (userId empty, boolValue false) rather than an HTTP error code. If disableAuthentication is set in server config, a default admin user is returned without credential checks (development only).")
 	public UserViewModel login(LoginInfo oLoginInfo) {
 
 		try {
@@ -130,7 +124,8 @@ public class AuthResource {
 				oUserVM.setType(UserType.PROFESSIONAL.name());
 				oUserVM.setPublicNickName("user");
 				oUserVM.setSkin("wasdi");
-				oUserVM.setRole(UserApplicationRole.ADMIN.getRole());				
+				oUserVM.setRole(UserApplicationRole.ADMIN.getRole());
+				oUserVM.setLastWorkspace("");
 				
 				// Create a new session
 				SessionRepository oSessionRepository = new SessionRepository();
@@ -178,7 +173,7 @@ public class AuthResource {
 				WasdiLog.debugLog("AuthResource.login: user not found: " + sLowerCaseUserId + ", check if this is the first access");
 				
 				// Try to retrieve info about this user 
-				String sUserInfo = m_oKeycloakService.getUserData(m_oKeycloakService.getToken(), sLowerCaseUserId);
+				String sUserInfo = KeycloakUtils.getUserData(KeycloakUtils.getToken(), sLowerCaseUserId);
 				
 				if (Utils.isNullOrEmpty(sUserInfo)) {
 					// No, something did not work well
@@ -253,15 +248,13 @@ public class AuthResource {
 			}
 
 			// First try to Authenticate using keycloak
-			String sAuthResult = m_oKeycloakService.login(sLowerCaseUserId, oLoginInfo.getUserPassword());
+			String sAuthResult = KeycloakUtils.login(sLowerCaseUserId, oLoginInfo.getUserPassword());
 			
 			boolean bLoginSuccess = false;
-			
-			String sRefreshToken = getRefreshTokenFromLoginResponse(sAuthResult);
+			JSONObject oKeycloakLoginResponse = getKeycloakLoginResponse(sAuthResult);
 
-			if(!Utils.isNullOrEmpty(sRefreshToken)) { 
+			if(oKeycloakLoginResponse != null) {
 				bLoginSuccess = true;
-				m_oKeycloakService.logout(sRefreshToken);
 			} 
 			else {
 				// Try to log in with the WASDI old password
@@ -276,22 +269,12 @@ public class AuthResource {
 				//Clear all old, expired sessions
 				Wasdi.clearUserExpiredSessions(oUser);
 				
-				// Create a new session
-				SessionRepository oSessionRepository = new SessionRepository();
-				UserSession oSession = oSessionRepository.insertUniqueSession(oUser.getUserId());
-				
-				if(null==oSession || Utils.isNullOrEmpty(oSession.getSessionId())) {
-					WasdiLog.debugLog("AuthResource.login: could not insert session in DB, aborting");
-					return UserViewModel.getInvalid();
-				}
-				
 				//populate view model
 				UserViewModel oUserVM = new UserViewModel();
 				oUserVM.setName(oUser.getName());
 				oUserVM.setSurname(oUser.getSurname());
 				oUserVM.setUserId(oUser.getUserId());
 				oUserVM.setAuthProvider(oUser.getAuthServiceProvider());
-				oUserVM.setSessionId(oSession.getSessionId());
 				oUserVM.setType(PermissionsUtils.getUserType(oUser));
 				oUserVM.setPublicNickName(oUser.getPublicNickName());
 				oUserVM.setSkin(oUser.getSkin());
@@ -306,8 +289,23 @@ public class AuthResource {
 				else {
 					oUserVM.setRole(UserApplicationRole.USER.getRole());
 				}
-
-				WasdiLog.debugLog("AuthResource.login: access succeeded, sSessionId: "+oSession.getSessionId());
+				
+				oUserVM.setLastWorkspace(oUser.getLastWorkspace());
+				SessionRepository oSessionRepository = new SessionRepository();
+				UserSession oSession = oSessionRepository.insertUniqueSession(oUser.getUserId());
+				if(null==oSession || Utils.isNullOrEmpty(oSession.getSessionId())) {
+					WasdiLog.debugLog("AuthResource.login: could not insert session in DB, aborting");
+					return UserViewModel.getInvalid();
+				}
+				oUserVM.setSessionId(oSession.getSessionId());
+				if (oKeycloakLoginResponse != null) {
+					oUserVM.setAccessToken(oKeycloakLoginResponse.optString("access_token", ""));
+					oUserVM.setRefreshToken(oKeycloakLoginResponse.optString("refresh_token", ""));
+					oUserVM.setExpiresIn(oKeycloakLoginResponse.optInt("expires_in", 0));
+					WasdiLog.debugLog("AuthResource.login: Keycloak access succeeded");
+				} else {
+					WasdiLog.debugLog("AuthResource.login: legacy access succeeded, sSessionId: "+oSession.getSessionId());
+				}
 				
 				return oUserVM;
 			} else {
@@ -319,6 +317,72 @@ public class AuthResource {
 		}
 
 		return UserViewModel.getInvalid();
+	}
+
+	/**
+	 * Refresh a Keycloak access token without exposing the confidential-client secret.
+	 *
+	 * @param oRefreshRequest request containing a Keycloak refresh token
+	 * @return refreshed access and refresh tokens, or an invalid user view model
+	 */
+	@POST
+	@Path("/refresh")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "Refresh Keycloak tokens", description = "Exchanges a Keycloak refresh token for a new access-token pair using WASDI's confidential client credentials. Returns an invalid UserViewModel when the refresh token is expired or invalid.")
+	public UserViewModel refresh(RefreshTokenViewModel oRefreshRequest) {
+		try {
+			if (oRefreshRequest == null) {
+				return UserViewModel.getInvalid();
+			}
+
+			String sRefreshToken = oRefreshRequest.getRefreshToken();
+			String sAuthResult = KeycloakUtils.refreshToken(sRefreshToken);
+			JSONObject oKeycloakRefreshResponse = getKeycloakLoginResponse(sAuthResult);
+			if (oKeycloakRefreshResponse == null) {
+				return UserViewModel.getInvalid();
+			}
+
+			String sAccessToken = oKeycloakRefreshResponse.optString("access_token", "");
+			String sUserId = KeycloakUtils.validateJwtAndGetUserId(sAccessToken);
+			if (Utils.isNullOrEmpty(sUserId)) {
+				return UserViewModel.getInvalid();
+			}
+
+			User oUser = new UserRepository().getUser(sUserId);
+			if (oUser == null) {
+				return UserViewModel.getInvalid();
+			}
+
+			UserViewModel oUserVM = new UserViewModel();
+			oUserVM.setUserId(oUser.getUserId());
+			oUserVM.setAccessToken(sAccessToken);
+			oUserVM.setRefreshToken(oKeycloakRefreshResponse.optString("refresh_token", ""));
+			oUserVM.setExpiresIn(oKeycloakRefreshResponse.optInt("expires_in", 0));
+			return oUserVM;
+		} catch (Exception oEx) {
+			WasdiLog.warnLog("AuthResource.refresh: " + oEx);
+		}
+
+		return UserViewModel.getInvalid();
+	}
+
+	protected JSONObject getKeycloakLoginResponse(String sAuthResult) {
+		if (Utils.isNullOrEmpty(sAuthResult)) {
+			return null;
+		}
+
+		try {
+			JSONObject oAuthResponse = new JSONObject(sAuthResult);
+			String sAccessToken = oAuthResponse.optString("access_token", "");
+			String sRefreshToken = oAuthResponse.optString("refresh_token", "");
+			if (!Utils.isNullOrEmpty(sAccessToken) && !Utils.isNullOrEmpty(sRefreshToken)) {
+				return oAuthResponse;
+			}
+		} catch (Exception oE) {
+			WasdiLog.errorLog("AuthResource.getKeycloakLoginResponse: could not parse login response: " + oE);
+		}
+
+		return null;
 	}
 	
 	/**
@@ -353,10 +417,11 @@ public class AuthResource {
 	@GET
 	@Path("/checksession")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public UserViewModel checkSession(@HeaderParam("x-session-token") String sSessionId) {
+	@Operation(summary = "Validate an existing session token", description="Validates an existing session token and returns the user profile associated with it. Used by the client to verify that a stored session is still active. Returns an invalid UserViewModel (userId empty) when the session is not valid rather than an HTTP error code.")
+	public UserViewModel checkSession(@Context ContainerRequestContext oRequestContext) {
 		try {
 			// Check if we can see the user from the session
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			
 			if (oUser == null) {
 				WasdiLog.debugLog("AuthResource.checkSession: invalid session");
@@ -375,7 +440,10 @@ public class AuthResource {
 			if (Utils.isNullOrEmpty(oUserVM.getPublicNickName())) {
 				String sPublicNick = oUserVM.getName();
 				oUserVM.setPublicNickName(sPublicNick);
-			}			
+			}	
+			
+			oUserVM.setLastWorkspace(oUser.getLastWorkspace());
+			
 			return oUserVM;
 		} catch (Exception oE) {
 			WasdiLog.errorLog("AuthResource.checkSession: " + oE);
@@ -391,15 +459,18 @@ public class AuthResource {
 	@GET
 	@Path("/logout")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult logout(@HeaderParam("x-session-token") String sSessionId) {
+	@Operation(summary = "Invalidate the current session", description="Invalidates the given session, deleting the session record from the database. Returns a PrimitiveResult indicating whether the operation succeeded. Returns an invalid PrimitiveResult when the session is not found.")
+	public PrimitiveResult logout(@Context ContainerRequestContext oRequestContext) {
 		WasdiLog.debugLog("AuthResource.logout");
 		
 		// Try to get the user
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		if (oUser == null) {
 			return PrimitiveResult.getInvalid();
 		}
+		
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 		PrimitiveResult oResult = null;
 		
@@ -419,230 +490,13 @@ public class AuthResource {
 				oResult.setBoolValue(false);
 			}
 
-		} else {
-			
-			//boolean bResult = m_oKeycloakService.logout(sSessionId);
-			//oResult.setBoolValue(bResult);
-			
+		}
+		else {
 			return PrimitiveResult.getInvalid();
 		}
 		return oResult;
 	}	
-	
-	/**
-	 * create an sftp account for the user
-	 * @param sSessionId User session
-	 * @param sEmail mail of the user
-	 * @return http response
-	 */
-	@POST
-	@Path("/upload/createaccount")
-	@Produces({"application/json", "text/xml"})
-	public Response createSftpAccount(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
-		
-		WasdiLog.debugLog("AuthResource.createSftpAccount: Called for Mail " + sEmail);
-		
-		// Validate the inputs
-		if(Utils.isNullOrEmpty(sEmail)) {
-			WasdiLog.debugLog("AuthResource.createSftpAccount: email null or empty, aborting");
-			return Response.status(Status.BAD_REQUEST).build();
-		}
-//		try {
-//			InternetAddress oEmailAddr = new InternetAddress(sEmail);
-//			oEmailAddr.validate();
-//		} catch (AddressException oEx) {
-//			WasdiLog.errorLog("AuthResource.createSftpAccount: email is invalid, aborting");
-//			return Response.status(Status.BAD_REQUEST).build();
-//		}
-		
-		try {	
-			
-			// Check the user
-			User oUser = Wasdi.getUserFromSession(sSessionId);
-			if (oUser == null) {
-				WasdiLog.debugLog("AuthResource.createSftpAccount: session invalid or user not found, aborting");
-				return Response.status(Status.UNAUTHORIZED).build();
-			}
-			
-			// Get the User Id
-			String sAccount = oUser.getUserId();
-			if(Utils.isNullOrEmpty(sAccount)) {
-				WasdiLog.debugLog("AuthResource.createSftpAccount: userid is null, aborting");
-				return Response.serverError().build();
-			}
-	
-			// Search for the sftp service
-			String sWsAddress = WasdiConfig.Current.sftp.sftpManagementWSServiceAddress;
-			if (Utils.isNullOrEmpty(sWsAddress)) {
-				sWsAddress = "ws://localhost:6703";
-				WasdiLog.debugLog("AuthResource.createSftpAccount: sWsAddress is null or empty, defaulting to " + sWsAddress);
-			}
-	
-			// Manager instance
-			SFTPManager oManager = new SFTPManager(sWsAddress);
-			String sPassword = Utils.generateRandomPassword();
-	
-			// Try to create the account
-			if (!oManager.createAccount(sAccount, sPassword)) {
-	
-				WasdiLog.debugLog("AuthResource.createSftpAccount: error creating sftp account");
-				return Response.serverError().build();
-			}
-	
-			// Sent the credentials to the user
-			if(!sendSftpPasswordEmail(sEmail, sAccount, sPassword)) {
-				return Response.serverError().build();
-			}
-	
-			// All is done
-			return Response.ok().build();
-		}catch (Exception oE) {
-			WasdiLog.errorLog("AuthResource.createSftpAccount: " + oE);
-		}
-		return Response.serverError().build();
-	}
-	
-	/**
-	 * Check if an sftp account exists for the user
-	 * @param sSessionId User session
-	 * @return true if exists, false otherwise
-	 */
-	@GET
-	@Path("/upload/existsaccount")
-	@Produces({"application/json", "text/xml"})
-	public boolean existsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
-		WasdiLog.debugLog("AuthResource.ExistsSftpAccount");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null) {
-			WasdiLog.debugLog("AuthResource.existsSftpAccount: invalid session");
-			return false;
-		}
-		String sAccount = oUser.getUserId();		
-
-		// Get the service address
-		String wsAddress = WasdiConfig.Current.sftp.sftpManagementWSServiceAddress;
-		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
-		SFTPManager oManager = new SFTPManager(wsAddress);
-
-		Boolean bRes = null;
-		try{
-			// Check the user
-			bRes = oManager.checkUser(sAccount);
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("AuthResource.existsSftpAccount: error " + oEx.toString());
-			bRes = false;
-		}
-		return bRes;
-	}
-	
-	/**
-	 * get the list of files in the sftp of the user
-	 * @param sSessionId user session
-	 * @return list of string, each representing the name of a file in the user sftp account
-	 */
-	@GET
-	@Path("/upload/list")
-	@Produces({"application/json", "text/xml"})
-	public String[] listSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
-
-		WasdiLog.debugLog("AuthResource.ListSftpAccount");
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null) {
-			WasdiLog.debugLog("AuthResource.listSftpAccount: invalid session");
-			return null;
-		}	
-		String sAccount = oUser.getUserId();		
-
-		// Get Service Address
-		String wsAddress = WasdiConfig.Current.sftp.sftpManagementWSServiceAddress;
-		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
-		SFTPManager oManager = new SFTPManager(wsAddress);
-
-		// Return the list
-		return oManager.list(sAccount);
-	}
-	
-	/**
-	 * Remove the sftp account of the user
-	 * @param sSessionId user session
-	 * @return http standard response
-	 */
-	@DELETE
-	@Path("/upload/removeaccount")
-	@Produces({"application/json", "text/xml"})
-	public Response removeSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
-
-		WasdiLog.debugLog("AuthResource.removeSftpAccount");
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-
-		if (oUser == null) {
-			WasdiLog.debugLog("AuthResource.removeSftpAccount: invalid session");
-			return Response.status(Status.UNAUTHORIZED).build();
-		}
-
-		String sAccount = oUser.getUserId();
-
-		// Get service address
-		String wsAddress = WasdiConfig.Current.sftp.sftpManagementWSServiceAddress;
-		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
-		SFTPManager oManager = new SFTPManager(wsAddress);
-
-		// Remove the account
-		return oManager.removeAccount(sAccount) ? Response.ok().build() : Response.status(Status.INTERNAL_SERVER_ERROR).build();
-	}
-	
-	/**
-	 * Update sftp password of a user: it creates a new password and 
-	 * send it to the mail received in input
-	 * @param sSessionId user session
-	 * @param sEmail user id /mail used for sftp account
-	 * @return std http response
-	 */
-	@POST
-	@Path("/upload/updatepassword")
-	@Produces({"application/json", "text/xml"})
-	public Response updateSftpPassword(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
-
-		WasdiLog.debugLog("AuthResource.updateSftpPassword Mail: " + sEmail);
-
-		if(!m_oCredentialPolicy.validEmail(sEmail)) {
-			WasdiLog.debugLog("AuthResource.updateSftpPassword Mail: invalid mail");
-			return Response.status(Status.BAD_REQUEST).build();
-		}
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-
-		if(null == oUser) {
-			WasdiLog.debugLog("AuthResource.updateSftpPassword Mail: invalid session");
-			return Response.status(Status.UNAUTHORIZED).build(); 
-		}
-
-		String sAccount = oUser.getUserId();
-
-		// Get the service address
-		String wsAddress = WasdiConfig.Current.sftp.sftpManagementWSServiceAddress;
-		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
-		SFTPManager oManager = new SFTPManager(wsAddress);
-
-		// New Password
-		String sPassword = Utils.generateRandomPassword();
-
-		// Try to update
-		if (!oManager.updatePassword(sAccount, sPassword)) {
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
-
-		// Send password to the user
-		if(!sendSftpPasswordEmail(sEmail, sAccount, sPassword)) {
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
-
-		return Response.ok().build();
-	}
-	
 	/**
 	 * Register a new user
 	 * @param oRegistrationInfoViewModel Registration Informations
@@ -651,6 +505,7 @@ public class AuthResource {
 	@POST
 	@Path("/register")
 	@Produces({"application/json", "text/xml"})
+	@Operation(summary = "Register a new WASDI user", description="Registers a new WASDI user. The userId (e-mail) must exist and be verified in Keycloak; the endpoint creates the user record in the WASDI database and automatically assigns a 90-day FREE trial subscription. Returns PrimitiveResult with boolValue=true and intValue=200 on success, or intValue=304 if already registered, 400 for bad request, 404 if user not found in Keycloak, or 500 on server error.")
 	public PrimitiveResult userRegistration(RegistrationInfoViewModel oRegistrationInfoViewModel) 
 	{
 		try{
@@ -692,12 +547,7 @@ public class AuthResource {
 				//let's check it's a legit one (against kc)  
 				//otherwise someone might call this api even if the user is not registered on KC
 				
-				if (m_oKeycloakService==null) {
-					WasdiLog.debugLog("AuthResource.userRegistration: m_oKeycloakService is NULL!! Creating it...");
-					m_oKeycloakService = new KeycloakService();
-				}
-				
-				User oNewUser = m_oKeycloakService.getUser(sLowerCasedUserId);
+				User oNewUser = KeycloakUtils.getUser(sLowerCasedUserId);
 				
 				if(null==oNewUser) {
 					PrimitiveResult oResult = new PrimitiveResult();
@@ -774,6 +624,7 @@ public class AuthResource {
 	@GET
 	@Path("/validateNewUser")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "Complete email-based account activation", description="Completes the legacy e-mail-based account activation flow. The link embedded in the confirmation e-mail points to this endpoint. When the validation code matches the stored token the user account is activated and a FREE trial subscription is created. Returns PrimitiveResult with boolValue=true and stringValue=userId on success, or invalid result on validation failure.")
 	public PrimitiveResult validateNewUser(@QueryParam("email") String sUserId, @QueryParam("validationCode") String sToken  ) {
 		WasdiLog.debugLog("AuthResource.validateNewUser UserId: " + sUserId + " Token: " + sToken);
 
@@ -881,7 +732,8 @@ public class AuthResource {
 	@POST
 	@Path("/editUserDetails")
 	@Produces({"application/json", "text/xml"})
-	public UserViewModel editUserDetails(@HeaderParam("x-session-token") String sSessionId, UserViewModel oInputUserVM ) {
+	@Operation(summary = "Update authenticated user profile", description="Allows an authenticated user to update their own profile fields: name, surname, link, description, and public nick name. Returns the updated UserViewModel. Returns invalid UserViewModel on validation failure or invalid session.")
+	public UserViewModel editUserDetails(@Context ContainerRequestContext oRequestContext, UserViewModel oInputUserVM ) {
 
 		WasdiLog.debugLog("AuthResource.editUserDetails");
 		//note: sSessionId validity is automatically checked later
@@ -900,12 +752,14 @@ public class AuthResource {
 
 		try {
 			//note: session validity is automatically checked		
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 			if(null == oUser) {
 				//Maybe the user didn't exist, or failed for some other reasons
 				WasdiLog.debugLog("AuthResource.editUserDetails: invalid session");
 				return UserViewModel.getInvalid();
 			}
+			
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 			//update
 			oUser.setName(oInputUserVM.getName());
@@ -954,7 +808,8 @@ public class AuthResource {
 	@POST
 	@Path("/changePassword")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult changePassword(@HeaderParam("x-session-token") String sSessionId, ChangeUserPasswordViewModel oChangePasswordViewModel) {
+	@Operation(summary = "Change WASDI password for authenticated user", description="Changes the WASDI password of the authenticated user. Requires the current password for verification before accepting the new one. Returns PrimitiveResult with boolValue=true on success, or invalid result on invalid session, wrong current password, or policy violation.")
+	public PrimitiveResult changePassword(@Context ContainerRequestContext oRequestContext, ChangeUserPasswordViewModel oChangePasswordViewModel) {
 
 		WasdiLog.debugLog("AuthResource.changePassword");
 
@@ -971,7 +826,7 @@ public class AuthResource {
 
 		try {
 			//validity is automatically checked		
-			User oUserId = Wasdi.getUserFromSession(sSessionId);
+			User oUserId = (User) oRequestContext.getProperty("authenticated-user");
 			if(null == oUserId) {
 				//Maybe the user didn't exist, or failed for some other reasons
 				WasdiLog.debugLog("AuthResource.changePassword: invalid session");
@@ -1012,6 +867,7 @@ public class AuthResource {
 	@GET
 	@Path("/lostPassword")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	@Operation(summary = "Initiate password recovery flow", description="Initiates the password recovery flow. For WASDI-native accounts a new random password is generated and sent by e-mail. For Keycloak accounts a password-reset e-mail is triggered via Keycloak. Returns PrimitiveResult with boolValue=true and intValue=0 on success, or intValue=400 for bad request, or intValue=500 on server error.")
 	public PrimitiveResult lostPassword(@QueryParam("userId") String sUserId ) {
 
 		WasdiLog.debugLog("AuthResource.lostPassword: sUserId: " + sUserId);
@@ -1089,7 +945,7 @@ public class AuthResource {
 				//else nothing is returned here and in the end 500 is returned
 				break;
 			case "KEYCLOAK":
-				return m_oKeycloakService.requirePasswordUpdateViaEmail(sUserId);
+				return KeycloakUtils.requirePasswordUpdateViaEmail(sUserId);
 			default:
 				break;
 			}
@@ -1214,11 +1070,12 @@ public class AuthResource {
 	@GET
 	@Path("/config")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getClientConfig(@HeaderParam("x-session-token") String sSessionId) {
+	@Operation(summary = "Get client UI configuration", description="Returns the client UI configuration object for the authenticated user. The configuration is resolved from the missions repository and includes data-provider settings and feature flags relevant to the user's context.")
+	public Response getClientConfig(@Context ContainerRequestContext oRequestContext) {
 
 		WasdiLog.debugLog("AuthResource.getClientConfig");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// Domain Check
 		if (oUser == null) {
@@ -1240,11 +1097,12 @@ public class AuthResource {
 	@GET
 	@Path("/privatemissions")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getPrivateMissions(@HeaderParam("x-session-token") String sSessionId) {
+	@Operation(summary = "Get private missions accessible to user", description="Returns the list of private missions accessible to the authenticated user, including missions they own and missions that have been shared with them (with their permission level).")
+	public Response getPrivateMissions(@Context ContainerRequestContext oRequestContext) {
 		
 		WasdiLog.debugLog("AuthResource.getPrivateMissions");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 		// domain Check
 		if (oUser == null) {
@@ -1289,15 +1147,16 @@ public class AuthResource {
 	}
 	
 	@GET
-	@Path("/skin")	
-	public Response getSkin(@HeaderParam("x-session-token") String sSessionId, @QueryParam("skin") String sSkin) {
+	@Path("/skin")
+	@Operation(summary = "Get branding and UI configuration for skin", description="Returns the branding and UI configuration for the specified skin name. Used by the client to apply the correct colours, logos, and feature flags on start-up. Query parameter 'skin' is optional and defaults to the server-configured default skin.")
+	public Response getSkin(@Context ContainerRequestContext oRequestContext, @QueryParam("skin") String sSkin) {
 		try {
 			
 			if (Utils.isNullOrEmpty(sSkin)) sSkin = WasdiConfig.Current.defaultSkin;
 			
 			WasdiLog.debugLog("AuthResource.getSkin( skin: " + sSkin + ")");
 			
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
 			if (oUser==null) {
 				WasdiLog.warnLog("AuthResource.getSkin: invalid user or session");

@@ -1,8 +1,13 @@
 package wasdi.shared.data.mongo;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.client.model.Filters;
 
 import wasdi.shared.business.OgcProcessesTask;
 import wasdi.shared.data.interfaces.IOgcProcessesTaskRepositoryBackend;
@@ -103,5 +108,35 @@ public class MongoOgcProcessesTaskRepositoryBackend extends MongoRepository impl
 		}
 
 		return null;
+	}
+
+	@Override
+	public List<String> getProcessWsIds(String sUserId) {
+		try {
+			Bson oFilter = Utils.isNullOrEmpty(sUserId) ? new Document() : Filters.eq("userId", sUserId);
+
+			List<Document> aoDocuments = getCollection(m_sThisCollection)
+					.find(oFilter)
+					.projection(new Document("processWorkspaceId", 1))
+					.into(new ArrayList<Document>());
+
+			List<String> asProcessWsIds = new ArrayList<>(aoDocuments.size());
+
+			for (Document oDocument : aoDocuments) {
+				if (oDocument == null) continue;
+
+				try {
+					asProcessWsIds.add((String) oDocument.get("processWorkspaceId"));
+				} catch (Exception oE) {
+					WasdiLog.debugLog("OgcProcessesTaskRepository.getProcessWsIds: cannot parse document due to " + oE + ", skipping");
+				}
+			}
+
+			return asProcessWsIds;
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("OgcProcessesTaskRepository.getProcessWsIds: error", oEx);
+		}
+
+		return new ArrayList<>();
 	}
 }

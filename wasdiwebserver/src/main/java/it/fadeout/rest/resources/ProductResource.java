@@ -10,11 +10,12 @@ import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -22,6 +23,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import it.fadeout.threads.DeleteProductWorker;
 import wasdi.shared.LauncherOperations;
@@ -76,13 +78,14 @@ public class ProductResource {
     @GET
     @Path("addtows")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public PrimitiveResult addProductToWorkspace(@HeaderParam("x-session-token") String sSessionId,
+    @Operation(summary = "Add product to workspace", description = "Adds a product file already present on the node filesystem to a workspace. An existing workspace link is treated as success.")
+    public PrimitiveResult addProductToWorkspace(@Context ContainerRequestContext oRequestContext,
                                                  @QueryParam("name") String sProductName, @QueryParam("workspace") String sWorkspaceId) {
         try {
             WasdiLog.debugLog("ProductResource.addProductToWorkspace:  WS: " + sWorkspaceId + " Product " + sProductName);
 
             // Validate Session
-            User oUser = Wasdi.getUserFromSession(sSessionId);
+            User oUser = (User) oRequestContext.getProperty("authenticated-user");
             if (oUser == null) {
                 WasdiLog.warnLog("ProductResource.addProductToWorkspace: invalid session");
                 return null;
@@ -153,13 +156,14 @@ public class ProductResource {
     @GET
     @Path("byname")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public GeorefProductViewModel getByProductName(@HeaderParam("x-session-token") String sSessionId,
+    @Operation(summary = "Get product by name", description = "Returns one georeferenced product by file name from a workspace accessible to the authenticated user.")
+    public GeorefProductViewModel getByProductName(@Context ContainerRequestContext oRequestContext,
                                                    @QueryParam("name") String sProductName, @QueryParam("workspace") String sWorkspaceId) {
         try {
             WasdiLog.debugLog("ProductResource.getByProductName(Product: " + sProductName + ", WS: " + sWorkspaceId + " )");
 
             // Validate Session
-            User oUser = Wasdi.getUserFromSession(sSessionId);
+            User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
             if (oUser == null) {
                 WasdiLog.warnLog("ProductResource.getByProductName: invalid session");
@@ -206,13 +210,15 @@ public class ProductResource {
     @GET
     @Path("metadatabyname")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public MetadataViewModel getMetadataByProductName(@HeaderParam("x-session-token") String sSessionId,
+    @Operation(summary = "Get product metadata", description = "Returns product metadata. When metadata has not been generated, starts a READMETADATA process and returns a placeholder indicating generation is in progress.")
+    public MetadataViewModel getMetadataByProductName(@Context ContainerRequestContext oRequestContext,
                                                       @QueryParam("name") String sProductName, @QueryParam("workspace") String sWorkspaceId) {
 
         WasdiLog.debugLog("ProductResource.getMetadataByProductName( Product: " + sProductName + ", WS: " + sWorkspaceId + " )");
 
         // Validate Session
-        User oUser = Wasdi.getUserFromSession(sSessionId);
+        User oUser = (User) oRequestContext.getProperty("authenticated-user");
+        String sSessionId = (String) oRequestContext.getProperty("session-id");
         
         if (oUser == null) {
         	WasdiLog.warnLog("ProductResource.getMetadataByProductName: invalid session");
@@ -312,7 +318,8 @@ public class ProductResource {
     @GET
     @Path("/byws")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public List<GeorefProductViewModel> getListByWorkspace(@HeaderParam("x-session-token") String sSessionId,
+    @Operation(summary = "Get workspace products", description = "Returns the full product list for a workspace, including bounding boxes, styles, and descriptions while omitting embedded metadata to reduce payload size.")
+    public List<GeorefProductViewModel> getListByWorkspace(@Context ContainerRequestContext oRequestContext,
                                                            @QueryParam("workspace") String sWorkspaceId) {
 
         WasdiLog.debugLog("ProductResource.getListByWorkspace( WS: " + sWorkspaceId + " )");
@@ -328,7 +335,7 @@ public class ProductResource {
                 return aoProductList;
             }        	
         	
-            User oUser = Wasdi.getUserFromSession(sSessionId);
+            User oUser = (User) oRequestContext.getProperty("authenticated-user");
             
             if (oUser == null) {
                 WasdiLog.warnLog("ProductResource.getListByWorkspace: invalid session");
@@ -406,7 +413,8 @@ public class ProductResource {
     @GET
     @Path("/bywslight")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public List<GeorefProductViewModel> getLightListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId) {
+    @Operation(summary = "Get light workspace product list", description = "Returns a lightweight product list for initial workspace display, including product names, friendly names, and bounding boxes.")
+    public List<GeorefProductViewModel> getLightListByWorkspace(@Context ContainerRequestContext oRequestContext, @QueryParam("workspace") String sWorkspaceId) {
 
         WasdiLog.debugLog("ProductResource.getLightListByWorkspace( WS: " + sWorkspaceId + " )");
         
@@ -419,7 +427,7 @@ public class ProductResource {
                 return aoProductList;
             }
         	
-            User oUser = Wasdi.getUserFromSession(sSessionId);
+            User oUser = (User) oRequestContext.getProperty("authenticated-user");
             if (oUser == null) {
                 WasdiLog.warnLog("ProductResource.getLightListByWorkspace: invalid session");
                 return aoProductList;
@@ -467,12 +475,13 @@ public class ProductResource {
     @GET
     @Path("/namesbyws")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public ArrayList<String> getNamesByWorkspace(@HeaderParam("x-session-token") String sSessionId,
+    @Operation(summary = "Get workspace product names", description = "Returns only the file names of products contained in the specified workspace.")
+    public ArrayList<String> getNamesByWorkspace(@Context ContainerRequestContext oRequestContext,
                                                  @QueryParam("workspace") String sWorkspaceId) {
 
         WasdiLog.debugLog("ProductResource.getNamesByWorkspace( WS: " + sWorkspaceId + " )");
 
-        User oUser = Wasdi.getUserFromSession(sSessionId);
+        User oUser = (User) oRequestContext.getProperty("authenticated-user");
 
         ArrayList<String> aoProductList = new ArrayList<String>();
 
@@ -543,14 +552,15 @@ public class ProductResource {
     @POST
     @Path("/update")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public Response updateProductViewModel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, ProductViewModel oProductViewModel) {
+    @Operation(summary = "Update product details", description = "Updates editable product fields such as friendly name, style, and description. Style changes are also applied to associated GeoServer layers when possible.")
+    public Response updateProductViewModel(@Context ContainerRequestContext oRequestContext, @QueryParam("workspace") String sWorkspaceId, ProductViewModel oProductViewModel) {
 
         WasdiLog.debugLog("ProductResource.updateProductViewModel( WS: " + sWorkspaceId + ", ... )");
 
         try {
 
             // Domain Check
-            User oUser = Wasdi.getUserFromSession(sSessionId);
+            User oUser = (User) oRequestContext.getProperty("authenticated-user");
             if (oUser == null) {
                 WasdiLog.warnLog("ProductResource.updateProductViewModel: invalid session");
                 return Response.status(Status.UNAUTHORIZED).build();
@@ -703,7 +713,8 @@ public class ProductResource {
     @POST
     @Path("/uploadfile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("style") String sStyle, @QueryParam("platform") String sPlatformType) throws Exception {
+    @Operation(summary = "Upload and ingest product", description = "Uploads a multipart file to a writable workspace and starts an INGEST launcher process, with optional name, style, and platform values.")
+    public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @Context ContainerRequestContext oRequestContext, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("style") String sStyle, @QueryParam("platform") String sPlatformType) throws Exception {
         WasdiLog.debugLog("ProductResource.uploadfile( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " )");
 
         // before any operation check that this is not an injection attempt from the user
@@ -712,7 +723,8 @@ public class ProductResource {
             return Response.status(Status.BAD_REQUEST).build();
         }
 
-        User oUser = Wasdi.getUserFromSession(sSessionId);
+        User oUser = (User) oRequestContext.getProperty("authenticated-user");
+        String sSessionId = (String) oRequestContext.getProperty("session-id");
         
         if (oUser == null) {
             WasdiLog.warnLog("ProductResource.uploadfile: invalid session");
@@ -801,7 +813,8 @@ public class ProductResource {
     @POST
     @Path("/uploadfilebylib")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response uploadFileByLib(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName) throws Exception {
+    @Operation(summary = "Upload product without ingestion", description = "Uploads a multipart file to a writable workspace without starting ingestion. This endpoint is intended for library clients.")
+    public Response uploadFileByLib(@FormDataParam("file") InputStream fileInputStream, @Context ContainerRequestContext oRequestContext, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName) throws Exception {
         WasdiLog.debugLog("ProductResource.uploadFileByLib( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " )");
 
         // before any operation check that this is not an injection attempt from the user
@@ -811,7 +824,7 @@ public class ProductResource {
         }
 
         // Check the user session
-        User oUser = Wasdi.getUserFromSession(sSessionId);
+        User oUser = (User) oRequestContext.getProperty("authenticated-user");
         
         if (oUser == null) {
         	WasdiLog.warnLog("ProductResource.uploadFileByLib: invalid session");
@@ -872,9 +885,33 @@ public class ProductResource {
     @GET
     @Path("delete")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public PrimitiveResult deleteProduct(@HeaderParam("x-session-token") String sSessionId,
+    @Operation(summary = "Delete workspace product", description = "Deletes a product from a workspace and can optionally remove its files, sidecar data, and published layers. Storage accounting and notifications are updated.")
+    public PrimitiveResult deleteProduct(@Context ContainerRequestContext oRequestContext,
                                          @QueryParam("name") String sProductName, @QueryParam("deletefile") Boolean bDeleteFile,
                                          @QueryParam("workspace") String sWorkspaceId, @QueryParam("deletelayer") Boolean bDeleteLayer) {
+
+        User oUser = (User) oRequestContext.getProperty("authenticated-user");
+        return deleteProductInternal(oUser, sProductName, bDeleteFile, sWorkspaceId, bDeleteLayer);
+    }
+
+    /**
+     * Internal entry point used by background workers that retain a legacy session ID.
+     *
+     * @param sSessionId legacy session ID
+     * @param sProductName product name
+     * @param bDeleteFile whether to delete the product file
+     * @param sWorkspaceId workspace ID
+     * @param bDeleteLayer whether to delete published layers
+     * @return deletion result
+     */
+    public PrimitiveResult deleteProduct(String sSessionId, String sProductName, Boolean bDeleteFile,
+                                         String sWorkspaceId, Boolean bDeleteLayer) {
+        User oUser = Wasdi.getUserFromSession(sSessionId);
+        return deleteProductInternal(oUser, sProductName, bDeleteFile, sWorkspaceId, bDeleteLayer);
+    }
+
+    private PrimitiveResult deleteProductInternal(User oUser, String sProductName, Boolean bDeleteFile,
+                                                  String sWorkspaceId, Boolean bDeleteLayer) {
 
         WasdiLog.debugLog("ProductResource.deleteProduct( Product: " + sProductName + ", Delete: " + bDeleteFile + ",  WS: " + sWorkspaceId + ", DeleteLayer: " + bDeleteLayer + " )");
 
@@ -891,7 +928,6 @@ public class ProductResource {
             return oReturn;
         }
 
-        User oUser = Wasdi.getUserFromSession(sSessionId);
         try {
 
             // Domain Check
@@ -1177,14 +1213,16 @@ public class ProductResource {
     @Path("deletelist")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({"application/json", "application/xml", "text/xml" })
-    public PrimitiveResult deleteMultipleProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("deletefile") Boolean bDeleteFile,
+    @Operation(summary = "Delete multiple workspace products", description = "Starts asynchronous deletion of the product names supplied in the request body, with optional file and published-layer removal.")
+    public PrimitiveResult deleteMultipleProduct(@Context ContainerRequestContext oRequestContext, @QueryParam("deletefile") Boolean bDeleteFile,
                                          @QueryParam("workspace") String sWorkspaceId, @QueryParam("deletelayer") Boolean bDeleteLayer,
                                          List<String> asProductList) {
     	
         // Support variable used to identify if deletions of one or more products failed
         PrimitiveResult oPrimitiveResult = new PrimitiveResult();
         
-    	User oUser = Wasdi.getUserFromSession(sSessionId);
+    	User oUser = (User) oRequestContext.getProperty("authenticated-user");
+    	String sSessionId = (String) oRequestContext.getProperty("session-id");
     	
     	if (oUser == null) {
             WasdiLog.warnLog("ProductResource.deleteMultipleProduct: invalid session " );

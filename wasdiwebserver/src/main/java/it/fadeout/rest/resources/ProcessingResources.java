@@ -2,14 +2,16 @@ package it.fadeout.rest.resources;
 
 import java.io.IOException;
 
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.users.User;
@@ -61,11 +63,14 @@ public class ProcessingResources {
     @POST
     @Path("mosaic")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public PrimitiveResult mosaic(@HeaderParam("x-session-token") String sSessionId,
+    @Operation(summary = "", description="")
+    public PrimitiveResult mosaic(@Context ContainerRequestContext oRequestContext,
                                   @QueryParam("name") String sDestinationProductName,
                                   @QueryParam("workspace") String sWorkspaceId,
                                   @QueryParam("parent") String sParentId, MosaicSetting oSetting) throws IOException {
         WasdiLog.debugLog("ProcessingResources.mosaic( Destination: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
+        
+        String sSessionId = (String) oRequestContext.getProperty("session-id");
         return callExecuteSNAPOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MOSAIC, sParentId);
     }
     
@@ -82,11 +87,13 @@ public class ProcessingResources {
     @POST
     @Path("regrid")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public PrimitiveResult regrid(@HeaderParam("x-session-token") String sSessionId,
+    @Operation(summary = "", description="")
+    public PrimitiveResult regrid(@Context ContainerRequestContext oRequestContext,
                                   @QueryParam("name") String sDestinationProductName,
                                   @QueryParam("workspace") String sWorkspaceId,
                                   @QueryParam("parent") String sParentId, RegridSetting oSetting) throws IOException {
         WasdiLog.debugLog("ProcessingResources.regrid( Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
+        String sSessionId = (String) oRequestContext.getProperty("session-id");
         return callExecuteSNAPOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.REGRID, sParentId);
     }
     
@@ -105,7 +112,8 @@ public class ProcessingResources {
     @POST
     @Path("subset")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public PrimitiveResult subset(@HeaderParam("x-session-token") String sSessionId,
+    @Operation(summary = "", description="")
+    public PrimitiveResult subset(@Context ContainerRequestContext oRequestContext,
                                   @QueryParam("source") String sSourceProductName,
                                   @QueryParam("name") String sDestinationProductName,
                                   @QueryParam("workspace") String sWorkspaceId,
@@ -120,6 +128,7 @@ public class ProcessingResources {
         oMultiSubsetSetting.getLonWList().add(oSetting.getLonW());
         oMultiSubsetSetting.getOutputNames().add(sDestinationProductName);
         
+        String sSessionId = (String) oRequestContext.getProperty("session-id");
         return callExecuteSNAPOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oMultiSubsetSetting, LauncherOperations.MULTISUBSET, sParentId);
     }
 
@@ -138,19 +147,22 @@ public class ProcessingResources {
     @POST
     @Path("multisubset")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public PrimitiveResult multiSubset(@HeaderParam("x-session-token") String sSessionId,
+    @Operation(summary = "", description="")
+    public PrimitiveResult multiSubset(@Context ContainerRequestContext oRequestContext,
                                        @QueryParam("source") String sSourceProductName,
                                        @QueryParam("name") String sDestinationProductName,
                                        @QueryParam("workspace") String sWorkspaceId,
                                        @QueryParam("parent") String sParentId, MultiSubsetSetting oSetting) throws IOException {
         WasdiLog.debugLog("ProcessingResources.multiSubset( Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
+        String sSessionId = (String) oRequestContext.getProperty("session-id");
         return callExecuteSNAPOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTISUBSET, sParentId);
     }
 
     @POST
     @Path("conversion/sen2cor")
     //@Produces({"application/xml", "application/json", "text/xml"})
-    public Response sen2CorConversion(@HeaderParam("x-session-token") String sSessionId,
+    @Operation(summary = "", description="")
+    public Response sen2CorConversion(@Context ContainerRequestContext oRequestContext,
                                       @QueryParam("productName") String sProductName,
                                       @QueryParam("workspace") String sWorkspaceId,
                                       @QueryParam("parentId") String sParentId) {
@@ -162,7 +174,9 @@ public class ProcessingResources {
             return Response.status(Status.BAD_REQUEST).build();
         }
         
-        User oUser = Wasdi.getUserFromSession(sSessionId);
+        User oUser = (User) oRequestContext.getProperty("authenticated-user");
+        String sSessionId = (String) oRequestContext.getProperty("session-id");
+        
         if (oUser == null) {
             WasdiLog.warnLog("ProcessingResources.sen2CorConversion: user not found");
             return Response.status(Status.UNAUTHORIZED).build();
@@ -334,7 +348,8 @@ public class ProcessingResources {
     @POST
     @Path("run")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public PrimitiveResult runProcess(@HeaderParam("x-session-token") String sSessionId,
+    @Operation(summary = "", description="")
+    public PrimitiveResult runProcess(@Context ContainerRequestContext oRequestContext,
                                       @QueryParam("operation") String sOperationType, @QueryParam("name") String
                                               sProductName, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("subtype") String
                                               sOperationSubType, String sParameter) throws IOException {
@@ -362,7 +377,8 @@ public class ProcessingResources {
             
             
             // Check the user
-            User oUser = Wasdi.getUserFromSession(sSessionId);
+            User oUser = (User) oRequestContext.getProperty("authenticated-user");
+            String sSessionId = (String) oRequestContext.getProperty("session-id");
 
             // Is valid user?
             if (oUser==null) {

@@ -33,7 +33,17 @@ import wasdi.shared.data.interfaces.ISubscriptionRepositoryBackend;
 import wasdi.shared.data.interfaces.IUserRepositoryBackend;
 import wasdi.shared.data.interfaces.IUserResourcePermissionRepositoryBackend;
 import wasdi.shared.data.interfaces.IWorkspaceRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.IDatasetImageRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.IDatasetProjectRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.IImageStyleRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.ILabelRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.ILabellingTemplateRepositoryBackend;
 import wasdi.shared.data.mongo.MongoDataRepositoryFactory;
+import wasdi.shared.data.no2.labelling.No2DatasetImageRepositoryBackend;
+import wasdi.shared.data.no2.labelling.No2DatasetProjectRepositoryBackend;
+import wasdi.shared.data.no2.labelling.No2ImageStyleRepositoryBackend;
+import wasdi.shared.data.no2.labelling.No2LabelRepositoryBackend;
+import wasdi.shared.data.no2.labelling.No2LabellingTemplatesRepositoryBackend;
 
 /**
  * Transitional NO2 repository factory.
@@ -207,5 +217,30 @@ public class No2DataRepositoryFactory implements IDataRepositoryFactory {
 	@Override
 	public IWorkspaceRepositoryBackend createWorkspaceRepository() {
 		return new No2WorkspaceRepositoryBackend();
+	}
+
+	@Override
+	public IDatasetImageRepositoryBackend createDatasetImageRepository() {
+		return new No2DatasetImageRepositoryBackend();
+	}
+
+	@Override
+	public IDatasetProjectRepositoryBackend createDatasetProjectRepository() {
+		return new No2DatasetProjectRepositoryBackend();
+	}
+
+	@Override
+	public IImageStyleRepositoryBackend createImageStyleRepository() {
+		return new No2ImageStyleRepositoryBackend();
+	}
+
+	@Override
+	public ILabellingTemplateRepositoryBackend createLabellingTemplateRepository() {
+		return new No2LabellingTemplatesRepositoryBackend();
+	}
+
+	@Override
+	public ILabelRepositoryBackend createLabelRepository() {
+		return new No2LabelRepositoryBackend();
 	}
 }

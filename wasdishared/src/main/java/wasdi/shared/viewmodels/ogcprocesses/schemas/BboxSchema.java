@@ -1,19 +1,32 @@
 package wasdi.shared.viewmodels.ogcprocesses.schemas;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import wasdi.shared.viewmodels.ogcprocesses.Schema;
 
 public class BboxSchema extends Schema {
+	
+	// Matches the canonical OGC API Processes bbox input schema (bbox + crs properties)
+	public Map<String, Object> properties = new LinkedHashMap<>();
+	
 	public BboxSchema() {
 		type = "object";
 		
-		HashMap<String, String> aoSchema = new HashMap<>();
-		aoSchema.put("format", "ogc-bbox");
-		aoSchema.put("$ref", "../../openapi/schemas/bbox.yaml");
+		Map<String, Object> oBboxProperty = new LinkedHashMap<>();
+		oBboxProperty.put("type", "array");
+		
+		Map<String, String> oItemsSchema = new LinkedHashMap<>();
+		oItemsSchema.put("type", "number");
+		oBboxProperty.put("items", oItemsSchema);
+		oBboxProperty.put("minItems", 4);
+		oBboxProperty.put("maxItems", 6);
+		
+		Map<String, Object> oCrsProperty = new LinkedHashMap<>();
+		oCrsProperty.put("type", "string");
+		oCrsProperty.put("format", "uri");
+		
+		properties.put("bbox", oBboxProperty);
+		properties.put("crs", oCrsProperty);
 	}
-	
-	public ArrayList<Map<String, String>> allOf = new ArrayList<>();
 }

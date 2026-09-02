@@ -207,7 +207,7 @@ public class CoreResource {
 	    		
 	    		if (asLinkParts != null) {
 	    			if (asLinkParts.length>0) {
-	    				oAPIDefinitionLink.setHref(asLinkParts[0]);
+	    				oAPIDescriptionLink.setHref(asLinkParts[0]);
 	    			}
 	    			
 	    			if (asLinkParts.length>1) {

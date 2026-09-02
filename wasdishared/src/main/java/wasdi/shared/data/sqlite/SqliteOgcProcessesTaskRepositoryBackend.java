@@ -1,5 +1,7 @@
 package wasdi.shared.data.sqlite;
 
+import java.util.List;
+
 import wasdi.shared.business.OgcProcessesTask;
 import wasdi.shared.data.interfaces.IOgcProcessesTaskRepositoryBackend;
 import wasdi.shared.utils.Utils;
@@ -89,6 +91,12 @@ public class SqliteOgcProcessesTaskRepositoryBackend extends SqliteRepository im
 			WasdiLog.errorLog("OgcProcessesTaskRepository.getOgcProcessesTask: error", oEx);
 		}
 
+		return null;
+	}
+
+	@Override
+	public List<String> getProcessWsIds(String sUserId) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

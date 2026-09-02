@@ -1,5 +1,7 @@
 package wasdi.shared.data;
 
+import java.util.List;
+
 import wasdi.shared.business.OgcProcessesTask;
 import wasdi.shared.data.factories.DataRepositoryFactoryProvider;
 import wasdi.shared.data.interfaces.IOgcProcessesTaskRepositoryBackend;
@@ -77,7 +79,16 @@ public class OgcProcessesTaskRepository {
      * @return OgcProcessesTask or null
      */
     public OgcProcessesTask getOgcProcessesTask(String sProcessWorkspaceId) {
-		return m_oBackend.getOgcProcessesTask(sProcessWorkspaceId);
+		  return m_oBackend.getOgcProcessesTask(sProcessWorkspaceId);
+    }
+
+    /**
+     * Get the processWorkspaceId of all the OgcProcessesTask, optionally filtered by owner
+     * @param sUserId Owner of the processes, or null/empty to get all of them
+     * @return List of processWorkspaceId
+     */
+    public List<String> getProcessWsIds(String sUserId) {
+	    return m_oBackend.getProcessWsIds(sUserId);
     }
 
 }

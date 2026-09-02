@@ -76,22 +76,6 @@ GET /searchorbit/track/{satellitename}
 - Return codes:
 	- 200 OK (possibly with an empty/default body on failure)
 
-GET /searchorbit/getkmlsearchresults
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-- Description: Builds and returns a KML document for a supplied footprint polygon and label text. The footprint is converted into a placemark polygon styled in blue and clamped to ground.
-- HTTP Verb: GET
-- Headers: x-session-token
-- Query params:
-	- text (string, required) — placemark name/title
-	- footPrint (string, required) — polygon footprint to render
-- Body: none
-- Success:
-	- 200 OK, body: KML document
-- Notes:
-	- Returns ``null`` on invalid session, empty inputs, or conversion errors instead of an HTTP error response.
-- Return codes:
-	- 200 OK (KML body, or ``null`` on failure)
-
 GET /searchorbit/updatetrack/{satellitesname}
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 - Description: Returns a compact current-position update for multiple satellites in one request. Satellite codes are passed as a single path parameter separated by ``-``.

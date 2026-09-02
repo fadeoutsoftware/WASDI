@@ -1,0 +1,144 @@
+pipeline {
+  agent any
+
+  environment {
+    sCurrentRevision             = "${env.BUILD_ID}"
+    sWasdiAIAssistantImageName   = "wasdai-assistant"
+    sWasdiAIAssistantDockerPath  = "llm_api_server"
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '365'))
+    disableConcurrentBuilds()
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        echo "env.GIT_BRANCH                   = " + env.GIT_BRANCH
+        echo "env.sAnsibleInventory            = " + env.sAnsibleInventory
+        echo "env.sAnsibleLimit                = " + env.sAnsibleLimit
+        echo "env.sCurrentRevision             = " + env.sCurrentRevision
+        echo "env.sWasdiAIAssistantImageName   = " + env.sWasdiAIAssistantImageName
+        echo "env.sWasdiAIAssistantDockerPath  = " + env.sWasdiAIAssistantDockerPath
+        echo "env.WORKSPACE                    = " + env.WORKSPACE
+
+        sh script: "pwd", label: "Current location"
+        sh script: "docker --version", label: "Docker version"
+      }
+    }
+
+    stage('CHECKOUT WASDAI CODE') {
+      steps {
+        checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/wasdi-cloud/wasdai.git']]])
+      }
+    }
+
+    stage('BUILD DOCKER IMAGE') {
+      steps {
+        sh script: """
+          docker build \
+            --tag ${env.sWasdiAIAssistantImageName}:${env.sCurrentRevision} \
+            --tag ${env.sWasdiAIAssistantImageName}:latest \
+            -f llm_api_server/Dockerfile \
+            .
+        """,
+        label: "Build Docker image for wasdi-assistant"
+      }
+    }
+
+    stage('LOGIN TO NEXUS REGISTRIES') {
+      steps {
+        withCredentials([
+          usernamePassword(credentialsId: 'sWasdiNexusApplicationUser', usernameVariable: 'sWasdiNexusUsername', passwordVariable: 'sWasdiNexusPassword')
+        ]) {
+          sh script: """
+            echo "${sWasdiNexusPassword}" | docker login -u "${sWasdiNexusUsername}" --password-stdin main01-registry-infrastructure.wasdi.net
+            echo "${sWasdiNexusPassword}" | docker login -u "${sWasdiNexusUsername}" --password-stdin main02-registry-infrastructure.wasdi.net
+          """,
+          label: "Login to Nexus registries"
+        }
+      }
+    }
+
+    stage('TAG AND PUSH TO NEXUS - main01') {
+      steps {
+        sh script: """
+          docker tag ${env.sWasdiAIAssistantImageName}:${env.sCurrentRevision} main01-registry-infrastructure.wasdi.net/${env.sWasdiAIAssistantImageName}:${env.sCurrentRevision}
+          docker tag ${env.sWasdiAIAssistantImageName}:latest main01-registry-infrastructure.wasdi.net/${env.sWasdiAIAssistantImageName}:latest
+          
+          docker image push main01-registry-infrastructure.wasdi.net/${env.sWasdiAIAssistantImageName}:${env.sCurrentRevision}
+          docker image push main01-registry-infrastructure.wasdi.net/${env.sWasdiAIAssistantImageName}:latest
+        """,
+        label: "Push image to main01 registry"
+      }
+    }
+
+    stage('TAG AND PUSH TO NEXUS - main02') {
+      steps {
+        sh script: """
+          docker tag ${env.sWasdiAIAssistantImageName}:${env.sCurrentRevision} main02-registry-infrastructure.wasdi.net/${env.sWasdiAIAssistantImageName}:${env.sCurrentRevision}
+          docker tag ${env.sWasdiAIAssistantImageName}:latest main02-registry-infrastructure.wasdi.net/${env.sWasdiAIAssistantImageName}:latest
+          
+          docker image push main02-registry-infrastructure.wasdi.net/${env.sWasdiAIAssistantImageName}:${env.sCurrentRevision}
+          docker image push main02-registry-infrastructure.wasdi.net/${env.sWasdiAIAssistantImageName}:latest
+        """,
+        label: "Push image to main02 registry"
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE VAULT PASSWORD') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          sh script: """
+            mkdir --parents `dirname ${sWasdiAnsibleVaultFile}`
+            echo '${sWasdiAnsibleVaultPassword}' > ${sWasdiAnsibleVaultFile}
+          """,
+          label: "Update the Ansible vault password"
+        }
+      }
+    }
+
+    stage('UPDATE THE ANSIBLE CODE') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+          string(credentialsId: 'sWasdiAnsibleVaultPassword', variable: 'sWasdiAnsibleVaultPassword'),
+        ]) {
+          dir("${env.sWasdiAnsiblePath}") {
+            checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'sWasdiGitHubWasdiCloudSsh', url: "${env.sWasdiAnsibleGitRepositorySshUrl}"]]])
+          }
+        }
+      }
+    }
+
+    stage('DEPLOY THE CONTAINER') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'sWasdiAnsibleVaultFile', variable: 'sWasdiAnsibleVaultFile'),
+        ]) {
+          sh script: """
+            cd ${env.sWasdiAnsiblePath}
+            ansible-playbook \
+              playbooks/deployDockerContainer.yml \
+              --inventory inventories/${env.sAnsibleInventory}.yml \
+              --limit ${env.sAnsibleLimit} \
+              --vault-password-file ${sWasdiAnsibleVaultFile} \
+              --diff \
+              --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sDeployWasdiAIAssistantContainer=true'
+          """,
+          label: "Deploy wasdi-assistant container via Ansible"
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}

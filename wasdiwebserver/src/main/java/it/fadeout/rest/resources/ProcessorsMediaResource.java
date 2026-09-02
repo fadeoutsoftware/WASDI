@@ -14,15 +14,16 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import it.fadeout.Wasdi;
+import io.swagger.v3.oas.annotations.Operation;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.Comment;
 import wasdi.shared.business.Review;
@@ -67,11 +68,12 @@ public class ProcessorsMediaResource {
 	@GET
 	@Path("categories/get")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response getCategories(@HeaderParam("x-session-token") String sSessionId) {
+	@Operation(summary = "Get processor categories", description="Returns a list of all available processor/application categories for filtering and organizing processors in the marketplace.")
+	public Response getCategories(@Context ContainerRequestContext oRequestContext) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.getCategories");
 		
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		AppsCategoriesRepository oAppCategoriesRepository = new AppsCategoriesRepository();
 		
@@ -97,7 +99,8 @@ public class ProcessorsMediaResource {
 	@DELETE
 	@Path("/reviews/delete")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response deleteReview(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("reviewId") String sReviewId ) {
+	@Operation(summary = "Delete processor review", description="Deletes a review written by the authenticated user for a processor. Also removes all comments associated with the deleted review.")
+	public Response deleteReview(@Context ContainerRequestContext oRequestContext, @QueryParam("processorId") String sProcessorId, @QueryParam("reviewId") String sReviewId ) {
 		
 		try {
 		    sProcessorId = java.net.URLDecoder.decode(sProcessorId, StandardCharsets.UTF_8.name());
@@ -113,7 +116,7 @@ public class ProcessorsMediaResource {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.deleteReview( sProcessorId: "+ sProcessorId +" reviewId: "+sReviewId+")");
 		
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		// Check the user session
 		if(oUser == null){
 			WasdiLog.warnLog("ProcessorsMediaResource.deleteReview: invalid session");
@@ -163,7 +166,8 @@ public class ProcessorsMediaResource {
 	@DELETE
 	@Path("/comments/delete")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response deleteComment(@HeaderParam("x-session-token") String sSessionId, @QueryParam("reviewId") String sReviewId, @QueryParam("commentId") String sCommentId ) {
+	@Operation(summary = "Delete review comment", description="Deletes a comment written by the authenticated user on a processor review. Only the comment author can delete their own comment.")
+	public Response deleteComment(@Context ContainerRequestContext oRequestContext, @QueryParam("reviewId") String sReviewId, @QueryParam("commentId") String sCommentId ) {
 		
 		try {
 		    sReviewId = java.net.URLDecoder.decode(sReviewId, StandardCharsets.UTF_8.name());
@@ -179,7 +183,7 @@ public class ProcessorsMediaResource {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.deleteComment( sReviewId: " + sReviewId + " sCommentId: " + sCommentId + ")");
 		
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		// Check the user session
 		if (oUser == null) {
@@ -225,11 +229,12 @@ public class ProcessorsMediaResource {
 	@POST
 	@Path("/reviews/update")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response updateReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {
+	@Operation(summary = "Update processor review", description="Updates an existing review's rating (1-5) and text content. User must be the review owner. Changes are immediately visible.")
+	public Response updateReview(@Context ContainerRequestContext oRequestContext, ReviewViewModel oReviewViewModel) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.updateReview");
 	
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		// Check the user session
 		if(oUser == null){
 			WasdiLog.warnLog("ProcessorsMediaResource.updateReview: invalid session");
@@ -270,11 +275,12 @@ public class ProcessorsMediaResource {
 	@POST
 	@Path("/comments/update")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response updateComment(@HeaderParam("x-session-token") String sSessionId, CommentDetailViewModel oCommentViewModel) {
+	@Operation(summary = "Update review comment", description="Updates the text content of an existing comment. User must be the comment author. Changes take effect immediately.")
+	public Response updateComment(@Context ContainerRequestContext oRequestContext, CommentDetailViewModel oCommentViewModel) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.updateComment");
 	
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		// Check the user session
 		if (oUser == null) {
 			WasdiLog.warnLog("ProcessorsMediaResource.updateComment: invalid session");
@@ -310,11 +316,12 @@ public class ProcessorsMediaResource {
 	@POST
 	@Path("/reviews/add")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response addReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {//
+	@Operation(summary = "Add processor review", description="Creates a new review/rating (1-5 stars) for a processor. Each user can only submit one review per processor. Requires processor access.")
+	public Response addReview(@Context ContainerRequestContext oRequestContext, ReviewViewModel oReviewViewModel) {//
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.addReview");
 	
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		// Check the user session
 		if(oUser == null){
 			WasdiLog.warnLog("ProcessorsMediaResource.addReview: invalid user");
@@ -378,11 +385,12 @@ public class ProcessorsMediaResource {
 	@POST
 	@Path("/comments/add")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response addComment(@HeaderParam("x-session-token") String sSessionId, CommentDetailViewModel oCommentViewModel) {
+	@Operation(summary = "Add comment to review", description="Adds a comment to an existing processor review. Requires access to the processor. Limited comments per review.")
+	public Response addComment(@Context ContainerRequestContext oRequestContext, CommentDetailViewModel oCommentViewModel) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.addComment");
 	
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		// Check the user session
 		if (oUser == null) {
 			WasdiLog.warnLog("ProcessorsMediaResource.addComment: invalid user");
@@ -446,11 +454,12 @@ public class ProcessorsMediaResource {
 	@GET
 	@Path("/reviews/getlist")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response getReviewListByProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorName") String sProcessorName, @QueryParam("page") Integer iPage, @QueryParam("itemsperpage") Integer iItemsPerPage) {
+	@Operation(summary = "Get paginated processor reviews", description="Returns paginated reviews for a processor with statistics (average rating, total votes). Includes flag indicating if current user already voted. Sortable and pageable.")
+	public Response getReviewListByProcessor(@Context ContainerRequestContext oRequestContext, @QueryParam("processorName") String sProcessorName, @QueryParam("page") Integer iPage, @QueryParam("itemsperpage") Integer iItemsPerPage) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.getReviewListByProcessor");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		// Check the user session
 		if(oUser == null){
 			WasdiLog.warnLog("ProcessorsMediaResource.getReviewListByProcessor: invalid session");
@@ -514,10 +523,11 @@ public class ProcessorsMediaResource {
 	@GET
 	@Path("/comments/getlist")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response getCommentListByReview(@HeaderParam("x-session-token") String sSessionId, @QueryParam("reviewId") String sReviewId) {
+	@Operation(summary = "Get review comments", description="Returns all comments associated with a specific review, displaying user names and timestamps. User must have access to the processor.")
+	public Response getCommentListByReview(@Context ContainerRequestContext oRequestContext, @QueryParam("reviewId") String sReviewId) {
 		WasdiLog.debugLog("ProcessorsMediaResource.getCommentListByReview");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		// Check the user session
 		if (oUser == null) {
 			WasdiLog.warnLog("ProcessorsMediaResource.getCommentListByReview: invalid session");
@@ -568,12 +578,13 @@ public class ProcessorsMediaResource {
 	@GET
 	@Path("/publisher/getlist")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response getPublishers(@HeaderParam("x-session-token") String sSessionId) {
+	@Operation(summary = "Get WASDI publishers", description="Returns a list of WASDI processor publishers (organizations/users with published applications), filtered by user permissions and accessibility.")
+	public Response getPublishers(@Context ContainerRequestContext oRequestContext) {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.getPublishers");
 
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		// Check the user session
 		if(oUser == null){
 			WasdiLog.warnLog("ProcessorsMediaResource.getPublishers: invalid session");

@@ -18,7 +18,7 @@ import net.wasdi.openeoserver.services.KeycloakService;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.users.*;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.HttpUtils;

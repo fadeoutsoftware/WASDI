@@ -33,6 +33,16 @@ import wasdi.shared.data.interfaces.ISubscriptionRepositoryBackend;
 import wasdi.shared.data.interfaces.IUserRepositoryBackend;
 import wasdi.shared.data.interfaces.IUserResourcePermissionRepositoryBackend;
 import wasdi.shared.data.interfaces.IWorkspaceRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.IDatasetImageRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.IDatasetProjectRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.IImageStyleRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.ILabelRepositoryBackend;
+import wasdi.shared.data.interfaces.labelling.ILabellingTemplateRepositoryBackend;
+import wasdi.shared.data.sqlite.labelling.SqliteDatasetImageRepositoryBackend;
+import wasdi.shared.data.sqlite.labelling.SqliteDatasetProjectRepositoryBackend;
+import wasdi.shared.data.sqlite.labelling.SqliteImageStyleRepositoryBackend;
+import wasdi.shared.data.sqlite.labelling.SqliteLabelRepositoryBackend;
+import wasdi.shared.data.sqlite.labelling.SqliteLabellingTemplatesRepositoryBackend;
 
 /**
  * Mongo implementation of centralized repository backend factory.
@@ -230,5 +240,30 @@ public class SqliteDataRepositoryFactory implements IDataRepositoryFactory {
         IWorkspaceRepositoryBackend oRepositoryBackend = new SqliteWorkspaceRepositoryBackend();
         return oRepositoryBackend;
     }
+
+	@Override
+	public IDatasetImageRepositoryBackend createDatasetImageRepository() {
+		return new SqliteDatasetImageRepositoryBackend();
+	}
+
+	@Override
+	public IDatasetProjectRepositoryBackend createDatasetProjectRepository() {
+		return new SqliteDatasetProjectRepositoryBackend();
+	}
+
+	@Override
+	public IImageStyleRepositoryBackend createImageStyleRepository() {
+		return new SqliteImageStyleRepositoryBackend();
+	}
+
+	@Override
+	public ILabellingTemplateRepositoryBackend createLabellingTemplateRepository() {
+		return new SqliteLabellingTemplatesRepositoryBackend();
+	}
+
+	@Override
+	public ILabelRepositoryBackend createLabelRepository() {
+		return new SqliteLabelRepositoryBackend();
+	}
 
 }

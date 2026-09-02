@@ -12,9 +12,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,9 +29,18 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
+import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
+import io.swagger.v3.oas.integration.OpenApiContextLocator;
+import io.swagger.v3.oas.integration.SwaggerConfiguration;
+import io.swagger.v3.oas.integration.api.OpenApiContext;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
+import it.fadeout.filters.AuthenticationFilter;
 import it.fadeout.providers.JerseyMapperProvider;
 import it.fadeout.rest.resources.AuthResource;
 import it.fadeout.rest.resources.ProcessWorkspaceResource;
+import it.fadeout.rest.resources.WasdiOpenApiResource;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -124,11 +135,61 @@ public class Wasdi extends ResourceConfig {
 	 * Constructor: bind the classes and the resources classes
 	 */
 	public Wasdi() {
-		register(new WasdiBinder());
 		register(JacksonFeature.class);
 		register(JerseyMapperProvider.class);
+		register(AuthenticationFilter.class);
 		register(org.glassfish.jersey.media.multipart.MultiPartFeature.class);
 		packages(true, "it.fadeout.rest.resources");
+		
+		register(WasdiOpenApiResource.class);
+	}
+	
+	private void updateOpenApiServerUrl() {
+		try {
+			String sBaseUrl = WasdiConfig.Current.baseUrl;
+			
+			if (sBaseUrl.endsWith("/")) sBaseUrl = sBaseUrl.substring(0, sBaseUrl.length()-1);
+			
+			Info oInfo = new Info().title("WASDI REST API").version("1.0.0").description("WASDI APEx compliant REST and STAC API");			
+			
+			// Configure the OpenAPI Server model
+	        Server oServer = new Server();
+	        oServer.setUrl(sBaseUrl);
+	        oServer.setDescription("WASDI Server Base URL");
+				        
+	        ArrayList<Server> aoServers = new ArrayList<>();
+	        aoServers.add(oServer);
+
+	        OpenAPI oOpenAPI = new OpenAPI().info(oInfo).servers(aoServers);
+	        
+	        Set<String> aoScannedPackages = new HashSet<>();
+	        aoScannedPackages.add("it.fadeout.rest.resources");	        
+
+	        // Pass configuration to Swagger Engine
+	        SwaggerConfiguration oSwaggerConfig = new SwaggerConfiguration()
+	                .openAPI(oOpenAPI)
+	                .prettyPrint(true)
+	                .resourcePackages(aoScannedPackages);
+	                //.resourcePackages(Collections.singleton("it.fadeout.rest.resources"));
+
+	        try {
+	            JaxrsOpenApiContextBuilder<?> oContextBuilder = new JaxrsOpenApiContextBuilder<>().openApiConfiguration(oSwaggerConfig);
+
+	            OpenApiContext oContext = oContextBuilder.buildContext(true);
+
+	            // Register as the default context in the locator
+	            OpenApiContextLocator.getInstance().putOpenApiContext("openapi.context.id.default",  oContext);
+	            
+	            WasdiLog.debugLog("Wasdi.updateOpenApiServerUrl: OpenAPI base URL set to " + sBaseUrl);
+	        } 
+	        catch (Exception oEx) {
+	            WasdiLog.errorLog("Wasdi.updateOpenApiServerUrl: " + oEx.getMessage());
+	        }
+			
+		}
+		catch(Exception oEx) {
+			WasdiLog.errorLog("Wasdi.updateOpenApiServerUrl: " + oEx.getMessage());
+		}
 	}
 
 	/**
@@ -158,7 +219,9 @@ public class Wasdi extends ResourceConfig {
 			WasdiLog.warnLog("Wasdi.initWasdi: ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
 		}
 		
-		WasdiLog.initLogger(WasdiConfig.Current.logLevelServer);	
+		WasdiLog.initLogger(WasdiConfig.Current.logLevelServer);
+		
+		updateOpenApiServerUrl();
 		
 		// set nfs properties download folder
 		String sUserHome = System.getProperty("user.home");
@@ -191,7 +254,7 @@ public class Wasdi extends ResourceConfig {
 			// Read the configuration of KeyCloak		
 			s_sKeyCloakIntrospectionUrl = WasdiConfig.Current.keycloack.introspectAddress;
 			s_sClientId = WasdiConfig.Current.keycloack.confidentialClient;
-			s_sClientSecret = WasdiConfig.Current.keycloack.clientSecret;			
+			s_sClientSecret = WasdiConfig.Current.keycloack.clientSecret;
 		}
 		
 		// Computational nodes need to configure also the local dababase
@@ -343,7 +406,9 @@ public class Wasdi extends ResourceConfig {
 					oJSON = new JSONObject(sResponse);
 					
 					if(oJSON != null) {
-						sUserId = oJSON.optString("preferred_username", null);
+						if (oJSON.optBoolean("active", false)) {
+							sUserId = oJSON.optString("preferred_username", null);
+						}
 					}					
 				}
 				

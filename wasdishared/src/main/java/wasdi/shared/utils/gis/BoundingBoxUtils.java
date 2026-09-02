@@ -2,6 +2,7 @@ package wasdi.shared.utils.gis;
 
 import java.awt.geom.Rectangle2D;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -232,11 +233,11 @@ public class BoundingBoxUtils {
 	private static BiFunction<Double, Double, Double> divide = (a, b) -> BigDecimal.valueOf(a).divide(BigDecimal.valueOf(b)).doubleValue();
 	private static Function<Double, Double> divideBy4 = (a) -> divide.apply(a, 4.0);
 
-	private static Function<Double, Double> roundUp = (a) -> BigDecimal.valueOf(a).setScale(0, BigDecimal.ROUND_CEILING).doubleValue();
-	private static Function<Double, Double> roundDown = (a) -> BigDecimal.valueOf(a).setScale(0, BigDecimal.ROUND_FLOOR).doubleValue();
+	private static Function<Double, Double> roundUp = (a) -> BigDecimal.valueOf(a).setScale(0, RoundingMode.CEILING).doubleValue();
+	private static Function<Double, Double> roundDown = (a) -> BigDecimal.valueOf(a).setScale(0, RoundingMode.FLOOR).doubleValue();
 
-	private static Function<Double, Integer> roundUpAsInt = (a) -> BigDecimal.valueOf(a).setScale(0, BigDecimal.ROUND_CEILING).intValue();
-	private static Function<Double, Integer> roundDownAsInt = (a) -> BigDecimal.valueOf(a).setScale(0, BigDecimal.ROUND_FLOOR).intValue();
+	private static Function<Double, Integer> roundUpAsInt = (a) -> BigDecimal.valueOf(a).setScale(0, RoundingMode.CEILING).intValue();
+	private static Function<Double, Integer> roundDownAsInt = (a) -> BigDecimal.valueOf(a).setScale(0, RoundingMode.FLOOR).intValue();
 
 	public static Function<Double, Double> roundToQuarterUp = (a) -> multiplyBy4.andThen(roundUp).andThen(divideBy4).apply(a);
 	public static Function<Double, Double> roundToQuarterDown = (a) -> multiplyBy4.andThen(roundDown).andThen(divideBy4).apply(a);

@@ -4,20 +4,20 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
-import javax.inject.Inject;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
-import it.fadeout.services.ProvidersCatalog;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DataProvider;
 import wasdi.shared.business.DownloadedFile;
@@ -27,6 +27,7 @@ import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.users.User;
+import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
@@ -65,13 +66,7 @@ import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
  */
 @Path("/filebuffer")
 public class FileBufferResource {
-		
-	/**
-	 * Providers Catalogue
-	 */
-	@Inject
-	ProvidersCatalog m_oDataProviderCatalog;
-
+	
 	/**
 	 * Trigger a sharing of an image (from one workspace to another) in WASDI.
 	 * The method checks the input, create the parameter and call WASDI.runProcess
@@ -87,7 +82,8 @@ public class FileBufferResource {
 		@GET
 	@Path("share")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response share(@HeaderParam("x-session-token") String sSessionId,
+	@Operation(summary = "Share a product between workspaces", description="Copies a product (file/dataset) from one workspace to another. The product must exist in the origin workspace. Supports optional bounding box filtering and parent process tracking. Returns the operation status including product URL and metadata.")
+	public Response share(@Context ContainerRequestContext oRequestContext,
 									@QueryParam("originWorkspaceId") String sOriginWorkspaceId,
 									@QueryParam("destinationWorkspaceId") String sDestinationWorkspaceId,
 									@QueryParam("productName") String sProductName,
@@ -104,7 +100,8 @@ public class FileBufferResource {
 		
 		try {
 			// Check User and Session
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 			
 			if (oUser == null) {
 				WasdiLog.warnLog("FileBufferResource.share: invalid session");
@@ -284,7 +281,8 @@ public class FileBufferResource {
 	@GET
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult download(@HeaderParam("x-session-token") String sSessionId,
+	@Operation(summary = "Import product (query parameters form)", description="Initiates an asynchronous import of a product (file or dataset) into a workspace. This is a query-parameter version of the POST download endpoint. Automatically creates a process with the provided metadata (file URL, provider, bounding box, parent process). Delegates to imageImport() internally.")
+	public PrimitiveResult download(@Context ContainerRequestContext oRequestContext,
 									@QueryParam("fileUrl") String sFileUrl,
 									@QueryParam("name") String sFileName,
 									@QueryParam("provider") String sProvider,
@@ -294,7 +292,8 @@ public class FileBufferResource {
 									@QueryParam("platform") String sPlatform)
 			throws IOException
 	{
-		WasdiLog.debugLog("FileBufferResource.download, session: " + sSessionId + " fileName: " + sFileName);
+		WasdiLog.debugLog("FileBufferResource.download, fileName: " + sFileName);
+		String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 		ImageImportViewModel oImageImportViewModel = new ImageImportViewModel();
 
@@ -306,7 +305,7 @@ public class FileBufferResource {
 		oImageImportViewModel.setParent(sParentProcessWorkspaceId);
 		oImageImportViewModel.setPlatformType(sPlatform);
 
-		return this.imageImport(sSessionId, oImageImportViewModel);
+		return this.imageImport(oRequestContext, oImageImportViewModel);
 	}
 
 	/**
@@ -321,7 +320,8 @@ public class FileBufferResource {
 	@POST
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult imageImport(@HeaderParam("x-session-token") String sSessionId, ImageImportViewModel oImageImportViewModel) {
+	@Operation(summary = "Import product (request body form)", description="Initiates an asynchronous import of a product (file or dataset) into a workspace. Accepts ImageImportViewModel in request body with all import parameters. Validates input, creates a process with the provided metadata, and schedules it via WASDI launcher. Returns a PrimitiveResult with process details.")
+	public PrimitiveResult imageImport(@Context ContainerRequestContext oRequestContext, ImageImportViewModel oImageImportViewModel) {
 		
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -331,7 +331,8 @@ public class FileBufferResource {
 			WasdiLog.debugLog("FileBufferResource.imageImport");
 			
 			// We get the user from session
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 			if (oUser==null) {
 				// Invalid credentials
@@ -399,7 +400,7 @@ public class FileBufferResource {
 			DataProvider oProvider = null;
 			
 			if (Utils.isNullOrEmpty(sProvider)) {
-				oProvider = m_oDataProviderCatalog.getDefaultProvider(WasdiConfig.Current.nodeCode);
+				oProvider = getDefaultProvider(WasdiConfig.Current.nodeCode);
 				
 				sProvider = oProvider.getName();
 				
@@ -409,7 +410,7 @@ public class FileBufferResource {
 				}
 				
 			} else {
-				oProvider = m_oDataProviderCatalog.getProvider(sProvider);
+				oProvider = getProvider(sProvider);
 			}
 
 			WasdiLog.debugLog("FileBufferResource.imageImport: provider: " + oProvider.getName());
@@ -523,7 +524,8 @@ public class FileBufferResource {
 	@GET
 	@Path("publishband")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public RabbitMessageViewModel publishBand(	@HeaderParam("x-session-token") String sSessionId,
+	@Operation(summary = "", description="")
+	public RabbitMessageViewModel publishBand(	@Context ContainerRequestContext oRequestContext,
 												@QueryParam("fileUrl") String sFileUrl,
 												@QueryParam("workspace") String sWorkspaceId,
 												@QueryParam("band") String sBand,
@@ -535,7 +537,8 @@ public class FileBufferResource {
 			WasdiLog.debugLog("FileBufferResource.publishBand");
 			
 			// Check Authentication
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 			if (oUser==null) {
 				WasdiLog.warnLog("FileBufferResource.publishBand: invalid session"); 
 				return oReturnValue;
@@ -631,4 +634,38 @@ public class FileBufferResource {
 		return oReturnValue;
 
 	}
+	
+    public DataProvider getProvider(String sName) {
+
+        DataProvider oProvider = new DataProvider();
+
+        // if it's a registered provider, fill the object with the data from the configuration file
+        DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(sName); 
+        
+
+        if (oDataProviderConfig != null) {
+            oProvider.setName(sName);
+            oProvider.setOSUser(oDataProviderConfig.user);
+            oProvider.setOSPassword(oDataProviderConfig.password);
+            oProvider.setDescription(oDataProviderConfig.description);
+            oProvider.setLink(oDataProviderConfig.link);
+        }
+
+        return oProvider;
+    }
+    
+    /**
+     * Get the default data provider for node
+     */
+    public DataProvider getDefaultProvider(String sNode) {
+    	NodeRepository oNodeRepository = new NodeRepository();
+        DataProvider oProvider = new DataProvider();
+        Node oNode = oNodeRepository.getNodeByCode(sNode);
+        if (oNode != null) {
+            String sDefaultProvider = oNode.getDefaultProvider();
+            oProvider = getProvider(sDefaultProvider);
+        }
+        return oProvider;
+    }
+	
 }

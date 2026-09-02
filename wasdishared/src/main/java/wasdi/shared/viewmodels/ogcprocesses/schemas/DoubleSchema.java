@@ -6,7 +6,8 @@ import wasdi.shared.viewmodels.ogcprocesses.Schema;
 
 public class DoubleSchema extends Schema {
 	public DoubleSchema() {
-		type = "numeric";
+		// "numeric" is not a valid JSON Schema type; the correct type is "number"
+		type = "number";
 	}
 	
 	public String format = "double";

@@ -128,11 +128,6 @@ public class ProcessWorkspaceRepository implements IProcessWorkspaceRepositoryBa
 	}
 
 	@Override
-	public List<ProcessWorkspace> getOGCProcessByUser(String sUserId) {
-		return m_oBackend.getOGCProcessByUser(sUserId);
-	}
-
-	@Override
 	public List<ProcessWorkspace> getCreatedProcesses() {
 		return m_oBackend.getCreatedProcesses();
 	}

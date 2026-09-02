@@ -325,6 +325,20 @@ public class Publishband extends Operation {
                     WasdiLog.debugLog("Publishband.executeOperation: node code: " + oNode.getNodeCode());
                     oPublishedBand.setGeoserverUrl(oNode.getNodeGeoserverAddress());
                 }
+                else {
+                	if (WasdiConfig.Current.geoserver!=null) {
+                		String sGeoserverUrl = WasdiConfig.Current.geoserver.address;
+                		if (!sGeoserverUrl.endsWith("ows")) {
+                			if (!sGeoserverUrl.endsWith("/")) sGeoserverUrl +="/";
+                			sGeoserverUrl += "ows";
+                		}
+                		
+                		oPublishedBand.setGeoserverUrl(sGeoserverUrl);	
+                	}
+                	else {
+                		WasdiLog.errorLog("Publishband.executeOperation: geoserver url not found neither in the node nor in the config.");
+                	}
+                }
 
                 // Add it the the db
                 oPublishedBandsRepository.insertPublishedBand(oPublishedBand);
@@ -382,7 +396,9 @@ public class Publishband extends Operation {
 	}
 
 	protected String getStyleByFileName(String sFile, String sBandName, WasdiProductReader oReadProduct) {
-        // Default Style: can be changed in the following lines depending by the product		
+        // Default Style: can be changed in the following lines depending by the product
+		
+		File oFile = new File(sFile);
 		
         String sStyle = "raster";
 
@@ -430,11 +446,14 @@ public class Publishband extends Operation {
         else if (WasdiFileUtils.isShapeFile(sFile)) {
         	sStyle = "polygon";
         }
-        else if (MissionUtils.isGeoPackageFile(new File(sFile))) {
+        else if (MissionUtils.isGeoPackageFile(oFile)) {
         	GpkgProductReader oGpkgReader = (GpkgProductReader) oReadProduct;
         	sStyle = oGpkgReader.getStyleForPublishBand(sBandName);
         }
-                
+        else if (oFile.getName().toUpperCase().startsWith("S2")) {
+        	sStyle = "wasdi_s2_rgb";
+        }
+        
         return sStyle;
 	}
 	

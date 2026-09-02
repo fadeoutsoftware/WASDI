@@ -9,15 +9,17 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
 import it.fadeout.threads.UpdateProcessorEnvironmentWorker;
 import wasdi.shared.LauncherOperations;
@@ -71,11 +73,12 @@ public class PackageManagerResource {
 	@GET
 	@Path("/listPackages")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response getListPackages(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) {
+	@Operation(summary = "Get processor packages", description="Returns a list of all packages installed in a processor's environment, organized by status (outdated, up-to-date, all). User must have access to the processor.")
+	public Response getListPackages(@Context ContainerRequestContext oRequestContext, @QueryParam("name") String sName) {
 		WasdiLog.debugLog("PackageManagerResource.getListPackages( " + "Name: " + sName + ", " + " )");
 		
 		// Check session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oUser == null) {
 			WasdiLog.warnLog("PackageManagerResource.getListPackages: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
@@ -144,11 +147,12 @@ public class PackageManagerResource {
 	@GET
 	@Path("/environmentActions")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response getEnvironmentActionsList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) {
+	@Operation(summary = "Get environment action history", description="Returns a log of all package management actions executed on a processor's environment (installations, updates, removals). User must have access to the processor.")
+	public Response getEnvironmentActionsList(@Context ContainerRequestContext oRequestContext, @QueryParam("name") String sName) {
 		WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList( " + "Name: " + sName + ", " + " )");
 		
 		// Check session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		if (oUser == null) {
 			WasdiLog.warnLog("PackageManagerResource.getEnvironmentActionsList: invalid session");
@@ -196,11 +200,12 @@ public class PackageManagerResource {
 	@GET
 	@Path("/managerVersion")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response getManagerVersion(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) {
+	@Operation(summary = "Get package manager version", description="Returns the version and configuration of the package manager (e.g., conda, pip) installed in a processor's environment. Reads cached packagesInfo.json or makes live query.")
+	public Response getManagerVersion(@Context ContainerRequestContext oRequestContext, @QueryParam("name") String sName) {
 		WasdiLog.debugLog("PackageManagerResource.getManagerVersion( " + "Name: " + sName + " )");
 		
 		// Check session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		if (oUser == null) {
 			WasdiLog.warnLog("PackageManagerResource.getManagerVersion: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
@@ -274,7 +279,8 @@ public class PackageManagerResource {
 	@GET
 	@Path("/environmentupdate")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response environmentUpdate(@HeaderParam("x-session-token") String sSessionId,
+	@Operation(summary = "Update processor environment", description="Forces an update of a processor's package environment, optionally targeting a specific package or action. Triggers async operation on all WASDI nodes.")
+	public Response environmentUpdate(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId,
 			@QueryParam("updateCommand") String sUpdateCommand) {
@@ -282,10 +288,11 @@ public class PackageManagerResource {
 
 		try {
 			// Check Session
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = (User) oRequestContext.getProperty("authenticated-user");
+			String sSessionId = (String) oRequestContext.getProperty("session-id");
 
 			if (oUser==null) {
-				WasdiLog.warnLog("ProcessorResources.environmentupdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
+				WasdiLog.warnLog("ProcessorResources.environmentupdate( Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
@@ -403,11 +410,12 @@ public class PackageManagerResource {
 	@GET
 	@Path("/reset")
 	@Produces({"application/json", "application/xml", "text/xml" })
-	public Response resetActionList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("workspace") String sWorkspaceId) {
+	@Operation(summary = "Reset package environment", description="Resets a processor's package environment to clean state, clearing all action history and reinstalling base packages. Async operation across all nodes.")
+	public Response resetActionList(@Context ContainerRequestContext oRequestContext, @QueryParam("processorId") String sProcessorId, @QueryParam("workspace") String sWorkspaceId) {
 		WasdiLog.debugLog("PackageManagerResource.resetActionList( " + "processorId: " + sProcessorId + ", " + " )");
 		
 		// Check session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+		User oUser = (User) oRequestContext.getProperty("authenticated-user");
 		
 		if (oUser == null) {
 			WasdiLog.warnLog("PackageManagerResource.resetActionList: invalid session");

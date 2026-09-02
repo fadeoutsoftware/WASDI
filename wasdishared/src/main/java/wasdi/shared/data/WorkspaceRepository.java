@@ -158,6 +158,14 @@ public class WorkspaceRepository {
 		return m_oBackend.getWorkspacesList();
 	}
 
+	/**
+	 * Get the workspaces flagged as public
+	 * @return
+	 */
+	public List<Workspace> getPublicWorkspaces() {
+		return m_oBackend.getPublicWorkspaces();
+	}
+
 	public List<Workspace> findWorkspacesByPartialName(String sPartialName) {
 		return m_oBackend.findWorkspacesByPartialName(sPartialName);
 	}

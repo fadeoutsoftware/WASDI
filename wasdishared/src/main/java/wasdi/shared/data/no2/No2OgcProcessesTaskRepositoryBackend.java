@@ -2,6 +2,8 @@ package wasdi.shared.data.no2;
 
 import static org.dizitart.no2.filters.FluentFilter.where;
 
+import java.util.List;
+
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 
@@ -151,5 +153,11 @@ public class No2OgcProcessesTaskRepositoryBackend extends No2Repository implemen
 			WasdiLog.errorLog("No2OgcProcessesTaskRepositoryBackend.deleteManyByField: error", oEx);
 			return -1;
 		}
+	}
+
+	@Override
+	public List<String> getProcessWsIds(String sUserId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -27,15 +27,13 @@
         <sVersionCommonsNet>3.12.0</sVersionCommonsNet>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionGoogleApiClient>2.8.1</sVersionGoogleApiClient>
-        <sVersionHttpClient>4.5.14</sVersionHttpClient>
         <sVersionJackson>2.20.1</sVersionJackson>
-        <sVersionJavaApiForKml>2.2.1</sVersionJavaApiForKml>
+        <sVersionJacksonAnnotations>2.20</sVersionJacksonAnnotations>
         <sVersionJavaxWebsocketApi>1.1</sVersionJavaxWebsocketApi>
         <sVersionJson>20250517</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionMavenCompilerPlugin>3.11.0</sVersionMavenCompilerPlugin>
         <sVersionMavenWarPlugin>3.4.0</sVersionMavenWarPlugin>
-        <sVersionOrbit>1.0.2</sVersionOrbit>
         <sVersionJersey2>2.45</sVersionJersey2>
         <sVersionServletApi>2.5</sVersionServletApi>
         <sVersionStripeJava>22.0.0</sVersionStripeJava>
@@ -168,12 +166,6 @@
             <version>${sVersionServletApi}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${sVersionHttpClient}</version>
-        </dependency>        
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider -->
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -185,6 +177,14 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${sVersionJackson}</version>
+        </dependency>
+        <!-- Pinned explicitly: jersey-media-json-jackson transitively pulls an older jackson-annotations
+             that Maven can end up preferring over the one jackson-databind needs, causing a
+             java.lang.NoSuchMethodError at runtime (JsonProperty.isRequired() missing) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${sVersionJacksonAnnotations}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
         <dependency>
@@ -198,12 +198,6 @@
             <artifactId>javax.websocket-api</artifactId>
             <version>${sVersionJavaxWebsocketApi}</version>
             <scope>provided</scope>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/de.micromata.jak/JavaAPIforKml -->
-        <dependency>
-            <groupId>de.micromata.jak</groupId>
-            <artifactId>JavaAPIforKml</artifactId>
-            <version>${sVersionJavaApiForKml}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.stripe/stripe-java -->
         <dependency>
@@ -233,26 +227,29 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>9.4.53.v20231009</version>
+			<version>9.4.57.v20241219</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
-			<version>9.4.53.v20231009</version>
+			<version>9.4.57.v20241219</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-servlet-core</artifactId>
 			<version>${sVersionJersey2}</version>
 		</dependency>
+		<dependency>
+		    <groupId>io.swagger.core.v3</groupId>
+		    <artifactId>swagger-jaxrs2</artifactId>
+		    <version>2.2.53</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.webjars</groupId>
+		    <artifactId>swagger-ui</artifactId>
+		    <version>5.32.14</version>
+		</dependency>		
         
-        <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
-        <dependency>
-            <groupId>org.nfs.orbits</groupId>
-            <artifactId>orbit</artifactId>
-            <version>${sVersionOrbit}</version>
-        </dependency>
-
         <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
         <dependency>
             <groupId>fadeout.software.wasdi</groupId>

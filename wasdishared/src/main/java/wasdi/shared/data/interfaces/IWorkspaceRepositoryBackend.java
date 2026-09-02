@@ -39,6 +39,8 @@ public interface IWorkspaceRepositoryBackend {
 
 	List<Workspace> getWorkspacesList();
 
+	List<Workspace> getPublicWorkspaces();
+
 	List<Workspace> findWorkspacesByPartialName(String sPartialName);
 
 	Long getStorageUsageForUser(String sUserId);

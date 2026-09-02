@@ -193,6 +193,18 @@ public class No2WorkspaceRepositoryBackend extends No2Repository implements IWor
 	}
 
 	@Override
+	public List<Workspace> getPublicWorkspaces() {
+		// Not worth a dedicated Nitrite query for this backend: filter the (small) full list in memory
+		List<Workspace> aoPublicWorkspaces = new ArrayList<>();
+
+		for (Workspace oWorkspace : getWorkspacesList()) {
+			if (oWorkspace.isPublic()) aoPublicWorkspaces.add(oWorkspace);
+		}
+
+		return aoPublicWorkspaces;
+	}
+
+	@Override
 	public List<Workspace> findWorkspacesByPartialName(String sPartialName) {
 		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
 			return new ArrayList<>();

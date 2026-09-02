@@ -123,7 +123,37 @@ If you already know WASDI features and you are a Python developer check out the 
 Reference center
 ---------------------------
 
-WASDI allows users and developer to interact though **libraries** and **APIs**. Find the reference of your language library on the left menu.
+WASDI allows users and developer to interact though **libraries** and **APIs**. Find the reference of your language library on the left menu. The WASDI REST API `OpenAPI description <https://www.wasdi.net/wasdiwebserver/docs>`_ is also available.
+
+
+OGC API Processes Compatibility
+-------------------------------
+
+WASDI is compliant with the OGC API - Processes standard. The OGC API - Processes interface allows clients to run all WASDI applications and to deploy applications created according to the Application Package Best Practice.
+
+See the :doc:`OGC API - Processes reference </ogc-processes/OgcApiProcesses>` for the exposed endpoints.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: OGC API Processes
+
+   ogc-processes/OgcApiProcesses.rst
+
+
+STAC and OGC API Features Support
+---------------------------------
+
+WASDI supports the STAC standard and the OGC API - Features standard. This interface exposes WASDI workspaces as STAC collections and their files as STAC items.
+
+See the :doc:`STAC and OGC API Features reference </stac/Stac>` for the exposed endpoints.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: STAC
+
+   stac/Stac.rst
 
 
 .. toctree::

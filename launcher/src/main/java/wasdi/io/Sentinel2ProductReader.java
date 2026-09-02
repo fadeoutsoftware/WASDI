@@ -20,6 +20,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.gis.GdalFileFormats;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -155,30 +156,90 @@ public class Sentinel2ProductReader extends WasdiProductReader {
                 WasdiLog.warnLog("Sentinel2ProductReader.getFileForPublishBand: band is null or empty");
                 return null;
             }
+            
+            // Read the RGB Bands
+            MeasurementSource oSourceR = findSourceForBand("B4");
+            MeasurementSource oSourceG = findSourceForBand("B3");
+            MeasurementSource oSourceB = findSourceForBand("B2");
 
-            MeasurementSource oSource = findSourceForBand(sBand);
-            if (oSource == null) {
-                WasdiLog.warnLog("Sentinel2ProductReader.getFileForPublishBand: no source found for band " + sBand);
+            if (oSourceR == null || oSourceG == null || oSourceB == null) {
+                WasdiLog.warnLog("Sentinel2ProductReader.getFileForPublishBand: Missing source for one of the bands");
                 return null;
             }
 
-            String sOutputPath = m_oProductFile.getParentFile().getAbsolutePath() + File.separator + sLayerId + ".tif";
+            String sBaseDir = m_oProductFile.getParentFile().getAbsolutePath();
+            String sVrtPath = sBaseDir + File.separator + sLayerId + "_temp.vrt";
+            String sOutputPath = sBaseDir + File.separator + sLayerId + ".tif";
+
+            // Build a VRT with RGB Bands
+            String sGdalBuildVrtCommand = GdalUtils.adjustGdalFolder("gdalbuildvrt");
+            ArrayList<String> asVrtArgs = new ArrayList<String>();
+            asVrtArgs.add(sGdalBuildVrtCommand);
+            asVrtArgs.add("-separate");
+            asVrtArgs.add(sVrtPath);            
+            
+            asVrtArgs.add(oSourceR.sDatasetPath); 
+            asVrtArgs.add(oSourceG.sDatasetPath); 
+            asVrtArgs.add(oSourceB.sDatasetPath);
+            
+            ShellExecReturn oVrtReturn = RunTimeUtils.shellExec(asVrtArgs, true, true, true, true);
+            WasdiLog.debugLog("Sentinel2ProductReader.getFileForPublishBand [gdalbuildvrt]: " + oVrtReturn.getOperationLogs());
+
+            File oVrtFile = new File(sVrtPath);
+            if (!oVrtFile.exists()) {
+                WasdiLog.errorLog("Sentinel2ProductReader.getFileForPublishBand: VRT creation failed.");
+                return null;
+            }            
+            
+            String sTempScaledTiff = sBaseDir + File.separator + sLayerId + "_scaled.tif";
+            String sGdalTranslateCommand = GdalUtils.adjustGdalFolder("gdal_translate");
+            ArrayList<String> asTranslateArgs = new ArrayList<String>();
+            asTranslateArgs.add(sGdalTranslateCommand);
+            asTranslateArgs.add("-ot");
+            asTranslateArgs.add("Byte"); // Convert data type to Byte
+
+            // Scale raw values (0 to 4000) down to standard visual ranges (0 to 255)
+            asTranslateArgs.add("-scale");
+            asTranslateArgs.add("0");
+            asTranslateArgs.add("4000");
+            asTranslateArgs.add("0");
+            asTranslateArgs.add("255");
+
+            asTranslateArgs.add(sVrtPath);       // Input VRT
+            asTranslateArgs.add(sTempScaledTiff); // Intermediate Output
+
+            ShellExecReturn oTranslateReturn = RunTimeUtils.shellExec(asTranslateArgs, true, true, true, true);
+            WasdiLog.debugLog("Sentinel2ProductReader.getFileForPublishBand [gdal_warp]: " + oTranslateReturn.getOperationLogs());
 
             // Use gdalwarp to reproject to EPSG:4326. This ensures the output is in WGS84
-            // (which GeoServer expects and the EPSG fallback in Publishband uses), and avoids
-            // SNAP failing on uint16/12-bit S2 data when it tries to read the output .tif for EPSG detection.
             String sGdalCommand = GdalUtils.adjustGdalFolder("gdalwarp");
             ArrayList<String> asArgs = new ArrayList<String>();
             asArgs.add(sGdalCommand);
             asArgs.add("-t_srs");
             asArgs.add("EPSG:4326");
             asArgs.add("-of");
-            asArgs.add("GTiff");
-            asArgs.add(oSource.sDatasetPath);
+            asArgs.add(GdalFileFormats.GTiff);
+                        
+            asArgs.add("-co");
+            asArgs.add("PHOTOMETRIC=RGB");
+            
+            asArgs.add("-co");
+            asArgs.add("COMPRESS=DEFLATE");
+            
+            asArgs.add("-co");
+            asArgs.add("PREDICTOR=2");
+
+            asArgs.add("-co");
+            asArgs.add("TILED=YES");
+            
+            asArgs.add(sVrtPath);
             asArgs.add(sOutputPath);
 
-            ShellExecReturn oTranslateReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
-            WasdiLog.debugLog("Sentinel2ProductReader.getFileForPublishBand [gdal_translate]: " + oTranslateReturn.getOperationLogs());
+            ShellExecReturn oWarpReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
+            WasdiLog.debugLog("Sentinel2ProductReader.getFileForPublishBand [gdal_warp]: " + oWarpReturn.getOperationLogs());
+            
+            WasdiFileUtils.deleteFile(sVrtPath);
+            WasdiFileUtils.deleteFile(sTempScaledTiff);
 
             File oOutputFile = new File(sOutputPath);
             if (oOutputFile.exists()) {
