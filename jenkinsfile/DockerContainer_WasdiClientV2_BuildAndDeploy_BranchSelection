@@ -65,13 +65,19 @@ pipeline {
 
     stage('CLONE THE GIT REPOSITORY') {
       steps {
-        sh script: """
-          mkdir client_v2
-          cd client_v2
-          git clone https://github.com/wasdi-cloud/wasdiClient2.git .
-        """,
-        label: "Clone the GIT repository"
-      }
+          withCredentials([usernamePassword(
+            credentialsId: 'pcampanella-github-token',
+            usernameVariable: 'GIT_USER', 
+            passwordVariable: 'GIT_PASS'
+          )]) {
+            sh script: """
+              mkdir client_v2
+              cd client_v2
+              git clone https://${GIT_USER}:${GIT_PASS}@github.com/wasdi-cloud/wasdiClient2.git .
+            """,
+            label: "Clone the GIT repository"
+          }
+        }      
     }
 
     stage('CHECKOUT THE CLIENT V2 BRANCH') {
