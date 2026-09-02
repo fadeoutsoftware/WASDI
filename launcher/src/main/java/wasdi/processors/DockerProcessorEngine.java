@@ -28,6 +28,7 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.processors.ProcessorSourceTypes;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
@@ -156,25 +157,33 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
             String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
             
-            // Create the file
-            File oProcessorZipFile = new File(sProcessorFolder + sProcessorId + ".zip");
-
-            WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: check processor exists in " + oProcessorZipFile.getAbsolutePath());
-
-            // Check it
-            if (oProcessorZipFile.exists() == false) {
-            	return logDeployErrorAndClean("DeployProcessor Cannot find the processor Zip file, something went wrong", bFirstDeploy);
-            }
-
             if (bFirstDeploy) {
-            	LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, m_oProcessWorkspace, ProcessStatus.RUNNING, 2);
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, m_oProcessWorkspace, ProcessStatus.RUNNING, 2);
             }
-                
-            WasdiLog.errorLog("DockerProcessorEngine.DeployProcessor: unzip processor");
 
-            // Unzip the processor (and check for entry point myProcessor.py)
-            if (!unzipProcessor(sProcessorFolder, sProcessorId + ".zip", oParameter.getProcessObjId())) {
-            	return logDeployErrorAndClean("error unzipping the Processor [" + sProcessorName + "]", bFirstDeploy);
+            if (ProcessorSourceTypes.GIT.equals(oProcessor.getSourceType())) {
+                if (!supportsGitProcessorSource()) {
+                    return logDeployErrorAndClean("Git source is not supported by processor type [" + oParameter.getProcessorType() + "]", bFirstDeploy);
+                }
+
+                processWorkspaceLog("Clone processor source from Git repository");
+                String sMaterializationError = ProcessorSourceMaterializer.materializeGitSource(oProcessor, sProcessorFolder);
+                if (!Utils.isNullOrEmpty(sMaterializationError)) {
+                    return logDeployErrorAndClean(sMaterializationError, bFirstDeploy);
+                }
+            }
+            else {
+                File oProcessorZipFile = new File(sProcessorFolder + sProcessorId + ".zip");
+                WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: check processor exists in " + oProcessorZipFile.getAbsolutePath());
+
+                if (!oProcessorZipFile.exists()) {
+                    return logDeployErrorAndClean("DeployProcessor Cannot find the processor Zip file, something went wrong", bFirstDeploy);
+                }
+
+                WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: unzip processor");
+                if (!unzipProcessor(sProcessorFolder, sProcessorId + ".zip", oParameter.getProcessObjId())) {
+                    return logDeployErrorAndClean("error unzipping the Processor [" + sProcessorName + "]", bFirstDeploy);
+                }
             }
 
             onAfterUnzipProcessor(sProcessorFolder);
@@ -277,6 +286,13 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
      */
     protected void onAfterUnzipProcessor(String sProcessorFolder) {
 
+    }
+
+    /**
+     * @return true when this engine uses the centralized build workflow and supports Git sources
+     */
+    protected boolean supportsGitProcessorSource() {
+        return false;
     }
 
     /**
@@ -849,6 +865,21 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
 
             WasdiLog.infoLog("DockerProcessorEngine.redeploy: update docker for " + sProcessorName);
+
+            if (ProcessorSourceTypes.GIT.equals(oProcessor.getSourceType())) {
+                if (!supportsGitProcessorSource()) {
+                    WasdiLog.errorLog("DockerProcessorEngine.redeploy: Git source is not supported by processor type " + oProcessor.getType());
+                    return false;
+                }
+
+                processWorkspaceLog("Refresh processor source from Git repository");
+                String sMaterializationError = ProcessorSourceMaterializer.materializeGitSource(oProcessor, sProcessorFolder);
+                if (!Utils.isNullOrEmpty(sMaterializationError)) {
+                    processWorkspaceLog(sMaterializationError);
+                    WasdiLog.errorLog("DockerProcessorEngine.redeploy: " + sMaterializationError);
+                    return false;
+                }
+            }
 
             onAfterUnzipProcessor(sProcessorFolder);
 

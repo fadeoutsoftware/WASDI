@@ -18,6 +18,11 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		// Disable download of processor files in local nodes
 		m_bDownloadProcessorFiles = false;
 	}
+
+	@Override
+	protected boolean supportsGitProcessorSource() {
+		return true;
+	}
 	
 	/**
 	 * Deploy the processor in WASDI.
@@ -109,8 +114,8 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
         }
         
 		// Increment the version of the processor
-		String sNewVersion = oProcessor.getVersion();
-		sNewVersion = StringUtils.incrementIntegerString(sNewVersion);
+		String sPreviousVersion = oProcessor.getVersion();
+		String sNewVersion = StringUtils.incrementIntegerString(sPreviousVersion);
 		oProcessor.setVersion(sNewVersion);
 		
 		// Save it
@@ -123,6 +128,8 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		if (!bResult) {
 			// This is not good
 			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: super class deploy returned false. So we stop here.");
+			oProcessor.setVersion(sPreviousVersion);
+			oProcessorRepository.updateProcessor(oProcessor);
 			return false;
 		}
 		else {

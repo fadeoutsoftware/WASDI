@@ -141,6 +141,17 @@ public class Processor {
 	private String logo = "";
 	
 	/**
+	 * Type of the source used by the processor.
+	 * Supported values: UPLOAD, GIT.
+	 */
+	private String sourceType = ProcessorSourceTypes.UPLOAD;
+	
+	/**
+	 * Optional public Git repository URL used for a Git-backed processor.
+	 */
+	private String gitRepositoryUrl = "";
+	
+	/**
 	 * Log of the build operations
 	 */
 	private ArrayList<String> buildLogs = new ArrayList<String>();
@@ -326,6 +337,18 @@ public class Processor {
 	}
 	public void setLogo(String logo) {
 		this.logo = logo;
+	}
+	public String getSourceType() {
+		return sourceType == null ? ProcessorSourceTypes.UPLOAD : sourceType;
+	}
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
+	public String getGitRepositoryUrl() {
+		return gitRepositoryUrl;
+	}
+	public void setGitRepositoryUrl(String gitRepositoryUrl) {
+		this.gitRepositoryUrl = gitRepositoryUrl;
 	}
 	public ArrayList<String> getBuildLogs() {
 		return buildLogs;

@@ -26,6 +26,23 @@ public class ProcessorTypes {
 	public static String PERSONALIZED_DOCKER = "personalized_docker";
 	public static String PYTHON312_UBUNTU24 = "python312";
 	public static String LOCAL_PYTHON312 = "local_python312";
+
+	/**
+	 * @param sProcessorType processor runtime type
+	 * @return true when the processor type uses the centralized Docker build workflow
+	 */
+	public static boolean supportsGitSource(String sProcessorType) {
+		return IDL.equals(sProcessorType)
+				|| OCTAVE.equals(sProcessorType)
+				|| CONDA.equals(sProcessorType)
+				|| CSHARP.equals(sProcessorType)
+				|| PYTHON_PIP_2.equals(sProcessorType)
+				|| PIP_ONESHOT.equals(sProcessorType)
+				|| PYTHON_PIP_2_UBUNTU_20.equals(sProcessorType)
+				|| JAVA_17_UBUNTU_22.equals(sProcessorType)
+				|| PERSONALIZED_DOCKER.equals(sProcessorType)
+				|| PYTHON312_UBUNTU24.equals(sProcessorType);
+	}
 	
 	
 	/**

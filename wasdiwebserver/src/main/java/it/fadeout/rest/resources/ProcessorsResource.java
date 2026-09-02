@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -64,6 +66,7 @@ import wasdi.shared.business.Review;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorLog;
+import wasdi.shared.business.processors.ProcessorSourceTypes;
 import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.business.processors.ProcessorUI;
 import wasdi.shared.business.users.ResourceTypes;
@@ -152,11 +155,8 @@ public class ProcessorsResource  {
 											@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName,
 											@QueryParam("version") String sVersion,	@QueryParam("description") String sDescription,
 											@QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample,
-											@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout, @QueryParam("force") Boolean bForce) throws Exception {
-		
-		if (bForce == null) bForce = Boolean.FALSE;
-		
-		String sSessionId = (String) oRequestContext.getProperty("session-id");
+													@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout, @QueryParam("force") Boolean bForce,
+													@QueryParam("gitRepositoryUrl") String sGitRepositoryUrl) throws Exception {
 		
 		WasdiLog.debugLog("ProcessorsResource.uploadProcessor( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description"
 				+ sDescription + ", Type: " + sType + ", ParamsSample: " + sParamsSample + " )");
@@ -167,8 +167,34 @@ public class ProcessorsResource  {
 		sName = URLDecoder.decode(sName, StandardCharsets.UTF_8.name());
 		sDescription = URLDecoder.decode(sDescription, StandardCharsets.UTF_8.name());
 		sParamsSample = URLDecoder.decode(sParamsSample, StandardCharsets.UTF_8.name());
+		if (!Utils.isNullOrEmpty(sGitRepositoryUrl)) {
+			sGitRepositoryUrl = URLDecoder.decode(sGitRepositoryUrl, StandardCharsets.UTF_8.name());
+		}
 
 		try {
+			boolean bHasUploadSource = oInputStreamForFile != null;
+			boolean bHasGitSource = !bHasUploadSource && !Utils.isNullOrEmpty(sGitRepositoryUrl);
+			if (!bHasUploadSource && !bHasGitSource) {
+				WasdiLog.warnLog("ProcessorsResource.uploadProcessor: no processor source provided");
+				oResult.setIntValue(400);
+				oResult.setStringValue("Provide an uploaded processor file or a gitRepositoryUrl.");
+				return oResult;
+			}
+			if (bHasGitSource && !isValidPublicGitRepositoryUrl(sGitRepositoryUrl)) {
+				WasdiLog.warnLog("ProcessorsResource.uploadProcessor: invalid public Git repository URL");
+				oResult.setIntValue(400);
+				oResult.setStringValue("gitRepositoryUrl must be a valid public HTTPS Git repository URL.");
+				return oResult;
+			}
+			if (Utils.isNullOrEmpty(sType)) {
+				sType = ProcessorTypes.PYTHON312_UBUNTU24;
+			}
+			if (bHasGitSource && !ProcessorTypes.supportsGitSource(sType)) {
+				WasdiLog.warnLog("ProcessorsResource.uploadProcessor: Git source is not supported for processor type " + sType);
+				oResult.setIntValue(400);
+				oResult.setStringValue("Git source is not supported for processor type " + sType + ".");
+				return oResult;
+			}
 			if(sName.contains("/") || sName.contains("\\") || sName.contains("#")) {
 				WasdiLog.warnLog("ProcessorsResource.uploadProcessor: not a valid filename, aborting");
 				oResult.setIntValue(400);
@@ -246,25 +272,20 @@ public class ProcessorsResource  {
 				}
 			}
 			
-			// Create file
 			String sProcessorId =  UUID.randomUUID().toString();
-			File oProcessorFile = new File(PathsConfig.getProcessorFolder(sName) + sProcessorId + ".zip");
-			WasdiLog.debugLog("ProcessorsResource.uploadProcessor: Processor file Path: " + oProcessorFile.getPath());
-			
-			// Save uploaded file
-			int iRead = 0;
-			byte[] ayBytes = new byte[1024];
-			
-			try (OutputStream oOutputStream = new FileOutputStream(oProcessorFile)) {
-				while ((iRead = oInputStreamForFile.read(ayBytes)) != -1) {
-					oOutputStream.write(ayBytes, 0, iRead);
+			if (bHasUploadSource) {
+				File oProcessorFile = new File(PathsConfig.getProcessorFolder(sName) + sProcessorId + ".zip");
+				WasdiLog.debugLog("ProcessorsResource.uploadProcessor: Processor file Path: " + oProcessorFile.getPath());
+
+				int iRead = 0;
+				byte[] ayBytes = new byte[1024];
+
+				try (OutputStream oOutputStream = new FileOutputStream(oProcessorFile)) {
+					while ((iRead = oInputStreamForFile.read(ayBytes)) != -1) {
+						oOutputStream.write(ayBytes, 0, iRead);
+					}
+					oOutputStream.flush();
 				}
-				oOutputStream.flush();
-				oOutputStream.close();				
-			}
-			
-			if (Utils.isNullOrEmpty(sType)) {
-				sType = ProcessorTypes.PYTHON312_UBUNTU24;
 			}
 			
 			Date oDate = new Date();
@@ -282,6 +303,10 @@ public class ProcessorsResource  {
 			oProcessor.setVersion("1");
 			oProcessor.setPort(-1);
 			oProcessor.setType(sType);
+			oProcessor.setSourceType(bHasGitSource ? ProcessorSourceTypes.GIT : ProcessorSourceTypes.UPLOAD);
+			if (bHasGitSource) {
+				oProcessor.setGitRepositoryUrl(sGitRepositoryUrl);
+			}
 			oProcessor.setIsPublic(iPublic);
 			oProcessor.setUpdateDate((double)oDate.getTime());
 			oProcessor.setUploadDate((double)oDate.getTime());
@@ -2031,7 +2056,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/libupdate")
 	@Produces({ "application/json", "text/xml" })
-	@Operation(summary = "Update processor libraries", description="Forces update of processor dependencies and libraries. Propagates to all computing nodes. Triggers async LIBRARYUPDATE operation with ongoing deployment flag.")
+	@Operation(summary = "Update processor libraries", description="Forces update of processor dependencies and libraries. Git-backed processors refresh their repository source on the main node. Triggers async LIBRARYUPDATE operation with ongoing deployment flag.")
 	public Response libraryUpdate(@Context ContainerRequestContext oRequestContext,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId) {
@@ -2062,7 +2087,7 @@ public class ProcessorsResource  {
 				return Response.status(Status.FORBIDDEN).build();				
 			}
 			
-			if (WasdiConfig.Current.isMainNode()) {
+			if (WasdiConfig.Current.isMainNode() && !ProcessorSourceTypes.GIT.equals(oProcessorToForceUpdate.getSourceType())) {
 				// In the main node: start a thread to update all the computing nodes
 				try {
 					WasdiLog.debugLog("ProcessorsResource.libraryUpdate: this is the main node, starting Worker to update computing nodes");
@@ -3744,6 +3769,47 @@ public class ProcessorsResource  {
 		Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName.toLowerCase().trim());
 
 		return oProcessor == null;
+	}
+
+	/**
+	 * Validates the public Git repository URL used as a processor source.
+	 * Only HTTPS URLs pointing to a public Git repository are accepted for the first incremental release.
+	 *
+	 * @param sGitRepositoryUrl Git repository URL to validate
+	 * @return true when the URL matches the supported public Git repository format
+	 */
+	private boolean isValidPublicGitRepositoryUrl(String sGitRepositoryUrl) {
+		if (Utils.isNullOrEmpty(sGitRepositoryUrl)) {
+			return false;
+		}
+
+		String sNormalizedUrl = sGitRepositoryUrl.trim();
+		if (!sNormalizedUrl.startsWith("https://")) {
+			return false;
+		}
+
+		try {
+			URI oUri = new URI(sNormalizedUrl);
+			String sHost = oUri.getHost();
+			String sPath = oUri.getPath();
+
+			if (!"https".equalsIgnoreCase(oUri.getScheme()) || oUri.getUserInfo() != null || Utils.isNullOrEmpty(sHost) || Utils.isNullOrEmpty(sPath)) {
+				return false;
+			}
+
+			String sNormalizedPath = sPath.endsWith("/") ? sPath.substring(0, sPath.length() - 1) : sPath;
+			String[] asSegments = sNormalizedPath.split("/");
+			if (asSegments.length < 2) {
+				return false;
+			}
+
+			String sLastSegment = asSegments[asSegments.length - 1];
+			return !sLastSegment.isEmpty() && !sLastSegment.contains(" ");
+		}
+		catch (URISyntaxException oEx) {
+			WasdiLog.warnLog("ProcessorsResource.isValidPublicGitRepositoryUrl: invalid Git URL " + sGitRepositoryUrl + " - " + oEx.getMessage());
+			return false;
+		}
 	}
 	
 	
