@@ -1,24 +1,23 @@
 package wasdi.processors;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.shared.utils.runtime.RunTimeUtils;
-import wasdi.shared.utils.runtime.ShellExecReturn;
 
 public class ProcessorSourceMaterializer {
 
@@ -56,6 +55,12 @@ public class ProcessorSourceMaterializer {
 		try {
 			List<String> asCommand = new ArrayList<>();
 			asCommand.add("git");
+			asCommand.add("-c");
+			asCommand.add("credential.interactive=false");
+			asCommand.add("-c");
+			asCommand.add("http.lowSpeedLimit=1");
+			asCommand.add("-c");
+			asCommand.add("http.lowSpeedTime=60");
 			asCommand.add("clone");
 			asCommand.add("--depth");
 			asCommand.add("1");
@@ -63,12 +68,9 @@ public class ProcessorSourceMaterializer {
 			asCommand.add(sGitRepositoryUrl);
 			asCommand.add(oStagingFolder.getAbsolutePath());
 
-			Map<String, String> aoEnvironment = new HashMap<>();
-			aoEnvironment.put("GIT_TERMINAL_PROMPT", "0");
-
-			ShellExecReturn oCloneResult = RunTimeUtils.shellExec(asCommand, true, true, true, true, aoEnvironment);
-			if (!oCloneResult.isOperationOk() || oCloneResult.getOperationReturn() != 0) {
-				return "Cannot clone Git processor source: " + oCloneResult.getOperationLogs();
+			String sCloneError = cloneRepository(asCommand);
+			if (!Utils.isNullOrEmpty(sCloneError)) {
+				return sCloneError;
 			}
 
 			File oGitMetadataFolder = new File(oStagingFolder, ".git");
@@ -113,6 +115,67 @@ public class ProcessorSourceMaterializer {
 				WasdiLog.warnLog("ProcessorSourceMaterializer.materializeGitSource: cannot clean staging folder " + oStagingFolder.getAbsolutePath());
 			}
 		}
+	}
+
+	private static String cloneRepository(List<String> asCommand) {
+		Process oProcess = null;
+		StringBuilder oProcessOutput = new StringBuilder();
+
+		try {
+			WasdiLog.debugLog("ProcessorSourceMaterializer.cloneRepository: cloning public Git repository");
+			ProcessBuilder oProcessBuilder = new ProcessBuilder(asCommand);
+			oProcessBuilder.redirectErrorStream(true);
+			oProcessBuilder.environment().put("GIT_TERMINAL_PROMPT", "0");
+
+			oProcess = oProcessBuilder.start();
+			Process oRunningProcess = oProcess;
+			Thread oOutputReader = Thread.ofVirtual().start(() -> readProcessOutput(oRunningProcess, oProcessOutput));
+
+			if (!oProcess.waitFor(180L, TimeUnit.SECONDS)) {
+				oProcess.descendants().forEach(ProcessHandle::destroyForcibly);
+				oProcess.destroyForcibly();
+				oProcess.waitFor(5L, TimeUnit.SECONDS);
+				oOutputReader.join(5000L);
+				return "Cannot clone Git processor source: operation timed out after 180 seconds" + formatProcessOutput(oProcessOutput);
+			}
+
+			oOutputReader.join(5000L);
+			if (oProcess.exitValue() != 0) {
+				return "Cannot clone Git processor source" + formatProcessOutput(oProcessOutput);
+			}
+
+			return "";
+		}
+		catch (InterruptedException oEx) {
+			Thread.currentThread().interrupt();
+			if (oProcess != null) {
+				oProcess.descendants().forEach(ProcessHandle::destroyForcibly);
+				oProcess.destroyForcibly();
+			}
+			return "Git processor source clone was interrupted";
+		}
+		catch (IOException oEx) {
+			return "Cannot start Git processor source clone: " + oEx.getMessage();
+		}
+	}
+
+	private static void readProcessOutput(Process oProcess, StringBuilder oProcessOutput) {
+		try (BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()))) {
+			String sLine = null;
+			while ((sLine = oReader.readLine()) != null) {
+				oProcessOutput.append(sLine).append(System.lineSeparator());
+			}
+		}
+		catch (IOException oEx) {
+			WasdiLog.warnLog("ProcessorSourceMaterializer.readProcessOutput: cannot read Git output " + oEx.getMessage());
+		}
+	}
+
+	private static String formatProcessOutput(StringBuilder oProcessOutput) {
+		if (oProcessOutput.length() == 0) {
+			return "";
+		}
+		return ": " + oProcessOutput.toString().trim();
 	}
 
 	private static void restoreBackup(Path oLivePath, Path oBackupPath) {
