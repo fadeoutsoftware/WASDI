@@ -50,7 +50,7 @@ pipeline {
     stage('LOGIN TO NEXUS REGISTRIES') {
       steps {
         withCredentials([
-          usernamePassword(credentialsId: 'sWasdiNexusApplicationUser', usernameVariable: 'sWasdiNexusUsername', passwordVariable: 'sWasdiNexusPassword')
+          usernamePassword(credentialsId: 'sWasdiNexusUserCredentials', usernameVariable: 'sWasdiNexusUsername', passwordVariable: 'sWasdiNexusPassword')
         ]) {
           sh script: """
             echo "${sWasdiNexusPassword}" | docker login -u "${sWasdiNexusUsername}" --password-stdin main01-registry-infrastructure.wasdi.net
