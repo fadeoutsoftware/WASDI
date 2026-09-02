@@ -26,6 +26,7 @@ public class DeployedProcessorViewModel {
 	private boolean readOnly = false;
 	private boolean isDeploymentOngoing = false;
 	private Double lastUpdate = 0.0;
+	private String sourceType = "UPLOAD";
 	
 	public String getParamsSample() {
 		return paramsSample;
@@ -122,5 +123,11 @@ public class DeployedProcessorViewModel {
 	}
 	public void setLastUpdate(Double lastUpdate) {
 		this.lastUpdate = lastUpdate;
+	}
+	public String getSourceType() {
+		return sourceType;
+	}
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
 	}
 }

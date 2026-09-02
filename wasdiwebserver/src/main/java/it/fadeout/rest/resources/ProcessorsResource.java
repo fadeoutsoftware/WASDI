@@ -458,6 +458,7 @@ public class ProcessorsResource  {
 				oDeployedProcessorViewModel.setLogo(oProcessor.getLogo());
 				oDeployedProcessorViewModel.setDeploymentOngoing(oProcessor.isDeploymentOngoing());
 				oDeployedProcessorViewModel.setLastUpdate(oProcessor.getUpdateDate());
+				oDeployedProcessorViewModel.setSourceType(oProcessor.getSourceType());
 				
 				oDeployedProcessorViewModel.setPublisherNickName(oDeployedProcessorViewModel.getPublisher());
 				
@@ -569,6 +570,7 @@ public class ProcessorsResource  {
 			oDeployedProcessorViewModel.setIsPublic(oProcessor.getIsPublic());
 			oDeployedProcessorViewModel.setType(oProcessor.getType());
 			oDeployedProcessorViewModel.setLastUpdate(oProcessor.getUpdateDate());
+			oDeployedProcessorViewModel.setSourceType(oProcessor.getSourceType());
 			
 			int iTimeoutMinutes = 0;
 			
