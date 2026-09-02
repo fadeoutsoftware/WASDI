@@ -158,6 +158,10 @@ public class ProcessorsResource  {
 													@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout, @QueryParam("force") Boolean bForce,
 													@QueryParam("gitRepositoryUrl") String sGitRepositoryUrl) throws Exception {
 		
+		if (bForce == null) bForce = Boolean.FALSE;
+		
+		String sSessionId = (String) oRequestContext.getProperty("session-id");		
+		
 		WasdiLog.debugLog("ProcessorsResource.uploadProcessor( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description"
 				+ sDescription + ", Type: " + sType + ", ParamsSample: " + sParamsSample + " )");
 		
