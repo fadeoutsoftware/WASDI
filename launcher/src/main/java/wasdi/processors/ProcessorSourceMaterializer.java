@@ -56,7 +56,11 @@ public class ProcessorSourceMaterializer {
 			List<String> asCommand = new ArrayList<>();
 			asCommand.add("git");
 			asCommand.add("-c");
+			asCommand.add("credential.helper=");
+			asCommand.add("-c");
 			asCommand.add("credential.interactive=false");
+			asCommand.add("-c");
+			asCommand.add("http.version=HTTP/1.1");
 			asCommand.add("-c");
 			asCommand.add("http.lowSpeedLimit=1");
 			asCommand.add("-c");
