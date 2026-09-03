@@ -281,6 +281,11 @@ public class OgcProcesses extends ResourceConfig {
 		try {
 			// Validate JWT and extract userId from token claims
 			String sUserId = KeycloakUtils.validateJwtAndGetUserId(sJwtToken);
+			String sClientId = KeycloakUtils.validateJwtAndGetClientId(sJwtToken);
+			if (isAcceptedExternalClient(sClientId)) {
+				sUserId = sClientId.toLowerCase();
+				ensureServiceUser(sUserId);
+			}
 			
 			if (Utils.isNullOrEmpty(sUserId)) {
 				WasdiLog.warnLog("OgcProcesses.handleJWTAuthentication: JWT validation failed or no userId extracted");
@@ -312,6 +317,36 @@ public class OgcProcesses extends ResourceConfig {
 		}
 		
 		return null;
+	}
+
+	private static boolean isAcceptedExternalClient(String sClientId) {
+		if (Utils.isNullOrEmpty(sClientId) || WasdiConfig.Current.keycloack == null
+				|| WasdiConfig.Current.keycloack.acceptedClientIds == null) {
+			return false;
+		}
+
+		for (String sAcceptedClientId : WasdiConfig.Current.keycloack.acceptedClientIds) {
+			if (sClientId.equals(sAcceptedClientId)) return true;
+		}
+		return false;
+	}
+
+	private static User ensureServiceUser(String sUserId) {
+		UserRepository oUserRepository = new UserRepository();
+		User oUser = oUserRepository.getUser(sUserId);
+		if (oUser != null) return oUser;
+
+		User oServiceUser = new User();
+		oServiceUser.setUserId(sUserId);
+		oServiceUser.setName(sUserId);
+		oServiceUser.setSurname("");
+		oServiceUser.setPassword(null);
+		oServiceUser.setValidAfterFirstAccess(true);
+		oServiceUser.setAuthServiceProvider("service");
+		oServiceUser.setDefaultNode(WasdiConfig.Current.usersDefaultNode);
+		oServiceUser.setSkin(WasdiConfig.Current.defaultSkin);
+		if (oUserRepository.insertUser(oServiceUser)) return oServiceUser;
+		return oUserRepository.getUser(sUserId);
 	}
 	
 	/**
@@ -450,6 +485,19 @@ public class OgcProcesses extends ResourceConfig {
 				}
 			}
 			
+			String sToken = AuthTokenUtil.extractTokenFromAuthHeader(sAuthorization);
+			if (AuthTokenUtil.appearsToBeJWT(sToken)) {
+				String sClientId = KeycloakUtils.validateJwtAndGetClientId(sToken);
+				if (isAcceptedExternalClient(sClientId)) {
+					String sUserId = sClientId.toLowerCase();
+					User oUser = ensureServiceUser(sUserId);
+					if (oUser != null) {
+						UserSession oSession = getOrCreateSessionFromJWT(sUserId);
+						return oSession == null ? "" : oSession.getSessionId();
+					}
+				}
+			}
+
 			return getSessionIdFromBasicAuthentication(sAuthorization);
 		}
 		catch (Exception oEx) {

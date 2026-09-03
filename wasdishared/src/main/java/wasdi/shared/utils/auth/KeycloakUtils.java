@@ -461,6 +461,44 @@ public class KeycloakUtils {
 		return "";
 	}
 
+	/**
+	 * Locally validates a JWT and returns its authorized client ID.
+	 *
+	 * @param sJwtToken Keycloak access token
+	 * @return the azp/client ID in the token, or an empty string if validation fails
+	 */
+	public static String validateJwtAndGetClientId(String sJwtToken) {
+		try {
+			if (Utils.isNullOrEmpty(sJwtToken) || WasdiConfig.Current.keycloack == null) {
+				return "";
+			}
+
+			KeycloackConfig oKeycloakConfig = WasdiConfig.Current.keycloack;
+			ConfigurableJWTProcessor<SecurityContext> oJwtProcessor = getJwtProcessor(oKeycloakConfig);
+			if (oJwtProcessor == null) {
+				return "";
+			}
+
+			JWTClaimsSet oClaims = oJwtProcessor.process(sJwtToken, null);
+			if (!isTokenForConfiguredClient(oClaims, oKeycloakConfig.client)) {
+				WasdiLog.warnLog("KeycloakUtils.validateJwtAndGetClientId: token is not intended for the configured client");
+				return "";
+			}
+
+			String sClientId = oClaims.getStringClaim("azp");
+			if (Utils.isNullOrEmpty(sClientId)) {
+				sClientId = oClaims.getStringClaim("client_id");
+			}
+			return Utils.isNullOrEmpty(sClientId) ? "" : sClientId;
+		} catch (BadJOSEException | JOSEException oEx) {
+			WasdiLog.warnLog("KeycloakUtils.validateJwtAndGetClientId: invalid JWT: " + oEx.getMessage());
+		} catch (Exception oEx) {
+			WasdiLog.warnLog("KeycloakUtils.validateJwtAndGetClientId: " + oEx);
+		}
+
+		return "";
+	}
+
 	private static synchronized ConfigurableJWTProcessor<SecurityContext> getJwtProcessor(KeycloackConfig oKeycloakConfig) {
 		String sIssuer = getIssuer(oKeycloakConfig);
 		String sJwksUrl = sIssuer + "/protocol/openid-connect/certs";

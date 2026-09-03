@@ -1,5 +1,7 @@
 package wasdi.shared.config;
 
+import java.util.ArrayList;
+
 /**
  * Keycloack authorization server Configuration
  * @author p.campanella
@@ -41,6 +43,11 @@ public class KeycloackConfig {
 	 * Client Secret
 	 */
 	public String clientSecret;
+
+	/**
+	 * External OAuth clients allowed to call APIs with bearer tokens.
+	 */
+	public ArrayList<String> acceptedClientIds = new ArrayList<>();
 	
 	/**
 	 * Realm

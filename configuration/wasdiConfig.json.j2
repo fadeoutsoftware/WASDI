@@ -55,6 +55,7 @@
         "confidentialClient": "{{ aoWasdiConfiguration['keycloak']['confidentialClient'] }}",
         "client": "{{ aoWasdiConfiguration['keycloak']['client'] }}",
         "clientSecret": "{{ aoWasdiConfiguration['keycloak']['clientSecret'] }}",
+        "acceptedClientIds": {{ aoWasdiConfiguration['keycloak']['acceptedClientIds'] | default([]) | to_json }},
         "realm": "{{ aoWasdiConfiguration['keycloak']['realm'] }}",
         "sessionExpireHours": 24
     },
