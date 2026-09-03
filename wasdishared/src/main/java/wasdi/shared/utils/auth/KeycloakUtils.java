@@ -280,21 +280,16 @@ public class KeycloakUtils {
 		}
 		String sUrl = sBaseUrl + "realms/" + sRealm + "/account/credentials/password";
 
-		String sPayload;
-		try {
-			sPayload = "currentPassword=" + URLEncoder.encode(sCurrentPassword, StandardCharsets.UTF_8.toString())
-					+ "&newPassword=" + URLEncoder.encode(sNewPassword, StandardCharsets.UTF_8.toString())
-					+ "&confirmation=" + URLEncoder.encode(sNewPassword, StandardCharsets.UTF_8.toString());
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("KeycloakUtils.updatePassword: could not encode password update payload for user " + sUserId, oEx);
-			return false;
-		}
+		JSONObject oPayload = new JSONObject();
+		oPayload.put("currentPassword", sCurrentPassword);
+		oPayload.put("newPassword", sNewPassword);
+		oPayload.put("confirmation", sNewPassword);
 
 		try {
 			Map<String, String> asHeaders = new HashMap<>();
 			asHeaders.put("Authorization", "Bearer " + sUserAccessToken);
-			asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-			HttpCallResponse oResponse = HttpUtils.httpPutResponse(sUrl, sPayload, asHeaders);
+			asHeaders.put("Content-Type", "application/json");
+			HttpCallResponse oResponse = HttpUtils.httpPutResponse(sUrl, oPayload.toString(), asHeaders);
 			boolean bSuccess = oResponse.getResponseCode() != null
 					&& oResponse.getResponseCode() >= 200
 					&& oResponse.getResponseCode() <= 299;
