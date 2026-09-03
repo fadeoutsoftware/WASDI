@@ -55,7 +55,7 @@
         "confidentialClient": "{{ aoWasdiConfiguration['keycloak']['confidentialClient'] }}",
         "client": "{{ aoWasdiConfiguration['keycloak']['client'] }}",
         "clientSecret": "{{ aoWasdiConfiguration['keycloak']['clientSecret'] }}",
-        "issuer": "{{ aoWasdiConfiguration['keycloak']['issuer'] | default('') }}",
+        "issuer": "{{ aoWasdiConfiguration['keycloak']['issuer'] | default('https://main01.wasdi.net/auth/realms/wasdi') }}",
         "acceptedClientIds": {{ aoWasdiConfiguration['keycloak']['acceptedClientIds'] | default([]) | to_json }},
         "realm": "{{ aoWasdiConfiguration['keycloak']['realm'] }}",
         "sessionExpireHours": 24
