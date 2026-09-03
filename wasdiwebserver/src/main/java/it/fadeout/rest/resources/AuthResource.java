@@ -24,6 +24,7 @@ import it.fadeout.Wasdi;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.Project;
 import wasdi.shared.business.Subscription;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.business.missions.ClientConfig;
 import wasdi.shared.business.missions.Mission;
 import wasdi.shared.business.users.User;
@@ -38,6 +39,7 @@ import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.missions.MissionsRepository;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.JsonUtils;
@@ -49,6 +51,7 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.missions.PrivateMissionViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
+import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
 import wasdi.shared.viewmodels.users.ChangeUserPasswordViewModel;
 import wasdi.shared.viewmodels.users.LoginInfo;
 import wasdi.shared.viewmodels.users.RegistrationInfoViewModel;
@@ -167,10 +170,18 @@ public class AuthResource {
 			String sLowerCaseUserId = oLoginInfo.getUserId().toLowerCase();
 			WasdiLog.debugLog("AuthResource.login: user id forced to be lower case: " + sLowerCaseUserId);
 			User oUser = oUserRepository.getUser(sLowerCaseUserId);
+			JSONObject oKeycloakLoginResponse = null;
 			
 			if( oUser == null ) {
 				// User not in the wasdi db
 				WasdiLog.debugLog("AuthResource.login: user not found: " + sLowerCaseUserId + ", check if this is the first access");
+
+				String sAuthResult = KeycloakUtils.login(sLowerCaseUserId, oLoginInfo.getUserPassword());
+				oKeycloakLoginResponse = getKeycloakLoginResponse(sAuthResult);
+				if (oKeycloakLoginResponse == null) {
+					WasdiLog.warnLog("AuthResource.login: first login authentication failed, no local data created");
+					return UserViewModel.getInvalid();
+				}
 				
 				// Try to retrieve info about this user 
 				String sUserInfo = KeycloakUtils.getUserData(KeycloakUtils.getToken(), sLowerCaseUserId);
@@ -210,11 +221,12 @@ public class AuthResource {
 					return UserViewModel.getInvalid();
 				}
 				else {
-					WasdiLog.debugLog("AuthResource.login: user found in keycloak and mail verified: we can register the new user!!");
+					WasdiLog.debugLog("AuthResource.login: user found in keycloak and mail verified: we can register the new user in the WASDI db!!");
 					
 					RegistrationInfoViewModel oRegistrationInfoViewModel = new RegistrationInfoViewModel();
 					oRegistrationInfoViewModel.setUserId(sLowerCaseUserId);
 					PrimitiveResult oRegistrationResult = this.userRegistration(oRegistrationInfoViewModel);
+					
 
 					if (oRegistrationResult==null) {
 						WasdiLog.warnLog("AuthResource.login: we had a problem registering the user, return invalid");
@@ -247,11 +259,11 @@ public class AuthResource {
 				oUser.setValidAfterFirstAccess(true);
 			}
 
-			// First try to Authenticate using keycloak
-			String sAuthResult = KeycloakUtils.login(sLowerCaseUserId, oLoginInfo.getUserPassword());
-			
 			boolean bLoginSuccess = false;
-			JSONObject oKeycloakLoginResponse = getKeycloakLoginResponse(sAuthResult);
+			if (oKeycloakLoginResponse == null) {
+				String sAuthResult = KeycloakUtils.login(sLowerCaseUserId, oLoginInfo.getUserPassword());
+				oKeycloakLoginResponse = getKeycloakLoginResponse(sAuthResult);
+			}
 
 			if(oKeycloakLoginResponse != null) {
 				bLoginSuccess = true;
@@ -582,11 +594,11 @@ public class AuthResource {
 					//success: the user is stored in DB!
 					WasdiLog.debugLog("AuthResource.userRegistration: user " + oNewUser.getUserId() + " added to wasdi");
 					
-					try {
-						createFirstSubscription(oNewUser);
-					}
-					catch (Exception oEx) {
-						WasdiLog.debugLog("AuthResource.userRegistration: error in   createFirstSubscription " + oEx.toString());
+					boolean bSubscriptionProvisioned = createFirstSubscription(oNewUser);
+					boolean bWorkspaceProvisioned = createFirstWorkspace(oNewUser);
+					if (!bSubscriptionProvisioned || !bWorkspaceProvisioned) {
+						WasdiLog.warnLog("AuthResource.userRegistration: default resource provisioning incomplete for " + oNewUser.getUserId()
+								+ " (subscription/project: " + bSubscriptionProvisioned + ", workspace: " + bWorkspaceProvisioned + ")");
 					}
 					
 					notifyNewUserInWasdi(oNewUser, true);
@@ -665,7 +677,12 @@ public class AuthResource {
 
 					notifyNewUserInWasdi(oUser, true);
 					
-					createFirstSubscription(oUser);
+					boolean bSubscriptionProvisioned = createFirstSubscription(oUser);
+					boolean bWorkspaceProvisioned = createFirstWorkspace(oUser);
+					if (!bSubscriptionProvisioned || !bWorkspaceProvisioned) {
+						WasdiLog.warnLog("AuthResource.validateNewUser: default resource provisioning incomplete for " + oUser.getUserId()
+								+ " (subscription/project: " + bSubscriptionProvisioned + ", workspace: " + bWorkspaceProvisioned + ")");
+					}
 
 					return oResult;
 				} else {
@@ -681,8 +698,13 @@ public class AuthResource {
 	 * Creates the first FREE Subscription for the actual User
 	 * @param oUser
 	 */
-	private void createFirstSubscription(User oUser) {
+	private boolean createFirstSubscription(User oUser) {
 		try {
+			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+				WasdiLog.errorLog("AuthResource.createFirstSubscription: invalid user");
+				return false;
+			}
+
 			Subscription oSubscription = new Subscription();
 			
 			oSubscription.setType(SubscriptionType.Free.getTypeName());
@@ -700,7 +722,10 @@ public class AuthResource {
 			oSubscription.setEndDate(dEndDate);
 			
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-			oSubscriptionRepository.insertSubscription(oSubscription);
+			if (!oSubscriptionRepository.insertSubscription(oSubscription)) {
+				WasdiLog.errorLog("AuthResource.createFirstSubscription: subscription insertion failed for " + oUser.getUserId());
+				return false;
+			}
 			
 			Project oProject = new Project();
 			oProject.setDescription("WASDI Trial");
@@ -709,18 +734,70 @@ public class AuthResource {
 			oProject.setProjectId(Utils.getRandomName());
 			
 			ProjectRepository oProjectRepository = new  ProjectRepository();
-			oProjectRepository.insertProject(oProject);
+			if (!oProjectRepository.insertProject(oProject)) {
+				WasdiLog.errorLog("AuthResource.createFirstSubscription: project insertion failed for " + oUser.getUserId());
+				return false;
+			}
 			
 			UserRepository oUserRepository = new UserRepository();
 			oUser.setActiveProjectId(oProject.getProjectId());
 			oUser.setActiveSubscriptionId(oSubscription.getSubscriptionId());
-			oUserRepository.updateUser(oUser);
+			if (!oUserRepository.updateUser(oUser)) {
+				WasdiLog.errorLog("AuthResource.createFirstSubscription: user update failed for " + oUser.getUserId());
+				return false;
+			}
+
+			return true;
 			
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("AuthResource.createFirstSubscription: exception " + oEx.toString());
+			return false;
 		}
-		
+	}
+	
+	private boolean createFirstWorkspace(User oUser) {
+		try {
+			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+				WasdiLog.errorLog("AuthResource.createFirstWorkspace: invalid user");
+				return false;
+			}
+
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			
+			String sNodeCode = WasdiConfig.Current.usersDefaultNode;
+			if (Utils.isNullOrEmpty(sNodeCode)) {
+				sNodeCode = "wasdi";
+			}
+			
+			Workspace oWorkspace = new Workspace();
+			oWorkspace.setName("First Workspace");
+			oWorkspace.setCreationDate(Utils.getDateAsDouble(new Date()));
+			oWorkspace.setLastEditDate(Utils.getDateAsDouble(new Date()));
+			oWorkspace.setNodeCode(sNodeCode);
+			oWorkspace.setPublic(false);
+			oWorkspace.setUserId(oUser.getUserId());
+			String sWorkspaceId = Utils.getRandomName();
+			oWorkspace.setWorkspaceId(sWorkspaceId);
+			
+			if (!oWorkspaceRepository.insertWorkspace(oWorkspace)) {
+				WasdiLog.errorLog("AuthResource.createFirstWorkspace: workspace insertion failed for " + oUser.getUserId());
+				return false;
+			}
+			
+			UserRepository oUserRepository = new UserRepository();
+			oUser.setLastWorkspace(sWorkspaceId);
+			if (!oUserRepository.updateUser(oUser)) {
+				WasdiLog.errorLog("AuthResource.createFirstWorkspace: user update failed for " + oUser.getUserId());
+				return false;
+			}
+
+			return true;
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("AuthResource.createFirstWorkspace: exception " + oEx.toString());
+			return false;
+		}
 	}
 
 	/**

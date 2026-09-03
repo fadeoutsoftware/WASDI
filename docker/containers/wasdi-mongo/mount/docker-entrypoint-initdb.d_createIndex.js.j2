@@ -43,3 +43,9 @@ print('[{{ sWasdiMongoGeneralDatabaseName }}] OK')
 {% endif %}
 {% endif %}
 {% endfor %}
+
+print('[{{ sWasdiMongoGeneralDatabaseName }}] Creating unique index on users.userId...')
+oCurrentDatabase.users.createIndex(
+    { userId: 1 }, 
+    { name: "idx_userId_001", unique: true }
+);
