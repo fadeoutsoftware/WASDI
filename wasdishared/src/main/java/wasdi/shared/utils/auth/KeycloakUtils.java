@@ -16,6 +16,7 @@ import com.nimbusds.jose.proc.JWSAlgorithmFamilyJWSKeySelector;
 import com.nimbusds.jose.proc.JWSKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
@@ -454,6 +455,7 @@ public class KeycloakUtils {
 			return Utils.isNullOrEmpty(sUserId) ? "" : sUserId;
 		} catch (BadJOSEException | JOSEException oEx) {
 			WasdiLog.warnLog("KeycloakUtils.validateJwtAndGetUserId: invalid JWT: " + oEx.getMessage());
+			logJwtValidationDiagnostics(sJwtToken, WasdiConfig.Current.keycloack);
 		} catch (Exception oEx) {
 			WasdiLog.warnLog("KeycloakUtils.validateJwtAndGetUserId: " + oEx);
 		}
@@ -492,6 +494,7 @@ public class KeycloakUtils {
 			return Utils.isNullOrEmpty(sClientId) ? "" : sClientId;
 		} catch (BadJOSEException | JOSEException oEx) {
 			WasdiLog.warnLog("KeycloakUtils.validateJwtAndGetClientId: invalid JWT: " + oEx.getMessage());
+			logJwtValidationDiagnostics(sJwtToken, WasdiConfig.Current.keycloack);
 		} catch (Exception oEx) {
 			WasdiLog.warnLog("KeycloakUtils.validateJwtAndGetClientId: " + oEx);
 		}
@@ -509,6 +512,9 @@ public class KeycloakUtils {
 		}
 
 		try {
+			WasdiLog.debugLog("KeycloakUtils.getJwtProcessor: configuring issuer " + sIssuer
+					+ ", jwks URL " + sJwksUrl + ", configured client " + oKeycloakConfig.client
+					+ ", accepted external clients " + oKeycloakConfig.acceptedClientIds);
 			JWKSource<SecurityContext> oJwkSource = JWKSourceBuilder.<SecurityContext>create(new URL(sJwksUrl)).cache(true).build();
 			JWSKeySelector<SecurityContext> oKeySelector = new JWSAlgorithmFamilyJWSKeySelector<>(JWSAlgorithm.Family.RSA, oJwkSource);
 
@@ -522,6 +528,23 @@ public class KeycloakUtils {
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("KeycloakUtils.getJwtProcessor: " + oEx);
 			return null;
+		}
+	}
+
+	private static void logJwtValidationDiagnostics(String sJwtToken, KeycloackConfig oKeycloakConfig) {
+		try {
+			JWTClaimsSet oClaims = JWTParser.parse(sJwtToken).getJWTClaimsSet();
+			String sExpectedIssuer = getIssuer(oKeycloakConfig);
+			WasdiLog.debugLog("KeycloakUtils JWT diagnostics: expected issuer=" + sExpectedIssuer
+					+ ", token issuer=" + oClaims.getIssuer()
+					+ ", audience=" + oClaims.getAudience()
+					+ ", azp=" + oClaims.getStringClaim("azp")
+					+ ", client_id=" + oClaims.getStringClaim("client_id")
+					+ ", subject=" + oClaims.getSubject()
+					+ ", preferred_username=" + oClaims.getStringClaim("preferred_username")
+					+ ", accepted external clients=" + oKeycloakConfig.acceptedClientIds);
+		} catch (Exception oEx) {
+			WasdiLog.warnLog("KeycloakUtils JWT diagnostics: could not parse claims for diagnostics: " + oEx.getMessage());
 		}
 	}
 
