@@ -100,7 +100,24 @@ public class AuthResource {
 	 * Credential Policy
 	 */
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
-		
+	
+	/**
+	 * Per-user synchronization locks to prevent concurrent auto-registration TOCTOU race conditions
+	 * Multiple threads attempting to register the same new Keycloak user simultaneously should
+	 * serialize their registration attempts rather than both succeeding/failing independently
+	 */
+	private static final java.util.Map<String, Object> m_oUserRegistrationLocks = 
+		new java.util.concurrent.ConcurrentHashMap<>();
+	
+	/**
+	 * Get or create a synchronization lock for the given userId
+	 * Used to serialize auto-registration attempts for the same user across concurrent requests
+	 * @param sUserId The user ID (will be lowercased)
+	 * @return A lock object unique to this userId
+	 */
+	private static Object getOrCreateUserLock(String sUserId) {
+		return m_oUserRegistrationLocks.computeIfAbsent(sUserId.toLowerCase(), k -> new Object());
+	}
 	/**
 	 * Login API
 	 * The system will try to login with Keycloak first. Then with the old WASDI login.
@@ -176,81 +193,110 @@ public class AuthResource {
 				// User not in the wasdi db
 				WasdiLog.debugLog("AuthResource.login: user not found: " + sLowerCaseUserId + ", check if this is the first access");
 
-				String sAuthResult = KeycloakUtils.login(sLowerCaseUserId, oLoginInfo.getUserPassword());
-				oKeycloakLoginResponse = getKeycloakLoginResponse(sAuthResult);
-				if (oKeycloakLoginResponse == null) {
-					WasdiLog.warnLog("AuthResource.login: first login authentication failed, no local data created");
-					return UserViewModel.getInvalid();
-				}
-				
-				// Try to retrieve info about this user 
-				String sUserInfo = KeycloakUtils.getUserData(KeycloakUtils.getToken(), sLowerCaseUserId);
-				
-				if (Utils.isNullOrEmpty(sUserInfo)) {
-					// No, something did not work well
-					WasdiLog.warnLog("AuthResource.login: user not found in keycloak, return invalid");
-					return UserViewModel.getInvalid();
-				}
-				
-				// Convert the json to a map: here we have a list
-				List<Map<String, Object>> aoKeyCloakUsers = JsonUtils.jsonToListOfMapOfObjects(sUserInfo);
-				
-				if (aoKeyCloakUsers == null) {
-					// No, something did not work well
-					WasdiLog.warnLog("AuthResource.login: user not found in keycloak, return invalid");
-					return UserViewModel.getInvalid();					
-				}
-				
-				if (aoKeyCloakUsers.size()<=0) {
-					// No, something did not work well
-					WasdiLog.warnLog("AuthResource.login: user not found in keycloak, return invalid");
-					return UserViewModel.getInvalid();					
-				}
-				
-				Boolean bMailVerified = (Boolean) JsonUtils.getProperty(aoKeyCloakUsers.get(0), "emailVerified");
-				
-				if (bMailVerified == null) {
-					// No, something did not work well
-					WasdiLog.warnLog("AuthResource.login: user not found in keycloak, return invalid");
-					return UserViewModel.getInvalid();
-				}
-				
-				if (!bMailVerified) {
-					// The user exists but did not verify the mail yet
-					WasdiLog.warnLog("AuthResource.login: user found in keycloak, but the mail is still not verified, return invalid");
-					return UserViewModel.getInvalid();
-				}
-				else {
-					WasdiLog.debugLog("AuthResource.login: user found in keycloak and mail verified: we can register the new user in the WASDI db!!");
+				// CRITICAL SECTION: Synchronize on per-user lock to prevent concurrent auto-registration TOCTOU race
+				// This ensures only one thread auto-registers this specific user at a time
+				synchronized (getOrCreateUserLock(sLowerCaseUserId)) {
 					
-					RegistrationInfoViewModel oRegistrationInfoViewModel = new RegistrationInfoViewModel();
-					oRegistrationInfoViewModel.setUserId(sLowerCaseUserId);
-					PrimitiveResult oRegistrationResult = this.userRegistration(oRegistrationInfoViewModel);
-					
+					// Double-check pattern: re-verify user still doesn't exist after acquiring lock
+					// Another thread may have registered this user while we were waiting for the lock
+					oUser = oUserRepository.getUser(sLowerCaseUserId);
+					if (oUser != null) {
+						WasdiLog.debugLog("AuthResource.login: user " + sLowerCaseUserId + " was registered by concurrent request, proceeding");
+					} else {
+						// This is the first thread to reach the critical section for this user
+						// Proceed with full auto-registration sequence
 
-					if (oRegistrationResult==null) {
-						WasdiLog.warnLog("AuthResource.login: we had a problem registering the user, return invalid");
-						return UserViewModel.getInvalid();						
-					}
-					
-					if (oRegistrationResult.getBoolValue()==null) {
-						WasdiLog.warnLog("AuthResource.login: we had a problem registering the user, return invalid");
-						return UserViewModel.getInvalid();						
-					}
+						String sAuthResult = KeycloakUtils.login(sLowerCaseUserId, oLoginInfo.getUserPassword());
+						oKeycloakLoginResponse = getKeycloakLoginResponse(sAuthResult);
+						if (oKeycloakLoginResponse == null) {
+							WasdiLog.warnLog("AuthResource.login: first login authentication failed, no local data created");
+							return UserViewModel.getInvalid();
+						}
+						
+						// Try to retrieve info about this user 
+						String sUserInfo = KeycloakUtils.getUserData(KeycloakUtils.getToken(), sLowerCaseUserId);
+						
+						if (Utils.isNullOrEmpty(sUserInfo)) {
+							// No, something did not work well
+							WasdiLog.warnLog("AuthResource.login: user not found in keycloak, return invalid");
+							return UserViewModel.getInvalid();
+						}
+						
+						// Convert the json to a map: here we have a list
+						List<Map<String, Object>> aoKeyCloakUsers = JsonUtils.jsonToListOfMapOfObjects(sUserInfo);
+						
+						if (aoKeyCloakUsers == null) {
+							// No, something did not work well
+							WasdiLog.warnLog("AuthResource.login: user not found in keycloak, return invalid");
+							return UserViewModel.getInvalid();					
+						}
+						
+						if (aoKeyCloakUsers.size()<=0) {
+							// No, something did not work well
+							WasdiLog.warnLog("AuthResource.login: user not found in keycloak, return invalid");
+							return UserViewModel.getInvalid();					
+						}
+						
+						Boolean bMailVerified = (Boolean) JsonUtils.getProperty(aoKeyCloakUsers.get(0), "emailVerified");
+						
+						if (bMailVerified == null) {
+							// No, something did not work well
+							WasdiLog.warnLog("AuthResource.login: user not found in keycloak, return invalid");
+							return UserViewModel.getInvalid();
+						}
+						
+						if (!bMailVerified) {
+							// The user exists but did not verify the mail yet
+							WasdiLog.warnLog("AuthResource.login: user found in keycloak, but the mail is still not verified, return invalid");
+							return UserViewModel.getInvalid();
+						}
+						else {
+							WasdiLog.debugLog("AuthResource.login: user found in keycloak and mail verified: we can register the new user in the WASDI db!!");
+							
+							RegistrationInfoViewModel oRegistrationInfoViewModel = new RegistrationInfoViewModel();
+							oRegistrationInfoViewModel.setUserId(sLowerCaseUserId);
+							PrimitiveResult oRegistrationResult = this.userRegistration(oRegistrationInfoViewModel);
+							
 
-					if (oRegistrationResult.getBoolValue()==false) {
-						WasdiLog.warnLog("AuthResource.login: we had a problem registering the user, return invalid");
-						return UserViewModel.getInvalid();						
+							if (oRegistrationResult==null) {
+								WasdiLog.warnLog("AuthResource.login: we had a problem registering the user, return invalid");
+								return UserViewModel.getInvalid();						
+							}
+							
+							if (oRegistrationResult.getBoolValue()==null) {
+								WasdiLog.warnLog("AuthResource.login: we had a problem registering the user, return invalid");
+								return UserViewModel.getInvalid();						
+							}
+
+							if (oRegistrationResult.getBoolValue()==false) {
+								WasdiLog.warnLog("AuthResource.login: we had a problem registering the user, return invalid");
+								return UserViewModel.getInvalid();						
+							}
+						}
+						
+						// Read the newly registered user
+						oUser = oUserRepository.getUser(sLowerCaseUserId);
+						
+						if (oUser==null) {
+							WasdiLog.errorLog("AuthResource.login: CRITICAL - user not found in DB after successful auto-registration for userId: " + sLowerCaseUserId);
+							WasdiLog.warnLog("AuthResource.login: attempting second read to confirm registration failure for userId: " + sLowerCaseUserId);
+							
+							try {
+								Thread.sleep(50);  // Brief delay to handle potential delayed DB writes
+							} catch (InterruptedException e) {
+								Thread.currentThread().interrupt();
+							}
+							
+							// Retry the read
+							oUser = oUserRepository.getUser(sLowerCaseUserId);
+							if (oUser==null) {
+								WasdiLog.errorLog("AuthResource.login: second read also failed for userId: " + sLowerCaseUserId + " - registration is definitely incomplete");
+								return UserViewModel.getInvalid();						
+							}
+							WasdiLog.warnLog("AuthResource.login: second read succeeded for userId: " + sLowerCaseUserId);
+						}
 					}
-				}
-				
-				// Read again the user to proceed
-				oUser = oUserRepository.getUser(sLowerCaseUserId);
-				
-				if (oUser==null) {
-					WasdiLog.warnLog("AuthResource.login: we had a problem reading again the user in the db after registration, return invalid");
-					return UserViewModel.getInvalid();						
-				}				
+				}	// end synchronized block
 			}
 
 			if(oUser.getValidAfterFirstAccess() == null) {
@@ -910,23 +956,42 @@ public class AuthResource {
 				return PrimitiveResult.getInvalid();
 			}
 
-			String sOldPassword = oUserId.getPassword();
-			boolean bPasswordCorrect = m_oPasswordAuthentication.authenticate(oChangePasswordViewModel.getCurrentPassword().toCharArray(), sOldPassword);
+			String sAuthProvider = oUserId.getAuthServiceProvider();
+			if (Utils.isNullOrEmpty(sAuthProvider)) {
+				sAuthProvider = "WASDI";
+			}
 
-			if( !bPasswordCorrect ) {
-				WasdiLog.debugLog("AuthResource.changePassword: Wrong current password for user " + oUserId);
-				return PrimitiveResult.getInvalid();
-			} else {
-				//todo create new user in keycloak
-				//todo set the user without need for email confirmation
-				//todo set new password for newly created user in keycloak
-				
-				oUserId.setPassword(m_oPasswordAuthentication.hash(oChangePasswordViewModel.getNewPassword().toCharArray()));
-				UserRepository oUR = new UserRepository();
-				oUR.updateUser(oUserId);
-				PrimitiveResult oResult = new PrimitiveResult();
-				oResult.setBoolValue(true);
-				return oResult;
+			switch (sAuthProvider.toUpperCase()) {
+			case "KEYCLOAK":
+				boolean bKeycloakPasswordChanged = KeycloakUtils.updatePassword(
+						oUserId.getUserId(),
+						oChangePasswordViewModel.getCurrentPassword(),
+						oChangePasswordViewModel.getNewPassword());
+
+				if (!bKeycloakPasswordChanged) {
+					WasdiLog.debugLog("AuthResource.changePassword: Wrong current password or Keycloak update failed for user " + oUserId.getUserId());
+					return PrimitiveResult.getInvalid();
+				}
+
+				PrimitiveResult oKeycloakResult = new PrimitiveResult();
+				oKeycloakResult.setBoolValue(true);
+				return oKeycloakResult;
+			case "WASDI":
+			default:
+				String sOldPassword = oUserId.getPassword();
+				boolean bPasswordCorrect = m_oPasswordAuthentication.authenticate(oChangePasswordViewModel.getCurrentPassword().toCharArray(), sOldPassword);
+
+				if( !bPasswordCorrect ) {
+					WasdiLog.debugLog("AuthResource.changePassword: Wrong current password for user " + oUserId);
+					return PrimitiveResult.getInvalid();
+				} else {
+					oUserId.setPassword(m_oPasswordAuthentication.hash(oChangePasswordViewModel.getNewPassword().toCharArray()));
+					UserRepository oUR = new UserRepository();
+					oUR.updateUser(oUserId);
+					PrimitiveResult oResult = new PrimitiveResult();
+					oResult.setBoolValue(true);
+					return oResult;
+				}
 			}
 		} catch(Exception oE) {
 			WasdiLog.errorLog("AuthResource.changePassword: " + oE);

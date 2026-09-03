@@ -1191,17 +1191,19 @@ public class AdminDashboardResource {
 			WasdiLog.infoLog("AdminDashboardResource.deleteUser: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
-
-		// Can the user access this section?
-		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
-			WasdiLog.infoLog("AdminDashboardResource.deleteUser: requesting user is not an admin ");
-			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
-		}
 		
 		if (Utils.isNullOrEmpty(sTargetUser)) {
 			WasdiLog.infoLog("AdminDashboardResource.deleteUser: target user is empty");
 			return Response.status(Status.BAD_REQUEST).build();			
-		}
+		}		
+		
+		if (oRequesterUser.getUserId().equals(sTargetUser) == false) {
+			// Can the user access this section?
+			if (!UserApplicationRole.isAdmin(oRequesterUser)) {
+				WasdiLog.infoLog("AdminDashboardResource.deleteUser: requesting user is not an admin ");
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
+			}
+		}		
 		
 		UserRepository oUserRepository = new UserRepository();
 		User oTargetUser = oUserRepository.getUser(sTargetUser);

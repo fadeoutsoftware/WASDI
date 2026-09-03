@@ -239,6 +239,128 @@ public class KeycloakUtils {
 				
 		return oResult;
 	}
+
+	public static boolean updatePassword(String sUserId, String sCurrentPassword, String sNewPassword) {
+		if (WasdiConfig.Current.keycloack == null) {
+			WasdiLog.debugLog("KeycloakUtils.updatePassword: keycloack config is null, aborting");
+			return false;
+		}
+
+		if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sCurrentPassword) || Utils.isNullOrEmpty(sNewPassword)) {
+			WasdiLog.debugLog("KeycloakUtils.updatePassword: invalid input, aborting");
+			return false;
+		}
+
+		String sAuthResult = login(sUserId, sCurrentPassword);
+		if (Utils.isNullOrEmpty(sAuthResult)) {
+			WasdiLog.debugLog("KeycloakUtils.updatePassword: current password is invalid for user " + sUserId);
+			return false;
+		}
+
+		try {
+			JSONObject oJson = new JSONObject(sAuthResult);
+			if (!oJson.has(s_sACCESS_TOKEN) || Utils.isNullOrEmpty(oJson.optString(s_sACCESS_TOKEN, null))) {
+				WasdiLog.debugLog("KeycloakUtils.updatePassword: keycloak login did not return an access token for user " + sUserId);
+				return false;
+			}
+		} catch (Exception oEx) {
+			WasdiLog.debugLog("KeycloakUtils.updatePassword: could not parse keycloak login response for user " + sUserId + ": " + oEx);
+			return false;
+		}
+
+		String sUserDbId = getUserDbId(sUserId);
+		if (Utils.isNullOrEmpty(sUserDbId)) {
+			WasdiLog.debugLog("KeycloakUtils.updatePassword: user not found in Keycloak for userId " + sUserId + ", aborting");
+			return false;
+		}
+
+		String sBaseUrl = WasdiConfig.Current.keycloack.address;
+		if (!sBaseUrl.endsWith("/")) {
+			sBaseUrl += "/";
+		}
+		String sUrl = sBaseUrl + "admin/realms/wasdi/users/" + sUserDbId + "/reset-password";
+
+		JSONObject oPayload = new JSONObject();
+		oPayload.put("type", "password");
+		oPayload.put("value", sNewPassword);
+		oPayload.put("temporary", false);
+
+		try {
+			String sToken = getToken();
+			if (Utils.isNullOrEmpty(sToken)) {
+				WasdiLog.errorLog("KeycloakUtils.updatePassword: could not get Keycloak admin token for userId " + sUserId);
+				return false;
+			}
+
+			Map<String, String> asHeaders = new HashMap<>();
+			asHeaders.put("Authorization", "Bearer " + sToken);
+			asHeaders.put("Content-Type", "application/json");
+			String sResponse = HttpUtils.httpPut(sUrl, oPayload.toString(), asHeaders);
+			boolean bSuccess = sResponse == null || sResponse.trim().isEmpty();
+			if (bSuccess) {
+				WasdiLog.infoLog("KeycloakUtils.updatePassword: password updated in Keycloak for user " + sUserId);
+				return true;
+			}
+
+			WasdiLog.errorLog("KeycloakUtils.updatePassword: Keycloak password update returned a non-empty response for user " + sUserId + ": " + sResponse);
+			return false;
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("KeycloakUtils.updatePassword: exception while updating Keycloak password for user " + sUserId, oEx);
+			return false;
+		}
+	}
+	
+	public static PrimitiveResult deleteUser(String sUserId) {
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+		oResult.setIntValue(500);
+		
+		if (WasdiConfig.Current.keycloack == null) {
+			WasdiLog.debugLog("KeycloakUtils.deleteUser: Keycloak config is null, skipping Keycloak cleanup");
+			return oResult;
+		}
+		
+		if (Utils.isNullOrEmpty(sUserId)) {
+			WasdiLog.debugLog("KeycloakUtils.deleteUser: user id null or empty, aborting");
+			return oResult;
+		}
+		
+		String sUserDbId = getUserDbId(sUserId);
+		if (Utils.isNullOrEmpty(sUserDbId)) {
+			WasdiLog.warnLog("KeycloakUtils.deleteUser: user not found in Keycloak for userId " + sUserId + ", skipping Keycloak deletion");
+			oResult.setBoolValue(true);
+			oResult.setIntValue(200);
+			return oResult;
+		}
+		
+		String sBaseUrl = WasdiConfig.Current.keycloack.address;
+		if (!sBaseUrl.endsWith("/")) {
+			sBaseUrl += "/";
+		}
+		String sUrl = sBaseUrl + "admin/realms/wasdi/users/" + sUserDbId;
+		
+		try {
+			String sToken = getToken();
+			if (Utils.isNullOrEmpty(sToken)) {
+				WasdiLog.errorLog("KeycloakUtils.deleteUser: could not get Keycloak admin token for userId " + sUserId);
+				return oResult;
+			}
+			Map<String, String> asHeaders = new HashMap<>();
+			asHeaders.put("Authorization", "Bearer " + sToken);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpDelete(sUrl, asHeaders);
+			if (oHttpCallResponse != null && oHttpCallResponse.getResponseCode() != null && oHttpCallResponse.getResponseCode() >= 200 && oHttpCallResponse.getResponseCode() <= 299) {
+				oResult.setBoolValue(true);
+				oResult.setIntValue(200);
+				WasdiLog.infoLog("KeycloakUtils.deleteUser: user removed from Keycloak: " + sUserId);
+				return oResult;
+			}
+			WasdiLog.errorLog("KeycloakUtils.deleteUser: Keycloak delete failed for userId " + sUserId + ", response code: " + (oHttpCallResponse != null ? oHttpCallResponse.getResponseCode() : "unknown") + ", body: " + (oHttpCallResponse != null ? oHttpCallResponse.getResponseBody() : ""));
+			return oResult;
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("KeycloakUtils.deleteUser: exception while deleting user from Keycloak: " + sUserId, oEx);
+			return oResult;
+		}
+	}
 	
 
 	public static User getUser(String sUserId) {

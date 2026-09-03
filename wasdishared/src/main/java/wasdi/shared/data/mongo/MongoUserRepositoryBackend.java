@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.MongoWriteException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
@@ -31,14 +32,30 @@ public class MongoUserRepositoryBackend extends MongoRepository implements IUser
 	@Override
 	public boolean insertUser(User oUser) {
 
+		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+			return false;
+		}
+
 		try {
 			String sJSON = s_oMapper.writeValueAsString(oUser);
 			getCollection(m_sThisCollection).insertOne(Document.parse(sJSON));
 
 			return true;
 
+		} catch (MongoWriteException oWriteEx) {
+			// Handle duplicate key error (E11000) - userId unique index violation
+			if (oWriteEx.getError() != null && oWriteEx.getError().getCategory() != null) {
+				if (oWriteEx.getError().getCategory().name().contains("DUPLICATE_KEY")) {
+					WasdiLog.warnLog("UserRepository.insertUser: duplicate key error for userId " + oUser.getUserId() + 
+						" - user likely registered by concurrent request");
+					return false;  // Indicate insert was not performed
+				}
+			}
+			// Other write errors (constraint violations, etc.)
+			WasdiLog.errorLog("UserRepository.insertUser: MongoDB write error for userId " + oUser.getUserId(), oWriteEx);
+			return false;
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("UserRepository.insertUser : error ", oEx);
+			WasdiLog.errorLog("UserRepository.insertUser: error ", oEx);
 		}
 
 		return false;

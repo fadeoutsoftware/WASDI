@@ -56,6 +56,7 @@ import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.missions.MissionsRepository;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.auth.KeycloakUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.wasdiAPI.ProcessorAPIClient;
 import wasdi.shared.utils.wasdiAPI.WorkspaceAPIClient;
@@ -1505,6 +1506,16 @@ public class PermissionsUtils {
             SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
             oSubscriptionRepository.deleteByUser(sUserId);
             
+            // Clean the Keycloak identity before removing the local WASDI record.
+            // If the IdP delete fails, we abort the local deletion to avoid leaving the account
+            // orphaned in WASDI while the Keycloak account still exists.
+            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Keycloak User");
+            PrimitiveResult oKeycloakDeleteResult = KeycloakUtils.deleteUser(sUserId);
+            if (oKeycloakDeleteResult == null || !Boolean.TRUE.equals(oKeycloakDeleteResult.getBoolValue())) {
+                WasdiLog.errorLog("PermissionsUtils.deleteUser: Keycloak user cleanup failed for userId " + sUserId + ", aborting WASDI deletion");
+                return false;
+            }
+
             // Clean the user table
             WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting User");
             WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting User Db Entry ");
