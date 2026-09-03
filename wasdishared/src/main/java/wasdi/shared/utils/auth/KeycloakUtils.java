@@ -58,7 +58,7 @@ public class KeycloakUtils {
 			Map<String, String> asHeaders = new HashMap<>();
 			asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 			//POST -> authenticate on keycloak 
-			WasdiLog.debugLog("KeycloakService.getToken: about to get token: " + sAuthUrl + ", " + sPayload);
+			WasdiLog.debugLog("KeycloakService.getToken: about to get token: " + sAuthUrl);
 			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sAuthUrl, sPayload, asHeaders);
 			String sAuthResult = oHttpCallResponse.getResponseBody();
 			if(Utils.isNullOrEmpty(sAuthResult)) {
@@ -257,9 +257,11 @@ public class KeycloakUtils {
 			return false;
 		}
 
+		String sUserAccessToken;
 		try {
 			JSONObject oJson = new JSONObject(sAuthResult);
-			if (!oJson.has(s_sACCESS_TOKEN) || Utils.isNullOrEmpty(oJson.optString(s_sACCESS_TOKEN, null))) {
+			sUserAccessToken = oJson.optString(s_sACCESS_TOKEN, null);
+			if (Utils.isNullOrEmpty(sUserAccessToken)) {
 				WasdiLog.debugLog("KeycloakUtils.updatePassword: keycloak login did not return an access token for user " + sUserId);
 				return false;
 			}
@@ -268,41 +270,36 @@ public class KeycloakUtils {
 			return false;
 		}
 
-		String sUserDbId = getUserDbId(sUserId);
-		if (Utils.isNullOrEmpty(sUserDbId)) {
-			WasdiLog.debugLog("KeycloakUtils.updatePassword: user not found in Keycloak for userId " + sUserId + ", aborting");
-			return false;
-		}
-
 		String sBaseUrl = WasdiConfig.Current.keycloack.address;
 		if (!sBaseUrl.endsWith("/")) {
 			sBaseUrl += "/";
 		}
-		String sUrl = sBaseUrl + "admin/realms/wasdi/users/" + sUserDbId + "/reset-password";
+		String sRealm = WasdiConfig.Current.keycloack.realm;
+		if (Utils.isNullOrEmpty(sRealm)) {
+			sRealm = "wasdi";
+		}
+		String sUrl = sBaseUrl + "realms/" + sRealm + "/account/credentials/password";
 
 		JSONObject oPayload = new JSONObject();
-		oPayload.put("type", "password");
-		oPayload.put("value", sNewPassword);
-		oPayload.put("temporary", false);
+		oPayload.put("currentPassword", sCurrentPassword);
+		oPayload.put("newPassword", sNewPassword);
+		oPayload.put("confirmation", sNewPassword);
 
 		try {
-			String sToken = getToken();
-			if (Utils.isNullOrEmpty(sToken)) {
-				WasdiLog.errorLog("KeycloakUtils.updatePassword: could not get Keycloak admin token for userId " + sUserId);
-				return false;
-			}
-
 			Map<String, String> asHeaders = new HashMap<>();
-			asHeaders.put("Authorization", "Bearer " + sToken);
+			asHeaders.put("Authorization", "Bearer " + sUserAccessToken);
 			asHeaders.put("Content-Type", "application/json");
-			String sResponse = HttpUtils.httpPut(sUrl, oPayload.toString(), asHeaders);
-			boolean bSuccess = sResponse == null || sResponse.trim().isEmpty();
+			HttpCallResponse oResponse = HttpUtils.httpPutResponse(sUrl, oPayload.toString(), asHeaders);
+			boolean bSuccess = oResponse.getResponseCode() != null
+					&& oResponse.getResponseCode() >= 200
+					&& oResponse.getResponseCode() <= 299;
 			if (bSuccess) {
 				WasdiLog.infoLog("KeycloakUtils.updatePassword: password updated in Keycloak for user " + sUserId);
 				return true;
 			}
 
-			WasdiLog.errorLog("KeycloakUtils.updatePassword: Keycloak password update returned a non-empty response for user " + sUserId + ": " + sResponse);
+			WasdiLog.errorLog("KeycloakUtils.updatePassword: Keycloak password update failed for user " + sUserId
+					+ ", response code: " + oResponse.getResponseCode() + ", body: " + oResponse.getResponseBody());
 			return false;
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("KeycloakUtils.updatePassword: exception while updating Keycloak password for user " + sUserId, oEx);

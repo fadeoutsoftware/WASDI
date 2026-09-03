@@ -758,6 +758,21 @@ public final class HttpUtils {
 	 * @return server response
 	 */
 	public static String httpPut(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth) {
+		HttpCallResponse oResponse = httpPutResponse(sUrl, sPayload, asHeaders, sAuth);
+		if (oResponse.getResponseCode() != null
+				&& oResponse.getResponseCode() >= 200
+				&& oResponse.getResponseCode() <= 299) {
+			return oResponse.getResponseBody();
+		}
+		return "";
+	}
+
+	public static HttpCallResponse httpPutResponse(String sUrl, String sPayload, Map<String, String> asHeaders) {
+		return httpPutResponse(sUrl, sPayload, asHeaders, null);
+	}
+
+	public static HttpCallResponse httpPutResponse(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth) {
+		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
 
 		try {
 			
@@ -765,10 +780,10 @@ public final class HttpUtils {
 				HttpCallResponse oResponse = SocketUtils.httpPut(sUrl, asHeaders, sPayload.getBytes());
 				
 				if (oResponse != null) {
-					return oResponse.getResponseBody();
+					return oResponse;
 				}
 				else {
-					return "";
+					return oHttpCallResponse;
 				}
 			}
 			
@@ -826,13 +841,15 @@ public final class HttpUtils {
 
 			oConnection.connect();
 
-			String sMessage = readHttpResponse(oConnection);
+			oHttpCallResponse.setResponseCode(oConnection.getResponseCode());
+			String sMessage = readHttpResponse(oConnection, null, true);
+			oHttpCallResponse.setResponseBody(sMessage);
 			oConnection.disconnect();
 
-			return sMessage;
+			return oHttpCallResponse;
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("HttpUtils.httpPut: error", oEx);
-			return "";
+			return oHttpCallResponse;
 		}
 	}	
 	
@@ -1102,6 +1119,10 @@ public final class HttpUtils {
 	 * @throws CopyStreamException
 	 */
 	public static String readHttpResponse(HttpURLConnection oConnection, Map<String, List<String>> aoOutputHeaders) {
+		return readHttpResponse(oConnection, aoOutputHeaders, false);
+	}
+
+	private static String readHttpResponse(HttpURLConnection oConnection, Map<String, List<String>> aoOutputHeaders, boolean bReturnErrorBody) {
 		try {
 			
 			if (aoOutputHeaders!=null) {
@@ -1146,7 +1167,7 @@ public final class HttpUtils {
 				return sMessage;
 			} else {
 				WasdiLog.debugLog("HttpUtils.readHttpResponse: status: " + oConnection.getResponseCode() + ", error message: " + sMessage);
-				return "";
+				return bReturnErrorBody ? sMessage : "";
 			}
 
 		} catch (Exception oE) {
