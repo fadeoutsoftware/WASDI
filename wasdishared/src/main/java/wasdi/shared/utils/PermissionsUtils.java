@@ -37,6 +37,7 @@ import wasdi.shared.business.users.UserType;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.CommentRepository;
+import wasdi.shared.data.DeletedUserRepository;
 import wasdi.shared.data.JupyterNotebookRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.OpenEOJobRepository;
@@ -56,7 +57,6 @@ import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.missions.MissionsRepository;
 import wasdi.shared.parameters.ProcessorParameter;
-import wasdi.shared.utils.auth.KeycloakUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.wasdiAPI.ProcessorAPIClient;
 import wasdi.shared.utils.wasdiAPI.WorkspaceAPIClient;
@@ -265,7 +265,7 @@ public class PermissionsUtils {
 			
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			
-			String sUserId = oUser.getUserId(); 
+			String sUserId = oUser.getUserId();
 			
 			OrganizationRepository oOrganizationRepository = new OrganizationRepository();
 			
@@ -1403,6 +1403,11 @@ public class PermissionsUtils {
 		try {
 			
 			String sUserId = oUser.getUserId();
+			DeletedUserRepository oDeletedUserRepository = new DeletedUserRepository();
+			if ("KEYCLOAK".equalsIgnoreCase(oUser.getAuthServiceProvider()) && !oDeletedUserRepository.markDeleted(sUserId)) {
+				WasdiLog.errorLog("PermissionsUtils.deleteUser: could not create deleted-user tombstone for userId " + sUserId + ", aborting");
+				return false;
+			}
 			
             // Get all the workspaces
             WorkspaceRepository oWorkspaceRepo = new WorkspaceRepository();
@@ -1506,16 +1511,6 @@ public class PermissionsUtils {
             SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
             oSubscriptionRepository.deleteByUser(sUserId);
             
-            // Clean the Keycloak identity before removing the local WASDI record.
-            // If the IdP delete fails, we abort the local deletion to avoid leaving the account
-            // orphaned in WASDI while the Keycloak account still exists.
-            WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting Keycloak User");
-            PrimitiveResult oKeycloakDeleteResult = KeycloakUtils.deleteUser(sUserId);
-            if (oKeycloakDeleteResult == null || !Boolean.TRUE.equals(oKeycloakDeleteResult.getBoolValue())) {
-                WasdiLog.errorLog("PermissionsUtils.deleteUser: Keycloak user cleanup failed for userId " + sUserId + ", aborting WASDI deletion");
-                return false;
-            }
-
             // Clean the user table
             WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting User");
             WasdiLog.debugLog("PermissionsUtils.deleteUser: Deleting User Db Entry ");
@@ -1531,6 +1526,21 @@ public class PermissionsUtils {
             sBasePath += "/";
 
             FileUtils.deleteDirectory(new File(sBasePath));
+
+			if ("KEYCLOAK".equalsIgnoreCase(oUser.getAuthServiceProvider())) {
+				String sAdminMail = WasdiConfig.Current.notifications.wasdiAdminMail;
+				if (!Utils.isNullOrEmpty(sAdminMail)) {
+					String sTitle = "Keycloak user deletion required";
+					String sMessage = "The WASDI account and data for userId " + sUserId
+							+ " have been deleted. Please delete the Keycloak user and then remove the entry with userId "
+							+ sUserId + " from the MongoDB collection deletedUsers.";
+					if (!MailUtils.sendEmail(sAdminMail, sTitle, sMessage)) {
+						WasdiLog.errorLog("PermissionsUtils.deleteUser: could not notify WASDI admin for Keycloak cleanup of userId " + sUserId);
+					}
+				} else {
+					WasdiLog.warnLog("PermissionsUtils.deleteUser: WASDI admin email is not configured for userId " + sUserId);
+				}
+			}
 			return true;
 		}
 		catch (Exception oEx) {

@@ -7,6 +7,7 @@ import wasdi.shared.data.interfaces.ICloudProviderRepositoryBackend;
 import wasdi.shared.data.interfaces.ICommentRepositoryBackend;
 import wasdi.shared.data.interfaces.ICounterRepositoryBackend;
 import wasdi.shared.data.interfaces.ICreditsPagackageRepositoryBackend;
+import wasdi.shared.data.interfaces.IDeletedUserRepositoryBackend;
 import wasdi.shared.data.interfaces.IDownloadedFilesRepositoryBackend;
 import wasdi.shared.data.interfaces.IJupyterNotebookRepositoryBackend;
 import wasdi.shared.data.interfaces.IMetricsEntryRepositoryBackend;
@@ -77,6 +78,11 @@ public class MongoDataRepositoryFactory implements IDataRepositoryFactory {
     public ICounterRepositoryBackend createCounterRepository() {
         ICounterRepositoryBackend oRepositoryBackend = new MongoCounterRepositoryBackend();
         return oRepositoryBackend;
+    }
+
+    @Override
+    public IDeletedUserRepositoryBackend createDeletedUserRepository() {
+        return new MongoDeletedUserRepositoryBackend();
     }
 
     @Override

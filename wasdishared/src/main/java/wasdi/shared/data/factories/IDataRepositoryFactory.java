@@ -6,6 +6,7 @@ import wasdi.shared.data.interfaces.ICloudProviderRepositoryBackend;
 import wasdi.shared.data.interfaces.ICommentRepositoryBackend;
 import wasdi.shared.data.interfaces.ICounterRepositoryBackend;
 import wasdi.shared.data.interfaces.ICreditsPagackageRepositoryBackend;
+import wasdi.shared.data.interfaces.IDeletedUserRepositoryBackend;
 import wasdi.shared.data.interfaces.IDownloadedFilesRepositoryBackend;
 import wasdi.shared.data.interfaces.IJupyterNotebookRepositoryBackend;
 import wasdi.shared.data.interfaces.IMetricsEntryRepositoryBackend;
@@ -52,6 +53,8 @@ public interface IDataRepositoryFactory {
     ICommentRepositoryBackend createCommentRepository();
 
     ICounterRepositoryBackend createCounterRepository();
+
+    IDeletedUserRepositoryBackend createDeletedUserRepository();
 
     ICreditsPagackageRepositoryBackend createCreditsPagackageRepository();
 

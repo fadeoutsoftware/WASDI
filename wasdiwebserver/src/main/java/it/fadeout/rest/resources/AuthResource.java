@@ -35,6 +35,7 @@ import wasdi.shared.business.users.UserType;
 import wasdi.shared.config.SkinConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProjectRepository;
+import wasdi.shared.data.DeletedUserRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
@@ -186,6 +187,10 @@ public class AuthResource {
 			UserRepository oUserRepository = new UserRepository();
 			String sLowerCaseUserId = oLoginInfo.getUserId().toLowerCase();
 			WasdiLog.debugLog("AuthResource.login: user id forced to be lower case: " + sLowerCaseUserId);
+			if (new DeletedUserRepository().isDeleted(sLowerCaseUserId)) {
+				WasdiLog.warnLog("AuthResource.login: user " + sLowerCaseUserId + " is marked as deleted, login rejected");
+				return UserViewModel.getInvalid();
+			}
 			User oUser = oUserRepository.getUser(sLowerCaseUserId);
 			JSONObject oKeycloakLoginResponse = null;
 			

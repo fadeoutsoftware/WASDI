@@ -7,6 +7,7 @@ import wasdi.shared.data.interfaces.ICloudProviderRepositoryBackend;
 import wasdi.shared.data.interfaces.ICommentRepositoryBackend;
 import wasdi.shared.data.interfaces.ICounterRepositoryBackend;
 import wasdi.shared.data.interfaces.ICreditsPagackageRepositoryBackend;
+import wasdi.shared.data.interfaces.IDeletedUserRepositoryBackend;
 import wasdi.shared.data.interfaces.IDownloadedFilesRepositoryBackend;
 import wasdi.shared.data.interfaces.IJupyterNotebookRepositoryBackend;
 import wasdi.shared.data.interfaces.IMetricsEntryRepositoryBackend;
@@ -82,6 +83,11 @@ public class No2DataRepositoryFactory implements IDataRepositoryFactory {
 	@Override
 	public ICounterRepositoryBackend createCounterRepository() {
 		return new No2CounterRepositoryBackend();
+	}
+
+	@Override
+	public IDeletedUserRepositoryBackend createDeletedUserRepository() {
+		return new No2DeletedUserRepositoryBackend();
 	}
 
 	@Override
