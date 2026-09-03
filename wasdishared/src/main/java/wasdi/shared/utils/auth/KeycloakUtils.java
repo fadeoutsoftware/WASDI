@@ -549,10 +549,10 @@ public class KeycloakUtils {
 	}
 
 	private static String getIssuer(KeycloackConfig oKeycloakConfig) {
-		String sAuthTokenAddress = oKeycloakConfig.authTokenAddress;
-		String sTokenPath = "/protocol/openid-connect/token";
-		if (!Utils.isNullOrEmpty(sAuthTokenAddress) && sAuthTokenAddress.endsWith(sTokenPath)) {
-			return sAuthTokenAddress.substring(0, sAuthTokenAddress.length() - sTokenPath.length());
+		if (!Utils.isNullOrEmpty(oKeycloakConfig.issuer)) {
+			return oKeycloakConfig.issuer.endsWith("/")
+					? oKeycloakConfig.issuer.substring(0, oKeycloakConfig.issuer.length() - 1)
+					: oKeycloakConfig.issuer;
 		}
 
 		String sKeycloakAddress = oKeycloakConfig.address;

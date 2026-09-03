@@ -45,6 +45,11 @@ public class KeycloackConfig {
 	public String clientSecret;
 
 	/**
+	 * Issuer expected in locally validated JWTs. If empty, address and realm are used.
+	 */
+	public String issuer;
+
+	/**
 	 * External OAuth clients allowed to call APIs with bearer tokens.
 	 */
 	public ArrayList<String> acceptedClientIds = new ArrayList<>();
