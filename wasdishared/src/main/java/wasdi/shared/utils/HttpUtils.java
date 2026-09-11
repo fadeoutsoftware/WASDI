@@ -643,6 +643,7 @@ public final class HttpUtils {
 		}
 
 		String sBoundary = "**WASDIlib**" + UUID.randomUUID().toString() + "**WASDIlib**";
+		boolean bUploadSuccessful = false;
 		
 		try {
 			try (FileInputStream oInputStream = new FileInputStream(oFile)) {
@@ -678,44 +679,36 @@ public final class HttpUtils {
 					Util.copyStream(oInputStream, oOutputStream);
 
 					oOutputStream.flush();
-					oInputStream.close();
 					oOutputStream.writeBytes("\r\n");
 					oOutputStream.flush();
 					oOutputStream.writeBytes("\r\n");
 					oOutputStream.writeBytes("--" + sBoundary + "--"+"\r\n");
-
-					// response
-					int iResponse = oConnection.getResponseCode();
-					
-					if (WasdiConfig.Current.logHttpCalls && bLog) {
-						WasdiLog.debugLog("HttpUtils.httpPostFile: server returned " + iResponse);
-					}
-
-					
-
-					ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
-					
-					try (InputStream oResponseInputStream = (200 <= iResponse && 299 >= iResponse)  ? oConnection.getInputStream()  : oConnection.getErrorStream()) {
-		                
-		                if (oResponseInputStream != null ) {
-		                    Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
-		                    if (WasdiConfig.Current.logHttpCalls) {
-		                        WasdiLog.debugLog("HttpUtils.httpPostFile: " + oByteArrayOutputStream.toString());
-		                    }
-		                } else {
-		                    WasdiLog.warnLog("WasdiLib.uploadFile: stream is null");
-		                }
-		            }
-					
-					oConnection.disconnect();
-
-				} catch(Exception oE) {
-					WasdiLog.errorLog("HttpUtils.httpPostFile( " + sUrl + ", " + sFileName + ", ...): internal exception: " + oE);
-					return false;
 				}
-			} catch (Exception oE) {
-				WasdiLog.errorLog("HttpUtils.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not open file due to: " + oE + ", aborting");
-				return false;
+
+				int iResponse = oConnection.getResponseCode();
+					
+				if (WasdiConfig.Current.logHttpCalls && bLog) {
+					WasdiLog.debugLog("HttpUtils.httpPostFile: server returned " + iResponse);
+				}
+
+				bUploadSuccessful = iResponse >= 200 && iResponse <= 299;
+
+				ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
+					
+				try (InputStream oResponseInputStream = bUploadSuccessful ? oConnection.getInputStream() : oConnection.getErrorStream()) {
+		                
+					if (oResponseInputStream != null ) {
+						Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
+						if (WasdiConfig.Current.logHttpCalls) {
+							WasdiLog.debugLog("HttpUtils.httpPostFile: " + oByteArrayOutputStream.toString());
+						}
+					} else {
+						WasdiLog.warnLog("WasdiLib.uploadFile: stream is null");
+					}
+				}
+					
+				oConnection.disconnect();
+
 			}			
 		}
 		catch(Exception oE) {
@@ -735,7 +728,7 @@ public final class HttpUtils {
 		}
 
 
-		return true;
+		return bUploadSuccessful;
 	}
 
 	/**

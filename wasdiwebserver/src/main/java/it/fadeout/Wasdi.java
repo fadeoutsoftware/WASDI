@@ -731,9 +731,11 @@ public class Wasdi extends ResourceConfig {
 					oProcess.setNotifyOwnerByMail(oParameter.isNotifyOwnerByMail());
 					
 					if (WasdiConfig.Current.activateSubscriptionChecks) {
-						if (Utils.isNullOrEmpty(oUser.getActiveProjectId())
-								|| Utils.isNullOrEmpty(oUser.getActiveSubscriptionId())) {
-							WasdiLog.warnLog("Wasdi.runProcess: Process Scheduled for Launcher. The user does not have a valid subscription and an active project");
+//						if (Utils.isNullOrEmpty(oUser.getActiveProjectId())
+//								|| Utils.isNullOrEmpty(oUser.getActiveSubscriptionId())) {
+						// P.Campanella 6/9/2026: relax the project, probably will be dropped from the code
+						if (Utils.isNullOrEmpty(oUser.getActiveSubscriptionId())) {
+							WasdiLog.warnLog("Wasdi.runProcess: Process Scheduled for Launcher. The user does not have a valid subscription");
 						}						
 					}
 

@@ -93,6 +93,10 @@ public class Send {
     private boolean SendMsg(String sRoutingKey, String sMessageAttribute)
     {
     	if (WasdiConfig.Current.rabbit == null) return false;
+    	if (Utils.isNullOrEmpty(sRoutingKey)) {
+    		WasdiLog.debugLog("Send.SendMgs: sRoutingKey is null or empty");
+    		return false;
+    	}
     	
     	if (m_oConnection == null || m_oChannel == null) {
     		WasdiLog.debugLog("Send.SendMgs: impossibile to send " + sMessageAttribute + " to " + sRoutingKey);
