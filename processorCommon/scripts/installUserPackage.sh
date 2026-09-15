@@ -134,6 +134,7 @@ function cleanCacheApt() {
 
 function installPackageConda() {
     local sFileToParse="${sApplicationDirectory}/env.yml"
+    local sCondaPrefix="${CONDA_PREFIX:-${sHomeDirectory}/venv}"
     local iReturnCode=0
 
     echo "[INFO] Check if the file '${sFileToParse}' exists..."
@@ -169,8 +170,8 @@ function installPackageConda() {
         return 0
     fi
 
-    echo "[INFO] Install package..."
-    conda env update --quiet --file ${sFileToParse}
+    echo "[INFO] Install package in Conda environment '${sCondaPrefix}'..."
+    conda env update --quiet --prefix "${sCondaPrefix}" --file "${sFileToParse}"
     iReturnCode=${?}
 
     if [[ ${iReturnCode} -eq 0 ]]

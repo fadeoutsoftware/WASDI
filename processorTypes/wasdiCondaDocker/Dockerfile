@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 
 LABEL org.opencontainers.image.authors="WASDI SARL"
@@ -17,8 +17,11 @@ ENV PYTHONDONTWRITEBYTECODE="False"
 # This variable is setted to force the 'print' method of Python to flush message directly
 ENV PYTHONUNBUFFERED="True"
 
-# This variable is setted to use binaries from our virtual environment
-ENV PATH="{{ sWasdiSystemUserHome }}/venv/bin:${PATH}"
+# This variable identifies the Conda base environment used by the processor.
+ENV CONDA_PREFIX="{{ sWasdiSystemUserHome }}/venv"
+
+# This variable is setted to use binaries from our Conda environment
+ENV PATH="${CONDA_PREFIX}/bin:${PATH}"
 
 
 # RUN generic to create user, group, directories, etc
@@ -35,9 +38,9 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     apt-get update && \
     apt-get install \
         ca-certificates && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ jammy main restricted universe multiverse"           > /etc/apt/sources.list && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ noble main restricted universe multiverse"           > /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ noble-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ noble-security main restricted universe multiverse" >> /etc/apt/sources.list && \
     apt-get update && \
     apt-get dist-upgrade && \
     apt-get install \
@@ -61,11 +64,10 @@ RUN mkdir --parents \
         {{ sWasdiSystemUserHome }}/application
 
 
-# Install miniconda
-RUN wget --quiet --output-document=/tmp/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py310_23.9.0-0-Linux-x86_64.sh && \
-    bash /tmp/miniconda.sh -b -p {{ sWasdiSystemUserHome }}/venv && \
+# Install Miniconda with Python 3.12 in the processor Conda prefix
+RUN wget --quiet --output-document=/tmp/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py312_25.1.1-2-Linux-x86_64.sh && \
+    bash /tmp/miniconda.sh -b -p ${CONDA_PREFIX} && \
     rm --force /tmp/miniconda.sh && \
-    conda update --yes --all && \
     conda install --yes \
         flask  \
         gunicorn && \
@@ -103,10 +105,10 @@ RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
         --package-conda
 
 
-# Install the common PIP libraries
-RUN pip3 install --no-cache-dir --no-compile \
+# Install the common PIP libraries in the environment updated from env.yml
+RUN ${CONDA_PREFIX}/bin/python -m pip install --no-cache-dir --no-compile \
         numpy && \
-    pip3 install --no-cache-dir --no-compile {{ sPythonPipLibraryWasdiRepository }} \
+    ${CONDA_PREFIX}/bin/python -m pip install --no-cache-dir --no-compile {{ sPythonPipLibraryWasdiRepository }} \
         wasdi && \
     find {{ sWasdiSystemUserHome }} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
