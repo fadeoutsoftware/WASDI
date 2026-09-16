@@ -502,30 +502,46 @@ public class DockerUtils {
             return "";
         }
 
-        String sCleanedText = sInputString;
+        // Split incoming NDJSON stream by newlines
+        String[] aLines = sInputString.split("\\r?\\n");
+        StringBuilder sbCleaned = new StringBuilder();
 
-        try {
-            // Let Jackson parse the JSON log entry
-            JsonNode oJsonNode = MongoRepository.s_oMapper.readTree(sInputString);
-            
-            // Extract content from "stream" or fallback to "log" (Docker Engine uses both)
-            if (oJsonNode.has("stream")) {
-                sCleanedText = oJsonNode.get("stream").asText();
-            } 
-            else if (oJsonNode.has("log")) {
-                sCleanedText = oJsonNode.get("log").asText();
+        for (String sLine : aLines) {
+            if (sLine.trim().isEmpty()) {
+                continue;
             }
-        } 
-        catch (Exception oEx) {
-            // Fallback: If it's raw text and not valid JSON, process as-is
-            WasdiLog.warnLog("DockerUtils.cleanDockerLogsString JSON parse skipped");
+
+            String sExtracted = sLine;
+
+            try {
+                // Parse individual JSON object line
+                JsonNode oJsonNode = MongoRepository.s_oMapper.readTree(sLine);
+
+                if (oJsonNode.has("stream")) {
+                    sExtracted = oJsonNode.get("stream").asText();
+                } else if (oJsonNode.has("log")) {
+                    sExtracted = oJsonNode.get("log").asText();
+                } else if (oJsonNode.has("error")) {
+                    sExtracted = oJsonNode.get("error").asText();
+                }
+            } catch (Exception oEx) {
+                // Fallback: If line isn't valid JSON, append as plain text
+            	WasdiLog.warnLog("DockerUtils.cleanDockerLogsString JSON parse skipped");
+            }
+
+            // Remove ANSI colors ([91m, [0m, etc.)
+            sExtracted = ANSI_PATTERN.matcher(sExtracted).replaceAll("");
+
+            sbCleaned.append(sExtracted);
+            
+            // Ensure a trailing newline if Jackson stripped it or if it wasn't present
+            if (!sExtracted.endsWith("\n")) {
+                sbCleaned.append("\n");
+            }
         }
 
-        // Remove ANSI control codes ([91m, [0m, etc.) for clean HTML display
-        sCleanedText = ANSI_PATTERN.matcher(sCleanedText).replaceAll("");
-
-        return sCleanedText;
-    }
+        return sbCleaned.toString();
+    }    
 
     /**
      * Run the docker
