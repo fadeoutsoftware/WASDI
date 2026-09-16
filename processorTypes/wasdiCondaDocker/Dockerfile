@@ -105,10 +105,9 @@ RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
         --package-conda
 
 
-# Install the common PIP libraries in the environment updated from env.yml
-RUN ${CONDA_PREFIX}/bin/python -m pip install --no-cache-dir --no-compile \
-        numpy && \
-    ${CONDA_PREFIX}/bin/python -m pip install --no-cache-dir --no-compile {{ sPythonPipLibraryWasdiRepository }} \
+# Install WASDI in the environment updated from env.yml. Application dependencies,
+# including NumPy, must remain Conda-resolved to preserve binary compatibility.
+RUN ${CONDA_PREFIX}/bin/python -m pip install --no-cache-dir --no-compile {{ sPythonPipLibraryWasdiRepository }} \
         wasdi && \
     find {{ sWasdiSystemUserHome }} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
