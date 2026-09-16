@@ -1,121 +1,290 @@
 '''
-Created on 14 Jun 2019
+Created on 16 Sep 2026
 
 @author: p.campanella
 '''
 
 import wasdi
 import os
-import sys
 import urllib.parse
 import json
 import traceback
+import subprocess
 
 m_sProcId = ""
 
+def _getEnvironmentVariable(sVariable):
+    try:
+        sValue = os.environ[sVariable]
+        return sValue
+    except KeyError:
+        return None
+
 def log(sLogString):
-    print("[" + m_sProcId + "] wasdiProcessorExecutor CONDA Engine v.2.1.1 - " + sLogString)
+    print("[" + m_sProcId + "] wasdiProcessorExecutor CONDA One Shot Engine v.1.0.0 - " + sLogString)
 
-def executeProcessor(parameters, processId):
+def executeProcessor():
+    # We need the proc id for logs
     global m_sProcId
-    m_sProcId = processId
 
-    # First of all be sure to be in the right path
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    os.chdir(dir_path)
-    
-    #Try to get the user
-    try:
-        sUser = parameters['user']
-        wasdi.setUser(sUser)
-        log("User available in params. Got " + sUser)
-    except:
-        log("user not available in parameters.")
-
-
-    #Try to get the session id
-    try:
-        sSessionId = parameters['sessionid']
-        wasdi.setSessionId(sSessionId)
-        log("Session available in params " + sSessionId)
-    except:
-        log("Session not available in parameters.")
-    
-    #Try to set the proc id
-    try:
-        wasdi.setProcId(processId)
-        log("set Proc Id " + processId)
-    except:
-        log("Proc Id not available")
-
-    sWorkspaceId = ""
-    #Try to get the workspace id
-    try:
-        sWorkspaceId = parameters['workspaceid']
-        wasdi.setActiveWorkspaceId(sWorkspaceId)
-        log("Workspace Id available in params " + sWorkspaceId)
-    except:
-        log("Workspace Id not available in parameters.")
-
-    #Try to get the base url
-    try:
-        sBaseUrl = parameters['baseurl']
-        wasdi.setBaseUrl(sBaseUrl)
-        log("Base Url in params " + sBaseUrl)
-    except:
-        log("Using default or ENV  base url")
-
-
-    #Init Wasdi
-    log("init waspy lib")
-    wasdi.setIsOnServer(True)
-    wasdi.setDownloadActive(False)
-    
-    if not wasdi.init():
-        log("init FAILED")
-
-    wasdi.openWorkspaceById(sWorkspaceId)
-        
     sForceStatus = 'ERROR'
-    
-    wasdi.setProcId(processId)
-    wasdi.setParametersDict(parameters)
-    
+
     #Run the processor
     try:
         import myProcessor
-        wasdi.wasdiLog("wasdi.executeProcessor RUN " + processId)
+        wasdi.wasdiLog("wasdi.executeProcessor RUN " + m_sProcId)
         myProcessor.run()
         wasdi.wasdiLog("wasdi.executeProcessor Done")
-        
+
         sForceStatus = 'DONE'
-        
-    except Exception as oEx:
+
+    except Exception as oEx2:
         wasdi.wasdiLog("wasdi.executeProcessor EXCEPTION")
-        wasdi.wasdiLog(repr(oEx))
+        wasdi.wasdiLog(repr(oEx2))
         wasdi.wasdiLog(traceback.format_exc())
     except:
         wasdi.wasdiLog("wasdi.executeProcessor generic EXCEPTION")
     finally:
-        sFinalStatus = wasdi.getProcessStatus(processId)
-        
+        sFinalStatus = wasdi.getProcessStatus(m_sProcId)
+
         if sFinalStatus != 'STOPPED' and sFinalStatus != 'DONE' and sFinalStatus != 'ERROR':
             wasdi.wasdiLog("wasdi.executeProcessor Process finished. Forcing status to " + sForceStatus)
-            wasdi.updateProcessStatus(processId, sForceStatus, 100)
+            wasdi.updateProcessStatus(m_sProcId, sForceStatus, 100)
 
     return
 
+def refresh_package_list(sRefreshPackageList: str):
+
+    # We need the proc id for logs
+    global m_sProcId
+
+    sForceStatus = 'ERROR'
+
+    try:
+        aoPackagesList = {}
+
+        # conda has no cheap equivalent of "pip list --outdated"; leave it empty
+        aoPackagesList["outdated"] = []
+
+        log("Get installed packages")
+        aoPackagesList["uptodate"] = pm_list_packages()
+
+        log("Get Manager Version")
+        aoPackagesList["packageManager"] = pm_manager_version()
+
+        sFullPath = wasdi.getPath(sRefreshPackageList)
+
+        log('Saving Packages Info file in ' + sFullPath)
+
+        with open(sFullPath, 'w') as oFile:
+            sJsonContent = json.dumps(aoPackagesList)
+            oFile.write(sJsonContent)
+            oFile.flush()
+            oFile.close()
+            log("Check closed: " + str(oFile.closed))
+
+        if os.path.exists(sFullPath):
+            log("Packages File written")
+        else:
+            log("ERROR Packages File NOT written")
+
+        log('Packages list done')
+
+        sForceStatus = 'DONE'
+
+    except Exception as oEx2:
+        wasdi.wasdiLog("wasdi.executeProcessor EXCEPTION")
+        wasdi.wasdiLog(repr(oEx2))
+        wasdi.wasdiLog(traceback.format_exc())
+    except:
+        wasdi.wasdiLog("wasdi.executeProcessor generic EXCEPTION")
+    finally:
+        sFinalStatus = wasdi.getProcessStatus(m_sProcId)
+
+        if sFinalStatus != 'STOPPED' and sFinalStatus != 'DONE' and sFinalStatus != 'ERROR':
+            wasdi.wasdiLog("wasdi.executeProcessor Process finished. Forcing status to " + sForceStatus)
+            wasdi.updateProcessStatus(m_sProcId, sForceStatus, 100)
+
+
+def pm_list_packages():
+    sOutput = __execute_conda_command_and_get_output(['list', '--json'])
+
+    if sOutput is None or sOutput.strip() == "":
+        log("pm_list_packages: empty output, returning empty list")
+        return []
+
+    try:
+        aoRawPackages = json.loads(sOutput)
+    except Exception as oEx:
+        # Never break the refresh flow for parser issues.
+        log("pm_list_packages: parse error, returning empty list: " + repr(oEx))
+        return []
+
+    aoDependencies = []
+    for oRawPackage in aoRawPackages:
+        aoDependencies.append({
+            "managerName": "conda",
+            "packageName": oRawPackage.get("name"),
+            "currentVersion": oRawPackage.get("version"),
+            "currentBuild": oRawPackage.get("build_string"),
+            "channel": oRawPackage.get("channel"),
+        })
+
+    return aoDependencies
+
+def pm_manager_version():
+    oVersion = {}
+    oVersion["name"] = "conda"
+    oVersion["version"] = ""
+    oVersion["major"] = ""
+    oVersion["minor"] = ""
+    oVersion["patch"] = ""
+
+    try:
+        log('pm_manager_version')
+
+        sOutput = __execute_conda_command_and_get_output(['--version'])
+        # Output looks like "conda 24.9.2"
+        sVersion = sOutput.strip().split()[-1]
+        asVersion = sVersion.split('.')
+
+        oVersion["version"] = sVersion
+        if len(asVersion) > 0:
+            oVersion["major"] = asVersion[0]
+        if len(asVersion) > 1:
+            oVersion["minor"] = asVersion[1]
+        if len(asVersion) > 2:
+            oVersion["patch"] = asVersion[2]
+    except Exception as oEx:
+        log("Error getting conda version: " + repr(oEx))
+
+    return oVersion
+
+def __execute_conda_command_and_get_output(command) -> str:
+    # Defensive: accept both list and accidental string input.
+    if isinstance(command, str):
+        asCondaArgs = command.split()
+    else:
+        asCondaArgs = command
+
+    asCommand = ['conda'] + asCondaArgs
+    sPrintableCommand = ' '.join(asCommand)
+    log('__execute_conda_command_and_get_output: ' + sPrintableCommand)
+
+    try:
+        oCondaProcess = subprocess.run(
+            asCommand,
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+    except subprocess.TimeoutExpired as oEx:
+        sStdout = '' if oEx.stdout is None else str(oEx.stdout)
+        sStderr = '' if oEx.stderr is None else str(oEx.stderr)
+        log('__execute_conda_command_and_get_output timeout for command: ' + sPrintableCommand)
+        return (sStdout + '\n' + sStderr).strip()
+    except Exception as oEx:
+        log('__execute_conda_command_and_get_output exception: ' + repr(oEx))
+        return ''
+
+    sOutput = oCondaProcess.stdout if oCondaProcess.stdout is not None else ''
+    sError = oCondaProcess.stderr if oCondaProcess.stderr is not None else ''
+
+    if sError != '' and sOutput == '':
+        sOutput = sError
+
+    log('__execute_conda_command_and_get_output rc=' + str(oCondaProcess.returncode) +
+        ' stdout_len=' + str(len(oCondaProcess.stdout or '')) +
+        ' stderr_len=' + str(len(oCondaProcess.stderr or '')))
+
+    return sOutput
+
 if __name__ == '__main__':
-    
-    aoParameters = {}
-    processId = ""
-    
-    if (len(sys.argv)>=2):
-        sEncodedParams = sys.argv[1]
+    try:
+        # Read the process Id
+        sProcId = _getEnvironmentVariable('WASDI_PROCESS_WORKSPACE_ID')
+
+        if sProcId is not None:
+            m_sProcId = sProcId
+        else:
+            m_sProcId = "N.A."
+
+        log("Assigned Proc Id " + m_sProcId)
+
+        # Read the encoded parameters
+        sEncodedParams = _getEnvironmentVariable('WASDI_ONESHOT_ENCODED_PARAMS')
+
+        if sEncodedParams is None:
+            log("No params available, use empty one")
+            sEncodedParams = "%7B%7D"
+
+        if sEncodedParams == "":
+            log("No params available, use empty one")
+            sEncodedParams = "%7B%7D"
+
         sDecodedParams = urllib.parse.unquote(sEncodedParams)
         aoParameters = json.loads(sDecodedParams)
-        
-    if (len(sys.argv)>=3):
-        processId = sys.argv[2]
-    
-    executeProcessor(aoParameters, processId)
+
+        wasdi.setParametersDict(aoParameters)
+
+        # Read the User
+        sUserId = _getEnvironmentVariable('WASDI_USER')
+
+        if sUserId is None:
+            log("User Id not available")
+
+        # Read the Session Id
+        sSessionId = _getEnvironmentVariable('WASDI_SESSION_ID')
+
+        if sSessionId is None:
+            log("Session Id not available")
+
+        # Read the Workspace Id
+        sWorkspaceId = _getEnvironmentVariable('WASDI_WORKSPACE_ID')
+
+        if sWorkspaceId is None:
+            log("Workspace Id not available")
+
+        # Read the on-server flag
+        bIsOnServer = True
+        sOnServer = _getEnvironmentVariable('WASDI_ONESHOT_ON_SERVER')
+
+        if sOnServer is not None:
+            if sOnServer == "0" or sOnServer.lower() == "false":
+                bIsOnServer = False
+
+        # set the server flags
+        wasdi.setIsOnServer(bIsOnServer)
+        wasdi.setIsOnExternalServer(not bIsOnServer)
+        wasdi.setDownloadActive(True)
+        wasdi.setUploadActive(True)
+
+        log("wasdi.executeProcessor: init waspy lib")
+        # The lib will read all the data from env
+        if not wasdi.init():
+            log("There was an error in init, we try to execute but it will likely not work")
+            wasdi.wasdiLog("There was an error in init, we try to execute but it will likely not work")
+        else:
+            log("Init done")
+            wasdi.wasdiLog("Init done")
+
+        bRun = True
+        sRefreshPackageList = _getEnvironmentVariable('WASDI_ONESHOT_REFRESH_PACKAGE_LIST')
+
+        if sRefreshPackageList is not None:
+            if sRefreshPackageList != "":
+                log("Refreshing package list in temp file " + sRefreshPackageList)
+                refresh_package_list(sRefreshPackageList)
+                bRun = False
+
+        if bRun:
+            wasdi.wasdiLog("Starting Processor")
+            executeProcessor()
+
+    except Exception as oEx:
+        wasdi.wasdiLog("wasdi.executeProcessor: EXCEPTION")
+        wasdi.wasdiLog(repr(oEx))
+        wasdi.wasdiLog(traceback.format_exc())
+    except:
+        wasdi.wasdiLog("wasdi.executeProcessor generic EXCEPTION")
+

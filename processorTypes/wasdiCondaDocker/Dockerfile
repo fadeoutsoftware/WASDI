@@ -68,9 +68,6 @@ RUN mkdir --parents \
 RUN wget --quiet --output-document=/tmp/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py312_25.1.1-2-Linux-x86_64.sh && \
     bash /tmp/miniconda.sh -b -p ${CONDA_PREFIX} && \
     rm --force /tmp/miniconda.sh && \
-    conda install --yes \
-        flask  \
-        gunicorn && \
     conda clean --all --force-pkgs-dirs --yes
 
 
@@ -115,14 +112,5 @@ RUN ${CONDA_PREFIX}/bin/python -m pip install --no-cache-dir --no-compile {{ sPy
 # Start the container
 CMD [ \
     "{{ sWasdiSystemUserHome }}/venv/bin/python3", \
-    "{{ sWasdiSystemUserHome }}/venv/bin/gunicorn", \
-    "--workers", \
-    "1", \
-    "--max-requests", \
-    "1", \
-    "--timeout", \
-    "3600", \
-    "--bind", \
-    "0.0.0.0:5000", \
-    "wasdiProcessorServer:app" \
+    "wasdiProcessorExecutor.py" \
 ]
