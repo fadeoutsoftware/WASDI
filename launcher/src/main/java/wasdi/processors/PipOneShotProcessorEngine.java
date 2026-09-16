@@ -128,10 +128,14 @@ public class PipOneShotProcessorEngine extends OneShotProcessorEngine {
 					return false;
 				}
 				
+				// A version, if present, pins the exact release; otherwise pip resolves the latest one
+				String sVersion = asParts.length >= 3 ? asParts[2] : "";
+				String sDependencySpec = Utils.isNullOrEmpty(sVersion) ? sPackage : sPackage + "==" + sVersion;
+				
 				String sMessage = "PipOneShotProcessorEngine.environmentUpdate: ";
 				if (bAdd) sMessage += "Adding Package ";
 				else sMessage += "Removing Package ";
-				sMessage += sPackage;
+				sMessage += sDependencySpec;
 				
 				WasdiLog.debugLog(sMessage);
 				
@@ -152,24 +156,16 @@ public class PipOneShotProcessorEngine extends OneShotProcessorEngine {
 		        
 		        ArrayList<String> asCleanPipLines = Utils.removeDuplicates(asPipLines);
 		        
+		        // Drop any existing line for this package (whatever version it was pinned to) before re-adding it
+		        final String sPackageName = sPackage;
+		        asCleanPipLines.removeIf(sLine -> getPipPackageName(sLine).equalsIgnoreCase(sPackageName));
+		        
 		        if (bAdd) {
-		        	if (asCleanPipLines.contains(sPackage)) {
-		        		WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: the package " +  sPackage + " already exists, move last");
-		        		asCleanPipLines.remove(sPackage);
-		        	}
-		        	else {
-		        		WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: package " +  sPackage + " added");
-		        	}
-		        	asCleanPipLines.add(sPackage);
+		        	WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: package " +  sDependencySpec + " added");
+		        	asCleanPipLines.add(sDependencySpec);
 		        }
 		        else {
-		        	if (asCleanPipLines.contains(sPackage)) {
-		        		WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: removing package " +  sPackage);
-		        		asCleanPipLines.remove(sPackage);
-		        	}
-		        	else {
-		        		WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: the package " +  sPackage + " is not in the list, nothing to remove");
-		        	}
+		        	WasdiLog.debugLog("PipOneShotProcessorEngine.environmentUpdate: package " +  sPackage + " removed");
 		        }
 		        
 		        // Re-write pip.txt
@@ -206,6 +202,13 @@ public class PipOneShotProcessorEngine extends OneShotProcessorEngine {
 
 			return false;
 		}
+	}
+	
+	/**
+	 * Extracts the bare package name from a pip dependency spec (e.g. "numpy==1.26.4" -> "numpy")
+	 */
+	private String getPipPackageName(String sSpec) {
+		return sSpec.split("[<>=!~\\s]")[0].trim();
 	}
 	
 	@Override
