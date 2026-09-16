@@ -398,13 +398,7 @@ public abstract class WasdiProcessorEngine {
 	public void waitForApplicationToStart(ProcessorParameter oParameter) {
 		try {
 	        WasdiLog.debugLog("WasdiProcessorEngine.waitForApplicationToStart: wait to let docker start");
-	        Thread.sleep(5000);
-
-//	        Integer iNumberOfAttemptsToPingTheServer = WasdiConfig.Current.dockers.numberOfAttemptsToPingTheServer;
-//	        Integer iMillisBetweenAttmpts = WasdiConfig.Current.dockers.millisBetweenAttmpts;
-//
-//	        WasdiLog.debugLog("WasdiProcessorEngine.waitForApplicationToStart: wait " + (iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts) + " sec to let docker start");
-//	        Thread.sleep(iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts);
+	        Thread.sleep(WasdiConfig.Current.dockers.millisBetweenAttmpts);
 		}
 		catch (InterruptedException oEx) {
 			Thread.currentThread().interrupt();
@@ -484,22 +478,7 @@ public abstract class WasdiProcessorEngine {
                 WasdiLog.errorLog("WasdiProcessorEngine.UnzipProcessor: could not unzip " + oProcessorZipFile.getCanonicalPath() + " due to: " + oE + ", aborting");
                 return false;
             }
-
-            //check myProcessor exists:
-            // This class is generic. to use this code we need before to adapt it to run with all the different processor types
-//			AtomicBoolean oMyProcessorExists = new AtomicBoolean(false);
-//			try(Stream<Path> oWalk = Files.walk(Paths.get(sProcessorFolder));){
-//				oWalk.map(Path::toFile).forEach(oFile->{
-//					if(oFile.getName().equals("myProcessor.py")) {
-//						oMyProcessorExists.set(true);
-//					}
-//				});
-//			}
-//		    if (!oMyProcessorExists.get()) {
-//		    	WasdiLog.errorLog("WasdiProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
-//		    	//return false;
-//		    }
-
+            
             try {
                 // Remove the zip?
                 if (!oProcessorZipFile.delete()) {

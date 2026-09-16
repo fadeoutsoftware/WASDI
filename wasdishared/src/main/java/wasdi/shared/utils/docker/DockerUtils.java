@@ -12,9 +12,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.shared.business.S3Volume;
@@ -25,6 +27,7 @@ import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.ProcessorTypeConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.HttpUtils;
@@ -483,6 +486,11 @@ public class DockerUtils {
     }
     
     /**
+     * Regex to remove ANSI escape sequences (colors/formatting)
+     */
+    private static final Pattern ANSI_PATTERN = Pattern.compile("\u001B\\[[;\\d]*[A-Za-z]");
+    
+    /**
      * Clean the string representing the log of a docker build, replacing
      * different special chars obtained by dockers api.
      * 
@@ -490,21 +498,33 @@ public class DockerUtils {
      * @return Logs cleaned from special chars
      */
     protected String cleanDockerLogsString(String sInputString) {
-    	String sOutputString = "";
-    	
-    	sOutputString = sInputString.replace("{\"stream\":", "");
-    	sOutputString = sOutputString.replace("\"\\n\"}", "\n");
-    	sOutputString = sOutputString.replace("\\n\"}", "\n");
-    	sOutputString = sOutputString.replace("\"}", "");
-    	sOutputString = sOutputString.replace("---\\u003e", "");
-    	sOutputString = sOutputString.replace("\\u0026", "");
-    	sOutputString = sOutputString.replace("\\u0026", "");
-    	sOutputString = sOutputString.replace("\\u001b", "");
-    	
-    	sOutputString = sOutputString.replace("\\n", "\n");
-    	
-    	
-    	return sOutputString;
+        if (sInputString == null || sInputString.trim().isEmpty()) {
+            return "";
+        }
+
+        String sCleanedText = sInputString;
+
+        try {
+            // Let Jackson parse the JSON log entry
+            JsonNode oJsonNode = MongoRepository.s_oMapper.readTree(sInputString);
+            
+            // Extract content from "stream" or fallback to "log" (Docker Engine uses both)
+            if (oJsonNode.has("stream")) {
+                sCleanedText = oJsonNode.get("stream").asText();
+            } 
+            else if (oJsonNode.has("log")) {
+                sCleanedText = oJsonNode.get("log").asText();
+            }
+        } 
+        catch (Exception oEx) {
+            // Fallback: If it's raw text and not valid JSON, process as-is
+            WasdiLog.warnLog("DockerUtils.cleanDockerLogsString JSON parse skipped");
+        }
+
+        // Remove ANSI control codes ([91m, [0m, etc.) for clean HTML display
+        sCleanedText = ANSI_PATTERN.matcher(sCleanedText).replaceAll("");
+
+        return sCleanedText;
     }
 
     /**
