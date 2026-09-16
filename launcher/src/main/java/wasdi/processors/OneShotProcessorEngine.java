@@ -33,6 +33,14 @@ public abstract class OneShotProcessorEngine extends DockerBuildOnceEngine {
 		super();
 	}
 
+	/**
+	 * Selects the runtime driver used to build/run/monitor this processor's container.
+	 * Only LocalDockerDriver exists today; a factory choosing among drivers will replace this call.
+	 */
+	protected ContainerRuntimeDriver getContainerRuntimeDriver() {
+		return new LocalDockerDriver(this);
+	}
+
 	@Override
 	public boolean deploy(ProcessorParameter oParameter, boolean bFirstDeploy) {
 		 
@@ -186,7 +194,6 @@ public abstract class OneShotProcessorEngine extends DockerBuildOnceEngine {
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
             // First Check if processor exists
-            String sProcessorName = oParameter.getName();
             String sProcessorId = oParameter.getProcessorID();
 
             ProcessorRepository oProcessorRepository = new ProcessorRepository();
@@ -225,11 +232,11 @@ public abstract class OneShotProcessorEngine extends DockerBuildOnceEngine {
             
             addEnvironmentVariablesToProcessorType(oProcessorTypeConfig,sEncodedJson,oParameter);
             
-            // Create the Docker Utils Object
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry, m_oProcessWorkspaceLogger);
+            // The container runtime driver decides where/how the app actually executes (local Docker today)
+            ContainerRuntimeDriver oContainerRuntimeDriver = getContainerRuntimeDriver();
 
             // Check if is started otherwise start it
-            String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter, false, WasdiConfig.Current.dockers.removeDockersAfterShellExec, false);
+            String sContainerName = oContainerRuntimeDriver.run(oParameter, m_sDockerImageName, sEncodedJson);
             
             // If we do not have a container name here, we are not in the position to continue
             if (Utils.isNullOrEmpty(sContainerName)) {
@@ -247,7 +254,7 @@ public abstract class OneShotProcessorEngine extends DockerBuildOnceEngine {
             WasdiLog.debugLog("OneShotProcessorEngine.run: process Status after start: " + sStatus);
             
             if (sStatus.equals(ProcessStatus.DONE.name())==false && sStatus.equals(ProcessStatus.ERROR.name())==false && sStatus.equals(ProcessStatus.STOPPED.name())==false) {
-            	sStatus = waitForApplicationToFinish(oProcessor, oProcessWorkspace.getProcessObjId(), sStatus, oProcessWorkspace, sContainerName);
+            	sStatus = oContainerRuntimeDriver.waitForCompletion(oParameter);
             }
 
             WasdiLog.debugLog("OneShotProcessorEngine.run: process finished with status " + sStatus);
