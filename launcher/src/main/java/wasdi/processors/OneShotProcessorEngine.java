@@ -5,6 +5,7 @@ import java.io.File;
 import com.google.common.io.Files;
 
 import wasdi.LauncherMain;
+import wasdi.processors.drivers.ContainerRuntimeDriver;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.Processor;
@@ -17,9 +18,6 @@ import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.docker.DockerUtils;
-import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
-import wasdi.shared.utils.docker.containersViewModels.constants.ContainerStates;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -34,11 +32,12 @@ public abstract class OneShotProcessorEngine extends DockerBuildOnceEngine {
 	}
 
 	/**
-	 * Selects the runtime driver used to build/run/monitor this processor's container.
-	 * Only LocalDockerDriver exists today; a factory choosing among drivers will replace this call.
+	 * One-shot containers are transient: there is no previous version to stop before redeploying.
+	 * Any run currently in progress just finishes with the old image; future runs use the new one.
 	 */
-	protected ContainerRuntimeDriver getContainerRuntimeDriver() {
-		return new LocalDockerDriver(this);
+	@Override
+	protected void stopRunningVersionBeforeRedeploy(Processor oProcessor) {
+		WasdiLog.debugLog("OneShotProcessorEngine.stopRunningVersionBeforeRedeploy: nothing to stop for one-shot processors");
 	}
 
 	@Override
@@ -287,41 +286,6 @@ public abstract class OneShotProcessorEngine extends DockerBuildOnceEngine {
 	 * Override of the wait for application to start
 	 */
 	@Override
-	public void waitForApplicationToStart(ProcessorParameter oParameter) {
-		try {
-			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
-			
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor.getName()), m_sDockerRegistry, m_oProcessWorkspaceLogger);
-			
-	        WasdiLog.debugLog("OneShotProcessorEngine.waitForApplicationToStart: wait to let docker start");
-
-	        Integer iNumberOfAttemptsToPingTheServer = WasdiConfig.Current.dockers.numberOfAttemptsToPingTheServer;
-	        Integer iMillisBetweenAttmpts = WasdiConfig.Current.dockers.millisBetweenAttmpts;
-
-	        for (int i = 0; i < iNumberOfAttemptsToPingTheServer; i++) {
-	        	
-	        	ContainerInfo oContainer = oDockerUtils.getContainerInfoByImageName(oProcessor.getName(), oProcessor.getVersion());
-	        	
-	        	if (oContainer.State.equals(ContainerStates.RUNNING) || oContainer.State.equals(ContainerStates.EXITED) || oContainer.State.equals(ContainerStates.DEAD)) {
-	        		return;
-	        	}
-	        	
-	        	Thread.sleep(iMillisBetweenAttmpts);
-	        }
-	        
-	        WasdiLog.debugLog("OneShotProcessorEngine.waitForApplicationToStart: attemps finished.. probably did not started!");
-		}
-    	catch (InterruptedException oEx) {
-    		Thread.currentThread().interrupt();
-    		WasdiLog.errorLog("OneShotProcessorEngine.waitForApplicationToStart: current thread was interrupted ", oEx);
-    	}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("OneShotProcessorEngine.waitForApplicationToStart: exception ", oEx);
-		}
-	}
-
-	@Override
 	public boolean refreshPackagesInfo(ProcessorParameter oParameter) {
 		if (oParameter == null) {
 			WasdiLog.errorLog("OneShotProcessorEngine.refreshPackagesInfo: oParameter is null");
@@ -346,9 +310,6 @@ public abstract class OneShotProcessorEngine extends DockerBuildOnceEngine {
 				return false;
 			}
 	
-	        // Create the Docker Utils Object
-	        DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry, m_oProcessWorkspaceLogger);
-	        
 	        ProcessorTypeConfig oProcessorTypeConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig(oProcessor.getType());
 	        
 	        if (oProcessorTypeConfig == null) {
@@ -361,13 +322,11 @@ public abstract class OneShotProcessorEngine extends DockerBuildOnceEngine {
 	        
 	        addEnvironmentVariablesToProcessorType(oProcessorTypeConfig, "", oParameter, true, sRandomName);
 	        
-	        boolean bAutoRemove = true;
+	        // This is a normal one-shot run: the env var above makes the executor dump the
+	        // package list to sRandomName instead of running the processor
+	        ContainerRuntimeDriver oContainerRuntimeDriver = getContainerRuntimeDriver();
 	        
-	        if (WasdiConfig.Current.dockers != null) {
-	        	bAutoRemove = WasdiConfig.Current.dockers.removeDockersAfterShellExec;
-	        }
-	        
-	        String sContainerName = oDockerUtils.start("", oProcessor.getPort(), bAutoRemove);
+	        String sContainerName = oContainerRuntimeDriver.run(oParameter, m_sDockerImageName, "");
 	        
 	        // Try to start Again the docker
 	        if (Utils.isNullOrEmpty(sContainerName)) {
@@ -375,7 +334,7 @@ public abstract class OneShotProcessorEngine extends DockerBuildOnceEngine {
 	        	return false;
 	        }
 	        
-	        waitForApplicationToFinish(oProcessor, oParameter.getProcessObjId(), "", m_oProcessWorkspace);
+	        oContainerRuntimeDriver.waitForCompletion(oParameter);
 	        
 	        String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
 	        String sOriginFile = sWorkspacePath + sRandomName;
@@ -409,50 +368,11 @@ public abstract class OneShotProcessorEngine extends DockerBuildOnceEngine {
 
     @Override
     public boolean stopApplication(ProcessorParameter oParameter) {
-    	
     	try {
-    		String sProcessorName = m_oProcessWorkspace.getProductName();
-    		ProcessorRepository oProcessorRepository = new ProcessorRepository();
-    		Processor oProcessorToKill = oProcessorRepository.getProcessorByName(sProcessorName);
-    		
-    		DockerUtils oDockerUtils = new DockerUtils(oProcessorToKill, m_oParameter, sProcessorName);
-    		oDockerUtils.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
-    		ContainerInfo oContainer = oDockerUtils.getContainerInfoByImageName(sProcessorName, oProcessorToKill.getVersion());
-    		
-    		if (oContainer == null) {
-    			WasdiLog.warnLog("OneShotProcessorEngine.stopApplication: error retriving the container info for the app "+ sProcessorName);
-    			return false;
-    		}
-    		
-    		if (oContainer.Names == null) {
-    			WasdiLog.warnLog("OneShotProcessorEngine.stopApplication: cannot find names for container of app "+ sProcessorName);
-    			return false;    			
-    		}
-    		
-    		if (oContainer.Names.size()<=0) {
-    			WasdiLog.warnLog("OneShotProcessorEngine.stopApplication: cannot find names for container of app "+ sProcessorName);
-    			return false;    			
-    		}
-
-    		String sContainerName = oContainer.Names.get(0);
-    		
-    		if (sContainerName.startsWith("/")) {
-    			sContainerName=sContainerName.substring(1);
-    		}
-    		
-    		WasdiLog.debugLog("OneShotProcessorEngine.stopApplication: Found Container named: " + sContainerName);
-    		
-    		if (oDockerUtils.stop(oProcessorToKill)) {
-    			WasdiLog.infoLog("OneShotProcessorEngine.stopApplication: container " + sContainerName + " stopped");
-    		}
-    		else {
-    			WasdiLog.infoLog("OneShotProcessorEngine.stopApplication: there was an error stopping " + sContainerName);
-    		}
-    		
-    		return true;
+    		return getContainerRuntimeDriver().stop(oParameter.getProcessObjId());
     	}
     	catch (Exception oEx) {
-			WasdiLog.errorLog("OneShotProcessorEngine.stopApplication: error");
+			WasdiLog.errorLog("OneShotProcessorEngine.stopApplication: error", oEx);
 			return false;
 		}
     }

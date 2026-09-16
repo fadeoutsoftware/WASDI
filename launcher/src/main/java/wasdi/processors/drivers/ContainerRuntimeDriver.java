@@ -1,5 +1,6 @@
-package wasdi.processors;
+package wasdi.processors.drivers;
 
+import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.parameters.ProcessorParameter;
 
 /**
@@ -25,7 +26,15 @@ public abstract class ContainerRuntimeDriver {
 	 * @param oParameter Processor Parameter
 	 * @return the image tag/reference to pass to run(), or null on failure
 	 */
-	public abstract String prepareContainerImage(ProcessorParameter oParameter);
+	public abstract String buildImage(ProcessorParameter oParameter);
+
+	/**
+	 * Uploads an already-built image to the registry.
+	 * @param oParameter Processor Parameter
+	 * @param sImageName Image name/tag returned by buildImage()
+	 * @return the pushed image address, or null on failure
+	 */
+	public abstract String pushImage(ProcessorParameter oParameter, String sImageName);
 
 	/**
 	 * Starts execution of the given image and confirms the resource actually launched.

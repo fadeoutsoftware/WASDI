@@ -24,6 +24,8 @@ import com.google.common.io.CharStreams;
 
 import wasdi.LauncherMain;
 import wasdi.asynch.PushDockerImagesThread;
+import wasdi.processors.drivers.ContainerRuntimeDriver;
+import wasdi.processors.drivers.LocalDockerDriver;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -113,6 +115,14 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	public void setDockerRegistry(String sDockerRegistry) {
 		this.m_sDockerRegistry = sDockerRegistry;
 	}
+	
+	/**
+	 * Selects the runtime driver used to build/run/monitor this processor's container.
+	 * Only LocalDockerDriver exists today; a factory choosing among drivers will replace this call.
+	 */
+	protected ContainerRuntimeDriver getContainerRuntimeDriver() {
+		return new LocalDockerDriver(this);
+	}	
 	
     /**
      * Deploy a new Processor in WASDI
@@ -210,9 +220,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: building image (Registry = " + m_sDockerRegistry + ")");
             processWorkspaceLog("Start building Image");
 
-            // Create Docker Util and deploy the docker
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, m_sDockerRegistry, m_oProcessWorkspaceLogger);
-            m_sDockerImageName = oDockerUtils.build();
+            // The container runtime driver builds the image (local Docker today, potentially a cloud build later)
+            m_sDockerImageName = getContainerRuntimeDriver().buildImage(oParameter);
             
             if (Utils.isNullOrEmpty(m_sDockerImageName)) {
             	return logDeployErrorAndClean("the deploy returned an empyt image name, something went wrong", bFirstDeploy);            	
@@ -908,7 +917,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Create again
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 33);
             WasdiLog.infoLog("DockerProcessorEngine.redeploy: deploy the image");
-            m_sDockerImageName = oDockerUtils.build();
+            m_sDockerImageName = getContainerRuntimeDriver().buildImage(oParameter);
 
             onAfterDeploy(sProcessorFolder, oProcessor);
 
@@ -1095,7 +1104,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
      * @param sApplicationContainerName Name of the container with the application. May be null
      * @return New Status
      */
-    protected String waitForApplicationToFinish(Processor oProcessor, String sProcId, String sStatus, ProcessWorkspace oProcessWorkspace, String sApplicationContainerName) {
+    public String waitForApplicationToFinish(Processor oProcessor, String sProcId, String sStatus, ProcessWorkspace oProcessWorkspace, String sApplicationContainerName) {
     	
     	WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToFinish: wait for the processor to finish");
     	
@@ -1553,7 +1562,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	 * @param oProcessor Processor
 	 * @return name of the image
 	 */
-	protected String pushImageInRegisters(Processor oProcessor) {
+	public String pushImageInRegisters(Processor oProcessor) {
 		try {
 			List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
 			
