@@ -750,6 +750,9 @@ public class ProcessorsResource  {
 				oAppListViewModel.setSquareKilometerPrice(oProcessor.getPricePerSquareKm());
 				oAppListViewModel.setImgLink(ImageResourceUtils.getProcessorLogoPlaceholderPath(oProcessor));
 				oAppListViewModel.setLogo(oProcessor.getLogo());
+				oAppListViewModel.setUpdateDate(oProcessor.getUpdateDate());
+				oAppListViewModel.setUploadDate(oProcessor.getUploadDate());
+				
 				
 				// Set the friendly name, same of name if null
 				if (!Utils.isNullOrEmpty(oProcessor.getFriendlyName())) {
