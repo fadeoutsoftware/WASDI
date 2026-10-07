@@ -25,6 +25,7 @@
         <sVersionBcpkixJdk15on>1.85</sVersionBcpkixJdk15on>
         <sVersionCommonsCli>1.10.0</sVersionCommonsCli>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
+            <sVersionJackson>2.21.7</sVersionJackson>
         <sVersionJson>20251224</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionJUniversalChardet>2.5.0</sVersionJUniversalChardet>
@@ -39,6 +40,19 @@
         <sVersionSshj>0.40.0</sVersionSshj>
         <sVersionLogback>1.5.33</sVersionLogback>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Keep SNAP's transitive Jackson modules compatible with wasdishared. -->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${sVersionJackson}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <resources>
