@@ -31,6 +31,19 @@
         <sVersionJersey2>2.48</sVersionJersey2>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Keep Jersey, Swagger, and wasdishared Jackson modules compatible. -->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${sVersionJackson}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <build>
         <finalName>processes</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
@@ -79,7 +92,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.20</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
