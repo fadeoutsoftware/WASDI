@@ -522,6 +522,21 @@
 			]
 		},
 		{
+		  "name": "CDS",
+		  "indexname": "platformname",
+		  "indexvalue": "CDS",
+		  "allowCustomFilters": true,
+		  "filters": [
+			{
+			  "indexname": "dataset",
+			  "indexlabel": "Dataset",
+			  "indexvalues": "A|B",
+			  "regex": ".*",
+			  "indexvalue": "A"
+			}
+		  ]
+		},
+		{
 			"name": "CAMS",
 			"indexname": "platformname",
 			"indexvalue": "CAMS",
