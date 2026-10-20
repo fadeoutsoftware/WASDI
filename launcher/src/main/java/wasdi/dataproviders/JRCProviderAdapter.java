@@ -3,6 +3,7 @@ package wasdi.dataproviders;
 import java.util.concurrent.TimeUnit;
 
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.jrc.ResponseTranslatorJRC;
 import wasdi.shared.utils.Utils;
@@ -29,7 +30,11 @@ public class JRCProviderAdapter extends ProviderAdapter {
 		
 		String sResult = "";
 		
-		String sDownloadURL = sFileURL.split(ResponseTranslatorJRC.s_sLinkSeparator)[ResponseTranslatorJRC.s_iLinkIndex];
+		String sDownloadURL = sFileURL;
+		
+		if (sDownloadPassword.contains(ResponseTranslatorJRC.s_sLinkSeparator)) {
+			sDownloadURL = sFileURL.split(ResponseTranslatorJRC.s_sLinkSeparator)[ResponseTranslatorJRC.s_iLinkIndex];
+		}
 		
 		WasdiLog.debugLog("JRCProviderAdapter.executeDownloadFile. Download url: " + sDownloadURL);
 		
@@ -59,7 +64,14 @@ public class JRCProviderAdapter extends ProviderAdapter {
 	public String getFileName(String sFileURL, String sDownloadPath) throws Exception {
 		String sFileName = "";
 		try {
-			sFileName = sFileURL.split(ResponseTranslatorJRC.s_sLinkSeparator)[ResponseTranslatorJRC.s_iFileNameIndex];
+			// GHSL
+			if (sFileURL.contains(";")) {
+				sFileName = sFileURL.split(ResponseTranslatorJRC.s_sLinkSeparator)[ResponseTranslatorJRC.s_iFileNameIndex];
+			}
+			// GLOFAS
+			else {
+				sFileName = sFileURL.substring(sFileURL.lastIndexOf('/') + 1);
+			}
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("JRCProviderAdapter.getFileName. Error retrieving the file name: " + oEx.getMessage());
 		}
@@ -74,10 +86,12 @@ public class JRCProviderAdapter extends ProviderAdapter {
 		if (sPlatformType.equals(Platforms.JRC_GHSL)) {
 			return DataProviderScores.DOWNLOAD.getValue();
 		}
+		if (sPlatformType.equals(Platforms.GLOFAS)) {
+			return DataProviderScores.DOWNLOAD.getValue();
+		}
 		
 		return 0;
 	}
-	
 	
 
 }
