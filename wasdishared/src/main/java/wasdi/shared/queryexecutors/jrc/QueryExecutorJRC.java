@@ -28,7 +28,6 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
-import wasdi.shared.queryexecutors.glofas.QueryExecutorGLOFAS.TileInfo;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -39,8 +38,7 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 public class QueryExecutorJRC extends QueryExecutor {
 
 	private String m_sShapeMaskPath;
-	private String s_sTileExtentFileUrl; // = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/CEMS-GLOFAS/flood_hazard/tile_extents.geojson";
-	private String m_sBaseUrl = ""; //"https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/CEMS-GLOFAS/flood_hazard/";
+	private String m_sBaseUrl = "";
 	
 	private static final Object s_oShapeFileLock = new Object();
 
