@@ -1477,6 +1477,26 @@
 					"visibilityConditions": "dataset:SWSI|ET-SW|GWU-BWU-SW"
 				}
 			]
+		},
+		{
+			"name": "GLOFAS",
+			"indexname": "platformname",
+			"indexvalue": "GLOFAS",
+			"ispublic": true,
+			"filters": [
+				{
+					"indexname": "returnperiods",
+					"indexlabel": "return periods",
+					"indexvalues": "10|20|50|75|100|200|500",
+					"indexvalue": "10"
+				},
+				{
+					"indexname": "producttype",
+					"indexlabel": "product type",
+					"indexvalues": "depth|depth_reclass",
+					"indexvalue": "depth"
+				}
+			]
 		}
 	],
 	"orbitsearch": {
