@@ -184,6 +184,8 @@ public abstract class QueryTranslator {
 	private static final String s_sPLATFORMNAME_GLOBATHY = "platformname:GLOBATHY";
 	
 	private static final String s_sPLATFORMNAME_GLOBATHYWASDI = "platformname:GLOBATHYWASDI";
+	
+	private static final String s_sPLATFORMNAME_GLOFAS = "platformname:GLOFAS";
 
 	/**
 	 * Token of product type
@@ -690,6 +692,10 @@ public abstract class QueryTranslator {
 			
 			if (!bFound) {
 				bFound = parseGlobathy(sQuery, oResult);
+			}
+			
+			if (!bFound) {
+				bFound = parseGLOFAS(sQuery, oResult);
 			}
 						
 			if (Utils.isNullOrEmpty(oResult.platformName)) {
@@ -1410,6 +1416,20 @@ public abstract class QueryTranslator {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_GLOBATHYWASDI);
 			
 			oResult.platformName = Platforms.GLOBATHYWASDI;
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean parseGLOFAS(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_GLOFAS)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_GLOFAS);
+			
+			oResult.platformName = Platforms.GLOFAS;
+			oResult.sensorMode = extractValue(sQuery, "returnperiods");
+			oResult.productType = extractValue(sQuery, "producttype");
 			
 			return true;
 		}
