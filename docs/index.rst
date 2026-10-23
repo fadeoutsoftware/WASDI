@@ -223,8 +223,15 @@ See the :doc:`STAC and OGC API Features reference </stac/Stac>` for the exposed 
    InsideWasdi/AddAppUIControl.rst
    InsideWasdi/AddProcessor.rst
    InsideWasdi/Configuration.rst
-   
 
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: DATA PROVIDERS
+
+   DataProviders/JRC.rst
+   
 
 Terms and Conditions
 ---------------------------
