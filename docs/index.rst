@@ -82,7 +82,7 @@ A good starting point to applications is the :doc:`App store overview </AppStore
    WasdiApplications/FloodFrequencyMapGenerator.rst
    WasdiApplications/WheatLocator.rst
    WasdiApplications/LandslideDetectionS2.rst
-
+   WasdiApplications/LandslideS1.rst
 
 
 Add your App to WASDI
