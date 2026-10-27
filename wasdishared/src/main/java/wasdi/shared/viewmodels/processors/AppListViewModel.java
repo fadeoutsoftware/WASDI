@@ -24,6 +24,8 @@ public class AppListViewModel {
 	private boolean buyed;
 	private String logo;
 	private boolean readOnly;
+	private double updateDate;
+	private double uploadDate;
 	
 	public Float getPrice() {
 		return price;
@@ -143,6 +145,22 @@ public class AppListViewModel {
 
 	public void setPublisherNickName(String publisherNickName) {
 		this.publisherNickName = publisherNickName;
+	}
+
+	public double getUpdateDate() {
+		return updateDate;
+	}
+
+	public void setUpdateDate(double updateDate) {
+		this.updateDate = updateDate;
+	}
+
+	public double getUploadDate() {
+		return uploadDate;
+	}
+
+	public void setUploadDate(double uploadDate) {
+		this.uploadDate = uploadDate;
 	}
 
 }

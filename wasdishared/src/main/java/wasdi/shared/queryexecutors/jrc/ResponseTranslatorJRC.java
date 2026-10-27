@@ -29,7 +29,7 @@ public class ResponseTranslatorJRC extends ResponseTranslator {
 		return 0;
 	}
 	
-	protected List<QueryResultViewModel> translateResults(Map<String, String> aoTilesMap, String sLimit, String sOffset) {
+	protected List<QueryResultViewModel> translateGHSLResults(Map<String, String> aoTilesMap, String sLimit, String sOffset) {
 		
 		int iOffset = Integer.parseInt(sOffset);
 		int iLimit = Integer.parseInt(sLimit);

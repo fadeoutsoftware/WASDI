@@ -27,8 +27,8 @@
         <sVersionCommonsNet>3.12.0</sVersionCommonsNet>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionGoogleApiClient>2.8.1</sVersionGoogleApiClient>
-        <sVersionJackson>2.20.1</sVersionJackson>
-        <sVersionJacksonAnnotations>2.20</sVersionJacksonAnnotations>
+        <sVersionJackson>2.21.7</sVersionJackson>
+            <sVersionJacksonAnnotations>2.21</sVersionJacksonAnnotations>
         <sVersionJavaxWebsocketApi>1.1</sVersionJavaxWebsocketApi>
         <sVersionJson>20250517</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
