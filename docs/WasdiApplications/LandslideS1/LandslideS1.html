@@ -349,8 +349,15 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
 .wl-delta span{font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--wl-muted)}
 .wl-foot2{font-size:.9rem; color:var(--wl-muted)}
 #wl-cstage button{padding:8px 13px; font-size:.84rem}
-.wl-tab{padding:9px 14px; font-size:.88rem; gap:7px}
-.wl-tabs{gap:6px}
+.wl-tab{padding:9px 9px; font-size:.85rem; gap:5px}
+.wl-tabs{gap:5px}
+/* relative-orbit file-name anatomy */
+.wl-fname{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 14px}
+.wl-fld{display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 11px 7px; border:1px solid var(--wl-line2); border-radius:10px; background:var(--wl-card)}
+.wl-fld code{font-size:.9rem; font-weight:700}
+.wl-fld small{font-size:.74rem; color:var(--wl-muted); font-weight:600}
+.wl-fld.hl{border-color:var(--wl-green); background:var(--wl-green-soft)}
+.wl-fld.hl small{color:var(--wl-green-text)}
 </style>
 
 <div class="wl" id="wl-root" data-theme="dark">
@@ -407,6 +414,7 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
     <button class="wl-tab" role="tab" id="wl-t5" aria-controls="wl-p5" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Real events</button>
     <button class="wl-tab" role="tab" id="wl-t6" aria-controls="wl-p6" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 18H2L12 3zM12 10v5M12 18v.01"/></svg>Limits</button>
     <button class="wl-tab" role="tab" id="wl-t7" aria-controls="wl-p7" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l13 8-13 8V4z"/></svg>Run it</button>
+    <button class="wl-tab" role="tab" id="wl-t8" aria-controls="wl-p8" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5A2.5 2.5 0 0 1 4 20.5z"/></svg>References</button>
   </div></div></div>
 
 
@@ -594,21 +602,13 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
           <p>Each ground resolution cell contains many small scatterers (blades of grass, soil grains, rock facets). Each reflects the radar wave back over a slightly different path length. At the sensor, the many small echoes add up <i>wave by wave</i>: sometimes reinforcing, sometimes cancelling out. A patch of ground whose physical properties are perfectly uniform can therefore still produce wildly different brightness values from one pixel to the next.</p>
           <p>Speckle is <b>multiplicative</b>: it scales with the signal rather than adding a fixed amount, and it is spatially random. Comparing two dates pixel by pixel is unreliable until it is suppressed, because a speckle spike can look just like a change.</p>
         </div>
-        <div class="wl-svgbox">
-          <svg viewBox="0 0 520 250" role="img" aria-label="Diagram: several scatterers inside one resolution cell return waves that interfere, giving a random bright or dark pixel.">
-            <g font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" text-anchor="middle">
-              <rect class="t-dim" x="150" y="150" width="220" height="60" rx="6"/>
-              <text class="t-dimtxt" x="260" y="236">one resolution cell, many scatterers</text>
-              <g fill="#c9a77a"><circle cx="180" cy="180" r="6"/><circle cx="215" cy="195" r="5"/><circle cx="255" cy="172" r="7"/><circle cx="300" cy="190" r="5"/><circle cx="335" cy="170" r="6"/></g>
-              <g class="t-arrow" stroke-width="1.6" fill="none" stroke-dasharray="4 4"><path d="M180 174 L110 40"/><path d="M215 190 L190 40"/><path d="M255 165 L260 40"/><path d="M300 185 L330 40"/><path d="M335 164 L410 40"/></g>
-              <rect class="t-box" x="200" y="12" width="120" height="28" rx="6"/>
-              <text class="t-boxtxt" x="260" y="31" font-weight="700">sensor</text>
-              <text class="t-dimtxt" x="450" y="96">waves with different path lengths</text>
-              <text class="t-dimtxt" x="450" y="112">add or cancel at the sensor</text>
-              <rect class="t-ok" x="420" y="140" width="90" height="30" rx="6"/><text class="t-oktxt" x="465" y="160" font-weight="700">bright pixel</text>
-              <rect class="t-dim" x="420" y="180" width="90" height="30" rx="6"/><text class="t-dimtxt" x="465" y="200" font-weight="700">dark pixel</text>
-            </g>
-          </svg>
+        <div>
+          <div class="wl-svgbox"><svg id="wl-spd-svg" viewBox="0 0 520 330" role="img" aria-label="Interactive diagram: six scatterers inside one resolution cell return echoes that add up like arrows. Depending on where the scatterers happen to sit, the sum is long (a bright pixel) or short (a dark pixel)."></svg></div>
+          <div style="display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:12px">
+            <div class="wl-seg"><button type="button" id="wl-spd-new" style="background:var(--wl-green); color:var(--wl-green-ink)">New random cell</button></div>
+            <span class="wl-src" id="wl-spd-out" aria-live="polite" style="flex:1 1 220px; margin:0"></span>
+          </div>
+          <p class="wl-src" style="margin-top:10px">The ground is identical every time. Only the exact positions of the scatterers inside the cell change, yet the pixel flips between bright and dark. Press the button a few times to see it.</p>
         </div>
       </div>
 
@@ -704,18 +704,18 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
         <div class="wl-plot" role="img" aria-label="Diagram: several pre-event measurements form a typical value and a spread; the post-event value lies far below.">
           <svg viewBox="0 0 560 300">
             <line class="ax" x1="50" y1="24" x2="50" y2="252"/><line class="ax" x1="50" y1="252" x2="540" y2="252"/>
-            <rect class="band" x="70" y="130" width="330" height="40"/>
-            <line class="med" x1="70" y1="150" x2="400" y2="150" stroke-width="1.8" stroke-dasharray="6 5"/>
-            <circle class="dot" cx="110" cy="141" r="5"/><circle class="dot" cx="170" cy="162" r="5"/><circle class="dot" cx="230" cy="148" r="5"/><circle class="dot" cx="290" cy="156" r="5"/>
-            <text x="200" y="200" font-size="13" text-anchor="middle">pre-event images</text>
-            <text x="408" y="154" font-size="12.5" class="t1">median (typical value)</text>
-            <text x="408" y="126" font-size="12" style="fill:var(--wl-green-text)">&plusmn; 1 spread (normal wobble)</text>
-            <circle class="post" cx="470" cy="228" r="7"/>
-            <line class="zl" x1="470" y1="152" x2="470" y2="220" stroke-width="2" stroke-dasharray="4 4"/>
-            <text x="444" y="246" font-size="13" text-anchor="middle" style="fill:var(--wl-alert-text);font-weight:700">post-event</text>
-            <text x="488" y="196" font-size="12.5" style="fill:var(--wl-alert-text)">Z = how many wobbles</text>
-            <text x="488" y="212" font-size="12.5" style="fill:var(--wl-alert-text)">away from normal</text>
-            <text x="300" y="282" font-size="12.5" text-anchor="middle">backscatter (dB) at one pixel, over time</text>
+            <rect class="band" x="70" y="130" width="240" height="40"/>
+            <line class="med" x1="70" y1="150" x2="310" y2="150" stroke-width="1.8" stroke-dasharray="6 5"/>
+            <circle class="dot" cx="100" cy="141" r="5.5"/><circle class="dot" cx="150" cy="162" r="5.5"/><circle class="dot" cx="205" cy="148" r="5.5"/><circle class="dot" cx="260" cy="156" r="5.5"/>
+            <text x="190" y="206" font-size="15" text-anchor="middle">pre-event images</text>
+            <text x="318" y="155" font-size="15" class="t1">median (typical value)</text>
+            <text x="318" y="122" font-size="15" style="fill:var(--wl-green-text)">&plusmn; 1 spread (normal wobble)</text>
+            <circle class="post" cx="500" cy="228" r="8"/>
+            <line class="zl" x1="500" y1="156" x2="500" y2="218" stroke-width="2" stroke-dasharray="4 4"/>
+            <text x="484" y="234" font-size="15" text-anchor="end" style="fill:var(--wl-alert-text);font-weight:700">post-event</text>
+            <text x="484" y="184" font-size="15" text-anchor="end" style="fill:var(--wl-alert-text)">Z = how many wobbles</text>
+            <text x="484" y="203" font-size="15" text-anchor="end" style="fill:var(--wl-alert-text)">away from normal</text>
+            <text x="295" y="284" font-size="15" text-anchor="middle">backscatter (dB) at one pixel, over time</text>
           </svg>
         </div>
       </div>
@@ -850,7 +850,7 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
       <li><b>Fuse</b>Combine satellite tracks: either, both, or a support count.</li>
     </ol>
     <nav class="wl-toc" aria-label="In this section"><span>In this section</span>
-      <button type="button" data-sec="wl-s31">Adaptive thresholds</button><button type="button" data-sec="wl-s32">Hysteresis</button><button type="button" data-sec="wl-s33">Slope filter</button><button type="button" data-sec="wl-s34">Closing</button><button type="button" data-sec="wl-s35">Shape filters</button><button type="button" data-sec="wl-s36">Cluster modes</button><button type="button" data-sec="wl-s37">Multi-orbit fusion</button></nav>
+      <button type="button" data-sec="wl-s31">Adaptive thresholds</button><button type="button" data-sec="wl-s32">Hysteresis</button><button type="button" data-sec="wl-s33">Slope filter</button><button type="button" data-sec="wl-s34">Closing</button><button type="button" data-sec="wl-s35">Shape filters</button><button type="button" data-sec="wl-s36">Cluster modes</button><button type="button" data-sec="wl-s37">Multi-orbit fusion</button><button type="button" data-sec="wl-s38">Hazard prior</button></nav>
 
     <div class="wl-sec" id="wl-s31">
       <h3 class="wl-h"><span class="n">3.1</span>Adaptive thresholds: let the scene set the bar</h3>
@@ -1079,6 +1079,59 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
       </div>
       <div class="wl-note"><p><b>In a real test</b> (Wayanad, two tracks): requiring both tracks to agree cut the detected area from 6,249 to 2,131 pixels while giving up only 86 of 942 true-positive pixels. Precision against the optical reference rose from 0.15 to 0.40. The Real events tab has the full numbers.</p></div>
     </div>
+    <div class="wl-sec" id="wl-s38">
+      <h3 class="wl-h"><span class="n">3.8</span>Hazard prior: an optional hint from a global hazard map</h3>
+      <div class="wl-split">
+        <div>
+          <p>Some terrain is simply more likely to slide than other terrain. The <b>World Bank / GFDRR Global Landslide Hazard Map</b> ranks every land pixel on Earth from <b>1 (very low)</b> to <b>4 (high)</b> landslide hazard, combining rainfall and earthquake triggers. When <code>USE_HAZARD_PRIOR</code> is switched on, the app uses that rank as a <b>hint</b>, never as a verdict.</p>
+          <p>The hint works on the strict (core) test only. Each pixel's rank multiplies the core threshold at that pixel, so terrain the global map rates as unlikely has to show a stronger anomaly before it can anchor a detection. The relaxed, extent threshold is not touched.</p>
+          <p>The map is switched off by default. When it is on, the app looks for the file <code>LS_TH_COG.tif</code> in the workspace, reuses it if it is there, and otherwise downloads it once from the World Bank Data Catalog.</p>
+        </div>
+        <div class="wl-note info" style="margin-top:0"><p><b class="lead">Soft, and in one direction only.</b> The multipliers are never below 1.00, so the hint can only <i>raise</i> the bar, never lower it, and never to the point where nothing could pass. A strong enough radar signal is still detected in a &ldquo;very low&rdquo; hazard area: the radar evidence always has the final say.</p></div>
+      </div>
+
+      <div class="wl-tablewrap"><table>
+        <thead><tr><th>Rank</th><th>Hazard</th><th>Multiplier on the core threshold</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Very low</td><td><code>1.50</code></td><td>Needs a <b>meaningfully stronger</b> anomaly to count</td></tr>
+          <tr><td>2</td><td>Low</td><td><code>1.20</code></td><td>Needs a somewhat stronger anomaly</td></tr>
+          <tr><td>3</td><td>Medium</td><td><code>1.00</code></td><td>No change</td></tr>
+          <tr><td>4</td><td>High</td><td><code>1.00</code></td><td>No change: <b>not</b> given a discount</td></tr>
+        </tbody></table></div>
+
+      <h3 class="wl-sub">Why &ldquo;high&rdquo; hazard is not rewarded</h3>
+      <p>An earlier version also lowered the bar in high-hazard terrain. On real mountain terrain that backfired. The map is coarse (about 1 km) and &ldquo;high&rdquo; covers most of a mountainous area, so lowering the bar over half the scene let noise through wherever a single track had a marginal pixel. The &ldquo;both agree&rdquo; mask filtered that noise back out, but the &ldquo;either&rdquo; mask did not. Since the point of the hint is to <i>cut false alarms</i>, not to recover missed slides, only the low-hazard ranks adjust anything now.</p>
+      <ul class="wl-list">
+        <li>Pixels outside ranks 1 to 4, for example beyond the map's coverage (60&deg;S to 72&deg;N), are treated as neutral (multiplier 1.00).</li>
+        <li>The scene's core and extent thresholds are computed exactly as before, so runs with and without the hint stay comparable. Only the per-pixel comparison against the core threshold changes.</li>
+        <li>The multipliers can be changed with the advanced settings <code>hazard_prior_rank1_factor</code> to <code>hazard_prior_rank4_factor</code> (defaults 1.5, 1.2, 1.0, 1.0).</li>
+        <li>The downloaded file is about 55 MB. It is kept between runs unless <code>DELETE</code> is true (see Tab 8).</li>
+      </ul>
+
+      <h3 class="wl-sub">Try the hazard hint</h3>
+      <p>Pick the hazard rank at a pixel and drag its anomaly score. The scene's normal core threshold is fixed at 3.00 here as an example (every real scene sets its own). Watch how the score needed in low-hazard terrain moves, while a score that is strong enough still passes.</p>
+      <div class="wl-widget wide">
+        <div class="wl-wtop">
+          <div class="wl-plot"><svg id="wl-hzsvg" viewBox="0 0 560 190" role="img" aria-label="Interactive scale of anomaly score showing the normal core threshold, the threshold required at the chosen hazard rank, and the pixel's own score"></svg></div>
+          <div>
+            <span class="wl-lab">Global hazard rank at this pixel</span>
+            <div class="wl-seg" role="group" aria-label="Hazard rank" id="wl-hzseg" style="margin-bottom:14px">
+              <button type="button" data-r="1" aria-pressed="true">1 Very low</button>
+              <button type="button" data-r="2" aria-pressed="false">2 Low</button>
+              <button type="button" data-r="3" aria-pressed="false">3 Medium</button>
+              <button type="button" data-r="4" aria-pressed="false">4 High</button>
+            </div>
+            <div class="wl-sliders"><label for="wl-hzd">Anomaly score of this pixel <output id="wl-hzd-o"></output><input type="range" id="wl-hzd" min="0" max="6" step="0.05" value="3.4"></label></div>
+            <div class="wl-stat">
+              <div><b id="wl-hzf">-</b><span>multiplier on the threshold</span></div>
+              <div><b id="wl-hzreq">-</b><span>score needed at this pixel</span></div>
+              <div><b>3.00</b><span>score needed with no hint (example)</span></div>
+            </div>
+            <div class="wl-readout" id="wl-hzread" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div></section>
 
   <!-- ========== 4 PIPELINE ========== -->
@@ -1138,16 +1191,47 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
             <li><b>Import, pre-process and delegate</b>Any scene not yet in the workspace is imported and given the same dual-polarization pre-processing the manual app uses. Then everything is passed to the manual app in a single call.</li>
           </ol></div>
       </div>
+      <p class="wl-src" style="margin-top:6px">How the tracks are chosen: if you name them yourself (<code>ORBITS</code>), exactly those are used. If you give a number (<code>NUMBER_OF_ORBITS</code>), that many top-ranked tracks are used. If you give neither, every track with a usable before and after set is used. A track needs at least 2 pre-event images and at least 1 post-event image, otherwise it is skipped.</p>
+
+      <h3 class="wl-sub">Relative orbit: which of the 175 repeating ground tracks?</h3>
       <div class="wl-split">
         <div>
-          <h3 class="wl-sub" style="margin-top:0">Relative orbit: one number per repeating track</h3>
-          <p>Sentinel-1 circles the Earth roughly 175 times in a 12-day repeat cycle. The same <i>relative orbit</i> number always means the same ground track, so scenes from one relative orbit see a place at the same angle every time. Scene names contain only the absolute orbit number, so the app converts it with an official, mission-specific offset:</p>
-          <div class="wl-eq"><small>Relative orbit from absolute orbit</small>
-            <i>S1A</i>: (abs &minus; 73) mod 175 + 1 &nbsp;&nbsp; <i>S1B</i>: (abs &minus; 27) mod 175 + 1 &nbsp;&nbsp; <i>S1D</i>: (abs &minus; 42) mod 175 + 1</div>
-          <p class="wl-src">The offset for Sentinel-1C changed on 24 June 2026, so scenes before and after that date use different formulas. Having several scenes per track also allows a pre-event baseline of images taken at 12-day steps.</p>
+          <p>Sentinel-1 keeps two different counters, and it helps to think of them as a lap counter and a lane number.</p>
+          <ul class="wl-list">
+            <li><b>Absolute orbit</b> is the lap counter. It starts at 1 at launch and only ever goes up, by one for every lap around the Earth (roughly 14 to 15 laps a day).</li>
+            <li><b>Relative orbit</b> is the lane number, from 1 to 175. The satellite flies over 175 fixed ground tracks one after another. After 175 laps, about <b>12 days</b>, it starts the same sequence again and flies over the very same ground.</li>
+          </ul>
+          <p>So two scenes of the same place, 12 days apart, have lap numbers exactly 175 apart but the same lane number. Only scenes with the same lane number see the ground from the same angle, which is what the baseline needs.</p>
+          <p>The catch: a scene's file name contains the lap counter but <b>not</b> the lane number. The app has to work the lane number out.</p>
         </div>
-        <div class="wl-note info" style="margin-top:2.8em"><p><b class="lead">Why this matters.</b> The statistics assume that the only thing changing between images is the ground. If a pre-event scene came from a different track, the viewing angle would differ and the backscatter would differ for reasons that have nothing to do with a landslide. Grouping by relative orbit is what makes the baseline valid.</p></div>
+        <div class="wl-note info" style="margin-top:0"><p><b class="lead">Why this matters.</b> The statistics assume that the only thing changing between images is the ground. If a pre-event scene came from a different lane, the viewing angle would differ and the backscatter would differ for reasons that have nothing to do with a landslide. Grouping by relative orbit is what makes the baseline valid.</p></div>
       </div>
+
+      <h3 class="wl-sub">How the app works it out, in three steps</h3>
+      <ol class="wl-steps" style="max-width:100%">
+        <li><b>Read the lap counter from the file name.</b> It is the seventh piece, between underscores (highlighted below).</li>
+        <li><b>Subtract the satellite's offset.</b> Each satellite started its lane numbering at a different lap: 73 for Sentinel-1A, 27 for 1B and 42 for 1D.</li>
+        <li><b>Divide by 175, keep the remainder, and add 1.</b> The remainder tells you how far into the 175-lane cycle you are. Adding 1 makes lanes count from 1 instead of 0.</li>
+      </ol>
+      <div class="wl-fname" role="group" aria-label="Anatomy of a Sentinel-1 file name, with the absolute orbit number highlighted">
+        <span class="wl-fld"><code>S1A</code><small>satellite</small></span><span class="wl-fld"><code>IW</code><small>imaging mode</small></span><span class="wl-fld"><code>GRDH</code><small>product type</small></span><span class="wl-fld"><code>1SDV</code><small>dual-pol</small></span><span class="wl-fld"><code>20240725T004900</code><small>start time</small></span><span class="wl-fld"><code>20240725T004925</code><small>stop time</small></span><span class="wl-fld hl"><code>054910</code><small>absolute orbit</small></span><span class="wl-fld"><code>06B02C</code><small>data-take ID</small></span><span class="wl-fld"><code>8680</code><small>unique ID</small></span>
+      </div>
+      <div class="wl-eq"><small>Worked example: the 25 July 2024 scene above (Sentinel-1A)</small>
+        54,910 &minus; 73 = 54,837 &nbsp;&rarr;&nbsp; 54,837 &divide; 175 = 313 with remainder <b>62</b> &nbsp;&rarr;&nbsp; 62 + 1 = <b>relative orbit 63</b></div>
+      <p>In short: <i>S1A</i>: (abs &minus; 73) mod 175 + 1 &nbsp;&nbsp; <i>S1B</i>: (abs &minus; 27) mod 175 + 1 &nbsp;&nbsp; <i>S1D</i>: (abs &minus; 42) mod 175 + 1. Here &ldquo;mod 175&rdquo; means the remainder after dividing by 175.</p>
+
+      <h3 class="wl-sub">Check it on the Wayanad baseline</h3>
+      <p>These are the five Sentinel-1A scenes the app used for track 63. Each lap number is exactly 175 more than the one before, 12 days later, and every one lands on the same lane.</p>
+      <div class="wl-tablewrap"><table>
+        <thead><tr><th>Scene date</th><th>Absolute orbit (lap)</th><th>Minus 73</th><th>Remainder after dividing by 175</th><th>Relative orbit</th></tr></thead>
+        <tbody>
+          <tr><td>19 Jun 2024</td><td>54,385</td><td>54,312</td><td>62</td><td><b>63</b></td></tr>
+          <tr><td>1 Jul 2024</td><td>54,560</td><td>54,487</td><td>62</td><td><b>63</b></td></tr>
+          <tr><td>13 Jul 2024</td><td>54,735</td><td>54,662</td><td>62</td><td><b>63</b></td></tr>
+          <tr><td>25 Jul 2024</td><td>54,910</td><td>54,837</td><td>62</td><td><b>63</b></td></tr>
+          <tr><td>6 Aug 2024 (post-event)</td><td>55,085</td><td>55,012</td><td>62</td><td><b>63</b></td></tr>
+        </tbody></table></div>
+      <p class="wl-src">Sentinel-1C has two offsets: 172 for scenes before 24 June 2026 and 99 from that date on, because its numbering changed. The app applies whichever matches the scene date.</p>
     </div>
 
     <div class="wl-sec" id="wl-s43">
@@ -1167,6 +1251,13 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
             <li><b>Fuse tracks and write the output</b>If several tracks were supplied, combine them (union, intersection and support count), then write GeoTIFF and PNG masks. If a reference raster is given, also score the result.</li>
           </ol></div>
       </div>
+      <h3 class="wl-sub">Details worth knowing</h3>
+      <ul class="wl-list">
+        <li><b>Terrain is measured before it is resampled.</b> Slope is computed on the terrain model at its own resolution, and only then resampled onto the analysis grid. Resampling the elevation first would smooth away real relief and under-estimate steep slopes.</li>
+        <li><b>A check on the two polarizations.</b> If VH and VV come out almost identical (correlation above 0.995), the app logs a warning, because that points to a problem in how the two channels were read for that track.</li>
+        <li><b>No data is handled per track.</b> Each track has its own no-data mask. In the fused masks a pixel is marked no-data only where <i>every</i> track is invalid, and a track never counts as support for a pixel it could not see.</li>
+        <li><b>The strict test is the only one the hazard prior touches.</b> The optional hazard hint (section 3.8) changes the core threshold pixel by pixel. The relaxed, extent threshold is never changed.</li>
+      </ul>
     </div>
 
     <div class="wl-sec" id="wl-s44">
@@ -1203,16 +1294,19 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
             <tr><td>Per-track mask</td><td><code>{BASENAME}_{TrackLabel}_landslide-mask.tif</code></td></tr>
             <tr><td>Fused masks (two or more tracks)</td><td><code>{BASENAME}_fused-union_landslide-mask.tif</code>, <code>{BASENAME}_fused-intersection_landslide-mask.tif</code></td></tr>
             <tr><td>Support count</td><td><code>{BASENAME}_orbit-support-count.tif</code>: a product in its own right, not just a step</td></tr>
-            <tr><td>Optional diagnostic plots</td><td>backscatter-change, anomaly-thresholds, overlap-map and, if a reference is given, a confusion-map</td></tr>
+            <tr><td>Preview colours</td><td>PNG masks: red landslide, grey no landslide, pale blue no data</td></tr>
+            <tr><td>Optional diagnostic plots</td><td>backscatter-change, anomaly-thresholds, overlap-map (only when exactly two tracks are used) and, if a reference is given, a confusion-map (green correct, red false alarm, blue missed)</td></tr>
+            <tr><td>Result record</td><td>The settings used, the list of output files and, if a reference was given, the scores. The automatic app passes on the manual app's record unchanged.</td></tr>
           </tbody></table></div>
         <div>
           <h4>Scoring against a reference</h4>
-          <p>If a reference raster of known landslides is supplied (<code>GROUND_TRUTH_FILE</code>), the app scores its result with four standard numbers:</p>
+          <p>If a reference raster of known landslides is supplied (<code>GROUND_TRUTH_FILE</code>), the app scores its result with standard numbers, for each track and for the fused masks:</p>
           <ul class="wl-list">
             <li><b>Precision</b>: of the pixels flagged, the share that are truly landslide.</li>
             <li><b>Recall</b>: of the true landslide pixels, the share that were found.</li>
             <li><b>IoU</b> (intersection over union): the overlap divided by the combined area of both masks. It punishes both misses and false alarms.</li>
             <li><b>F1</b>: the balance of precision and recall in one number.</li>
+            <li><b>AUC</b> (per track): how well the raw anomaly score ranks true landslide pixels above all others, before any threshold is applied.</li>
           </ul>
         </div>
       </div>
@@ -1380,7 +1474,7 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
           </div>
         </div></details>
         <details class="wl-more"><summary>2. Ginger Hill <span class="wl-chip ok">Detected, one track</span></summary><div>
-          <p>Only track 113 produced a result in round 1. Track 150, with images that had worked fine elsewhere, hit a network (SSL certificate) error against the WASDI service mid-run and was skipped by the per-track error handler instead of aborting the run. Replaying the same track locally succeeded, so the best reading is transient network flakiness, not a fault in the detection. The surviving track still delivered a tight, spatially coherent diagonal chain of clusters.</p>
+          <p>Round 1 detected this site on track 113, which delivered a tight, spatially coherent diagonal chain of clusters.</p>
           <div class="wl-stat"><div><b>1,776</b><span>pixels flagged (about 1.5% of the area)</span></div><div><b>1 of 2</b><span>tracks contributing</span></div><div><b>Localized</b><span>USGS severity of the cell</span></div></div>
         </div></details>
         <details class="wl-more"><summary>3. Trout Hall <span class="wl-chip ok">Detected, weak</span></summary><div>
@@ -1422,8 +1516,6 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
       <div class="wl-sec">
         <h3 class="wl-h"><span class="n">D</span>Round 2: does combining more post-event images help?</h3>
         <p class="wl-intro">Landslide scars do not vanish the day after the storm, so a natural follow-up is to give the app more post-event passes to choose from, combined differently. All five sites were re-run with 4 post-event images (up from 1) and a search window of 100 days forward (up from 60). The aggregation was split by hypothesis: <code>median</code> on the three rural hits (to suppress false positives) and <code>max_anomaly</code> on the two urban misses (to catch a fading signal).</p>
-
-        <div class="wl-note warn"><p><b>An operational cost we did not expect.</b> Raising the images per track from 5 to 8 visibly raised the failure rate of individual tracks: 4 of the 5 first-attempt runs lost at least one track, and Montego Bay lost both. Every failed track ran successfully when replayed locally with identical inputs, and explicit certificate errors turned up in several logs, pointing to transient connectivity problems made more likely by more sequential per-image network calls. The cases needed retries before both tracks completed together.</p></div>
 
         <div class="wl-split b" style="margin-top:26px">
           <figure><img src="data:image/png;base64,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" alt="Comparison at Montego Bay: purple for the reference landslide, teal for the app detection, gold where they overlap" width="520" height="520"><figcaption>Purple: analyst outline. Teal: app. Gold: overlap.</figcaption></figure>
@@ -1518,7 +1610,7 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
     <div class="wl-sec" id="wl-s64">
       <h3 class="wl-h"><span class="n">6.4</span>Where it is heading</h3>
       <div class="wl-cards3 c2">
-        <div class="wl-card"><h4>Susceptibility maps</h4><b class="t">Use known landslide hazard as a soft hint</b><p>The World Bank / GFDRR global landslide hazard layer can act as a soft prior to cut false positives. Users could also bring their own susceptibility map.</p></div>
+        <div class="wl-card"><h4>Susceptibility maps</h4><b class="t">A first hazard hint is built in; more to come</b><p>The World Bank / GFDRR global landslide hazard layer is already available as an optional soft prior that cuts false positives in unlikely terrain (see Tab 4). Next steps: let users bring their own, finer susceptibility map, and test the hint on more events.</p></div>
         <div class="wl-card"><h4>Drone confirmation</h4><b class="t">Drone images as ground truth</b><p>Drone surveys of a few slopes can confirm detections and tune thresholds for a region.</p></div>
         <div class="wl-card"><h4>Radar exclusion maps</h4><b class="t">Say where radar cannot see</b><p>Masks for shadow, layover and no-data areas, and a report of the share of each track's eligible area actually observed, so a blank result is not mistaken for "no landslide".</p></div>
         <div class="wl-card"><h4>Radar plus optical</h4><b class="t">Combine with the Sentinel-2 app</b><p>Joint detection that uses optical imagery when the sky is clear and radar when it is not.</p></div>
@@ -1540,14 +1632,14 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
     <h2>Run it on your own area</h2>
     <p class="wl-lead">The app runs in the WASDI cloud, so there is nothing to install. All you need is a WASDI account, an area and an event date. Everything else has a sensible default, which this page lists in full so that you can tune it when you need to.</p>
     <nav class="wl-toc" aria-label="In this section"><span>In this section</span>
-      <button type="button" data-sec="wl-s71">Quick start</button><button type="button" data-sec="wl-s72">Automatic app parameters</button><button type="button" data-sec="wl-s73">Manual app parameters</button><button type="button" data-sec="wl-s74">Tuning guide</button><button type="button" data-sec="wl-s75">Sources</button></nav>
+      <button type="button" data-sec="wl-s71">Quick start</button><button type="button" data-sec="wl-s72">Automatic app parameters</button><button type="button" data-sec="wl-s73">Manual app parameters</button><button type="button" data-sec="wl-s74">Tuning guide</button></nav>
 
     <div class="wl-sec" id="wl-s71">
       <h3 class="wl-h"><span class="n">7.1</span>Quick start</h3>
       <div class="wl-split">
         <div>
           <ol class="wl-steps">
-            <li><b>Open WASDI and create a workspace.</b> Your results are saved there.</li>
+            <li><b>Open WASDI and pick a workspace.</b> Use one you already have, or create a new one from the app's own screen. Your results are saved in the workspace the app runs in.</li>
             <li><b>Find the Landslide Detection (Sentinel-1) app</b> in the WASDI marketplace and open it.</li>
             <li><b>Draw a box</b> around the area of interest. Start with something around 10 by 10 km.</li>
             <li><b>Enter the event date.</b> The app looks for radar images before it and after it.</li>
@@ -1573,15 +1665,19 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
       <div class="wl-tablewrap"><table>
         <thead><tr><th>Parameter</th><th>Default</th><th>Meaning</th></tr></thead>
         <tbody>
-          <tr><td><code>BASENAME</code></td><td>required</td><td>Prefix used to name every output file.</td></tr>
+          <tr><td><code>BASENAME</code></td><td>required</td><td>Prefix used to name every output file. Underscores are removed automatically.</td></tr>
           <tr><td><code>EVENT_DATE</code></td><td>required</td><td>The date to search around. The manual app has no equivalent.</td></tr>
           <tr><td><code>BBOX</code></td><td>required</td><td>The area of interest, as two corner coordinates.</td></tr>
           <tr><td><code>DEM_FILE</code></td><td>none</td><td>Optional terrain model. Generated automatically (Copernicus 30 m) if omitted.</td></tr>
-          <tr><td><code>DAYS_BACK</code> / <code>DAYS_FORWARD</code></td><td>100 / 100</td><td>The search window around the event date.</td></tr>
+          <tr><td><code>DAYS_BACK</code> / <code>DAYS_FORWARD</code></td><td>100 / 100</td><td>The search window around the event date. It never extends past today.</td></tr>
+          <tr><td><code>MIN_DAYS_DISTANCE</code></td><td>0</td><td>Minimum number of days between a pre-event image and the event date, to keep images taken just before the event, when the ground may already be changing, out of the baseline.</td></tr>
           <tr><td><code>MIN_ORBIT_COVERAGE</code></td><td>10 (%)</td><td>Minimum share of the area that a track's scenes must cover to be kept.</td></tr>
+          <tr><td><code>ORBITS</code></td><td>none</td><td>Optional: the exact tracks to use, as a list such as <code>[63, 165]</code> or a text such as <code>63,165</code>. The easiest way to repeat an earlier run. Overrides <code>NUMBER_OF_ORBITS</code>.</td></tr>
+          <tr><td><code>NUMBER_OF_ORBITS</code></td><td>unset</td><td>Optional: use only this many tracks, best-ranked first. If both this and <code>ORBITS</code> are left out, <b>every</b> track with a usable before and after set is used, a good way to find out which tracks cover a new area.</td></tr>
           <tr><td><code>NUMBER_OF_PRE_IMAGES</code></td><td>4</td><td>How many pre-event images to select per track (they build the baseline).</td></tr>
           <tr><td><code>NUMBER_OF_POST_IMAGES</code></td><td>1</td><td>How many post-event images to select per track.</td></tr>
           <tr><td><code>PROVIDER</code></td><td>AUTO</td><td>Which data provider to search.</td></tr>
+          <tr><td><code>FORCE_RERUN</code></td><td>false</td><td>If true, re-runs instead of reusing an existing terrain model or result.</td></tr>
         </tbody></table></div>
     </div>
 
@@ -1605,7 +1701,14 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
           <tr><td><code>CLUSTER_MODE</code></td><td>multi</td><td><code>multi</code>, <code>single</code> or <code>off</code>.</td><td>3.6</td></tr>
           <tr><td><code>MULTI_CLUSTER_RELATIVE_STRENGTH</code></td><td>0.6</td><td>How strong a region must be, relative to the strongest, to become its own anchor.</td><td>3.6</td></tr>
           <tr><td><code>GROUND_TRUTH_FILE</code></td><td>none</td><td>Optional reference raster; enables scoring with IoU, precision, recall and F1.</td><td>4.5</td></tr>
+          <tr><td><code>USE_HAZARD_PRIOR</code></td><td>false</td><td>Optional soft hint from the World Bank / GFDRR hazard map: raises the core threshold in terrain rated unlikely to slide, never lowers it.</td><td>3.8</td></tr>
+          <tr><td><code>hazard_prior_rank1_factor</code> to <code>hazard_prior_rank4_factor</code></td><td>1.5, 1.2, 1.0, 1.0</td><td>Advanced: the threshold multiplier for each hazard rank (very low to high).</td><td>3.8</td></tr>
+          <tr><td><code>ISOLATE_TO_STRONGEST_CLUSTER</code></td><td>unset</td><td>Older on/off switch kept for compatibility: true acts as <code>CLUSTER_MODE = single</code>, false as <code>off</code>. Used only if <code>CLUSTER_MODE</code> is not set.</td><td>3.6</td></tr>
+          <tr><td><code>GENERATE_DIAGNOSTIC_PLOTS</code></td><td>true</td><td>Set to false to skip the diagnostic pictures and write only the masks, for faster, leaner runs.</td><td>4.5</td></tr>
+          <tr><td><code>DELETE_INTERMEDIATE_FILES</code></td><td>true</td><td>Removes this run's per-image pre-processed files. The original Sentinel-1 files, the terrain model and all results are kept.</td><td>below</td></tr>
+          <tr><td><code>DELETE</code></td><td>true</td><td>A broader clean-up: also removes this run's raw Sentinel-1 files, terrain model, reference raster and hazard file, leaving only the results.</td><td>below</td></tr>
         </tbody></table></div>
+      <div class="wl-note info"><p><b class="lead">About clean-up.</b> With the defaults, a finished run leaves only its results in the workspace: the downloaded Sentinel-1 files, the terrain model and the hazard file are deleted. This keeps the workspace tidy, but a re-run then has to fetch and pre-process everything again. While you experiment on the same area, set <code>DELETE</code> to <code>false</code> so those files are reused. Clean-up only ever touches files that this run used or produced, never other runs' files in the same workspace.</p></div>
     </div>
 
     <div class="wl-sec" id="wl-s74">
@@ -1619,22 +1722,30 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
           <tr><td>Very noisy results</td><td>Use several post-event images with <code>median</code>, or a larger <code>SCORE_SMOOTHING_WINDOW</code>.</td><td>Blurring a signal that partly recovers.</td></tr>
           <tr><td>Gentle or urban terrain</td><td>Lower <code>MIN_SOURCE_SLOPE</code>.</td><td>Flat-ground false alarms such as flooding.</td></tr>
           <tr><td>Fragmented detections</td><td>Raise <code>MORPH_CLOSING_KERNEL</code>.</td><td>Welding together unrelated regions.</td></tr>
+          <tr><td>False alarms in terrain the global hazard map rates unlikely</td><td>Switch on <code>USE_HAZARD_PRIOR</code>.</td><td>A little more required signal in low-hazard areas; a real slide there must be strong.</td></tr>
           <tr><td>One dominant slide expected</td><td>Set <code>CLUSTER_MODE</code> to <code>single</code>.</td><td>Losing independent slides far from the anchor.</td></tr>
         </tbody></table></div>
     </div>
+  </div></section>
 
-    <div class="wl-sec" id="wl-s75">
-      <h3 class="wl-h"><span class="n">7.5</span>Sources</h3>
+  <!-- ========== 8 REFERENCES ========== -->
+  <section class="wl-panel" role="tabpanel" id="wl-p8" aria-labelledby="wl-t8" hidden><div class="wl-inner">
+    <div class="wl-eyebrow">Where this comes from</div>
+    <h2>References</h2>
+    <p class="wl-lead">The events, data sets and background material behind this page, so that every claim can be checked at its source.</p>
+
+    <div class="wl-sec" id="wl-s81">
+      <h3 class="wl-h"><span class="n">8.1</span>Sources and data</h3>
       <ul class="wl-list wl-src">
         <li>Wayanad event details and coordinates: <a href="https://eos.org/thelandslideblog/wayanad-landslides" target="_blank" rel="noopener">The Landslide Blog (AGU Eos), "The 30 July 2024 Wayanad landslides in Kerala, India"</a>; <a href="https://en.wikipedia.org/wiki/2024_Wayanad_landslides" target="_blank" rel="noopener">2024 Wayanad landslides</a>; village coordinates from <a href="https://en.wikipedia.org/wiki/Mundakkai,_Wayanad" target="_blank" rel="noopener">Mundakkai</a> and <a href="https://en.wikipedia.org/wiki/Chooralmala" target="_blank" rel="noopener">Chooralmala</a>.</li>
         <li>Independent radar-based damage assessment of the same event: <a href="https://dataforpublicgood.org.in/blog/landslide-damage-assessment-wayanad-kerala/" target="_blank" rel="noopener">Data for Public Good, Landslide Damage Assessment, Wayanad, Kerala</a> (not spatially compared here).</li>
         <li>Jamaica: <a href="https://www.usgs.gov/programs/landslide-hazards/science/2025-hurricane-melissa-landslide-hazards" target="_blank" rel="noopener">USGS, 2025 Hurricane Melissa Landslide Hazards</a> and its rapid imagery assessment data release (<a href="https://doi.org/10.5066/P1JMKWMF" target="_blank" rel="noopener">DOI 10.5066/P1JMKWMF</a>); <a href="https://mapping.emergency.copernicus.eu/activations/EMSR847/" target="_blank" rel="noopener">Copernicus Emergency Management Service, activation EMSR847</a>; NOAA National Hurricane Center report AL132025.</li>
         <li>Radar background: <a href="https://arset.gsfc.nasa.gov/" target="_blank" rel="noopener">NASA ARSET, Using SAR for Landslide Detection</a>; <a href="https://step.esa.int/main/doc/tutorials/" target="_blank" rel="noopener">ESA SNAP tutorials, Sentinel-1 SAR pre-processing</a>; <a href="https://wasdi.readthedocs.io/en/latest/ProgrammingTutorials/PythonTutorial.html" target="_blank" rel="noopener">WASDI Python tutorial</a>.</li>
+        <li>Hazard hint: World Bank / GFDRR <a href="https://datacatalog.worldbank.org/search/dataset/0037584/global-landslide-hazard-map" target="_blank" rel="noopener">Global Landslide Hazard Map</a> (ranks 1 to 4, used by the optional <code>USE_HAZARD_PRIOR</code> setting).</li>
         <li>Radar data: Copernicus Sentinel-1. Terrain: Copernicus 30 m DEM. Case-study figures were produced from WASDI runs of the landslide detection apps in September 2026.</li>
       </ul>
     </div>
   </div></section>
-
   <footer class="wl-foot"><div class="wl-inner">WASDI Landslide Detection (Sentinel-1). Simulated panels are illustrations built from invented data, not satellite imagery. Case-study figures come from real WASDI runs.</div></footer>
 </div>
 
@@ -1671,9 +1782,9 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
     });
     if(focus) tabs[i].focus();
     if(!noScroll && tabbar.getBoundingClientRect().top<0) tabbar.scrollIntoView({block:'start'});
-    if(i===1) initSpeckle();
+    if(i===1){ initSpeckle(); spdInit(); }
     if(i===2) initStats();
-    if(i===3){ build(); sim(); simC(); }
+    if(i===3){ build(); sim(); simC(); initHz(); }
   }
   tabs.forEach(function(t,i){
     t.addEventListener('click',function(){show(i)});
@@ -2117,5 +2228,68 @@ html.wl-pagedark.wl-wide .rst-footer-buttons a.btn{background:#183656!important;
     $('wl-cout').innerHTML=out;
   }
 
+
+
+  /* ================== interactive speckle diagram ================== */
+  var SPD={ready:false,rnd:null,drawn:false};
+  function spdInit(){
+    if(!SPD.ready){ SPD.ready=true; SPD.rnd=mulberry(23); $('wl-spd-new').addEventListener('click',spdRoll); }
+    if(!SPD.drawn) spdRoll();
+  }
+  function spdRoll(){
+    var r=SPD.rnd, N=6, i, sc=[], ph=[], sx=0, sy=0, W=520;
+    for(i=0;i<N;i++){ sc.push({x:46+r()*208, y:224+r()*38}); ph.push(r()*2*Math.PI); sx+=Math.cos(ph[i]); sy+=Math.sin(ph[i]); }
+    var I=(sx*sx+sy*sy)/N;   /* mean 1 over many cells */
+    var L=31, px=[0], py=[0], mnx=0,mxx=0,mny=0,mxy=0;
+    for(i=0;i<N;i++){ px.push(px[i]+L*Math.cos(ph[i])); py.push(py[i]-L*Math.sin(ph[i])); }
+    px.forEach(function(v){mnx=Math.min(mnx,v);mxx=Math.max(mxx,v)}); py.forEach(function(v){mny=Math.min(mny,v);mxy=Math.max(mxy,v)});
+    var ox=410-(mnx+mxx)/2, oy=140-(mny+mxy)/2, s=[];
+    s.push('<defs><marker id="wl-spd-ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--wl-ink)"/></marker><marker id="wl-spd-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--wl-alert)"/></marker></defs>');
+    s.push('<g font-family="Segoe UI,Helvetica,Arial,sans-serif" text-anchor="middle" font-size="14">');
+    s.push('<rect class="t-box" x="95" y="10" width="110" height="30" rx="6"/><text class="t-boxtxt" x="150" y="30" font-weight="700">sensor</text>');
+    for(i=0;i<N;i++) s.push('<line class="t-arrow" x1="'+sc[i].x.toFixed(1)+'" y1="'+(sc[i].y-6).toFixed(1)+'" x2="150" y2="42" stroke-width="1.5" stroke-dasharray="4 4"/>');
+    s.push('<g style="paint-order:stroke; stroke:var(--wl-card); stroke-width:5px; stroke-linejoin:round"><text class="t-dimtxt" x="150" y="128" font-size="13.5">echoes with slightly</text><text class="t-dimtxt" x="150" y="146" font-size="13.5">different path lengths</text></g>');
+    s.push('<rect class="t-dim" x="30" y="208" width="240" height="68" rx="6"/>');
+    for(i=0;i<N;i++) s.push('<circle cx="'+sc[i].x.toFixed(1)+'" cy="'+sc[i].y.toFixed(1)+'" r="6" fill="#c9a77a"/>');
+    s.push('<text class="t-dimtxt" x="150" y="300">one resolution cell, 6 scatterers</text>');
+    s.push('<text x="410" y="26" font-weight="700" style="fill:var(--wl-head)">The echoes add up like arrows</text>');
+    s.push('<text class="t-dimtxt" x="410" y="44" font-size="13">(each arrow is one echo)</text>');
+    for(i=0;i<N;i++) s.push('<line x1="'+(ox+px[i]).toFixed(1)+'" y1="'+(oy+py[i]).toFixed(1)+'" x2="'+(ox+px[i+1]).toFixed(1)+'" y2="'+(oy+py[i+1]).toFixed(1)+'" stroke="var(--wl-ink)" stroke-width="2" marker-end="url(#wl-spd-ah)"/>');
+    s.push('<line x1="'+ox.toFixed(1)+'" y1="'+oy.toFixed(1)+'" x2="'+(ox+px[N]).toFixed(1)+'" y2="'+(oy+py[N]).toFixed(1)+'" stroke="var(--wl-alert)" stroke-width="3" stroke-dasharray="6 4" marker-end="url(#wl-spd-ar)"/>');
+    s.push('<text x="410" y="236" style="fill:var(--wl-alert-text)" font-weight="700">sum: the longer, the brighter</text>');
+    var lt=Math.round(14+78*Math.min(1,I/2.6)), lab=I>1.35?'bright pixel':(I<0.55?'dark pixel':'medium pixel');
+    s.push('<rect x="345" y="252" width="130" height="38" rx="8" fill="hsl(215,12%,'+lt+'%)" stroke="var(--wl-line2)"/><text x="410" y="276" font-weight="700" fill="'+(lt<55?'#fff':'#14202e')+'">'+lab+'</text>');
+    s.push('</g>');
+    $('wl-spd-svg').innerHTML=s.join('');
+    $('wl-spd-out').textContent='This cell: the echoes '+(I>1.35?'mostly reinforce each other':(I<0.55?'mostly cancel each other':'partly cancel'))+', so the pixel comes out '+(I>1.35?'bright':(I<0.55?'dark':'in between'))+' ('+I.toFixed(1)+' times the average brightness).';
+    SPD.drawn=true;
+  }
+
+  /* ================== hazard prior widget ================== */
+  var HZ={f:[1.5,1.2,1.0,1.0],rank:1,done:false}, HZ_CORE=3.0;
+  function initHz(){
+    if(HZ.done){hzUpdate();return} HZ.done=true;
+    seg($('wl-hzseg'),function(b){HZ.rank=+b.getAttribute('data-r'); hzUpdate()});
+    $('wl-hzd').addEventListener('input',hzUpdate); hzUpdate();
+  }
+  function hzUpdate(){
+    var D=+$('wl-hzd').value, f=HZ.f[HZ.rank-1], req=HZ_CORE*f, ok=D>=req, X=function(v){return 40+v/6*480}, s=[];
+    $('wl-hzd-o').textContent=D.toFixed(2); $('wl-hzf').textContent='×'+f.toFixed(2); $('wl-hzreq').textContent=req.toFixed(2);
+    s.push('<line class="ax" x1="40" y1="110" x2="520" y2="110" stroke-width="2"/>');
+    for(var v=0;v<=6;v++) s.push('<line class="ax" x1="'+X(v)+'" y1="106" x2="'+X(v)+'" y2="114"/><text x="'+X(v)+'" y="132" font-size="13" text-anchor="middle">'+v+'</text>');
+    s.push('<text x="280" y="156" font-size="13" text-anchor="middle">anomaly score of a pixel (example scale)</text>');
+    s.push('<line x1="'+X(HZ_CORE)+'" y1="56" x2="'+X(HZ_CORE)+'" y2="110" stroke="var(--wl-muted)" stroke-width="2" stroke-dasharray="5 4"/>');
+    s.push('<text x="'+X(HZ_CORE)+'" y="50" font-size="13" text-anchor="middle">normal core threshold 3.00</text>');
+    if(f>1) { s.push('<line x1="'+X(req)+'" y1="28" x2="'+X(req)+'" y2="110" stroke="var(--wl-amber)" stroke-width="3"/><text x="'+(X(req)+8)+'" y="24" font-size="14" font-weight="700" style="fill:var(--wl-amber-text)">needed here '+req.toFixed(2)+'</text>'); }
+    else s.push('<text x="'+(X(HZ_CORE)+8)+'" y="24" font-size="14" font-weight="700" style="fill:var(--wl-green-text)">needed here 3.00 (no change)</text>');
+    s.push('<circle cx="'+X(D)+'" cy="110" r="10" style="fill:'+(ok?'var(--wl-green)':'var(--wl-alert)')+'" stroke="var(--wl-bg)" stroke-width="2"/>');
+    s.push('<text x="'+Math.max(70,Math.min(490,X(D)))+'" y="88" font-size="13.5" font-weight="700" text-anchor="middle" style="paint-order:stroke; stroke:var(--wl-bg); stroke-width:5px; fill:'+(ok?'var(--wl-green-text)':'var(--wl-alert-text)')+'">this pixel '+D.toFixed(2)+'</text>');
+    $('wl-hzsvg').innerHTML=s.join('');
+    var msg;
+    if(ok) msg='<span class="good">Passes the strict test.</span> This pixel is strong enough to anchor a detection'+(f>1?', even though the hazard map rates the terrain as unlikely.':'.');
+    else if(D>=HZ_CORE) msg='<span class="bad">Held back by the hint.</span> Without the hint this pixel would pass (3.00). In this hazard class it needs '+req.toFixed(2)+'.';
+    else msg='<span class="bad">Does not pass</span>, with or without the hint: the anomaly is too weak.';
+    $('wl-hzread').innerHTML=msg;
+  }
 })();
 </script>
