@@ -82,7 +82,7 @@ A good starting point to applications is the :doc:`App store overview </AppStore
    WasdiApplications/FloodFrequencyMapGenerator.rst
    WasdiApplications/WheatLocator.rst
    WasdiApplications/LandslideDetectionS2.rst
-
+   WasdiApplications/LandslideS1.rst
 
 
 Add your App to WASDI
@@ -223,8 +223,15 @@ See the :doc:`STAC and OGC API Features reference </stac/Stac>` for the exposed 
    InsideWasdi/AddAppUIControl.rst
    InsideWasdi/AddProcessor.rst
    InsideWasdi/Configuration.rst
-   
 
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: DATA PROVIDERS
+
+   DataProviders/JRC.rst
+   
 
 Terms and Conditions
 ---------------------------
