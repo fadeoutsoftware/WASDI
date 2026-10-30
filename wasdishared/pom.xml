@@ -33,7 +33,7 @@
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
         <sVersionGeoserverManager>1.7.0</sVersionGeoserverManager>
         <!--sVersionGson>2.12.1</sVersionGson-->
-        <sVersionGuava>33.5.0-jre</sVersionGuava>
+        <sVersionGuava>33.7.1-jre</sVersionGuava>
         <sVersionJackson>2.21.7</sVersionJackson>
         <sVersionJson>20251224</sVersionJson>
 		<sVersionNimbusJoseJwt>10.7</sVersionNimbusJoseJwt>
