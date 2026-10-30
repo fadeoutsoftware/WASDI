@@ -909,7 +909,7 @@ public class PermissionsUtils {
 			if (aoUserAppSharings == null) return false;
 			
 			for (UserResourcePermission oShared: aoUserAppSharings) {
-				if (oShared.getResourceId()==oProcessor.getProcessorId()) {
+				if (oShared.getResourceId().equals(oProcessor.getProcessorId())) {
 					return true;
 				}
 			}

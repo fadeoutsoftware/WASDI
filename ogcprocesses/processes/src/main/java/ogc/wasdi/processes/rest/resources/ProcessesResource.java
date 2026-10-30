@@ -42,12 +42,14 @@ import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.business.processors.ProcessorUI;
 import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.OgcProcessesTaskRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProcessorUIRepository;
+import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.mongo.MongoRepository;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -161,6 +163,9 @@ public class ProcessesResource {
 			
     		// Take all the processors
     		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			List<UserResourcePermission> aoSharedApplications = oUserResourcePermissionRepository.getProcessorSharingsByUserId(oUser.getUserId());
 			
 			// Initialize ascending direction
 			List<Processor> aoDeployed = oProcessorRepository.getDeployedProcessors("friendlyName", 1);
@@ -172,7 +177,7 @@ public class ProcessesResource {
 				Processor oProcessor = aoDeployed.get(i);
 				
 				// See if this is a processor the user can access to
-				if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId())) continue;
+				if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor, aoSharedApplications)) continue;
 				
 				// Run until the actual offset
 				if (iAvailableApps<oiOffset) {
@@ -181,7 +186,7 @@ public class ProcessesResource {
 				}
 				
 				// If we are in the range offset+limit add the processor to the return list
-				if (oProcessList.getProcesses().size()<oiOffset+oiLimit) {
+				if (oProcessList.getProcesses().size()<oiLimit) {
 					
 					// Create the view model
 					ProcessSummary oSummary = new ProcessSummary();
@@ -225,12 +230,13 @@ public class ProcessesResource {
 				
 				// Increment the number of available apps
 				iAvailableApps++;
+				if (iAvailableApps>(long) oiOffset+oiLimit) break;
 			}
 			
-			WasdiLog.debugLog("ProcessesResource.getProcesses: found " + iAvailableApps + " Apps");
+			WasdiLog.debugLog("ProcessesResource.getProcesses: scanned " + iAvailableApps + " accessible Apps");
 			
 			// Did we finish all the pages?
-			if (iAvailableApps>oiOffset+oiLimit) {
+			if (iAvailableApps>(long) oiOffset+oiLimit) {
 				
 				WasdiLog.debugLog("ProcessesResource.getProcesses: adding next and prev links");
 				
