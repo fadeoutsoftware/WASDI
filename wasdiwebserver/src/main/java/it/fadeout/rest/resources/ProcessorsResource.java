@@ -422,15 +422,24 @@ public class ProcessorsResource  {
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			UserRepository oUserRepository = new UserRepository();
 			List<Processor> aoDeployed = oProcessorRepository.getDeployedProcessors();
+			List<UserResourcePermission> aoSharedApplications = oUserResourcePermissionRepository.getProcessorSharingsByUserId(oUser.getUserId());
+			Map<String, User> aoUsersMap = new HashMap<>();
 			
 			for (int i=0; i<aoDeployed.size(); i++) {
 				
 				Processor oProcessor = aoDeployed.get(i);
-
-				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 				
 				// See if this is a processor the user can access to
-				if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor)) continue;
+				if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor, aoSharedApplications)) continue;
+				
+				UserResourcePermission oSharing = null;
+				
+				for (UserResourcePermission oShared: aoSharedApplications) {
+					if (oShared.getResourceId()==oProcessor.getProcessorId()) {
+						oSharing = oShared;
+						break;
+					}
+				}
 				
 				DeployedProcessorViewModel oDeployedProcessorViewModel = new DeployedProcessorViewModel();
 				
@@ -462,7 +471,15 @@ public class ProcessorsResource  {
 				
 				oDeployedProcessorViewModel.setPublisherNickName(oDeployedProcessorViewModel.getPublisher());
 				
-				User oAppOwner = oUserRepository.getUser(oProcessor.getUserId());
+				User oAppOwner = null;
+				
+				if (aoUsersMap.containsKey(oProcessor.getUserId())) {
+					oAppOwner = aoUsersMap.get(oProcessor.getUserId()); 
+				}
+				else {
+					oAppOwner = oUserRepository.getUser(oProcessor.getUserId());
+					if (oAppOwner != null) aoUsersMap.put(oAppOwner.getUserId(), oAppOwner);
+				}
 				
 				if (oAppOwner != null) {
 					if (Utils.isNullOrEmpty(oAppOwner.getPublicNickName())) {

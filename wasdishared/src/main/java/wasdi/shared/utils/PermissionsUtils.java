@@ -517,7 +517,7 @@ public class PermissionsUtils {
 
 			return oUserResourcePermissionRepository.isOrganizationSharedWithUser(sUserId, sOrganizationId);
 		} catch (Exception oE) {
-			WasdiLog.debugLog("PermissionsUtils.canUserAccessOrganization( " + sUserId + ", " + sOrganizationId + " ): error: " + oE);
+			WasdiLog.errorLog("PermissionsUtils.canUserAccessOrganization( " + sUserId + ", " + sOrganizationId + " ): error: " + oE);
 		}
 
 		return false;
@@ -589,7 +589,7 @@ public class PermissionsUtils {
 			}
 			
 		} catch (Exception oE) {
-			WasdiLog.debugLog("PermissionsUtils.canUserAccessSubscription( " + sUserId + ", " + sSubscriptionId + " ): error: " + oE);
+			WasdiLog.errorLog("PermissionsUtils.canUserAccessSubscription( " + sUserId + ", " + sSubscriptionId + " ): error: " + oE);
 		}
 
 		return false;
@@ -660,7 +660,7 @@ public class PermissionsUtils {
 			return oUserResourcePermissionRepository.isStyleSharedWithUser(sUserId, sStyleId);
 			
 		} catch (Exception oE) {
-			WasdiLog.debugLog("PermissionsUtils.canUserAccessStyle( " + sUserId + ", " + sStyleId + " ): error: " + oE);
+			WasdiLog.errorLog("PermissionsUtils.canUserAccessStyle( " + sUserId + ", " + sStyleId + " ): error: " + oE);
 		}
 
 		return false;
@@ -721,7 +721,7 @@ public class PermissionsUtils {
 				return canUserAccessWorkspace(sUserId, sWorkspaceId);
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("PermissionsUtils.canUserAccessProcess( " + sUserId + ", " + sProcessObjId + " ): " + oE);
+			WasdiLog.errorLog("PermissionsUtils.canUserAccessProcess( " + sUserId + ", " + sProcessObjId + " ): " + oE);
 		}
 
 		return false;
@@ -787,7 +787,7 @@ public class PermissionsUtils {
 
 			return oUserResourcePermissionRepository.isProcessorParametersTemplateSharedWithUser(sUserId, sTemplateId);
 		} catch (Exception oE) {
-			WasdiLog.debugLog("PermissionsUtils.canUserAccessProcessorParametersTemplate( " + sUserId + ", " + sTemplateId + " ): error: " + oE);
+			WasdiLog.errorLog("PermissionsUtils.canUserAccessProcessorParametersTemplate( " + sUserId + ", " + sTemplateId + " ): error: " + oE);
 		}
 
 		return false;
@@ -839,7 +839,7 @@ public class PermissionsUtils {
 			return canUserAccessProcessor(sUserId, oProcessor);
 			
 		} catch (Exception oE) {
-			WasdiLog.debugLog("PermissionsUtils.canUserAccessProcessor( " + sUserId + ", " + sProcessorId + " ): error: " + oE);
+			WasdiLog.errorLog("PermissionsUtils.canUserAccessProcessor( " + sUserId + ", " + sProcessorId + " ): error: " + oE);
 		}
 
 		return false;		
@@ -863,7 +863,7 @@ public class PermissionsUtils {
 			
 			return canUserAccessProcessor(sUserId, oProcessor);			
 		} catch (Exception oE) {
-			WasdiLog.debugLog("PermissionsUtils.canUserAccessProcessor( " + sUserId + ", " + sName + " ): error: " + oE);
+			WasdiLog.errorLog("PermissionsUtils.canUserAccessProcessor( " + sUserId + ", " + sName + " ): error: " + oE);
 		}
 
 		return false;		
@@ -886,12 +886,42 @@ public class PermissionsUtils {
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			return oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, oProcessor.getProcessorId());
 		} catch (Exception oE) {
-			WasdiLog.debugLog("PermissionsUtils.canUserAccessProcessor error: " + oE);
+			WasdiLog.errorLog("PermissionsUtils.canUserAccessProcessor error: " + oE);
 		}
 
 		return false;		
 	}
 	
+	/**
+	 * Check if a user can access a Processor
+	 * @param sUserId User requesting access
+	 * @param oProcessor Processor requested
+	 * @return true if can access, false if not
+	 */
+	public static boolean canUserAccessProcessor(String sUserId, Processor oProcessor, List<UserResourcePermission> aoUserAppSharings) {
+		try {			
+			if (oProcessor == null) return false;
+			
+			if (oProcessor.getIsPublic()>0) return true;
+			
+			if (oProcessor.getUserId().equals(sUserId)) return true;
+			
+			if (aoUserAppSharings == null) return false;
+			
+			for (UserResourcePermission oShared: aoUserAppSharings) {
+				if (oShared.getResourceId()==oProcessor.getProcessorId()) {
+					return true;
+				}
+			}
+			
+			return false;
+
+		} catch (Exception oE) {
+			WasdiLog.errorLog("PermissionsUtils.canUserAccessProcessor error: " + oE);
+		}
+
+		return false;		
+	}	
 	/**
 	 * Check if a user can write a processor
 	 * @param sUserId
@@ -911,7 +941,7 @@ public class PermissionsUtils {
 			return canUserWriteProcessor(sUserId, oProcessor);
 			
 		} catch (Exception oE) {
-			WasdiLog.debugLog("PermissionsUtils.canUserAccessProcessor( " + sUserId + ", " + sProcessorId + " ): error: " + oE);
+			WasdiLog.errorLog("PermissionsUtils.canUserAccessProcessor( " + sUserId + ", " + sProcessorId + " ): error: " + oE);
 		}
 
 		return false;		
@@ -937,7 +967,7 @@ public class PermissionsUtils {
 			
 			return canUserWriteProcessor(sUserId, oProcessor);			
 		} catch (Exception oE) {
-			WasdiLog.debugLog("PermissionsUtils.canUserWriteProcessorByName( " + sUserId + ", " + sName + " ): error: " + oE);
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteProcessorByName( " + sUserId + ", " + sName + " ): error: " + oE);
 		}
 
 		return false;		
