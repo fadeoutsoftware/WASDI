@@ -22,7 +22,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0</revision>
-        <sVersionAmqpClient>5.34.0</sVersionAmqpClient>
+        <sVersionAmqpClient>5.37.0</sVersionAmqpClient>
         <sVersionAssertjCore>3.27.7</sVersionAssertjCore>
         <sVersionAwsJavaSdkS3>1.12.797</sVersionAwsJavaSdkS3>
         <sVersionCommonsCompress>1.28.0</sVersionCommonsCompress>
@@ -313,7 +313,7 @@
 		<dependency>
 		    <groupId>org.jsoup</groupId>
 		    <artifactId>jsoup</artifactId>
-		    <version>1.18.3</version>
+		    <version>1.23.2</version>
 		</dependency>        
 		<!-- https://mvnrepository.com/artifact/com.hubspot.jinjava/jinjava -->
 		<dependency>
