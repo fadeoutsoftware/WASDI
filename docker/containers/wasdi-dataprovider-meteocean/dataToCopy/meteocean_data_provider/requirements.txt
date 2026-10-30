@@ -13,7 +13,7 @@ click==8.1.7
 colorama==0.4.6
 Flask==3.0.3
 frozenlist==1.5.0
-fsspec==2024.10.0
+fsspec==2026.6.0
 h5netcdf==1.4.0
 h5py==3.12.1
 idna==3.10
