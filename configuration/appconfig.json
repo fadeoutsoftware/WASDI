@@ -1561,6 +1561,26 @@
 					"indexvalue": "depth"
 				}
 			]
+		},
+		{
+			"name": "MeteoGate",
+			"indexname": "platformname",
+			"indexvalue": "MeteoGate",
+			"ispublic": true,
+			"filters": [
+				{
+					"indexname": "stationtype",
+					"indexlabel": "station type",
+					"indexvalues": "land",
+					"indexvalue": "land"
+				},
+				{
+					"indexname": "outputformat",
+					"indexlabel": "output format",
+					"indexvalues": "csv",
+					"indexvalue": "csv"
+				}
+			]
 		}
 	],
 	"orbitsearch": {

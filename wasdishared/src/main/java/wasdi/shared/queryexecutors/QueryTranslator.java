@@ -187,6 +187,8 @@ public abstract class QueryTranslator {
 	
 	private static final String s_sPLATFORMNAME_GLOFAS = "platformname:GLOFAS";
 
+	private static final String s_sPLATFORMNAME_METEOGATE = "platformname:MeteoGate";
+
 	/**
 	 * Token of product type
 	 */
@@ -696,6 +698,10 @@ public abstract class QueryTranslator {
 			
 			if (!bFound) {
 				bFound = parseGLOFAS(sQuery, oResult);
+			}
+
+			if (!bFound) {
+				bFound = parseMeteoGate(sQuery, oResult);
 			}
 						
 			if (Utils.isNullOrEmpty(oResult.platformName)) {
@@ -1434,6 +1440,17 @@ public abstract class QueryTranslator {
 			return true;
 		}
 		
+		return false;
+	}
+
+	private boolean parseMeteoGate(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_METEOGATE)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_METEOGATE);
+			oResult.platformName = Platforms.METEO_GATE;
+			oResult.productType = extractValue(sQuery, "stationtype");
+			oResult.sensorMode = extractValue(sQuery, "outputformat");
+			return true;
+		}
 		return false;
 	}
 
