@@ -27,7 +27,6 @@ import wasdi.shared.viewmodels.labelling.imagestyles.ImageStyleViewModel;
 public class ImageStyleResource {
 
 	@GET
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response getById(@Context ContainerRequestContext oRequestContext, @QueryParam("styleId") String sStyleId) {
 
@@ -68,7 +67,6 @@ public class ImageStyleResource {
 	}
 
 	@POST
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response create(@Context ContainerRequestContext oRequestContext, ImageStyleViewModel oImageStyleViewModel) {
 
@@ -107,7 +105,6 @@ public class ImageStyleResource {
 	}
 
 	@PUT
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response update(@Context ContainerRequestContext oRequestContext, ImageStyleViewModel oImageStyleViewModel) {
 
@@ -151,7 +148,6 @@ public class ImageStyleResource {
 	}
 
 	@DELETE
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response delete(@Context ContainerRequestContext oRequestContext, @QueryParam("imageStyleId") String sImageStyleId) {
 
