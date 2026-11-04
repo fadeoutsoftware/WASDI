@@ -645,7 +645,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 			//parse response as json
 			JSONObject oJson = new JSONObject(sQueryResult);
 			if(null!=oJson) {
-				iResult = oJson.optInt("totalResults", -1);
+				iResult = oJson.optInt("numberMatched", -1);
 			}
 		}
 
