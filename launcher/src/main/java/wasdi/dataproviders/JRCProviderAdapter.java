@@ -3,7 +3,6 @@ package wasdi.dataproviders;
 import java.util.concurrent.TimeUnit;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.jrc.ResponseTranslatorJRC;
 import wasdi.shared.utils.Utils;

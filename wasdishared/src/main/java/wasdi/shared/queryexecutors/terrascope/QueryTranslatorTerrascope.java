@@ -1,11 +1,15 @@
 package wasdi.shared.queryexecutors.terrascope;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.json.JSONObject;
 
 import wasdi.shared.queryexecutors.QueryTranslator;
 import wasdi.shared.queryexecutors.PaginatedQuery;
@@ -15,34 +19,34 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 
 public class QueryTranslatorTerrascope extends QueryTranslator {
 
-	private static final String TERRASCOPE_CATALOGUE_URL = "https://services.terrascope.be/catalogue/products?";
+	private static final String TERRASCOPE_CATALOGUE_URL = "https://stac.terrascope.be/search?";
 
-	private static Map<String, String> collectionNames;
+	private static Map<String, String> s_asCollectionNames;
 
 	static {
-		collectionNames = new HashMap<>();
+		s_asCollectionNames = new HashMap<>();
 
-		collectionNames.put("Sentinel-1:GRD", "urn:eop:VITO:CGS_S1_GRD_L1");
-		collectionNames.put("Sentinel-1:SLC", "urn:eop:VITO:CGS_S1_SLC_L1");
-		collectionNames.put("Sentinel-1", "urn:eop:VITO:CGS_S1_GRD_L1,urn:eop:VITO:CGS_S1_SLC_L1");
+//		s_asCollectionNames.put("Sentinel-1:GRD", "urn:eop:VITO:CGS_S1_GRD_L1");
+//		s_asCollectionNames.put("Sentinel-1:SLC", "urn:eop:VITO:CGS_S1_SLC_L1");
+//		s_asCollectionNames.put("Sentinel-1", "urn:eop:VITO:CGS_S1_GRD_L1,urn:eop:VITO:CGS_S1_SLC_L1");
+//
+//		s_asCollectionNames.put("Sentinel-2:S2MSI1C", "urn:eop:VITO:CGS_S2_L1C");
+//		s_asCollectionNames.put("Sentinel-2", "urn:eop:VITO:CGS_S2_L1C");
+//
+//		s_asCollectionNames.put("Proba-V:urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001", "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001");
+//		s_asCollectionNames.put("Proba-V:urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001", "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001");
+//		s_asCollectionNames.put("Proba-V:urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001", "urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001");
+//		s_asCollectionNames.put("Proba-V", "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001,urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001,urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001");
+//
+		s_asCollectionNames.put("DEM:DEM_30M", "cop-dem-glo-30m-cog");
+		s_asCollectionNames.put("DEM:DEM_90M", "cop-dem-glo-90m-cog");
+		s_asCollectionNames.put("DEM", "cop-dem-glo-30m-cog,cop-dem-glo-90m-cog");
 
-		collectionNames.put("Sentinel-2:S2MSI1C", "urn:eop:VITO:CGS_S2_L1C");
-		collectionNames.put("Sentinel-2", "urn:eop:VITO:CGS_S2_L1C");
-
-		collectionNames.put("Proba-V:urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001", "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001");
-		collectionNames.put("Proba-V:urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001", "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001");
-		collectionNames.put("Proba-V:urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001", "urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001");
-		collectionNames.put("Proba-V", "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001,urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001,urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001");
-
-		collectionNames.put("DEM:DEM_30M", "urn:eop:VITO:COP_DEM_GLO_30M_COG");
-		collectionNames.put("DEM:DEM_90M", "urn:eop:VITO:COP_DEM_GLO_90M_COG");
-		collectionNames.put("DEM", "urn:eop:VITO:COP_DEM_GLO_30M_COG,urn:eop:VITO:COP_DEM_GLO_90M_COG");
-
-		collectionNames.put("WorldCover:10m_2020_V1", "urn:eop:VITO:ESA_WorldCover_10m_2020_V1");
-		collectionNames.put("WorldCover:10m_2021_V2", "urn:eop:VITO:ESA_WorldCover_10m_2021_V2");
-		collectionNames.put("WorldCover:S1VVVHratio_10m_2020_V1", "urn:eop:VITO:ESA_WorldCover_S1VVVHratio_10m_2020_V1");
-		collectionNames.put("WorldCover:S2RGBNIR_10m_2020_V1", "urn:eop:VITO:ESA_WorldCover_S2RGBNIR_10m_2020_V1");
-		collectionNames.put("WorldCover", "urn:eop:VITO:ESA_WorldCover_10m_2020_V1,urn:eop:VITO:ESA_WorldCover_S1VVVHratio_10m_2020_V1,urn:eop:VITO:ESA_WorldCover_S2RGBNIR_10m_2020_V1");
+		s_asCollectionNames.put("WorldCover:10m_2020_V1", "esa-worldcover-map-10m-2020-v1");
+		s_asCollectionNames.put("WorldCover:10m_2021_V2", "esa-worldcover-map-10m-2021-v2");
+		s_asCollectionNames.put("WorldCover:S1VVVHratio_10m_2020_V1", "esa-worldcover-s1vvvhratio-10m-2020-v1");
+//		s_asCollectionNames.put("WorldCover:S2RGBNIR_10m_2020_V1", "urn:eop:VITO:ESA_WorldCover_S2RGBNIR_10m_2020_V1");
+//		s_asCollectionNames.put("WorldCover", "urn:eop:VITO:ESA_WorldCover_10m_2020_V1,urn:eop:VITO:ESA_WorldCover_S1VVVHratio_10m_2020_V1,urn:eop:VITO:ESA_WorldCover_S2RGBNIR_10m_2020_V1");
 	}
 
 	protected List<String> translateMultiple(String sQueryFromClient) {
@@ -61,17 +65,14 @@ public class QueryTranslatorTerrascope extends QueryTranslator {
 		// Set start and end date
 		String sTimeStart = oWasdiQuery.startFromDate.substring(0, 10);
 		String sTimeEnd = oWasdiQuery.endToDate.substring(0, 10);
-		// increment the end day by one, because the upper limit is excluded:
-		// Terrascope considers the timestamp, hence the moment considered is 00:00:00
-		sTimeEnd = LocalDate.parse(sTimeEnd).plusDays(1).toString();
 
 		String sTimePeriod = "";
 
 		if (Platforms.SENTINEL1.equals(oWasdiQuery.platformName)
 				|| Platforms.SENTINEL2.equals(oWasdiQuery.platformName)
 				|| Platforms.WORLD_COVER.equals(oWasdiQuery.platformName)) {
-			// start=2022-01-01&end=2022-01-06
-			sTimePeriod = "&start=" + sTimeStart + "&end=" + sTimeEnd;
+			// datetime=2020-01-05T00:00:00Z/2020-01-15T23:59:59Z
+			sTimePeriod = "&datetime=" + sTimeStart + "T00:00:00Z/" + sTimeEnd + "T23:59:59Z";
 		} else if (Platforms.DEM.equals(oWasdiQuery.platformName)) {
 			// processingDate=[2022-01-01,2022-01-13]
 			sTimePeriod = "&processingDate=[" + sTimeStart + "," + sTimeEnd + "]";
@@ -79,53 +80,59 @@ public class QueryTranslatorTerrascope extends QueryTranslator {
 
 		sTerrascopeQuery += sTimePeriod;
 
-		if (oWasdiQuery.limit > 0) {
-			String sCount = "&count=" + oWasdiQuery.limit;
-			sTerrascopeQuery += sCount;
-		}
-
-		// Set the start index:
-		if (oWasdiQuery.offset >= 0) {
-			int iOffset = oWasdiQuery.offset + 1;
-			String sOffset= "&startIndex=" + iOffset;
-			sTerrascopeQuery += sOffset;
-		}
-
 		// Set the Bbox
 		String sBbox = "";
 
 		if (oWasdiQuery.north != null && oWasdiQuery.south != null && oWasdiQuery.east != null && oWasdiQuery.west != null) {
-			// P.Campanella 16/02/2021: change geographic filter to avoid geoserver intersection bug.
-			//sBbox = "&box=" + oWasdiQuery.west + "," + oWasdiQuery.south + "," + oWasdiQuery.east + "," + oWasdiQuery.north;
-			sBbox = "&geometry=POLYGON((" + oWasdiQuery.west +" " + oWasdiQuery.south + ", " + oWasdiQuery.east +" " + oWasdiQuery.south + ", " + oWasdiQuery.east + " " + oWasdiQuery.north + ", " + oWasdiQuery.west + " " + oWasdiQuery.north+ ", " + oWasdiQuery.west  +" " + oWasdiQuery.south + "))";
+			sBbox = "&bbox=" + oWasdiQuery.west +"," + oWasdiQuery.south + "," + oWasdiQuery.east +"," + oWasdiQuery.north;
 		}
 
 		sTerrascopeQuery += sBbox;
 
-		// Set Sensor Mode
-		if (!Utils.isNullOrEmpty(oWasdiQuery.sensorMode)) {
-			String sSensorMode = "&SensorMode=" + oWasdiQuery.sensorMode;
-			sTerrascopeQuery += sSensorMode;
+		if (oWasdiQuery.limit > 0) {
+			String sCount = "&limit=" + oWasdiQuery.limit;
+			sTerrascopeQuery += sCount;
 		}
 
-		// Set Cloud Coverage
-		if (oWasdiQuery.cloudCoverageFrom != null && oWasdiQuery.cloudCoverageTo != null) {
-			int iFrom = oWasdiQuery.cloudCoverageFrom.intValue();
-			int iTo = oWasdiQuery.cloudCoverageTo.intValue();
+		JSONObject oStacQuery = new JSONObject();
 
-			String sCloudCoverage = "&cloudCover=%5B" + iFrom + "," + iTo + "%5D";
-			sTerrascopeQuery += sCloudCoverage;
+		if (Platforms.SENTINEL1.equals(oWasdiQuery.platformName)) {
+			if (!Utils.isNullOrEmpty(oWasdiQuery.sensorMode)) {
+				oStacQuery.put("sar:instrument_mode", new JSONObject().put("eq", oWasdiQuery.sensorMode));
+			}
 		}
 
-		// Set Relative Orbit
-		if (oWasdiQuery.relativeOrbit >= 0) {
-			String sOrbitNumber = "&orbitNumber=" + oWasdiQuery.relativeOrbit;
-			sTerrascopeQuery += sOrbitNumber;
+		if (Platforms.SENTINEL2.equals(oWasdiQuery.platformName)) {
+			JSONObject oCloudCoverageFilter = new JSONObject();
+			if (oWasdiQuery.cloudCoverageFrom != null) {
+				oCloudCoverageFilter.put("gte", oWasdiQuery.cloudCoverageFrom);
+			}
+			if (oWasdiQuery.cloudCoverageTo != null) {
+				oCloudCoverageFilter.put("lte", oWasdiQuery.cloudCoverageTo);
+			}
+			if (oCloudCoverageFilter.length() > 0) {
+				oStacQuery.put("eo:cloud_cover", oCloudCoverageFilter);
+			}
 		}
 
-		//add free text search, assuming it's the product id
+		if (oWasdiQuery.relativeOrbit >= 0
+				&& (Platforms.SENTINEL1.equals(oWasdiQuery.platformName)
+						|| Platforms.SENTINEL2.equals(oWasdiQuery.platformName))) {
+			oStacQuery.put("sat:relative_orbit", new JSONObject().put("eq", oWasdiQuery.relativeOrbit));
+		}
+
 		if (!Utils.isNullOrEmpty(oWasdiQuery.productName)) {
-			sTerrascopeQuery += "&uid=" + oWasdiQuery.productName;
+			String sProductNameProperty = "id";
+			if (Platforms.SENTINEL1.equals(oWasdiQuery.platformName)) {
+				sProductNameProperty = "s1:product_identifier";
+			} else if (Platforms.SENTINEL2.equals(oWasdiQuery.platformName)) {
+				sProductNameProperty = "s2:product_uri";
+			}
+			oStacQuery.put(sProductNameProperty, new JSONObject().put("eq", oWasdiQuery.productName));
+		}
+
+		if (oStacQuery.length() > 0) {
+			sTerrascopeQuery += "&query=" + encodeQueryParameter(oStacQuery.toString());
 		}
 
 		String sCollectionNames = retrieveCollectionName(oWasdiQuery.platformName, oWasdiQuery.productType);
@@ -140,7 +147,7 @@ public class QueryTranslatorTerrascope extends QueryTranslator {
 
 		for (String sCollectionName : aoCollectionNames) {
 			if (!Utils.isNullOrEmpty(sCollectionName)) {
-				String sBaseAddress = TERRASCOPE_CATALOGUE_URL + "collection=" + sCollectionName;
+				String sBaseAddress = TERRASCOPE_CATALOGUE_URL + "collections=" + sCollectionName;
 
 				String sUrl = sBaseAddress + sTerrascopeQuery;
 				aoUrls.add(sUrl);
@@ -148,6 +155,14 @@ public class QueryTranslatorTerrascope extends QueryTranslator {
 		}
 
 		return aoUrls;
+	}
+
+	private static String encodeQueryParameter(String sQueryParameter) {
+		try {
+			return URLEncoder.encode(sQueryParameter, "UTF-8");
+		} catch (UnsupportedEncodingException oEx) {
+			throw new IllegalStateException("UTF-8 is not available", oEx);
+		}
 	}
 
 	// platformName = Sentinel-1 productType = GRD
@@ -158,7 +173,7 @@ public class QueryTranslatorTerrascope extends QueryTranslator {
 			key += ":" + productType;
 		}
 
-		return collectionNames.get(key);
+		return s_asCollectionNames.get(key);
 	}
 
 	@Override

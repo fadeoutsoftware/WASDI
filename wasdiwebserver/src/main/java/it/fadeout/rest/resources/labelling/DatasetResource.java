@@ -180,7 +180,6 @@ public class DatasetResource {
 	}
 	
 	@GET
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response getById(@Context ContainerRequestContext oRequestContext, @QueryParam("datasetId") String sDatasetId) {
 		
@@ -304,7 +303,6 @@ public class DatasetResource {
 	}	
 	
 	@POST
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response create(@Context ContainerRequestContext oRequestContext, DatasetViewModel oDatasetViewModel) {
 		WasdiLog.debugLog("DatasetResource.create");
@@ -371,7 +369,6 @@ public class DatasetResource {
 	}
 	
 	@PUT
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response update(@Context ContainerRequestContext oRequestContext, DatasetViewModel oDatasetViewModel) {
 		WasdiLog.debugLog("DatasetResource.update");
@@ -436,7 +433,6 @@ public class DatasetResource {
 	}	
 	
 	@DELETE
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response delete(@Context ContainerRequestContext oRequestContext, @QueryParam("datasetId") String sDatasetId) {
 		WasdiLog.debugLog("DatasetResource.delete");
