@@ -1447,7 +1447,7 @@ public abstract class QueryTranslator {
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_METEOGATE)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_METEOGATE);
 			oResult.platformName = Platforms.METEO_GATE;
-			oResult.productType = extractValue(sQuery, "stationtype");
+			oResult.productType = extractValue(sQuery, "observation");
 			oResult.sensorMode = extractValue(sQuery, "outputformat");
 			return true;
 		}

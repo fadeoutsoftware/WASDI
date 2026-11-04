@@ -1,10 +1,12 @@
 package wasdi.shared.queryexecutors.meteogate;
 
-import static wasdi.shared.utils.HttpUtils.httpPost;
+import static wasdi.shared.utils.HttpUtils.httpGet;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.json.JSONArray;
 
 //import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -18,17 +20,91 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 
 public class QueryExecutorMeteoGate extends EDRQueryExecutor{
 
+    String m_sMeteoGateBaseUrl;
+
     public QueryExecutorMeteoGate() {
 		m_oQueryTranslator = new QueryTranslatorMeteoGate();
 		m_oResponseTranslator = new ResponseTranslatorMeteoGate();
 	}
 
+    @Override 
+    public void init() {
+        this.m_sMeteoGateBaseUrl = this.m_oDataProviderConfig.link;
+    }
+
+    private JSONArray getStations(QueryViewModel oQueryVM) {
+        /** 
+         * Query the WMO OSCAR Surface service to get a list of stations 
+        */
+
+        try {
+
+            // for the moment, we only consider the bbox
+            // TODO: understad which other parameters should be included 
+
+            StringBuilder sQueryParametersBuilder = new StringBuilder();
+
+            Double dNorth = oQueryVM.north;
+            Double dSouth = oQueryVM.south;
+            Double dEast = oQueryVM.east;
+            Double dWest = oQueryVM.west;
+
+            if (dNorth == null || dSouth == null || dEast == null || dWest == null) {
+                WasdiLog.warnLog("QueryExecutorMeteoGate.getStations. Bounding box not fully specified");
+                return null;
+            }
+
+            sQueryParametersBuilder.append("bbox=" + dWest + "," + dSouth+"," + dEast+"," + dNorth);
+
+            String sDateFrom = oQueryVM.startFromDate;
+            String sDateTo = oQueryVM.endToDate;
+
+            if (sDateFrom == null && sDateTo == null) {
+                WasdiLog.warnLog("QueryExecutorMeteoGate.getStations. Dates not specified");
+                return null;
+            }
+
+            sQueryParametersBuilder.append("&datetime=" + sDateFrom + "/" + sDateTo);
+
+            String sObservation = oQueryVM.productType;
+
+            if (sObservation == null) {
+                WasdiLog.warnLog("QueryExecutorMeteoGate.getStations. Observation not specified");
+                return null;
+            }
+
+            sQueryParametersBuilder.append("&standard_name=" + sObservation);
+
+            String sUrl = this.m_sMeteoGateBaseUrl + "?" + sQueryParametersBuilder.toString();
+
+            HttpCallResponse oResponse = httpGet(sUrl);
+
+            if (oResponse == null) {
+                WasdiLog.warnLog("QueryExecutorMeteoGate.getStations. HTTP response is null");
+                return null;
+            }
+
+            int iResponseCode = oResponse.getResponseCode();
+            WasdiLog.debugLog("QueryExecutorMeteoGate.getStations. Response code: " + iResponseCode);
+
+            if (iResponseCode != 200) {
+                WasdiLog.warnLog("QueryExecutorMeteoGate.getStations. HTTP call failed with code " + iResponseCode);
+                return null;
+            }
+
+            JSONArray aoStations = new JSONArray(oResponse.getResponseBody());
+            return aoStations;
+        
+        } catch (Exception oE) {
+            WasdiLog.errorLog("QueryExecutorMeteoGate.getStations: Exception", oE);
+            return null;
+        }
+    }
+
     @Override
     public int executeCount(String sQuery) {
 
         int iCount = -1;
-
-        String sUrl = "http://oscar.wmo.int/surface/rest/api/search/stationSearch";
 
         try {
 
@@ -41,79 +117,13 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 return iCount;
             }
 
-            StringBuilder oPayload = new StringBuilder();
+            JSONArray aoStations = getStations(oQueryVM);
 
-            Double dNorth = oQueryVM.north;
-            Double dSouth = oQueryVM.south;
-            Double dEast = oQueryVM.east;
-            Double dWest = oQueryVM.west;
-
-            oPayload.append("{\"operation\":\"AND\"");
-
-            if (dNorth != null && dSouth != null && dEast != null && dWest != null) {
-                oPayload.append(",");
-                oPayload.append("\"latitudeFrom\":\"" + dSouth.toString() + "\",");
-                oPayload.append("\"latitudeTo\":\"" + dNorth.toString() + "\",");
-                oPayload.append("\"longitudeFrom\":\"" + dWest.toString() + "\",");
-                oPayload.append("\"longitudeTo\":\"" + dEast.toString() + "\"");
+            if (aoStations != null) {
+                iCount = aoStations.length();
+                WasdiLog.debugLog("QueryExecutorMeteoGate.executeCount. Count: " + iCount);
             }
 
-            oPayload.append(",");
-            oPayload.append("\"nrt\":false");
-            oPayload.append(",\"quickSearch\":false"); 
-            oPayload.append(",\"operatingStatusId\":10");
-            oPayload.append(",\"assessedStatusId\":10");
-            oPayload.append(",\"programApprovalStatusId\":5");
-            oPayload.append(",\"stationTypeIdList\":[5,6,11]");
-            oPayload.append(",\"filetype\":\"csv\"");
-            oPayload.append(",\"stationProgramName\":null");
-            oPayload.append(",\"variableName\":null");
-
-            oPayload.append("}");
-
-            String sPayload = oPayload.toString();
-
-            WasdiLog.debugLog("QueryExecutorMeteoGate.executeCount. Payload: " + sPayload);
-
-            Map<String, String> oHeaders = new HashMap<>();
-            oHeaders.put("Content-Type", "application/json");
-
-            HttpCallResponse oResponse = httpPost(sUrl, sPayload, oHeaders);
-
-            if (oResponse == null) {
-                WasdiLog.warnLog("QueryExecutorMeteoGate.executeCount. HTTP response is null");
-                return iCount;
-            }
-
-            WasdiLog.debugLog("QueryExecutorMeteoGate.executeCount. Response code: " + oResponse.getResponseCode());
-
-            /**
-            String sPayload = "{\"operation\":\"AND\",\"nrt\":false,\"quickSearch\":false,\"operatingStatusId\":10,\"assessedStatusId\":10,\"programApprovalStatusId\":5,\"stationTypeIdList\":[5,6,11,12,1,2,9,3,4,10,7,8],\"latitudeTo\":\"50\",\"latitudeFrom\":\"46\",\"longitudeFrom\":\"5\",\"longitudeTo\":\"6\",\"filetype\":\"csv\",\"stationProgramName\":null,\"variableName\":null}";
-            
-            HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, sPayload);
-            
-            if (oResponse != null && oResponse.getResponseCode() == 200) {
-                String sResponseBody = oResponse.getResponseBody();
-                
-                ObjectMapper oMapper = new ObjectMapper();
-                Object oResult = oMapper.readValue(sResponseBody, Object.class);
-                
-                // Extract count from response - adjust based on actual response structure
-                if (oResult instanceof java.util.Map) {
-                    java.util.Map<?, ?> oMap = (java.util.Map<?, ?>) oResult;
-                    if (oMap.containsKey("count")) {
-                        return ((Number) oMap.get("count")).intValue();
-                    }
-                }
-                
-                WasdiLog.warnLog("MeteoGateQueryExecutor.executeCount: Unable to extract count from response");
-                return 0;
-            } else {
-                WasdiLog.errorLog("MeteoGateQueryExecutor.executeCount: HTTP call failed with code " + 
-                    (oResponse != null ? oResponse.getResponseCode() : "null"));
-                return 0;
-            }
-            */
         } catch (Exception oE) {
             WasdiLog.errorLog("MeteoGateQueryExecutor.executeCount: Exception", oE);
         }
@@ -122,8 +132,31 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
 
     @Override
     public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'executeAndRetrieve'");
+
+        try {
+        
+            String sQuery = oQuery.getQuery();
+            QueryViewModel oQueryVM = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
+
+            if (!m_asSupportedPlatforms.contains(oQueryVM.platformName)) {
+                WasdiLog.debugLog("QueryExecutorMeteoGate.executeCount. Plaform not supported by the data provider for query: " + sQuery);
+                return null;
+            }
+
+            JSONArray aoStations = getStations(oQueryVM);
+
+            if (aoStations == null) {
+                WasdiLog.debugLog("QueryExecutorMeteoGate.executeAndRetrieve. No stations found");
+                return null;
+            }
+
+            // now I need to make the call to MeteoGate for look for getting the time series available 
+
+                
+        } catch (Exception oE) {
+            WasdiLog.errorLog("QueryExecutorMeteoGate.executeAndRetrieve: Exception", oE);
+        }
+        return null;
     }
 
 
