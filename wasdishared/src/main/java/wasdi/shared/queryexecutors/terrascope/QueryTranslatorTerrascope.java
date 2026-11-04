@@ -38,9 +38,9 @@ public class QueryTranslatorTerrascope extends QueryTranslator {
 //		s_asCollectionNames.put("Proba-V:urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001", "urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001");
 //		s_asCollectionNames.put("Proba-V", "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001,urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001,urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001");
 //
-//		s_asCollectionNames.put("DEM:DEM_30M", "urn:eop:VITO:COP_DEM_GLO_30M_COG");
-//		s_asCollectionNames.put("DEM:DEM_90M", "urn:eop:VITO:COP_DEM_GLO_90M_COG");
-//		s_asCollectionNames.put("DEM", "urn:eop:VITO:COP_DEM_GLO_30M_COG,urn:eop:VITO:COP_DEM_GLO_90M_COG");
+		s_asCollectionNames.put("DEM:DEM_30M", "cop-dem-glo-30m-cog");
+		s_asCollectionNames.put("DEM:DEM_90M", "cop-dem-glo-90m-cog");
+		s_asCollectionNames.put("DEM", "cop-dem-glo-30m-cog,cop-dem-glo-90m-cog");
 
 		s_asCollectionNames.put("WorldCover:10m_2020_V1", "esa-worldcover-map-10m-2020-v1");
 		s_asCollectionNames.put("WorldCover:10m_2021_V2", "esa-worldcover-map-10m-2021-v2");
