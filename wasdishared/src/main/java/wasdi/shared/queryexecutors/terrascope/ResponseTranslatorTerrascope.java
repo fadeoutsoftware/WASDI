@@ -118,8 +118,28 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 					}
 				}
 			}
+			
+			JSONObject oAssets = oInJson.optJSONObject("assets");
+			if (oAssets == null ) {
+				WasdiLog.debugLog("ResponseTranslatorTerrascope.addProperties: input json has null assets");
+				return oResult;
+			}
+			
+			JSONObject oMap = oAssets.optJSONObject("Map");
+			if (oMap == null) {
+				WasdiLog.debugLog("ResponseTranslatorTerrascope.addProperties: input asset has not map. Trying with 'DEM'");
+				oMap = oAssets.optJSONObject("DEM");
+				if (oMap == null) {
+					WasdiLog.debugLog("ResponseTranslatorTerrascope.addProperties: input asset has not dem");
+					return oResult;
+				}
+			}
+			
+			
+			String sLink = oMap.optString("href");
+			oResult.setLink(sLink);			
 
-			buildLink(oResult);
+			//buildLink(oResult);
 			buildSummary(oResult);
 		} catch (Exception oE) {
 			WasdiLog.debugLog("ResponseTranslatorTerrascope.translate( " +
@@ -248,11 +268,11 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 				WasdiLog.debugLog("ResponseTranslatorTerrascope.addProperties: input json has null properties");
 				return;
 			}
-
+			
 			String sBuffer = null;
 
 			loadMostProperties(oResult, oProperties);
-
+			
 			//title
 			oResult.setTitle("");
 			if (!oProperties.isNull(ResponseTranslatorTerrascope.STITLE)) {
@@ -266,6 +286,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 				oResult.setTitle(sTitle);
 				oResult.getProperties().put(ResponseTranslatorTerrascope.STITLE, sTitle);
 			}
+			
 
 			//preview
 			if (bFullViewModel) {
@@ -285,7 +306,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 
 			}
 
-			sBuffer = oProperties.optString("date", null);
+			sBuffer = oProperties.optString("datetime", null);
 			if (null != sBuffer) {
 				oResult.getProperties().put(ResponseTranslatorTerrascope.SDATE, sBuffer);
 				oResult.getProperties().put("startDate", sBuffer);
@@ -320,9 +341,9 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 				oResult.getProperties().put("polarisationmode", oProperties.optString(ResponseTranslatorTerrascope.SPOLARISATION, null));
 			}
 
-			parseLinks(oProperties, oResult);
-
-			parseServices(oResult, oProperties);
+			//parseLinks(oProperties, oResult);
+			//parseServices(oResult, oProperties);
+			
 		} catch (Exception oE) {
 			WasdiLog.debugLog("ResponseTranslatorTerrascope.parseProperties(" + oInJson.toString() + ", " + bFullViewModel + ", ... ): " + oE);
 		}
@@ -628,7 +649,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 			//parse response as json
 			JSONObject oJson = new JSONObject(sQueryResult);
 			if(null!=oJson) {
-				iResult = oJson.optInt("totalResults", -1);
+				iResult = oJson.optInt("numberMatched", -1);
 			}
 		}
 
