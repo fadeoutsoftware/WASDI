@@ -14,20 +14,14 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorTypes;
-import wasdi.shared.config.EnvironmentVariableConfig;
 import wasdi.shared.config.PathsConfig;
-import wasdi.shared.config.ProcessorTypeConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.packagemanagers.PipOneShotPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
-import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.docker.DockerUtils;
-import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
-import wasdi.shared.utils.docker.containersViewModels.constants.ContainerStates;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class PipOneShotProcessorEngine extends OneShotProcessorEngine {
