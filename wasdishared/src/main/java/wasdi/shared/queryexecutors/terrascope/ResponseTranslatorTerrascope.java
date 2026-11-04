@@ -127,8 +127,12 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 			
 			JSONObject oMap = oAssets.optJSONObject("Map");
 			if (oMap == null) {
-				WasdiLog.debugLog("ResponseTranslatorTerrascope.addProperties: input asset has not map");
-				return oResult;
+				WasdiLog.debugLog("ResponseTranslatorTerrascope.addProperties: input asset has not map. Trying with 'DEM'");
+				oMap = oAssets.optJSONObject("DEM");
+				if (oMap == null) {
+					WasdiLog.debugLog("ResponseTranslatorTerrascope.addProperties: input asset has not dem");
+					return oResult;
+				}
 			}
 			
 			
