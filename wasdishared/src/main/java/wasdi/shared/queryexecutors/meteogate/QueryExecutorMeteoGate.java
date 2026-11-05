@@ -2,11 +2,13 @@ package wasdi.shared.queryexecutors.meteogate;
 
 import static wasdi.shared.utils.HttpUtils.httpGet;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 //import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -32,9 +34,9 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
         this.m_sMeteoGateBaseUrl = this.m_oDataProviderConfig.link;
     }
 
-    private JSONArray getStations(QueryViewModel oQueryVM) {
+    private JSONObject getStations(QueryViewModel oQueryVM) {
         /** 
-         * Query the WMO OSCAR Surface service to get a list of stations 
+         * Query MeteoGate to get a list of stations 
         */
 
         try {
@@ -49,6 +51,7 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
             Double dEast = oQueryVM.east;
             Double dWest = oQueryVM.west;
 
+            // mandatory bbox
             if (dNorth == null || dSouth == null || dEast == null || dWest == null) {
                 WasdiLog.warnLog("QueryExecutorMeteoGate.getStations. Bounding box not fully specified");
                 return null;
@@ -59,12 +62,17 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
             String sDateFrom = oQueryVM.startFromDate;
             String sDateTo = oQueryVM.endToDate;
 
+            // mandatory dates (usually only date close to the present moment are supported)
+            // TODO: understand if only dates in the past are supported or also in the near future
             if (sDateFrom == null && sDateTo == null) {
                 WasdiLog.warnLog("QueryExecutorMeteoGate.getStations. Dates not specified");
                 return null;
             }
 
             sQueryParametersBuilder.append("&datetime=" + sDateFrom + "/" + sDateTo);
+
+            // TODO: remove once the check is done
+            WasdiLog.debugLog("QueryExecutorMeteoGate.getStations. Start date " + sDateFrom + ", end date: " + sDateTo);
 
             String sObservation = oQueryVM.productType;
 
@@ -75,7 +83,8 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
 
             sQueryParametersBuilder.append("&standard_name=" + sObservation);
 
-            String sUrl = this.m_sMeteoGateBaseUrl + "?" + sQueryParametersBuilder.toString();
+            String sUrl = this.m_sMeteoGateBaseUrl + "/collections/observations/locations?" + sQueryParametersBuilder.toString();
+            WasdiLog.debugLog("QueryExecutorMeteoGate.getStations. URL: " + sUrl);
 
             HttpCallResponse oResponse = httpGet(sUrl);
 
@@ -92,7 +101,7 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 return null;
             }
 
-            JSONArray aoStations = new JSONArray(oResponse.getResponseBody());
+            JSONObject aoStations = new JSONObject(oResponse.getResponseBody());
             return aoStations;
         
         } catch (Exception oE) {
@@ -117,12 +126,24 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 return iCount;
             }
 
-            JSONArray aoStations = getStations(oQueryVM);
+            JSONObject aoStations = getStations(oQueryVM);
 
-            if (aoStations != null) {
-                iCount = aoStations.length();
-                WasdiLog.debugLog("QueryExecutorMeteoGate.executeCount. Count: " + iCount);
+            if (aoStations == null) {
+                
+                WasdiLog.warnLog("QueryExecutorMeteoGate.executeCount. No stations returned");
+                return iCount;
             }
+
+            JSONArray aoFeatures = aoStations.optJSONArray("features");
+
+            if (aoFeatures == null) {
+                WasdiLog.warnLog("QueryExecutorMeteoGate.executeCount. Array 'feature' not present in the JSON response");
+                return iCount;
+            }
+
+            iCount = aoFeatures.length();
+            WasdiLog.debugLog("QueryExecutorMeteoGate.executeCount. Count: " + iCount);
+            
 
         } catch (Exception oE) {
             WasdiLog.errorLog("MeteoGateQueryExecutor.executeCount: Exception", oE);
@@ -143,14 +164,85 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 return null;
             }
 
-            JSONArray aoStations = getStations(oQueryVM);
+            JSONObject oStations = getStations(oQueryVM);
 
-            if (aoStations == null) {
+            if (oStations == null) {
                 WasdiLog.debugLog("QueryExecutorMeteoGate.executeAndRetrieve. No stations found");
                 return null;
             }
 
-            // now I need to make the call to MeteoGate for look for getting the time series available 
+            // now I need to make the call to MeteoGate for look for getting the time series available
+            JSONArray aoFeatures = oStations.optJSONArray("features");
+
+            if (aoFeatures == null) {
+                WasdiLog.warnLog("QueryExecutorMeteoGate.executeAndRetrieve. Array 'features' missing");
+                return null;
+            }
+
+            WasdiLog.debugLog("QueryExecutorMeteoGate.executeAndRetrieve. Features count: " + aoFeatures.length());
+
+            List<QueryResultViewModel> aoResults = new ArrayList<>();
+
+            for (int i = 0; i < aoFeatures.length(); i++) {
+                JSONObject oFeature = aoFeatures.optJSONObject(i);
+                QueryResultViewModel oResult = new QueryResultViewModel();
+
+                JSONObject oPropsJson = oFeature.optJSONObject("properties");
+                if (oPropsJson == null) {
+                    WasdiLog.warnLog("QueryExecutorMeteoGate.executeAndRetrieve. No properties, impossible to get info about station");
+                    return null;
+                }
+
+                String sStationName =oPropsJson.optString("name");
+                JSONArray aoParametersNames = oPropsJson.optJSONArray("parameter-name");
+                String sTimeseriesLink = oPropsJson.optString("timeseries-link");
+                String sWMOOscarStationId = oPropsJson.optString("id");
+
+                if (aoParametersNames == null || aoParametersNames.isEmpty() || sTimeseriesLink == null) {
+                    WasdiLog.warnLog("QueryExecutorMeteoGate.executeAndRetrieve. Observation not available for station " + sStationName + "(id: " + sWMOOscarStationId + ")");
+                    continue;
+                }
+
+                String sObservation = oQueryVM.productType;
+                String sStartDate = oQueryVM.startFromDate.substring(0, 10);
+                String sEndDate = oQueryVM.endFromDate.substring(0, 10);
+                String sWasdiId = sStationName + "_" + sObservation + "_" + sStartDate + "_" + sEndDate;
+
+                JSONObject oGeometry = oPropsJson.optJSONObject("geometry");
+                if (!oGeometry.optString("type").equals("Point")) {
+                    WasdiLog.warnLog("QueryExecutorMeteoGate.executeAndRetrieve. Geometry not a point");
+                    continue;
+                }
+
+                // TODO: controllare eventualmente che sia una bbox 
+                JSONArray aoCoords = oGeometry.optJSONArray("coordinates");
+                Double dLongitude = aoCoords.getDouble(0);
+                Double dLatitude = aoCoords.getDouble(1);
+
+                // we transform a point to a small bbox around it
+                Double dLonWest = dLongitude - 0.014;
+                Double dLonEast = dLongitude + 0.014;
+                Double dLatSouth = dLatitude - 0.009;
+                Double dLatNorth = dLatitude + 0.009;
+
+                String sFootprint = dLonWest + "," + dLatSouth + "," + dLonEast + "," + dLatNorth;
+
+                oResult.setId(sWasdiId);
+                oResult.setTitle(sWasdiId);
+                oResult.setSummary("");         // TODO
+                oResult.setLink(sTimeseriesLink);            // TODO: adjust
+                oResult.setFootprint(sFootprint);
+                oResult.setPlatform("MeteoGate");
+                oResult.setProvider("MeteoGate");
+                Map<String, String> oProps = new HashMap<>();
+                oProps.put("pointCoordinate", dLongitude + "," + dLatitude);
+                oProps.put("WMOOscarId", sWMOOscarStationId);
+                oResult.setProperties(oProps);
+                
+                aoResults.add(oResult);
+            }
+
+            return aoResults;
 
                 
         } catch (Exception oE) {
