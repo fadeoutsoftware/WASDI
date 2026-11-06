@@ -196,7 +196,15 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 String sStationName =oPropsJson.optString("name");
                 JSONArray aoParametersNames = oPropsJson.optJSONArray("parameter-name");
                 String sTimeseriesLink = oPropsJson.optString("timeseries-link");
-                String sWMOOscarStationId = oPropsJson.optString("id");
+                JSONArray aoParameterNames = oPropsJson.optJSONArray("parameter-name");
+                String sParameterName = "";
+                if (aoParameterNames != null && !aoParameterNames.isEmpty()) sParameterName = aoParameterNames.optString(0);
+                String sTimeseriesDataLink = getDataUrl(sTimeseriesLink, sParameterName);
+                if (sTimeseriesDataLink == null) {
+                    WasdiLog.warnLog("QueryExecutorMeteoGate.executeAndRetrieve. No data link for station " + sStationName);
+                    continue;
+                }
+                String sWMOOscarStationId = oFeature.optString("id");
 
                 if (aoParametersNames == null || aoParametersNames.isEmpty() || sTimeseriesLink == null) {
                     WasdiLog.warnLog("QueryExecutorMeteoGate.executeAndRetrieve. Observation not available for station " + sStationName + "(id: " + sWMOOscarStationId + ")");
@@ -208,13 +216,14 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 String sEndDate = oQueryVM.endFromDate.substring(0, 10);
                 String sWasdiId = sStationName + "_" + sObservation + "_" + sStartDate + "_" + sEndDate;
 
-                JSONObject oGeometry = oPropsJson.optJSONObject("geometry");
-                if (!oGeometry.optString("type").equals("Point")) {
+                JSONObject oGeometry = oFeature.optJSONObject("geometry");
+                if (oGeometry==null || !oGeometry.optString("type").equals("Point")) {
                     WasdiLog.warnLog("QueryExecutorMeteoGate.executeAndRetrieve. Geometry not a point");
                     continue;
                 }
 
-                // TODO: controllare eventualmente che sia una bbox 
+                // TODO: controllare eventualmente che sia una bbox
+
                 JSONArray aoCoords = oGeometry.optJSONArray("coordinates");
                 Double dLongitude = aoCoords.getDouble(0);
                 Double dLatitude = aoCoords.getDouble(1);
@@ -225,17 +234,24 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 Double dLatSouth = dLatitude - 0.009;
                 Double dLatNorth = dLatitude + 0.009;
 
-                String sFootprint = dLonWest + "," + dLatSouth + "," + dLonEast + "," + dLatNorth;
+                String sFootprint = "POLYGON((" + 
+                    dLonWest + " " + dLatSouth + ", " + 
+                    dLonEast + " " + dLatSouth + ", " + 
+                    dLonEast + " " + dLatNorth + ", " + 
+                    dLonWest + " " + dLatNorth + ", " + 
+                    dLonWest + " " + dLatSouth + 
+                "))";
 
                 oResult.setId(sWasdiId);
                 oResult.setTitle(sWasdiId);
-                oResult.setSummary("");         // TODO
-                oResult.setLink(sTimeseriesLink);            // TODO: adjust
+                oResult.setSummary("");
+                oResult.setLink(sTimeseriesDataLink);       
                 oResult.setFootprint(sFootprint);
                 oResult.setPlatform("MeteoGate");
                 oResult.setProvider("MeteoGate");
                 Map<String, String> oProps = new HashMap<>();
                 oProps.put("pointCoordinate", dLongitude + "," + dLatitude);
+                oProps.put("sensoroperationalmode", sParameterName);
                 oProps.put("WMOOscarId", sWMOOscarStationId);
                 oResult.setProperties(oProps);
                 
@@ -250,6 +266,55 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
         }
         return null;
     }
+
+    private String getDataUrl(String sUrl, String sParameterName) {
+
+        String sDataUrl = "";
+
+        try {
+
+            HttpCallResponse oResponse =httpGet(sUrl);
+
+            if (oResponse == null) {
+                    WasdiLog.warnLog("QueryExecutorMeteoGate.getDataUrl. HTTP response is null");
+                    return null;
+                }
+
+                int iResponseCode = oResponse.getResponseCode();
+                WasdiLog.debugLog("QueryExecutorMeteoGate.getDataUrl. Response code: " + iResponseCode);
+
+                if (iResponseCode != 200) {
+                    WasdiLog.warnLog("QueryExecutorMeteoGate.getDataUrl. HTTP call failed with code " + iResponseCode);
+                    return null;
+                }
+
+                JSONObject oObservationsItems = new JSONObject(oResponse.getResponseBody());
+                JSONArray aoFeatures = oObservationsItems.optJSONArray("features");
+
+                if (aoFeatures == null) {
+                    WasdiLog.warnLog("QueryExecutorMeteoGate.getDataUrl. No features array");
+                    return sDataUrl;
+                }
+
+                for (int i = 0; i < aoFeatures.length(); i++) {
+                    JSONObject oFeature = aoFeatures.getJSONObject(i);
+                    JSONObject oProperties = oFeature.optJSONObject("properties");
+                    if (oProperties == null) continue;
+                    String sParameterNameString = oProperties.optString("parameter_name");
+                    if (sParameterNameString.equals(sParameterName)) {
+                        sDataUrl = oProperties.optString("data");
+                        if (sDataUrl.isEmpty()) continue;
+                        break;
+                    }
+                }
+        } catch (Exception oE) {
+            WasdiLog.errorLog("QueryExecutorMeteoGate.getDataUrl: Exception", oE);
+        }
+
+        return sDataUrl;
+
+    }
+
 
 
 }
