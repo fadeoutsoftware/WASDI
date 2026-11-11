@@ -43,7 +43,8 @@ def _getEnvironmentVariable(sVariable, *asAlternativeVariables):
     for sKey in (sVariable, *asAlternativeVariables):
         sValue = os.environ.get(sKey)
         if sValue is not None:
-            return sValue
+            if sValue != "":
+                return sValue
     return None
 
 
@@ -297,10 +298,10 @@ def _wait_for_server(sBaseUrl, iMaxWaitSeconds=180, iPollSeconds=3):
 
 
 def run():
-    print("[STARTUP] Welcome to MiniWasdi 1.0.2")
+    print("[STARTUP] Welcome to MiniWasdi 1.0.3")
 
     # Read the config file path from the env
-    sConfigFile = _getEnvironmentVariable("WASDI_CONFIG_FILE", "CONFIG_FILE")
+    sConfigFile = _getEnvironmentVariable("CONFIG_FILE", "WASDI_CONFIG_FILE")
 
     # Assign a default config file path if not set
     if (sConfigFile is None):
