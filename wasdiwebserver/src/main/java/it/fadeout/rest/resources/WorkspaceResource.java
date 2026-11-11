@@ -150,6 +150,12 @@ public class WorkspaceResource {
 						Node oNode = aoNodeMap.get(oWorkspace.getNodeCode());
 
 						if (oNode != null) {
+							
+							if (!oNode.getActive()) {
+								WasdiLog.debugLog("WorkspaceResource.getListByUser: jumping WS " + oWorkspace.getWorkspaceId() + " from not active node " + oNode.getNodeCode());
+								continue;
+							}
+							
 							oWSViewModel.setActiveNode(oNode.getActive());
 						}
 					}
