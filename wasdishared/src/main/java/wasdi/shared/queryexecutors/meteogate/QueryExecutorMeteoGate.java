@@ -215,6 +215,7 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 String sStartDate = oQueryVM.startFromDate.substring(0, 10);
                 String sEndDate = oQueryVM.endFromDate.substring(0, 10);
                 String sWasdiId = sStationName + "_" + sObservation + "_" + sStartDate + "_" + sEndDate;
+                String sOutputFormat = oQueryVM.sensorMode;
 
                 JSONObject oGeometry = oFeature.optJSONObject("geometry");
                 if (oGeometry==null || !oGeometry.optString("type").equals("Point")) {
@@ -242,10 +243,15 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                     dLonWest + " " + dLatSouth + 
                 "))";
 
+                String sLink = sTimeseriesDataLink + ";"    // 0 - download url
+                            + sWasdiId + ";"                // 1 - file name
+                            + sOutputFormat + ";"           // 2 - output format
+                            + sParameterName;               // 3 - observation type
+                            
                 oResult.setId(sWasdiId);
                 oResult.setTitle(sWasdiId);
                 oResult.setSummary("");
-                oResult.setLink(sTimeseriesDataLink);       
+                oResult.setLink(sLink); ; 
                 oResult.setFootprint(sFootprint);
                 oResult.setPlatform("MeteoGate");
                 oResult.setProvider("MeteoGate");
@@ -302,7 +308,7 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                     if (oProperties == null) continue;
                     String sParameterNameString = oProperties.optString("parameter_name");
                     if (sParameterNameString.equals(sParameterName)) {
-                        sDataUrl = oProperties.optString("data");
+                        sDataUrl = oProperties.optString("data").replace("?=", "?");
                         if (sDataUrl.isEmpty()) continue;
                         break;
                     }

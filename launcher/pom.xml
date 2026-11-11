@@ -836,6 +836,19 @@
             <artifactId>juniversalchardet</artifactId>
             <version>${sVersionJUniversalChardet}</version>
         </dependency>
+        <!-- Zarr-Java Library -->
+        <dependency>
+            <groupId>dev.zarr</groupId>
+            <artifactId>zarr-java</artifactId>
+            <version>0.3.0</version> <!-- Check for the latest version -->
+        </dependency>
+
+        <!-- NetCDF-Java Library (provides ucar.ma2 for multidimensional arrays) -->
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>cdm-core</artifactId>
+            <version>5.5.3</version> <!-- Check for the latest version -->
+        </dependency>
         <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
         <dependency>
             <groupId>fadeout.software.wasdi</groupId>
