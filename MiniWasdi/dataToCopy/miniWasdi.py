@@ -521,7 +521,17 @@ def run():
 
 
     aoWorkspaces = wasdi.getWorkspaces()
-    
+
+    sPrintWorkspaces = _getEnvironmentVariable("WASDI_PRINT_WORKSPACES", "PRINT_WORKSPACES", "PRINT_WS")
+
+    if sPrintWorkspaces is not None:
+        if sPrintWorkspaces != "":
+            infoLog("Printing available workspaces:")
+            if aoWorkspaces is not None:
+                for oWorkspace in aoWorkspaces:
+                    infoLog("Workspace: " + oWorkspace.get("workspaceName", "") + " with ID: " + oWorkspace.get("workspaceId", ""))
+            infoLog("-------------------------------Finished printing available workspaces.")
+
     if sWorkspace == "":
         sWorkspace = "Default Workspace"
 
