@@ -243,6 +243,8 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                     dLonWest + " " + dLatSouth + 
                 "))";
 
+                String sPoint = "POINT(" + dLongitude + " " + dLatitude + ")";
+
                 String sLink = sTimeseriesDataLink + ";"    // 0 - download url
                             + sWasdiId + ";"                // 1 - file name
                             + sOutputFormat + ";"           // 2 - output format
@@ -252,7 +254,7 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 oResult.setTitle(sWasdiId);
                 oResult.setSummary("");
                 oResult.setLink(sLink); ; 
-                oResult.setFootprint(sFootprint);
+                //oResult.setFootprint(sFootprint);
                 oResult.setPlatform("MeteoGate");
                 oResult.setProvider("MeteoGate");
                 Map<String, String> oProps = new HashMap<>();
@@ -260,6 +262,7 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 oProps.put("sensoroperationalmode", sParameterName);
                 oProps.put("WMOOscarId", sWMOOscarStationId);
                 oResult.setProperties(oProps);
+                oResult.setLatLonPoint(sPoint);
                 
                 aoResults.add(oResult);
             }

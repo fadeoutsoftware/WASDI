@@ -63,6 +63,10 @@ public class QueryResultViewModel {
 	 */
 	protected String footprint="";
 	/**
+	 * WKT Point (as an alternative to the footprint)
+	 */
+	protected String latLonPoint="";
+	/**
 	 * Data Provider that found this item
 	 */
 	protected String provider="";
@@ -148,6 +152,12 @@ public class QueryResultViewModel {
 	}
 	public void setFootprint(String footprint) {
 		this.footprint = footprint;
+	}
+	public String getLatLonPoint() {
+		return latLonPoint;
+	}
+	public void setLatLonPoint(String latLonPoint) {
+		this.latLonPoint = latLonPoint;
 	}
 	public Map<String, String> getProperties() {
 		return properties;

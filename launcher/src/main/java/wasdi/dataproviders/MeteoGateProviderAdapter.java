@@ -96,7 +96,8 @@ public class MeteoGateProviderAdapter extends EDRProviderAdapter {
                     }
                     WasdiLog.debugLog("MeteoGateProviderAdapter.executeDonwloadFile. File generated: " + sOutputFilePath);
                 }
-            }
+                return sOutputFilePath;
+        }
             else if (sOutputFormat.toLowerCase().equals("zarr")) {
                 // Initialize the Zarr filesystem store
                 dev.zarr.zarrjava.store.FilesystemStore oStore = new dev.zarr.zarrjava.store.FilesystemStore(sOutputFilePath);
@@ -131,7 +132,7 @@ public class MeteoGateProviderAdapter extends EDRProviderAdapter {
 
                                         
         } catch (Exception oE) {
-            WasdiLog.errorLog("MeteoGateProviderAdapter.executeDownloadFile. Exception: ", oE);
+            WasdiLog.errorLog("MeteoGateProviderAdapter.executeDownloadFinpm le. Exception: ", oE);
         }
 
         return null;
