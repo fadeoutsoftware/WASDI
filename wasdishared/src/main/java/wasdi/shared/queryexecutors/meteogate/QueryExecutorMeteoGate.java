@@ -229,19 +229,6 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 Double dLongitude = aoCoords.getDouble(0);
                 Double dLatitude = aoCoords.getDouble(1);
 
-                // we transform a point to a small bbox around it
-                Double dLonWest = dLongitude - 0.014;
-                Double dLonEast = dLongitude + 0.014;
-                Double dLatSouth = dLatitude - 0.009;
-                Double dLatNorth = dLatitude + 0.009;
-
-                String sFootprint = "POLYGON((" + 
-                    dLonWest + " " + dLatSouth + ", " + 
-                    dLonEast + " " + dLatSouth + ", " + 
-                    dLonEast + " " + dLatNorth + ", " + 
-                    dLonWest + " " + dLatNorth + ", " + 
-                    dLonWest + " " + dLatSouth + 
-                "))";
 
                 String sPoint = "POINT(" + dLongitude + " " + dLatitude + ")";
 
@@ -254,7 +241,7 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 oResult.setTitle(sWasdiId);
                 oResult.setSummary("");
                 oResult.setLink(sLink); ; 
-                //oResult.setFootprint(sFootprint);
+                oResult.setLatLonPoint(sPoint);
                 oResult.setPlatform("MeteoGate");
                 oResult.setProvider("MeteoGate");
                 Map<String, String> oProps = new HashMap<>();
@@ -262,7 +249,6 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 oProps.put("sensoroperationalmode", sParameterName);
                 oProps.put("WMOOscarId", sWMOOscarStationId);
                 oResult.setProperties(oProps);
-                oResult.setLatLonPoint(sPoint);
                 
                 aoResults.add(oResult);
             }
