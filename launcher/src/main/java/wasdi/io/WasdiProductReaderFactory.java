@@ -100,6 +100,11 @@ public class WasdiProductReaderFactory {
 			return new LandsatProductReader(oFile);
 		}
 
+		if (oFile.getName().toLowerCase().startsWith("meteogate_") && oFile.getName().toLowerCase().endsWith(".csv")) {
+			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating CSV File Reader for MeteoGate file" + oFile.getName());
+			return new CsvProductReader(oFile);
+		}
+
 
 		if (WasdiFileUtils.isDocumentFormatFile(oFile)) { 
 			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating Documents File Reader for " + oFile.getName());
@@ -171,11 +176,6 @@ public class WasdiProductReaderFactory {
 		if (oFile.getName().toLowerCase().endsWith(".tif") || oFile.getName().toLowerCase().endsWith(".tiff")) {
 			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating GeoTIFF File Reader for " + oFile.getName());
 			return new GeoTiffProductReader(oFile);
-		}
-
-		if (oFile.getName().toLowerCase().endsWith(".csv")) {
-			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating CSV File Reader for " + oFile.getName());
-			return new CsvProductReader(oFile);
 		}
 
 		WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating SNAP File Reader for " + oFile.getName());

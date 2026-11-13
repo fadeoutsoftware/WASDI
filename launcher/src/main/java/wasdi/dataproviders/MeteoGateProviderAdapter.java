@@ -130,7 +130,7 @@ public class MeteoGateProviderAdapter extends EDRProviderAdapter {
 
                                         
         } catch (Exception oE) {
-            WasdiLog.errorLog("MeteoGateProviderAdapter.executeDownloadFinpm le. Exception: ", oE);
+            WasdiLog.errorLog("MeteoGateProviderAdapter.executeDownloadFile. Exception: ", oE);
         }
 
         return null;
