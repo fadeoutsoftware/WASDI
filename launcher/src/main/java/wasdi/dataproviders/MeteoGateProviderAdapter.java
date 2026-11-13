@@ -20,8 +20,6 @@ public class MeteoGateProviderAdapter extends EDRProviderAdapter {
 
     @Override
     protected void internalReadConfig() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'internalReadConfig'");
     }
 
     @Override

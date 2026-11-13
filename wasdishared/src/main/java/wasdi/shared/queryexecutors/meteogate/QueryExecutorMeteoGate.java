@@ -216,7 +216,7 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 String sEndDate = oQueryVM.endFromDate.substring(0, 10);
                 String sWasdiId = "MeteoGate_" + sStationName + "_" + sObservation + "_" + sStartDate + "_" + sEndDate;
                 String sOutputFormat = oQueryVM.sensorMode;
-                String sFileNameWithExtension = sWasdiId + sOutputFormat;
+                String sFileNameWithExtension = sWasdiId + "." + sOutputFormat;
 
                 JSONObject oGeometry = oFeature.optJSONObject("geometry");
                 if (oGeometry==null || !oGeometry.optString("type").equals("Point")) {
