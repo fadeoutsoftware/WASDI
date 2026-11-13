@@ -216,6 +216,7 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 String sEndDate = oQueryVM.endFromDate.substring(0, 10);
                 String sWasdiId = "MeteoGate_" + sStationName + "_" + sObservation + "_" + sStartDate + "_" + sEndDate;
                 String sOutputFormat = oQueryVM.sensorMode;
+                String sFileNameWithExtension = sWasdiId + sOutputFormat;
 
                 JSONObject oGeometry = oFeature.optJSONObject("geometry");
                 if (oGeometry==null || !oGeometry.optString("type").equals("Point")) {
@@ -228,15 +229,16 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 Double dLatitude = aoCoords.getDouble(1);
 
 
+
                 String sPoint = "POINT(" + dLongitude + " " + dLatitude + ")";
 
                 String sLink = sTimeseriesDataLink + ";"    // 0 - download url
-                            + sWasdiId + ";"                // 1 - file name
+                            + sFileNameWithExtension + ";"  // 1 - file name
                             + sOutputFormat + ";"           // 2 - output format
                             + sParameterName;               // 3 - observation type
                             
                 oResult.setId(sWasdiId);
-                oResult.setTitle(sWasdiId);
+                oResult.setTitle(sFileNameWithExtension);
                 oResult.setSummary("");
                 oResult.setLink(sLink); ; 
                 oResult.setLatLonPoint(sPoint);
