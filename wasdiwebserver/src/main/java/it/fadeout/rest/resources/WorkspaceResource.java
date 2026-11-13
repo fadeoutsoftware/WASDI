@@ -150,6 +150,12 @@ public class WorkspaceResource {
 						Node oNode = aoNodeMap.get(oWorkspace.getNodeCode());
 
 						if (oNode != null) {
+							
+							if (!oNode.getActive()) {
+								WasdiLog.debugLog("WorkspaceResource.getListByUser: jumping WS " + oWorkspace.getWorkspaceId() + " from not active node " + oNode.getNodeCode());
+								continue;
+							}
+							
 							oWSViewModel.setActiveNode(oNode.getActive());
 						}
 					}
@@ -625,6 +631,8 @@ public class WorkspaceResource {
 				return Response.ok().build();
 			}
 			
+			boolean bActiveNodeDelete = true;
+			
 			if (!WasdiConfig.Current.nodeCode.equals(oWorkspace.getNodeCode())) {
 				WasdiLog.infoLog("WorkspaceResource.deleteWorkspace: redirecting delete command on target node");
 				
@@ -632,9 +640,15 @@ public class WorkspaceResource {
 					NodeRepository oNodeRepo = new NodeRepository();
 					Node oTargetNode = oNodeRepo.getNodeByCode(oWorkspace.getNodeCode());
 					
-					HttpCallResponse oHttpResponse = WorkspaceAPIClient.deleteWorkspace(oTargetNode, sSessionId, sWorkspaceId);
+					if (oTargetNode.getActive()) {
+						HttpCallResponse oHttpResponse = WorkspaceAPIClient.deleteWorkspace(oTargetNode, sSessionId, sWorkspaceId);
+						return Response.status(oHttpResponse.getResponseCode()).build();						
+					}
+					else {
+						WasdiLog.warnLog("The workspace " + sWorkspaceId + " is in the not anymore active node " + oTargetNode.getNodeCode() + ". We will delete what is possible");
+						bActiveNodeDelete = false;
+					}
 					
-					return Response.status(oHttpResponse.getResponseCode()).build();					
 				}
 				catch (Exception oEx) {
 					WasdiLog.errorLog("WorkspaceResource.deleteWorkspace: exception calling delete API on target node", oEx);
@@ -644,12 +658,14 @@ public class WorkspaceResource {
 			
 			
 			// Terminate and clean the console/Jupyter Lab instance if present
-			terminateConsole(oWorkspace, sSessionId);
+			terminateConsole(oWorkspace, sSessionId, bActiveNodeDelete);
 			
-			//kill active processes
-			ProcessWorkspaceService oProcessWorkspaceService = new ProcessWorkspaceService();
-			if(!oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId, sSessionId, true)) {
-				WasdiLog.warnLog("WorkspaceResource.deleteWorkspace: WARNING: could not schedule kill processes in workspace");
+			if (bActiveNodeDelete) {
+				//kill active processes
+				ProcessWorkspaceService oProcessWorkspaceService = new ProcessWorkspaceService();
+				if(!oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId, sSessionId, true)) {
+					WasdiLog.warnLog("WorkspaceResource.deleteWorkspace: WARNING: could not schedule kill processes in workspace");
+				}				
 			}
 			
 			// get workspace path
@@ -666,7 +682,7 @@ public class WorkspaceResource {
 
 				DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 				// Do we need to delete layers?
-				if (bDeleteLayer) {
+				if (bDeleteLayer && bActiveNodeDelete) {
 					try {
 						WasdiLog.debugLog("ProductResource.deleteWorkspace: Deleting workspace layers");
 
@@ -740,7 +756,7 @@ public class WorkspaceResource {
 
 				}
 
-				if (bDeleteFile) {
+				if (bDeleteFile /*&& bActiveNodeDelete*/) {
 					try {
 
 						WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: Delete workspace folder " + sWorkspacePath);
@@ -793,9 +809,10 @@ public class WorkspaceResource {
                 //	-All the parameters
                 // Then we can clean the process workspaces
                 
-                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-                oProcessWorkspaceRepository.deleteProcessWorkspaceByWorkspaceId(oWorkspace.getWorkspaceId());
-
+                if (bActiveNodeDelete) {
+                    ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+                    oProcessWorkspaceRepository.deleteProcessWorkspaceByWorkspaceId(oWorkspace.getWorkspaceId());                	
+                }
 
 				return Response.ok().build();
 			} 
@@ -1149,7 +1166,7 @@ public class WorkspaceResource {
 	 * @param oWorkspace
 	 * @return
 	 */
-	protected boolean terminateConsole(Workspace oWorkspace, String sSessionId) {
+	protected boolean terminateConsole(Workspace oWorkspace, String sSessionId, boolean bActiveNodeDelete) {
 		try {
 			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oWorkspace.getUserId(), oWorkspace.getWorkspaceId());
 
@@ -1164,32 +1181,35 @@ public class WorkspaceResource {
 				WasdiLog.debugLog("WorkspaceResource.terminateConsole: no notebook in the workspace");
 				return true;
 			}
-
-
-			// Schedule the process to run the processor
-			String sProcessObjId = Utils.getRandomName();
-
-			WasdiLog.debugLog("WorkspaceResource.terminateConsole: create local operation " + sProcessObjId);
-
-			ProcessorParameter oProcessorParameter = new ProcessorParameter();
-			oProcessorParameter.setName("jupyter-notebook");
-			oProcessorParameter.setProcessorType(ProcessorTypes.JUPYTER_NOTEBOOK);
-			oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
-			oProcessorParameter.setUserId(oWorkspace.getUserId());
-			oProcessorParameter.setExchange(oWorkspace.getWorkspaceId());
-			oProcessorParameter.setProcessObjId(sProcessObjId);
-			oProcessorParameter.setSessionID(sSessionId);
-			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(oWorkspace.getWorkspaceId()));
-
-			PrimitiveResult oRes = Wasdi.runProcess(oWorkspace.getUserId(), sSessionId, LauncherOperations.TERMINATEJUPYTERNOTEBOOK.name(), sJupyterNotebookCode, oProcessorParameter);
-
-			if (oRes.getBoolValue()) {
-				return true;
-			} 
-			else {
-				return false;
-			}
 			
+			if (bActiveNodeDelete) {
+				// Schedule the process to run the processor
+				String sProcessObjId = Utils.getRandomName();
+
+				WasdiLog.debugLog("WorkspaceResource.terminateConsole: create local operation " + sProcessObjId);
+
+				ProcessorParameter oProcessorParameter = new ProcessorParameter();
+				oProcessorParameter.setName("jupyter-notebook");
+				oProcessorParameter.setProcessorType(ProcessorTypes.JUPYTER_NOTEBOOK);
+				oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
+				oProcessorParameter.setUserId(oWorkspace.getUserId());
+				oProcessorParameter.setExchange(oWorkspace.getWorkspaceId());
+				oProcessorParameter.setProcessObjId(sProcessObjId);
+				oProcessorParameter.setSessionID(sSessionId);
+				oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(oWorkspace.getWorkspaceId()));
+
+				PrimitiveResult oRes = Wasdi.runProcess(oWorkspace.getUserId(), sSessionId, LauncherOperations.TERMINATEJUPYTERNOTEBOOK.name(), sJupyterNotebookCode, oProcessorParameter);
+
+				if (oRes.getBoolValue()) {
+					return true;
+				} 
+				else {
+					return false;
+				}				
+			}
+			else {
+				return true;
+			}
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("WorkspaceResource.terminateConsole: Exception " + oEx.toString());

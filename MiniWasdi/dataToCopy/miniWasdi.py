@@ -39,12 +39,13 @@ def log(sMessage, sLevel="INFO"):
     
     print(f"[{sLevel}] [STARTUP] {sMessage}")
 
-def _getEnvironmentVariable(sVariable):
-    try:
-        sValue = os.environ[sVariable]
-        return sValue
-    except KeyError:
-        return None
+def _getEnvironmentVariable(sVariable, *asAlternativeVariables):
+    for sKey in (sVariable, *asAlternativeVariables):
+        sValue = os.environ.get(sKey)
+        if sValue is not None:
+            if sValue != "":
+                return sValue
+    return None
 
 
 def waitProcess(sProcessId):
@@ -297,10 +298,10 @@ def _wait_for_server(sBaseUrl, iMaxWaitSeconds=180, iPollSeconds=3):
 
 
 def run():
-    print("[STARTUP] Welcome to MiniWasdi 1.0")
+    print("[STARTUP] Welcome to MiniWasdi 1.0.3")
 
     # Read the config file path from the env
-    sConfigFile = _getEnvironmentVariable("WASDI_CONFIG_FILE")
+    sConfigFile = _getEnvironmentVariable("CONFIG_FILE", "WASDI_CONFIG_FILE")
 
     # Assign a default config file path if not set
     if (sConfigFile is None):
@@ -327,7 +328,7 @@ def run():
     # Wait for the mini server to be ready before proceeding
     _wait_for_server(sBaseUrl)
 
-    sCleanHistory = _getEnvironmentVariable("WASDI_CLEAR_HISTORY")
+    sCleanHistory = _getEnvironmentVariable("WASDI_CLEAR_HISTORY", "CLEAR_HISTORY")
 
     if sCleanHistory is not None:
         if sCleanHistory.lower() == "true" or sCleanHistory == "1":
@@ -464,7 +465,7 @@ def run():
                     _upload_workflow(sNewWorkflowUrl, sWorkflowPath, sWorkflow)
 
     # Check if the user wants to run in server mode
-    sServerMode = _getEnvironmentVariable("WASDI_SERVER_MODE")
+    sServerMode = _getEnvironmentVariable("WASDI_SERVER_MODE", "SERVER_MODE")
     bServerMode = sServerMode is not None and sServerMode.lower() in {"1", "true"}
 
     if bServerMode:
@@ -475,16 +476,26 @@ def run():
         return
 
     # Now the start up is done: read what the user wants to start and start it
-    sApplicationToStart = _getEnvironmentVariable("WASDI_RUN_APPLICATION")
-    sParams = _getEnvironmentVariable("WASDI_PARAMS")
-    sWorkspace = _getEnvironmentVariable("WASDI_WORKSPACE")
+    sApplicationToStart = _getEnvironmentVariable("WASDI_RUN_APPLICATION", "RUN_APPLICATION", "APP")
+    sParams = _getEnvironmentVariable("WASDI_PARAMS", "PARAMS")
+    sParamsFile = _getEnvironmentVariable("WASDI_PARAMS_FILE", "PARAMS_FILE")
+    sWorkspace = _getEnvironmentVariable("WASDI_WORKSPACE", "WORKSPACE")
 
     # Sanity check the params, if not set use empty params
     if sParams is None:
         sParams = ""
     
     if sParams == "":
-        sParams = "{}"
+        if sParamsFile is not None and sParamsFile != "":
+            try:
+                with open(sParamsFile, "r") as f:
+                    sParams = f.read()
+                    debugLog("Read WASDI_PARAMS_FILE successfully.")
+            except Exception as oEx:
+                sParams = "{}"
+                errorLog("Error reading WASDI_PARAMS_FILE, using empty params. Error: " + str(oEx))
+        else:
+            sParams = "{}"
     
     # Object version of the params
     aoParams = {}
@@ -501,7 +512,7 @@ def run():
     # Sanity check the workspace, if not set use empty workspace
     if sWorkspace in ("", None):
         sWorkspace = ""
-        sWorkspaceId = _getEnvironmentVariable("WASDI_WORKSPACE_ID")
+        sWorkspaceId = _getEnvironmentVariable("WASDI_WORKSPACE_ID", "WORKSPACE_ID")
         debugLog("WASDI_WORKSPACE_ID value: " + str(sWorkspaceId))
         if sWorkspaceId is not None and sWorkspaceId != "":
             bUseWorkspaceId = True
@@ -510,7 +521,17 @@ def run():
 
 
     aoWorkspaces = wasdi.getWorkspaces()
-    
+
+    sPrintWorkspaces = _getEnvironmentVariable("WASDI_PRINT_WORKSPACES", "PRINT_WORKSPACES", "PRINT_WS")
+
+    if sPrintWorkspaces is not None:
+        if sPrintWorkspaces != "":
+            infoLog("Printing available workspaces:")
+            if aoWorkspaces is not None:
+                for oWorkspace in aoWorkspaces:
+                    infoLog("Workspace: " + oWorkspace.get("workspaceName", "") + " with ID: " + oWorkspace.get("workspaceId", ""))
+            infoLog("-------------------------------Finished printing available workspaces.")
+
     if sWorkspace == "":
         sWorkspace = "Default Workspace"
 

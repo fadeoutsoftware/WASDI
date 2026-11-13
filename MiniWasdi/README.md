@@ -129,6 +129,14 @@ docker run --rm \
   wasdi/wasdi:mwasdi
 ```
 
+To read application parameters from a JSON file instead, place it in the mounted host folder (for example, `params.json`) and replace `-e WASDI_PARAMS='{}'` in either example with:
+
+```text
+-e WASDI_PARAMS_FILE="/data/wasdi/params.json"
+```
+
+Use the path inside the container, not the host path. Non-empty inline parameters (`WASDI_PARAMS` or `PARAMS`) take priority over the file; they are not merged with its contents.
+
 ### 4.1 Server mode — run Mini-WASDI as a persistent local server
 
 Set `WASDI_SERVER_MODE=1` to keep the container alive after startup.
@@ -199,34 +207,44 @@ cp /etc/wasdi/wasdiConfig.json /data/wasdi/wasdiConfig.json
 
 ## 5. Environment variables
 
-- `WASDI_RUN_APPLICATION`
+For variables with aliases below, names are checked in the listed order and the first defined value is used. A defined empty string still takes precedence over later aliases. The `WASDI_` name therefore takes priority over its shorter aliases.
+
+- `WASDI_RUN_APPLICATION` (aliases: `RUN_APPLICATION`, `APP`)
   - Name of the application to run.
   - It must already be installed (or installed at startup from `install/processors`).
 
-- `WASDI_PARAMS`
+- `WASDI_PARAMS` (alias: `PARAMS`)
   - JSON string with input parameters for the application.
+  - When non-empty, takes priority over `WASDI_PARAMS_FILE` / `PARAMS_FILE`.
   - Example: `'{}'`
 
-- `WASDI_WORKSPACE`
+- `WASDI_PARAMS_FILE` (alias: `PARAMS_FILE`)
+  - Path to a JSON file containing input parameters for the application, inside the container.
+  - Used only when the selected inline parameters value is unset or empty; otherwise the file is ignored.
+  - Example: `/data/wasdi/params.json` (place `params.json` in the mounted host folder).
+  - Parameters default to `{}` when neither source is supplied. File-read or JSON-parse errors are logged and empty parameters are used.
+  - Subject to the current implementation limitation noted in section 4.
+
+- `WASDI_WORKSPACE` (alias: `WORKSPACE`)
   - Workspace name.
   - If omitted, Mini-WASDI uses the default workspace.
 
-- `WASDI_WORKSPACE_ID`
+- `WASDI_WORKSPACE_ID` (alias: `WORKSPACE_ID`)
   - Optional alternative to `WASDI_WORKSPACE`.
-  - Use this to target a workspace by id.
+  - Use this to target a workspace by id when the selected workspace name is unset or empty.
 
-- `WASDI_CONFIG_FILE`
+- `WASDI_CONFIG_FILE` (alias: `CONFIG_FILE`)
   - Path to the config file inside the container.
   - Typical value: `/data/wasdi/wasdiConfig.json`
 
-- `WASDI_SERVER_MODE`
+- `WASDI_SERVER_MODE` (alias: `SERVER_MODE`)
   - When set to `1` or `true`, Mini-WASDI runs as a persistent local server.
   - Processor and workflow installs still happen at startup.
   - No application is executed.
   - The container stays alive; the WASDI REST API is available on port 8080.
   - Publish the port with `-p 8080:8080` when starting the container.
 
-- `WASDI_CLEAR_HISTORY`
+- `WASDI_CLEAR_HISTORY` (alias: `CLEAR_HISTORY`)
   - Optional flag to clear past process workspaces at startup. By default, the system keeps all past process workspaces, which can be useful for debugging and historical reference. Setting this flag to `true` will delete all past process workspaces and allow also to start processes marked as CREATED from a previous run. If this flag is set, the system will clean the CREATED queue and delete all the processes that have been already executed.
   - Typical value: `1` or `true`. If it is not set or have any other value is considered false.
 
