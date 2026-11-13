@@ -380,7 +380,7 @@ public class MissionUtils {
 			else if (sFileName.toLowerCase().endsWith("_bathymetry.tif")) {
 				return Platforms.GLOBATHY;
 			}
-			else if (sFileName.toLowerCase().startsWith("MeteoGate_")) {
+			else if (sFileName.toLowerCase().startsWith("meteogate_")) {
 				return Platforms.METEO_GATE;
 			}
 		}

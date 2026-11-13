@@ -34,6 +34,14 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
         this.m_sMeteoGateBaseUrl = this.m_oDataProviderConfig.link;
     }
 
+    @Override
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl, String sPlatform) {
+		if (sProduct.toLowerCase().startsWith("meteogate_")) {
+			return sOriginalUrl;
+		}
+		return null;
+	}
+
     private JSONObject getStations(QueryViewModel oQueryVM) {
         /** 
          * Query MeteoGate to get a list of stations 
