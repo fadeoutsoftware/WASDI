@@ -214,7 +214,7 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                 String sObservation = oQueryVM.productType;
                 String sStartDate = oQueryVM.startFromDate.substring(0, 10);
                 String sEndDate = oQueryVM.endFromDate.substring(0, 10);
-                String sWasdiId = sStationName + "_" + sObservation + "_" + sStartDate + "_" + sEndDate;
+                String sWasdiId = "MeteoGate_" + sStationName + "_" + sObservation + "_" + sStartDate + "_" + sEndDate;
                 String sOutputFormat = oQueryVM.sensorMode;
 
                 JSONObject oGeometry = oFeature.optJSONObject("geometry");
@@ -222,8 +222,6 @@ public class QueryExecutorMeteoGate extends EDRQueryExecutor{
                     WasdiLog.warnLog("QueryExecutorMeteoGate.executeAndRetrieve. Geometry not a point");
                     continue;
                 }
-
-                // TODO: controllare eventualmente che sia una bbox
 
                 JSONArray aoCoords = oGeometry.optJSONArray("coordinates");
                 Double dLongitude = aoCoords.getDouble(0);

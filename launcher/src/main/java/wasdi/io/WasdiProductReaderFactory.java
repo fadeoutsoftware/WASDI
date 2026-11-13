@@ -173,6 +173,11 @@ public class WasdiProductReaderFactory {
 			return new GeoTiffProductReader(oFile);
 		}
 
+		if (oFile.getName().toLowerCase().endsWith(".csv")) {
+			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating CSV File Reader for " + oFile.getName());
+			return new CsvProductReader(oFile);
+		}
+
 		WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader: Creating SNAP File Reader for " + oFile.getName());
 		SnapProductReader oSnapReader = new SnapProductReader(oFile);
 
