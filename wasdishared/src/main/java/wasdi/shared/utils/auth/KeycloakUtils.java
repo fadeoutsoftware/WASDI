@@ -515,7 +515,8 @@ public class KeycloakUtils {
 			WasdiLog.debugLog("KeycloakUtils.getJwtProcessor: configuring issuer " + sIssuer
 					+ ", jwks URL " + sJwksUrl + ", configured client " + oKeycloakConfig.client
 					+ ", accepted external clients " + oKeycloakConfig.acceptedClientIds);
-			JWKSource<SecurityContext> oJwkSource = JWKSourceBuilder.<SecurityContext>create(new URL(sJwksUrl)).cache(true).build();
+			JWKSource<SecurityContext> oJwkSource = JWKSourceBuilder.<SecurityContext>create(new URL(sJwksUrl),
+					new com.nimbusds.jose.util.DefaultResourceRetriever(5000, 5000, 51200)).cache(true).build();
 			JWSKeySelector<SecurityContext> oKeySelector = new JWSAlgorithmFamilyJWSKeySelector<>(JWSAlgorithm.Family.RSA, oJwkSource);
 
 			ConfigurableJWTProcessor<SecurityContext> oJwtProcessor = new DefaultJWTProcessor<>();
