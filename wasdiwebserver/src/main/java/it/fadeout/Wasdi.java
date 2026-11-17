@@ -361,6 +361,7 @@ public class Wasdi extends ResourceConfig {
 	/**
 	 * Get the User object from the session Id
 	 * It checks first in Key Cloak and later on the local session mechanism.
+	 * With useLegacySessions enabled, only the local session mechanism is used.
 	 * @param sSessionId
 	 * @return
 	 */
@@ -387,34 +388,38 @@ public class Wasdi extends ResourceConfig {
 				return oUser;
 			}
 			
-			try  {
-				// Try to Introspect the token
-				String sPayload = "token=" + sSessionId;
-				
-				// Add headers
-				Map<String,String> asHeaders = new HashMap<>();
-				asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-				
-				// Post to keycloak server
-				HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(Wasdi.s_sKeyCloakIntrospectionUrl, sPayload, asHeaders, s_sClientId + ":" + s_sClientSecret); 
-				String sResponse = oHttpCallResponse.getResponseBody();
-				
-				// Try to read the result
-				JSONObject oJSON = null;
-				
-				if(!Utils.isNullOrEmpty(sResponse)) {
-					oJSON = new JSONObject(sResponse);
-					
-					if(oJSON != null) {
-						if (oJSON.optBoolean("active", false)) {
-							sUserId = oJSON.optString("preferred_username", null);
+			boolean bUseLegacySessions = WasdiConfig.Current.keycloack != null
+					&& WasdiConfig.Current.keycloack.useLegacySessions;
+			if (!bUseLegacySessions) {
+				try  {
+					// Try to Introspect the token
+					String sPayload = "token=" + sSessionId;
+
+					// Add headers
+					Map<String,String> asHeaders = new HashMap<>();
+					asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+
+					// Post to keycloak server
+					HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(Wasdi.s_sKeyCloakIntrospectionUrl, sPayload, asHeaders, s_sClientId + ":" + s_sClientSecret);
+					String sResponse = oHttpCallResponse.getResponseBody();
+
+					// Try to read the result
+					JSONObject oJSON = null;
+
+					if(!Utils.isNullOrEmpty(sResponse)) {
+						oJSON = new JSONObject(sResponse);
+
+						if(oJSON != null) {
+							if (oJSON.optBoolean("active", false)) {
+								sUserId = oJSON.optString("preferred_username", null);
+							}
 						}
-					}					
+					}
+
 				}
-				
-			}
-			catch (Exception oKeyEx) {
-				WasdiLog.errorLog("Wasdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
+				catch (Exception oKeyEx) {
+					WasdiLog.errorLog("Wasdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
+				}
 			}
 
 			if(!Utils.isNullOrEmpty(sUserId)) {
@@ -451,7 +456,7 @@ public class Wasdi extends ResourceConfig {
 			} 
 			else {
 				
-				// Session not found in keyclock: check session against DB
+				// Check the local session when introspection is skipped or finds no active user.
 				UserSession oUserSession = oSessionRepository.getSession(sSessionId);
 				
 				// We really do not have this session
