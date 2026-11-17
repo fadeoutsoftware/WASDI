@@ -90,7 +90,6 @@ public class TemplateResource {
 	}
 	
 	@GET
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response getById(@Context ContainerRequestContext oRequestContext, @QueryParam("templateId") String sTemplateId) {
 		
@@ -154,7 +153,6 @@ public class TemplateResource {
 	}
 
 	@POST
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response create(@Context ContainerRequestContext oRequestContext, TemplateViewModel oTemplateViewModel) {
 		WasdiLog.debugLog("TemplateResource.create");
@@ -211,7 +209,6 @@ public class TemplateResource {
 	}
 	
 	@PUT
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response update(@Context ContainerRequestContext oRequestContext, TemplateViewModel oTemplateViewModel) {
 		WasdiLog.debugLog("TemplateResource.update");
@@ -275,7 +272,6 @@ public class TemplateResource {
 	}	
 	
 	@DELETE
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response delete(@Context ContainerRequestContext oRequestContext, @QueryParam("templateId") String sTemplateId) {
 		WasdiLog.debugLog("TemplateResource.delete");

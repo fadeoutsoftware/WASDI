@@ -26,7 +26,7 @@
         <sVersionCommonsCli>1.10.0</sVersionCommonsCli>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
             <sVersionJackson>2.21.7</sVersionJackson>
-        <sVersionJson>20251224</sVersionJson>
+        <sVersionJson>20260719</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionJUniversalChardet>2.5.0</sVersionJUniversalChardet>
         <sVersionMavenJarPlugin>3.3.0</sVersionMavenJarPlugin>

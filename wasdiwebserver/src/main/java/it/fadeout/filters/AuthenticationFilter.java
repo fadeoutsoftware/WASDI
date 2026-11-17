@@ -9,6 +9,9 @@ import javax.ws.rs.ext.Provider;
 import it.fadeout.Wasdi;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserApplicationRole;
+import wasdi.shared.business.users.UserType;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.auth.AuthTokenUtil;
 import wasdi.shared.utils.auth.KeycloakUtils;
@@ -46,29 +49,46 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 		User oUser = null;
 		String sToken = "";
 		
-		try {
-			// Try to get token from headers
-			sToken = extractToken(oRequestContext);
+		if (WasdiConfig.Current.disableAuthentication) {
+			WasdiLog.debugLog("Wasdi.getUserFromSession: auth is disabled, return standard user");
+			oUser = new User();
+			oUser.setName("user");
+			oUser.setUserId("user");
+			oUser.setRole(UserApplicationRole.ADMIN.getRole());
+			oUser.setSkin("wasdi");
+			oUser.setPublicNickName("user");
+			oUser.setType(UserType.PROFESSIONAL.name());
 			
-			if (!Utils.isNullOrEmpty(sToken)) {
-				// Validate token and get user
-				oUser = validateAndGetUser(sToken);
+			sToken = "free";
+			
+			oRequestContext.setProperty(CONTEXT_USER_KEY, oUser);
+			oRequestContext.setProperty(CONTEXT_SESSION_ID, sToken);
+		}
+		else {
+			try {
+				// Try to get token from headers
+				sToken = extractToken(oRequestContext);
+				
+				if (!Utils.isNullOrEmpty(sToken)) {
+					// Validate token and get user
+					oUser = validateAndGetUser(sToken);
+				}
+				
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("AuthenticationFilter.filter: error during authentication: " + oEx);
 			}
 			
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("AuthenticationFilter.filter: error during authentication: " + oEx);
+			// Always set user in context (can be null - endpoints will handle)
+			oRequestContext.setProperty(CONTEXT_USER_KEY, oUser);
+			
+			if (!Utils.isNullOrEmpty(sToken)) {
+				if (AuthTokenUtil.isLegacyWasdiToken(sToken)) {
+					// Legacy token - extract session ID and check DB
+					sToken = AuthTokenUtil.extractLegacySessionId(sToken);
+				} 
+			}
+			oRequestContext.setProperty(CONTEXT_SESSION_ID, sToken);			
 		}
-		
-		// Always set user in context (can be null - endpoints will handle)
-		oRequestContext.setProperty(CONTEXT_USER_KEY, oUser);
-		
-		if (!Utils.isNullOrEmpty(sToken)) {
-			if (AuthTokenUtil.isLegacyWasdiToken(sToken)) {
-				// Legacy token - extract session ID and check DB
-				sToken = AuthTokenUtil.extractLegacySessionId(sToken);
-			} 
-		}
-		oRequestContext.setProperty(CONTEXT_SESSION_ID, sToken);
 	}
 	
 	/**
