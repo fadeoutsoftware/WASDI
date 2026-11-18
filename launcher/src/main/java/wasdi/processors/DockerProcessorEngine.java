@@ -25,14 +25,17 @@ import com.google.common.io.CharStreams;
 import wasdi.LauncherMain;
 import wasdi.asynch.PushDockerImagesThread;
 import wasdi.processors.drivers.ContainerRuntimeDriver;
+import wasdi.processors.drivers.RunPodRuntimeDriver;
 import wasdi.processors.drivers.LocalDockerDriver;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.business.processors.ProcessorSourceTypes;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.PathsConfig;
+import wasdi.shared.config.RuntimeDriverConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
@@ -120,30 +123,40 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	
 	/**
 	 * Selects the runtime driver used to build/run/monitor this processor's container.
-	 * Only LocalDockerDriver exists today; a factory choosing among drivers will replace this call.
 	 */
 	protected ContainerRuntimeDriver getContainerRuntimeDriver() {
 		
+		RuntimeDriverConfig oRuntimeConfig = null;
+		
 		if (m_oContainerRuntimeDriver == null) {
 			
+			m_oContainerRuntimeDriver = new LocalDockerDriver(this);
+			
 			if (m_oParameter != null) {
+				
 				Processor oProcessor = m_oParameter.getProcessor();
+				
 				if (oProcessor != null) {
+					
 					if (oProcessor.getHwRequirements()!=null) {
 						if (oProcessor.getHwRequirements().isGpuTraining()) {
-							m_oContainerRuntimeDriver = new LocalDockerDriver(this);
-							return m_oContainerRuntimeDriver;							
+							m_oContainerRuntimeDriver = new LocalDockerDriver(this);	
 						}
-						if (oProcessor.getHwRequirements().isGpuInference()) {
-							m_oContainerRuntimeDriver = new LocalDockerDriver(this);
-							return m_oContainerRuntimeDriver;
+                        else if (oProcessor.getHwRequirements().isGpuInference()
+                                && ProcessorTypes.PIP_ONESHOT.equals(oProcessor.getType())
+                                && WasdiConfig.Current.isMainNode() && WasdiConfig.Current.runtimeDrivers != null) {
+							
+							oRuntimeConfig = WasdiConfig.Current.runtimeDrivers.getDriverConfig("runpod");
+							
+							if (oRuntimeConfig != null) {
+								m_oContainerRuntimeDriver = new RunPodRuntimeDriver(this);
+							}
 						}
 					}
 				}
 			}
-			
-			m_oContainerRuntimeDriver = new LocalDockerDriver(this); 
-		}
+            m_oContainerRuntimeDriver.setDriverConfig(oRuntimeConfig);
+        }
 		
 		return m_oContainerRuntimeDriver;
 	}	
@@ -1616,17 +1629,18 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 					WasdiLog.debugLog("DockerProcessorEngine.pushImageInRegisters: image pushed");
 					// Ok we got a valid address!
 					break;
-				}
+                }
 			}
 			
-			// Did we used all the avaialbe options?
-			if (iAvailableRegisters<aoRegisters.size()) {
+            if (iAvailableRegisters<aoRegisters.size() && aoRegisters.size()>1) {
 				
 				PushDockerImagesThread oPushDockerImagesThread = new PushDockerImagesThread();
 				oPushDockerImagesThread.setProcessor(oProcessor);
 				
 				for (int iOtherRegisters = 0; iOtherRegisters<aoRegisters.size(); iOtherRegisters++) {
-					oPushDockerImagesThread.getRegisters().add(aoRegisters.get(iOtherRegisters));
+                    if (iOtherRegisters != iAvailableRegisters) {
+                        oPushDockerImagesThread.getRegisters().add(aoRegisters.get(iOtherRegisters));
+                    }
 				}
 				
 				WasdiLog.debugLog("DockerProcessorEngine.pushImageInRegisters: staring thread to push on other regitries");

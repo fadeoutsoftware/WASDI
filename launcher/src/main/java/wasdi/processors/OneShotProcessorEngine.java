@@ -6,12 +6,15 @@ import com.google.common.io.Files;
 
 import wasdi.LauncherMain;
 import wasdi.processors.drivers.ContainerRuntimeDriver;
+import wasdi.processors.drivers.RunPodRuntimeDriver;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.config.EnvironmentVariableConfig;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.ProcessorTypeConfig;
+import wasdi.shared.config.RuntimeDriverConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
@@ -38,48 +41,6 @@ public abstract class OneShotProcessorEngine extends DockerBuildOnceEngine {
 	@Override
 	protected void stopRunningVersionBeforeRedeploy(Processor oProcessor) {
 		WasdiLog.debugLog("OneShotProcessorEngine.stopRunningVersionBeforeRedeploy: nothing to stop for one-shot processors");
-	}
-
-	@Override
-	public boolean deploy(ProcessorParameter oParameter, boolean bFirstDeploy) {
-		 
-		// We do not need to start after the build
-		m_bRunAfterDeploy = false;
-		// And we work with our main register
-		m_sDockerRegistry = getDockerRegisterAddress();
-		
-		if (Utils.isNullOrEmpty(m_sDockerRegistry)) {
-			WasdiLog.errorLog("OneShotProcessorEngine.deploy: register address not found, return false.");
-			return false;			
-		}
-		
-		WasdiLog.debugLog("OneShotProcessorEngine.deploy: call base class deploy");
-		
-		// Build the image of the docker
-		boolean bResult = super.deploy(oParameter, bFirstDeploy);
-		
-		if (!bResult) {
-			// This is not good
-			WasdiLog.errorLog("OneShotProcessorEngine.deploy: super class deploy returned false. So we stop here.");
-			return false;
-		}
-		
-		// Get Processor Name and Id
-		String sProcessorId = oParameter.getProcessorID();
-		
-		// Read the processor from the db
-		ProcessorRepository oProcessorRepository = new ProcessorRepository();
-		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
-		
-		// Here we save the address of the image
-		String sPushedImageAddress = pushImageInRegisters(oProcessor);
-		
-		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
-			WasdiLog.errorLog("OneShotProcessorEngine.deploy: Impossible to push the image.");
-			return false;
-		}
-		
-        return true;		
 	}
 	
 	protected void addEnvironmentVariablesToProcessorType(ProcessorTypeConfig oProcessorTypeConfig, String sEncodedJson, ProcessorParameter oParameter) {

@@ -72,6 +72,17 @@ public class LocalDockerDriver extends ContainerRuntimeDriver {
 
 	@Override
 	public String pushImage(ProcessorParameter oParameter, String sImageName) {
+		return pushImage(oParameter, sImageName, false);
+	}
+
+	/**
+	 * Push an image to the registry.
+	 * @param oParameter
+	 * @param sImageName
+	 * @param bRequireMainRegistry
+	 * @return The address of the image uploaded
+	 */
+	String pushImage(ProcessorParameter oParameter, String sImageName, boolean bRequireMainRegistry) {
 		try {
 			Processor oProcessor = new ProcessorRepository().getProcessor(oParameter.getProcessorID());
 
@@ -91,13 +102,14 @@ public class LocalDockerDriver extends ContainerRuntimeDriver {
 			String sPushedImageAddress = "";
 
 			// For each register: ordered by priority
-			for (; iAvailableRegisters < aoRegisters.size(); iAvailableRegisters++) {
+			int iRegistryAttempts = bRequireMainRegistry ? Math.min(1, aoRegisters.size()) : aoRegisters.size();
+			for (; iAvailableRegisters < iRegistryAttempts; iAvailableRegisters++) {
 
 				DockerRegistryConfig oDockerRegistryConfig = aoRegisters.get(iAvailableRegisters);
 
 				WasdiLog.debugLog("LocalDockerDriver.pushImage: try to push to " + oDockerRegistryConfig.id);
 
-				sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, sImageName);
+				sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, sImageName, bRequireMainRegistry);
 
 				if (!Utils.isNullOrEmpty(sPushedImageAddress)) {
 					WasdiLog.debugLog("LocalDockerDriver.pushImage: image pushed");
@@ -105,14 +117,15 @@ public class LocalDockerDriver extends ContainerRuntimeDriver {
 				}
 			}
 
-			// Did we use all the available options?
-			if (iAvailableRegisters < aoRegisters.size()) {
+			if (iAvailableRegisters < iRegistryAttempts && aoRegisters.size() > 1) {
 
 				PushDockerImagesThread oPushDockerImagesThread = new PushDockerImagesThread();
 				oPushDockerImagesThread.setProcessor(oProcessor);
 
 				for (int iOtherRegisters = 0; iOtherRegisters < aoRegisters.size(); iOtherRegisters++) {
-					oPushDockerImagesThread.getRegisters().add(aoRegisters.get(iOtherRegisters));
+					if (iOtherRegisters != iAvailableRegisters) {
+						oPushDockerImagesThread.getRegisters().add(aoRegisters.get(iOtherRegisters));
+					}
 				}
 
 				WasdiLog.debugLog("LocalDockerDriver.pushImage: starting thread to push on other registries");
@@ -130,7 +143,7 @@ public class LocalDockerDriver extends ContainerRuntimeDriver {
 	/**
 	 * Logs into a single registry and pushes the given image name to it.
 	 */
-	private String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName) {
+	private String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName, boolean bVerifyTagPush) {
 		try {
 			String sToken = oDockerUtils.loginInRegistry(oDockerRegistryConfig);
 
@@ -139,7 +152,7 @@ public class LocalDockerDriver extends ContainerRuntimeDriver {
 				return "";
 			}
 
-			boolean bPushed = oDockerUtils.push(sImageName, sToken);
+			boolean bPushed = oDockerUtils.push(sImageName, sToken, bVerifyTagPush);
 
 			if (!bPushed) {
 				WasdiLog.debugLog("LocalDockerDriver.loginAndPush: error in push, return false.");

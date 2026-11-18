@@ -1,6 +1,7 @@
 package wasdi.processors.drivers;
 
 import wasdi.processors.WasdiProcessorEngine;
+import wasdi.shared.config.RuntimeDriverConfig;
 import wasdi.shared.parameters.ProcessorParameter;
 
 /**
@@ -16,6 +17,11 @@ public abstract class ContainerRuntimeDriver {
 	 * Everything else must come from the ProcessorParameter/id passed to each method.
 	 */
 	protected final WasdiProcessorEngine m_oEngine;
+	
+	/**
+	 * Configuration of the Runtime Driver
+	 */
+	protected RuntimeDriverConfig m_oDriverConfig;
 
 	protected ContainerRuntimeDriver(WasdiProcessorEngine oEngine) {
 		m_oEngine = oEngine;
@@ -64,5 +70,21 @@ public abstract class ContainerRuntimeDriver {
 	 * @return true if the operation succeeded
 	 */
 	public abstract boolean stop(String sProcessWorkspaceId);
+
+	/**
+	 * Get the Runtime Driver Config
+	 * @return
+	 */
+	public RuntimeDriverConfig getDriverConfig() {
+		return m_oDriverConfig;
+	}
+	
+	/**
+	 * Set the Runtime Driver Config
+	 * @param m_oDriverConfig
+	 */
+	public void setDriverConfig(RuntimeDriverConfig m_oDriverConfig) {
+		this.m_oDriverConfig = m_oDriverConfig;
+	}
 }
 

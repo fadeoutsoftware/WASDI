@@ -69,7 +69,10 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
-		// Here we save the address of the image
+		return publishDeployment(oProcessor, oParameter);
+	}
+
+	protected boolean publishDeployment(Processor oProcessor, ProcessorParameter oParameter) {
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
 		
 		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
