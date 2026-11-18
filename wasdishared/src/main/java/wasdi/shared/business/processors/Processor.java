@@ -152,6 +152,11 @@ public class Processor {
 	private String gitRepositoryUrl = "";
 	
 	/**
+	 * Flag to determine if the processor requires a GPU or not
+	 */
+	private HwRequirements hwRequirements = new HwRequirements();
+	
+	/**
 	 * Log of the build operations
 	 */
 	private ArrayList<String> buildLogs = new ArrayList<String>();
@@ -361,5 +366,11 @@ public class Processor {
 	}
 	public void setDeploymentOngoing(boolean isDeploymentOngoing) {
 		this.isDeploymentOngoing = isDeploymentOngoing;
+	}
+	public HwRequirements getHwRequirements() {
+		return hwRequirements;
+	}
+	public void setHwRequirements(HwRequirements hwRequirements) {
+		this.hwRequirements = hwRequirements;
 	}
 }

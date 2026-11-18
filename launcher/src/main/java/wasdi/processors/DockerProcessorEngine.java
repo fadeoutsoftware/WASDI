@@ -77,6 +77,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	 */
 	protected boolean m_bDownloadProcessorFiles = true;
 	
+	ContainerRuntimeDriver m_oContainerRuntimeDriver = null;
+	
 	/**
 	 * Create clean instance
 	 */
@@ -121,7 +123,29 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	 * Only LocalDockerDriver exists today; a factory choosing among drivers will replace this call.
 	 */
 	protected ContainerRuntimeDriver getContainerRuntimeDriver() {
-		return new LocalDockerDriver(this);
+		
+		if (m_oContainerRuntimeDriver == null) {
+			
+			if (m_oParameter != null) {
+				Processor oProcessor = m_oParameter.getProcessor();
+				if (oProcessor != null) {
+					if (oProcessor.getHwRequirements()!=null) {
+						if (oProcessor.getHwRequirements().isGpuTraining()) {
+							m_oContainerRuntimeDriver = new LocalDockerDriver(this);
+							return m_oContainerRuntimeDriver;							
+						}
+						if (oProcessor.getHwRequirements().isGpuInference()) {
+							m_oContainerRuntimeDriver = new LocalDockerDriver(this);
+							return m_oContainerRuntimeDriver;
+						}
+					}
+				}
+			}
+			
+			m_oContainerRuntimeDriver = new LocalDockerDriver(this); 
+		}
+		
+		return m_oContainerRuntimeDriver;
 	}	
 	
     /**
