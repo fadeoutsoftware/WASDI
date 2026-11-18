@@ -1257,4 +1257,86 @@ public class ProductResource {
         	return oPrimitiveResult;
         }
     }
+
+    /**
+     * Get chart data for a product
+     * @param oRequestContext Container request context
+     * @param oChartRequest Chart request containing product name, workspace ID, and chart parameters
+     * @return PrimitiveResult containing chart data as JSON string
+     */
+    @POST
+    @Path("chart")
+    @Consumes({"application/xml", "application/json", "text/xml"})
+    @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "Get product chart", description = "Returns chart data for a product in a workspace accessible to the authenticated user.")
+    public PrimitiveResult getChart(@Context ContainerRequestContext oRequestContext,
+                                   ChartRequestViewModel oChartRequest) {
+        try {
+            if (oChartRequest == null) {
+                WasdiLog.warnLog("ProductResource.getChart: invalid request");
+                return PrimitiveResult.getInvalid();
+            }
+
+            String sProductName = oChartRequest.getName();
+            String sWorkspaceId = oChartRequest.getWorkspace();
+
+            WasdiLog.debugLog("ProductResource.getChart: Product: " + sProductName + ", WS: " + sWorkspaceId);
+
+            // Validate Session
+            User oUser = (User) oRequestContext.getProperty("authenticated-user");
+            if (oUser == null) {
+                WasdiLog.warnLog("ProductResource.getChart: invalid session");
+                return PrimitiveResult.getInvalid();
+            }
+            
+            if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+                WasdiLog.warnLog("ProductResource.getChart: user cannot access workspace");
+                return PrimitiveResult.getInvalid();
+            }
+
+            // Hardcoded chart data
+            String sChartJson = "{\n" +
+                "      \"chart-type\": \"line\",\n" +
+                "      \"chart-name\": \"Original Flood Area / Image\",\n" +
+                "      \"x-axis-name\": \"Date\",\n" +
+                "      \"y-axis-name\": \"Area of Flooded Pixels (km2)\",\n" +
+                "      \"chart-data\": [\n" +
+                "        {\n" +
+                "          \"name\": \"\",\n" +
+                "          \"series\": [\n" +
+                "            { \"value\": 0.0, \"name\": \"2026-10-02\" },\n" +
+                "            { \"value\": 0.0, \"name\": \"2026-10-03\" },\n" +
+                "            { \"value\": 0.0, \"name\": \"2026-10-07\" },\n" +
+                "            { \"value\": 0.0, \"name\": \"2026-10-08\" },\n" +
+                "            { \"value\": 1.8957, \"name\": \"2026-10-09\" },\n" +
+                "            { \"value\": 0.0, \"name\": \"2026-10-13\" },\n" +
+                "            { \"value\": 0.0, \"name\": \"2026-10-14\" },\n" +
+                "            { \"value\": 1.0245, \"name\": \"2026-10-15\" },\n" +
+                "            { \"value\": 0.0, \"name\": \"2026-10-16\" },\n" +
+                "            { \"value\": 0.0, \"name\": \"2026-10-19\" },\n" +
+                "            { \"value\": 0.0, \"name\": \"2026-10-20\" },\n" +
+                "            { \"value\": 0.9638, \"name\": \"2026-10-21\" },\n" +
+                "            { \"value\": 9.5434, \"name\": \"2026-10-25\" },\n" +
+                "            { \"value\": 5.7495, \"name\": \"2026-10-27\" },\n" +
+                "            { \"value\": 0.0, \"name\": \"2026-11-01\" },\n" +
+                "            { \"value\": 6.5734, \"name\": \"2026-11-06\" },\n" +
+                "            { \"value\": 0.0, \"name\": \"2026-11-07\" },\n" +
+                "            { \"value\": 4.113, \"name\": \"2026-11-08\" },\n" +
+                "            { \"value\": 0.0, \"name\": \"2026-11-09\" }\n" +
+                "          ]\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    }";
+
+            PrimitiveResult oPrimitiveResult = new PrimitiveResult();
+            oPrimitiveResult.setStringValue(sChartJson);
+            
+            return oPrimitiveResult;
+        } catch (Exception oE) {
+            WasdiLog.errorLog("ProductResource.getChart: error " + oE);
+        }
+        return PrimitiveResult.getInvalid();
+    }
+
+    
 }

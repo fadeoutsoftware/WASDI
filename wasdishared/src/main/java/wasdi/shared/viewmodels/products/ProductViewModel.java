@@ -35,6 +35,62 @@ public class ProductViewModel {
 
     private String description;
     
+    private Boolean isChart = false;
+    
+    private ChartMetadata chartMetadata;
+
+	/**
+	 * Inner class to hold chart metadata when isChart is true
+	 */
+	public static class ChartMetadata {
+		private String chartType;
+		private String xAxisName;
+		private String yAxisName;
+		private String chartDataName;
+
+		public ChartMetadata() {
+		}
+
+		public ChartMetadata(String sChartType, String sXAxisName, String sYAxisName, String sChartDataName) {
+			this.chartType = sChartType;
+			this.xAxisName = sXAxisName;
+			this.yAxisName = sYAxisName;
+			this.chartDataName = sChartDataName;
+		}
+
+		public String getChartType() {
+			return chartType;
+		}
+
+		public void setChartType(String sChartType) {
+			this.chartType = sChartType;
+		}
+
+		public String getXAxisName() {
+			return xAxisName;
+		}
+
+		public void setXAxisName(String sXAxisName) {
+			this.xAxisName = sXAxisName;
+		}
+
+		public String getYAxisName() {
+			return yAxisName;
+		}
+
+		public void setYAxisName(String sYAxisName) {
+			this.yAxisName = sYAxisName;
+		}
+
+		public String getChartDataName() {
+			return chartDataName;
+		}
+
+		public void setChartDataName(String sChartDataName) {
+			this.chartDataName = sChartDataName;
+		}
+	}
+    
 	public ProductViewModel() {
 	}
     
@@ -119,6 +175,22 @@ public class ProductViewModel {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Boolean isChart() {
+        return isChart;
+    }
+
+    public void setChart(Boolean bIsChart) {
+        this.isChart = bIsChart;
+    }
+
+    public ChartMetadata getChartMetadata() {
+        return chartMetadata;
+    }
+
+    public void setChartMetadata(ChartMetadata oChartMetadata) {
+        this.chartMetadata = oChartMetadata;
     }
 
 }
