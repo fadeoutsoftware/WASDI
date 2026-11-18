@@ -19,6 +19,7 @@ import wasdi.shared.utils.log.WasdiLog;
 
 public class RunPodRuntimeDriver extends ContainerRuntimeDriver {
 
+	private static final URI s_oServerlessUri = URI.create("https://api.runpod.io/v2/serverless");
 	private final LocalDockerDriver m_oLocalDockerDriver;
 
 	public RunPodRuntimeDriver(DockerProcessorEngine oEngine) {
@@ -29,28 +30,34 @@ public class RunPodRuntimeDriver extends ContainerRuntimeDriver {
 	private boolean publishDeployment(ProcessorParameter oParameter, String sPushedImage) {
 		
 		if (m_oDriverConfig == null || Utils.isNullOrEmpty(m_oDriverConfig.apiKey) || Utils.isNullOrEmpty(m_oDriverConfig.registryId) || Utils.isNullOrEmpty(m_oDriverConfig.gpuPool)) {
-			WasdiLog.errorLog("GPodRuntimeDriver.publishDeployment: Runpod API key, registry ID and GPU pool are required");
+			WasdiLog.errorLog("RunPodRuntimeDriver.publishDeployment: Runpod API key, registry ID and GPU pool are required");
 			return false;
 		}
 		
-		Processor oProcessor = oParameter.getProcessor();
-		
-		if (!Utils.isNullOrEmpty(oProcessor.getRunpodEndpointId())) {
-			return true;
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
+		if (oProcessor == null) {
+			WasdiLog.errorLog("RunPodRuntimeDriver.publishDeployment: processor not found");
+			return false;
 		}
+		
 		try {
+			if (!Utils.isNullOrEmpty(oProcessor.getRunpodEndpointId())) {
+				updateEndpointImage(oProcessor.getRunpodEndpointId(), sPushedImage);
+				return true;
+			}
 			String sEndpointId = createEndpoint("wasdi-" + oProcessor.getProcessorId(), sPushedImage);
 			oProcessor.setRunpodEndpointId(sEndpointId);
-			if (!new ProcessorRepository().updateProcessor(oProcessor)) {
-				WasdiLog.errorLog("GPodRuntimeDriver.publishDeployment: could not persist endpoint " + sEndpointId);
+			if (!oProcessorRepository.updateProcessor(oProcessor)) {
+				WasdiLog.errorLog("RunPodRuntimeDriver.publishDeployment: could not persist endpoint " + sEndpointId);
 				return false;
 			}
 			return true;
 		} catch (InterruptedException oEx) {
 			Thread.currentThread().interrupt();
-			WasdiLog.errorLog("GPodRuntimeDriver.publishDeployment: endpoint creation interrupted");
+			WasdiLog.errorLog("RunPodRuntimeDriver.publishDeployment: endpoint request interrupted");
 		} catch (IOException oEx) {
-			WasdiLog.errorLog("GPodRuntimeDriver.publishDeployment: " + oEx.getMessage());
+			WasdiLog.errorLog("RunPodRuntimeDriver.publishDeployment: " + oEx.getMessage());
 		}
 		return false;
 	}
@@ -67,23 +74,37 @@ public class RunPodRuntimeDriver extends ContainerRuntimeDriver {
 		oBody.putObject("workers").put("min", 0).put("max", 1);
 		oBody.putObject("scaling").put("type", "QUEUE_DELAY").put("queueDelay", 4);
 
-		HttpRequest oRequest = HttpRequest.newBuilder(URI.create("https://api.runpod.io/v2/serverless"))
+		String sResponse = sendEndpointRequest("POST", s_oServerlessUri, oBody, 201);
+		String sEndpointId = oMapper.readTree(sResponse).path("id").asText("");
+		if (Utils.isNullOrEmpty(sEndpointId)) {
+			throw new IOException("Runpod endpoint creation returned no endpoint ID");
+		}
+		return sEndpointId;
+	}
+
+	private void updateEndpointImage(String sEndpointId, String sImageName) throws IOException, InterruptedException {
+		if (!sEndpointId.matches("[a-zA-Z0-9_-]+")) {
+			throw new IOException("Invalid Runpod endpoint ID");
+		}
+		ObjectNode oBody = new ObjectMapper().createObjectNode().put("image", sImageName);
+		sendEndpointRequest("PATCH", URI.create(s_oServerlessUri + "/" + sEndpointId), oBody, 200);
+	}
+
+	private String sendEndpointRequest(String sMethod, URI oUri, ObjectNode oBody, int iExpectedStatus)
+			throws IOException, InterruptedException {
+		HttpRequest oRequest = HttpRequest.newBuilder(oUri)
 				.timeout(Duration.ofSeconds(30))
 				.header("Authorization", "Bearer " + m_oDriverConfig.apiKey)
 				.header("Content-Type", "application/json")
-				.POST(HttpRequest.BodyPublishers.ofString(oMapper.writeValueAsString(oBody)))
+				.method(sMethod, HttpRequest.BodyPublishers.ofString(oBody.toString()))
 				.build();
 
 		try (HttpClient oClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build()) {
 			HttpResponse<String> oResponse = oClient.send(oRequest, HttpResponse.BodyHandlers.ofString());
-			if (oResponse.statusCode() != 201) {
-				throw new IOException("Runpod endpoint creation failed (HTTP " + oResponse.statusCode() + ")");
+			if (oResponse.statusCode() != iExpectedStatus) {
+				throw new IOException("Runpod endpoint " + sMethod + " failed (HTTP " + oResponse.statusCode() + ")");
 			}
-			String sEndpointId = oMapper.readTree(oResponse.body()).path("id").asText();
-			if (Utils.isNullOrEmpty(sEndpointId)) {
-				throw new IOException("Runpod endpoint creation returned no endpoint ID");
-			}
-			return sEndpointId;
+			return oResponse.body();
 		}
 	}
 
@@ -98,6 +119,11 @@ public class RunPodRuntimeDriver extends ContainerRuntimeDriver {
 		String sAddress = m_oLocalDockerDriver.pushImage(oParameter, sImageName, true);
 		
 		return !Utils.isNullOrEmpty(sAddress) && publishDeployment(oParameter, sAddress) ? sAddress : null;
+	}
+
+	@Override
+	public boolean retainsPreviousImagesOnRedeploy() {
+		return true;
 	}
 
 	@Override

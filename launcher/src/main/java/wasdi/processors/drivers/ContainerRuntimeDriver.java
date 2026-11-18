@@ -42,6 +42,10 @@ public abstract class ContainerRuntimeDriver {
 	 */
 	public abstract String pushImage(ProcessorParameter oParameter, String sImageName);
 
+	public boolean retainsPreviousImagesOnRedeploy() {
+		return false;
+	}
+
 	/**
 	 * Starts execution of the given image and confirms the resource actually launched.
 	 * @param oParameter Processor Parameter

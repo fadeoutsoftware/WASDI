@@ -122,7 +122,10 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		oProcessor.setVersion(sNewVersion);
 		
 		// Save it
-		oProcessorRepository.updateProcessor(oProcessor);
+		if (!oProcessorRepository.updateProcessor(oProcessor)) {
+			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: could not save the new version");
+			return false;
+		}
         
 		WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: call base class deploy. New Version " + sNewVersion);
 		
@@ -130,13 +133,18 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		
 		if (!bResult) {
 			// This is not good
-			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: super class deploy returned false. So we stop here.");
-			oProcessor.setVersion(sPreviousVersion);
-			oProcessorRepository.updateProcessor(oProcessor);
+			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: build or publish failed; restoring the previous version");
+			Processor oCurrentProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			if (oCurrentProcessor != null && sNewVersion.equals(oCurrentProcessor.getVersion())) {
+				oCurrentProcessor.setVersion(sPreviousVersion);
+				if (!oProcessorRepository.updateProcessor(oCurrentProcessor)) {
+					WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: could not restore the previous version");
+				}
+			}
 			return false;
 		}
-		else {
-			WasdiLog.infoLog("DockerBuildOnceEngine.redeploy: super class deploy returned true lets proceed to clean and push");
+		if (getContainerRuntimeDriver().retainsPreviousImagesOnRedeploy()) {
+			return true;
 		}
 		
 		WasdiLog.infoLog("DockerBuildOnceEngine.redeploy: start thread to delete old versions");
@@ -159,6 +167,14 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		}		
 		
         return true;
+	}
+
+	@Override
+	protected boolean onAfterRedeployBuild(Processor oProcessor, ProcessorParameter oParameter) {
+		if (!getContainerRuntimeDriver().retainsPreviousImagesOnRedeploy()) {
+			return true;
+		}
+		return !Utils.isNullOrEmpty(m_sDockerImageName) && publishDeployment(oProcessor, oParameter);
 	}
 	
 	/**

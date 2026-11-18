@@ -264,6 +264,13 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             	return logDeployErrorAndClean("the deploy returned an empyt image name, something went wrong", bFirstDeploy);            	
             }
 
+            if (bFirstDeploy) {
+                oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+                if (oProcessor == null) {
+                    return logDeployErrorAndClean("processor not found after building the image", bFirstDeploy);
+                }
+            }
+
             onAfterDeploy(sProcessorFolder, oProcessor);
             processWorkspaceLog("Image done");
 
@@ -958,6 +965,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             onAfterDeploy(sProcessorFolder, oProcessor);
 
+            if (!onAfterRedeployBuild(oProcessor, oParameter)) {
+                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+                return false;
+            }
+
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
             WasdiLog.infoLog("DockerProcessorEngine.redeploy: docker " + sProcessorName + " updated");
@@ -981,6 +993,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             return false;
         }
+    }
+
+    protected boolean onAfterRedeployBuild(Processor oProcessor, ProcessorParameter oParameter) {
+        return true;
     }
 
     @Override
