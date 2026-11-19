@@ -169,7 +169,7 @@ the driver and app execution for a specific run. ``ProcessWorkspace.pid`` and
 ``containerId`` identify the launcher process/container, not the app runtime.
 
 Factory behavior
----------------
+--------------------------
 
 ``WasdiProcessorEngine.getProcessorEngine`` maps the stored processor type to a
 concrete engine. A missing type defaults to ``ubuntu_python37_snap``. An
