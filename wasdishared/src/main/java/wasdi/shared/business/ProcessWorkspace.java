@@ -115,6 +115,16 @@ public class ProcessWorkspace {
 	 * identified not by the pid but by this container name
 	 */
 	private String containerId;
+
+	/**
+	 * name of the runtime driver used to execute the process
+	 */
+	private String runtimeDriver;
+
+	/**
+	 * Process Id as assigned by the runtime driver
+	 */
+	private String runtimeReference;
 	
 	/**
 	 * Flag to know if we need to notify the user by mail when the operation is finished
@@ -320,6 +330,22 @@ public class ProcessWorkspace {
 
 	public void setContainerId(String containerId) {
 		this.containerId = containerId;
+	}
+
+	public String getRuntimeDriver() {
+		return runtimeDriver;
+	}
+
+	public void setRuntimeDriver(String runtimeDriver) {
+		this.runtimeDriver = runtimeDriver;
+	}
+
+	public String getRuntimeReference() {
+		return runtimeReference;
+	}
+
+	public void setRuntimeReference(String runtimeReference) {
+		this.runtimeReference = runtimeReference;
 	}
 
 	public boolean isNotifyOwnerByMail() {

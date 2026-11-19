@@ -26,6 +26,7 @@ import wasdi.shared.utils.runtime.RunTimeUtils;
  * DockerUtils and to the owning engine's existing build/run/wait helpers, unchanged in behavior.
  */
 public class LocalDockerDriver extends ContainerRuntimeDriver {
+	public static final String DRIVER_NAME = "local-docker";
 
 	/**
 	 * Narrower, Docker-specific reference: the abstract base only guarantees a WasdiProcessorEngine.
@@ -198,6 +199,19 @@ public class LocalDockerDriver extends ContainerRuntimeDriver {
 			}
 
 			oParameter.setContainerName(m_sContainerName);
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcess = oRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			if (oProcess == null || ProcessStatus.STOPPED.name().equals(oProcess.getStatus())) {
+				oDockerUtils.stop(m_sContainerName);
+				return null;
+			}
+			oProcess.setRuntimeDriver(DRIVER_NAME);
+			oProcess.setRuntimeReference(m_sContainerName);
+			if (!oRepository.updateProcess(oProcess)) {
+				WasdiLog.errorLog("LocalDockerDriver.run: unable to save app container " + m_sContainerName);
+				oDockerUtils.stop(m_sContainerName);
+				return null;
+			}
 
 			waitForContainerToStart(oDockerUtils, oProcessor);
 
@@ -361,6 +375,13 @@ public class LocalDockerDriver extends ContainerRuntimeDriver {
 			if (oProcessWorkspace == null) {
 				WasdiLog.warnLog("LocalDockerDriver.stop: process workspace not found " + sProcessWorkspaceId);
 				return false;
+			}
+			if (!Utils.isNullOrEmpty(oProcessWorkspace.getRuntimeDriver())) {
+				if (!DRIVER_NAME.equals(oProcessWorkspace.getRuntimeDriver())
+						|| Utils.isNullOrEmpty(oProcessWorkspace.getRuntimeReference())) return false;
+				DockerUtils oDockerUtils = new DockerUtils();
+				oDockerUtils.setProcessWorkspaceLogger(m_oEngine.geProcessWorkspaceLogger());
+				return oDockerUtils.stop(oProcessWorkspace.getRuntimeReference());
 			}
 
 			String sProcessorName = oProcessWorkspace.getProductName();

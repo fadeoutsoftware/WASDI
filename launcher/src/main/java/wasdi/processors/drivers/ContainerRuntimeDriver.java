@@ -46,6 +46,10 @@ public abstract class ContainerRuntimeDriver {
 		return false;
 	}
 
+	public ContainerRuntimeDriver getPackageRefreshDriver() {
+		return this;
+	}
+
 	/**
 	 * Starts execution of the given image and confirms the resource actually launched.
 	 * @param oParameter Processor Parameter

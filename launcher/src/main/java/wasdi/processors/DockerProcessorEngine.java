@@ -146,7 +146,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                                 && ProcessorTypes.PIP_ONESHOT.equals(oProcessor.getType())
                                 && WasdiConfig.Current.isMainNode() && WasdiConfig.Current.runtimeDrivers != null) {
 							
-							oRuntimeConfig = WasdiConfig.Current.runtimeDrivers.getDriverConfig("runpod");
+                            oRuntimeConfig = WasdiConfig.Current.runtimeDrivers.getDriverConfig(RunPodRuntimeDriver.DRIVER_NAME);
 							
 							if (oRuntimeConfig != null) {
 								m_oContainerRuntimeDriver = new RunPodRuntimeDriver(this);
@@ -160,6 +160,23 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		
 		return m_oContainerRuntimeDriver;
 	}	
+
+    protected ContainerRuntimeDriver getContainerRuntimeDriverForExecution(ProcessWorkspace oProcessWorkspace) {
+        String sDriverName = oProcessWorkspace.getRuntimeDriver();
+        if (Utils.isNullOrEmpty(sDriverName) || LocalDockerDriver.DRIVER_NAME.equals(sDriverName)) {
+            return new LocalDockerDriver(this);
+        }
+        if (RunPodRuntimeDriver.DRIVER_NAME.equals(sDriverName) && WasdiConfig.Current.runtimeDrivers != null) {
+            RuntimeDriverConfig oConfig = WasdiConfig.Current.runtimeDrivers.getDriverConfig(sDriverName);
+            if (oConfig != null) {
+                ContainerRuntimeDriver oDriver = new RunPodRuntimeDriver(this);
+                oDriver.setDriverConfig(oConfig);
+                return oDriver;
+            }
+        }
+        WasdiLog.errorLog("DockerProcessorEngine: runtime driver unavailable: " + sDriverName);
+        return null;
+    }
 	
     /**
      * Deploy a new Processor in WASDI

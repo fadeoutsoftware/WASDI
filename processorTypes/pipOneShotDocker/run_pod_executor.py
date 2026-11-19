@@ -8,10 +8,11 @@ structured status back to RunPod.
 """
 
 import json
+import math
 import os
 import subprocess
 import sys
-import traceback
+import tempfile
 import urllib.parse
 from typing import Any, Dict, Optional
 
@@ -29,14 +30,7 @@ ENV_KEY_MAP = {
     "WASDI_SESSION_ID": ["WASDI_SESSION_ID", "sessionId"],
     "WASDI_WORKSPACE_ID": ["WASDI_WORKSPACE_ID", "workspaceId"],
     "WASDI_ONESHOT_ENCODED_PARAMS": ["WASDI_ONESHOT_ENCODED_PARAMS", "encodedParams"],
-    "WASDI_ONESHOT_ON_SERVER": ["WASDI_ONESHOT_ON_SERVER", "onServer"],
-    "WASDI_ONESHOT_REFRESH_PACKAGE_LIST": [
-        "WASDI_ONESHOT_REFRESH_PACKAGE_LIST",
-        "refreshPackageList",
-    ],
-    # Optional waspy config overrides (if your waspy.init() reads them from env)
-    "WASDI_BASE_URL": ["WASDI_BASE_URL", "baseUrl"],
-    "WASDI_WORKSPACE_BASE_DIR": ["WASDI_WORKSPACE_BASE_DIR", "workspaceBaseDir"],
+    "WASDI_WEBSERVER_URL": ["WASDI_WEBSERVER_URL", "baseUrl", "WASDI_BASE_URL"],
 }
 
 
@@ -47,31 +41,27 @@ def _extract_value(payload: Dict[str, Any], candidates: list[str]) -> Optional[A
     return None
 
 
-def _build_subprocess_env(job_input: Dict[str, Any]) -> Dict[str, str]:
-    env = os.environ.copy()
+def _build_subprocess_env(job_input: Dict[str, Any], sBasePath: str) -> Dict[str, str]:
+    asEnvironment = os.environ.copy()
 
-    for env_var, candidate_keys in ENV_KEY_MAP.items():
-        val = _extract_value(job_input, candidate_keys)
-        if val is not None:
-            env[env_var] = str(val)
+    for sVariable, asKeys in ENV_KEY_MAP.items():
+        oValue = _extract_value(job_input, asKeys)
+        if oValue is None and sVariable == "WASDI_WEBSERVER_URL":
+            oValue = asEnvironment.get(sVariable)
+        asEnvironment.pop(sVariable, None)
+        if sVariable == "WASDI_ONESHOT_ENCODED_PARAMS" and oValue is None:
+            oParams = job_input.get("params", {})
+            sJson = oParams if isinstance(oParams, str) else json.dumps(oParams)
+            oValue = urllib.parse.quote(sJson)
+        if not isinstance(oValue, str) or (not oValue.strip() and sVariable != "WASDI_ONESHOT_ENCODED_PARAMS"):
+            raise ValueError(f"Missing or invalid {sVariable} in Runpod job configuration")
+        asEnvironment[sVariable] = oValue
 
-    # Support passing raw dict/JSON parameters via "params" if "encodedParams" isn't pre-encoded
-    if "WASDI_ONESHOT_ENCODED_PARAMS" not in env and "params" in job_input:
-        raw_params = job_input["params"]
-        json_str = raw_params if isinstance(raw_params, str) else json.dumps(raw_params or {})
-        env["WASDI_ONESHOT_ENCODED_PARAMS"] = urllib.parse.quote(json_str)
-
-    # Default to external execution mode so waspy enables HTTP/S3 download & upload
-    env.setdefault("WASDI_ONESHOT_ON_SERVER", "false")
-
-    # Allow arbitrary extra WASDI_* keys passed inside an optional "env" sub-dict
-    extra_env = job_input.get("env")
-    if isinstance(extra_env, dict):
-        for k, v in extra_env.items():
-            if v is not None:
-                env[str(k)] = str(v)
-
-    return env
+    asEnvironment["WASDI_ONESHOT_ON_SERVER"] = "false"
+    asEnvironment["WASDI_BASE_PATH"] = sBasePath
+    asEnvironment.pop("WASDI_ONLY_WS_FOLDER", None)
+    asEnvironment.pop("WASDI_ONESHOT_REFRESH_PACKAGE_LIST", None)
+    return asEnvironment
 
 
 def handler(job: Dict[str, Any]) -> Dict[str, Any]:
@@ -91,28 +81,34 @@ def handler(job: Dict[str, Any]) -> Dict[str, Any]:
     # Optional soft timeout in seconds (slightly below RunPod's hard executionTimeout
     # so we can terminate the child cleanly and return diagnostics before worker kill)
     timeout_sec: Optional[float] = None
-    raw_timeout = job_input.get("timeoutSeconds") or job_input.get("executionTimeoutSeconds")
+    raw_timeout = job_input.get("timeoutSeconds", job_input.get("executionTimeoutSeconds"))
     if raw_timeout is not None:
         try:
             timeout_sec = float(raw_timeout)
-        except (TypeError, ValueError):
-            return {"status": "ERROR", "error": f"Invalid timeoutSeconds: {raw_timeout}"}
+            if isinstance(raw_timeout, bool) or not math.isfinite(timeout_sec) or timeout_sec <= 0:
+                raise ValueError()
+        except (TypeError, ValueError, OverflowError):
+            return {"status": "ERROR", "error": "timeoutSeconds must be a positive finite number"}
 
-    sub_env = _build_subprocess_env(job_input)
-    cmd = [sys.executable, EXECUTOR_SCRIPT]
+    asCommand = [sys.executable, EXECUTOR_SCRIPT, "--runpod"]
 
     print(f"[RunPod:{job_id}][WASDI:{proc_id}] Launching {EXECUTOR_SCRIPT}")
 
     try:
         # Stream stdout/stderr directly to container logs so RunPod captures live logs,
         # while enforcing timeout and checking exit code cleanly.
-        completed = subprocess.run(
-            cmd,
-            env=sub_env,
-            cwd=os.path.dirname(EXECUTOR_SCRIPT),
-            timeout=timeout_sec,
-            check=False,
-        )
+        with tempfile.TemporaryDirectory(prefix="wasdi-runpod-") as sBasePath:
+            try:
+                asEnvironment = _build_subprocess_env(job_input, sBasePath)
+            except ValueError as oError:
+                return {"error": str(oError), "processWorkspaceId": proc_id}
+            completed = subprocess.run(
+                asCommand,
+                env=asEnvironment,
+                cwd=os.path.dirname(EXECUTOR_SCRIPT),
+                timeout=timeout_sec,
+                check=False,
+            )
 
         rc = completed.returncode
         print(f"[RunPod:{job_id}][WASDI:{proc_id}] Finished with returncode={rc}")
@@ -140,12 +136,11 @@ def handler(job: Dict[str, Any]) -> Dict[str, Any]:
             "timedOut": True,
         }
 
-    except Exception as exc:
-        tb = traceback.format_exc()
-        print(f"[RunPod:{job_id}][WASDI:{proc_id}] UNEXPECTED ERROR:\n{tb}")
+    except Exception as oError:
+        sErrorType = type(oError).__name__
+        print(f"[RunPod:{job_id}][WASDI:{proc_id}] UNEXPECTED ERROR: {sErrorType}")
         return {
-            "error": f"Handler exception: {exc}",
-            "traceback": tb,
+            "error": f"Handler exception: {sErrorType}",
             "processWorkspaceId": proc_id,
         }
 

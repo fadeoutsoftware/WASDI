@@ -200,7 +200,11 @@ public abstract class OneShotProcessorEngine extends DockerBuildOnceEngine {
             
             // If we do not have a container name here, we are not in the position to continue
             if (Utils.isNullOrEmpty(sContainerName)) {
-            	WasdiLog.errorLog("OneShotProcessorEngine.run: Impossible to start the application docker");
+				WasdiLog.errorLog("OneShotProcessorEngine.run: unable to start the application");
+				oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+				if (oProcessWorkspace != null && !ProcessStatus.STOPPED.name().equals(oProcessWorkspace.getStatus())) {
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				}
             	return false;
             }
                                     
@@ -215,6 +219,7 @@ public abstract class OneShotProcessorEngine extends DockerBuildOnceEngine {
             
             if (sStatus.equals(ProcessStatus.DONE.name())==false && sStatus.equals(ProcessStatus.ERROR.name())==false && sStatus.equals(ProcessStatus.STOPPED.name())==false) {
             	sStatus = oContainerRuntimeDriver.waitForCompletion(oParameter);
+                oProcessWorkspace.setStatus(sStatus);
             }
 
             WasdiLog.debugLog("OneShotProcessorEngine.run: process finished with status " + sStatus);
@@ -285,7 +290,7 @@ public abstract class OneShotProcessorEngine extends DockerBuildOnceEngine {
 	        
 	        // This is a normal one-shot run: the env var above makes the executor dump the
 	        // package list to sRandomName instead of running the processor
-	        ContainerRuntimeDriver oContainerRuntimeDriver = getContainerRuntimeDriver();
+	        ContainerRuntimeDriver oContainerRuntimeDriver = getContainerRuntimeDriver().getPackageRefreshDriver();
 	        
 	        String sContainerName = oContainerRuntimeDriver.run(oParameter, m_sDockerImageName, "");
 	        
@@ -330,7 +335,11 @@ public abstract class OneShotProcessorEngine extends DockerBuildOnceEngine {
     @Override
     public boolean stopApplication(ProcessorParameter oParameter) {
     	try {
-    		return getContainerRuntimeDriver().stop(oParameter.getProcessObjId());
+			String sProcessId = oParameter.getProcessObjId();
+			ProcessWorkspace oProcess = new ProcessWorkspaceRepository().getProcessByProcessObjId(sProcessId);
+			if (oProcess == null) return false;
+			ContainerRuntimeDriver oDriver = getContainerRuntimeDriverForExecution(oProcess);
+			return oDriver != null && oDriver.stop(sProcessId);
     	}
     	catch (Exception oEx) {
 			WasdiLog.errorLog("OneShotProcessorEngine.stopApplication: error", oEx);
