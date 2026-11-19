@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import wasdi.LauncherMain;
@@ -63,12 +62,21 @@ public class RunPodRuntimeDriver extends ContainerRuntimeDriver {
 			// Check if this is a create or an update
 			if (!Utils.isNullOrEmpty(oProcessor.getRunpodEndpointId())) {
 				WasdiLog.debugLog("RunPodRuntimeDriver.publishDeployment: end point exists, we update it");
+				
+				processWorkspaceLog("Application will be executed in RunPod: updating the endpoint");
+				
 				// Update end-point
 				updateEndpointImage(oProcessor.getRunpodEndpointId(), sPushedImage);
+				
+				processWorkspaceLog("Run pod endpoint updated");
+				
 				return true;
 			}
 			
 			WasdiLog.debugLog("RunPodRuntimeDriver.publishDeployment: end point does not exists. we create it");
+			
+			
+			processWorkspaceLog("Application will be executed in RunPod: creating the end point image");
 			
 			// Create end point
 			String sEndpointId = createEndpoint("wasdi-" + oProcessor.getProcessorId(), sPushedImage);
@@ -79,6 +87,8 @@ public class RunPodRuntimeDriver extends ContainerRuntimeDriver {
 				WasdiLog.errorLog("RunPodRuntimeDriver.publishDeployment: could not persist endpoint " + sEndpointId);
 				return false;
 			}
+			
+			processWorkspaceLog("Run pod endpoint created");
 			
 			return true;
 		} catch (IOException oEx) {
@@ -272,12 +282,18 @@ public class RunPodRuntimeDriver extends ContainerRuntimeDriver {
 				return null;
 			}
 			
-			if (ProcessStatus.STOPPED.name().equals(oProcess.getStatus())) return null;
+			if (ProcessStatus.STOPPED.name().equals(oProcess.getStatus())) {
+				processWorkspaceLog("Application is already stopped, we exit here");
+				return null;
+			}
 			
 			// Do we already have the runtime reference?			
 			if (!Utils.isNullOrEmpty(oProcess.getRuntimeReference())) {
+				processWorkspaceLog("Application was not executed on RunPod, something went wrong..");
 				return DRIVER_NAME.equals(oProcess.getRuntimeDriver()) ? oProcess.getRuntimeReference() : null;
 			}
+			
+			processWorkspaceLog("Waiting for a RunPod worker");
 			
 			String sEndpointId = oProcessor.getRunpodEndpointId();
 			
@@ -307,6 +323,7 @@ public class RunPodRuntimeDriver extends ContainerRuntimeDriver {
 			oProcess = oRepository.getProcessByProcessObjId(sProcessId);
 			
 			if (oProcess == null || ProcessStatus.STOPPED.name().equals(oProcess.getStatus())) {
+				processWorkspaceLog("The process looks already stopped. We exit");
 				cancelJob(sReference);
 				return null;
 			}
@@ -314,10 +331,13 @@ public class RunPodRuntimeDriver extends ContainerRuntimeDriver {
 			oProcess.setRuntimeReference(sReference);
 			
 			if (!oRepository.updateProcess(oProcess)) {
+				processWorkspaceLog("Error persisting RunPod Job");
 				WasdiLog.errorLog("RunPodRuntimeDriver.run: unable to persist Runpod job " + sReference);
 				cancelJob(sReference);
 				return null;
 			}
+			
+			processWorkspaceLog("Ok the worker is availalbe");
 			
 			return sReference;
 		} catch (IOException oEx) {

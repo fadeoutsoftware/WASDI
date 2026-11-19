@@ -98,5 +98,11 @@ public abstract class ContainerRuntimeDriver {
 	public void setDriverConfig(RuntimeDriverConfig m_oDriverConfig) {
 		this.m_oDriverConfig = m_oDriverConfig;
 	}
+	
+	public void processWorkspaceLog(String sLog) {
+		if (m_oEngine != null) {
+			m_oEngine.processWorkspaceLog(sLog);
+		}
+	}
 }
 

@@ -290,7 +290,7 @@ public abstract class WasdiProcessorEngine {
 	 * Safe Processor log
 	 * @param sLog
 	 */
-	protected void processWorkspaceLog(String sLog) {
+	public void processWorkspaceLog(String sLog) {
 		if (m_oProcessWorkspaceLogger!=null) {
 			m_oProcessWorkspaceLogger.log(sLog);
 		}
