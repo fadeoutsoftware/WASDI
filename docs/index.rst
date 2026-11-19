@@ -83,6 +83,7 @@ A good starting point to applications is the :doc:`App store overview </AppStore
    WasdiApplications/WheatLocator.rst
    WasdiApplications/LandslideDetectionS2.rst
    WasdiApplications/LandslideS1.rst
+   WasdiApplications/RainfallAnomalyIMERG.rst
 
 
 Add your App to WASDI
@@ -223,6 +224,7 @@ See the :doc:`STAC and OGC API Features reference </stac/Stac>` for the exposed 
    InsideWasdi/AddAppUIControl.rst
    InsideWasdi/AddProcessor.rst
    InsideWasdi/Configuration.rst
+   InsideWasdi/ProcessorHierarchy.rst
 
 
 .. toctree::
