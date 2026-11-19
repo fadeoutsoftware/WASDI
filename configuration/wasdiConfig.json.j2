@@ -725,5 +725,8 @@
         ]
 {% endif %}
     },
+    "runtimeDrivers": {
+        "drivers": {{ aoWasdiConfiguration['runtimeDrivers']['drivers'] | to_json }}
+    },
     "useNotebooksDockerAddress": {{ aoWasdiConfiguration['useNotebooksDockerAddress'] | lower }}
 }
