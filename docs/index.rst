@@ -224,6 +224,7 @@ See the :doc:`STAC and OGC API Features reference </stac/Stac>` for the exposed 
    InsideWasdi/AddAppUIControl.rst
    InsideWasdi/AddProcessor.rst
    InsideWasdi/Configuration.rst
+   InsideWasdi/ProcessorHierarchy.rst
 
 
 .. toctree::
