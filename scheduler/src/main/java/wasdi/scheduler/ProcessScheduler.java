@@ -6,16 +6,22 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.ParametersRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.parameters.BaseParameter;
+import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.docker.DockerUtils;
@@ -895,7 +901,7 @@ public class ProcessScheduler {
 								WasdiLog.infoLog(m_sLogPrefix + ".sometimesCheck: Process " + oRunningPws.getProcessObjId() + " is in Timeout");
 								
 								// Stop the process
-								stopProcess(sPidOrContainerId);
+								stopProcess(sPidOrContainerId, oRunningPws);
 								
 								// Update the state
 								oRunningPws.setStatus(ProcessStatus.STOPPED.name());
@@ -1292,9 +1298,62 @@ public class ProcessScheduler {
 	 * @param iPid
 	 * @return
 	 */
-	private boolean stopProcess(String sPid) {
+	private boolean stopProcess(String sPid, ProcessWorkspace oProcessWs) {
 		
 		try {
+			
+			if (LauncherOperationsUtils.doesOperationLaunchApplication(oProcessWs.getOperationType())) {
+				
+				// Get the original operation Parameter
+				ParametersRepository oParametersRepository = new ParametersRepository();
+				BaseParameter oOriginalParam = oParametersRepository.getParameterByProcessObjId(oProcessWs.getProcessObjId());
+				
+				// Create the param to kill the process
+				KillProcessTreeParameter oKillProcessParameter = new KillProcessTreeParameter();
+				
+				// Take session id and workspace id
+				String sSessionId = oOriginalParam.getSessionID();
+				String sWorkspaceId = oProcessWs.getWorkspaceId();
+				
+				// Add the process the the list of the ones to be killed
+				List<String> asProcesses = null;
+				asProcesses = new LinkedList<String>();
+				asProcesses.add(oProcessWs.getProcessObjId());
+				
+				oKillProcessParameter.setKillTree(true);
+				oKillProcessParameter.setWorkspace(sWorkspaceId);
+				oKillProcessParameter.setExchange(sWorkspaceId);
+				oKillProcessParameter.setProcessesToBeKilledObjId(asProcesses);
+				oKillProcessParameter.setSessionID(sSessionId);
+				oKillProcessParameter.setProcessObjId(UUID.randomUUID().toString());
+				oKillProcessParameter.setWorkspaceOwnerId(oOriginalParam.getWorkspaceOwnerId());
+				oKillProcessParameter.setCleanDb(true);
+				oKillProcessParameter.setUserId(oProcessWs.getUserId());
+				
+				// We create the param
+				oParametersRepository.insertParameter(oKillProcessParameter);
+
+				// Create the process Workspace
+				ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+				ProcessWorkspace oKillProcessWs = new ProcessWorkspace();
+				
+				// And fill it
+				oKillProcessWs.setOperationTimestamp(Utils.nowInMillis());
+				oKillProcessWs.setOperationType(LauncherOperations.KILLPROCESSTREE.name());
+				oKillProcessWs.setOperationSubType("");
+				oKillProcessWs.setProductName(oProcessWs.getProductName());
+				oKillProcessWs.setWorkspaceId(sWorkspaceId);
+				oKillProcessWs.setUserId(oKillProcessParameter.getUserId());
+				oKillProcessWs.setNotifyOwnerByMail(false);
+				
+				oKillProcessWs.setProcessObjId(oKillProcessParameter.getProcessObjId());
+				oKillProcessWs.setStatus(ProcessStatus.CREATED.name());
+				oKillProcessWs.setNodeCode(oProcessWs.getNodeCode());
+				
+				oRepository.insertProcessWorkspace(oKillProcessWs);
+				WasdiLog.debugLog("ProcessScheduler.stopProcess: Process Scheduled for Launcher");
+			}
+			
 			if (WasdiConfig.Current.shellExecLocally) {
 				int iPid = (int) Integer.parseInt(sPid);
 				
