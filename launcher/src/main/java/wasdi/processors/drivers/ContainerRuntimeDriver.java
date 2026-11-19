@@ -23,6 +23,10 @@ public abstract class ContainerRuntimeDriver {
 	 */
 	protected RuntimeDriverConfig m_oDriverConfig;
 
+	/**
+	 * Constructor: take in input the related engine
+	 * @param oEngine
+	 */
 	protected ContainerRuntimeDriver(WasdiProcessorEngine oEngine) {
 		m_oEngine = oEngine;
 	}

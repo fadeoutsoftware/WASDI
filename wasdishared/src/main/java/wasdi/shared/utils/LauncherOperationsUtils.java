@@ -9,6 +9,7 @@ package wasdi.shared.utils;
 import org.apache.commons.lang3.EnumUtils;
 
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.ProcessStatus;
 
 /**
  * @author c.nattero
@@ -53,5 +54,18 @@ public class LauncherOperationsUtils {
 	public static boolean isValidLauncherOperation(String sOperation) {
 		return EnumUtils.isValidEnum(LauncherOperations.class, sOperation);
 	}
+	
+
+	/**
+	 * Check if sStatus is a terminal one, DONE, STOPPED or ERROR
+	 * @param sStatus
+	 * @return
+	 */
+	public static boolean isTerminalStatus(String sStatus) {
+		
+		if (Utils.isNullOrEmpty(sStatus)) return false;
+		
+		return ProcessStatus.DONE.name().equals(sStatus) || ProcessStatus.ERROR.name().equals(sStatus) || ProcessStatus.STOPPED.name().equals(sStatus);
+	}	
 	
 }

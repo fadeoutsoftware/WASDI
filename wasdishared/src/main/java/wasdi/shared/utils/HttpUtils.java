@@ -14,6 +14,10 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.time.Duration;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
@@ -845,6 +850,53 @@ public final class HttpUtils {
 			return oHttpCallResponse;
 		}
 	}	
+
+	/**
+	 * Sends a JSON HTTP PATCH request and returns its status code and response body.
+	 * HttpURLConnection does not support PATCH on all supported JDKs, so this method
+	 * uses the JDK HTTP client while preserving WASDI timeout and logging settings.
+	 */
+	public static HttpCallResponse httpPatch(String sUrl, String sPayload, Map<String, String> asHeaders) {
+		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
+		try {
+			boolean bLog = true;
+			if (WasdiConfig.Current.filterInternalHttpCalls) {
+				if (WasdiConfig.Current.keycloack != null
+						&& sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) bLog = false;
+				if (WasdiConfig.Current.dockers != null
+						&& sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) bLog = false;
+			}
+			if (WasdiConfig.Current.logHttpCalls && bLog) {
+				WasdiLog.debugLog("HttpUtils.httpPatch: calling url " + sUrl);
+			}
+
+			HttpRequest.Builder oRequestBuilder = HttpRequest.newBuilder(URI.create(sUrl))
+					.timeout(Duration.ofMillis(WasdiConfig.Current.readTimeout))
+					.header("Accept", "*/*")
+					.method("PATCH", HttpRequest.BodyPublishers.ofString(sPayload == null ? "" : sPayload));
+			if (asHeaders != null) {
+				for (Entry<String, String> oHeader : asHeaders.entrySet()) {
+					oRequestBuilder.header(oHeader.getKey(), oHeader.getValue());
+				}
+			}
+
+			try (HttpClient oClient = HttpClient.newBuilder()
+					.connectTimeout(Duration.ofMillis(WasdiConfig.Current.connectionTimeout)).build()) {
+				HttpResponse<String> oResponse = oClient.send(oRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+				oHttpCallResponse.setResponseCode(oResponse.statusCode());
+				oHttpCallResponse.setResponseBody(oResponse.body());
+				if (WasdiConfig.Current.logHttpCalls && bLog) {
+					WasdiLog.debugLog("HttpUtils.httpPatch: response code " + oResponse.statusCode());
+				}
+			}
+		} catch (InterruptedException oEx) {
+			Thread.currentThread().interrupt();
+			WasdiLog.errorLog("HttpUtils.httpPatch: request interrupted", oEx);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("HttpUtils.httpPatch: error", oEx);
+		}
+		return oHttpCallResponse;
+	}
 	
 	/**
 	 * Standard http delete utility function

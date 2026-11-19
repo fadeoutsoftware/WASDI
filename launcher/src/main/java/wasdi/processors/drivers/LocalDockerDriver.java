@@ -29,18 +29,12 @@ public class LocalDockerDriver extends ContainerRuntimeDriver {
 	public static final String DRIVER_NAME = "local-docker";
 
 	/**
-	 * Narrower, Docker-specific reference: the abstract base only guarantees a WasdiProcessorEngine.
-	 */
-	private final DockerProcessorEngine m_oDockerEngine;
-
-	/**
 	 * Container name returned by run(), reused by waitForCompletion() within the same lifecycle
 	 */
 	private String m_sContainerName;
 
 	public LocalDockerDriver(DockerProcessorEngine oEngine) {
 		super(oEngine);
-		m_oDockerEngine = oEngine;
 	}
 
 	@Override
@@ -53,7 +47,7 @@ public class LocalDockerDriver extends ContainerRuntimeDriver {
 				return null;
 			}
 
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor, oParameter, PathsConfig.getProcessorFolder(oProcessor.getName()), m_oDockerEngine.getDockerRegistry(), m_oEngine.geProcessWorkspaceLogger());
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, oParameter, PathsConfig.getProcessorFolder(oProcessor.getName()), ((DockerProcessorEngine) m_oEngine).getDockerRegistry(), m_oEngine.geProcessWorkspaceLogger());
 			String sImageName = oDockerUtils.build();
 
 			if (Utils.isNullOrEmpty(sImageName)) {
@@ -179,7 +173,7 @@ public class LocalDockerDriver extends ContainerRuntimeDriver {
 				return null;
 			}
 
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor, oParameter, PathsConfig.getProcessorFolder(oProcessor.getName()), m_oDockerEngine.getDockerRegistry(), m_oEngine.geProcessWorkspaceLogger());
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, oParameter, PathsConfig.getProcessorFolder(oProcessor.getName()), ((DockerProcessorEngine) m_oEngine).getDockerRegistry(), m_oEngine.geProcessWorkspaceLogger());
 
 			// sTag/sParams are not needed here: local Docker resolves the image from Processor+version,
 			// and env vars are already staged on WasdiConfig.Current.dockers by the caller.
@@ -290,7 +284,7 @@ public class LocalDockerDriver extends ContainerRuntimeDriver {
 			boolean bForcedError = false;
 
 			// Wait for the process to finish, while checking timeout
-			while (!(sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {
+			while (!LauncherOperationsUtils.isTerminalStatus(sStatus)) {
 
 				try {
 					Thread.sleep(iThreadSleepMs);
