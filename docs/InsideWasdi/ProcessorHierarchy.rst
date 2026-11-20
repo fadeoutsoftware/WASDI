@@ -27,24 +27,43 @@ processor types returned directly by the engine factory.
 .. code-block:: text
 
    WasdiProcessorEngine (abstract)
+   |
    +-- DockerProcessorEngine (abstract; shared Docker lifecycle)
+   |   |
    |   +-- PipProcessorEngine (shared Python/Pip behavior)
+   |   |   |
    |   |   +-- UbuntuPython37ProcessorEngine [ubuntu_python37_snap]
+   |   |   |
    |   |   +-- DockerBuildOnceEngine (shared build-once behavior)
+   |   |       |
    |   |       +-- OneShotProcessorEngine (abstract; transient app containers)
+   |   |       |   |
    |   |       |   +-- PipOneShotProcessorEngine [pip_oneshot]
-  |   |       |   |   +-- Python312Ubuntu24ProcessorEngine [python312]
-  |   |       |   +-- CondaProcessorEngine [conda]
+   |   |       |   |   |
+   |   |       |   |   +-- Python312Ubuntu24ProcessorEngine [python312]
+   |   |       |   |   
+   |   |       |   +-- CondaProcessorEngine [conda]
+   |   |       |
    |   |       +-- CSharpProcessorEngine [csharp]
+   |   |       |
    |   |       +-- IDL2ProcessorEngine [ubuntu_idl372]
+   |   |       |   
    |   |       +-- Java17Ubuntu22ProcessorEngine [java_17_Ubuntu_22]
+   |   |       |   
    |   |       +-- OctaveProcessorEngine [octave]
+   |   |       |   
    |   |       +-- PersonalizedDockerProcessor [personalized_docker]
+   |   |       |   
    |   |       +-- PythonPipProcessorEngine2 [python_pip_2]
+   |   |       |   
    |   |       +-- Ubuntu20Pip2ProcessorEngine [python_pip_2_ubuntu_20]
+   |   |   
    |   +-- EoepcaProcessorEngine [eoepca]
+   |   |
    |   +-- JupyterNotebookProcessorEngine [jupyter-notebook]
+   |   |
    |   +-- OgcAppPackageProcessorEngine [ogc_app_package]
+   |
    +-- LocalProcessorEngine [local_python312]
 
 Registered processor types
