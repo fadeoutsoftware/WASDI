@@ -48,8 +48,11 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.products.BandViewModel;
+import wasdi.shared.viewmodels.products.ChartRequestViewModel;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
+import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
 /**
@@ -1277,7 +1280,7 @@ public class ProductResource {
                 return PrimitiveResult.getInvalid();
             }
 
-            String sProductName = oChartRequest.getName();
+            String sProductName = oChartRequest.getFileName();
             String sWorkspaceId = oChartRequest.getWorkspace();
 
             WasdiLog.debugLog("ProductResource.getChart: Product: " + sProductName + ", WS: " + sWorkspaceId);
@@ -1294,39 +1297,23 @@ public class ProductResource {
                 return PrimitiveResult.getInvalid();
             }
 
-            // Hardcoded chart data
-            String sChartJson = "{\n" +
-                "      \"chart-type\": \"line\",\n" +
-                "      \"chart-name\": \"Original Flood Area / Image\",\n" +
-                "      \"x-axis-name\": \"Date\",\n" +
-                "      \"y-axis-name\": \"Area of Flooded Pixels (km2)\",\n" +
-                "      \"chart-data\": [\n" +
-                "        {\n" +
-                "          \"name\": \"\",\n" +
-                "          \"series\": [\n" +
-                "            { \"value\": 0.0, \"name\": \"2026-10-02\" },\n" +
-                "            { \"value\": 0.0, \"name\": \"2026-10-03\" },\n" +
-                "            { \"value\": 0.0, \"name\": \"2026-10-07\" },\n" +
-                "            { \"value\": 0.0, \"name\": \"2026-10-08\" },\n" +
-                "            { \"value\": 1.8957, \"name\": \"2026-10-09\" },\n" +
-                "            { \"value\": 0.0, \"name\": \"2026-10-13\" },\n" +
-                "            { \"value\": 0.0, \"name\": \"2026-10-14\" },\n" +
-                "            { \"value\": 1.0245, \"name\": \"2026-10-15\" },\n" +
-                "            { \"value\": 0.0, \"name\": \"2026-10-16\" },\n" +
-                "            { \"value\": 0.0, \"name\": \"2026-10-19\" },\n" +
-                "            { \"value\": 0.0, \"name\": \"2026-10-20\" },\n" +
-                "            { \"value\": 0.9638, \"name\": \"2026-10-21\" },\n" +
-                "            { \"value\": 9.5434, \"name\": \"2026-10-25\" },\n" +
-                "            { \"value\": 5.7495, \"name\": \"2026-10-27\" },\n" +
-                "            { \"value\": 0.0, \"name\": \"2026-11-01\" },\n" +
-                "            { \"value\": 6.5734, \"name\": \"2026-11-06\" },\n" +
-                "            { \"value\": 0.0, \"name\": \"2026-11-07\" },\n" +
-                "            { \"value\": 4.113, \"name\": \"2026-11-08\" },\n" +
-                "            { \"value\": 0.0, \"name\": \"2026-11-09\" }\n" +
-                "          ]\n" +
-                "        }\n" +
-                "      ]\n" +
-                "    }";
+            String sDataLabel = oChartRequest.getDataLabel();
+            if (sProductName == null || sProductName.isBlank() || sDataLabel == null || sDataLabel.isBlank()) {
+                WasdiLog.warnLog("ProductResource.getChart: missing product file name or data column");
+                return PrimitiveResult.getInvalid();
+            }
+
+            String sWorkspacePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+            File oWorkspace = new File(sWorkspacePath).getCanonicalFile();
+            File oProduct = new File(oWorkspace, sProductName).getCanonicalFile();
+            if (!oProduct.toPath().startsWith(oWorkspace.toPath()) || !oProduct.isFile()) {
+                WasdiLog.warnLog("ProductResource.getChart: product not found in workspace: " + sProductName);
+                return PrimitiveResult.getInvalid();
+            }
+
+            String sXAxisLabel = "timestamp";       // we assume that the column representing the timestamps has a fixed name
+            Map<String, List<String>> oColumns = WasdiFileUtils.extractColumnsFromCSV(oProduct.getPath(), Arrays.asList(sXAxisLabel, sDataLabel));
+            String sChartJson = buildTimeSeriesChart(oColumns, sXAxisLabel, sDataLabel);
 
             PrimitiveResult oPrimitiveResult = new PrimitiveResult();
             oPrimitiveResult.setStringValue(sChartJson);
@@ -1336,6 +1323,40 @@ public class ProductResource {
             WasdiLog.errorLog("ProductResource.getChart: error " + oE);
         }
         return PrimitiveResult.getInvalid();
+    }
+
+    static String buildTimeSeriesChart(Map<String, List<String>> oColumns, String sXAxisLabel, String sDataLabel) {
+        List<String> asTimestamps = oColumns.get(sXAxisLabel);
+        List<String> asValues = oColumns.get(sDataLabel);
+        if (asTimestamps == null || asValues == null || asTimestamps.isEmpty() || asTimestamps.size() != asValues.size()) {
+            throw new IllegalArgumentException("CSV chart columns must contain matching observations");
+        }
+
+        ObjectMapper oMapper = new ObjectMapper();
+        ObjectNode oChart = oMapper.createObjectNode();
+        oChart.put("chart-type", "line");
+        oChart.put("chart-name", "Timeseries for " + sDataLabel);
+        ArrayNode aoSeries = oChart.putArray("chart-data").addObject()
+                .put("name", "").putArray("series");
+
+        for (int iIndex = 0; iIndex < asTimestamps.size(); iIndex++) {
+            String sTimestamp = asTimestamps.get(iIndex);
+            String sValue = asValues.get(iIndex);
+            if (sTimestamp == null || sTimestamp.isBlank() || sValue == null || sValue.isBlank()) {
+                throw new IllegalArgumentException("Missing timestamp or value at observation " + (iIndex + 1));
+            }
+            double dValue;
+            try {
+                dValue = Double.parseDouble(sValue);
+            } catch (NumberFormatException oException) {
+                throw new IllegalArgumentException("Invalid numeric value at observation " + (iIndex + 1), oException);
+            }
+            if (!Double.isFinite(dValue)) {
+                throw new IllegalArgumentException("Non-finite value at observation " + (iIndex + 1));
+            }
+            aoSeries.addObject().put("name", sTimestamp).put("value", dValue);
+        }
+        return oChart.toString();
     }
 
     

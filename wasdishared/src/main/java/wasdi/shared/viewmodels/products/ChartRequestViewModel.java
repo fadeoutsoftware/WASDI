@@ -2,28 +2,26 @@ package wasdi.shared.viewmodels.products;
 
 /**
  * Request DTO for chart data endpoint
- * 
- * @author Copilot
  */
 public class ChartRequestViewModel {
 	
 	private String workspace;
-	private String name;
+	private String fileName;
 	private String chartType;
 	private String xAxis;
 	private String yAxis;
-	private String chartData;
+	private String dataLabel;
 
 	public ChartRequestViewModel() {
 	}
 
-	public ChartRequestViewModel(String sWorkspace, String sName, String sChartType, String sXAxis, String sYAxis, String sChartData) {
+	public ChartRequestViewModel(String sWorkspace, String sFileName, String sChartType, String sXAxis, String sYAxis, String sDataLabel) {
 		this.workspace = sWorkspace;
-		this.name = sName;
+		this.fileName = sFileName;
 		this.chartType = sChartType;
 		this.xAxis = sXAxis;
 		this.yAxis = sYAxis;
-		this.chartData = sChartData;
+		this.dataLabel = sDataLabel;
 	}
 
 	public String getWorkspace() {
@@ -34,12 +32,12 @@ public class ChartRequestViewModel {
 		this.workspace = sWorkspace;
 	}
 
-	public String getName() {
-		return name;
+	public String getFileName() {
+		return fileName;
 	}
 
-	public void setName(String sName) {
-		this.name = sName;
+	public void setFileName(String sName) {
+		this.fileName = sName;
 	}
 
 	public String getChartType() {
@@ -66,11 +64,11 @@ public class ChartRequestViewModel {
 		this.yAxis = sYAxis;
 	}
 
-	public String getChartData() {
-		return chartData;
+	public String getDataLabel() {
+		return dataLabel;
 	}
 
-	public void setChartData(String sChartData) {
-		this.chartData = sChartData;
+	public void setDataLabel(String sChartData) {
+		this.dataLabel = sChartData;
 	}
 }

@@ -6,6 +6,7 @@
  */
 package wasdi.shared.utils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -20,8 +21,11 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -934,6 +938,66 @@ public class WasdiFileUtils {
     	
         return lWorkspaceSize;
     	
+    }
+
+	/**
+	 * Given a CSV file and column names, extract the columns into lists of values.
+	 * @param sFilePath path to CSV file
+	 * @param asColumnNames list of columns to extract
+	 * @return map of column names to lists of values
+	 */
+	public static Map<String, List<String>> extractColumnsFromCSV(String sFilePath, List<String> asColumnNames) throws IOException {
+        Map<String, List<String>> oResult = new LinkedHashMap<>();
+		
+        for (String sCol : asColumnNames) {
+            oResult.put(sCol, new ArrayList<>());
+        }
+
+        String sDelimiter = ",";
+
+        try (BufferedReader oReader = Files.newBufferedReader(Path.of(sFilePath))) {
+            String sHeaderLine = oReader.readLine();
+            if (sHeaderLine == null) {
+                return oResult;
+            }
+
+            // Map each normalized header name to its column index
+            String[] asHeaders = sHeaderLine.replace("\uFEFF", "").split(sDelimiter, -1);
+            Map<String, Integer> mHeaderIndex = new HashMap<>();
+            for (int i = 0; i < asHeaders.length; i++) {
+                String sCleanHeader = asHeaders[i].trim().replaceAll("^\"|\"$", "").toLowerCase();
+                mHeaderIndex.put(sCleanHeader, i);
+            }
+
+            // Validate and resolve indices for all requested columns upfront
+            Map<String, Integer> mTargetIndices = new LinkedHashMap<>();
+            for (String sCol : asColumnNames) {
+                Integer iIndex = mHeaderIndex.get(sCol.trim().toLowerCase());
+                if (iIndex == null) {
+                    throw new IllegalArgumentException("Column '" + sCol + "' not found in CSV header.");
+                }
+                mTargetIndices.put(sCol, iIndex);
+            }
+
+            // Read the file once and populate all lists simultaneously
+            String sLine;
+            while ((sLine = oReader.readLine()) != null) {
+                if (sLine.isBlank()) {
+                    continue;
+                }
+
+                String[] asColumns = sLine.split(sDelimiter, -1);
+                for (Map.Entry<String, Integer> oEntry : mTargetIndices.entrySet()) {
+                    int iIdx = oEntry.getValue();
+                    String sValue = (iIdx < asColumns.length)
+                            ? asColumns[iIdx].trim().replaceAll("^\"|\"$", "")
+                            : "";
+                    oResult.get(oEntry.getKey()).add(sValue);
+                }
+            }
+        }
+
+        return oResult;
     }
 	
 }
