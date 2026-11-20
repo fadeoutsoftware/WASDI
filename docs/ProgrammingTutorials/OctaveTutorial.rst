@@ -120,7 +120,7 @@ The command windows will show some details about WASDI initialization:
 
 .. image:: ../_static/octave_tutorial_images/octave_tutorial_5.png
 
- WASDI MATLAB LIB INITIALIZED it's a confirmation that our local environment is connected to WASDI. Nice ! 
+WASDI MATLAB LIB INITIALIZED it's a confirmation that our local environment is connected to WASDI. Nice ! 
 
 Now, to showcase the local execution of functions from WASDI octave library, a search and download will be performed.
 Open and edit **octavetutorialexample.m** adding a call to the method to :ref:`mat_SearchEOImages`.
