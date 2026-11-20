@@ -106,6 +106,7 @@ RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh \
 # including NumPy, must remain Conda-resolved to preserve binary compatibility.
 RUN ${CONDA_PREFIX}/bin/python -m pip install --no-cache-dir --no-compile {{ sPythonPipLibraryWasdiRepository }} \
         wasdi && \
+    ${CONDA_PREFIX}/bin/python -m pip install --no-cache-dir --no-compile runpod && \
     find {{ sWasdiSystemUserHome }} -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
