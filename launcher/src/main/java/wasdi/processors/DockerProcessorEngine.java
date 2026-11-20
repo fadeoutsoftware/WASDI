@@ -143,8 +143,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 							m_oContainerRuntimeDriver = new LocalDockerDriver(this);	
 						}
                         else if (oProcessor.getHwRequirements().isGpuInference()
-                                && ProcessorTypes.PIP_ONESHOT.equals(oProcessor.getType())
-                                && WasdiConfig.Current.isMainNode() && WasdiConfig.Current.runtimeDrivers != null) {
+                                && ProcessorTypes.supportsGpuInference(oProcessor.getType()) ) {
 							
                             oRuntimeConfig = WasdiConfig.Current.runtimeDrivers.getDriverConfig(RunPodRuntimeDriver.DRIVER_NAME);
 							
