@@ -58,7 +58,7 @@ pipeline {
             --inventory inventories/${env.sAnsibleInventory}.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerAll=true sWasdiKeycloakThemeVersion=${env.sWasdiKeycloakThemeVersion}'
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerAll=false sWasdiKeycloakThemeVersion=${env.sWasdiKeycloakThemeVersion}'
         """,
         label: "Deploy all containers run elements"
       }
