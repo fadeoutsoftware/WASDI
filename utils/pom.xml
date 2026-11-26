@@ -825,6 +825,13 @@
             <artifactId>juniversalchardet</artifactId>
             <version>${sVersionJUniversalChardet}</version>
         </dependency>
+        <!-- Zarr-Java Library -->
+        <dependency>
+            <groupId>dev.zarr</groupId>
+            <artifactId>zarr-java</artifactId>
+            <version>0.3.0</version> <!-- Check for the latest version -->
+        </dependency>
+		
         <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
         <dependency>
             <groupId>fadeout.software.wasdi</groupId>
