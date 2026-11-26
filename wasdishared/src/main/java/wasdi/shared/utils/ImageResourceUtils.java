@@ -123,7 +123,8 @@ public class ImageResourceUtils {
 	
 	
 	/**
-	 * Get the path of a subofolder of images in WASDI
+	 * Get the path of a subfolder of images in WASDI, or the ZIP archive
+	 * containing root-level images for an archived collection.
 	 * @return
 	 */
 	public static String getImagesSubPath(String sCollection, String sFolder) {
@@ -139,6 +140,10 @@ public class ImageResourceUtils {
 			sPath += getParentFolderName(sFolder) + "/";
 			bMakeDir = false;
 		}
+		
+		if (sCollection.equals(ImagesCollections.LAKE3D.getFolder())) {
+			return sPath + "lake3d.zip";
+		}		
 		
 		if (Utils.isNullOrEmpty(sFolder)==false) {
 			sPath += sFolder;

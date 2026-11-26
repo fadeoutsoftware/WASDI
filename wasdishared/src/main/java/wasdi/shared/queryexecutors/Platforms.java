@@ -59,6 +59,10 @@ public class Platforms {
 
 	public static String METEO_GATE = "MeteoGate";
 	
+	public static String LAKE_3D = "LAKE3D";
+	
+	public static String LAKE_3DWASDI = "LAKE3DWASDI";
+	
 	/**
 	 * Link to the globathy collection that can be used from a mini wasdi or external wasdi to use the main one as 
 	 * data provider

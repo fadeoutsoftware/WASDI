@@ -1389,6 +1389,13 @@
 			"filters": []
 		},
 		{
+			"name": "LAKE3D",
+			"indexname": "platformname",
+			"indexvalue": "LAKE3D",
+			"ispublic": true,
+			"filters": []
+		},
+		{
 			"name": "Return NatFIM",
 			"indexname": "platformname",
 			"indexvalue": "ReturnNatFIM",
@@ -1500,6 +1507,13 @@
 			"ispublic": true,
 			"filters": []
 		},
+		{
+			"name": "LAKE3DWASDI",
+			"indexname": "platformname",
+			"indexvalue": "LAKE3DWASDI",
+			"ispublic": true,
+			"filters": []
+		},		
 		{
 			"name": "TERESA SUP",
 			"indexname": "platformname",

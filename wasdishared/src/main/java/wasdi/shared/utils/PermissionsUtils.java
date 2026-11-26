@@ -1022,6 +1022,10 @@ public class PermissionsUtils {
 				// the dataset is freely accessible. No additional check is needed
 				return true;
 			}
+			else if (sCollection.equals(ImagesCollections.LAKE3D.getFolder())) {
+				// the dataset is freely accessible. No additional check is needed
+				return true;
+			} 
 			else if (sCollection.equals(ImagesCollections.PROCESSORS.getFolder())) {
 				ProcessorRepository oProcessorRepository = new ProcessorRepository();
 				Processor oProcessor = oProcessorRepository.getProcessorByName(sFolder);
