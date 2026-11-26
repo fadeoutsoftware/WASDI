@@ -337,7 +337,7 @@ public class RunPodRuntimeDriver extends ContainerRuntimeDriver {
 				return null;
 			}
 			
-			processWorkspaceLog("Ok the worker is availalbe");
+			processWorkspaceLog("RunPod: the worker is available, waiting for the instance to be up");
 			
 			return sReference;
 		} catch (IOException oEx) {

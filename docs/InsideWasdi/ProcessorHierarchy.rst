@@ -163,6 +163,77 @@ and are separate from processor-engine inheritance:
 * ``LocalDockerDriver`` implements local Docker image and execution operations.
 * ``RunPodRuntimeDriver`` delegates image build/push to local Docker and uses a
   Runpod Serverless endpoint for configured Pip one-shot GPU inference runs.
+* ``MeluxinaRuntimeDriver`` is an inactive draft for one Slurm job per run.
+  It builds and pushes locally, submits a configured batch script through
+  Slurm REST, stores the job ID, polls its status, and requests cancellation.
+  Existing saved MeluXina jobs can be routed back to the driver, but new jobs
+  are not automatically selected for it.
+
+MeluXina draft configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Runtime configuration provides generic ``runtimeUrl``, ``user``, ``password``,
+``workingDirectory`` and ``startScript`` fields, plus an ``options`` map of
+provider-specific string values. Existing Runpod configuration fields remain
+unchanged.
+
+For a driver named ``meluxina``, set ``workingDirectory`` and ``startScript``,
+and provide ``account`` and ``qos`` in ``options``. The account identifies the
+project allocation, not the login username. ``user`` and ``password`` are not
+used by the current authentication stub. Optional ``partition`` selects a
+resource pool; optional ``tresPerNode`` requests trackable resources per node,
+such as GPUs. QoS controls scheduling policy and limits.
+
+If omitted, the driver defaults ``runtimeUrl`` to
+``https://slurm-api.lxp.lu`` and ``options.apiVersion`` to ``v0.0.43``. From the
+cloud partition, configure the site-provided cloud URL instead. The processor
+timeout is sent as the Slurm time limit, rounded up to minutes.
+
+Illustrative configuration (project, policy, resources and paths must be
+confirmed with the site; replace the example script with the real launcher):
+
+.. code-block:: json
+
+   {
+     "name": "meluxina",
+     "runtimeUrl": "https://slurm-api.lxp.lu",
+     "workingDirectory": "/project/home/pXXXXXX",
+     "startScript": "#!/bin/bash -l\nexec /project/home/pXXXXXX/wasdi-launch.sh\n",
+     "options": {
+       "apiVersion": "v0.0.43",
+       "account": "pXXXXXX",
+       "qos": "short",
+       "partition": "gpu",
+       "tresPerNode": "gres/gpu=1"
+     }
+   }
+
+The earlier draft's ``slurmUrl``, ``slurmWorkingDirectory`` and
+``slurmBatchScript`` fields are replaced by ``runtimeUrl``, ``workingDirectory``
+and ``startScript``. Move ``slurmApiVersion``, ``slurmAccount``, ``slurmQos``,
+``slurmPartition`` and ``slurmTresPerNode`` to their corresponding ``options``
+keys shown above. The old fields are no longer supported.
+
+The batch script receives ``WASDI_IMAGE`` (a Docker registry image reference),
+``WASDI_PROCESS_WORKSPACE_ID``, ``WASDI_USER``, ``WASDI_SESSION_ID``,
+``WASDI_WORKSPACE_ID``, ``WASDI_WEBSERVER_URL``,
+``WASDI_ONESHOT_ENCODED_PARAMS`` and ``WASDI_ONESHOT_ON_SERVER=false`` in the
+Slurm job environment. It must load Apptainer, arrange registry access and
+storage bindings, set a writable ``WASDI_BASE_PATH``, pass the WASDI variables
+into the container, and run the processor executor. GPU jobs also need an
+appropriate allocation and Apptainer's ``--nv`` option. The current Python
+one-shot templates require the executor's ``--runpod`` flag for a nonzero exit
+on initialization or application failure; its use outside Runpod is provisional.
+
+The token acquisition method is intentionally a stub, and no new MeluXina
+jobs can run until authentication and driver selection are implemented. The
+batch script, image access, site resource settings, networking and job-state
+handling have not been verified on MeluXina. Slurm may retain the submitted
+environment, including the WASDI session ID; confirm site security and retention
+policies before enabling this integration. A failed submit can be ambiguous, so
+check Slurm before retrying. Cancellation means the request was accepted, not
+that the job has already stopped. WASDI may report a terminal application status
+before Slurm finishes releasing its resources.
 
 The saved ``ProcessWorkspace.runtimeDriver`` and ``runtimeReference`` identify
 the driver and app execution for a specific run. ``ProcessWorkspace.pid`` and

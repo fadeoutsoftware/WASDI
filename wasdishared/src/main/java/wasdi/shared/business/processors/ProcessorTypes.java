@@ -84,4 +84,17 @@ public class ProcessorTypes {
 				|| PYTHON312_UBUNTU24.equals(sProcessorType);		
 	}
 	
+	/**
+	 * Detect if a processor Type supports Gpu Inference Execution on third party cloud
+	 * 
+	 * @param sProcessorType Processor Type
+	 * @return True if can run on ext clouds
+	 */
+	public static boolean supportsGpuTraining(String sProcessorType) {
+		return CONDA.equals(sProcessorType)
+				|| PIP_ONESHOT.equals(sProcessorType)
+				|| PERSONALIZED_DOCKER.equals(sProcessorType)
+				|| PYTHON312_UBUNTU24.equals(sProcessorType);		
+	}	
+	
 }

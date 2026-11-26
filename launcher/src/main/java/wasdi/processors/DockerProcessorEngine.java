@@ -26,6 +26,7 @@ import wasdi.LauncherMain;
 import wasdi.asynch.PushDockerImagesThread;
 import wasdi.processors.drivers.ContainerRuntimeDriver;
 import wasdi.processors.drivers.RunPodRuntimeDriver;
+import wasdi.processors.drivers.MeluxinaRuntimeDriver;
 import wasdi.processors.drivers.LocalDockerDriver;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
@@ -151,6 +152,15 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 								m_oContainerRuntimeDriver = new RunPodRuntimeDriver(this);
 							}
 						}
+                        else if (oProcessor.getHwRequirements().isGpuTraining()
+                                && ProcessorTypes.supportsGpuTraining(oProcessor.getType()) ) {
+							
+                            oRuntimeConfig = WasdiConfig.Current.runtimeDrivers.getDriverConfig(MeluxinaRuntimeDriver.DRIVER_NAME);
+							
+							if (oRuntimeConfig != null) {
+								m_oContainerRuntimeDriver = new MeluxinaRuntimeDriver(this);
+							}
+						}						
 					}
 				}
 			}
@@ -169,6 +179,14 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             RuntimeDriverConfig oConfig = WasdiConfig.Current.runtimeDrivers.getDriverConfig(sDriverName);
             if (oConfig != null) {
                 ContainerRuntimeDriver oDriver = new RunPodRuntimeDriver(this);
+                oDriver.setDriverConfig(oConfig);
+                return oDriver;
+            }
+        }
+        if (MeluxinaRuntimeDriver.DRIVER_NAME.equals(sDriverName) && WasdiConfig.Current.runtimeDrivers != null) {
+            RuntimeDriverConfig oConfig = WasdiConfig.Current.runtimeDrivers.getDriverConfig(sDriverName);
+            if (oConfig != null) {
+                ContainerRuntimeDriver oDriver = new MeluxinaRuntimeDriver(this);
                 oDriver.setDriverConfig(oConfig);
                 return oDriver;
             }

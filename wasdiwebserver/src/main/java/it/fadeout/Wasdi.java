@@ -388,8 +388,8 @@ public class Wasdi extends ResourceConfig {
 				return oUser;
 			}
 			
-			boolean bUseLegacySessions = WasdiConfig.Current.keycloack != null
-					&& WasdiConfig.Current.keycloack.useLegacySessions;
+			boolean bUseLegacySessions = WasdiConfig.Current.keycloack != null && WasdiConfig.Current.keycloack.useLegacySessions;
+			
 			if (!bUseLegacySessions) {
 				try  {
 					// Try to Introspect the token
