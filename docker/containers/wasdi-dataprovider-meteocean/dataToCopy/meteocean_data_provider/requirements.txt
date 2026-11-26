@@ -18,7 +18,7 @@ h5netcdf==1.4.0
 h5py==3.12.1
 idna==3.10
 itsdangerous==2.2.0
-Jinja2==3.1.4
+Jinja2==3.1.6
 jmespath==1.0.1
 MarkupSafe==3.0.2
 multidict==6.1.0
