@@ -2,6 +2,8 @@ package wasdi.dataproviders;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -79,7 +81,11 @@ public class MeteoGateProviderAdapter extends EDRProviderAdapter {
                                         .getJSONArray("values");
             int iLength = aoValuesArray.length();
 
-            String sOutputFilePath = sSaveDirOnServer + File.separator + sFileName;
+            Files.createDirectories(Path.of(sSaveDirOnServer));
+
+            String sOutputFilePath = sSaveDirOnServer;
+            if (!sSaveDirOnServer.endsWith(File.separator)) sOutputFilePath += File.separator;
+            sOutputFilePath += sFileName;
 
             if (sOutputFormat.toLowerCase().equals("csv")) {
                 try (PrintWriter oWriter = new PrintWriter(new File(sOutputFilePath))) {
@@ -95,7 +101,7 @@ public class MeteoGateProviderAdapter extends EDRProviderAdapter {
                     WasdiLog.debugLog("MeteoGateProviderAdapter.executeDonwloadFile. File generated: " + sOutputFilePath);
                 }
                 return sOutputFilePath;
-        }
+            }
             else if (sOutputFormat.toLowerCase().equals("zarr")) {
                 // Initialize the Zarr filesystem store
                 dev.zarr.zarrjava.store.FilesystemStore oStore = new dev.zarr.zarrjava.store.FilesystemStore(sOutputFilePath);
