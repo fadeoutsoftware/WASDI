@@ -207,7 +207,7 @@ cp /etc/wasdi/wasdiConfig.json /data/wasdi/wasdiConfig.json
 
 ## 5. Environment variables
 
-For variables with aliases below, names are checked in the listed order and the first defined value is used. A defined empty string still takes precedence over later aliases. The `WASDI_` name therefore takes priority over its shorter aliases.
+For variables with aliases below, names are checked in the listed order and the first non-empty value is used. The `WASDI_` name therefore takes priority when it is non-empty.
 
 - `WASDI_RUN_APPLICATION` (aliases: `RUN_APPLICATION`, `APP`)
   - Name of the application to run.
@@ -232,6 +232,9 @@ For variables with aliases below, names are checked in the listed order and the 
 - `WASDI_WORKSPACE_ID` (alias: `WORKSPACE_ID`)
   - Optional alternative to `WASDI_WORKSPACE`.
   - Use this to target a workspace by id when the selected workspace name is unset or empty.
+
+- `WASDI_PRINT_WORKSPACES` (aliases: `PRINT_WORKSPACES`, `PRINT_WS`)
+  - Set to any non-empty value to log the available workspace names and IDs at startup.
 
 - `WASDI_CONFIG_FILE` (alias: `CONFIG_FILE`)
   - Path to the config file inside the container.

@@ -63,4 +63,16 @@ public class KeycloackConfig {
 	 * Number of hours before a session expires. Used in the local db and not in keycloak at the moment
 	 */
 	public int sessionExpireHours = 24;
+
+	/**
+	 * Return local sessions at login and validate them without Keycloak introspection.
+	 * Credential authentication is unchanged.
+	 */
+	public boolean useLegacySessions = false;
+	
+	/**
+	 * Optional internal address of the keycloak service to use instead of the public one to
+	 * get the certificates to check JWT tokens
+	 */
+	public String jwksUrl = null;
 }

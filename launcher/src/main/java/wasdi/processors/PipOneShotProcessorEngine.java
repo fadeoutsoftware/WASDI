@@ -217,7 +217,7 @@ public class PipOneShotProcessorEngine extends OneShotProcessorEngine {
 			File oPipFile = new File(sProcessorFolder+"pip.txt");
 
 			if (!oPipFile.exists()) {
-				WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: pip file not present, done");
+				WasdiLog.infoLog("PipOnsShotProcessorEngine.onAfterUnzipProcessor: pip file not present, done");
 				return;
 			}
 			else {

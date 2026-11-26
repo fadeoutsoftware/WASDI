@@ -1162,6 +1162,10 @@ public class DockerUtils {
      * @return True if pushed false if error 
      */
     public boolean push(String sImage, String sToken) {
+		return push(sImage, sToken, false);
+	}
+
+	public boolean push(String sImage, String sToken, boolean bVerifyTagPush) {
     	
     	try {
     		
@@ -1169,7 +1173,16 @@ public class DockerUtils {
     		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
     		if (!sUrl.endsWith("/")) sUrl += "/";
     		
-    		if (sImage.contains(":")) {
+			String sTagQuery = "";
+			if (bVerifyTagPush) {
+				int iTagSeparator = sImage.lastIndexOf(':');
+				if (iTagSeparator <= sImage.lastIndexOf('/') || iTagSeparator == sImage.length() - 1) {
+					return false;
+				}
+				sTagQuery = "?tag=" + StringUtils.encodeUrl(sImage.substring(iTagSeparator + 1));
+				sImage = sImage.substring(0, iTagSeparator);
+			}
+			else if (sImage.contains(":")) {
     			WasdiLog.debugLog("DockerUtils.push image contains a tag: remove it");
     			sImage = sImage.split(":")[0];
     		}    		
@@ -1178,7 +1191,7 @@ public class DockerUtils {
     		String sEncodedServerImage = StringUtils.encodeUrl(sImage);
     		
     		// Add the query parameter
-    		sUrl += "images/"+sEncodedServerImage + "/push";
+			sUrl += "images/"+sEncodedServerImage + "/push" + sTagQuery;
     		
     		// We need a couple of headers
     		HashMap<String, String> asHeaders = new HashMap<>();
@@ -1195,7 +1208,9 @@ public class DockerUtils {
         		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "", asHeaders);
         		iResponseCode = oResponse.getResponseCode();
         		
-        		if (iResponseCode==200) break;
+				if (iResponseCode==200) {
+					return !bVerifyTagPush || isSuccessfulPushResponse(oResponse.getResponseBody());
+				}
         		
         		iAttemp= iAttemp+1;
         		
@@ -1210,19 +1225,28 @@ public class DockerUtils {
 				}        		
     		}
     		
-    		if (iResponseCode == 200) {
-    			return true;
-    		}
-    		else {
-    			WasdiLog.errorLog("DockerUtils.push: Error pushing image " + sImage + " got answer http " + iResponseCode);
-    			return false;
-    		}
+			WasdiLog.errorLog("DockerUtils.push: Error pushing image " + sImage + " got answer http " + iResponseCode);
+			return false;
     	} 
     	catch (Exception oEx) {
     		WasdiLog.errorLog("DockerUtils.push: " + oEx.toString());
             return false;
         }
     }
+
+	static boolean isSuccessfulPushResponse(String sBody) throws java.io.IOException {
+		if (Utils.isNullOrEmpty(sBody)) return false;
+		boolean bConfirmed = false;
+		try (var oEvents = JsonUtils.s_oMapper.readerFor(JsonNode.class).<JsonNode>readValues(sBody)) {
+			while (oEvents.hasNextValue()) {
+				JsonNode oEvent = oEvents.nextValue();
+				if (oEvent.hasNonNull("error") || oEvent.hasNonNull("errorDetail")) return false;
+				if (oEvent.path("aux").path("Digest").isTextual()
+						|| oEvent.path("status").asText().contains("digest: sha256:")) bConfirmed = true;
+			}
+		}
+		return bConfirmed;
+	}
     
     /**
      * Pull a docker image from a registry. Must be logged 

@@ -1,8 +1,11 @@
 package wasdi.shared.parameters;
 
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorTypes;
+import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Parameter for the Processor related Operations:
@@ -42,6 +45,11 @@ public class ProcessorParameter extends BaseParameter {
 	 * The flag is mainly used to filter the list of jobs in the OGC Processes Endpoint.
 	 */
 	private boolean isOGCProcess = false;
+	
+	/**
+	 * Lazy loaded processor reference
+	 */
+	private Processor m_oProcessor = null;
 	
 	/**
 	 * Container name of the processor.
@@ -105,11 +113,27 @@ public class ProcessorParameter extends BaseParameter {
 		
 		return LauncherOperations.RUNPROCESSOR.name();
 	}
+	
 	public String getContainerName() {
 		return containerName;
 	}
+	
 	public void setContainerName(String containerName) {
 		this.containerName = containerName;
+	}
+	
+	public Processor getProcessor() {
+		if (m_oProcessor == null) {
+			try {
+				ProcessorRepository oProcessorRepository = new ProcessorRepository();
+				m_oProcessor = oProcessorRepository.getProcessor(processorID);
+			}
+			catch (Exception oEx) {
+				WasdiLog.errorLog("ProcessorParameter.getProcessor(): error reading the processor " + oEx.toString());
+			}
+		}
+		
+		return m_oProcessor;
 	}
 	
 }

@@ -121,6 +121,7 @@ public class AuthResource {
 	/**
 	 * Login API
 	 * The system will try to login with Keycloak first. Then with the old WASDI login.
+	 * When useLegacySessions is enabled, only the local session is returned, without Keycloak tokens.
 	 * 
 	 * @param oLoginInfo LoginInfo object. View model with info to login
 	 * @return UserViewModel View Model of the user logged. Can be invalid if noit logged
@@ -360,7 +361,9 @@ public class AuthResource {
 					return UserViewModel.getInvalid();
 				}
 				oUserVM.setSessionId(oSession.getSessionId());
-				if (oKeycloakLoginResponse != null) {
+				boolean bUseLegacySessions = WasdiConfig.Current.keycloack != null
+						&& WasdiConfig.Current.keycloack.useLegacySessions;
+				if (oKeycloakLoginResponse != null && !bUseLegacySessions) {
 					oUserVM.setAccessToken(oKeycloakLoginResponse.optString("access_token", ""));
 					oUserVM.setRefreshToken(oKeycloakLoginResponse.optString("refresh_token", ""));
 					oUserVM.setExpiresIn(oKeycloakLoginResponse.optInt("expires_in", 0));

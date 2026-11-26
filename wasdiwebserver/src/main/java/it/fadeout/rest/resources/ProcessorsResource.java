@@ -65,6 +65,7 @@ import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.processors.HwRequirements;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorLog;
 import wasdi.shared.business.processors.ProcessorSourceTypes;
@@ -157,7 +158,8 @@ public class ProcessorsResource  {
 											@QueryParam("version") String sVersion,	@QueryParam("description") String sDescription,
 											@QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample,
 													@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout, @QueryParam("force") Boolean bForce,
-													@QueryParam("gitRepositoryUrl") String sGitRepositoryUrl) throws Exception {
+													@QueryParam("gitRepositoryUrl") String sGitRepositoryUrl,
+													@QueryParam("gpuInference") Boolean bGpuInference, @QueryParam("gpuTraining") Boolean bGpuTraining) throws Exception {
 		
 		if (bForce == null) bForce = Boolean.FALSE;
 		
@@ -310,6 +312,8 @@ public class ProcessorsResource  {
 			oProcessor.setPort(-1);
 			oProcessor.setType(sType);
 			oProcessor.setSourceType(bHasGitSource ? ProcessorSourceTypes.GIT : ProcessorSourceTypes.UPLOAD);
+			oProcessor.getHwRequirements().setGpuInference(Boolean.TRUE.equals(bGpuInference));
+			oProcessor.getHwRequirements().setGpuTraining(Boolean.TRUE.equals(bGpuTraining));
 			if (bHasGitSource) {
 				oProcessor.setGitRepositoryUrl(sGitRepositoryUrl);
 			}
@@ -591,6 +595,16 @@ public class ProcessorsResource  {
 			oDeployedProcessorViewModel.setType(oProcessor.getType());
 			oDeployedProcessorViewModel.setLastUpdate(oProcessor.getUpdateDate());
 			oDeployedProcessorViewModel.setSourceType(oProcessor.getSourceType());
+
+			HwRequirements oHwRequirements = oProcessor.getHwRequirements();
+			if (oHwRequirements == null) {
+				oHwRequirements = new HwRequirements();
+			}
+			oDeployedProcessorViewModel.setGpuInference(oHwRequirements.isGpuInference());
+			oDeployedProcessorViewModel.setGpuTraining(oHwRequirements.isGpuTraining());
+			oDeployedProcessorViewModel.setGpuPreference(oHwRequirements.getGpuPreferenence());
+			oDeployedProcessorViewModel.setDisk(oHwRequirements.getDisk());
+			oDeployedProcessorViewModel.setRam(oHwRequirements.getRam());
 			
 			int iTimeoutMinutes = 0;
 			
@@ -2249,6 +2263,21 @@ public class ProcessorsResource  {
 			oProcessorToUpdate.setDescription(oUpdatedProcessorVM.getProcessorDescription());
 			oProcessorToUpdate.setIsPublic(oUpdatedProcessorVM.getIsPublic());
 			oProcessorToUpdate.setParameterSample(oUpdatedProcessorVM.getParamsSample());
+			Boolean bGpuInference = oUpdatedProcessorVM.getGpuInference();
+			Boolean bGpuTraining = oUpdatedProcessorVM.getGpuTraining();
+			if (bGpuInference != null || bGpuTraining != null) {
+				HwRequirements oHwRequirements = oProcessorToUpdate.getHwRequirements();
+				if (oHwRequirements == null) {
+					oHwRequirements = new HwRequirements();
+					oProcessorToUpdate.setHwRequirements(oHwRequirements);
+				}
+				if (bGpuInference != null) {
+					oHwRequirements.setGpuInference(bGpuInference);
+				}
+				if (bGpuTraining != null) {
+					oHwRequirements.setGpuTraining(bGpuTraining);
+				}
+			}
 			
 			if (oUpdatedProcessorVM.getMinuteTimeout() <= 0) {
 				oProcessorToUpdate.setTimeoutMs(-1);
