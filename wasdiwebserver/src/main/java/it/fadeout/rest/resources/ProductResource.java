@@ -6,7 +6,9 @@ import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -22,6 +24,10 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
@@ -49,6 +55,7 @@ import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.products.BandViewModel;
+import wasdi.shared.viewmodels.products.ChartMetadataViewModel;
 import wasdi.shared.viewmodels.products.ChartRequestViewModel;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
@@ -327,11 +334,10 @@ public class ProductResource {
 
         WasdiLog.debugLog("ProductResource.getListByWorkspace( WS: " + sWorkspaceId + " )");
         
-        // Prepare return object, empty to sart
+        // Prepare return object
         List<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
         
         try {
-        	
             // Validate input
             if (Utils.isNullOrEmpty(sWorkspaceId)) {
                 WasdiLog.warnLog("ProductResource.getListByWorkspace: workspace is null or empty");
@@ -1303,6 +1309,10 @@ public class ProductResource {
                 return PrimitiveResult.getInvalid();
             }
 
+            String sChartType = oChartRequest.getChartType();
+            if (sChartType == null || sChartType.isBlank()) 
+                sChartType = "line";
+
             String sWorkspacePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
             File oWorkspace = new File(sWorkspacePath).getCanonicalFile();
             File oProduct = new File(oWorkspace, sProductName).getCanonicalFile();
@@ -1313,7 +1323,7 @@ public class ProductResource {
 
             String sXAxisLabel = "timestamp";       // we assume that the column representing the timestamps has a fixed name
             Map<String, List<String>> oColumns = WasdiFileUtils.extractColumnsFromCSV(oProduct.getPath(), Arrays.asList(sXAxisLabel, sDataLabel));
-            String sChartJson = buildTimeSeriesChart(oColumns, sXAxisLabel, sDataLabel);
+            String sChartJson = buildTimeSeriesChart(oColumns, sChartType, sXAxisLabel, sDataLabel);
 
             PrimitiveResult oPrimitiveResult = new PrimitiveResult();
             oPrimitiveResult.setStringValue(sChartJson);
@@ -1325,7 +1335,7 @@ public class ProductResource {
         return PrimitiveResult.getInvalid();
     }
 
-    static String buildTimeSeriesChart(Map<String, List<String>> oColumns, String sXAxisLabel, String sDataLabel) {
+    static String buildTimeSeriesChart(Map<String, List<String>> oColumns, String sChartType,String sXAxisLabel, String sDataLabel) {
         List<String> asTimestamps = oColumns.get(sXAxisLabel);
         List<String> asValues = oColumns.get(sDataLabel);
         if (asTimestamps == null || asValues == null || asTimestamps.isEmpty() || asTimestamps.size() != asValues.size()) {
@@ -1334,7 +1344,7 @@ public class ProductResource {
 
         ObjectMapper oMapper = new ObjectMapper();
         ObjectNode oChart = oMapper.createObjectNode();
-        oChart.put("chart-type", "line");
+        oChart.put("chart-type", sChartType);
         oChart.put("chart-name", "Timeseries for " + sDataLabel);
         ArrayNode aoSeries = oChart.putArray("chart-data").addObject()
                 .put("name", "").putArray("series");

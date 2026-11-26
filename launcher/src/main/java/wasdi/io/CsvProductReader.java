@@ -11,6 +11,7 @@ import java.util.List;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
+import wasdi.shared.viewmodels.products.ChartMetadataViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
 import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
@@ -39,20 +40,30 @@ public class CsvProductReader extends WasdiProductReader {
         NodeGroupViewModel oNodeGroupViewModel = new NodeGroupViewModel();
     	oNodeGroupViewModel.setNodeName("Columns");
     	
-    	List<BandViewModel> oBands = new ArrayList<>();
-        try {
-            List<String> sBandNames = readFileFirstLine(m_oProductFile);
-            for (String sBandName : sBandNames) {
-                BandViewModel oBand = new BandViewModel();
-                oBand.setName(sBandName);
-                oBands.add(oBand);
-            }
-        } catch (Exception oE) {
-            WasdiLog.errorLog("CsvProductReader.getProductViewModel. Exception ", oE);
-        }
-
+        List<BandViewModel> oBands = new ArrayList<>();
     	oNodeGroupViewModel.setBands(oBands);
     	oViewModel.setBandsGroups(oNodeGroupViewModel);
+
+        // add the information for visualizing the chart
+        List<String> asColumnsName = null;
+        try {
+            asColumnsName = readFileFirstLine(m_oProductFile);
+        } catch (Exception oE) {
+            WasdiLog.errorLog("CsvProductReader.getProductViewModel. Error reading first line", oE);
+        }
+        
+        if ( asColumnsName == null 
+            || asColumnsName.isEmpty() 
+            || !asColumnsName.contains("timestamp") // for time series, this should be a standard column
+            || asColumnsName.size() < 2) 
+            return oViewModel;
+        
+        oViewModel.setChart(true);
+
+        String sDataColumn = asColumnsName.get(asColumnsName.size() - 1);
+
+        ChartMetadataViewModel oChartMetadataVM = new ChartMetadataViewModel("line", "timestamp", sDataColumn, sDataColumn);
+        oViewModel.setChartMetadata(oChartMetadataVM);
         	
 		return oViewModel;
 	}
