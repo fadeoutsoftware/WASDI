@@ -8,9 +8,10 @@ import java.nio.file.Path;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+/*
 import dev.zarr.zarrjava.store.FilesystemStore;
 import dev.zarr.zarrjava.v3.DataType;
-
+*/
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
@@ -102,6 +103,7 @@ public class MeteoGateProviderAdapter extends EDRProviderAdapter {
                 }
                 return sOutputFilePath;
             }
+            /*
             else if (sOutputFormat.toLowerCase().equals("zarr")) {
                 // Initialize the Zarr filesystem store
                 dev.zarr.zarrjava.store.FilesystemStore oStore = new dev.zarr.zarrjava.store.FilesystemStore(sOutputFilePath);
@@ -133,7 +135,7 @@ public class MeteoGateProviderAdapter extends EDRProviderAdapter {
                 WasdiLog.debugLog("MeteoGateProviderAdapter.executeDownloadFile. Zarr Store generated at: " + sOutputFilePath);
             }
         
-
+			*/
                                         
         } catch (Exception oE) {
             WasdiLog.errorLog("MeteoGateProviderAdapter.executeDownloadFile. Exception: ", oE);
@@ -164,15 +166,6 @@ public class MeteoGateProviderAdapter extends EDRProviderAdapter {
             return DataProviderScores.DOWNLOAD.getValue();
         }
         return 0;
-    }
-
-    public static void main (String[] args) throws Exception {
-        WasdiConfig.readConfig("C:\\temp\\wasdi\\wasdiLocalTESTConfig_develop.json");
-        MeteoGateProviderAdapter oAdapter = new MeteoGateProviderAdapter();
-        String sUrl = "https://api.meteogate.eu/eu-eumetnet-surface-observations/collections/observations/locations/0-20000-0-10609?parameter-name=wind_gust_from_direction:10.0:point:PT3H;output.zarr;zarr;wind_gust_from_direction:10.0:point:PT3H";
-        String sCompositeUrl = sUrl + ";output.csv";
-        String sSavePath = "C:\\Users\\valentina.leone\\Downloads";
-        oAdapter.executeDownloadFile(sCompositeUrl, null, null, sSavePath, null, 0);
     }
     
 }
