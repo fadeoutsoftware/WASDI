@@ -14,7 +14,7 @@ public class Lake3dProviderAdapter extends ProviderAdapter {
 	
 
 	public Lake3dProviderAdapter() {
-		m_sDataProviderCode = "GLOBATHY";
+		m_sDataProviderCode = "LAKE3D";
 	}
 
 	@Override
