@@ -18,8 +18,6 @@ public class QueryExecutorGlobathyWasdi extends QueryExecutor {
 	private String m_sWasdiUser = "";
 	private String m_sWasdiPassword = "";
 	private String m_sSessionId = "";
-	
-	private static final Object s_oShapeFileLock = new Object();
 
 
 	public QueryExecutorGlobathyWasdi() {

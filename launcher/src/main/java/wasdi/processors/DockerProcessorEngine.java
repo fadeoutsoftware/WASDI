@@ -24,13 +24,18 @@ import com.google.common.io.CharStreams;
 
 import wasdi.LauncherMain;
 import wasdi.asynch.PushDockerImagesThread;
+import wasdi.processors.drivers.ContainerRuntimeDriver;
+import wasdi.processors.drivers.RunPodRuntimeDriver;
+import wasdi.processors.drivers.LocalDockerDriver;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.business.processors.ProcessorSourceTypes;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.PathsConfig;
+import wasdi.shared.config.RuntimeDriverConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
@@ -75,6 +80,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	 */
 	protected boolean m_bDownloadProcessorFiles = true;
 	
+	ContainerRuntimeDriver m_oContainerRuntimeDriver = null;
+	
 	/**
 	 * Create clean instance
 	 */
@@ -113,6 +120,62 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	public void setDockerRegistry(String sDockerRegistry) {
 		this.m_sDockerRegistry = sDockerRegistry;
 	}
+	
+	/**
+	 * Selects the runtime driver used to build/run/monitor this processor's container.
+	 */
+	protected ContainerRuntimeDriver getContainerRuntimeDriver() {
+		
+		RuntimeDriverConfig oRuntimeConfig = null;
+		
+		if (m_oContainerRuntimeDriver == null) {
+			
+			m_oContainerRuntimeDriver = new LocalDockerDriver(this);
+			
+			if (m_oParameter != null) {
+				
+				Processor oProcessor = m_oParameter.getProcessor();
+				
+				if (oProcessor != null) {
+					
+					if (oProcessor.getHwRequirements()!=null) {
+						if (oProcessor.getHwRequirements().isGpuTraining()) {
+							m_oContainerRuntimeDriver = new LocalDockerDriver(this);	
+						}
+                        else if (oProcessor.getHwRequirements().isGpuInference()
+                                && ProcessorTypes.supportsGpuInference(oProcessor.getType()) ) {
+							
+                            oRuntimeConfig = WasdiConfig.Current.runtimeDrivers.getDriverConfig(RunPodRuntimeDriver.DRIVER_NAME);
+							
+							if (oRuntimeConfig != null) {
+								m_oContainerRuntimeDriver = new RunPodRuntimeDriver(this);
+							}
+						}
+					}
+				}
+			}
+            m_oContainerRuntimeDriver.setDriverConfig(oRuntimeConfig);
+        }
+		
+		return m_oContainerRuntimeDriver;
+	}	
+
+    protected ContainerRuntimeDriver getContainerRuntimeDriverForExecution(ProcessWorkspace oProcessWorkspace) {
+        String sDriverName = oProcessWorkspace.getRuntimeDriver();
+        if (Utils.isNullOrEmpty(sDriverName) || LocalDockerDriver.DRIVER_NAME.equals(sDriverName)) {
+            return new LocalDockerDriver(this);
+        }
+        if (RunPodRuntimeDriver.DRIVER_NAME.equals(sDriverName) && WasdiConfig.Current.runtimeDrivers != null) {
+            RuntimeDriverConfig oConfig = WasdiConfig.Current.runtimeDrivers.getDriverConfig(sDriverName);
+            if (oConfig != null) {
+                ContainerRuntimeDriver oDriver = new RunPodRuntimeDriver(this);
+                oDriver.setDriverConfig(oConfig);
+                return oDriver;
+            }
+        }
+        WasdiLog.errorLog("DockerProcessorEngine: runtime driver unavailable: " + sDriverName);
+        return null;
+    }
 	
     /**
      * Deploy a new Processor in WASDI
@@ -210,12 +273,18 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: building image (Registry = " + m_sDockerRegistry + ")");
             processWorkspaceLog("Start building Image");
 
-            // Create Docker Util and deploy the docker
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, sProcessorFolder, m_sDockerRegistry, m_oProcessWorkspaceLogger);
-            m_sDockerImageName = oDockerUtils.build();
+            // The container runtime driver builds the image (local Docker today, potentially a cloud build later)
+            m_sDockerImageName = getContainerRuntimeDriver().buildImage(oParameter);
             
             if (Utils.isNullOrEmpty(m_sDockerImageName)) {
             	return logDeployErrorAndClean("the deploy returned an empyt image name, something went wrong", bFirstDeploy);            	
+            }
+
+            if (bFirstDeploy) {
+                oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+                if (oProcessor == null) {
+                    return logDeployErrorAndClean("processor not found after building the image", bFirstDeploy);
+                }
             }
 
             onAfterDeploy(sProcessorFolder, oProcessor);
@@ -908,9 +977,14 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Create again
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 33);
             WasdiLog.infoLog("DockerProcessorEngine.redeploy: deploy the image");
-            m_sDockerImageName = oDockerUtils.build();
+            m_sDockerImageName = getContainerRuntimeDriver().buildImage(oParameter);
 
             onAfterDeploy(sProcessorFolder, oProcessor);
+
+            if (!onAfterRedeployBuild(oProcessor, oParameter)) {
+                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+                return false;
+            }
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
@@ -935,6 +1009,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             return false;
         }
+    }
+
+    protected boolean onAfterRedeployBuild(Processor oProcessor, ProcessorParameter oParameter) {
+        return true;
     }
 
     @Override
@@ -1095,7 +1173,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
      * @param sApplicationContainerName Name of the container with the application. May be null
      * @return New Status
      */
-    protected String waitForApplicationToFinish(Processor oProcessor, String sProcId, String sStatus, ProcessWorkspace oProcessWorkspace, String sApplicationContainerName) {
+    public String waitForApplicationToFinish(Processor oProcessor, String sProcId, String sStatus, ProcessWorkspace oProcessWorkspace, String sApplicationContainerName) {
     	
     	WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToFinish: wait for the processor to finish");
     	
@@ -1553,7 +1631,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	 * @param oProcessor Processor
 	 * @return name of the image
 	 */
-	protected String pushImageInRegisters(Processor oProcessor) {
+	public String pushImageInRegisters(Processor oProcessor) {
 		try {
 			List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
 			
@@ -1583,17 +1661,18 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 					WasdiLog.debugLog("DockerProcessorEngine.pushImageInRegisters: image pushed");
 					// Ok we got a valid address!
 					break;
-				}
+                }
 			}
 			
-			// Did we used all the avaialbe options?
-			if (iAvailableRegisters<aoRegisters.size()) {
+            if (iAvailableRegisters<aoRegisters.size() && aoRegisters.size()>1) {
 				
 				PushDockerImagesThread oPushDockerImagesThread = new PushDockerImagesThread();
 				oPushDockerImagesThread.setProcessor(oProcessor);
 				
 				for (int iOtherRegisters = 0; iOtherRegisters<aoRegisters.size(); iOtherRegisters++) {
-					oPushDockerImagesThread.getRegisters().add(aoRegisters.get(iOtherRegisters));
+                    if (iOtherRegisters != iAvailableRegisters) {
+                        oPushDockerImagesThread.getRegisters().add(aoRegisters.get(iOtherRegisters));
+                    }
 				}
 				
 				WasdiLog.debugLog("DockerProcessorEngine.pushImageInRegisters: staring thread to push on other regitries");

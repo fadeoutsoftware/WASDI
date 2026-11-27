@@ -28,6 +28,8 @@ public class ProcessorTypes {
 	public static String LOCAL_PYTHON312 = "local_python312";
 
 	/**
+	 * Detect if a processor support the source code from GIT
+	 * 
 	 * @param sProcessorType processor runtime type
 	 * @return true when the processor type uses the centralized Docker build workflow
 	 */
@@ -67,6 +69,19 @@ public class ProcessorTypes {
 		else if (sProcessorType.equals(PYTHON312_UBUNTU24)) return "python312";
 		else if (sProcessorType.equals(LOCAL_PYTHON312)) return "local_python312";
 		return "";
+	}
+	
+	/**
+	 * Detect if a processor Type supports Gpu Inference Execution on third party cloud
+	 * 
+	 * @param sProcessorType Processor Type
+	 * @return True if can run on ext clouds
+	 */
+	public static boolean supportsGpuInference(String sProcessorType) {
+		return CONDA.equals(sProcessorType)
+				|| PIP_ONESHOT.equals(sProcessorType)
+				|| PERSONALIZED_DOCKER.equals(sProcessorType)
+				|| PYTHON312_UBUNTU24.equals(sProcessorType);		
 	}
 	
 }

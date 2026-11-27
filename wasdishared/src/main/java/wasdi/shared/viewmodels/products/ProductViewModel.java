@@ -35,6 +35,11 @@ public class ProductViewModel {
 
     private String description;
     
+    private Boolean isChart = false;
+    
+    private ChartMetadataViewModel chartMetadata;
+
+    
 	public ProductViewModel() {
 	}
     
@@ -46,6 +51,8 @@ public class ProductViewModel {
 		setProductFriendlyName(base.getProductFriendlyName());
 		setStyle(base.getStyle());
 		setDescription(base.getDescription());
+        setChart(base.isChart());
+        setChartMetadata(base.getChartMetadata());
     }
 
 
@@ -119,6 +126,22 @@ public class ProductViewModel {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Boolean isChart() {
+        return isChart;
+    }
+
+    public void setChart(Boolean bIsChart) {
+        this.isChart = bIsChart;
+    }
+
+    public ChartMetadataViewModel getChartMetadata() {
+        return chartMetadata;
+    }
+
+    public void setChartMetadata(ChartMetadataViewModel oChartMetadata) {
+        this.chartMetadata = oChartMetadata;
     }
 
 }

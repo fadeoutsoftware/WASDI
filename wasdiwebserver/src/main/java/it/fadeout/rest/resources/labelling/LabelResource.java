@@ -82,7 +82,6 @@ public class LabelResource {
 	}
 
 	@GET
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response getById(@Context ContainerRequestContext oRequestContext, @QueryParam("labelId") String sLabelId) {
 
@@ -123,7 +122,6 @@ public class LabelResource {
 	}
 
 	@POST
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response create(@Context ContainerRequestContext oRequestContext, LabelViewModel oLabelViewModel) {
 
@@ -164,7 +162,6 @@ public class LabelResource {
 	}
 
 	@PUT
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response update(@Context ContainerRequestContext oRequestContext, LabelViewModel oLabelViewModel) {
 
@@ -208,7 +205,6 @@ public class LabelResource {
 	}
 
 	@DELETE
-	@Path("/")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response delete(@Context ContainerRequestContext oRequestContext, @QueryParam("labelId") String sLabelId) {
 

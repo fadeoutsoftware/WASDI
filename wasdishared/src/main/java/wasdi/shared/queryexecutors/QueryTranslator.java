@@ -183,9 +183,15 @@ public abstract class QueryTranslator {
 	
 	private static final String s_sPLATFORMNAME_GLOBATHY = "platformname:GLOBATHY";
 	
+	private static final String s_sPLATFORMNAME_LAKE3D = "platformname:LAKE3D";
+	
+	private static final String s_sPLATFORMNAME_LAKE3DWASDI = "platformname:LAKE3DWASDI";
+	
 	private static final String s_sPLATFORMNAME_GLOBATHYWASDI = "platformname:GLOBATHYWASDI";
 	
 	private static final String s_sPLATFORMNAME_GLOFAS = "platformname:GLOFAS";
+
+	private static final String s_sPLATFORMNAME_METEOGATE = "platformname:MeteoGate";
 
 	/**
 	 * Token of product type
@@ -697,6 +703,18 @@ public abstract class QueryTranslator {
 			if (!bFound) {
 				bFound = parseGLOFAS(sQuery, oResult);
 			}
+
+			if (!bFound) {
+				bFound = parseMeteoGate(sQuery, oResult);
+			}
+			
+			if (!bFound) {
+				bFound = parseLake3D(sQuery, oResult);
+			}
+			
+			if (!bFound) {
+				bFound = parseLake3DWasdi(sQuery, oResult);
+			}			
 						
 			if (Utils.isNullOrEmpty(oResult.platformName)) {
 				WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: platformName not found: try to read the generic one");
@@ -1423,6 +1441,31 @@ public abstract class QueryTranslator {
 		return false;
 	}
 	
+	private boolean parseLake3D(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_LAKE3D)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_LAKE3D);
+			
+			oResult.platformName = Platforms.LAKE_3D;
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean parseLake3DWasdi(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_LAKE3DWASDI)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_LAKE3DWASDI);
+			
+			oResult.platformName = Platforms.LAKE_3DWASDI;
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	
 	private boolean parseGLOFAS(String sQuery, QueryViewModel oResult) {
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_GLOFAS)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_GLOFAS);
@@ -1434,6 +1477,17 @@ public abstract class QueryTranslator {
 			return true;
 		}
 		
+		return false;
+	}
+
+	private boolean parseMeteoGate(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_METEOGATE)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_METEOGATE);
+			oResult.platformName = Platforms.METEO_GATE;
+			oResult.productType = extractValue(sQuery, "observation");
+			oResult.sensorMode = extractValue(sQuery, "outputformat");
+			return true;
+		}
 		return false;
 	}
 

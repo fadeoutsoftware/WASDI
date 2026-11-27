@@ -34,8 +34,8 @@ import wasdi.shared.business.users.UserSession;
 import wasdi.shared.business.users.UserType;
 import wasdi.shared.config.SkinConfig;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.DeletedUserRepository;
+import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
@@ -52,11 +52,10 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.missions.PrivateMissionViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
-import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
 import wasdi.shared.viewmodels.users.ChangeUserPasswordViewModel;
 import wasdi.shared.viewmodels.users.LoginInfo;
-import wasdi.shared.viewmodels.users.RegistrationInfoViewModel;
 import wasdi.shared.viewmodels.users.RefreshTokenViewModel;
+import wasdi.shared.viewmodels.users.RegistrationInfoViewModel;
 import wasdi.shared.viewmodels.users.SkinViewModel;
 import wasdi.shared.viewmodels.users.UserViewModel;
 
@@ -122,6 +121,7 @@ public class AuthResource {
 	/**
 	 * Login API
 	 * The system will try to login with Keycloak first. Then with the old WASDI login.
+	 * When useLegacySessions is enabled, only the local session is returned, without Keycloak tokens.
 	 * 
 	 * @param oLoginInfo LoginInfo object. View model with info to login
 	 * @return UserViewModel View Model of the user logged. Can be invalid if noit logged
@@ -361,7 +361,9 @@ public class AuthResource {
 					return UserViewModel.getInvalid();
 				}
 				oUserVM.setSessionId(oSession.getSessionId());
-				if (oKeycloakLoginResponse != null) {
+				boolean bUseLegacySessions = WasdiConfig.Current.keycloack != null
+						&& WasdiConfig.Current.keycloack.useLegacySessions;
+				if (oKeycloakLoginResponse != null && !bUseLegacySessions) {
 					oUserVM.setAccessToken(oKeycloakLoginResponse.optString("access_token", ""));
 					oUserVM.setRefreshToken(oKeycloakLoginResponse.optString("refresh_token", ""));
 					oUserVM.setExpiresIn(oKeycloakLoginResponse.optInt("expires_in", 0));

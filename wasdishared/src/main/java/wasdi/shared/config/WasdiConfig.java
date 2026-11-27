@@ -309,6 +309,11 @@ public class WasdiConfig {
 	 * List of the allowed user skins
 	 */
 	public ArrayList<SkinConfig> skins = new ArrayList<>();
+	
+	/**
+	 * Configuration of the different RunTime Drivers
+	 */
+	public RuntimeDriversConfig runtimeDrivers = new RuntimeDriversConfig();
 		
 	/**
 	 * Get the Catalogue Config for the specified Platform Type

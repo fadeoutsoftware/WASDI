@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -106,6 +108,12 @@ public class ImagesResource {
 			if (Utils.isNullOrEmpty(sFolder)) {
 				sFolder = "";			
 			}
+			
+			// In Globathy and Lake 3d We do not allow uploads via API
+			if (sCollection.equals(ImagesCollections.GLOBATHY.getFolder()) || sCollection.equals(ImagesCollections.LAKE3D.getFolder())) {
+				WasdiLog.warnLog("ImagesResource.uploadImage: cannot upload in this collection");
+				return Response.status(Status.FORBIDDEN).build();			
+			}			
 			
 			//sanity check: is sImageName safe? It must be a file name, not a path
 			if(sImageName.contains("/") || sImageName.contains("\\") || sCollection.contains("/") || sCollection.contains("\\") || sFolder.contains("/") || sFolder.contains("\\") ) {
@@ -244,14 +252,14 @@ public class ImagesResource {
 	
 	
 	/**
-	 * Gets an image as a Byte Stream
+	 * Gets an image as a Byte Stream, including root-level entries in ZIP archives.
 	 * @param sSessionId User Session Id
 	 * @param sCollection Processor Id
 	 * @return Logo byte stream
 	 */
 	@GET
 	@Path("/get")
-	@Operation(summary = "Get image by name", description="Retrieves an image from a collection/folder by name. Supports authentication via either x-session-token header or token query parameter. Returns the image as a byte stream.")
+	@Operation(summary = "Get image by name", description="Retrieves an image from a collection/folder by name, including root-level files in ZIP-backed collections. Supports authentication via either x-session-token header or token query parameter. Returns the image as a byte stream.")
 	public Response getImage(@Context ContainerRequestContext oRequestContext, @QueryParam("token") String sTokenSessionId, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName) {
 		
 		try {
@@ -295,6 +303,10 @@ public class ImagesResource {
 			}		
 					
 			String sPathLogoFolder = ImageResourceUtils.getImagesSubPath(sCollection, sFolder);
+			if (FilenameUtils.getExtension(sPathLogoFolder).equalsIgnoreCase("zip")) {
+				return getZippedImage(sPathLogoFolder, sImageName);
+			}
+
 			String sAbsolutePath = sPathLogoFolder + sImageName;
 			
 			WasdiLog.debugLog("ImagesResource.getImage: sAbsolutePath " + sAbsolutePath);
@@ -324,6 +336,44 @@ public class ImagesResource {
 		}
 	}	
 	
+
+	private Response getZippedImage(String sZipPath, String sImageName) throws IOException {
+		File oArchive = new File(sZipPath);
+		if (!oArchive.isFile() || !oArchive.canRead()) {
+			WasdiLog.warnLog("ImagesResource.getImage: unable to find archive in " + sZipPath);
+			return Response.status(Status.NO_CONTENT).build();
+		}
+
+		try (ZipFile oZipFile = new ZipFile(oArchive)) {
+			ZipEntry oEntry = oZipFile.getEntry(sImageName);
+			if (oEntry == null || oEntry.isDirectory()) {
+				WasdiLog.warnLog("ImagesResource.getImage: unable to find image " + sImageName + " in " + sZipPath);
+				return Response.status(Status.NO_CONTENT).build();
+			}
+		}
+
+		// Open the archive during response writing so an unused response cannot leak it.
+		StreamingOutput oStream = oOs -> {
+			try (ZipFile oZipFile = new ZipFile(oArchive)) {
+				ZipEntry oEntry = oZipFile.getEntry(sImageName);
+				if (oEntry == null || oEntry.isDirectory()) {
+					throw new IOException("Image no longer available in archive: " + sImageName);
+				}
+				try (InputStream oIs = oZipFile.getInputStream(oEntry)) {
+					byte[] abBuffer = new byte[8192];
+					int iBytesRead;
+					while ((iBytesRead = oIs.read(abBuffer)) != -1) {
+						oOs.write(abBuffer, 0, iBytesRead);
+					}
+				}
+			}
+			catch (IOException oEx) {
+				WasdiLog.errorLog("ImagesResource.getImage: ZIP streaming interrupted for " + sZipPath + " entry " + sImageName, oEx);
+				throw new WebApplicationException(oEx, Status.INTERNAL_SERVER_ERROR);
+			}
+		};
+		return Response.ok(oStream).build();
+	}
 
 	
 	private StreamingOutput streamFile(String sFilePath) {

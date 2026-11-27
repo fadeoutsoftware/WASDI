@@ -30,7 +30,7 @@
         <sVersionJackson>2.21.7</sVersionJackson>
             <sVersionJacksonAnnotations>2.21</sVersionJacksonAnnotations>
         <sVersionJavaxWebsocketApi>1.1</sVersionJavaxWebsocketApi>
-        <sVersionJson>20250517</sVersionJson>
+        <sVersionJson>20260719</sVersionJson>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionMavenCompilerPlugin>3.11.0</sVersionMavenCompilerPlugin>
         <sVersionMavenWarPlugin>3.4.0</sVersionMavenWarPlugin>

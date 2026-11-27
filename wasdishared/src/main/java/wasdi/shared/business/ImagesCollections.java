@@ -11,7 +11,8 @@ public enum ImagesCollections {
 	USERS("users"),
 	ORGANIZATIONS("organizations"),
 	STYLES("styles"),
-	GLOBATHY("globathy");
+	GLOBATHY("globathy"),
+	LAKE3D("lake3d");
 	
 	private String m_sFolder;
 	

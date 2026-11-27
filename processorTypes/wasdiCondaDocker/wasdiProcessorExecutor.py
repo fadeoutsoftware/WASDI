@@ -10,6 +10,7 @@ import urllib.parse
 import json
 import traceback
 import subprocess
+import sys
 
 m_sProcId = ""
 
@@ -49,9 +50,9 @@ def executeProcessor():
 
         if sFinalStatus != 'STOPPED' and sFinalStatus != 'DONE' and sFinalStatus != 'ERROR':
             wasdi.wasdiLog("wasdi.executeProcessor Process finished. Forcing status to " + sForceStatus)
-            wasdi.updateProcessStatus(m_sProcId, sForceStatus, 100)
+            sFinalStatus = wasdi.updateProcessStatus(m_sProcId, sForceStatus, 100)
 
-    return
+    return sForceStatus == 'DONE' and sFinalStatus == 'DONE'
 
 def refresh_package_list(sRefreshPackageList: str):
 
@@ -200,6 +201,8 @@ def __execute_conda_command_and_get_output(command) -> str:
     return sOutput
 
 if __name__ == '__main__':
+    bRunpod = '--runpod' in sys.argv[1:]
+    bSucceeded = False
     try:
         # Read the process Id
         sProcId = _getEnvironmentVariable('WASDI_PROCESS_WORKSPACE_ID')
@@ -261,17 +264,29 @@ if __name__ == '__main__':
 
         log("wasdi.executeProcessor: init waspy lib")
         # The lib will read all the data from env
-        if not wasdi.init():
+        if bRunpod:
+            bWasVerbose = wasdi.getVerbose()
+            wasdi.setVerbose(False)
+            try:
+                bInitialized = wasdi.init()
+            finally:
+                wasdi.setVerbose(bWasVerbose)
+        else:
+            bInitialized = wasdi.init()
+
+        if not bInitialized and bRunpod:
+            log("WASPY initialization failed")
+        elif not bInitialized:
             log("There was an error in init, we try to execute but it will likely not work")
             wasdi.wasdiLog("There was an error in init, we try to execute but it will likely not work")
         else:
             log("Init done")
             wasdi.wasdiLog("Init done")
 
-        bRun = True
+        bRun = not bRunpod or bInitialized
         sRefreshPackageList = _getEnvironmentVariable('WASDI_ONESHOT_REFRESH_PACKAGE_LIST')
 
-        if sRefreshPackageList is not None:
+        if not bRunpod and sRefreshPackageList is not None:
             if sRefreshPackageList != "":
                 log("Refreshing package list in temp file " + sRefreshPackageList)
                 refresh_package_list(sRefreshPackageList)
@@ -279,7 +294,7 @@ if __name__ == '__main__':
 
         if bRun:
             wasdi.wasdiLog("Starting Processor")
-            executeProcessor()
+            bSucceeded = executeProcessor()
 
     except Exception as oEx:
         wasdi.wasdiLog("wasdi.executeProcessor: EXCEPTION")
@@ -287,4 +302,7 @@ if __name__ == '__main__':
         wasdi.wasdiLog(traceback.format_exc())
     except:
         wasdi.wasdiLog("wasdi.executeProcessor generic EXCEPTION")
+
+    if bRunpod:
+        sys.exit(0 if bSucceeded else 1)
 

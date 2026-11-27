@@ -1,6 +1,5 @@
 package wasdi.shared.queryexecutors.terrascope;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,21 +12,12 @@ import com.google.common.base.Preconditions;
 
 import wasdi.shared.queryexecutors.ResponseTranslator;
 import wasdi.shared.utils.JsonUtils;
-import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 public class ResponseTranslatorTerrascope extends ResponseTranslator {
 
-	//String constants to be used elsewhere
-	private static final String SLINK_SEPARATOR_TERRASCOPE = ",";
-	private static final String SLINK = "link";
-
-	//private string constants
-	private static final String SSIZE_IN_BYTES = "sizeInBytes";
-	private static final String SHREF = "href";
-	private static final String SURL = "url";
 	private static final String SPOLARISATION = "polarisation";
 	private static final String SRELATIVEORBITNUMBER = "relativeOrbitNumber";
 	private static final String SSIZE = "size";
@@ -36,9 +26,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 	private static final String SINSTRUMENT = "instrument";
 	private static final String SDATE = "date";
 	private static final String STYPE = "type";
-	private static final String SSELF = "self";
 	private static final String STITLE = "title";
-	private static final String SPRODUCTIDENTIFIER = "productIdentifier";
 
 	private static Map<String, String> instrumentByPlatform;
 
@@ -102,29 +90,49 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 			parseMainInfo(oInJson, oResult);		
 			parseFootPrint(oInJson, oResult);
 			parseProperties(oInJson, bFullViewModel, oResult);
-			
-			// P.Campanella 2022-08-29
-			if (!oResult.getTitle().contains(".")) {
-				if (oResult.getProperties().containsKey("format"))   {
-					Object oValue = oResult.getProperties().get("format");
-					if (oValue != null) {
 						
-						if (oValue.toString().equals("tif") && oResult.getTitle().startsWith("ESA_WorldCover_")) {
-							oResult.setTitle(oResult.getTitle() + "_Map." + oValue.toString());
-						}
-						else {
-							oResult.setTitle(oResult.getTitle() + "." + oValue.toString());
-						}
-					}
+			JSONObject oAssets = oInJson.optJSONObject("assets");
+			if (oAssets == null ) {
+				WasdiLog.debugLog("ResponseTranslatorTerrascope.addProperties: input json has null assets");
+				return oResult;
+			}
+			
+			JSONObject oMap = oAssets.optJSONObject("Map");
+			if (oMap == null) {
+				WasdiLog.debugLog("ResponseTranslatorTerrascope.addProperties: input asset has not map. Trying with 'DEM'");
+				oMap = oAssets.optJSONObject("DEM");
+				if (oMap == null) {
+					WasdiLog.debugLog("ResponseTranslatorTerrascope.addProperties: input asset has not dem");
+					return oResult;
 				}
 			}
-
-			buildLink(oResult);
+			
+			
+			String sLink = oMap.optString("href");
+			oResult.setLink(sLink);
+			
+			// P.Campanella 2026-11-04
+			if (!oResult.getTitle().contains(".")) {
+				
+				String sType = oMap.optString("type");
+				
+				if (!Utils.isNullOrEmpty(sType)) {
+					if (sType.contains("tiff")) {
+						oResult.setTitle(oResult.getTitle()+ ".tif"); 
+					}
+					else if (sType.contains("zip")) {
+						oResult.setTitle(oResult.getTitle()+ ".zip");
+					}
+				}
+				
+				// Back up option: we try a tif...
+				if (!oResult.getTitle().contains(".")) oResult.setTitle(oResult.getTitle()+ ".tif");				
+			}
+			
 			buildSummary(oResult);
-		} catch (Exception oE) {
-			WasdiLog.debugLog("ResponseTranslatorTerrascope.translate( " +
-					oInJson.toString() + ", " +
-					bFullViewModel + " ): " + oE );
+		} 
+		catch (Exception oE) {
+			WasdiLog.debugLog("ResponseTranslatorTerrascope.translate( " + oInJson.toString() + ", " +bFullViewModel + " ): " + oE );
 		}
 
 		return oResult;
@@ -248,11 +256,11 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 				WasdiLog.debugLog("ResponseTranslatorTerrascope.addProperties: input json has null properties");
 				return;
 			}
-
+			
 			String sBuffer = null;
 
 			loadMostProperties(oResult, oProperties);
-
+			
 			//title
 			oResult.setTitle("");
 			if (!oProperties.isNull(ResponseTranslatorTerrascope.STITLE)) {
@@ -266,6 +274,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 				oResult.setTitle(sTitle);
 				oResult.getProperties().put(ResponseTranslatorTerrascope.STITLE, sTitle);
 			}
+			
 
 			//preview
 			if (bFullViewModel) {
@@ -285,7 +294,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 
 			}
 
-			sBuffer = oProperties.optString("date", null);
+			sBuffer = oProperties.optString("datetime", null);
 			if (null != sBuffer) {
 				oResult.getProperties().put(ResponseTranslatorTerrascope.SDATE, sBuffer);
 				oResult.getProperties().put("startDate", sBuffer);
@@ -320,9 +329,9 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 				oResult.getProperties().put("polarisationmode", oProperties.optString(ResponseTranslatorTerrascope.SPOLARISATION, null));
 			}
 
-			parseLinks(oProperties, oResult);
-
-			parseServices(oResult, oProperties);
+			//parseLinks(oProperties, oResult);
+			//parseServices(oResult, oProperties);
+			
 		} catch (Exception oE) {
 			WasdiLog.debugLog("ResponseTranslatorTerrascope.parseProperties(" + oInJson.toString() + ", " + bFullViewModel + ", ... ): " + oE);
 		}
@@ -332,67 +341,6 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 		return instrumentByPlatform.get(platformName);
 	}
 
-	/**
-	 * @param oProperties
-	 * @param oResult
-	 */
-	private void parseLinks(JSONObject oProperties, QueryResultViewModel oResult) {
-		Preconditions.checkNotNull(oProperties, "properties JSON is null");
-		Preconditions.checkNotNull(oResult, "result view model is null");
-
-		try {
-			//links
-			if (!oProperties.has("links")) {
-				WasdiLog.debugLog("ResponseTranslatorTerrascope.parseProperties: warning: field \"links\" was expected but not found, here's the json:\nJSON DUMP BEGIN\n" +
-						oProperties + "\nJSON DUMP END");
-			}
-			if (oProperties.isNull("links")) {
-				WasdiLog.debugLog("ResponseTranslatorTerrascope.parseProperties: warning: field \"links\" is present but has null value, here's the json:\nJSON DUMP BEGIN\n" +
-						oProperties + "\nJSON DUMP END");
-			}
-			//try as object
-			JSONObject oLinks = oProperties.optJSONObject("links");
-			if (null != oLinks) {
-				if(oLinks.has(ResponseTranslatorTerrascope.SHREF) && !oLinks.isNull(ResponseTranslatorTerrascope.SHREF)) {
-					oResult.getProperties().put(ResponseTranslatorTerrascope.SHREF, oLinks.optString(ResponseTranslatorTerrascope.SHREF, null));
-				}
-			} else {
-				//try as array
-				JSONArray oLinksArray = oProperties.optJSONArray("links");
-				if (null != oLinksArray) {
-					for (Object oObject : oLinksArray) {
-						try {
-							JSONObject oItem = (JSONObject) oObject;
-							if (!oItem.has("rel") || oItem.isNull("rel")) {
-								continue;
-							}
-							String sRel = oItem.optString("rel", null);
-							if (Utils.isNullOrEmpty(sRel)) {
-								continue;
-							}
-							if (!sRel.equals(ResponseTranslatorTerrascope.SSELF)) {
-								//if the product is missing, this link can be used to later ask again for it, after the order has been completed
-								String sHref = oItem.optString(ResponseTranslatorTerrascope.SHREF, null);
-								if (null != sHref) {
-									oResult.getProperties().put(ResponseTranslatorTerrascope.SSELF, sHref);
-								}
-							}
-
-							//just store the "self" link
-							if (oItem.has(ResponseTranslatorTerrascope.SHREF) && !oItem.isNull(ResponseTranslatorTerrascope.SHREF)) {
-								oResult.getProperties().put(ResponseTranslatorTerrascope.SHREF, oItem.optString(ResponseTranslatorTerrascope.SHREF, null));
-							}
-
-						} catch (Exception oE) {
-							WasdiLog.debugLog("ResponseTranslatorTerrascope.parseProperties: exception while trying to cast item object to JSONObject: " + oE);
-						}
-					}
-				}
-			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("DiasResponseTranslator.parseLinks( " + oProperties.toString() + ", ... ): " + oE);
-		}
-	}
 
 	/**
 	 * @param oResult
@@ -406,200 +354,6 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 			if(null!=sBuffer) {
 				oResult.getProperties().put(sKey, sBuffer);
 			}
-		}
-	}
-
-	/**
-	 * @param oResult
-	 * @param oProperties
-	 */
-	private void parseServices(QueryResultViewModel oResult, JSONObject oProperties) {
-		String sUrl = null;
-
-		long lSize = 0;
-
-		String sType = (String) JsonUtils.getProperty(oProperties.toMap(), "links.data.0.type");
-		if ("application/zip".equalsIgnoreCase(sType) || "image/tiff".equalsIgnoreCase(sType)) {
-			Object oLength = JsonUtils.getProperty(oProperties.toMap(), "links.data.0.length");
-
-			if (oLength instanceof Integer) {
-				lSize = ((Integer) oLength).longValue();
-			} else if (oLength instanceof Long) {
-				lSize = ((Long) oLength).longValue();
-			}
-
-			sUrl = (String) JsonUtils.getProperty(oProperties.toMap(), "links.data.0.href");
-		} else {
-			List<Map<String, Object>> aoAllLinks = extractAllLinks(oProperties);
-
-			lSize = calculateDownloadSize(aoAllLinks);
-
-			String sPayload = prepareLinkJsonPayload(aoAllLinks);
-			String sCompressedPayload = compressPayload(sPayload);
-			if (sCompressedPayload != null) {
-				sUrl = "https://services.terrascope.be/package/zip" + "?compressed_payload=" + sCompressedPayload + "&size=" + lSize;
-			}
-		}
-
-		oResult.getProperties().put(ResponseTranslatorTerrascope.SSIZE_IN_BYTES, "" + lSize);
-		String sSize = "0";
-		if (lSize > 0) {
-			double dTmp = (double) lSize;
-			sSize = Utils.getNormalizedSize(dTmp);
-			oResult.getProperties().put(ResponseTranslatorTerrascope.SSIZE, sSize);
-		}
-
-		if (!Utils.isNullOrEmpty(sUrl)) {
-			try {
-				oResult.getProperties().put(ResponseTranslatorTerrascope.SURL, sUrl);
-				oResult.getProperties().put("format", sUrl.substring(sUrl.lastIndexOf(".") + 1));
-				oResult.setLink(sUrl);				
-			}
-			catch (Exception oEx) {
-				WasdiLog.errorLog("ResponseTranslatorTerrascope.parseServices: exception parsing url", oEx);
-			}
-		} 
-		else {
-			WasdiLog.debugLog("ResponseTranslatorTerrascope.parseServices: download link not found! dumping json:\n" + "JSON DUMP BEGIN\n" + oProperties.toString() + "JSON DUMP END");
-		}
-	}
-
-	private static String compressPayload(String sPayload) {
-		String sCompressedPayload = null;
-
-		try {
-			sCompressedPayload = StringUtils.compressString(sPayload);
-		} catch (IOException e) {
-			WasdiLog.debugLog("ResponseTranslatorTerrascope.compressPayload: the payload cannot be compressed: " + e.getMessage());
-		}
-
-		return sCompressedPayload;
-	}
-
-	private static List<Map<String, Object>> extractAllLinks(JSONObject oProperties) {
-		@SuppressWarnings("unchecked")
-		List<Map<String, Object>> aoPreviews = (List<Map<String, Object>>) JsonUtils.getProperty(oProperties.toMap(), "links.previews");
-
-		@SuppressWarnings("unchecked")
-		List<Map<String, Object>> aoAlternates = (List<Map<String, Object>>) JsonUtils.getProperty(oProperties.toMap(), "links.alternates");
-
-		@SuppressWarnings("unchecked")
-		List<Map<String, Object>> aoRelated = (List<Map<String, Object>>) JsonUtils.getProperty(oProperties.toMap(), "links.related");
-
-		@SuppressWarnings("unchecked")
-		List<Map<String, Object>> aoData = (List<Map<String, Object>>) JsonUtils.getProperty(oProperties.toMap(), "links.data");
-
-		List<Map<String, Object>> aoAllLinks = new ArrayList<Map<String, Object>>();
-		aoAllLinks.addAll(aoPreviews);
-		aoAllLinks.addAll(aoAlternates);
-		aoAllLinks.addAll(aoRelated);
-		aoAllLinks.addAll(aoData);
-
-		return aoAllLinks;
-	}
-
-	private static long calculateDownloadSize(List<Map<String, Object>> aoLinks) {
-		long lSize = 0;
-
-		for (Map<String, Object> aoLink : aoLinks) {
-			if (aoLink != null) {
-				Object oLength = aoLink.get("length");
-
-				if (oLength instanceof Integer) {
-					lSize += ((Integer) oLength).longValue();
-				} else if (oLength instanceof Long) {
-					lSize += ((Long) oLength).longValue();
-				}
-
-			}
-		}
-
-		return lSize;
-	}
-
-	private static String prepareLinkJsonPayload(List<Map<String, Object>> aoLinks) {
-		String sPayload = "[";
-
-		for (Map<String, Object> aoLink : aoLinks) {
-			if (aoLink != null) {
-				String sHref = (String) aoLink.get("href");
-				sPayload += "\"" + sHref + "\"" + ",";
-			}
-		}
-
-		if (sPayload.length() > 1) {
-			sPayload = sPayload.substring(0, sPayload.length() - 1);
-		}
-
-		sPayload += "]";
-
-		return sPayload;
-	}
-
-	private void buildLink(QueryResultViewModel oResult) {
-		Preconditions.checkNotNull(oResult, "result view model is null");
-		try {
-			StringBuilder oLink = new StringBuilder("");
-
-			String sItem = "";
-
-			sItem = oResult.getProperties().get(ResponseTranslatorTerrascope.SURL);
-			if (sItem == null || sItem.isEmpty()) {
-				WasdiLog.debugLog("ResponseTranslatorTerrascope.buildLink: the download URL is null or empty. Product title: " + oResult.getTitle());
-				sItem = "http://";
-			}
-			oLink.append(sItem).append(ResponseTranslatorTerrascope.SLINK_SEPARATOR_TERRASCOPE); //0
-
-			sItem = oResult.getTitle();
-			if (sItem == null) {
-				sItem = "";
-			}
-			//fix file extension
-			if (!sItem.toLowerCase().endsWith(".zip") && !sItem.toLowerCase().endsWith(".tif") && !sItem.toLowerCase().endsWith(".tar.gz") || !sItem.toLowerCase().endsWith(".nc")) {
-				if (sItem.toUpperCase().startsWith("S1A") || sItem.toUpperCase().startsWith("S1B") ||
-						sItem.toUpperCase().startsWith("S2A") || sItem.toUpperCase().startsWith("S2B") || 
-						sItem.toUpperCase().startsWith("S3A") || sItem.toUpperCase().startsWith("S3B") || sItem.toUpperCase().startsWith("S3_") ||
-						sItem.toUpperCase().startsWith("S5") ||
-						sItem.toUpperCase().startsWith("LC08") ||
-						sItem.toUpperCase().startsWith("COP-DEM") ||
-						sItem.toUpperCase().startsWith("S2GLC")
-						) {
-					if (sItem.endsWith(".SAFE")) {
-						sItem = sItem.substring(0, sItem.length() - 5);
-					}
-					sItem = sItem + ".zip";
-				}
-			}
-			oLink.append(sItem).append(ResponseTranslatorTerrascope.SLINK_SEPARATOR_TERRASCOPE); //1
-
-			sItem = oResult.getProperties().get(ResponseTranslatorTerrascope.SSIZE_IN_BYTES);
-			if (sItem == null) {
-				sItem = "";
-			}
-			oLink.append(sItem).append(ResponseTranslatorTerrascope.SLINK_SEPARATOR_TERRASCOPE); //2
-
-			sItem = oResult.getProperties().get("status");
-			if (sItem == null) {
-				sItem = "";
-			}
-			oLink.append(sItem).append(ResponseTranslatorTerrascope.SLINK_SEPARATOR_TERRASCOPE); //3
-
-			sItem = oResult.getProperties().get(ResponseTranslatorTerrascope.SSELF);
-			if (sItem == null) {
-				sItem = "";
-			}
-			oLink.append(sItem).append(ResponseTranslatorTerrascope.SLINK_SEPARATOR_TERRASCOPE); //4
-
-			sItem = oResult.getProperties().get(ResponseTranslatorTerrascope.SPRODUCTIDENTIFIER);
-			if (sItem == null) {
-				sItem = "";
-			}
-			oLink.append(sItem).append(ResponseTranslatorTerrascope.SLINK_SEPARATOR_TERRASCOPE); //5
-
-			oResult.getProperties().put(ResponseTranslatorTerrascope.SLINK, oLink.toString());
-			oResult.setLink(oLink.toString());
-		} catch (Exception oE) {
-			WasdiLog.debugLog("ResponseTranslatorTerrascope.buildLink: could not extract download link: " + oE);
 		}
 	}
 
@@ -628,7 +382,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 			//parse response as json
 			JSONObject oJson = new JSONObject(sQueryResult);
 			if(null!=oJson) {
-				iResult = oJson.optInt("totalResults", -1);
+				iResult = oJson.optInt("numberMatched", -1);
 			}
 		}
 

@@ -25,6 +25,15 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 	}
 	
 	/**
+	 * Push the built image through the container runtime driver instead of DockerUtils directly.
+	 * This overload keeps the base Processor-only signature; m_oParameter is current at this call site.
+	 */
+	@Override
+	public String pushImageInRegisters(Processor oProcessor) {
+		return getContainerRuntimeDriver().pushImage(m_oParameter, m_sDockerImageName);
+	}
+	
+	/**
 	 * Deploy the processor in WASDI.
 	 * The method creates the docker
 	 * Then it pushes the image in Nexus
@@ -60,7 +69,10 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
-		// Here we save the address of the image
+		return publishDeployment(oProcessor, oParameter);
+	}
+
+	protected boolean publishDeployment(Processor oProcessor, ProcessorParameter oParameter) {
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
 		
 		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
@@ -101,17 +113,8 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
-		// Create utils
-        DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry, m_oProcessWorkspaceLogger);
-        
-        if (oDockerUtils.isContainerStarted(oProcessor.getName(), oProcessor.getVersion())) {
-        	WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: There is the previous version running, stop it");
-        	boolean bStop = oDockerUtils.stop(oProcessor);
-        	
-        	if (!bStop) {
-        		WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: stop returned false, we try to proceed anyhow");
-        	}
-        }
+		// Stop a previous running version before redeploying (legacy server-based processors only)
+		stopRunningVersionBeforeRedeploy(oProcessor);
         
 		// Increment the version of the processor
 		String sPreviousVersion = oProcessor.getVersion();
@@ -119,7 +122,10 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		oProcessor.setVersion(sNewVersion);
 		
 		// Save it
-		oProcessorRepository.updateProcessor(oProcessor);
+		if (!oProcessorRepository.updateProcessor(oProcessor)) {
+			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: could not save the new version");
+			return false;
+		}
         
 		WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: call base class deploy. New Version " + sNewVersion);
 		
@@ -127,13 +133,18 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		
 		if (!bResult) {
 			// This is not good
-			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: super class deploy returned false. So we stop here.");
-			oProcessor.setVersion(sPreviousVersion);
-			oProcessorRepository.updateProcessor(oProcessor);
+			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: build or publish failed; restoring the previous version");
+			Processor oCurrentProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			if (oCurrentProcessor != null && sNewVersion.equals(oCurrentProcessor.getVersion())) {
+				oCurrentProcessor.setVersion(sPreviousVersion);
+				if (!oProcessorRepository.updateProcessor(oCurrentProcessor)) {
+					WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: could not restore the previous version");
+				}
+			}
 			return false;
 		}
-		else {
-			WasdiLog.infoLog("DockerBuildOnceEngine.redeploy: super class deploy returned true lets proceed to clean and push");
+		if (getContainerRuntimeDriver().retainsPreviousImagesOnRedeploy()) {
+			return true;
 		}
 		
 		WasdiLog.infoLog("DockerBuildOnceEngine.redeploy: start thread to delete old versions");
@@ -156,6 +167,31 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		}		
 		
         return true;
+	}
+
+	@Override
+	protected boolean onAfterRedeployBuild(Processor oProcessor, ProcessorParameter oParameter) {
+		if (!getContainerRuntimeDriver().retainsPreviousImagesOnRedeploy()) {
+			return true;
+		}
+		return !Utils.isNullOrEmpty(m_sDockerImageName) && publishDeployment(oProcessor, oParameter);
+	}
+	
+	/**
+	 * Stops a previously running version before redeploying. Meaningful for legacy, persistent
+	 * server-based processors; one-shot engines override this as a no-op (see OneShotProcessorEngine).
+	 */
+	protected void stopRunningVersionBeforeRedeploy(Processor oProcessor) {
+        DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_oParameter, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry, m_oProcessWorkspaceLogger);
+        
+        if (oDockerUtils.isContainerStarted(oProcessor.getName(), oProcessor.getVersion())) {
+        	WasdiLog.debugLog("DockerBuildOnceEngine.stopRunningVersionBeforeRedeploy: There is the previous version running, stop it");
+        	boolean bStop = oDockerUtils.stop(oProcessor);
+        	
+        	if (!bStop) {
+        		WasdiLog.debugLog("DockerBuildOnceEngine.stopRunningVersionBeforeRedeploy: stop returned false, we try to proceed anyhow");
+        	}
+        }
 	}
 	
 	@Override

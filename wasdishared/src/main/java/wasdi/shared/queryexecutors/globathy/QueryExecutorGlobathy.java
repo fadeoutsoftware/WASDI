@@ -40,7 +40,7 @@ public class QueryExecutorGlobathy extends QueryExecutor {
 	
 	private String m_sLakesShapeFilePath = "";	// path to the shp file
 	
-	private static final Object s_oShapeFileLock = new Object();
+	public static final Object s_oShapeFileLock = new Object();
 
 
 	public QueryExecutorGlobathy() {

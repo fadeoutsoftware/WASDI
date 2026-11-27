@@ -1325,6 +1325,12 @@
 			"filters": []
 		},
 		{
+			"name": "LAKE3D",
+			"indexname": "platformname",
+			"indexvalue": "LAKE3D",
+			"filters": []
+		},		
+		{
 			"name": "Return NatFIM",
 			"indexname": "platformname",
 			"indexvalue": "ReturnNatFIM",
@@ -1437,6 +1443,13 @@
 			"filters": []
 		},
 		{
+			"name": "LAKE3DWASDI",
+			"indexname": "platformname",
+			"indexvalue": "LAKE3DWASDI",
+			"ispublic": true,
+			"filters": []
+		},		
+		{
 			"name": "TERESA SUP",
 			"indexname": "platformname",
 			"indexvalue": "TERESA_SUP",
@@ -1495,6 +1508,26 @@
 					"indexlabel": "product type",
 					"indexvalues": "depth|depth_reclass",
 					"indexvalue": "depth"
+				}
+			]
+		},
+		{
+			"name": "MeteoGate",
+			"indexname": "platformname",
+			"indexvalue": "MeteoGate",
+			"ispublic": true,
+			"filters": [
+				{
+					"indexname": "observation",
+					"indexlabel": "observation",
+					"indexvalues": "air_pressure|air_pressure_at_mean_sea_level|air_temperature|dew_point_temperature|precipitation_amount|relative_humidity|wind_from_direction|wind_speed|wind_speed_of_gust",
+					"indexvalue": "air_pressure"
+				},
+				{
+					"indexname": "outputformat",
+					"indexlabel": "output format",
+					"indexvalues": "csv|zarr",
+					"indexvalue": "csv"
 				}
 			]
 		}

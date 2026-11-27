@@ -6,7 +6,9 @@ import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -22,6 +24,10 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.swagger.v3.oas.annotations.Operation;
 import it.fadeout.Wasdi;
@@ -48,8 +54,12 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.products.BandViewModel;
+import wasdi.shared.viewmodels.products.ChartMetadataViewModel;
+import wasdi.shared.viewmodels.products.ChartRequestViewModel;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
+import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
 /**
@@ -324,11 +334,10 @@ public class ProductResource {
 
         WasdiLog.debugLog("ProductResource.getListByWorkspace( WS: " + sWorkspaceId + " )");
         
-        // Prepare return object, empty to sart
+        // Prepare return object
         List<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
         
         try {
-        	
             // Validate input
             if (Utils.isNullOrEmpty(sWorkspaceId)) {
                 WasdiLog.warnLog("ProductResource.getListByWorkspace: workspace is null or empty");
@@ -1257,4 +1266,108 @@ public class ProductResource {
         	return oPrimitiveResult;
         }
     }
+
+    /**
+     * Get chart data for a product
+     * @param oRequestContext Container request context
+     * @param oChartRequest Chart request containing product name, workspace ID, and chart parameters
+     * @return PrimitiveResult containing chart data as JSON string
+     */
+    @POST
+    @Path("chart")
+    @Consumes({"application/xml", "application/json", "text/xml"})
+    @Produces({"application/xml", "application/json", "text/xml"})
+    @Operation(summary = "Get product chart", description = "Returns chart data for a product in a workspace accessible to the authenticated user.")
+    public PrimitiveResult getChart(@Context ContainerRequestContext oRequestContext,
+                                   ChartRequestViewModel oChartRequest) {
+        try {
+            if (oChartRequest == null) {
+                WasdiLog.warnLog("ProductResource.getChart: invalid request");
+                return PrimitiveResult.getInvalid();
+            }
+
+            String sProductName = oChartRequest.getFileName();
+            String sWorkspaceId = oChartRequest.getWorkspace();
+
+            WasdiLog.debugLog("ProductResource.getChart: Product: " + sProductName + ", WS: " + sWorkspaceId);
+
+            // Validate Session
+            User oUser = (User) oRequestContext.getProperty("authenticated-user");
+            if (oUser == null) {
+                WasdiLog.warnLog("ProductResource.getChart: invalid session");
+                return PrimitiveResult.getInvalid();
+            }
+            
+            if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+                WasdiLog.warnLog("ProductResource.getChart: user cannot access workspace");
+                return PrimitiveResult.getInvalid();
+            }
+
+            String sDataLabel = oChartRequest.getDataLabel();
+            if (sProductName == null || sProductName.isBlank() || sDataLabel == null || sDataLabel.isBlank()) {
+                WasdiLog.warnLog("ProductResource.getChart: missing product file name or data column");
+                return PrimitiveResult.getInvalid();
+            }
+
+            String sChartType = oChartRequest.getChartType();
+            if (sChartType == null || sChartType.isBlank()) 
+                sChartType = "line";
+
+            String sWorkspacePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+            File oWorkspace = new File(sWorkspacePath).getCanonicalFile();
+            File oProduct = new File(oWorkspace, sProductName).getCanonicalFile();
+            if (!oProduct.toPath().startsWith(oWorkspace.toPath()) || !oProduct.isFile()) {
+                WasdiLog.warnLog("ProductResource.getChart: product not found in workspace: " + sProductName);
+                return PrimitiveResult.getInvalid();
+            }
+
+            String sXAxisLabel = "timestamp";       // we assume that the column representing the timestamps has a fixed name
+            Map<String, List<String>> oColumns = WasdiFileUtils.extractColumnsFromCSV(oProduct.getPath(), Arrays.asList(sXAxisLabel, sDataLabel));
+            String sChartJson = buildTimeSeriesChart(oColumns, sChartType, sXAxisLabel, sDataLabel);
+
+            PrimitiveResult oPrimitiveResult = new PrimitiveResult();
+            oPrimitiveResult.setStringValue(sChartJson);
+            
+            return oPrimitiveResult;
+        } catch (Exception oE) {
+            WasdiLog.errorLog("ProductResource.getChart: error " + oE);
+        }
+        return PrimitiveResult.getInvalid();
+    }
+
+    static String buildTimeSeriesChart(Map<String, List<String>> oColumns, String sChartType,String sXAxisLabel, String sDataLabel) {
+        List<String> asTimestamps = oColumns.get(sXAxisLabel);
+        List<String> asValues = oColumns.get(sDataLabel);
+        if (asTimestamps == null || asValues == null || asTimestamps.isEmpty() || asTimestamps.size() != asValues.size()) {
+            throw new IllegalArgumentException("CSV chart columns must contain matching observations");
+        }
+
+        ObjectMapper oMapper = new ObjectMapper();
+        ObjectNode oChart = oMapper.createObjectNode();
+        oChart.put("chart-type", sChartType);
+        oChart.put("chart-name", "Timeseries for " + sDataLabel);
+        ArrayNode aoSeries = oChart.putArray("chart-data").addObject()
+                .put("name", "").putArray("series");
+
+        for (int iIndex = 0; iIndex < asTimestamps.size(); iIndex++) {
+            String sTimestamp = asTimestamps.get(iIndex);
+            String sValue = asValues.get(iIndex);
+            if (sTimestamp == null || sTimestamp.isBlank() || sValue == null || sValue.isBlank()) {
+                throw new IllegalArgumentException("Missing timestamp or value at observation " + (iIndex + 1));
+            }
+            double dValue;
+            try {
+                dValue = Double.parseDouble(sValue);
+            } catch (NumberFormatException oException) {
+                throw new IllegalArgumentException("Invalid numeric value at observation " + (iIndex + 1), oException);
+            }
+            if (!Double.isFinite(dValue)) {
+                throw new IllegalArgumentException("Non-finite value at observation " + (iIndex + 1));
+            }
+            aoSeries.addObject().put("name", sTimestamp).put("value", dValue);
+        }
+        return oChart.toString();
+    }
+
+    
 }

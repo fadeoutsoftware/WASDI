@@ -27,6 +27,11 @@ public class DeployedProcessorViewModel {
 	private boolean isDeploymentOngoing = false;
 	private Double lastUpdate = 0.0;
 	private String sourceType = "UPLOAD";
+	private Boolean gpuInference;
+	private Boolean gpuTraining;
+	private String gpuPreference;
+	private Integer disk;
+	private Integer ram;
 	
 	public String getParamsSample() {
 		return paramsSample;
@@ -129,5 +134,35 @@ public class DeployedProcessorViewModel {
 	}
 	public void setSourceType(String sourceType) {
 		this.sourceType = sourceType;
+	}
+	public Boolean getGpuInference() {
+		return gpuInference;
+	}
+	public void setGpuInference(Boolean gpuInference) {
+		this.gpuInference = gpuInference;
+	}
+	public Boolean getGpuTraining() {
+		return gpuTraining;
+	}
+	public void setGpuTraining(Boolean gpuTraining) {
+		this.gpuTraining = gpuTraining;
+	}
+	public String getGpuPreference() {
+		return gpuPreference;
+	}
+	public void setGpuPreference(String gpuPreference) {
+		this.gpuPreference = gpuPreference;
+	}
+	public Integer getDisk() {
+		return disk;
+	}
+	public void setDisk(Integer disk) {
+		this.disk = disk;
+	}
+	public Integer getRam() {
+		return ram;
+	}
+	public void setRam(Integer ram) {
+		this.ram = ram;
 	}
 }

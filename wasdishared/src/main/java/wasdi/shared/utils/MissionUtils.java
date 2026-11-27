@@ -380,7 +380,9 @@ public class MissionUtils {
 			else if (sFileName.toLowerCase().endsWith("_bathymetry.tif")) {
 				return Platforms.GLOBATHY;
 			}
-			return null;
+			else if (sFileName.toLowerCase().startsWith("meteogate_")) {
+				return Platforms.METEO_GATE;
+			}
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("WasdiFileUtils.getPlatformFromFileName: exception " + oEx.toString());

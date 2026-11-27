@@ -503,9 +503,12 @@ public class KeycloakUtils {
 	}
 
 	private static synchronized ConfigurableJWTProcessor<SecurityContext> getJwtProcessor(KeycloackConfig oKeycloakConfig) {
+		
 		String sIssuer = getIssuer(oKeycloakConfig);
-		String sJwksUrl = sIssuer + "/protocol/openid-connect/certs";
-		String sConfigurationKey = sIssuer + "|" + oKeycloakConfig.client;
+		String sJwksUrl = Utils.isNullOrEmpty(oKeycloakConfig.jwksUrl)
+		        ? sIssuer + "/protocol/openid-connect/certs"
+		        : oKeycloakConfig.jwksUrl;
+		String sConfigurationKey = sIssuer + "|" + sJwksUrl + "|" + oKeycloakConfig.client;
 
 		if (s_oJwtProcessor != null && sConfigurationKey.equals(s_sJwtConfigurationKey)) {
 			return s_oJwtProcessor;
@@ -515,7 +518,15 @@ public class KeycloakUtils {
 			WasdiLog.debugLog("KeycloakUtils.getJwtProcessor: configuring issuer " + sIssuer
 					+ ", jwks URL " + sJwksUrl + ", configured client " + oKeycloakConfig.client
 					+ ", accepted external clients " + oKeycloakConfig.acceptedClientIds);
-			JWKSource<SecurityContext> oJwkSource = JWKSourceBuilder.<SecurityContext>create(new URL(sJwksUrl)).cache(true).build();
+			JWKSource<SecurityContext> oJwkSource = JWKSourceBuilder.<SecurityContext>create(new URL(sJwksUrl),
+					new com.nimbusds.jose.util.DefaultResourceRetriever(
+							WasdiConfig.Current.connectionTimeout, WasdiConfig.Current.readTimeout, 51200))
+					.cache(true)
+					// Nimbus caches fallback keys again; reserve that interval within the 15-minute limit.
+					.outageTolerant(15 * 60 * 1000L - JWKSourceBuilder.DEFAULT_CACHE_TIME_TO_LIVE,
+							oEvent -> WasdiLog.warnLog("KeycloakUtils: Keycloak signing-key retrieval failed; "
+									+ "using cached keys with a maximum total age of 15 minutes"))
+					.build();
 			JWSKeySelector<SecurityContext> oKeySelector = new JWSAlgorithmFamilyJWSKeySelector<>(JWSAlgorithm.Family.RSA, oJwkSource);
 
 			ConfigurableJWTProcessor<SecurityContext> oJwtProcessor = new DefaultJWTProcessor<>();

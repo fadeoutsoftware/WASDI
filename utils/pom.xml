@@ -26,7 +26,7 @@
         <sVersionBcpkixJdk15on>1.85</sVersionBcpkixJdk15on>
         <sVersionCommonsCli>1.9.0</sVersionCommonsCli>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
-        <sVersionJson>20240303</sVersionJson>
+        <sVersionJson>20260719</sVersionJson>
         <sVersionJts>1.13</sVersionJts>
         <sVersionJunit>4.13.1</sVersionJunit>
         <sVersionJUniversalChardet>2.5.0</sVersionJUniversalChardet>
