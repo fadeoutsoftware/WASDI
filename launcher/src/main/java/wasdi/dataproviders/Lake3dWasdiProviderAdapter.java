@@ -16,7 +16,7 @@ public class Lake3dWasdiProviderAdapter extends ProviderAdapter {
 	
 
 	public Lake3dWasdiProviderAdapter() {
-		m_sDataProviderCode = "GLOBATHYWASDI";
+		m_sDataProviderCode = "LAKE3DWASDI";
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class Lake3dWasdiProviderAdapter extends ProviderAdapter {
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		
-		WasdiLog.debugLog("Lake3dWasdiProviderAdapter.executeDownloadFile. Copying bathymetry file to " + sSaveDirOnServer);
+		WasdiLog.debugLog("Lake3dWasdiProviderAdapter.executeDownloadFile. Copying lake 3d file to " + sSaveDirOnServer);
 		
 		String sDownloadedFilePath = null;
 		
@@ -65,12 +65,12 @@ public class Lake3dWasdiProviderAdapter extends ProviderAdapter {
 			
 			sHttpURL += "images/get";
 			//parameters
-			sHttpURL += "?collection=globathy&name=" + sFileName;
+			sHttpURL += "?collection=lake3d&name=" + sFileName;
 			
 			m_sRemoteWasdiSessionId = AuthAPIClient.login(m_sProviderUser, m_sProviderPassword, this.m_oDataProviderConfig.link);
 			
 			if (Utils.isNullOrEmpty(m_sRemoteWasdiSessionId)) {
-				WasdiLog.errorLog("QueryExecutorGlobathyWasdi.init: impossible to get the session id for url  " + this.m_oDataProviderConfig.link + " user " + m_sProviderUser);
+				WasdiLog.errorLog("Lake3dWasdiProviderAdapter.init: impossible to get the session id for url  " + this.m_oDataProviderConfig.link + " user " + m_sProviderUser);
 			}
 			
 			Map<String, String> aoHeaders = Map.of("x-session-token", m_sRemoteWasdiSessionId);
