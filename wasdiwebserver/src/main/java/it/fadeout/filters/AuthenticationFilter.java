@@ -105,7 +105,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 		// First try legacy header
 		String sToken = oRequestContext.getHeaderString(HEADER_SESSION_TOKEN);
 		if (!Utils.isNullOrEmpty(sToken)) {
-			WasdiLog.debugLog("AuthenticationFilter.extractToken: found x-session-token header");
 			return sToken;
 		}
 		
@@ -114,7 +113,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 		if (!Utils.isNullOrEmpty(sAuthHeader)) {
 			sToken = AuthTokenUtil.extractTokenFromAuthHeader(sAuthHeader);
 			if (!Utils.isNullOrEmpty(sToken)) {
-				WasdiLog.debugLog("AuthenticationFilter.extractToken: found Authorization header with token");
 				return sToken;
 			}
 		}

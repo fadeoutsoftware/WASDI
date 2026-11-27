@@ -188,6 +188,11 @@ public class QueryExecutorLake3d extends QueryExecutor {
 				// Get the Data Store
 				FileDataStore oStore = FileDataStoreFinder.getDataStore(new File(m_sLakesShapeFilePath));
 				
+				if (oStore == null) {
+					WasdiLog.errorLog("QueryExecutorLake3d.countFeatures: error opening " + m_sLakesShapeFilePath);
+					return iCount;
+				}
+				
 				try {
 					SimpleFeatureSource oFeatureSource = oStore.getFeatureSource();		
 					SimpleFeatureCollection oIntersectedFeatures = intersectBoundingBox(dNorth, dEast, dSouth, dWest, oFeatureSource);
@@ -215,6 +220,10 @@ public class QueryExecutorLake3d extends QueryExecutor {
 				// Get the Data Store
 				FileDataStore oStore = FileDataStoreFinder.getDataStore(new File(m_sLakesShapeFilePath));
 				
+				if (oStore == null) {
+					WasdiLog.errorLog("QueryExecutorLake3d.countFeatures: error opening " + m_sLakesShapeFilePath);
+					return aoLakeInfo;
+				}
 				
 				try {
 					SimpleFeatureSource oFeatureSource = oStore.getFeatureSource();
